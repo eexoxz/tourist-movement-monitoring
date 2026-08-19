@@ -1,0 +1,85 @@
+import { destinations } from "./destinations";
+import type { AppData } from "../types";
+
+const now = new Date();
+const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString();
+
+export const initialData: AppData = {
+  users: [
+    {
+      id: "tourist-demo",
+      name: "Demo Tourist",
+      email: "tourist@example.com",
+      password: "tourist123",
+      role: "tourist",
+      createdAt: hoursAgo(120),
+    },
+    {
+      id: "admin-demo",
+      name: "Tourism Administrator",
+      email: "admin@tourism.local",
+      password: "admin123",
+      role: "admin",
+      createdAt: hoursAgo(120),
+    },
+  ],
+  consents: [
+    {
+      id: "consent-demo",
+      userId: "tourist-demo",
+      granted: true,
+      grantedAt: hoursAgo(5),
+    },
+  ],
+  trips: [
+    {
+      id: "trip-demo-1",
+      userId: "tourist-demo",
+      status: "completed",
+      startedAt: hoursAgo(5),
+      endedAt: hoursAgo(3),
+      consentId: "consent-demo",
+    },
+  ],
+  points: [
+    {
+      id: "point-demo-1",
+      tripId: "trip-demo-1",
+      latitude: 3.142,
+      longitude: 101.6894,
+      accuracyMeters: 35,
+      recordedAt: hoursAgo(5),
+      source: "demo",
+    },
+    {
+      id: "point-demo-2",
+      tripId: "trip-demo-1",
+      latitude: 3.1457,
+      longitude: 101.6954,
+      accuracyMeters: 28,
+      recordedAt: hoursAgo(4.4),
+      source: "demo",
+    },
+    {
+      id: "point-demo-3",
+      tripId: "trip-demo-1",
+      latitude: 3.1478,
+      longitude: 101.6937,
+      accuracyMeters: 24,
+      recordedAt: hoursAgo(3.9),
+      source: "demo",
+    },
+    {
+      id: "point-demo-4",
+      tripId: "trip-demo-1",
+      latitude: 3.1556,
+      longitude: 101.7139,
+      accuracyMeters: 30,
+      recordedAt: hoursAgo(3.2),
+      source: "demo",
+    },
+  ],
+  destinations,
+  analyses: [],
+  recommendations: [],
+};
