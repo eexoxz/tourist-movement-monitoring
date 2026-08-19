@@ -12,11 +12,17 @@ Demo accounts:
 Run locally:
 
 ```bash
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 ```
 
-Use `pnpm run preview` after a build when you only want to reopen the latest compiled version.
+If your global npm command is misconfigured, run the Windows helper instead:
+
+```powershell
+.\start.bat
+```
+
+Use `npm run preview` after a build when you only want to reopen the latest compiled version.
 
 Build check:
 
