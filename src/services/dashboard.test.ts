@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
 import { refreshAllRecommendations } from "./analytics";
 import {
+  buildMovementRecordsCsv,
   getDailyMovementTrend,
   getDestinationCategoryCoverage,
   getMovementRecords,
   getProfileDistribution,
   getTourists,
+  getTripFilterOptions,
   summarizeDashboard,
 } from "./dashboard";
 
@@ -45,6 +47,36 @@ describe("dashboard service", () => {
     const records = getMovementRecords(initialData, "all");
 
     expect(records).toHaveLength(initialData.points.length);
+  });
+
+  it("filters movement records by trip and date range", () => {
+    const dateKey = initialData.points.find((point) => point.tripId === "trip-demo-2")!.recordedAt.slice(0, 10);
+    const expectedCount = initialData.points.filter((point) => point.tripId === "trip-demo-2" && point.recordedAt.startsWith(dateKey)).length;
+    const records = getMovementRecords(initialData, {
+      tripId: "trip-demo-2",
+      fromDate: dateKey,
+      toDate: dateKey,
+    });
+
+    expect(records).toHaveLength(expectedCount);
+    expect(records.every((record) => record.point.tripId === "trip-demo-2")).toBe(true);
+    expect(records.every((record) => record.point.recordedAt.startsWith(dateKey))).toBe(true);
+  });
+
+  it("returns trip filter options for a selected tourist", () => {
+    const trips = getTripFilterOptions(initialData, "tourist-demo");
+
+    expect(trips).toHaveLength(1);
+    expect(trips[0].id).toBe("trip-demo-1");
+  });
+
+  it("builds a CSV export from visible movement records", () => {
+    const records = getMovementRecords(initialData, "tourist-demo");
+    const csv = buildMovementRecordsCsv(records);
+
+    expect(csv).toContain('"tourist","trip_id","recorded_at"');
+    expect(csv).toContain('"Demo Tourist"');
+    expect(csv).toContain('"Merdeka Square"');
   });
 
   it("counts destination coverage across every supported category", () => {

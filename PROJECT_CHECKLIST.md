@@ -128,10 +128,10 @@ Completion gate:
 - [x] Show basic destination category distribution.
 - [x] Add dashboard charts for movement trends.
 - [x] Add tourist filters.
-- [ ] Add date/trip filters.
+- [x] Add date/trip filters.
 - [x] Add destination edit function.
 - [x] Add destination delete function.
-- [ ] Add dashboard summary export or evidence screenshot flow.
+- [x] Add dashboard summary export or evidence screenshot flow.
 - [ ] Add admin-only Firestore reads/writes.
 - [ ] Add empty-state handling for no movement data.
 

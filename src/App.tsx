@@ -26,7 +26,16 @@ import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOu
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
-import { getDailyMovementTrend, getDestinationCategoryCoverage, getMovementRecords, getProfileDistribution, getTourists, summarizeDashboard } from "./services/dashboard";
+import {
+  buildMovementRecordsCsv,
+  getDailyMovementTrend,
+  getDestinationCategoryCoverage,
+  getMovementRecords,
+  getProfileDistribution,
+  getTourists,
+  getTripFilterOptions,
+  summarizeDashboard,
+} from "./services/dashboard";
 import {
   appendMovementPoint,
   deleteTouristMovementData,
@@ -714,6 +723,9 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
+  const [selectedTripId, setSelectedTripId] = useState<string>("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [destinationForm, setDestinationForm] = useState({
     name: "",
     city: "",
@@ -724,11 +736,30 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
   });
   const [destinationMessage, setDestinationMessage] = useState<string | null>(null);
 
-  const movementRecords = useMemo(() => getMovementRecords(data, selectedTouristId), [data, selectedTouristId]);
+  const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
+  const movementRecords = useMemo(
+    () =>
+      getMovementRecords(data, {
+        touristId: selectedTouristId,
+        tripId: selectedTripId,
+        fromDate,
+        toDate,
+      }),
+    [data, selectedTouristId, selectedTripId, fromDate, toDate]
+  );
   const allPoints = movementRecords.map((record) => record.point);
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const travelPlan = useMemo(() => createMovementBasedTravelPlan(data), [data]);
+  const filteredTouristCount = new Set(movementRecords.map((record) => record.trip?.userId).filter(Boolean)).size;
+  const filteredTripCount = new Set(movementRecords.map((record) => record.point.tripId)).size;
+  const hasRecordFilters = selectedTouristId !== "all" || selectedTripId !== "all" || Boolean(fromDate) || Boolean(toDate);
+
+  useEffect(() => {
+    if (selectedTripId !== "all" && !tripOptions.some((trip) => trip.id === selectedTripId)) {
+      setSelectedTripId("all");
+    }
+  }, [selectedTripId, tripOptions]);
 
   const addDestination = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -747,22 +778,74 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
     onDataChange(refreshAllRecommendations(data));
   };
 
+  const resetRecordFilters = () => {
+    setSelectedTouristId("all");
+    setSelectedTripId("all");
+    setFromDate("");
+    setToDate("");
+  };
+
+  const exportFilteredRecords = () => {
+    const blob = new Blob([buildMovementRecordsCsv(movementRecords)], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `movement-records-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (view === "records") {
     return (
       <Page
         title="Movement Records"
         eyebrow="Administrator workspace"
         actions={
-          <select className="toolbar-select" value={selectedTouristId} onChange={(event) => setSelectedTouristId(event.target.value)}>
-            <option value="all">All tourists</option>
-            {tourists.map((tourist) => (
-              <option key={tourist.id} value={tourist.id}>
-                {tourist.name}
-              </option>
-            ))}
-          </select>
+          <div className="filter-toolbar">
+            <select
+              className="toolbar-select"
+              value={selectedTouristId}
+              onChange={(event) => {
+                setSelectedTouristId(event.target.value);
+                setSelectedTripId("all");
+              }}
+            >
+              <option value="all">All tourists</option>
+              {tourists.map((tourist) => (
+                <option key={tourist.id} value={tourist.id}>
+                  {tourist.name}
+                </option>
+              ))}
+            </select>
+            <select className="toolbar-select" value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
+              <option value="all">All trips</option>
+              {tripOptions.map((trip) => (
+                <option key={trip.id} value={trip.id}>
+                  {formatDateTime(trip.startedAt)} - {trip.status}
+                </option>
+              ))}
+            </select>
+            <input className="toolbar-input" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} aria-label="From date" />
+            <input className="toolbar-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} aria-label="To date" />
+            <button className="secondary-action" onClick={resetRecordFilters} disabled={!hasRecordFilters}>
+              <RotateCcw size={18} />
+              Reset
+            </button>
+            <button className="secondary-action" onClick={exportFilteredRecords} disabled={movementRecords.length === 0}>
+              <Download size={18} />
+              CSV
+            </button>
+          </div>
         }
       >
+        <MetricGrid
+          items={[
+            ["Filtered records", movementRecords.length.toString()],
+            ["Trips matched", filteredTripCount.toString()],
+            ["Tourists shown", filteredTouristCount.toString()],
+            ["Date range", fromDate || toDate ? "Custom" : "All"],
+          ]}
+        />
         <div className="two-column">
           <MapView points={allPoints} destinations={data.destinations} />
           <section className="list-panel">

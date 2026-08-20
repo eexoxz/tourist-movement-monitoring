@@ -181,6 +181,8 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .page-header span {
@@ -814,6 +816,20 @@ textarea {
 
 .toolbar-select {
   min-width: 220px;
+}
+
+.filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbar-input {
+  min-height: 44px;
+  max-width: 155px;
+  padding: 0 12px;
 }
 
 .analysis-card small {

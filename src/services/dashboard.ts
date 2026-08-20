@@ -18,6 +18,13 @@ export type DashboardSummary = {
   destinationCount: number;
 };
 
+export type MovementRecordFilters = {
+  touristId?: string;
+  tripId?: string;
+  fromDate?: string;
+  toDate?: string;
+};
+
 export function getTourists(data: AppData) {
   return data.users.filter((user) => user.role === "tourist");
 }
@@ -36,12 +43,32 @@ export function summarizeDashboard(data: AppData): DashboardSummary {
   };
 }
 
-export function getMovementRecords(data: AppData, selectedTouristId = "all"): MovementRecordView[] {
-  const visibleTrips = selectedTouristId === "all" ? data.trips : data.trips.filter((trip) => trip.userId === selectedTouristId);
+function normalizeMovementFilters(filters: MovementRecordFilters | string = {}): MovementRecordFilters {
+  if (typeof filters === "string") {
+    return { touristId: filters };
+  }
+
+  return filters;
+}
+
+function isWithinDateRange(recordedAt: string, filters: MovementRecordFilters) {
+  const dateKey = recordedAt.slice(0, 10);
+
+  return (!filters.fromDate || dateKey >= filters.fromDate) && (!filters.toDate || dateKey <= filters.toDate);
+}
+
+export function getMovementRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementRecordView[] {
+  const normalized = normalizeMovementFilters(filters);
+  const visibleTrips =
+    normalized.touristId && normalized.touristId !== "all"
+      ? data.trips.filter((trip) => trip.userId === normalized.touristId)
+      : data.trips;
   const visibleTripIds = new Set(visibleTrips.map((trip) => trip.id));
 
   return data.points
     .filter((point) => visibleTripIds.has(point.tripId))
+    .filter((point) => !normalized.tripId || normalized.tripId === "all" || point.tripId === normalized.tripId)
+    .filter((point) => isWithinDateRange(point.recordedAt, normalized))
     .map((point) => {
       const trip = data.trips.find((candidate) => candidate.id === point.tripId) ?? null;
       const tourist = data.users.find((candidate) => candidate.id === trip?.userId) ?? null;
@@ -56,6 +83,34 @@ export function getMovementRecords(data: AppData, selectedTouristId = "all"): Mo
       };
     })
     .sort((a, b) => new Date(b.point.recordedAt).getTime() - new Date(a.point.recordedAt).getTime());
+}
+
+export function getTripFilterOptions(data: AppData, touristId = "all") {
+  return data.trips
+    .filter((trip) => touristId === "all" || trip.userId === touristId)
+    .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+}
+
+function csvCell(value: string | number | null | undefined) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+export function buildMovementRecordsCsv(records: MovementRecordView[]) {
+  const header = ["tourist", "trip_id", "recorded_at", "latitude", "longitude", "accuracy_meters", "nearest_destination", "destination_category", "source"];
+  const rows = records.map((record) => [
+    record.tourist?.name ?? "Unknown tourist",
+    record.trip?.id ?? record.point.tripId,
+    record.point.recordedAt,
+    record.point.latitude,
+    record.point.longitude,
+    record.point.accuracyMeters,
+    record.nearestDestinationName,
+    record.nearestDestinationCategory ?? "",
+    record.point.source,
+  ]);
+
+  return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
 }
 
 export function getDestinationCategoryCoverage(data: AppData) {
