@@ -117,7 +117,13 @@ function App() {
 
   const commitData = (nextData: AppData, actor: User | null = currentUser) => {
     setData(nextData);
-    saveData(nextData, actor);
+    void saveData(nextData, actor)
+      .then((synced) => {
+        setSyncStatus(synced ? "Saved to Firestore collections" : "Saved to local browser storage");
+      })
+      .catch(() => {
+        setSyncStatus("Saved locally; Firebase sync failed");
+      });
   };
 
   const login = async (email: string, password: string) => {
@@ -420,6 +426,7 @@ function TouristWorkspace({
   const latestAnalysis = data.analyses.filter((analysis) => analysis.userId === user.id).sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
   const recommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
+  const [isLiveTracking, setIsLiveTracking] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
@@ -428,6 +435,12 @@ function TouristWorkspace({
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
+
+  useEffect(() => {
+    if (!activeTrip && isLiveTracking) {
+      setIsLiveTracking(false);
+    }
+  }, [activeTrip, isLiveTracking]);
 
   const grantConsent = () => {
     onDataChange(grantLocationConsent(data, user.id));
@@ -451,23 +464,22 @@ function TouristWorkspace({
     return true;
   };
 
-  const startTrip = () => {
-    const result = startTripSession(data, user.id);
-    if (result.error || !result.trip || !result.data) {
-      setTrackingMessage(result.error ?? "Trip could not be started.");
-      return;
-    }
-
-    onDataChange(result.data);
-
+  const startLocationWatch = (tripId: string, message: string) => {
     if (!navigator.geolocation) {
       setTrackingMessage("Browser geolocation is unavailable. Demo points can still be added manually.");
-      return;
+      setIsLiveTracking(false);
+      return false;
+    }
+
+    if (watchId.current !== null) {
+      setIsLiveTracking(true);
+      setTrackingMessage("Live browser tracking is already active.");
+      return true;
     }
 
     watchId.current = navigator.geolocation.watchPosition(
       (position) => {
-        appendPoint(result.trip.id, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
+        appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
         setTrackingMessage("Live movement point recorded.");
       },
       (error) => {
@@ -476,6 +488,7 @@ function TouristWorkspace({
             navigator.geolocation.clearWatch(watchId.current);
             watchId.current = null;
           }
+          setIsLiveTracking(false);
 
           const stopped = stopActiveTrip(loadData(), user.id);
           if (stopped.data) {
@@ -491,6 +504,30 @@ function TouristWorkspace({
         timeout: 15000,
       }
     );
+
+    setIsLiveTracking(true);
+    setTrackingMessage(message);
+    return true;
+  };
+
+  const startTrip = () => {
+    const result = startTripSession(data, user.id);
+    if (result.error || !result.trip || !result.data) {
+      setTrackingMessage(result.error ?? "Trip could not be started.");
+      return;
+    }
+
+    onDataChange(result.data);
+    startLocationWatch(result.trip.id, "Trip started and live browser tracking is active.");
+  };
+
+  const resumeLiveTracking = () => {
+    if (!activeTrip) {
+      setTrackingMessage("No active trip is available to resume.");
+      return;
+    }
+
+    startLocationWatch(activeTrip.id, "Live browser tracking resumed for the active trip.");
   };
 
   const stopTrip = () => {
@@ -498,6 +535,7 @@ function TouristWorkspace({
       navigator.geolocation.clearWatch(watchId.current);
       watchId.current = null;
     }
+    setIsLiveTracking(false);
 
     const result = stopActiveTrip(data, user.id);
     if (result.error || !result.data) {
@@ -542,6 +580,7 @@ function TouristWorkspace({
       navigator.geolocation.clearWatch(watchId.current);
       watchId.current = null;
     }
+    setIsLiveTracking(false);
 
     const nextData = revokeLocationConsent(data, user.id);
     onDataChange(refreshAllRecommendations(nextData));
@@ -553,6 +592,7 @@ function TouristWorkspace({
       navigator.geolocation.clearWatch(watchId.current);
       watchId.current = null;
     }
+    setIsLiveTracking(false);
 
     const nextData = deleteTouristMovementData(data, user.id);
     onDataChange(refreshAllRecommendations(nextData));
@@ -593,6 +633,10 @@ function TouristWorkspace({
               <button className="primary-action" onClick={startTrip} disabled={!currentConsent || Boolean(activeTrip)}>
                 <Play size={18} />
                 Start tracking
+              </button>
+              <button className="secondary-action" onClick={resumeLiveTracking} disabled={!activeTrip || isLiveTracking}>
+                <Navigation size={18} />
+                Resume live
               </button>
               <button className="secondary-action" onClick={stopTrip} disabled={!activeTrip}>
                 <Square size={18} />
@@ -640,6 +684,7 @@ function TouristWorkspace({
               items={[
                 ["Active points", activePoints.length.toString()],
                 ["Completed trips", userTrips.filter((trip) => trip.status === "completed").length.toString()],
+                ["Live watch", isLiveTracking ? "Active" : activeTrip ? "Paused" : "Off"],
                 ["Profile", latestAnalysis?.profile ?? "Pending"],
               ]}
             />

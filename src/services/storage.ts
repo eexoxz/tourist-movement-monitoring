@@ -34,9 +34,7 @@ export function loadData(): AppData {
 
 export function saveData(data: AppData, actor?: User | null) {
   localStorage.setItem(DATA_KEY, JSON.stringify(data));
-  void saveCloudData(data, actor).catch((error) => {
-    console.warn("Cloud save skipped:", error);
-  });
+  return saveCloudData(data, actor);
 }
 
 export function loadSession(): string | null {
@@ -119,7 +117,7 @@ export async function loadCloudData() {
 export async function saveCloudData(data: AppData, actor?: User | null) {
   const services = getFirebaseServices();
   if (!services) {
-    return;
+    return false;
   }
 
   const { collection, doc, getDocs, writeBatch } = await import("firebase/firestore");
@@ -127,7 +125,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
   const currentActor = actor ?? data.users.find((user) => user.authUid === authUid || user.id === authUid);
 
   if (!currentActor) {
-    return;
+    return false;
   }
 
   const batch = writeBatch(services.db);
@@ -178,6 +176,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
   }
 
   await batch.commit();
+  return true;
 }
 
 function saveLocalData(data: AppData) {

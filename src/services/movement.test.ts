@@ -138,6 +138,24 @@ describe("movement service", () => {
     expect(stopped.data?.trips.find((trip) => trip.id === started.trip?.id)?.endedAt).toBeTruthy();
   });
 
+  it("recovers an active trip from stored data after a reload", () => {
+    const activeData: AppData = {
+      ...initialData,
+      trips: [
+        ...initialData.trips,
+        {
+          id: "trip-recovered",
+          userId: "tourist-demo",
+          status: "active",
+          startedAt: new Date().toISOString(),
+          consentId: "consent-demo",
+        },
+      ],
+    };
+
+    expect(getActiveTrip(activeData, "tourist-demo")?.id).toBe("trip-recovered");
+  });
+
   it("revokes consent and ends active tracking", () => {
     const started = startTripSession(
       {

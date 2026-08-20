@@ -86,17 +86,17 @@ Completion gate:
 - [x] Store movement points locally with trip IDs and timestamps.
 - [x] Store trip sessions in Firestore.
 - [x] Store movement records in Firestore.
-- [ ] Handle browser permission denial cleanly.
-- [ ] Handle browser geolocation timeout cleanly.
+- [x] Handle browser permission denial cleanly.
+- [x] Handle browser geolocation timeout cleanly.
 - [x] Prevent movement collection before consent.
-- [ ] Add active trip recovery if the page reloads.
+- [x] Add active trip recovery if the page reloads.
 - [x] Add minimum movement filtering to avoid duplicate/noisy points.
 - [x] Add clear user message for tracking accuracy limitations.
 
 Completion gate:
 
-- [ ] A tourist can start and stop a trip, and the resulting movement records are saved under the correct user and trip.
-- [ ] No movement record is created before consent is granted.
+- [x] A tourist can start and stop a trip, and the resulting movement records are saved under the correct user and trip.
+- [x] No movement record is created before consent is granted.
 
 ## Phase 5: Map Visualization And Destination Information
 
@@ -212,8 +212,8 @@ Completion gate:
 - [x] Add data deletion/reset option for tourist prototype testing.
 - [x] Enforce role-based Firestore rules.
 - [x] Prevent unauthenticated access to protected pages.
-- [ ] Validate form inputs.
-- [ ] Add loading and error handling around Firebase operations.
+- [x] Validate form inputs.
+- [x] Add loading and error handling around Firebase operations.
 - [ ] Confirm main pages load under the three-second target in normal testing.
 
 Completion gate:
