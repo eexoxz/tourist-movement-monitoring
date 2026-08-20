@@ -1,6 +1,6 @@
 import type { AppView, UserRole } from "../types";
 
-const touristViews: AppView[] = ["overview", "tracking", "history", "recommendations"];
+const touristViews: AppView[] = ["overview", "tracking", "history", "recommendations", "profile"];
 const adminViews: AppView[] = ["dashboard", "records", "destinations", "ai"];
 
 export function getAllowedViewsForRole(role: UserRole) {

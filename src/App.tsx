@@ -4,6 +4,8 @@ import {
   Compass,
   Database,
   Download,
+  Eye,
+  EyeOff,
   LogOut,
   MapPinned,
   Navigation,
@@ -46,7 +48,14 @@ import {
   refreshAllRecommendations,
   refreshAnalysis,
 } from "./services/analytics";
-import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
+import {
+  authProviderName,
+  hasConfiguredAuth,
+  registerWithConfiguredProvider,
+  sendVerificationEmail,
+  signInWithConfiguredProvider,
+  signOutConfiguredProvider,
+} from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import {
@@ -78,6 +87,18 @@ import {
 const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
+type AuthResult = { error?: string; message?: string };
+type RememberedLogin = { email: string; password: string };
+const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
+const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
+const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = [
+  { value: "cultural", label: "Culture" },
+  { value: "nature", label: "Nature" },
+  { value: "urban", label: "City spots" },
+  { value: "heritage", label: "Heritage" },
+  { value: "food", label: "Food" },
+  { value: "coastal", label: "Coastal" },
+];
 
 const demoRoute = [
   [3.142, 101.6894],
@@ -101,6 +122,46 @@ function geolocationErrorMessage(error: GeolocationPositionError) {
   }
 
   return error.message || "Location could not be read by the browser.";
+}
+
+function loadRememberedLogin(): RememberedLogin | null {
+  try {
+    const raw = localStorage.getItem(REMEMBER_LOGIN_KEY);
+    return raw ? (JSON.parse(raw) as RememberedLogin) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveRememberedLogin(email: string, password: string) {
+  localStorage.setItem(REMEMBER_LOGIN_KEY, JSON.stringify({ email, password }));
+}
+
+function clearRememberedLogin() {
+  localStorage.removeItem(REMEMBER_LOGIN_KEY);
+}
+
+function getProfileSkipKey(userId: string) {
+  return `${PROFILE_SKIP_KEY_PREFIX}${userId}`;
+}
+
+function getDisplayName(user: User) {
+  const name = user.name.trim();
+  return name && name !== user.email && !name.includes("@") ? name : "";
+}
+
+function inferExpectedProfileFromPreferences(preferences: DestinationCategory[]): NonNullable<User["expectedProfile"]> {
+  const culturalScore = preferences.filter((category) => category === "cultural" || category === "heritage").length;
+  const natureScore = preferences.filter((category) => category === "nature" || category === "coastal").length;
+  const urbanScore = preferences.filter((category) => category === "urban" || category === "food").length;
+  const scores = [
+    ["cultural", culturalScore],
+    ["nature", natureScore],
+    ["urban", urbanScore],
+  ] as const;
+  const ranked = [...scores].sort((a, b) => b[1] - a[1]);
+
+  return ranked[0][1] > 0 && ranked[0][1] > ranked[1][1] ? ranked[0][0] : "mixed";
 }
 
 function App() {
@@ -151,23 +212,38 @@ function App() {
         setSyncStatus(synced ? "Saved to Firestore collections" : "Saved to local browser storage");
       })
       .catch(() => {
-        setSyncStatus("Saved locally; Firebase sync failed");
+        setSyncStatus("Saved on this device; cloud retry pending");
       });
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     let authUid: string | undefined;
-    try {
-      const firebaseUser = await signInWithConfiguredProvider(email, password);
-      authUid = firebaseUser?.uid;
-    } catch (error) {
-      const hasLocalAccount = Boolean(authenticateLocalUser(data, email, password));
-      if (!hasLocalAccount) {
-        return error instanceof Error ? error.message : "Firebase login failed.";
+    const firebaseMode = hasConfiguredAuth();
+
+    if (firebaseMode) {
+      try {
+        const firebaseUser = await signInWithConfiguredProvider(email, password);
+        authUid = firebaseUser?.uid;
+        const storedUser = findUserByEmail(data, email);
+        if (firebaseUser && !firebaseUser.emailVerified && storedUser?.role !== "admin") {
+          await sendVerificationEmail(firebaseUser).catch(() => undefined);
+          await signOutConfiguredProvider().catch(() => undefined);
+          return { error: "Verify your email first. A fresh verification email has been sent." };
+        }
+      } catch (error) {
+        return { error: error instanceof Error ? error.message : "Firebase login failed." };
       }
+    } else {
+      const localUser = authenticateLocalUser(data, email, password);
+      if (!localUser) {
+        return { error: "Invalid email or password." };
+      }
+      setSessionUserId(localUser.id);
+      setView(getDefaultViewForRole(localUser.role));
+      return {};
     }
 
-    let user = authUid ? findUserByEmail(data, email) : authenticateLocalUser(data, email, password);
+    let user = authUid ? findUserByEmail(data, email) : null;
     if (!user && authUid) {
       user = {
         id: authUid,
@@ -185,18 +261,18 @@ function App() {
     }
 
     if (!user) {
-      return "Invalid email or password.";
+      return { error: "Invalid email or password." };
     }
 
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));
-    return null;
+    return {};
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string): Promise<AuthResult> => {
     const precheck = validateTouristAccount(data, { name, email, password });
     if (precheck.error) {
-      return precheck.error;
+      return { error: precheck.error };
     }
 
     let authUid: string | undefined;
@@ -204,19 +280,49 @@ function App() {
       const firebaseUser = await registerWithConfiguredProvider(email, password);
       authUid = firebaseUser?.uid;
     } catch (error) {
-      return error instanceof Error ? error.message : "Firebase registration failed.";
+      return { error: error instanceof Error ? error.message : "Firebase registration failed." };
     }
 
     const created = createTouristAccount(data, { name, email, password, authUid });
     if (created.error || !created.user || !created.data) {
-      return created.error ?? "Unable to create tourist account.";
+      return { error: created.error ?? "Unable to create tourist account." };
     }
 
     const user = created.user;
+    if (hasConfiguredAuth()) {
+      setData(created.data);
+      await saveData(created.data, user).catch(() => false);
+      await signOutConfiguredProvider().catch(() => undefined);
+      return { message: "Account created. Check your email for the Firebase verification link, then log in after verifying." };
+    }
+
     commitData(created.data, user);
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));
-    return null;
+    return {};
+  };
+
+  const resendVerification = async (email: string, password: string): Promise<AuthResult> => {
+    if (!hasConfiguredAuth()) {
+      return { error: "Verification email is only available in Firebase mode." };
+    }
+
+    try {
+      const firebaseUser = await signInWithConfiguredProvider(email, password);
+      if (!firebaseUser) {
+        return { error: "Firebase account could not be found." };
+      }
+
+      if (firebaseUser.emailVerified) {
+        return { message: "This email is already verified. You can log in now." };
+      }
+
+      await sendVerificationEmail(firebaseUser);
+      await signOutConfiguredProvider().catch(() => undefined);
+      return { message: "Verification email sent again. Check your inbox or spam folder." };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Verification email could not be sent." };
+    }
   };
 
   const logout = async () => {
@@ -254,7 +360,7 @@ function App() {
   };
 
   if (!currentUser) {
-    return <AuthScreen onLogin={login} onRegister={register} />;
+    return <AuthScreen onLogin={login} onRegister={register} onResendVerification={resendVerification} />;
   }
 
   const roleViews =
@@ -266,14 +372,15 @@ function App() {
           ["ai", "AI Analysis", Sparkles],
         ] as const)
       : ([
-          ["overview", "Overview", Compass],
-          ["tracking", "Tracking", Navigation],
-          ["history", "History", MapPinned],
-          ["recommendations", "Recommendations", Sparkles],
+          ["overview", "Home", Compass],
+          ["tracking", "Track", Navigation],
+          ["history", "Trips", MapPinned],
+          ["recommendations", "Places", Sparkles],
+          ["profile", "Profile", UserRound],
         ] as const);
 
   return (
-    <div className="app-shell">
+    <div className={currentUser.role === "tourist" ? "app-shell tourist-shell" : "app-shell admin-shell"}>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">
@@ -328,7 +435,7 @@ function App() {
         {currentUser.role === "admin" ? (
           <AdminWorkspace data={data} view={safeView} onDataChange={commitData} />
         ) : (
-          <TouristWorkspace data={data} view={safeView} user={currentUser} onDataChange={commitData} watchId={watchId} />
+          <TouristWorkspace data={data} view={safeView} user={currentUser} onDataChange={commitData} onViewChange={setView} watchId={watchId} />
         )}
       </main>
     </div>
@@ -338,17 +445,24 @@ function App() {
 function AuthScreen({
   onLogin,
   onRegister,
+  onResendVerification,
 }: {
-  onLogin: (email: string, password: string) => Promise<string | null>;
-  onRegister: (name: string, email: string, password: string) => Promise<string | null>;
+  onLogin: (email: string, password: string) => Promise<AuthResult>;
+  onRegister: (name: string, email: string, password: string) => Promise<AuthResult>;
+  onResendVerification: (email: string, password: string) => Promise<AuthResult>;
 }) {
+  const [rememberedLogin] = useState(() => loadRememberedLogin());
   const [mode, setMode] = useState<"login" | "register">("login");
   const [roleHint, setRoleHint] = useState<UserRole | "nature" | "culture" | "urban">("tourist");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("tourist@example.com");
-  const [password, setPassword] = useState("tourist123");
+  const [email, setEmail] = useState(rememberedLogin?.email ?? "tourist@example.com");
+  const [password, setPassword] = useState(rememberedLogin?.password ?? "tourist123");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberLogin, setRememberLogin] = useState(Boolean(rememberedLogin));
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const firebaseMode = hasConfiguredAuth();
 
   const setDemoRole = (role: UserRole | "nature" | "culture" | "urban") => {
     setRoleHint(role);
@@ -374,8 +488,27 @@ function AuthScreen({
     event.preventDefault();
     setIsSubmitting(true);
     setError(null);
-    const message = mode === "login" ? await onLogin(email, password) : await onRegister(name, email, password);
-    setError(message);
+    setMessage(null);
+    const result = mode === "login" ? await onLogin(email, password) : await onRegister(name, email, password);
+    setError(result.error ?? null);
+    setMessage(result.message ?? null);
+    if (!result.error) {
+      if (rememberLogin) {
+        saveRememberedLogin(email, password);
+      } else {
+        clearRememberedLogin();
+      }
+    }
+    setIsSubmitting(false);
+  };
+
+  const resendVerification = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    setMessage(null);
+    const result = await onResendVerification(email, password);
+    setError(result.error ?? null);
+    setMessage(result.message ?? null);
     setIsSubmitting(false);
   };
 
@@ -398,7 +531,7 @@ function AuthScreen({
             </button>
           </div>
 
-          {mode === "login" && (
+          {mode === "login" && !firebaseMode && (
             <div className="segmented-control role-switch profile-switch" aria-label="Demo role">
               <button type="button" className={roleHint === "tourist" ? "active" : ""} onClick={() => setDemoRole("tourist")}>
                 Mixed
@@ -417,6 +550,9 @@ function AuthScreen({
               </button>
             </div>
           )}
+          {firebaseMode && (
+            <p className="form-hint">Firebase mode is active. Use a registered and verified Firebase account.</p>
+          )}
 
           {mode === "register" && (
             <label>
@@ -432,15 +568,42 @@ function AuthScreen({
 
           <label>
             Password
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} />
+            <span className="password-field">
+              <input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} />
+              <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? "Hide password" : "Show password"}>
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </span>
+          </label>
+
+          <label className="checkbox-field remember-login">
+            <input
+              type="checkbox"
+              checked={rememberLogin}
+              onChange={(event) => {
+                setRememberLogin(event.target.checked);
+                if (!event.target.checked) {
+                  clearRememberedLogin();
+                }
+              }}
+            />
+            Remember login on this device
           </label>
 
           {error && <p className="form-error">{error}</p>}
+          {message && <p className="form-success">{message}</p>}
 
           <button className="primary-action" type="submit" disabled={isSubmitting}>
             <ShieldCheck size={18} />
             {isSubmitting ? "Checking access" : mode === "login" ? "Enter system" : "Create tourist account"}
           </button>
+
+          {firebaseMode && mode === "login" && (
+            <button className="secondary-action" type="button" onClick={resendVerification} disabled={isSubmitting}>
+              <RotateCcw size={18} />
+              Resend verification email
+            </button>
+          )}
         </form>
       </section>
     </main>
@@ -452,12 +615,14 @@ function TouristWorkspace({
   view,
   user,
   onDataChange,
+  onViewChange,
   watchId,
 }: {
   data: AppData;
   view: AppView;
   user: User;
-  onDataChange: (data: AppData) => void;
+  onDataChange: (data: AppData, actor?: User | null) => void;
+  onViewChange: (view: AppView) => void;
   watchId: React.MutableRefObject<number | null>;
 }) {
   const userTrips = getUserTrips(data, user.id);
@@ -471,6 +636,7 @@ function TouristWorkspace({
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
+  const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
   const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? userTrips[0];
   const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
   const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
@@ -479,6 +645,8 @@ function TouristWorkspace({
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
+  const displayName = getDisplayName(user);
+  const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
 
   useEffect(() => {
     if (!activeTrip && isLiveTracking) {
@@ -644,26 +812,71 @@ function TouristWorkspace({
     setTrackingMessage("Your movement history and AI recommendation records were deleted.");
   };
 
+  const saveProfile = (nextUser: User) => {
+    const nextData = {
+      ...data,
+      users: data.users.map((candidate) => (candidate.id === user.id ? nextUser : candidate)),
+    };
+    localStorage.removeItem(getProfileSkipKey(user.id));
+    setProfileSetupSkipped(false);
+    onDataChange(refreshAllRecommendations(nextData), nextUser);
+  };
+
+  const skipProfileSetup = () => {
+    localStorage.setItem(getProfileSkipKey(user.id), "true");
+    setProfileSetupSkipped(true);
+  };
+
+  if (view === "profile") {
+    return (
+      <Page title="My Profile" eyebrow="Tourist">
+        <TouristProfileForm
+          user={user}
+          title="Travel Preferences"
+          description="Update the details used to personalise your trip suggestions."
+          primaryLabel="Save profile"
+          onSave={saveProfile}
+        />
+      </Page>
+    );
+  }
+
+  if (view === "overview" && showProfileSetup) {
+    return (
+      <Page title="Set Up Your Travel Profile" eyebrow="Tourist">
+        <TouristProfileForm
+          user={user}
+          title="Make the app feel like yours"
+          description="Add a name and travel style so recommendations start from your preferences, then improve as your movement history grows."
+          primaryLabel="Save and continue"
+          secondaryLabel="Skip for now"
+          onSave={saveProfile}
+          onSkip={skipProfileSetup}
+        />
+      </Page>
+    );
+  }
+
   if (view === "tracking") {
     const activePoints = activeTrip ? data.points.filter((point) => point.tripId === activeTrip.id) : [];
 
     return (
-      <Page title="Trip Tracking" eyebrow="Tourist workspace">
+      <Page title="Track My Trip" eyebrow="Tourist">
         <div className="two-column">
           <section className="panel">
-            <h2>Movement Session</h2>
+            <h2>Current Trip</h2>
             <div className="consent-box">
               <ShieldCheck size={22} />
               <div>
-                <strong>{currentConsent ? "Location consent granted" : "Location consent required"}</strong>
-                <p>Movement recording starts only after consent is granted and a trip session is active. Saved records include coordinates, accuracy, timestamp, and the trip ID used for route history and recommendations.</p>
+                <strong>{currentConsent ? "Location is allowed" : "Allow location first"}</strong>
+                <p>{currentConsent ? "You can start a trip whenever you are ready." : "The app needs permission before it can record a route for recommendations."}</p>
               </div>
             </div>
 
             {!currentConsent && (
               <button className="primary-action" onClick={grantConsent}>
                 <ShieldCheck size={18} />
-                Grant consent
+                Allow location
               </button>
             )}
             {currentConsent && (
@@ -676,15 +889,15 @@ function TouristWorkspace({
             <div className="action-row">
               <button className="primary-action" onClick={startTrip} disabled={!currentConsent || Boolean(activeTrip)}>
                 <Play size={18} />
-                Start tracking
+                Start trip
               </button>
               <button className="secondary-action" onClick={resumeLiveTracking} disabled={!activeTrip || isLiveTracking}>
                 <Navigation size={18} />
-                Resume live
+                Resume
               </button>
               <button className="secondary-action" onClick={stopTrip} disabled={!activeTrip}>
                 <Square size={18} />
-                Stop
+                Finish trip
               </button>
             </div>
 
@@ -716,21 +929,20 @@ function TouristWorkspace({
             {trackingMessage && <p className="status-message">{trackingMessage}</p>}
 
             <section className="privacy-actions">
-              <strong>Privacy control</strong>
-              <p>Movement data remains linked to your tourist account for route history and recommendations. You can stop tracking, revoke consent, or delete your prototype movement history at any time.</p>
+              <strong>Privacy</strong>
+              <p>Your route can be deleted from your tourist account at any time.</p>
               <button className="secondary-action wide danger" onClick={deleteMyMovementData} disabled={userTrips.length === 0}>
                 <Trash2 size={18} />
-                Delete my movement data
+                Delete my route history
               </button>
             </section>
 
             <MetricGrid
               items={[
-                ["Active points", activePoints.length.toString()],
-                ["Active distance", `${activeTripSummary?.distanceKm ?? 0} km`],
-                ["Completed trips", userTrips.filter((trip) => trip.status === "completed").length.toString()],
-                ["Live watch", isLiveTracking ? "Active" : activeTrip ? "Paused" : "Off"],
-                ["Profile", latestAnalysis?.profile ?? "Pending"],
+                ["Points saved", activePoints.length.toString()],
+                ["Distance", `${activeTripSummary?.distanceKm ?? 0} km`],
+                ["Trip status", isLiveTracking ? "Recording" : activeTrip ? "Paused" : "Off"],
+                ["Profile", latestAnalysis?.profile ?? "Learning"],
               ]}
             />
           </section>
@@ -743,7 +955,7 @@ function TouristWorkspace({
 
   if (view === "history") {
     return (
-      <Page title="Movement History" eyebrow="Tourist workspace">
+      <Page title="My Trips" eyebrow="Tourist">
         <div className="two-column">
           <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
           <section className="list-panel">
@@ -763,7 +975,7 @@ function TouristWorkspace({
                 </button>
               );
             })}
-            {userTrips.length === 0 && <EmptyState text="No trip sessions have been created yet." />}
+            {userTrips.length === 0 && <EmptyState text="Your saved trips will appear here after you start tracking." />}
           </section>
         </div>
       </Page>
@@ -773,8 +985,8 @@ function TouristWorkspace({
   if (view === "recommendations") {
     return (
       <Page
-        title="Recommendations"
-        eyebrow="Tourist workspace"
+        title="Places To Visit"
+        eyebrow="Tourist"
         actions={
           <button className="secondary-action" onClick={refreshRecommendations}>
             <RotateCcw size={18} />
@@ -784,34 +996,43 @@ function TouristWorkspace({
       >
         <div className="two-column">
           <RecommendationList recommendations={recommendations} destinations={data.destinations} demand={destinationDemand} />
-          <MovementDemandList title="Where Tourists Are Moving" demand={destinationDemand.slice(0, 6)} destinations={data.destinations} />
+          <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 6)} destinations={data.destinations} />
         </div>
       </Page>
     );
   }
 
   return (
-    <Page title="Tourist Overview" eyebrow="Tourist workspace">
-      <MovementPulseHero
-        mode="tourist"
-        demand={destinationDemand}
-        destinations={data.destinations}
-        profile={latestAnalysis?.profile ?? "pending"}
+    <Page title={displayName ? `Welcome back, ${displayName}` : "Plan Your Visit"} eyebrow="Tourist">
+      <TouristNextAction
+        hasConsent={Boolean(currentConsent)}
+        hasActiveTrip={Boolean(activeTrip)}
+        isLiveTracking={isLiveTracking}
         pointCount={tripPoints.length}
+        recommendationCount={recommendations.length}
+        onAllowLocation={grantConsent}
+        onStartTrip={startTrip}
+        onResumeTrip={resumeLiveTracking}
+        onOpenPlaces={() => onViewChange("recommendations")}
+        onOpenTracking={() => onViewChange("tracking")}
       />
-      <MetricGrid
-        items={[
-          ["Trips", userTrips.length.toString()],
-          ["Movement points", tripPoints.length.toString()],
-          ["Tourist profile", latestAnalysis?.profile ?? "Pending"],
-          ["Decision confidence", latestAnalysis ? `${Math.round(latestAnalysis.classificationConfidence * 100)}%` : "Pending"],
-          ["Recommendations", recommendations.length.toString()],
-        ]}
-      />
-      <div className="two-column">
-        <MovementMap points={tripPoints} destinations={data.destinations} />
+
+      <div className="tourist-home-grid">
         <div className="stack">
-          <MovementDemandList title="Where Tourists Are Moving" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} />
+          <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} />
+          <section className="tourist-section">
+            <div className="section-heading">
+              <h2>Recommended For You</h2>
+              <button className="secondary-action compact-action" onClick={() => onViewChange("recommendations")}>
+                <Sparkles size={16} />
+                View all
+              </button>
+            </div>
+            <RecommendationList recommendations={recommendations.slice(0, 2)} destinations={data.destinations} demand={destinationDemand} compact />
+          </section>
+        </div>
+        <div className="stack">
+          <MovementMap points={tripPoints} destinations={data.destinations} />
           <DestinationPanel
             destinations={data.destinations.slice(0, 6)}
             demand={destinationDemand}
@@ -822,7 +1043,205 @@ function TouristWorkspace({
           {selectedDestination && <DestinationDetail destination={selectedDestination} demand={destinationDemand.find((row) => row.destinationId === selectedDestination.id)} />}
         </div>
       </div>
+
+      <MetricGrid
+        items={[
+          ["Trips saved", userTrips.length.toString()],
+          ["Route points", tripPoints.length.toString()],
+          ["Travel style", latestAnalysis?.profile ?? "Learning"],
+          ["Confidence", latestAnalysis ? `${Math.round(latestAnalysis.classificationConfidence * 100)}%` : "Learning"],
+        ]}
+      />
     </Page>
+  );
+}
+
+function TouristProfileForm({
+  user,
+  title,
+  description,
+  primaryLabel,
+  secondaryLabel,
+  onSave,
+  onSkip,
+}: {
+  user: User;
+  title: string;
+  description: string;
+  primaryLabel: string;
+  secondaryLabel?: string;
+  onSave: (user: User) => void;
+  onSkip?: () => void;
+}) {
+  const [name, setName] = useState(getDisplayName(user));
+  const [preferences, setPreferences] = useState<DestinationCategory[]>(user.travelPreferences ?? []);
+  const [tripPace, setTripPace] = useState<User["tripPace"]>(user.tripPace ?? "balanced");
+  const [travelGroup, setTravelGroup] = useState<User["travelGroup"]>(user.travelGroup ?? "solo");
+  const [accessibilityPreference, setAccessibilityPreference] = useState<User["accessibilityPreference"]>(user.accessibilityPreference ?? "none");
+
+  const togglePreference = (preference: DestinationCategory) => {
+    setPreferences((current) =>
+      current.includes(preference) ? current.filter((candidate) => candidate !== preference) : [...current, preference]
+    );
+  };
+
+  const saveProfile = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSave({
+      ...user,
+      name: name.trim() || user.name,
+      expectedProfile: inferExpectedProfileFromPreferences(preferences),
+      travelPreferences: preferences,
+      tripPace,
+      travelGroup,
+      accessibilityPreference,
+      profileCompletedAt: new Date().toISOString(),
+    });
+  };
+
+  return (
+    <form className="profile-setup" onSubmit={saveProfile}>
+      <section className="profile-setup-card">
+        <div className="profile-setup-copy">
+          <span>Personal setup</span>
+          <h2>{title}</h2>
+          <p>{description}</p>
+        </div>
+
+        <div className="profile-form-grid">
+          <label>
+            Preferred name
+            <input value={name} onChange={(event) => setName(event.target.value)} placeholder="What should the app call you?" />
+          </label>
+
+          <fieldset>
+            <legend>What kind of places do you like?</legend>
+            <div className="preference-grid">
+              {preferenceOptions.map((option) => (
+                <label className={preferences.includes(option.value) ? "preference-chip active" : "preference-chip"} key={option.value}>
+                  <input type="checkbox" checked={preferences.includes(option.value)} onChange={() => togglePreference(option.value)} />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="field-pair">
+            <label>
+              Travel pace
+              <select value={tripPace} onChange={(event) => setTripPace(event.target.value as User["tripPace"])}>
+                <option value="relaxed">Relaxed</option>
+                <option value="balanced">Balanced</option>
+                <option value="packed">Packed schedule</option>
+              </select>
+            </label>
+            <label>
+              Travelling with
+              <select value={travelGroup} onChange={(event) => setTravelGroup(event.target.value as User["travelGroup"])}>
+                <option value="solo">Solo</option>
+                <option value="couple">Partner</option>
+                <option value="family">Family</option>
+                <option value="friends">Friends</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Walking preference
+            <select value={accessibilityPreference} onChange={(event) => setAccessibilityPreference(event.target.value as User["accessibilityPreference"])}>
+              <option value="none">No special preference</option>
+              <option value="low-walking">Prefer less walking</option>
+              <option value="wheelchair-friendly">Prefer wheelchair-friendly places</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="profile-actions">
+          <button className="primary-action" type="submit">
+            <Save size={18} />
+            {primaryLabel}
+          </button>
+          {onSkip && (
+            <button className="secondary-action" type="button" onClick={onSkip}>
+              {secondaryLabel ?? "Skip"}
+            </button>
+          )}
+        </div>
+      </section>
+    </form>
+  );
+}
+
+function TouristNextAction({
+  hasConsent,
+  hasActiveTrip,
+  isLiveTracking,
+  pointCount,
+  recommendationCount,
+  onAllowLocation,
+  onStartTrip,
+  onResumeTrip,
+  onOpenPlaces,
+  onOpenTracking,
+}: {
+  hasConsent: boolean;
+  hasActiveTrip: boolean;
+  isLiveTracking: boolean;
+  pointCount: number;
+  recommendationCount: number;
+  onAllowLocation: () => void;
+  onStartTrip: () => void;
+  onResumeTrip: () => void;
+  onOpenPlaces: () => void;
+  onOpenTracking: () => void;
+}) {
+  const title = !hasConsent ? "Ready when you allow location" : hasActiveTrip ? "Your trip is in progress" : recommendationCount > 0 ? "Your places are ready" : "Start a trip to get better suggestions";
+  const message = !hasConsent
+    ? "Turn on location once, then start a trip when you begin moving."
+    : hasActiveTrip
+      ? `${pointCount} route point(s) saved so far.`
+      : recommendationCount > 0
+        ? `${recommendationCount} recommendation(s) are based on your route history.`
+        : "A short route is enough for the app to learn your travel style.";
+
+  return (
+    <section className="tourist-next-card">
+      <div>
+        <span>{isLiveTracking ? "Recording now" : hasActiveTrip ? "Trip paused" : hasConsent ? "Location allowed" : "Location off"}</span>
+        <h2>{title}</h2>
+        <p>{message}</p>
+      </div>
+      <div className="tourist-next-actions">
+        {!hasConsent ? (
+          <button className="primary-action" onClick={onAllowLocation}>
+            <ShieldCheck size={18} />
+            Allow location
+          </button>
+        ) : hasActiveTrip ? (
+          <>
+            <button className="primary-action" onClick={isLiveTracking ? onOpenTracking : onResumeTrip}>
+              <Navigation size={18} />
+              {isLiveTracking ? "View trip" : "Resume trip"}
+            </button>
+            <button className="secondary-action" onClick={onOpenTracking}>
+              <MapPinned size={18} />
+              Trip controls
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="primary-action" onClick={onStartTrip}>
+              <Play size={18} />
+              Start trip
+            </button>
+            <button className="secondary-action" onClick={onOpenPlaces}>
+              <Sparkles size={18} />
+              See places
+            </button>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 

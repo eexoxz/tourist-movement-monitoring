@@ -63,7 +63,7 @@ Completion gate:
 - [x] Add tourist registration flow.
 - [x] Add administrator login path.
 - [x] Add role-based navigation in the UI.
-- [ ] Replace demo/local authentication with Firebase Authentication.
+- [x] Replace demo/local authentication with Firebase Authentication when Firebase is configured.
 - [x] Store user role safely in Firestore.
 - [x] Add protected route handling.
 - [x] Block tourists from administrator pages.
@@ -198,7 +198,7 @@ Completion gate:
 - [ ] Enable Firestore.
 - [ ] Add Firebase config to `.env.local`.
 - [x] Add Firebase client module.
-- [ ] Replace local user storage with Firebase Authentication.
+- [x] Replace local user storage with Firebase Authentication when Firebase is configured.
 - [x] Replace local app data storage with Firestore reads/writes.
 - [x] Add Firestore security rules.
 - [x] Add Firestore indexes if needed.

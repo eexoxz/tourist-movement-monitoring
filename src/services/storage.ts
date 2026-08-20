@@ -137,7 +137,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     return false;
   }
 
-  const { collection, doc, getDocs, writeBatch } = await import("firebase/firestore");
+  const { collection, doc, getDocs, query, where, writeBatch } = await import("firebase/firestore");
   const authUid = services.auth.currentUser?.uid;
   const currentActor = actor ?? data.users.find((user) => user.authUid === authUid || user.id === authUid);
 
@@ -145,6 +145,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     return false;
   }
 
+  const actorId = currentActor.id;
   const db = services.db;
   const batch = writeBatch(services.db);
   const syncCollection = async <T>(name: string, rows: T[], getId: (row: T) => string) => {
@@ -166,13 +167,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
 
   if (currentActor?.role === "tourist") {
     const ownTripIds = new Set(data.trips.filter((trip) => trip.userId === currentActor.id).map((trip) => trip.id));
-    const existingTrips = await getDocs(collection(services.db, FIRESTORE_COLLECTIONS.trips));
-    const existingOwnTripIds = new Set(
-      existingTrips.docs
-        .map((snapshot) => snapshot.data() as TripSession)
-        .filter((trip) => trip.userId === currentActor.id)
-        .map((trip) => trip.id)
-    );
+    const existingTrips = await getDocs(query(collection(db, FIRESTORE_COLLECTIONS.trips), where("userId", "==", currentActor.id)));
     const nextConsentIds = new Set(data.consents.filter((consent) => consent.userId === currentActor.id).map((consent) => consent.id));
     const nextTripIds = new Set(data.trips.filter((trip) => trip.userId === currentActor.id).map((trip) => trip.id));
     const nextPointIds = new Set(data.points.filter((point) => ownTripIds.has(point.tripId)).map((point) => point.id));
@@ -197,20 +192,16 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
       batch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>);
     });
 
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.consents, nextConsentIds, (consent: LocationConsent) => consent.userId === currentActor.id);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.consents, nextConsentIds);
     existingTrips.docs.forEach((snapshot) => {
       const trip = snapshot.data() as TripSession;
       if (trip.userId === currentActor.id && !nextTripIds.has(snapshot.id)) {
         batch.delete(snapshot.ref);
       }
     });
-    await deleteMissingOwnedDocs(
-      FIRESTORE_COLLECTIONS.movementPoints,
-      nextPointIds,
-      (point: MovementPoint) => existingOwnTripIds.has(point.tripId) || ownTripIds.has(point.tripId)
-    );
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.analyses, nextAnalysisIds, (analysis: AnalysisResult) => analysis.userId === currentActor.id);
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds, (recommendation: Recommendation) => recommendation.userId === currentActor.id);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.movementPoints, nextPointIds);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.analyses, nextAnalysisIds);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds);
   } else {
     await syncCollection(FIRESTORE_COLLECTIONS.users, data.users.map(publicUser), (user) => user.id);
     await syncCollection(FIRESTORE_COLLECTIONS.consents, data.consents, (consent) => consent.id);
@@ -224,11 +215,10 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
   await batch.commit();
   return true;
 
-  async function deleteMissingOwnedDocs<T>(name: string, nextIds: Set<string>, ownsRecord: (record: T) => boolean) {
-    const existing = await getDocs(collection(db, name));
+  async function deleteMissingOwnedDocs(name: string, nextIds: Set<string>) {
+    const existing = await getDocs(query(collection(db, name), where("userId", "==", actorId)));
     existing.docs.forEach((snapshot) => {
-      const record = snapshot.data() as T;
-      if (ownsRecord(record) && !nextIds.has(snapshot.id)) {
+      if (!nextIds.has(snapshot.id)) {
         batch.delete(snapshot.ref);
       }
     });

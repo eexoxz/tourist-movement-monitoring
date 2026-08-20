@@ -8,7 +8,7 @@ describe("access service", () => {
   });
 
   it("keeps tourist users out of administrator views", () => {
-    expect(getAllowedViewsForRole("tourist")).toEqual(["overview", "tracking", "history", "recommendations"]);
+    expect(getAllowedViewsForRole("tourist")).toEqual(["overview", "tracking", "history", "recommendations", "profile"]);
     expect(canAccessView("tourist", "dashboard")).toBe(false);
     expect(coerceViewForRole("tourist", "records")).toBe("overview");
   });

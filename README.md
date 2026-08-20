@@ -12,7 +12,7 @@ Demo accounts:
 - Urban tourist: `urban@example.com` / `urban123`
 - Tourism Administrator: `admin@tourism.local` / `admin123`
 
-The app intentionally starts at the login/register screen on each page load. A previous browser session is cleared at startup so demonstrations always begin from authentication.
+The app intentionally starts at the login/register screen on each page load. A previous browser session is cleared at startup so demonstrations always begin from authentication. Demo account shortcuts appear only in local mode. When Firebase is configured, users must sign in with Firebase Authentication and newly registered tourist accounts receive an email verification link before access. Users can toggle password visibility and optionally remember login details on the same device for prototype testing.
 
 Run locally:
 
@@ -48,7 +48,7 @@ Firebase setup:
 3. Fill in the `VITE_FIREBASE_*` values from the Firebase web app settings.
 4. Restart the app.
 
-Without `.env`, the app stays in local prototype mode. With Firebase config, app data is saved to Firestore collections while browser storage remains a local backup.
+Without `.env`, the app stays in local prototype mode. With Firebase config, app data is saved to Firestore collections while browser storage remains a local backup. Firebase Email/Password authentication must be enabled, and tourist users must verify their email after registration.
 
 The Firestore collection design, migration notes, rules, and indexes are documented in `docs/firebase-schema.md`. Deployable Firebase files are included as `firebase.json`, `firestore.rules`, and `firestore.indexes.json`.
 

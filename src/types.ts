@@ -1,6 +1,6 @@
 export type UserRole = "tourist" | "admin";
 
-export type AppView = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
+export type AppView = "overview" | "tracking" | "history" | "recommendations" | "profile" | "dashboard" | "records" | "destinations" | "ai";
 
 export type DestinationCategory =
   | "cultural"
@@ -22,6 +22,11 @@ export type User = {
   password: string;
   role: UserRole;
   expectedProfile?: TouristProfile;
+  travelPreferences?: DestinationCategory[];
+  tripPace?: "relaxed" | "balanced" | "packed";
+  travelGroup?: "solo" | "couple" | "family" | "friends";
+  accessibilityPreference?: "none" | "low-walking" | "wheelchair-friendly";
+  profileCompletedAt?: string;
   createdAt: string;
 };
 
