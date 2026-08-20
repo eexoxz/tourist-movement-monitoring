@@ -7,7 +7,7 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | Check | Command | Current Result |
 | --- | --- | --- |
 | TypeScript and production build | `npm run build` | Passing |
-| Service tests | `npm test` | Passing: 18 tests |
+| Service tests | `npm test` | Passing: 23 tests |
 
 ## DPP Test Mapping
 
@@ -21,6 +21,7 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | FT6 | Trip tracking | Covered by trip start, movement point saving, and trip stop tests |
 | FT10 | Recommendation generation | Covered by `src/services/analytics.test.ts` |
 | FT12 | AI analysis display/data | Covered at service level by K-Means, Decision Tree, and evaluation tests |
+| FT13 | Manage destination data | Covered by `src/services/destinationManagement.test.ts` |
 | NFT3 | Privacy | Covered by consent requirement, consent revocation, and tourist data deletion tests |
 | AIT1 | K-Means clustering | Confirms valid completed trips receive cluster records |
 | AIT2 | Cluster interpretation | Confirms silhouette output and decision-path evidence are produced |

@@ -25,6 +25,7 @@ import { formatDateTime, nearestDestination } from "./services/geo";
 import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
+import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import {
   appendMovementPoint,
   deleteTouristMovementData,
@@ -46,8 +47,6 @@ const demoRoute = [
   [3.1556, 101.7139],
   [3.1579, 101.7116],
 ] as const;
-
-const destinationCategories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
@@ -695,6 +694,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
     longitude: "101.6937",
     description: "",
   });
+  const [destinationMessage, setDestinationMessage] = useState<string | null>(null);
 
   const visibleTrips = selectedTouristId === "all" ? data.trips : data.trips.filter((trip) => trip.userId === selectedTouristId);
   const visibleTripIds = new Set(visibleTrips.map((trip) => trip.id));
@@ -705,18 +705,15 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
 
   const addDestination = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const destination: Destination = {
-      id: createId("destination"),
-      name: destinationForm.name,
-      city: destinationForm.city,
-      category: destinationForm.category as Destination["category"],
-      latitude: Number(destinationForm.latitude),
-      longitude: Number(destinationForm.longitude),
-      description: destinationForm.description,
-      averageVisitMinutes: 60,
-    };
-    onDataChange({ ...data, destinations: [...data.destinations, destination] });
+    const result = addDestinationRecord(data.destinations, destinationForm);
+    if (result.error || !result.destinations) {
+      setDestinationMessage(result.error ?? "Destination could not be saved.");
+      return;
+    }
+
+    onDataChange(refreshAllRecommendations({ ...data, destinations: result.destinations }));
     setDestinationForm({ name: "", city: "", category: "cultural", latitude: "3.1478", longitude: "101.6937", description: "" });
+    setDestinationMessage("Destination saved.");
   };
 
   const recomputeAi = () => {
@@ -808,6 +805,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
               <MapPinned size={18} />
               Save destination
             </button>
+            {destinationMessage && <p className="status-message">{destinationMessage}</p>}
           </form>
 
           <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} />
@@ -1106,6 +1104,7 @@ function DestinationManager({ destinations, onChange }: { destinations: Destinat
   const [editingId, setEditingId] = useState<string | null>(null);
   const editingDestination = destinations.find((destination) => destination.id === editingId) ?? null;
   const [form, setForm] = useState<Destination | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   const startEdit = (destination: Destination) => {
     setEditingId(destination.id);
@@ -1123,16 +1122,26 @@ function DestinationManager({ destinations, onChange }: { destinations: Destinat
       return;
     }
 
-    onChange(destinations.map((destination) => (destination.id === form.id ? form : destination)));
+    const result = updateDestinationRecord(destinations, form);
+    if (result.error || !result.destinations) {
+      setMessage(result.error ?? "Destination could not be updated.");
+      return;
+    }
+
+    onChange(result.destinations);
+    setMessage("Destination updated.");
     cancelEdit();
   };
 
   const removeDestination = (destinationId: string) => {
-    if (destinations.length <= 1) {
+    const result = deleteDestinationRecord(destinations, destinationId);
+    if (result.error || !result.destinations) {
+      setMessage(result.error ?? "Destination could not be deleted.");
       return;
     }
 
-    onChange(destinations.filter((destination) => destination.id !== destinationId));
+    onChange(result.destinations);
+    setMessage("Destination deleted.");
     if (editingId === destinationId) {
       cancelEdit();
     }
@@ -1158,6 +1167,7 @@ function DestinationManager({ destinations, onChange }: { destinations: Destinat
           </div>
         </article>
       ))}
+      {message && <p className="status-message">{message}</p>}
       {editingDestination && form && (
         <form className="panel destination-form edit-form" onSubmit={saveEdit}>
           <div className="form-heading">
