@@ -133,11 +133,11 @@ Completion gate:
 - [x] Add destination delete function.
 - [x] Add dashboard summary export or evidence screenshot flow.
 - [x] Add admin-only Firestore reads/writes.
-- [ ] Add empty-state handling for no movement data.
+- [x] Add empty-state handling for no movement data.
 
 Completion gate:
 
-- [ ] Tourism Administrator can review movement records, understand travel patterns, and manage destination information.
+- [x] Tourism Administrator can review movement records, understand travel patterns, and manage destination information.
 
 ## Phase 7: AI Analysis
 
@@ -180,7 +180,7 @@ Completion gate:
 
 Completion gate:
 
-- [ ] Tourist receives relevant destination suggestions based on movement history, tourist profile, cluster pattern, and unvisited destination rule.
+- [x] Tourist receives relevant destination suggestions based on movement history, tourist profile, cluster pattern, and unvisited destination rule.
 
 ## Phase 9: Firebase Integration
 

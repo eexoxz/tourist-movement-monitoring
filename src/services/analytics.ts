@@ -274,6 +274,37 @@ function demandTier(score: number): DestinationDemand["tier"] {
   return "low";
 }
 
+function calculateApproachSignals(data: AppData, destinationId: string) {
+  const destination = data.destinations.find((candidate) => candidate.id === destinationId);
+  if (!destination) {
+    return { approachSignalCount: 0, approachingTouristCount: 0 };
+  }
+
+  let approachSignalCount = 0;
+  const approachingTouristIds = new Set<string>();
+
+  data.trips.forEach((trip) => {
+    const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
+
+    points.slice(1).forEach((point, index) => {
+      const previous = points[index];
+      const previousDistance = distanceKm(previous, destination);
+      const currentDistance = distanceKm(point, destination);
+      const movedCloserBy = previousDistance - currentDistance;
+
+      if (previousDistance <= 8 && currentDistance <= 8 && movedCloserBy >= 0.08) {
+        approachSignalCount += 1;
+        approachingTouristIds.add(trip.userId);
+      }
+    });
+  });
+
+  return {
+    approachSignalCount,
+    approachingTouristCount: approachingTouristIds.size,
+  };
+}
+
 export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
   const since = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const rows = data.destinations.map((destination) => {
@@ -286,13 +317,21 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
       data.trips.filter((trip) => tripIds.has(trip.id)).map((trip) => trip.userId)
     );
     const recentPointCount = nearbyPoints.filter((point) => new Date(point.recordedAt).getTime() >= since).length;
+    const approach = calculateApproachSignals(data, destination.id);
 
     return {
       destinationId: destination.id,
       movementPointCount: nearbyPoints.length,
       uniqueTouristCount: touristIds.size,
       recentPointCount,
-      rawScore: nearbyPoints.length * 8 + touristIds.size * 18 + recentPointCount * 10,
+      approachSignalCount: approach.approachSignalCount,
+      approachingTouristCount: approach.approachingTouristCount,
+      rawScore:
+        nearbyPoints.length * 8 +
+        touristIds.size * 18 +
+        recentPointCount * 10 +
+        approach.approachSignalCount * 12 +
+        approach.approachingTouristCount * 20,
     };
   });
   const maxScore = Math.max(1, ...rows.map((row) => row.rawScore));
@@ -306,6 +345,8 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
         movementPointCount: row.movementPointCount,
         uniqueTouristCount: row.uniqueTouristCount,
         recentPointCount: row.recentPointCount,
+        approachSignalCount: row.approachSignalCount,
+        approachingTouristCount: row.approachingTouristCount,
         popularityScore,
         tier: demandTier(popularityScore),
       };
@@ -516,9 +557,32 @@ export function createMovementBasedTravelPlan(data: AppData): TravelPlan {
       return {
         destinationId: row.destinationId,
         order: index + 1,
-        reason: `${row.tier} demand: ${row.movementPointCount} movement points from ${row.uniqueTouristCount} tourist profile(s).`,
+        reason: `${row.tier} demand: ${row.movementPointCount} nearby points and ${row.approachSignalCount} approach signal(s) from ${Math.max(row.uniqueTouristCount, row.approachingTouristCount)} tourist profile(s).`,
         suggestedMinutes: destination?.averageVisitMinutes ?? 60,
       };
     }),
   };
+}
+
+function csvCell(value: string | number | null | undefined) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+export function buildTravelPlanCsv(plan: TravelPlan, data: AppData) {
+  const header = ["order", "destination", "city", "category", "suggested_minutes", "reason"];
+  const rows = plan.stops.map((stop) => {
+    const destination = data.destinations.find((candidate) => candidate.id === stop.destinationId);
+
+    return [
+      stop.order,
+      destination?.name ?? "Unknown destination",
+      destination?.city ?? "",
+      destination?.category ?? "",
+      stop.suggestedMinutes,
+      stop.reason,
+    ];
+  });
+
+  return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
 }

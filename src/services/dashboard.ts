@@ -18,6 +18,11 @@ export type DashboardSummary = {
   destinationCount: number;
 };
 
+export type MovementDataStatus = {
+  hasMovementData: boolean;
+  message: string;
+};
+
 export type MovementRecordFilters = {
   touristId?: string;
   tripId?: string;
@@ -40,6 +45,20 @@ export function summarizeDashboard(data: AppData): DashboardSummary {
     completedTripCount: data.trips.filter((trip) => trip.status === "completed").length,
     movementPointCount: data.points.length,
     destinationCount: data.destinations.length,
+  };
+}
+
+export function getMovementDataStatus(data: AppData): MovementDataStatus {
+  if (data.points.length === 0) {
+    return {
+      hasMovementData: false,
+      message: "No tourist movement records have been collected yet. The dashboard will populate after a tourist grants consent and records a trip.",
+    };
+  }
+
+  return {
+    hasMovementData: true,
+    message: `${data.points.length} movement records are available for monitoring and recommendation analysis.`,
   };
 }
 

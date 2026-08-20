@@ -7,7 +7,7 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | Check | Command | Current Result |
 | --- | --- | --- |
 | TypeScript and production build | `npm run build` | Passing |
-| Service tests | `npm test` | Passing: 38 tests |
+| Service tests | `npm test` | Passing: 41 tests |
 
 ## DPP Test Mapping
 

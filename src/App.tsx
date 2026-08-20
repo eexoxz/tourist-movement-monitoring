@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   Compass,
@@ -18,12 +18,11 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { MapView } from "./components/MapView";
-import type { AppData, AppView, Destination, DestinationCategory, DestinationDemand, TravelPlan, User, UserRole } from "./types";
+import type { AppData, AppView, Destination, DestinationCategory, DestinationDemand, MovementPoint, TravelPlan, User, UserRole } from "./types";
 import { coerceViewForRole, getDefaultViewForRole } from "./services/access";
 import { clearSession, createId, getStorageMode, loadCloudData, loadData, resetData, saveData } from "./services/storage";
 import { formatDateTime } from "./services/geo";
-import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
+import { buildTravelPlanCsv, calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
@@ -31,6 +30,7 @@ import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
   getDestinationCategoryCoverage,
+  getMovementDataStatus,
   getMovementRecords,
   getProfileDistribution,
   getTourists,
@@ -49,6 +49,8 @@ import {
   startTripSession,
   stopActiveTrip,
 } from "./services/movement";
+
+const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
 
 const demoRoute = [
   [3.142, 101.6894],
@@ -690,7 +692,7 @@ function TouristWorkspace({
             />
           </section>
 
-          <MapView points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} />
+          <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} />
         </div>
       </Page>
     );
@@ -700,7 +702,7 @@ function TouristWorkspace({
     return (
       <Page title="Movement History" eyebrow="Tourist workspace">
         <div className="two-column">
-          <MapView points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
+          <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
           <section className="list-panel">
             {userTrips.map((trip) => {
               const points = data.points.filter((point) => point.tripId === trip.id);
@@ -757,7 +759,7 @@ function TouristWorkspace({
         ]}
       />
       <div className="two-column">
-        <MapView points={tripPoints} destinations={data.destinations} />
+        <MovementMap points={tripPoints} destinations={data.destinations} />
         <div className="stack">
           <MovementDemandList title="Where Tourists Are Moving" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} />
           <DestinationPanel destinations={data.destinations.slice(0, 6)} selectedId={selectedDestination?.id} visitedIds={visitedDestinationIds} onSelect={setSelectedDestinationId} />
@@ -774,6 +776,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
   const categoryCoverage = useMemo(() => getDestinationCategoryCoverage(data), [data]);
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
+  const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
   const [selectedTripId, setSelectedTripId] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
@@ -847,6 +850,16 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
     URL.revokeObjectURL(url);
   };
 
+  const exportTravelPlan = () => {
+    const blob = new Blob([buildTravelPlanCsv(travelPlan, data)], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `movement-travel-plan-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (view === "records") {
     return (
       <Page
@@ -899,7 +912,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
           ]}
         />
         <div className="two-column">
-          <MapView points={allPoints} destinations={data.destinations} />
+          <MovementMap points={allPoints} destinations={data.destinations} />
           <section className="list-panel">
             {movementRecords.map((record) => {
               return (
@@ -1050,8 +1063,9 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
         ]}
       />
       <div className="two-column">
-        <MapView points={allPoints} destinations={data.destinations} />
+        <MovementMap points={allPoints} destinations={data.destinations} />
         <section className="panel">
+          {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
           <h2>Destination Coverage</h2>
           <CategoryBars values={categoryCoverage} />
           <h2>Movement Trend</h2>
@@ -1060,7 +1074,13 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
           <CategoryBars values={profileDistribution} />
           <h2>Movement Demand</h2>
           <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
-          <h2>Travel Plan Signal</h2>
+          <div className="section-heading">
+            <h2>Travel Plan Signal</h2>
+            <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
+              <Download size={18} />
+              CSV
+            </button>
+          </div>
           <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
           <h2>Recent Recommendation Output</h2>
           <RecommendationList recommendations={data.recommendations.slice(0, 4)} destinations={data.destinations} compact />
@@ -1082,6 +1102,21 @@ function Page({ title, eyebrow, actions, children }: { title: string; eyebrow: s
       </header>
       {children}
     </section>
+  );
+}
+
+function MovementMap({ points, destinations, activePoint }: { points: MovementPoint[]; destinations: Destination[]; activePoint?: MovementPoint }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="map-frame">
+          <div className="map-view map-view-placeholder" />
+          <div className="map-status">Loading map</div>
+        </div>
+      }
+    >
+      <MapView points={points} destinations={destinations} activePoint={activePoint} />
+    </Suspense>
   );
 }
 
@@ -1241,7 +1276,7 @@ function MovementDemandList({
             <div>
               <strong>{destination.name}</strong>
               <p>
-                {row.uniqueTouristCount} tourist profile(s), {row.movementPointCount} movement points
+                {row.uniqueTouristCount} tourist profile(s), {row.movementPointCount} nearby points, {row.approachSignalCount} approach signals
               </p>
               <div className="demand-meter">
                 <i style={{ width: `${Math.max(8, row.popularityScore)}%` }} />

@@ -334,6 +334,13 @@ button:disabled {
   box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
 }
 
+.map-view-placeholder {
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.14), transparent 34%),
+    linear-gradient(315deg, rgba(245, 158, 11, 0.16), transparent 28%),
+    #dbe9e1;
+}
+
 .destination-marker {
   display: grid;
   place-items: center;
@@ -969,7 +976,8 @@ textarea {
 }
 
 .card-actions,
-.form-heading {
+.form-heading,
+.section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -978,6 +986,15 @@ textarea {
 
 .card-actions {
   justify-content: flex-end;
+}
+
+.section-heading h2 {
+  margin: 0;
+}
+
+.compact-action {
+  min-height: 36px;
+  padding: 0 12px;
 }
 
 .icon-action {

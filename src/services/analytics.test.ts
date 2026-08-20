@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
-import type { AppData, TripSession } from "../types";
+import type { AppData, MovementPoint, TripSession } from "../types";
 import {
   calculateDestinationDemand,
+  buildTravelPlanCsv,
   createMovementBasedTravelPlan,
   evaluateAiOutput,
   recommendForUser,
@@ -37,7 +38,50 @@ describe("analytics service", () => {
 
     expect(top.popularityScore).toBeGreaterThan(0);
     expect(top.movementPointCount).toBeGreaterThan(0);
+    expect(top.approachSignalCount).toBeGreaterThanOrEqual(0);
     expect(["high", "medium", "emerging"]).toContain(top.tier);
+  });
+
+  it("detects destinations tourists are moving toward before arrival", () => {
+    const startedAt = new Date(Date.now() - 45 * 60 * 1000).toISOString();
+    const approachTrip: TripSession = {
+      id: "trip-approach",
+      userId: "tourist-demo",
+      status: "completed",
+      startedAt,
+      endedAt: new Date().toISOString(),
+      consentId: "consent-demo",
+    };
+    const approachPoints: MovementPoint[] = [
+      {
+        id: "approach-point-1",
+        tripId: "trip-approach",
+        latitude: 3.18,
+        longitude: 101.72,
+        accuracyMeters: 25,
+        recordedAt: startedAt,
+        source: "demo",
+      },
+      {
+        id: "approach-point-2",
+        tripId: "trip-approach",
+        latitude: 3.16,
+        longitude: 101.705,
+        accuracyMeters: 25,
+        recordedAt: new Date().toISOString(),
+        source: "demo",
+      },
+    ];
+    const approachData: AppData = {
+      ...initialData,
+      trips: [...initialData.trips, approachTrip],
+      points: [...initialData.points, ...approachPoints],
+    };
+    const demand = calculateDestinationDemand(approachData);
+    const klcc = demand.find((row) => row.destinationId === "klcc-park");
+
+    expect(klcc?.approachSignalCount).toBeGreaterThan(0);
+    expect(klcc?.approachingTouristCount).toBeGreaterThan(0);
   });
 
   it("creates a travel plan from tourist movement hotspots", () => {
@@ -46,6 +90,15 @@ describe("analytics service", () => {
     expect(plan.stops.length).toBeGreaterThan(0);
     expect(plan.stops[0].order).toBe(1);
     expect(plan.summary).toContain("movement");
+  });
+
+  it("exports the movement-based travel plan as CSV", () => {
+    const plan = createMovementBasedTravelPlan(initialData);
+    const csv = buildTravelPlanCsv(plan, initialData);
+
+    expect(csv).toContain('"order","destination","city"');
+    expect(csv).toContain('"suggested_minutes"');
+    expect(csv.split("\n").length).toBe(plan.stops.length + 1);
   });
 
   it("falls back without misleading personalization when a tourist has insufficient movement data", () => {

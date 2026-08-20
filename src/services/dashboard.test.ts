@@ -5,6 +5,7 @@ import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
   getDestinationCategoryCoverage,
+  getMovementDataStatus,
   getMovementRecords,
   getProfileDistribution,
   getTourists,
@@ -24,6 +25,11 @@ describe("dashboard service", () => {
       movementPointCount: 7,
       destinationCount: 10,
     });
+  });
+
+  it("reports whether movement data is available for the admin dashboard", () => {
+    expect(getMovementDataStatus(initialData).hasMovementData).toBe(true);
+    expect(getMovementDataStatus({ ...initialData, points: [] }).message).toContain("No tourist movement records");
   });
 
   it("lists tourist accounts separately from administrator accounts", () => {

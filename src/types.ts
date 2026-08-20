@@ -103,6 +103,8 @@ export type DestinationDemand = {
   movementPointCount: number;
   uniqueTouristCount: number;
   recentPointCount: number;
+  approachSignalCount: number;
+  approachingTouristCount: number;
   popularityScore: number;
   tier: "high" | "medium" | "emerging" | "low";
 };
