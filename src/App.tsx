@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   Compass,
@@ -20,9 +20,10 @@ import {
 } from "lucide-react";
 import { MapView } from "./components/MapView";
 import type { AppData, Destination, DestinationCategory, DestinationDemand, LocationConsent, MovementPoint, TravelPlan, TripSession, User, UserRole } from "./types";
-import { clearSession, createId, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
+import { clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
 import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
+import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 
 type View = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
 
@@ -41,15 +42,68 @@ function App() {
   const [sessionUserId, setSessionUserId] = useState<string | null>(() => loadSession());
   const currentUser = data.users.find((user) => user.id === sessionUserId) ?? null;
   const [view, setView] = useState<View>(() => (currentUser?.role === "admin" ? "dashboard" : "overview"));
+  const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const watchId = useRef<number | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    loadCloudData()
+      .then((cloudData) => {
+        if (!isMounted || !cloudData) {
+          return;
+        }
+
+        const refreshed = refreshAllRecommendations(cloudData);
+        setData(refreshed);
+        saveData(refreshed);
+        setSyncStatus("Synced with Firebase Firestore");
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSyncStatus("Local mode; Firebase sync unavailable");
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const commitData = (nextData: AppData) => {
     setData(nextData);
     saveData(nextData);
   };
 
-  const login = (email: string, password: string) => {
-    const user = data.users.find((candidate) => candidate.email.toLowerCase() === email.toLowerCase() && candidate.password === password);
+  const login = async (email: string, password: string) => {
+    let authUid: string | undefined;
+    try {
+      const firebaseUser = await signInWithConfiguredProvider(email, password);
+      authUid = firebaseUser?.uid;
+    } catch (error) {
+      const hasLocalAccount = data.users.some((candidate) => candidate.email.toLowerCase() === email.toLowerCase() && candidate.password === password);
+      if (!hasLocalAccount) {
+        return error instanceof Error ? error.message : "Firebase login failed.";
+      }
+    }
+
+    let user = data.users.find((candidate) => candidate.email.toLowerCase() === email.toLowerCase() && candidate.password === password);
+    if (!user && authUid) {
+      user = {
+        id: createId("user"),
+        authUid,
+        name: email.split("@")[0],
+        email,
+        password: "",
+        role: "tourist",
+        createdAt: new Date().toISOString(),
+      };
+      commitData({ ...data, users: [...data.users, user] });
+    } else if (user && authUid && user.authUid !== authUid) {
+      user = { ...user, authUid };
+      commitData({ ...data, users: data.users.map((candidate) => (candidate.id === user?.id ? user : candidate)) });
+    }
+
     if (!user) {
       return "Invalid email or password.";
     }
@@ -60,13 +114,22 @@ function App() {
     return null;
   };
 
-  const register = (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string) => {
     if (data.users.some((user) => user.email.toLowerCase() === email.toLowerCase())) {
       return "An account with this email already exists.";
     }
 
+    let authUid: string | undefined;
+    try {
+      const firebaseUser = await registerWithConfiguredProvider(email, password);
+      authUid = firebaseUser?.uid;
+    } catch (error) {
+      return error instanceof Error ? error.message : "Firebase registration failed.";
+    }
+
     const user: User = {
       id: createId("user"),
+      authUid,
       name,
       email,
       password,
@@ -81,12 +144,13 @@ function App() {
     return null;
   };
 
-  const logout = () => {
+  const logout = async () => {
     if (watchId.current !== null) {
       navigator.geolocation.clearWatch(watchId.current);
       watchId.current = null;
     }
 
+    await signOutConfiguredProvider().catch(() => undefined);
     clearSession();
     setSessionUserId(null);
   };
@@ -163,6 +227,11 @@ function App() {
           </div>
         </div>
 
+        <div className="status-pill">
+          <span>{authProviderName()}</span>
+          <strong>{syncStatus}</strong>
+        </div>
+
         <div className="sidebar-tools">
           <button className="nav-item utility" onClick={exportData} title="Export prototype data">
             <Download size={18} />
@@ -191,13 +260,20 @@ function App() {
   );
 }
 
-function AuthScreen({ onLogin, onRegister }: { onLogin: (email: string, password: string) => string | null; onRegister: (name: string, email: string, password: string) => string | null }) {
+function AuthScreen({
+  onLogin,
+  onRegister,
+}: {
+  onLogin: (email: string, password: string) => Promise<string | null>;
+  onRegister: (name: string, email: string, password: string) => Promise<string | null>;
+}) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [roleHint, setRoleHint] = useState<UserRole | "nature">("tourist");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("tourist@example.com");
   const [password, setPassword] = useState("tourist123");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setDemoRole = (role: UserRole | "nature") => {
     setRoleHint(role);
@@ -213,10 +289,13 @@ function AuthScreen({ onLogin, onRegister }: { onLogin: (email: string, password
     }
   };
 
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const message = mode === "login" ? onLogin(email, password) : onRegister(name, email, password);
+    setIsSubmitting(true);
+    setError(null);
+    const message = mode === "login" ? await onLogin(email, password) : await onRegister(name, email, password);
     setError(message);
+    setIsSubmitting(false);
   };
 
   return (
@@ -271,9 +350,9 @@ function AuthScreen({ onLogin, onRegister }: { onLogin: (email: string, password
 
           {error && <p className="form-error">{error}</p>}
 
-          <button className="primary-action" type="submit">
+          <button className="primary-action" type="submit" disabled={isSubmitting}>
             <ShieldCheck size={18} />
-            {mode === "login" ? "Enter system" : "Create tourist account"}
+            {isSubmitting ? "Checking access" : mode === "login" ? "Enter system" : "Create tourist account"}
           </button>
         </form>
       </section>
@@ -415,12 +494,57 @@ function TouristWorkspace({
       return;
     }
 
-    appendPoint(activeTrip.id, Number(manualLocation.latitude), Number(manualLocation.longitude), Number(manualLocation.accuracyMeters), "demo");
+    const latitude = Number(manualLocation.latitude);
+    const longitude = Number(manualLocation.longitude);
+    const accuracyMeters = Number(manualLocation.accuracyMeters);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+      setTrackingMessage("Enter a valid latitude and longitude before saving.");
+      return;
+    }
+
+    appendPoint(activeTrip.id, latitude, longitude, Math.max(1, accuracyMeters || 25), "demo");
     setTrackingMessage("Manual movement point saved to the active trip.");
   };
 
   const refreshRecommendations = () => {
     onDataChange(refreshAnalysis(data, user.id));
+  };
+
+  const revokeConsent = () => {
+    if (watchId.current !== null) {
+      navigator.geolocation.clearWatch(watchId.current);
+      watchId.current = null;
+    }
+
+    const nextData = {
+      ...data,
+      consents: data.consents.map((consent) =>
+        consent.userId === user.id && consent.granted ? { ...consent, granted: false, revokedAt: new Date().toISOString() } : consent
+      ),
+      trips: data.trips.map((trip) => (trip.userId === user.id && trip.status === "active" ? { ...trip, status: "completed" as const, endedAt: new Date().toISOString() } : trip)),
+    };
+    onDataChange(refreshAllRecommendations(nextData));
+    setTrackingMessage("Location consent revoked. Active tracking has been stopped.");
+  };
+
+  const deleteMyMovementData = () => {
+    if (watchId.current !== null) {
+      navigator.geolocation.clearWatch(watchId.current);
+      watchId.current = null;
+    }
+
+    const userTripIds = new Set(userTrips.map((trip) => trip.id));
+    const nextData = {
+      ...data,
+      trips: data.trips.filter((trip) => trip.userId !== user.id),
+      points: data.points.filter((point) => !userTripIds.has(point.tripId)),
+      analyses: data.analyses.filter((analysis) => analysis.userId !== user.id),
+      recommendations: data.recommendations.filter((recommendation) => recommendation.userId !== user.id),
+    };
+    onDataChange(refreshAllRecommendations(nextData));
+    setSelectedTripId("");
+    setTrackingMessage("Your movement history and AI recommendation records were deleted.");
   };
 
   if (view === "tracking") {
@@ -443,6 +567,12 @@ function TouristWorkspace({
               <button className="primary-action" onClick={grantConsent}>
                 <ShieldCheck size={18} />
                 Grant consent
+              </button>
+            )}
+            {currentConsent && (
+              <button className="secondary-action wide" onClick={revokeConsent}>
+                <ShieldCheck size={18} />
+                Revoke consent
               </button>
             )}
 
@@ -483,6 +613,15 @@ function TouristWorkspace({
             </form>
 
             {trackingMessage && <p className="status-message">{trackingMessage}</p>}
+
+            <section className="privacy-actions">
+              <strong>Privacy control</strong>
+              <p>Movement data remains linked to your tourist account for route history and recommendations.</p>
+              <button className="secondary-action wide danger" onClick={deleteMyMovementData} disabled={userTrips.length === 0}>
+                <Trash2 size={18} />
+                Delete my movement data
+              </button>
+            </section>
 
             <MetricGrid
               items={[

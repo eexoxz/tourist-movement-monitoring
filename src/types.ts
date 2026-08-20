@@ -14,6 +14,7 @@ export type TripStatus = "active" | "completed";
 
 export type User = {
   id: string;
+  authUid?: string;
   name: string;
   email: string;
   password: string;

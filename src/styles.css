@@ -129,6 +129,28 @@ button:disabled {
   gap: 8px;
 }
 
+.status-pill {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: #fff7ed;
+}
+
+.status-pill span {
+  color: #9a3412;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.status-pill strong {
+  color: #172033;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
 .nav-item.utility {
   color: #0f766e;
 }
@@ -406,6 +428,21 @@ button:disabled {
   border-radius: 8px;
   color: #6b3d00;
   background: #fff7ed;
+}
+
+.privacy-actions {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff7f7;
+}
+
+.privacy-actions p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.5;
 }
 
 .list-panel,

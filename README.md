@@ -31,6 +31,15 @@ Build check:
 npm run build
 ```
 
+Firebase setup:
+
+1. Create a Firebase web app with Authentication and Firestore enabled.
+2. Copy `.env.example` to `.env`.
+3. Fill in the `VITE_FIREBASE_*` values from the Firebase web app settings.
+4. Restart the app.
+
+Without `.env`, the app stays in local prototype mode. With Firebase config, app data is mirrored to Firestore under `prototype/appData`, while browser storage remains a local backup.
+
 Project roadmap:
 
 - See `PROJECT_CHECKLIST.md` for the staged completion checklist based on the DPP.

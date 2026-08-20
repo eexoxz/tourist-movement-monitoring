@@ -36,7 +36,7 @@ function emptyCounts(): Record<DestinationCategory, number> {
 function categoryCounts(points: MovementPoint[], data: AppData) {
   const counts = emptyCounts();
 
-  points.forEach((point) => {
+  prepareMovementPoints(points).forEach((point) => {
     const nearest = nearestDestination(point, data.destinations);
     if (nearest && nearest.distance <= 1.2) {
       counts[nearest.destination.category] += 1;
@@ -44,6 +44,22 @@ function categoryCounts(points: MovementPoint[], data: AppData) {
   });
 
   return counts;
+}
+
+function prepareMovementPoints(points: MovementPoint[]) {
+  const sortedPoints = [...points]
+    .filter((point) => Math.abs(point.latitude) <= 90 && Math.abs(point.longitude) <= 180)
+    .sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+
+  return sortedPoints.filter((point, index) => {
+    if (index === 0) {
+      return true;
+    }
+
+    const previous = sortedPoints[index - 1];
+    const secondsApart = Math.abs(new Date(point.recordedAt).getTime() - new Date(previous.recordedAt).getTime()) / 1000;
+    return distanceKm(point, previous) >= 0.04 || secondsApart >= 60;
+  });
 }
 
 function inferProfile(counts: Record<DestinationCategory, number>): TouristProfile {
@@ -143,7 +159,7 @@ function createTripFeatures(data: AppData): TripFeature[] {
   return data.trips
     .filter((trip) => trip.status === "completed")
     .map((trip) => {
-      const points = data.points.filter((point) => point.tripId === trip.id);
+      const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
       if (points.length < 2) {
         return null;
       }
@@ -298,7 +314,7 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
 }
 
 export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | null {
-  const points = data.points.filter((point) => point.tripId === trip.id);
+  const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
 
   if (points.length < 2) {
     return null;
