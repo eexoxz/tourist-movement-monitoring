@@ -3,20 +3,26 @@ import {
   BarChart3,
   Compass,
   Database,
+  Download,
   LogOut,
   MapPinned,
   Navigation,
+  Pencil,
+  RotateCcw,
   Play,
+  Save,
   ShieldCheck,
   Sparkles,
   Square,
+  Trash2,
   UserRound,
+  X,
 } from "lucide-react";
 import { MapView } from "./components/MapView";
-import type { AppData, Destination, LocationConsent, MovementPoint, TripSession, User, UserRole } from "./types";
-import { clearSession, createId, loadData, loadSession, saveData, saveSession } from "./services/storage";
+import type { AppData, Destination, DestinationCategory, LocationConsent, MovementPoint, TripSession, User, UserRole } from "./types";
+import { clearSession, createId, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
-import { refreshAnalysis } from "./services/analytics";
+import { refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 
 type View = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
 
@@ -28,8 +34,10 @@ const demoRoute = [
   [3.1579, 101.7116],
 ] as const;
 
+const destinationCategories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
+
 function App() {
-  const [data, setData] = useState<AppData>(() => loadData());
+  const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
   const [sessionUserId, setSessionUserId] = useState<string | null>(() => loadSession());
   const currentUser = data.users.find((user) => user.id === sessionUserId) ?? null;
   const [view, setView] = useState<View>(() => (currentUser?.role === "admin" ? "dashboard" : "overview"));
@@ -83,6 +91,29 @@ function App() {
     setSessionUserId(null);
   };
 
+  const resetPrototype = () => {
+    if (watchId.current !== null) {
+      navigator.geolocation.clearWatch(watchId.current);
+      watchId.current = null;
+    }
+
+    const freshData = refreshAllRecommendations(resetData());
+    saveData(freshData);
+    setData(freshData);
+    setSessionUserId(null);
+    setView("overview");
+  };
+
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `tourist-movement-export-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!currentUser) {
     return <AuthScreen onLogin={login} onRegister={register} />;
   }
@@ -132,6 +163,17 @@ function App() {
           </div>
         </div>
 
+        <div className="sidebar-tools">
+          <button className="nav-item utility" onClick={exportData} title="Export prototype data">
+            <Download size={18} />
+            Export data
+          </button>
+          <button className="nav-item utility danger" onClick={resetPrototype} title="Reset prototype data">
+            <RotateCcw size={18} />
+            Reset demo
+          </button>
+        </div>
+
         <button className="nav-item logout" onClick={logout}>
           <LogOut size={18} />
           Logout
@@ -151,17 +193,20 @@ function App() {
 
 function AuthScreen({ onLogin, onRegister }: { onLogin: (email: string, password: string) => string | null; onRegister: (name: string, email: string, password: string) => string | null }) {
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [roleHint, setRoleHint] = useState<UserRole>("tourist");
+  const [roleHint, setRoleHint] = useState<UserRole | "nature">("tourist");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("tourist@example.com");
   const [password, setPassword] = useState("tourist123");
   const [error, setError] = useState<string | null>(null);
 
-  const setDemoRole = (role: UserRole) => {
+  const setDemoRole = (role: UserRole | "nature") => {
     setRoleHint(role);
     if (role === "admin") {
       setEmail("admin@tourism.local");
       setPassword("admin123");
+    } else if (role === "nature") {
+      setEmail("nature@example.com");
+      setPassword("nature123");
     } else {
       setEmail("tourist@example.com");
       setPassword("tourist123");
@@ -194,9 +239,12 @@ function AuthScreen({ onLogin, onRegister }: { onLogin: (email: string, password
           </div>
 
           {mode === "login" && (
-            <div className="segmented-control role-switch" aria-label="Demo role">
+            <div className="segmented-control role-switch three-way" aria-label="Demo role">
               <button type="button" className={roleHint === "tourist" ? "active" : ""} onClick={() => setDemoRole("tourist")}>
                 Tourist
+              </button>
+              <button type="button" className={roleHint === "nature" ? "active" : ""} onClick={() => setDemoRole("nature")}>
+                Nature
               </button>
               <button type="button" className={roleHint === "admin" ? "active" : ""} onClick={() => setDemoRole("admin")}>
                 Admin
@@ -253,6 +301,12 @@ function TouristWorkspace({
   const latestAnalysis = data.analyses.filter((analysis) => analysis.userId === user.id).sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
   const recommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
+  const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
+  const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
+  const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
+  const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? userTrips[0];
+  const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
+  const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
 
   const grantConsent = () => {
     const consent: LocationConsent = {
@@ -353,6 +407,21 @@ function TouristWorkspace({
     setTrackingMessage("Demo movement point added to the active trip.");
   };
 
+  const addManualPoint = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!activeTrip) {
+      setTrackingMessage("Start a trip before saving a manual movement point.");
+      return;
+    }
+
+    appendPoint(activeTrip.id, Number(manualLocation.latitude), Number(manualLocation.longitude), Number(manualLocation.accuracyMeters), "demo");
+    setTrackingMessage("Manual movement point saved to the active trip.");
+  };
+
+  const refreshRecommendations = () => {
+    onDataChange(refreshAnalysis(data, user.id));
+  };
+
   if (view === "tracking") {
     const activePoints = activeTrip ? data.points.filter((point) => point.tripId === activeTrip.id) : [];
 
@@ -391,6 +460,27 @@ function TouristWorkspace({
               Add demo movement point
             </button>
 
+            <form className="mini-form" onSubmit={addManualPoint}>
+              <div className="field-pair">
+                <label>
+                  Latitude
+                  <input value={manualLocation.latitude} onChange={(event) => setManualLocation({ ...manualLocation, latitude: event.target.value })} required />
+                </label>
+                <label>
+                  Longitude
+                  <input value={manualLocation.longitude} onChange={(event) => setManualLocation({ ...manualLocation, longitude: event.target.value })} required />
+                </label>
+              </div>
+              <label>
+                Accuracy meters
+                <input value={manualLocation.accuracyMeters} onChange={(event) => setManualLocation({ ...manualLocation, accuracyMeters: event.target.value })} required />
+              </label>
+              <button className="secondary-action wide" type="submit" disabled={!activeTrip}>
+                <Save size={18} />
+                Save manual point
+              </button>
+            </form>
+
             {trackingMessage && <p className="status-message">{trackingMessage}</p>}
 
             <MetricGrid
@@ -412,20 +502,21 @@ function TouristWorkspace({
     return (
       <Page title="Movement History" eyebrow="Tourist workspace">
         <div className="two-column">
-          <MapView points={tripPoints} destinations={data.destinations} />
+          <MapView points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
           <section className="list-panel">
             {userTrips.map((trip) => {
               const points = data.points.filter((point) => point.tripId === trip.id);
               return (
-                <article className="record-card" key={trip.id}>
+                <button className={selectedTrip?.id === trip.id ? "record-card selectable active" : "record-card selectable"} key={trip.id} onClick={() => setSelectedTripId(trip.id)}>
                   <div>
                     <strong>{formatDateTime(trip.startedAt)}</strong>
                     <span>{trip.status}</span>
                   </div>
                   <p>{points.length} movement points recorded</p>
-                </article>
+                </button>
               );
             })}
+            {userTrips.length === 0 && <EmptyState text="No trip sessions have been created yet." />}
           </section>
         </div>
       </Page>
@@ -434,7 +525,16 @@ function TouristWorkspace({
 
   if (view === "recommendations") {
     return (
-      <Page title="Recommendations" eyebrow="Tourist workspace">
+      <Page
+        title="Recommendations"
+        eyebrow="Tourist workspace"
+        actions={
+          <button className="secondary-action" onClick={refreshRecommendations}>
+            <RotateCcw size={18} />
+            Refresh
+          </button>
+        }
+      >
         <RecommendationList recommendations={recommendations} destinations={data.destinations} />
       </Page>
     );
@@ -452,7 +552,10 @@ function TouristWorkspace({
       />
       <div className="two-column">
         <MapView points={tripPoints} destinations={data.destinations} />
-        <DestinationPanel destinations={data.destinations.slice(0, 5)} />
+        <div className="stack">
+          <DestinationPanel destinations={data.destinations.slice(0, 6)} selectedId={selectedDestination?.id} onSelect={setSelectedDestinationId} />
+          {selectedDestination && <DestinationDetail destination={selectedDestination} />}
+        </div>
       </div>
     </Page>
   );
@@ -465,6 +568,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
     totals[destination.category] = (totals[destination.category] ?? 0) + 1;
     return totals;
   }, {});
+  const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
   const [destinationForm, setDestinationForm] = useState({
     name: "",
     city: "",
@@ -474,7 +578,9 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
     description: "",
   });
 
-  const allPoints = data.points;
+  const visibleTrips = selectedTouristId === "all" ? data.trips : data.trips.filter((trip) => trip.userId === selectedTouristId);
+  const visibleTripIds = new Set(visibleTrips.map((trip) => trip.id));
+  const allPoints = data.points.filter((point) => visibleTripIds.has(point.tripId));
 
   const addDestination = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -492,13 +598,30 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
     setDestinationForm({ name: "", city: "", category: "cultural", latitude: "3.1478", longitude: "101.6937", description: "" });
   };
 
+  const recomputeAi = () => {
+    onDataChange(refreshAllRecommendations(data));
+  };
+
   if (view === "records") {
     return (
-      <Page title="Movement Records" eyebrow="Administrator workspace">
+      <Page
+        title="Movement Records"
+        eyebrow="Administrator workspace"
+        actions={
+          <select className="toolbar-select" value={selectedTouristId} onChange={(event) => setSelectedTouristId(event.target.value)}>
+            <option value="all">All tourists</option>
+            {tourists.map((tourist) => (
+              <option key={tourist.id} value={tourist.id}>
+                {tourist.name}
+              </option>
+            ))}
+          </select>
+        }
+      >
         <div className="two-column">
           <MapView points={allPoints} destinations={data.destinations} />
           <section className="list-panel">
-            {data.points.map((point) => {
+            {allPoints.map((point) => {
               const trip = data.trips.find((candidate) => candidate.id === point.tripId);
               const user = data.users.find((candidate) => candidate.id === trip?.userId);
               const nearest = nearestDestination(point, data.destinations);
@@ -509,11 +632,12 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
                     <span>{formatDateTime(point.recordedAt)}</span>
                   </div>
                   <p>
-                    {point.latitude.toFixed(4)}, {point.longitude.toFixed(4)} near {nearest.destination.name}
+                    {point.latitude.toFixed(4)}, {point.longitude.toFixed(4)} near {nearest?.destination.name ?? "unmapped destination"}
                   </p>
                 </article>
               );
             })}
+            {allPoints.length === 0 && <EmptyState text="No movement records match this filter." />}
           </section>
         </div>
       </Page>
@@ -565,7 +689,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
             </button>
           </form>
 
-          <DestinationPanel destinations={data.destinations} />
+          <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} />
         </div>
       </Page>
     );
@@ -573,7 +697,16 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
 
   if (view === "ai") {
     return (
-      <Page title="AI Analysis" eyebrow="Administrator workspace">
+      <Page
+        title="AI Analysis"
+        eyebrow="Administrator workspace"
+        actions={
+          <button className="secondary-action" onClick={recomputeAi}>
+            <RotateCcw size={18} />
+            Recompute
+          </button>
+        }
+      >
         <div className="analysis-grid">
           {data.analyses.map((analysis) => {
             const user = data.users.find((candidate) => candidate.id === analysis.userId);
@@ -583,6 +716,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
                 <h2>{user?.name ?? "Unknown tourist"}</h2>
                 <p>{analysis.profile} tourist profile</p>
                 <strong>Silhouette {analysis.silhouetteScore}</strong>
+                <small>{analysis.dataPointCount} points processed by {analysis.method}</small>
                 <CategoryBars values={analysis.categoryCounts} />
               </article>
             );
@@ -594,7 +728,16 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
   }
 
   return (
-    <Page title="Administrator Dashboard" eyebrow="Administrator workspace">
+    <Page
+      title="Administrator Dashboard"
+      eyebrow="Administrator workspace"
+      actions={
+        <button className="secondary-action" onClick={recomputeAi}>
+          <RotateCcw size={18} />
+          Refresh AI
+        </button>
+      }
+    >
       <MetricGrid
         items={[
           ["Tourists", tourists.length.toString()],
@@ -616,12 +759,15 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
   );
 }
 
-function Page({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
+function Page({ title, eyebrow, actions, children }: { title: string; eyebrow: string; actions?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="page">
       <header className="page-header">
-        <span>{eyebrow}</span>
-        <h1>{title}</h1>
+        <div>
+          <span>{eyebrow}</span>
+          <h1>{title}</h1>
+        </div>
+        {actions && <div className="page-actions">{actions}</div>}
       </header>
       {children}
     </section>
@@ -641,19 +787,163 @@ function MetricGrid({ items }: { items: [string, string][] }) {
   );
 }
 
-function DestinationPanel({ destinations }: { destinations: Destination[] }) {
+function DestinationPanel({ destinations, selectedId, onSelect }: { destinations: Destination[]; selectedId?: string; onSelect?: (id: string) => void }) {
   return (
     <section className="list-panel">
       {destinations.map((destination) => (
-        <article className="destination-card" key={destination.id}>
+        <button
+          className={selectedId === destination.id ? "destination-card selectable active" : "destination-card selectable"}
+          key={destination.id}
+          onClick={() => onSelect?.(destination.id)}
+          type="button"
+        >
           <div>
             <strong>{destination.name}</strong>
             <span>{destination.city}</span>
           </div>
           <p>{destination.description}</p>
           <small>{destination.category}</small>
+        </button>
+      ))}
+    </section>
+  );
+}
+
+function DestinationDetail({ destination }: { destination: Destination }) {
+  return (
+    <section className="panel detail-panel">
+      <h2>{destination.name}</h2>
+      <p>{destination.description}</p>
+      <dl>
+        <div>
+          <dt>City</dt>
+          <dd>{destination.city}</dd>
+        </div>
+        <div>
+          <dt>Category</dt>
+          <dd>{destination.category}</dd>
+        </div>
+        <div>
+          <dt>Average visit</dt>
+          <dd>{destination.averageVisitMinutes} minutes</dd>
+        </div>
+        <div>
+          <dt>Coordinates</dt>
+          <dd>
+            {destination.latitude.toFixed(4)}, {destination.longitude.toFixed(4)}
+          </dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
+function DestinationManager({ destinations, onChange }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void }) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const editingDestination = destinations.find((destination) => destination.id === editingId) ?? null;
+  const [form, setForm] = useState<Destination | null>(null);
+
+  const startEdit = (destination: Destination) => {
+    setEditingId(destination.id);
+    setForm(destination);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(null);
+  };
+
+  const saveEdit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!form) {
+      return;
+    }
+
+    onChange(destinations.map((destination) => (destination.id === form.id ? form : destination)));
+    cancelEdit();
+  };
+
+  const removeDestination = (destinationId: string) => {
+    if (destinations.length <= 1) {
+      return;
+    }
+
+    onChange(destinations.filter((destination) => destination.id !== destinationId));
+    if (editingId === destinationId) {
+      cancelEdit();
+    }
+  };
+
+  return (
+    <section className="list-panel">
+      {destinations.map((destination) => (
+        <article className="destination-card editable" key={destination.id}>
+          <div>
+            <strong>{destination.name}</strong>
+            <span>{destination.city}</span>
+          </div>
+          <p>{destination.description}</p>
+          <small>{destination.category}</small>
+          <div className="card-actions">
+            <button className="secondary-action icon-action" onClick={() => startEdit(destination)} type="button" title="Edit destination">
+              <Pencil size={16} />
+            </button>
+            <button className="secondary-action icon-action danger" onClick={() => removeDestination(destination.id)} type="button" title="Delete destination" disabled={destinations.length <= 1}>
+              <Trash2 size={16} />
+            </button>
+          </div>
         </article>
       ))}
+      {editingDestination && form && (
+        <form className="panel destination-form edit-form" onSubmit={saveEdit}>
+          <div className="form-heading">
+            <h2>Edit Destination</h2>
+            <button className="secondary-action icon-action" type="button" onClick={cancelEdit} title="Cancel edit">
+              <X size={16} />
+            </button>
+          </div>
+          <label>
+            Name
+            <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
+          </label>
+          <label>
+            City
+            <input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
+          </label>
+          <label>
+            Category
+            <select value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value as DestinationCategory })}>
+              {destinationCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="field-pair">
+            <label>
+              Latitude
+              <input type="number" step="any" value={form.latitude} onChange={(event) => setForm({ ...form, latitude: Number(event.target.value) })} required />
+            </label>
+            <label>
+              Longitude
+              <input type="number" step="any" value={form.longitude} onChange={(event) => setForm({ ...form, longitude: Number(event.target.value) })} required />
+            </label>
+          </div>
+          <label>
+            Average visit minutes
+            <input type="number" min="1" value={form.averageVisitMinutes} onChange={(event) => setForm({ ...form, averageVisitMinutes: Number(event.target.value) })} required />
+          </label>
+          <label>
+            Description
+            <textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} required />
+          </label>
+          <button className="primary-action" type="submit">
+            <Save size={18} />
+            Save changes
+          </button>
+        </form>
+      )}
     </section>
   );
 }

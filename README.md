@@ -7,6 +7,7 @@ The current implementation runs locally with browser storage so the main project
 Demo accounts:
 
 - Tourist: `tourist@example.com` / `tourist123`
+- Nature tourist: `nature@example.com` / `nature123`
 - Tourism Administrator: `admin@tourism.local` / `admin123`
 
 Run locally:
@@ -27,5 +28,9 @@ Use `npm run preview` after a build when you only want to reopen the latest comp
 Build check:
 
 ```bash
-pnpm run build
+npm run build
 ```
+
+Project roadmap:
+
+- See `PROJECT_CHECKLIST.md` for the staged completion checklist based on the DPP.

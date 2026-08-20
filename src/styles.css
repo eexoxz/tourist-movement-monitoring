@@ -115,6 +115,20 @@ button:disabled {
   color: #fecaca;
 }
 
+.sidebar-tools {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-item.utility {
+  color: #cfe8ff;
+}
+
+.nav-item.danger,
+.secondary-action.danger {
+  color: #fecaca;
+}
+
 .content {
   min-width: 0;
   padding: 28px;
@@ -123,6 +137,19 @@ button:disabled {
 .page {
   display: grid;
   gap: 22px;
+}
+
+.page-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .page-header span {
@@ -180,6 +207,11 @@ button:disabled {
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
   gap: 18px;
   align-items: start;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
 }
 
 .map-view {
@@ -251,6 +283,12 @@ button:disabled {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.mini-form {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
 }
 
 .primary-action,
@@ -409,6 +447,7 @@ meter {
 }
 
 .destination-form label,
+.mini-form label,
 .auth-form label {
   display: grid;
   gap: 7px;
@@ -502,6 +541,10 @@ textarea {
   background: #f8fafc;
 }
 
+.three-way {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .form-error {
   margin: 0;
   color: #b91c1c;
@@ -513,6 +556,80 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 18px;
+}
+
+.selectable {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+}
+
+.selectable.active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.detail-panel p {
+  margin: 0;
+  color: #596575;
+  line-height: 1.55;
+}
+
+.detail-panel dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.detail-panel dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.detail-panel dt {
+  color: #657181;
+}
+
+.detail-panel dd {
+  margin: 0;
+  color: #172033;
+  font-weight: 800;
+  text-align: right;
+}
+
+.toolbar-select {
+  min-width: 220px;
+}
+
+.analysis-card small {
+  display: block;
+  margin-top: 6px;
+  color: #657181;
+}
+
+.card-actions,
+.form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card-actions {
+  justify-content: flex-end;
+}
+
+.icon-action {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
+.edit-form {
+  margin-top: 4px;
 }
 
 @media (max-width: 1040px) {

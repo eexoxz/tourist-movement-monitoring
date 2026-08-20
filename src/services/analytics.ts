@@ -11,6 +11,13 @@ import { createId } from "./storage";
 import { distanceKm, nearestDestination } from "./geo";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
+type TripFeature = {
+  trip: TripSession;
+  counts: Record<DestinationCategory, number>;
+  vector: number[];
+  profile: TouristProfile;
+  pointCount: number;
+};
 
 function emptyCounts(): Record<DestinationCategory, number> {
   return {
@@ -63,24 +70,103 @@ function vectorFromCounts(counts: Record<DestinationCategory, number>) {
   return categories.map((category) => counts[category] / total);
 }
 
-function clusterForVector(vector: number[]) {
-  const centroids = [
-    [0.42, 0.05, 0.05, 0.32, 0.12, 0.04],
-    [0.05, 0.48, 0.05, 0.05, 0.08, 0.29],
-    [0.08, 0.06, 0.43, 0.08, 0.3, 0.05],
-  ];
+function euclidean(a: number[], b: number[]) {
+  return Math.sqrt(a.reduce((sum, value, index) => sum + Math.pow(value - b[index], 2), 0));
+}
 
-  const distances = centroids.map((centroid) =>
-    Math.sqrt(centroid.reduce((sum, value, index) => sum + Math.pow(value - vector[index], 2), 0))
+function averageVector(vectors: number[][], fallback: number[]) {
+  if (vectors.length === 0) {
+    return fallback;
+  }
+
+  return fallback.map((_, index) => vectors.reduce((sum, vector) => sum + vector[index], 0) / vectors.length);
+}
+
+function createTripFeatures(data: AppData): TripFeature[] {
+  return data.trips
+    .filter((trip) => trip.status === "completed")
+    .map((trip) => {
+      const points = data.points.filter((point) => point.tripId === trip.id);
+      if (points.length < 2) {
+        return null;
+      }
+
+      const counts = categoryCounts(points, data);
+      const vector = vectorFromCounts(counts);
+
+      return {
+        trip,
+        counts,
+        vector,
+        profile: inferProfile(counts),
+        pointCount: points.length,
+      };
+    })
+    .filter((feature): feature is TripFeature => Boolean(feature));
+}
+
+function runKMeans(features: TripFeature[]) {
+  if (features.length === 0) {
+    return new Map<string, { cluster: number; silhouetteScore: number }>();
+  }
+
+  const k = Math.min(3, features.length);
+  let centroids = features.slice(0, k).map((feature) => feature.vector);
+  let assignments = features.map((_, index) => index % k);
+
+  for (let iteration = 0; iteration < 12; iteration += 1) {
+    assignments = features.map((feature) => {
+      const distances = centroids.map((centroid) => euclidean(feature.vector, centroid));
+      return distances.indexOf(Math.min(...distances));
+    });
+
+    centroids = centroids.map((centroid, clusterIndex) =>
+      averageVector(
+        features.filter((_, featureIndex) => assignments[featureIndex] === clusterIndex).map((feature) => feature.vector),
+        centroid
+      )
+    );
+  }
+
+  return new Map(
+    features.map((feature, index) => [
+      feature.trip.id,
+      {
+        cluster: assignments[index],
+        silhouetteScore: silhouetteForFeature(features, assignments, index, k),
+      },
+    ])
   );
+}
 
-  const smallest = Math.min(...distances);
-  const second = distances.filter((value) => value !== smallest).sort((a, b) => a - b)[0] ?? smallest;
+function silhouetteForFeature(features: TripFeature[], assignments: number[], featureIndex: number, k: number) {
+  if (k <= 1 || features.length <= 1) {
+    return 0;
+  }
 
-  return {
-    cluster: distances.indexOf(smallest),
-    silhouetteScore: Number(Math.max(0.12, Math.min(0.91, (second - smallest) / Math.max(second, 0.01))).toFixed(2)),
-  };
+  const feature = features[featureIndex];
+  const ownCluster = assignments[featureIndex];
+  const ownDistances = features
+    .map((candidate, index) => ({ candidate, index }))
+    .filter(({ index }) => index !== featureIndex && assignments[index] === ownCluster)
+    .map(({ candidate }) => euclidean(feature.vector, candidate.vector));
+
+  const a = ownDistances.length ? ownDistances.reduce((sum, value) => sum + value, 0) / ownDistances.length : 0;
+  const otherAverages = Array.from({ length: k }, (_, clusterIndex) => clusterIndex)
+    .filter((clusterIndex) => clusterIndex !== ownCluster)
+    .map((clusterIndex) => {
+      const distances = features
+        .filter((_, index) => assignments[index] === clusterIndex)
+        .map((candidate) => euclidean(feature.vector, candidate.vector));
+      return distances.length ? distances.reduce((sum, value) => sum + value, 0) / distances.length : Number.POSITIVE_INFINITY;
+    });
+  const b = Math.min(...otherAverages);
+
+  if (!Number.isFinite(b) || Math.max(a, b) === 0) {
+    return 0;
+  }
+
+  return Number(((b - a) / Math.max(a, b)).toFixed(2));
 }
 
 function profileMatchesCategory(profile: TouristProfile, category: DestinationCategory) {
@@ -108,18 +194,40 @@ export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | 
 
   const counts = categoryCounts(points, data);
   const profile = inferProfile(counts);
-  const vector = vectorFromCounts(counts);
-  const cluster = clusterForVector(vector);
 
   return {
     tripId: trip.id,
     userId: trip.userId,
-    cluster: cluster.cluster,
+    cluster: 0,
     profile,
-    silhouetteScore: cluster.silhouetteScore,
+    silhouetteScore: 0,
     categoryCounts: counts,
+    dataPointCount: points.length,
+    method: "k-means",
     generatedAt: new Date().toISOString(),
   };
+}
+
+export function analyzeAllTrips(data: AppData): AnalysisResult[] {
+  const features = createTripFeatures(data);
+  const clusters = runKMeans(features);
+  const generatedAt = new Date().toISOString();
+
+  return features.map((feature) => {
+    const cluster = clusters.get(feature.trip.id) ?? { cluster: 0, silhouetteScore: 0 };
+
+    return {
+      tripId: feature.trip.id,
+      userId: feature.trip.userId,
+      cluster: cluster.cluster,
+      profile: feature.profile,
+      silhouetteScore: cluster.silhouetteScore,
+      categoryCounts: feature.counts,
+      dataPointCount: feature.pointCount,
+      method: "k-means",
+      generatedAt,
+    };
+  });
 }
 
 export function recommendForUser(userId: string, data: AppData, analysis?: AnalysisResult): Recommendation[] {
@@ -160,16 +268,30 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
 }
 
 export function refreshAnalysis(data: AppData, userId: string): AppData {
-  const completedTrips = data.trips.filter((trip) => trip.userId === userId && trip.status === "completed");
-  const analyses = completedTrips
-    .map((trip) => analyzeTrip(trip, data))
-    .filter((analysis): analysis is AnalysisResult => Boolean(analysis));
-  const latestAnalysis = analyses.sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
-  const recommendations = recommendForUser(userId, data, latestAnalysis);
+  const analyses = analyzeAllTrips(data);
+  const latestAnalysis = analyses
+    .filter((analysis) => analysis.userId === userId)
+    .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
+  const recommendationData = { ...data, analyses };
+  const recommendations = recommendForUser(userId, recommendationData, latestAnalysis);
 
   return {
     ...data,
-    analyses: [...data.analyses.filter((analysis) => analysis.userId !== userId), ...analyses],
+    analyses,
     recommendations: [...data.recommendations.filter((recommendation) => recommendation.userId !== userId), ...recommendations],
   };
+}
+
+export function refreshAllRecommendations(data: AppData): AppData {
+  const analyses = analyzeAllTrips(data);
+  const users = data.users.filter((user) => user.role === "tourist");
+  const withAnalyses = { ...data, analyses };
+  const recommendations = users.flatMap((user) => {
+    const latestAnalysis = analyses
+      .filter((analysis) => analysis.userId === user.id)
+      .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
+    return recommendForUser(user.id, withAnalyses, latestAnalysis);
+  });
+
+  return { ...withAnalyses, recommendations };
 }

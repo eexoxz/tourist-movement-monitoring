@@ -43,3 +43,9 @@ export function publicUser(user: User) {
   const { password: _password, ...safeUser } = user;
   return safeUser;
 }
+
+export function resetData() {
+  saveData(initialData);
+  clearSession();
+  return initialData;
+}

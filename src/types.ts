@@ -66,6 +66,8 @@ export type AnalysisResult = {
   profile: TouristProfile;
   silhouetteScore: number;
   categoryCounts: Record<DestinationCategory, number>;
+  dataPointCount: number;
+  method: "k-means";
   generatedAt: string;
 };
 
