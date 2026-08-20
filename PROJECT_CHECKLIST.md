@@ -147,7 +147,7 @@ Completion gate:
 - [x] Add silhouette-like score placeholder for UI evidence.
 - [x] Implement actual K-Means clustering.
 - [x] Decide whether K-Means runs in frontend JavaScript, a backend function, or a Python analysis script.
-- [ ] Prepare prototype movement dataset for AI testing.
+- [x] Prepare prototype movement dataset for AI testing.
 - [x] Prepare destination category features.
 - [x] Select and justify K value.
 - [x] Calculate and record silhouette score from the real clustering output.
@@ -161,8 +161,8 @@ Completion gate:
 
 Completion gate:
 
-- [ ] Valid movement data produces a cluster, tourist category, and explainable AI result.
-- [ ] AI testing evidence includes cluster interpretation, silhouette score, classification accuracy, and confusion matrix where data allows.
+- [x] Valid movement data produces a cluster, tourist category, and explainable AI result.
+- [x] AI testing evidence includes cluster interpretation, silhouette score, classification accuracy, and confusion matrix where data allows.
 
 ## Phase 8: Recommendation Engine
 

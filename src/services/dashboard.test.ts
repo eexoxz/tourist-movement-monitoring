@@ -18,11 +18,11 @@ describe("dashboard service", () => {
     const summary = summarizeDashboard(initialData);
 
     expect(summary).toEqual({
-      touristCount: 2,
-      consentedTouristCount: 2,
+      touristCount: 4,
+      consentedTouristCount: 4,
       activeTripCount: 0,
-      completedTripCount: 2,
-      movementPointCount: 7,
+      completedTripCount: 4,
+      movementPointCount: 15,
       destinationCount: 10,
     });
   });
@@ -35,7 +35,7 @@ describe("dashboard service", () => {
   it("lists tourist accounts separately from administrator accounts", () => {
     const tourists = getTourists(initialData);
 
-    expect(tourists).toHaveLength(2);
+    expect(tourists).toHaveLength(4);
     expect(tourists.every((tourist) => tourist.role === "tourist")).toBe(true);
   });
 

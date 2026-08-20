@@ -8,6 +8,8 @@ Demo accounts:
 
 - Tourist: `tourist@example.com` / `tourist123`
 - Nature tourist: `nature@example.com` / `nature123`
+- Culture tourist: `culture@example.com` / `culture123`
+- Urban tourist: `urban@example.com` / `urban123`
 - Tourism Administrator: `admin@tourism.local` / `admin123`
 
 The app intentionally starts at the login/register screen on each page load. A previous browser session is cleared at startup so demonstrations always begin from authentication.

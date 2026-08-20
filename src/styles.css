@@ -716,6 +716,22 @@ meter {
   color: #596575;
 }
 
+.tree-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tree-metrics span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #334155;
+  background: #f1f5f9;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .cluster-badge {
   width: max-content;
   padding: 5px 10px;
@@ -857,6 +873,10 @@ textarea {
 
 .three-way {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.profile-switch {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .form-error {
@@ -1048,6 +1068,7 @@ textarea {
   .analysis-grid,
   .action-row,
   .field-pair,
+  .profile-switch,
   .page-header {
     grid-template-columns: 1fr;
   }

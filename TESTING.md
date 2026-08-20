@@ -31,7 +31,7 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | NFT3 | Privacy | Covered by consent requirement, consent revocation, and tourist data deletion tests |
 | AIT1 | K-Means clustering | Confirms valid completed trips receive cluster records |
 | AIT2 | Cluster interpretation | Confirms silhouette output and decision-path evidence are produced |
-| AIT3 | Decision Tree classification | Confirms labelled demo profiles match predicted output |
+| AIT3 | Decision Tree classification | Confirms mixed, nature, cultural, and urban labelled demo profiles match predicted output with tree depth/rule metadata |
 | AIT4 | Recommendation logic | Confirms recommendation output is generated from movement/profile data |
 | AIT5 | Insufficient data handling | Confirms fallback recommendations avoid misleading personalization |
 

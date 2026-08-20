@@ -70,6 +70,8 @@ export type AnalysisResult = {
   profile: TouristProfile;
   classifier: "decision-tree";
   classificationConfidence: number;
+  decisionTreeDepth: number;
+  decisionRuleCount: number;
   decisionPath: string[];
   silhouetteScore: number;
   categoryCounts: Record<DestinationCategory, number>;

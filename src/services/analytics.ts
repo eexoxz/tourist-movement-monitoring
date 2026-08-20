@@ -22,6 +22,26 @@ type TripFeature = {
   pointCount: number;
 };
 
+type DecisionTreeFeatures = {
+  culturalScore: number;
+  natureScore: number;
+  urbanScore: number;
+  total: number;
+  diversityCount: number;
+  topProfile: TouristProfile;
+  topScore: number;
+  secondScore: number;
+  topShare: number;
+};
+
+type DecisionTreeResult = {
+  profile: TouristProfile;
+  confidence: number;
+  path: string[];
+  depth: number;
+  evaluatedRules: number;
+};
+
 function emptyCounts(): Record<DestinationCategory, number> {
   return {
     cultural: 0,
@@ -66,71 +86,133 @@ function inferProfile(counts: Record<DestinationCategory, number>): TouristProfi
   return classifyWithDecisionTree(counts).profile;
 }
 
-function classifyWithDecisionTree(counts: Record<DestinationCategory, number>) {
+function decisionTreeFeatures(counts: Record<DestinationCategory, number>): DecisionTreeFeatures {
   const culturalScore = counts.cultural + counts.heritage;
   const natureScore = counts.nature + counts.coastal;
   const urbanScore = counts.urban + counts.food;
   const total = culturalScore + natureScore + urbanScore;
-  const branches: Array<[TouristProfile, number, string]> = [
-    ["cultural", culturalScore, "cultural + heritage"],
-    ["nature", natureScore, "nature + coastal"],
-    ["urban", urbanScore, "urban + food"],
+  const branches: Array<[TouristProfile, number]> = [
+    ["cultural", culturalScore],
+    ["nature", natureScore],
+    ["urban", urbanScore],
   ];
   const ranked = branches.sort((a, b) => b[1] - a[1]);
   const [top, second] = ranked;
-  const path = [
-    `Matched destination-category points: ${total}`,
-    `Strongest branch: ${top[2]} (${top[1]})`,
-    `Second branch: ${second[2]} (${second[1]})`,
-  ];
+  const diversityCount = [culturalScore, natureScore, urbanScore].filter((score) => score > 0).length;
 
-  if (total < 2) {
+  return {
+    culturalScore,
+    natureScore,
+    urbanScore,
+    total,
+    diversityCount,
+    topProfile: top[0],
+    topScore: top[1],
+    secondScore: second[1],
+    topShare: total === 0 ? 0 : top[1] / total,
+  };
+}
+
+function treeConfidence(features: DecisionTreeFeatures, base: number) {
+  if (features.total < 2) {
+    return 0.35;
+  }
+
+  const dominance = features.total === 0 ? 0 : (features.topScore - features.secondScore) / features.total;
+  const diversityPenalty = Math.max(0, features.diversityCount - 1) * 0.05;
+  return Number(Math.min(0.96, Math.max(0.4, base + dominance * 0.32 - diversityPenalty)).toFixed(2));
+}
+
+function classifyWithDecisionTree(counts: Record<DestinationCategory, number>): DecisionTreeResult {
+  const features = decisionTreeFeatures(counts);
+  const path = [
+    `Feature extraction: cultural=${features.culturalScore}, nature=${features.natureScore}, urban=${features.urbanScore}, total=${features.total}`,
+  ];
+  let depth = 1;
+  let evaluatedRules = 1;
+
+  path.push(`Rule 1: total matched destination points >= 2 -> ${features.total >= 2 ? "yes" : "no"}`);
+  if (features.total < 2) {
     return {
       profile: "mixed" as const,
       confidence: 0.35,
-      path: [...path, "Decision: mixed because the route has too little destination evidence."],
+      path: [...path, "Leaf: mixed because the route has too little destination evidence."],
+      depth,
+      evaluatedRules,
     };
   }
 
-  if (top[1] === second[1]) {
+  depth += 1;
+  evaluatedRules += 1;
+  path.push(`Rule 2: top interest share >= 55% -> ${features.topShare >= 0.55 ? "yes" : "no"} (${Math.round(features.topShare * 100)}%)`);
+  if (features.topShare < 0.55 && features.diversityCount >= 2) {
     return {
       profile: "mixed" as const,
-      confidence: 0.5,
-      path: [...path, "Decision: mixed because the leading branches are tied."],
+      confidence: treeConfidence(features, 0.55),
+      path: [...path, "Leaf: mixed because movement is spread across multiple attraction groups."],
+      depth,
+      evaluatedRules,
     };
   }
 
-  const dominance = (top[1] - second[1]) / total;
-  const confidence = Number(Math.min(0.95, 0.62 + dominance).toFixed(2));
-
-  if (top[0] === "cultural" && culturalScore >= Math.ceil(total * 0.45)) {
-    return {
-      profile: "cultural" as const,
-      confidence,
-      path: [...path, "Decision: cultural because cultural/heritage visits dominate the route."],
-    };
-  }
-
-  if (top[0] === "nature" && natureScore >= Math.ceil(total * 0.45)) {
+  depth += 1;
+  evaluatedRules += 1;
+  path.push(`Rule 3: strongest branch is nature/coastal -> ${features.topProfile === "nature" ? "yes" : "no"}`);
+  if (features.topProfile === "nature") {
     return {
       profile: "nature" as const,
-      confidence,
-      path: [...path, "Decision: nature because nature/coastal visits dominate the route."],
+      confidence: treeConfidence(features, 0.72),
+      path: [...path, "Leaf: nature profile because nature/coastal visits dominate the route."],
+      depth,
+      evaluatedRules,
     };
   }
 
-  if (top[0] === "urban" && urbanScore >= Math.ceil(total * 0.45)) {
+  depth += 1;
+  evaluatedRules += 1;
+  path.push(`Rule 4: strongest branch is cultural/heritage -> ${features.topProfile === "cultural" ? "yes" : "no"}`);
+  if (features.topProfile === "cultural") {
+    return {
+      profile: "cultural" as const,
+      confidence: treeConfidence(features, 0.72),
+      path: [...path, "Leaf: cultural profile because cultural/heritage visits dominate the route."],
+      depth,
+      evaluatedRules,
+    };
+  }
+
+  depth += 1;
+  evaluatedRules += 1;
+  path.push(`Rule 5: strongest branch is urban/food -> ${features.topProfile === "urban" ? "yes" : "no"}`);
+  if (features.topProfile === "urban") {
     return {
       profile: "urban" as const,
-      confidence,
-      path: [...path, "Decision: urban because urban/food visits dominate the route."],
+      confidence: treeConfidence(features, 0.72),
+      path: [...path, "Leaf: urban profile because urban/food visits dominate the route."],
+      depth,
+      evaluatedRules,
+    };
+  }
+
+  depth += 1;
+  evaluatedRules += 1;
+  path.push(`Rule 6: diversity count >= 2 -> ${features.diversityCount >= 2 ? "yes" : "no"}`);
+  if (features.diversityCount >= 2) {
+    return {
+      profile: "mixed" as const,
+      confidence: treeConfidence(features, 0.58),
+      path: [...path, "Leaf: mixed because no single branch is decisive after tie-breaking."],
+      depth,
+      evaluatedRules,
     };
   }
 
   return {
     profile: "mixed" as const,
-    confidence: 0.58,
-    path: [...path, "Decision: mixed because no branch is dominant enough."],
+    confidence: treeConfidence(features, 0.5),
+    path: [...path, "Leaf: mixed because the tree could not identify a strong travel preference."],
+    depth,
+    evaluatedRules,
   };
 }
 
@@ -371,6 +453,8 @@ export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | 
     profile: classification.profile,
     classifier: "decision-tree",
     classificationConfidence: classification.confidence,
+    decisionTreeDepth: classification.depth,
+    decisionRuleCount: classification.evaluatedRules,
     decisionPath: classification.path,
     silhouetteScore: 0,
     categoryCounts: counts,
@@ -396,6 +480,8 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
       profile: classification.profile,
       classifier: "decision-tree" as const,
       classificationConfidence: classification.confidence,
+      decisionTreeDepth: classification.depth,
+      decisionRuleCount: classification.evaluatedRules,
       decisionPath: classification.path,
       silhouetteScore: cluster.silhouetteScore,
       categoryCounts: feature.counts,

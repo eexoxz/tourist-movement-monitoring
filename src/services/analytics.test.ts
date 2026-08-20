@@ -14,22 +14,29 @@ describe("analytics service", () => {
   it("assigns valid completed trips to K-Means clusters and Decision Tree profiles", () => {
     const data = refreshAllRecommendations(initialData);
 
-    expect(data.analyses).toHaveLength(2);
+    expect(data.analyses).toHaveLength(4);
     expect(data.analyses.every((analysis) => analysis.method === "k-means")).toBe(true);
     expect(data.analyses.every((analysis) => analysis.classifier === "decision-tree")).toBe(true);
     expect(data.analyses.map((analysis) => analysis.profile)).toContain("mixed");
     expect(data.analyses.map((analysis) => analysis.profile)).toContain("nature");
+    expect(data.analyses.map((analysis) => analysis.profile)).toContain("cultural");
+    expect(data.analyses.map((analysis) => analysis.profile)).toContain("urban");
     expect(data.analyses.every((analysis) => analysis.decisionPath.length >= 4)).toBe(true);
+    expect(data.analyses.every((analysis) => analysis.decisionTreeDepth >= 2)).toBe(true);
+    expect(data.analyses.every((analysis) => analysis.decisionRuleCount >= 2)).toBe(true);
+    expect(data.analyses.some((analysis) => analysis.decisionPath.some((step) => step.startsWith("Rule 3")))).toBe(true);
   });
 
   it("reports AI evaluation evidence for labelled demo records", () => {
     const evaluation = evaluateAiOutput(initialData);
 
-    expect(evaluation.validClusteredRecordCount).toBe(2);
-    expect(evaluation.labelledRecordCount).toBe(2);
+    expect(evaluation.validClusteredRecordCount).toBe(4);
+    expect(evaluation.labelledRecordCount).toBe(4);
     expect(evaluation.classificationAccuracy).toBe(1);
     expect(evaluation.confusionMatrix.mixed.mixed).toBe(1);
     expect(evaluation.confusionMatrix.nature.nature).toBe(1);
+    expect(evaluation.confusionMatrix.cultural.cultural).toBe(1);
+    expect(evaluation.confusionMatrix.urban.urban).toBe(1);
   });
 
   it("uses recorded movement as a destination demand signal", () => {

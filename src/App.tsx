@@ -316,14 +316,14 @@ function AuthScreen({
   onRegister: (name: string, email: string, password: string) => Promise<string | null>;
 }) {
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [roleHint, setRoleHint] = useState<UserRole | "nature">("tourist");
+  const [roleHint, setRoleHint] = useState<UserRole | "nature" | "culture" | "urban">("tourist");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("tourist@example.com");
   const [password, setPassword] = useState("tourist123");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const setDemoRole = (role: UserRole | "nature") => {
+  const setDemoRole = (role: UserRole | "nature" | "culture" | "urban") => {
     setRoleHint(role);
     if (role === "admin") {
       setEmail("admin@tourism.local");
@@ -331,6 +331,12 @@ function AuthScreen({
     } else if (role === "nature") {
       setEmail("nature@example.com");
       setPassword("nature123");
+    } else if (role === "culture") {
+      setEmail("culture@example.com");
+      setPassword("culture123");
+    } else if (role === "urban") {
+      setEmail("urban@example.com");
+      setPassword("urban123");
     } else {
       setEmail("tourist@example.com");
       setPassword("tourist123");
@@ -366,12 +372,18 @@ function AuthScreen({
           </div>
 
           {mode === "login" && (
-            <div className="segmented-control role-switch three-way" aria-label="Demo role">
+            <div className="segmented-control role-switch profile-switch" aria-label="Demo role">
               <button type="button" className={roleHint === "tourist" ? "active" : ""} onClick={() => setDemoRole("tourist")}>
-                Tourist
+                Mixed
               </button>
               <button type="button" className={roleHint === "nature" ? "active" : ""} onClick={() => setDemoRole("nature")}>
                 Nature
+              </button>
+              <button type="button" className={roleHint === "culture" ? "active" : ""} onClick={() => setDemoRole("culture")}>
+                Culture
+              </button>
+              <button type="button" className={roleHint === "urban" ? "active" : ""} onClick={() => setDemoRole("urban")}>
+                Urban
               </button>
               <button type="button" className={roleHint === "admin" ? "active" : ""} onClick={() => setDemoRole("admin")}>
                 Admin
@@ -1018,6 +1030,11 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
                 <small>
                   {analysis.dataPointCount} points processed by {analysis.method} + {analysis.classifier}
                 </small>
+                <div className="tree-metrics">
+                  <span>Confidence {Math.round(analysis.classificationConfidence * 100)}%</span>
+                  <span>Depth {analysis.decisionTreeDepth}</span>
+                  <span>{analysis.decisionRuleCount} rules</span>
+                </div>
                 <ul className="decision-path">
                   {analysis.decisionPath.map((step) => (
                     <li key={step}>{step}</li>
