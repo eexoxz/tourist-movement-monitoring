@@ -56,7 +56,7 @@ import {
   signInWithConfiguredProvider,
   signOutConfiguredProvider,
 } from "./services/auth";
-import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
+import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import {
   buildMovementRecordsCsv,
@@ -91,6 +91,7 @@ type AuthResult = { error?: string; message?: string };
 type RememberedLogin = { email: string; password: string };
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
+const demoCredentialEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
 const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = [
   { value: "cultural", label: "Culture" },
   { value: "nature", label: "Nature" },
@@ -127,7 +128,17 @@ function geolocationErrorMessage(error: GeolocationPositionError) {
 function loadRememberedLogin(): RememberedLogin | null {
   try {
     const raw = localStorage.getItem(REMEMBER_LOGIN_KEY);
-    return raw ? (JSON.parse(raw) as RememberedLogin) : null;
+    if (!raw) {
+      return null;
+    }
+
+    const login = JSON.parse(raw) as RememberedLogin;
+    if (demoCredentialEmails.has(login.email.trim().toLowerCase())) {
+      clearRememberedLogin();
+      return null;
+    }
+
+    return login;
   } catch {
     return null;
   }
@@ -139,6 +150,32 @@ function saveRememberedLogin(email: string, password: string) {
 
 function clearRememberedLogin() {
   localStorage.removeItem(REMEMBER_LOGIN_KEY);
+}
+
+function friendlyAuthError(error: unknown, fallback: string) {
+  const message = error instanceof Error ? error.message : "";
+
+  if (message.includes("auth/invalid-email")) {
+    return "Enter a valid email address.";
+  }
+
+  if (message.includes("auth/invalid-credential") || message.includes("auth/user-not-found") || message.includes("auth/wrong-password")) {
+    return "Email or password is incorrect, or this Firebase account does not exist.";
+  }
+
+  if (message.includes("auth/email-already-in-use")) {
+    return "This email is already registered. Log in or resend the verification email.";
+  }
+
+  if (message.includes("auth/too-many-requests")) {
+    return "Too many attempts. Wait a bit before trying again.";
+  }
+
+  if (message.includes("auth/weak-password")) {
+    return "Password must be at least 6 characters.";
+  }
+
+  return message || fallback;
 }
 
 function getProfileSkipKey(userId: string) {
@@ -231,7 +268,7 @@ function App() {
           return { error: "Verify your email first. A fresh verification email has been sent." };
         }
       } catch (error) {
-        return { error: error instanceof Error ? error.message : "Firebase login failed." };
+        return { error: friendlyAuthError(error, "Firebase login failed.") };
       }
     } else {
       const localUser = authenticateLocalUser(data, email, password);
@@ -280,7 +317,7 @@ function App() {
       const firebaseUser = await registerWithConfiguredProvider(email, password);
       authUid = firebaseUser?.uid;
     } catch (error) {
-      return { error: error instanceof Error ? error.message : "Firebase registration failed." };
+      return { error: friendlyAuthError(error, "Firebase registration failed.") };
     }
 
     const created = createTouristAccount(data, { name, email, password, authUid });
@@ -321,7 +358,7 @@ function App() {
       await signOutConfiguredProvider().catch(() => undefined);
       return { message: "Verification email sent again. Check your inbox or spam folder." };
     } catch (error) {
-      return { error: error instanceof Error ? error.message : "Verification email could not be sent." };
+      return { error: friendlyAuthError(error, "Verification email could not be sent.") };
     }
   };
 
@@ -455,8 +492,8 @@ function AuthScreen({
   const [mode, setMode] = useState<"login" | "register">("login");
   const [roleHint, setRoleHint] = useState<UserRole | "nature" | "culture" | "urban">("tourist");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState(rememberedLogin?.email ?? "tourist@example.com");
-  const [password, setPassword] = useState(rememberedLogin?.password ?? "tourist123");
+  const [email, setEmail] = useState(rememberedLogin?.email ?? "");
+  const [password, setPassword] = useState(rememberedLogin?.password ?? "");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(Boolean(rememberedLogin));
   const [error, setError] = useState<string | null>(null);
@@ -486,15 +523,35 @@ function AuthScreen({
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError("Enter a valid email address.");
+      setMessage(null);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      setMessage(null);
+      return;
+    }
+
+    if (mode === "register" && name.trim().length < 2) {
+      setError("Enter a name with at least two characters.");
+      setMessage(null);
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     setMessage(null);
-    const result = mode === "login" ? await onLogin(email, password) : await onRegister(name, email, password);
+    const result = mode === "login" ? await onLogin(normalizedEmail, password) : await onRegister(name, normalizedEmail, password);
     setError(result.error ?? null);
     setMessage(result.message ?? null);
     if (!result.error) {
       if (rememberLogin) {
-        saveRememberedLogin(email, password);
+        saveRememberedLogin(normalizedEmail, password);
       } else {
         clearRememberedLogin();
       }
@@ -503,10 +560,24 @@ function AuthScreen({
   };
 
   const resendVerification = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError("Enter a valid email address before resending verification.");
+      setMessage(null);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Enter the password for this account before resending verification.");
+      setMessage(null);
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     setMessage(null);
-    const result = await onResendVerification(email, password);
+    const result = await onResendVerification(normalizedEmail, password);
     setError(result.error ?? null);
     setMessage(result.message ?? null);
     setIsSubmitting(false);
@@ -521,7 +592,7 @@ function AuthScreen({
           <p>Consent-based trip tracking, route visualization, dashboard monitoring, and explainable destination recommendations for selected Malaysian tourist locations.</p>
         </div>
 
-        <form className="auth-form" onSubmit={submit}>
+        <form className="auth-form" onSubmit={submit} noValidate>
           <div className="segmented-control" role="tablist" aria-label="Authentication mode">
             <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
               Login
@@ -563,13 +634,13 @@ function AuthScreen({
 
           <label>
             Email
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
           </label>
 
           <label>
             Password
             <span className="password-field">
-              <input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} />
+              <input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={6} />
               <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? "Hide password" : "Show password"}>
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
