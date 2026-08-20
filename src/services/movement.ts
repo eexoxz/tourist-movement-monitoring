@@ -1,6 +1,6 @@
 import type { AppData, LocationConsent, MovementPoint, TripSession } from "../types";
 import { createId } from "./storage";
-import { distanceKm } from "./geo";
+import { distanceKm, nearestDestination } from "./geo";
 
 type MovementInput = {
   tripId: string;
@@ -20,6 +20,22 @@ export function getActiveTrip(data: AppData, userId: string) {
 
 export function getGrantedConsent(data: AppData, userId: string) {
   return data.consents.find((consent) => consent.userId === userId && consent.granted) ?? null;
+}
+
+export function getVisitedDestinationIds(data: AppData, userId: string, maxDistanceKm = 1.2) {
+  const tripIds = new Set(getUserTrips(data, userId).map((trip) => trip.id));
+  const visited = new Set<string>();
+
+  data.points
+    .filter((point) => tripIds.has(point.tripId))
+    .forEach((point) => {
+      const nearest = nearestDestination(point, data.destinations);
+      if (nearest && nearest.distance <= maxDistanceKm) {
+        visited.add(nearest.destination.id);
+      }
+    });
+
+  return visited;
 }
 
 export function grantLocationConsent(data: AppData, userId: string) {

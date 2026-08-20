@@ -7,7 +7,7 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | Check | Command | Current Result |
 | --- | --- | --- |
 | TypeScript and production build | `npm run build` | Passing |
-| Service tests | `npm test` | Passing: 33 tests |
+| Service tests | `npm test` | Passing: 37 tests |
 
 ## DPP Test Mapping
 
@@ -19,11 +19,15 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | FT4 | Location permission | Covered at service level by `src/services/movement.test.ts` consent tests |
 | FT5 | Location denied | Covered by tracking rejection when consent is missing |
 | FT6 | Trip tracking | Covered by trip start, movement point saving, and trip stop tests |
+| FT7 | Map route and destination markers | Implemented through `src/components/MapView.tsx`; final browser screenshot still needed |
+| FT8 | Movement history | Covered by trip-specific route selection in the tourist history screen |
+| FT9 | Destination details | Covered by selectable destination panel and detail view in the tourist overview |
 | FT10 | Recommendation generation | Covered by `src/services/analytics.test.ts` |
 | FT11 | Admin dashboard | Covered by `src/services/dashboard.test.ts` summary, filter, export, coverage, profile, and trend tests |
 | FT12 | AI analysis display/data | Covered at service level by K-Means, Decision Tree, and evaluation tests |
 | FT13 | Manage destination data | Covered by `src/services/destinationManagement.test.ts` |
-| FT14 | Movement summaries | Covered by `src/services/dashboard.test.ts` records and chart-summary tests |
+| FT14 | Logout | Implemented in the app shell; final manual screenshot evidence still needed |
+| NFT2 | Protected access | Covered by `src/services/access.test.ts` role-view guard tests |
 | NFT3 | Privacy | Covered by consent requirement, consent revocation, and tourist data deletion tests |
 | AIT1 | K-Means clustering | Confirms valid completed trips receive cluster records |
 | AIT2 | Cluster interpretation | Confirms silhouette output and decision-path evidence are produced |

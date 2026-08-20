@@ -577,6 +577,17 @@ button:disabled {
   background: #dcfce7;
 }
 
+.tag-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.destination-card small.visited-tag {
+  color: #7c2d12;
+  background: #ffedd5;
+}
+
 .movement-demand {
   padding: 18px;
 }

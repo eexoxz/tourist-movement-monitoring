@@ -6,6 +6,7 @@ import {
   deleteTouristMovementData,
   getActiveTrip,
   getGrantedConsent,
+  getVisitedDestinationIds,
   grantLocationConsent,
   revokeLocationConsent,
   startTripSession,
@@ -157,5 +158,15 @@ describe("movement service", () => {
     expect(cleaned.trips.some((trip) => trip.userId === "tourist-demo")).toBe(false);
     expect(cleaned.points.some((point) => point.tripId === "trip-demo-1")).toBe(false);
     expect(cleaned.trips.some((trip) => trip.userId === "tourist-nature-demo")).toBe(true);
+  });
+
+  it("detects destinations already visited from tourist movement records", () => {
+    const visited = getVisitedDestinationIds(initialData, "tourist-demo");
+
+    expect(visited.has("islamic-arts-museum")).toBe(true);
+    expect(visited.has("central-market")).toBe(true);
+    expect(visited.has("merdeka-square")).toBe(true);
+    expect(visited.has("klcc-park")).toBe(true);
+    expect(visited.has("penang-hill")).toBe(false);
   });
 });

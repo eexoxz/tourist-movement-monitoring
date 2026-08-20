@@ -19,8 +19,9 @@ import {
   X,
 } from "lucide-react";
 import { MapView } from "./components/MapView";
-import type { AppData, Destination, DestinationCategory, DestinationDemand, TravelPlan, User, UserRole } from "./types";
-import { clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
+import type { AppData, AppView, Destination, DestinationCategory, DestinationDemand, TravelPlan, User, UserRole } from "./types";
+import { coerceViewForRole, getDefaultViewForRole } from "./services/access";
+import { clearSession, createId, getStorageMode, loadCloudData, loadData, resetData, saveData } from "./services/storage";
 import { formatDateTime } from "./services/geo";
 import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
@@ -42,13 +43,12 @@ import {
   getActiveTrip,
   getGrantedConsent,
   getUserTrips,
+  getVisitedDestinationIds,
   grantLocationConsent,
   revokeLocationConsent,
   startTripSession,
   stopActiveTrip,
 } from "./services/movement";
-
-type View = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
 
 const demoRoute = [
   [3.142, 101.6894],
@@ -76,14 +76,16 @@ function geolocationErrorMessage(error: GeolocationPositionError) {
 
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
-  const [sessionUserId, setSessionUserId] = useState<string | null>(() => loadSession());
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const currentUser = data.users.find((user) => user.id === sessionUserId) ?? null;
-  const [view, setView] = useState<View>(() => (currentUser?.role === "admin" ? "dashboard" : "overview"));
+  const [view, setView] = useState<AppView>("overview");
+  const safeView = currentUser ? coerceViewForRole(currentUser.role, view) : view;
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const watchId = useRef<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
+    clearSession();
 
     loadCloudData()
       .then((cloudData) => {
@@ -106,6 +108,12 @@ function App() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (currentUser && safeView !== view) {
+      setView(safeView);
+    }
+  }, [currentUser, safeView, view]);
 
   const commitData = (nextData: AppData, actor: User | null = currentUser) => {
     setData(nextData);
@@ -146,8 +154,7 @@ function App() {
     }
 
     setSessionUserId(user.id);
-    saveSession(user.id);
-    setView(user.role === "admin" ? "dashboard" : "overview");
+    setView(getDefaultViewForRole(user.role));
     return null;
   };
 
@@ -173,8 +180,7 @@ function App() {
     const user = created.user;
     commitData(created.data, user);
     setSessionUserId(user.id);
-    saveSession(user.id);
-    setView("overview");
+    setView(getDefaultViewForRole(user.role));
     return null;
   };
 
@@ -246,7 +252,7 @@ function App() {
 
         <nav className="nav-list" aria-label="Primary navigation">
           {roleViews.map(([key, label, Icon]) => (
-            <button key={key} className={view === key ? "nav-item active" : "nav-item"} onClick={() => setView(key)}>
+            <button key={key} className={safeView === key ? "nav-item active" : "nav-item"} onClick={() => setView(key)}>
               <Icon size={18} />
               {label}
             </button>
@@ -285,9 +291,9 @@ function App() {
 
       <main className="content">
         {currentUser.role === "admin" ? (
-          <AdminWorkspace data={data} view={view} onDataChange={commitData} />
+          <AdminWorkspace data={data} view={safeView} onDataChange={commitData} />
         ) : (
-          <TouristWorkspace data={data} view={view} user={currentUser} onDataChange={commitData} watchId={watchId} />
+          <TouristWorkspace data={data} view={safeView} user={currentUser} onDataChange={commitData} watchId={watchId} />
         )}
       </main>
     </div>
@@ -402,7 +408,7 @@ function TouristWorkspace({
   watchId,
 }: {
   data: AppData;
-  view: View;
+  view: AppView;
   user: User;
   onDataChange: (data: AppData) => void;
   watchId: React.MutableRefObject<number | null>;
@@ -421,6 +427,7 @@ function TouristWorkspace({
   const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
+  const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
 
   const grantConsent = () => {
     onDataChange(grantLocationConsent(data, user.id));
@@ -708,7 +715,7 @@ function TouristWorkspace({
         <MapView points={tripPoints} destinations={data.destinations} />
         <div className="stack">
           <MovementDemandList title="Where Tourists Are Moving" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} />
-          <DestinationPanel destinations={data.destinations.slice(0, 6)} selectedId={selectedDestination?.id} onSelect={setSelectedDestinationId} />
+          <DestinationPanel destinations={data.destinations.slice(0, 6)} selectedId={selectedDestination?.id} visitedIds={visitedDestinationIds} onSelect={setSelectedDestinationId} />
           {selectedDestination && <DestinationDetail destination={selectedDestination} />}
         </div>
       </div>
@@ -716,7 +723,7 @@ function TouristWorkspace({
   );
 }
 
-function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: View; onDataChange: (data: AppData) => void }) {
+function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: AppView; onDataChange: (data: AppData) => void }) {
   const tourists = getTourists(data);
   const summary = useMemo(() => summarizeDashboard(data), [data]);
   const categoryCoverage = useMemo(() => getDestinationCategoryCoverage(data), [data]);
@@ -1093,24 +1100,41 @@ function MetricGrid({ items }: { items: [string, string][] }) {
   );
 }
 
-function DestinationPanel({ destinations, selectedId, onSelect }: { destinations: Destination[]; selectedId?: string; onSelect?: (id: string) => void }) {
+function DestinationPanel({
+  destinations,
+  selectedId,
+  visitedIds,
+  onSelect,
+}: {
+  destinations: Destination[];
+  selectedId?: string;
+  visitedIds?: Set<string>;
+  onSelect?: (id: string) => void;
+}) {
   return (
     <section className="list-panel">
-      {destinations.map((destination) => (
-        <button
-          className={selectedId === destination.id ? "destination-card selectable active" : "destination-card selectable"}
-          key={destination.id}
-          onClick={() => onSelect?.(destination.id)}
-          type="button"
-        >
-          <div>
-            <strong>{destination.name}</strong>
-            <span>{destination.city}</span>
-          </div>
-          <p>{destination.description}</p>
-          <small>{destination.category}</small>
-        </button>
-      ))}
+      {destinations.map((destination) => {
+        const visited = visitedIds?.has(destination.id);
+
+        return (
+          <button
+            className={selectedId === destination.id ? "destination-card selectable active" : "destination-card selectable"}
+            key={destination.id}
+            onClick={() => onSelect?.(destination.id)}
+            type="button"
+          >
+            <div>
+              <strong>{destination.name}</strong>
+              <span>{destination.city}</span>
+            </div>
+            <p>{destination.description}</p>
+            <div className="tag-row">
+              <small>{destination.category}</small>
+              {visited && <small className="visited-tag">Visited</small>}
+            </div>
+          </button>
+        );
+      })}
     </section>
   );
 }

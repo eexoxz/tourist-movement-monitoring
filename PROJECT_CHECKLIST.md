@@ -65,16 +65,16 @@ Completion gate:
 - [x] Add role-based navigation in the UI.
 - [ ] Replace demo/local authentication with Firebase Authentication.
 - [x] Store user role safely in Firestore.
-- [ ] Add protected route handling.
-- [ ] Block tourists from administrator pages.
-- [ ] Block administrators from tourist-only trip tracking actions.
-- [ ] Add logout verification.
-- [ ] Add invalid login feedback tests.
+- [x] Add protected route handling.
+- [x] Block tourists from administrator pages.
+- [x] Block administrators from tourist-only trip tracking actions.
+- [x] Add logout verification.
+- [x] Add invalid login feedback tests.
 
 Completion gate:
 
-- [ ] Users must log in before accessing protected tourist or administrator features.
-- [ ] Role access cannot be bypassed through manual URL changes or browser state edits.
+- [x] Users must log in before accessing protected tourist or administrator features.
+- [x] Role access cannot be bypassed through manual URL changes or browser state edits.
 
 ## Phase 4: Tourist Movement Tracking
 
@@ -106,17 +106,17 @@ Completion gate:
 - [x] Show tourist movement route line.
 - [x] Show movement point popups.
 - [x] Show destination list.
-- [ ] Add destination detail screen or panel.
-- [ ] Show previously visited places clearly.
-- [ ] Add route history selection by trip.
+- [x] Add destination detail screen or panel.
+- [x] Show previously visited places clearly.
+- [x] Add route history selection by trip.
 - [x] Add map loading/error state.
 - [x] Add marker category styling.
 - [ ] Verify map behavior on Chrome, Edge, and Firefox.
-- [ ] Check OpenStreetMap attribution remains visible.
+- [x] Check OpenStreetMap attribution remains visible.
 
 Completion gate:
 
-- [ ] Tourist can view current/latest route, previous movement history, and destination details on the map.
+- [x] Tourist can view current/latest route, previous movement history, and destination details on the map.
 
 ## Phase 6: Administrator Dashboard
 
@@ -211,7 +211,7 @@ Completion gate:
 - [x] Add option to stop tracking clearly.
 - [x] Add data deletion/reset option for tourist prototype testing.
 - [x] Enforce role-based Firestore rules.
-- [ ] Prevent unauthenticated access to protected pages.
+- [x] Prevent unauthenticated access to protected pages.
 - [ ] Validate form inputs.
 - [ ] Add loading and error handling around Firebase operations.
 - [ ] Confirm main pages load under the three-second target in normal testing.

@@ -10,6 +10,8 @@ Demo accounts:
 - Nature tourist: `nature@example.com` / `nature123`
 - Tourism Administrator: `admin@tourism.local` / `admin123`
 
+The app intentionally starts at the login/register screen on each page load. A previous browser session is cleared at startup so demonstrations always begin from authentication.
+
 Run locally:
 
 ```bash
