@@ -107,6 +107,7 @@ Completion gate:
 - [x] Show movement point popups.
 - [x] Show destination list.
 - [x] Add destination detail screen or panel.
+- [x] Show destination movement demand inside tourist destination information.
 - [x] Show previously visited places clearly.
 - [x] Add route history selection by trip.
 - [x] Add map loading/error state.
@@ -214,6 +215,7 @@ Completion gate:
 - [x] Add explicit explanation of what location data is stored.
 - [x] Add option to stop tracking clearly.
 - [x] Add data deletion/reset option for tourist prototype testing.
+- [x] Ensure tourist-owned Firestore movement records can be deleted during privacy reset.
 - [x] Enforce role-based Firestore rules.
 - [x] Prevent unauthenticated access to protected pages.
 - [x] Validate form inputs.

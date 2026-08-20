@@ -791,8 +791,14 @@ function TouristWorkspace({
         <MovementMap points={tripPoints} destinations={data.destinations} />
         <div className="stack">
           <MovementDemandList title="Where Tourists Are Moving" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} />
-          <DestinationPanel destinations={data.destinations.slice(0, 6)} selectedId={selectedDestination?.id} visitedIds={visitedDestinationIds} onSelect={setSelectedDestinationId} />
-          {selectedDestination && <DestinationDetail destination={selectedDestination} />}
+          <DestinationPanel
+            destinations={data.destinations.slice(0, 6)}
+            demand={destinationDemand}
+            selectedId={selectedDestination?.id}
+            visitedIds={visitedDestinationIds}
+            onSelect={setSelectedDestinationId}
+          />
+          {selectedDestination && <DestinationDetail destination={selectedDestination} demand={destinationDemand.find((row) => row.destinationId === selectedDestination.id)} />}
         </div>
       </div>
     </Page>
@@ -1277,11 +1283,13 @@ function MetricGrid({ items }: { items: [string, string][] }) {
 
 function DestinationPanel({
   destinations,
+  demand = [],
   selectedId,
   visitedIds,
   onSelect,
 }: {
   destinations: Destination[];
+  demand?: DestinationDemand[];
   selectedId?: string;
   visitedIds?: Set<string>;
   onSelect?: (id: string) => void;
@@ -1290,6 +1298,7 @@ function DestinationPanel({
     <section className="list-panel">
       {destinations.map((destination) => {
         const visited = visitedIds?.has(destination.id);
+        const demandRow = demand.find((row) => row.destinationId === destination.id);
 
         return (
           <button
@@ -1305,6 +1314,7 @@ function DestinationPanel({
             <p>{destination.description}</p>
             <div className="tag-row">
               <small>{destination.category}</small>
+              {demandRow && demandRow.popularityScore > 0 && <small className="demand-tag">{demandRow.tier} demand</small>}
               {visited && <small className="visited-tag">Visited</small>}
             </div>
           </button>
@@ -1314,11 +1324,27 @@ function DestinationPanel({
   );
 }
 
-function DestinationDetail({ destination }: { destination: Destination }) {
+function DestinationDetail({ destination, demand }: { destination: Destination; demand?: DestinationDemand }) {
   return (
     <section className="panel detail-panel">
       <h2>{destination.name}</h2>
       <p>{destination.description}</p>
+      {demand && (
+        <div className="destination-signal">
+          <div>
+            <span>Movement Score</span>
+            <strong>{demand.popularityScore}%</strong>
+          </div>
+          <div>
+            <span>Demand Tier</span>
+            <strong>{demand.tier}</strong>
+          </div>
+          <div>
+            <span>Tourists</span>
+            <strong>{Math.max(demand.uniqueTouristCount, demand.approachingTouristCount)}</strong>
+          </div>
+        </div>
+      )}
       <dl>
         <div>
           <dt>City</dt>
@@ -1338,6 +1364,18 @@ function DestinationDetail({ destination }: { destination: Destination }) {
             {destination.latitude.toFixed(4)}, {destination.longitude.toFixed(4)}
           </dd>
         </div>
+        {demand && (
+          <>
+            <div>
+              <dt>Nearby movement</dt>
+              <dd>{demand.movementPointCount} points</dd>
+            </div>
+            <div>
+              <dt>Approach signals</dt>
+              <dd>{demand.approachSignalCount}</dd>
+            </div>
+          </>
+        )}
       </dl>
     </section>
   );

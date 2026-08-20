@@ -6,6 +6,7 @@ import {
   buildTravelPlanCsv,
   createMovementBasedTravelPlan,
   evaluateAiOutput,
+  getDestinationDemand,
   recommendForUser,
   refreshAllRecommendations,
 } from "./analytics";
@@ -54,6 +55,8 @@ describe("analytics service", () => {
     expect(top.movementPointCount).toBeGreaterThan(0);
     expect(top.approachSignalCount).toBeGreaterThanOrEqual(0);
     expect(["high", "medium", "emerging"]).toContain(top.tier);
+    expect(getDestinationDemand(initialData, top.destinationId)?.popularityScore).toBe(top.popularityScore);
+    expect(getDestinationDemand(initialData, "missing-destination")).toBeNull();
   });
 
   it("detects destinations tourists are moving toward before arrival", () => {

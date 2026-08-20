@@ -47,6 +47,27 @@ describe("storage service", () => {
           generatedAt: "2026-08-01T00:00:00.000Z",
         },
       ],
+      trips: [
+        {
+          id: "trip-old",
+          userId: "tourist-old",
+          status: "completed",
+          startedAt: "2026-08-01T00:00:00.000Z",
+          endedAt: "2026-08-01T02:00:00.000Z",
+          consentId: "consent-old",
+        },
+      ],
+      points: [
+        {
+          id: "point-old",
+          tripId: "trip-old",
+          latitude: 3.1556,
+          longitude: 101.7139,
+          accuracyMeters: 25,
+          recordedAt: "2026-08-01T01:00:00.000Z",
+          source: "demo",
+        },
+      ],
     };
 
     const normalized = normalizeAppData(legacyData as Parameters<typeof normalizeAppData>[0]);
@@ -57,5 +78,6 @@ describe("storage service", () => {
     expect(normalized.analyses[0].clusterLabel).toBe("Unlabelled movement cluster");
     expect(normalized.analyses[0].decisionTreeDepth).toBe(0);
     expect(normalized.analyses[0].clusterCentroid.urban).toBe(0);
+    expect(normalized.points[0].userId).toBe("tourist-old");
   });
 });

@@ -111,6 +111,7 @@ export function appendMovementPoint(data: AppData, input: MovementInput) {
   const point: MovementPoint = {
     id: createId("point"),
     tripId: input.tripId,
+    userId: trip.userId,
     latitude: input.latitude,
     longitude: input.longitude,
     accuracyMeters: Math.max(1, input.accuracyMeters || 25),

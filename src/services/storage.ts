@@ -68,7 +68,7 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
     users: asArray<User>(data.users),
     consents: asArray<LocationConsent>(data.consents),
     trips: asArray<TripSession>(data.trips),
-    points: asArray<MovementPoint>(data.points),
+    points: asArray<MovementPoint>(data.points).map((point) => normalizeMovementPoint(point, data)),
     destinations: destinations.map(normalizeDestination),
     analyses: asArray<Partial<AnalysisResult>>(data.analyses).map(normalizeAnalysis),
     recommendations: asArray<Partial<Recommendation>>(data.recommendations).map(normalizeRecommendation),
@@ -145,15 +145,16 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     return false;
   }
 
+  const db = services.db;
   const batch = writeBatch(services.db);
   const syncCollection = async <T>(name: string, rows: T[], getId: (row: T) => string) => {
-    const existing = await getDocs(collection(services.db, name));
+    const existing = await getDocs(collection(db, name));
     const nextIds = new Set<string>();
 
     rows.forEach((row) => {
       const id = getId(row);
       nextIds.add(id);
-      batch.set(doc(services.db, name, id), cleanFirestoreData(row) as Record<string, unknown>);
+      batch.set(doc(db, name, id), cleanFirestoreData(row) as Record<string, unknown>);
     });
 
     existing.docs.forEach((snapshot) => {
@@ -165,23 +166,51 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
 
   if (currentActor?.role === "tourist") {
     const ownTripIds = new Set(data.trips.filter((trip) => trip.userId === currentActor.id).map((trip) => trip.id));
-    batch.set(doc(services.db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>);
+    const existingTrips = await getDocs(collection(services.db, FIRESTORE_COLLECTIONS.trips));
+    const existingOwnTripIds = new Set(
+      existingTrips.docs
+        .map((snapshot) => snapshot.data() as TripSession)
+        .filter((trip) => trip.userId === currentActor.id)
+        .map((trip) => trip.id)
+    );
+    const nextConsentIds = new Set(data.consents.filter((consent) => consent.userId === currentActor.id).map((consent) => consent.id));
+    const nextTripIds = new Set(data.trips.filter((trip) => trip.userId === currentActor.id).map((trip) => trip.id));
+    const nextPointIds = new Set(data.points.filter((point) => ownTripIds.has(point.tripId)).map((point) => point.id));
+    const nextAnalysisIds = new Set(data.analyses.filter((analysis) => analysis.userId === currentActor.id).map((analysis) => analysis.tripId));
+    const nextRecommendationIds = new Set(data.recommendations.filter((recommendation) => recommendation.userId === currentActor.id).map((recommendation) => recommendation.id));
+
+    batch.set(doc(db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>);
 
     data.consents.filter((consent) => consent.userId === currentActor.id).forEach((consent) => {
-      batch.set(doc(services.db, FIRESTORE_COLLECTIONS.consents, consent.id), cleanFirestoreData(consent) as Record<string, unknown>);
+      batch.set(doc(db, FIRESTORE_COLLECTIONS.consents, consent.id), cleanFirestoreData(consent) as Record<string, unknown>);
     });
     data.trips.filter((trip) => trip.userId === currentActor.id).forEach((trip) => {
-      batch.set(doc(services.db, FIRESTORE_COLLECTIONS.trips, trip.id), cleanFirestoreData(trip) as Record<string, unknown>);
+      batch.set(doc(db, FIRESTORE_COLLECTIONS.trips, trip.id), cleanFirestoreData(trip) as Record<string, unknown>);
     });
     data.points.filter((point) => ownTripIds.has(point.tripId)).forEach((point) => {
-      batch.set(doc(services.db, FIRESTORE_COLLECTIONS.movementPoints, point.id), cleanFirestoreData(point) as Record<string, unknown>);
+      batch.set(doc(db, FIRESTORE_COLLECTIONS.movementPoints, point.id), cleanFirestoreData(point) as Record<string, unknown>);
     });
     data.analyses.filter((analysis) => analysis.userId === currentActor.id).forEach((analysis) => {
-      batch.set(doc(services.db, FIRESTORE_COLLECTIONS.analyses, analysis.tripId), cleanFirestoreData(analysis) as Record<string, unknown>);
+      batch.set(doc(db, FIRESTORE_COLLECTIONS.analyses, analysis.tripId), cleanFirestoreData(analysis) as Record<string, unknown>);
     });
     data.recommendations.filter((recommendation) => recommendation.userId === currentActor.id).forEach((recommendation) => {
-      batch.set(doc(services.db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>);
+      batch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>);
     });
+
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.consents, nextConsentIds, (consent: LocationConsent) => consent.userId === currentActor.id);
+    existingTrips.docs.forEach((snapshot) => {
+      const trip = snapshot.data() as TripSession;
+      if (trip.userId === currentActor.id && !nextTripIds.has(snapshot.id)) {
+        batch.delete(snapshot.ref);
+      }
+    });
+    await deleteMissingOwnedDocs(
+      FIRESTORE_COLLECTIONS.movementPoints,
+      nextPointIds,
+      (point: MovementPoint) => existingOwnTripIds.has(point.tripId) || ownTripIds.has(point.tripId)
+    );
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.analyses, nextAnalysisIds, (analysis: AnalysisResult) => analysis.userId === currentActor.id);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds, (recommendation: Recommendation) => recommendation.userId === currentActor.id);
   } else {
     await syncCollection(FIRESTORE_COLLECTIONS.users, data.users.map(publicUser), (user) => user.id);
     await syncCollection(FIRESTORE_COLLECTIONS.consents, data.consents, (consent) => consent.id);
@@ -194,6 +223,16 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
 
   await batch.commit();
   return true;
+
+  async function deleteMissingOwnedDocs<T>(name: string, nextIds: Set<string>, ownsRecord: (record: T) => boolean) {
+    const existing = await getDocs(collection(db, name));
+    existing.docs.forEach((snapshot) => {
+      const record = snapshot.data() as T;
+      if (ownsRecord(record) && !nextIds.has(snapshot.id)) {
+        batch.delete(snapshot.ref);
+      }
+    });
+  }
 }
 
 function saveLocalData(data: AppData) {
@@ -209,6 +248,14 @@ function normalizeDestination(destination: Destination): Destination {
   return {
     ...destination,
     averageVisitMinutes: Number.isFinite(destination.averageVisitMinutes) ? destination.averageVisitMinutes : fallback?.averageVisitMinutes ?? 60,
+  };
+}
+
+function normalizeMovementPoint(point: MovementPoint, data: Partial<AppData>): MovementPoint {
+  const trip = data.trips?.find((candidate) => candidate.id === point.tripId);
+  return {
+    ...point,
+    userId: point.userId ?? trip?.userId,
   };
 }
 

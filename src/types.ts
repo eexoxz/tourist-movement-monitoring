@@ -39,6 +39,7 @@ export type Destination = {
 export type MovementPoint = {
   id: string;
   tripId: string;
+  userId?: string;
   latitude: number;
   longitude: number;
   accuracyMeters: number;

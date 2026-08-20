@@ -480,6 +480,10 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
     .sort((a, b) => b.popularityScore - a.popularityScore);
 }
 
+export function getDestinationDemand(data: AppData, destinationId: string) {
+  return calculateDestinationDemand(data).find((row) => row.destinationId === destinationId) ?? null;
+}
+
 export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | null {
   const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
 

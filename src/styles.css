@@ -595,6 +595,11 @@ button:disabled {
   background: #ffedd5;
 }
 
+.destination-card small.demand-tag {
+  color: #064e3b;
+  background: #ccfbf1;
+}
+
 .movement-demand {
   padding: 18px;
 }
@@ -995,6 +1000,33 @@ textarea {
   line-height: 1.55;
 }
 
+.destination-signal {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.destination-signal div {
+  padding: 10px;
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+
+.destination-signal span {
+  display: block;
+  color: #657181;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.destination-signal strong {
+  display: block;
+  margin-top: 5px;
+  color: #0f766e;
+  font-size: 1.05rem;
+}
+
 .detail-panel dl {
   display: grid;
   gap: 10px;
@@ -1154,6 +1186,7 @@ textarea {
   .analysis-grid,
   .action-row,
   .field-pair,
+  .destination-signal,
   .plan-builder,
   .profile-switch,
   .page-header {
