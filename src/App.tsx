@@ -19,12 +19,23 @@ import {
   X,
 } from "lucide-react";
 import { MapView } from "./components/MapView";
-import type { AppData, Destination, DestinationCategory, DestinationDemand, LocationConsent, MovementPoint, TravelPlan, TripSession, User, UserRole } from "./types";
+import type { AppData, Destination, DestinationCategory, DestinationDemand, TravelPlan, User, UserRole } from "./types";
 import { clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
 import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
+import {
+  appendMovementPoint,
+  deleteTouristMovementData,
+  getActiveTrip,
+  getGrantedConsent,
+  getUserTrips,
+  grantLocationConsent,
+  revokeLocationConsent,
+  startTripSession,
+  stopActiveTrip,
+} from "./services/movement";
 
 type View = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
 
@@ -371,9 +382,9 @@ function TouristWorkspace({
   onDataChange: (data: AppData) => void;
   watchId: React.MutableRefObject<number | null>;
 }) {
-  const userTrips = data.trips.filter((trip) => trip.userId === user.id);
-  const activeTrip = userTrips.find((trip) => trip.status === "active");
-  const currentConsent = data.consents.find((consent) => consent.userId === user.id && consent.granted);
+  const userTrips = getUserTrips(data, user.id);
+  const activeTrip = getActiveTrip(data, user.id);
+  const currentConsent = getGrantedConsent(data, user.id);
   const tripPoints = data.points.filter((point) => userTrips.some((trip) => trip.id === point.tripId));
   const latestAnalysis = data.analyses.filter((analysis) => analysis.userId === user.id).sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
   const recommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
@@ -387,53 +398,35 @@ function TouristWorkspace({
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
 
   const grantConsent = () => {
-    const consent: LocationConsent = {
-      id: createId("consent"),
-      userId: user.id,
-      granted: true,
-      grantedAt: new Date().toISOString(),
-    };
-    onDataChange({
-      ...data,
-      consents: [...data.consents.filter((item) => item.userId !== user.id), consent],
-    });
+    onDataChange(grantLocationConsent(data, user.id));
   };
 
   const appendPoint = (tripId: string, latitude: number, longitude: number, accuracyMeters: number, source: "browser" | "demo") => {
-    const point: MovementPoint = {
-      id: createId("point"),
+    const result = appendMovementPoint(loadData(), {
       tripId,
       latitude,
       longitude,
       accuracyMeters,
-      recordedAt: new Date().toISOString(),
       source,
-    };
-    const latestData = loadData();
-    const nextData = { ...latestData, points: [...latestData.points, point] };
-    onDataChange(nextData);
+    });
+
+    if (result.error || !result.data) {
+      setTrackingMessage(result.error ?? "Movement point could not be saved.");
+      return false;
+    }
+
+    onDataChange(result.data);
+    return true;
   };
 
   const startTrip = () => {
-    if (!currentConsent) {
-      setTrackingMessage("Location consent is required before trip tracking starts.");
+    const result = startTripSession(data, user.id);
+    if (result.error || !result.trip || !result.data) {
+      setTrackingMessage(result.error ?? "Trip could not be started.");
       return;
     }
 
-    if (activeTrip) {
-      setTrackingMessage("A trip is already being recorded.");
-      return;
-    }
-
-    const trip: TripSession = {
-      id: createId("trip"),
-      userId: user.id,
-      status: "active",
-      startedAt: new Date().toISOString(),
-      consentId: currentConsent.id,
-    };
-    const nextData = { ...data, trips: [...data.trips, trip] };
-    onDataChange(nextData);
+    onDataChange(result.data);
 
     if (!navigator.geolocation) {
       setTrackingMessage("Browser geolocation is unavailable. Demo points can still be added manually.");
@@ -442,7 +435,7 @@ function TouristWorkspace({
 
     watchId.current = navigator.geolocation.watchPosition(
       (position) => {
-        appendPoint(trip.id, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
+        appendPoint(result.trip.id, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
         setTrackingMessage("Live movement point recorded.");
       },
       (error) => {
@@ -457,20 +450,18 @@ function TouristWorkspace({
   };
 
   const stopTrip = () => {
-    if (!activeTrip) {
-      return;
-    }
-
     if (watchId.current !== null) {
       navigator.geolocation.clearWatch(watchId.current);
       watchId.current = null;
     }
 
-    const endedData = {
-      ...data,
-      trips: data.trips.map((trip) => (trip.id === activeTrip.id ? { ...trip, status: "completed" as const, endedAt: new Date().toISOString() } : trip)),
-    };
-    onDataChange(refreshAnalysis(endedData, user.id));
+    const result = stopActiveTrip(data, user.id);
+    if (result.error || !result.data) {
+      setTrackingMessage(result.error ?? "Trip could not be stopped.");
+      return;
+    }
+
+    onDataChange(refreshAnalysis(result.data, user.id));
     setTrackingMessage("Trip stopped and recommendation analysis refreshed.");
   };
 
@@ -481,8 +472,9 @@ function TouristWorkspace({
 
     const currentPoints = data.points.filter((point) => point.tripId === activeTrip.id);
     const [latitude, longitude] = demoRoute[currentPoints.length % demoRoute.length];
-    appendPoint(activeTrip.id, latitude, longitude, 32, "demo");
-    setTrackingMessage("Demo movement point added to the active trip.");
+    if (appendPoint(activeTrip.id, latitude, longitude, 32, "demo")) {
+      setTrackingMessage("Demo movement point added to the active trip.");
+    }
   };
 
   const addManualPoint = (event: React.FormEvent<HTMLFormElement>) => {
@@ -492,17 +484,9 @@ function TouristWorkspace({
       return;
     }
 
-    const latitude = Number(manualLocation.latitude);
-    const longitude = Number(manualLocation.longitude);
-    const accuracyMeters = Number(manualLocation.accuracyMeters);
-
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
-      setTrackingMessage("Enter a valid latitude and longitude before saving.");
-      return;
+    if (appendPoint(activeTrip.id, Number(manualLocation.latitude), Number(manualLocation.longitude), Number(manualLocation.accuracyMeters), "demo")) {
+      setTrackingMessage("Manual movement point saved to the active trip.");
     }
-
-    appendPoint(activeTrip.id, latitude, longitude, Math.max(1, accuracyMeters || 25), "demo");
-    setTrackingMessage("Manual movement point saved to the active trip.");
   };
 
   const refreshRecommendations = () => {
@@ -515,13 +499,7 @@ function TouristWorkspace({
       watchId.current = null;
     }
 
-    const nextData = {
-      ...data,
-      consents: data.consents.map((consent) =>
-        consent.userId === user.id && consent.granted ? { ...consent, granted: false, revokedAt: new Date().toISOString() } : consent
-      ),
-      trips: data.trips.map((trip) => (trip.userId === user.id && trip.status === "active" ? { ...trip, status: "completed" as const, endedAt: new Date().toISOString() } : trip)),
-    };
+    const nextData = revokeLocationConsent(data, user.id);
     onDataChange(refreshAllRecommendations(nextData));
     setTrackingMessage("Location consent revoked. Active tracking has been stopped.");
   };
@@ -532,14 +510,7 @@ function TouristWorkspace({
       watchId.current = null;
     }
 
-    const userTripIds = new Set(userTrips.map((trip) => trip.id));
-    const nextData = {
-      ...data,
-      trips: data.trips.filter((trip) => trip.userId !== user.id),
-      points: data.points.filter((point) => !userTripIds.has(point.tripId)),
-      analyses: data.analyses.filter((analysis) => analysis.userId !== user.id),
-      recommendations: data.recommendations.filter((recommendation) => recommendation.userId !== user.id),
-    };
+    const nextData = deleteTouristMovementData(data, user.id);
     onDataChange(refreshAllRecommendations(nextData));
     setSelectedTripId("");
     setTrackingMessage("Your movement history and AI recommendation records were deleted.");

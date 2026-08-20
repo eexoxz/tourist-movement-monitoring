@@ -7,7 +7,7 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | Check | Command | Current Result |
 | --- | --- | --- |
 | TypeScript and production build | `npm run build` | Passing |
-| Service tests | `npm test` | Passing: 11 tests |
+| Service tests | `npm test` | Passing: 18 tests |
 
 ## DPP Test Mapping
 
@@ -16,8 +16,12 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | FT1 | User registration | Covered by `src/services/accounts.test.ts` |
 | FT2 | User login | Covered by `src/services/accounts.test.ts` |
 | FT3 | Invalid login | Covered by `src/services/accounts.test.ts` |
+| FT4 | Location permission | Covered at service level by `src/services/movement.test.ts` consent tests |
+| FT5 | Location denied | Covered by tracking rejection when consent is missing |
+| FT6 | Trip tracking | Covered by trip start, movement point saving, and trip stop tests |
 | FT10 | Recommendation generation | Covered by `src/services/analytics.test.ts` |
 | FT12 | AI analysis display/data | Covered at service level by K-Means, Decision Tree, and evaluation tests |
+| NFT3 | Privacy | Covered by consent requirement, consent revocation, and tourist data deletion tests |
 | AIT1 | K-Means clustering | Confirms valid completed trips receive cluster records |
 | AIT2 | Cluster interpretation | Confirms silhouette output and decision-path evidence are produced |
 | AIT3 | Decision Tree classification | Confirms labelled demo profiles match predicted output |
