@@ -3,6 +3,8 @@ import { initialData } from "../data/demoData";
 import type { AppData, MovementPoint, TripSession } from "../types";
 import {
   calculateDestinationDemand,
+  calculateMovementAlerts,
+  buildMovementAlertsCsv,
   buildTravelPlanCsv,
   createMovementBasedTravelPlan,
   evaluateAiOutput,
@@ -99,6 +101,19 @@ describe("analytics service", () => {
 
     expect(klcc?.approachSignalCount).toBeGreaterThan(0);
     expect(klcc?.approachingTouristCount).toBeGreaterThan(0);
+  });
+
+  it("creates movement alerts for administrator monitoring", () => {
+    const alerts = calculateMovementAlerts(initialData);
+    const csv = buildMovementAlertsCsv(alerts, initialData);
+
+    expect(alerts.length).toBeGreaterThan(0);
+    expect(alerts[0].score).toBeGreaterThan(0);
+    expect(["critical", "watch", "info"]).toContain(alerts[0].severity);
+    expect(alerts[0].recommendedAction.length).toBeGreaterThan(20);
+    expect(csv).toContain('"destination","city","severity"');
+    expect(csv).toContain(alerts[0].severity);
+    expect(calculateMovementAlerts({ ...initialData, points: [] })).toHaveLength(0);
   });
 
   it("creates a travel plan from tourist movement hotspots", () => {

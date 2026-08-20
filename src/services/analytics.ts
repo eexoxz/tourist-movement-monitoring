@@ -5,6 +5,7 @@ import type {
   Destination,
   DestinationDemand,
   DestinationCategory,
+  MovementAlert,
   MovementPoint,
   Recommendation,
   TouristProfile,
@@ -484,6 +485,48 @@ export function getDestinationDemand(data: AppData, destinationId: string) {
   return calculateDestinationDemand(data).find((row) => row.destinationId === destinationId) ?? null;
 }
 
+function movementAlertSeverity(row: DestinationDemand): MovementAlert["severity"] {
+  if (row.tier === "high" && (row.approachSignalCount > 0 || row.uniqueTouristCount >= 2)) {
+    return "critical";
+  }
+
+  if (row.tier === "high" || row.tier === "medium" || row.approachSignalCount > 0) {
+    return "watch";
+  }
+
+  return "info";
+}
+
+export function calculateMovementAlerts(data: AppData): MovementAlert[] {
+  const generatedAt = new Date().toISOString();
+
+  return calculateDestinationDemand(data)
+    .filter((row) => row.popularityScore > 0 && (row.tier !== "low" || row.approachSignalCount > 0))
+    .map((row) => {
+      const destination = data.destinations.find((candidate) => candidate.id === row.destinationId);
+      const severity = movementAlertSeverity(row);
+      const visitorCount = Math.max(row.uniqueTouristCount, row.approachingTouristCount);
+
+      return {
+        id: `alert-${row.destinationId}`,
+        destinationId: row.destinationId,
+        severity,
+        title: `${destination?.name ?? "Destination"} movement ${severity}`,
+        message: `${row.popularityScore}% demand with ${row.movementPointCount} nearby point(s), ${row.recentPointCount} recent point(s), and ${row.approachSignalCount} approach signal(s).`,
+        recommendedAction:
+          severity === "critical"
+            ? "Prioritise crowd monitoring and consider promoting nearby alternative stops."
+            : severity === "watch"
+            ? "Keep this destination visible in travel plans and monitor whether movement continues rising."
+            : "Use as an emerging recommendation candidate when it fits the tourist profile.",
+        score: row.popularityScore + row.approachSignalCount * 8 + visitorCount * 6,
+        generatedAt,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+}
+
 export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | null {
   const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
 
@@ -794,6 +837,25 @@ export function buildTravelPlanCsv(plan: TravelPlan, data: AppData) {
       destination?.category ?? "",
       stop.suggestedMinutes,
       stop.reason,
+    ];
+  });
+
+  return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+}
+
+export function buildMovementAlertsCsv(alerts: MovementAlert[], data: AppData) {
+  const header = ["destination", "city", "severity", "score", "message", "recommended_action", "generated_at"];
+  const rows = alerts.map((alert) => {
+    const destination = data.destinations.find((candidate) => candidate.id === alert.destinationId);
+
+    return [
+      destination?.name ?? "Unknown destination",
+      destination?.city ?? "",
+      alert.severity,
+      alert.score,
+      alert.message,
+      alert.recommendedAction,
+      alert.generatedAt,
     ];
   });
 

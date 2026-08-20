@@ -128,6 +128,8 @@ Completion gate:
 - [x] Add destination creation form.
 - [x] Show basic destination category distribution.
 - [x] Add dashboard charts for movement trends.
+- [x] Add movement alert signals for high-demand destinations.
+- [x] Add movement alert CSV export.
 - [x] Add tourist filters.
 - [x] Add date/trip filters.
 - [x] Add destination edit function.

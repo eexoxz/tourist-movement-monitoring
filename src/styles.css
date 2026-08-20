@@ -604,6 +604,67 @@ button:disabled {
   padding: 18px;
 }
 
+.movement-alerts {
+  display: grid;
+  gap: 10px;
+}
+
+.movement-alerts h2 {
+  margin: 0;
+}
+
+.alert-card {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.alert-card > span {
+  align-self: start;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.alert-card.critical > span {
+  color: #7f1d1d;
+  background: #fee2e2;
+}
+
+.alert-card.watch > span {
+  color: #713f12;
+  background: #fef3c7;
+}
+
+.alert-card.info > span {
+  color: #064e3b;
+  background: #ccfbf1;
+}
+
+.alert-card strong,
+.alert-card p,
+.alert-card small {
+  display: block;
+}
+
+.alert-card p {
+  margin: 4px 0 6px;
+  color: #596575;
+  line-height: 1.45;
+}
+
+.alert-card small {
+  color: #334155;
+  font-weight: 800;
+}
+
 .movement-demand h2 {
   margin: 0;
   font-size: 1.15rem;
@@ -1186,6 +1247,7 @@ textarea {
   .analysis-grid,
   .action-row,
   .field-pair,
+  .alert-card,
   .destination-signal,
   .plan-builder,
   .profile-switch,

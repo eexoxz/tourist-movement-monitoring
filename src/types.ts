@@ -122,6 +122,17 @@ export type DestinationDemand = {
   tier: "high" | "medium" | "emerging" | "low";
 };
 
+export type MovementAlert = {
+  id: string;
+  destinationId: string;
+  severity: "critical" | "watch" | "info";
+  title: string;
+  message: string;
+  recommendedAction: string;
+  score: number;
+  generatedAt: string;
+};
+
 export type TravelPlanStop = {
   destinationId: string;
   order: number;

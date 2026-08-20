@@ -24,6 +24,7 @@ import type {
   Destination,
   DestinationCategory,
   DestinationDemand,
+  MovementAlert,
   MovementPoint,
   Recommendation,
   TravelPlan,
@@ -34,7 +35,16 @@ import type {
 import { coerceViewForRole, getDefaultViewForRole } from "./services/access";
 import { clearSession, createId, getStorageMode, loadCloudData, loadData, resetData, saveData } from "./services/storage";
 import { formatDateTime } from "./services/geo";
-import { buildTravelPlanCsv, calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
+import {
+  buildMovementAlertsCsv,
+  buildTravelPlanCsv,
+  calculateDestinationDemand,
+  calculateMovementAlerts,
+  createMovementBasedTravelPlan,
+  evaluateAiOutput,
+  refreshAllRecommendations,
+  refreshAnalysis,
+} from "./services/analytics";
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
@@ -845,6 +855,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
   const allPoints = movementRecords.map((record) => record.point);
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
+  const movementAlerts = useMemo(() => calculateMovementAlerts(data), [data]);
   const travelPlan = useMemo(
     () =>
       createMovementBasedTravelPlan(data, {
@@ -907,6 +918,16 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
     const link = document.createElement("a");
     link.href = url;
     link.download = `movement-travel-plan-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportMovementAlerts = () => {
+    const blob = new Blob([buildMovementAlertsCsv(movementAlerts, data)], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `movement-alerts-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -1121,12 +1142,14 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
           ["Completed trips", summary.completedTripCount.toString()],
           ["Movement points", summary.movementPointCount.toString()],
           ["Destinations", summary.destinationCount.toString()],
+          ["Alerts", movementAlerts.length.toString()],
         ]}
       />
       <div className="two-column">
         <MovementMap points={allPoints} destinations={data.destinations} />
         <section className="panel">
           {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
+          <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
           <h2>Destination Coverage</h2>
           <CategoryBars values={categoryCoverage} />
           <h2>Movement Trend</h2>
@@ -1420,6 +1443,35 @@ function MovementDemandList({
         );
       })}
       {visibleDemand.length === 0 && <EmptyState text="Movement popularity appears after tourists record routes near destinations." />}
+    </section>
+  );
+}
+
+function MovementAlertList({ alerts, destinations, onExport }: { alerts: MovementAlert[]; destinations: Destination[]; onExport: () => void }) {
+  return (
+    <section className="movement-alerts">
+      <div className="section-heading">
+        <h2>Movement Alerts</h2>
+        <button className="secondary-action compact-action" onClick={onExport} disabled={alerts.length === 0}>
+          <Download size={18} />
+          CSV
+        </button>
+      </div>
+      {alerts.map((alert) => {
+        const destination = destinations.find((candidate) => candidate.id === alert.destinationId);
+
+        return (
+          <article className={`alert-card ${alert.severity}`} key={alert.id}>
+            <span>{alert.severity}</span>
+            <div>
+              <strong>{destination?.name ?? alert.title}</strong>
+              <p>{alert.message}</p>
+              <small>{alert.recommendedAction}</small>
+            </div>
+          </article>
+        );
+      })}
+      {alerts.length === 0 && <EmptyState text="Movement alerts appear when tourist flow creates a destination signal." />}
     </section>
   );
 }
