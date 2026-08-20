@@ -175,6 +175,7 @@ button:disabled {
 .metric-card,
 .panel,
 .list-panel,
+.movement-demand,
 .auth-panel,
 .analysis-card,
 .empty-state {
@@ -329,14 +330,18 @@ button:disabled {
 
 .list-panel,
 .recommendation-list,
-.analysis-grid {
+.analysis-grid,
+.movement-demand,
+.travel-plan {
   display: grid;
   gap: 12px;
 }
 
 .record-card,
 .destination-card,
-.recommendation-card {
+.recommendation-card,
+.demand-card,
+.plan-stop {
   display: grid;
   gap: 8px;
   padding: 14px;
@@ -369,6 +374,96 @@ button:disabled {
   border-radius: 999px;
   color: #14532d;
   background: #dcfce7;
+}
+
+.movement-demand {
+  padding: 18px;
+}
+
+.movement-demand h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.movement-demand.compact {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.demand-card {
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.rank-badge {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  color: #064e3b;
+  background: #ccfbf1;
+  font-weight: 900;
+}
+
+.demand-card p,
+.plan-stop p,
+.travel-plan > p {
+  margin: 5px 0 0;
+  color: #596575;
+  line-height: 1.5;
+}
+
+.demand-card small {
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #0f172a;
+  background: #fef3c7;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.demand-meter {
+  height: 8px;
+  margin-top: 9px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.demand-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #14b8a6, #f59e0b);
+}
+
+.travel-plan {
+  gap: 10px;
+}
+
+.plan-stop {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  background: #f8fafc;
+}
+
+.plan-stop > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #0f766e;
+  font-weight: 900;
+}
+
+.plan-stop small {
+  color: #657181;
+  font-weight: 800;
 }
 
 .recommendation-list {

@@ -2,10 +2,12 @@ import type {
   AnalysisResult,
   AiEvaluation,
   AppData,
+  DestinationDemand,
   DestinationCategory,
   MovementPoint,
   Recommendation,
   TouristProfile,
+  TravelPlan,
   TripSession,
 } from "../types";
 import { createId } from "./storage";
@@ -240,6 +242,61 @@ function profileMatchesCategory(profile: TouristProfile, category: DestinationCa
   return category === "urban" || category === "food";
 }
 
+function demandTier(score: number): DestinationDemand["tier"] {
+  if (score >= 75) {
+    return "high";
+  }
+
+  if (score >= 45) {
+    return "medium";
+  }
+
+  if (score >= 20) {
+    return "emerging";
+  }
+
+  return "low";
+}
+
+export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
+  const since = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const rows = data.destinations.map((destination) => {
+    const nearbyPoints = data.points.filter((point) => {
+      const nearest = nearestDestination(point, data.destinations);
+      return nearest?.destination.id === destination.id && nearest.distance <= 1.2;
+    });
+    const tripIds = new Set(nearbyPoints.map((point) => point.tripId));
+    const touristIds = new Set(
+      data.trips.filter((trip) => tripIds.has(trip.id)).map((trip) => trip.userId)
+    );
+    const recentPointCount = nearbyPoints.filter((point) => new Date(point.recordedAt).getTime() >= since).length;
+
+    return {
+      destinationId: destination.id,
+      movementPointCount: nearbyPoints.length,
+      uniqueTouristCount: touristIds.size,
+      recentPointCount,
+      rawScore: nearbyPoints.length * 8 + touristIds.size * 18 + recentPointCount * 10,
+    };
+  });
+  const maxScore = Math.max(1, ...rows.map((row) => row.rawScore));
+
+  return rows
+    .map((row) => {
+      const popularityScore = Math.round((row.rawScore / maxScore) * 100);
+
+      return {
+        destinationId: row.destinationId,
+        movementPointCount: row.movementPointCount,
+        uniqueTouristCount: row.uniqueTouristCount,
+        recentPointCount: row.recentPointCount,
+        popularityScore,
+        tier: demandTier(popularityScore),
+      };
+    })
+    .sort((a, b) => b.popularityScore - a.popularityScore);
+}
+
 export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | null {
   const points = data.points.filter((point) => point.tripId === trip.id);
 
@@ -304,17 +361,22 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
   const latestPoint = points.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
   const profile = analysis?.profile ?? "mixed";
   const hasPersonalizedAnalysis = Boolean(analysis);
+  const demandByDestination = new Map(calculateDestinationDemand(data).map((demand) => [demand.destinationId, demand]));
 
   return data.destinations
     .filter((destination) => !visited.has(destination.id))
     .map((destination) => {
+      const demand = demandByDestination.get(destination.id);
       const profileScore = profileMatchesCategory(profile, destination.category) ? 45 : 12;
       const unvisitedScore = 25;
       const distanceScore = latestPoint ? Math.max(0, 30 - distanceKm(latestPoint, destination) * 1.4) : 14;
-      const score = Math.round(profileScore + unvisitedScore + distanceScore);
+      const movementScore = demand ? Math.round(demand.popularityScore * 0.22) : 0;
+      const score = Math.min(100, Math.round(profileScore + unvisitedScore + distanceScore + movementScore));
       const reason =
         !hasPersonalizedAnalysis
           ? "Fallback suggestion shown because the movement history is still too limited for a personalised AI result."
+          : demand && demand.tier !== "low"
+          ? `Matches the ${profile} travel profile and has strong movement demand from recorded tourist routes.`
           : profile === "mixed"
           ? "Matches a balanced movement profile and has not been visited in the current history."
           : `Matches the ${profile} travel profile and has not been visited in the current history.`;
@@ -402,5 +464,45 @@ export function evaluateAiOutput(data: AppData): AiEvaluation {
     validClusteredRecordCount: analyses.length,
     insufficientTripCount,
     confusionMatrix: matrix,
+  };
+}
+
+export function createMovementBasedTravelPlan(data: AppData): TravelPlan {
+  const demandRows = calculateDestinationDemand(data);
+  const selectedCategories = new Set<DestinationCategory>();
+  const selected = demandRows
+    .filter((row) => row.popularityScore > 0)
+    .filter((row) => {
+      const destination = data.destinations.find((candidate) => candidate.id === row.destinationId);
+      if (!destination) {
+        return false;
+      }
+
+      if (selectedCategories.has(destination.category) && selectedCategories.size < 4) {
+        return false;
+      }
+
+      selectedCategories.add(destination.category);
+      return true;
+    })
+    .slice(0, 5);
+
+  return {
+    title: "Movement-Based Suggested Route",
+    generatedAt: new Date().toISOString(),
+    summary:
+      selected.length === 0
+        ? "Not enough movement records have been collected yet to create a demand-led travel plan."
+        : "Suggested route based on destinations receiving the strongest tourist movement signals in the prototype data.",
+    stops: selected.map((row, index) => {
+      const destination = data.destinations.find((candidate) => candidate.id === row.destinationId);
+
+      return {
+        destinationId: row.destinationId,
+        order: index + 1,
+        reason: `${row.tier} demand: ${row.movementPointCount} movement points from ${row.uniqueTouristCount} tourist profile(s).`,
+        suggestedMinutes: destination?.averageVisitMinutes ?? 60,
+      };
+    }),
   };
 }

@@ -19,10 +19,10 @@ import {
   X,
 } from "lucide-react";
 import { MapView } from "./components/MapView";
-import type { AppData, Destination, DestinationCategory, LocationConsent, MovementPoint, TripSession, User, UserRole } from "./types";
+import type { AppData, Destination, DestinationCategory, DestinationDemand, LocationConsent, MovementPoint, TravelPlan, TripSession, User, UserRole } from "./types";
 import { clearSession, createId, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
-import { evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
+import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 
 type View = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
 
@@ -307,6 +307,7 @@ function TouristWorkspace({
   const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? userTrips[0];
   const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
+  const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
 
   const grantConsent = () => {
     const consent: LocationConsent = {
@@ -554,6 +555,7 @@ function TouristWorkspace({
       <div className="two-column">
         <MapView points={tripPoints} destinations={data.destinations} />
         <div className="stack">
+          <MovementDemandList title="Where Tourists Are Moving" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} />
           <DestinationPanel destinations={data.destinations.slice(0, 6)} selectedId={selectedDestination?.id} onSelect={setSelectedDestinationId} />
           {selectedDestination && <DestinationDetail destination={selectedDestination} />}
         </div>
@@ -583,6 +585,8 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
   const visibleTripIds = new Set(visibleTrips.map((trip) => trip.id));
   const allPoints = data.points.filter((point) => visibleTripIds.has(point.tripId));
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
+  const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
+  const travelPlan = useMemo(() => createMovementBasedTravelPlan(data), [data]);
 
   const addDestination = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -769,6 +773,10 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
         <section className="panel">
           <h2>Destination Coverage</h2>
           <CategoryBars values={categories} />
+          <h2>Movement Demand</h2>
+          <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
+          <h2>Travel Plan Signal</h2>
+          <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
           <h2>Recent Recommendation Output</h2>
           <RecommendationList recommendations={data.recommendations.slice(0, 4)} destinations={data.destinations} compact />
         </section>
@@ -852,6 +860,74 @@ function DestinationDetail({ destination }: { destination: Destination }) {
           </dd>
         </div>
       </dl>
+    </section>
+  );
+}
+
+function MovementDemandList({
+  title,
+  demand,
+  destinations,
+  compact = false,
+}: {
+  title: string;
+  demand: DestinationDemand[];
+  destinations: Destination[];
+  compact?: boolean;
+}) {
+  const visibleDemand = demand.filter((row) => row.popularityScore > 0);
+
+  return (
+    <section className={compact ? "movement-demand compact" : "movement-demand"}>
+      <h2>{title}</h2>
+      {visibleDemand.map((row, index) => {
+        const destination = destinations.find((candidate) => candidate.id === row.destinationId);
+        if (!destination) {
+          return null;
+        }
+
+        return (
+          <article className="demand-card" key={row.destinationId}>
+            <span className="rank-badge">{index + 1}</span>
+            <div>
+              <strong>{destination.name}</strong>
+              <p>
+                {row.uniqueTouristCount} tourist profile(s), {row.movementPointCount} movement points
+              </p>
+              <div className="demand-meter">
+                <i style={{ width: `${Math.max(8, row.popularityScore)}%` }} />
+              </div>
+            </div>
+            <small>{row.tier}</small>
+          </article>
+        );
+      })}
+      {visibleDemand.length === 0 && <EmptyState text="Movement popularity appears after tourists record routes near destinations." />}
+    </section>
+  );
+}
+
+function TravelPlanPanel({ plan, destinations }: { plan: TravelPlan; destinations: Destination[] }) {
+  return (
+    <section className="travel-plan">
+      <p>{plan.summary}</p>
+      {plan.stops.map((stop) => {
+        const destination = destinations.find((candidate) => candidate.id === stop.destinationId);
+        if (!destination) {
+          return null;
+        }
+
+        return (
+          <article className="plan-stop" key={stop.destinationId}>
+            <span>{stop.order}</span>
+            <div>
+              <strong>{destination.name}</strong>
+              <p>{stop.reason}</p>
+            </div>
+            <small>{stop.suggestedMinutes} min</small>
+          </article>
+        );
+      })}
     </section>
   );
 }

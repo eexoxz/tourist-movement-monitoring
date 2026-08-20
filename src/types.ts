@@ -95,6 +95,29 @@ export type Recommendation = {
   generatedAt: string;
 };
 
+export type DestinationDemand = {
+  destinationId: string;
+  movementPointCount: number;
+  uniqueTouristCount: number;
+  recentPointCount: number;
+  popularityScore: number;
+  tier: "high" | "medium" | "emerging" | "low";
+};
+
+export type TravelPlanStop = {
+  destinationId: string;
+  order: number;
+  reason: string;
+  suggestedMinutes: number;
+};
+
+export type TravelPlan = {
+  title: string;
+  generatedAt: string;
+  summary: string;
+  stops: TravelPlanStop[];
+};
+
 export type AppData = {
   users: User[];
   consents: LocationConsent[];
