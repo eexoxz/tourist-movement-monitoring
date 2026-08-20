@@ -24,6 +24,7 @@ import { clearSession, createId, getStorageMode, loadCloudData, loadData, loadSe
 import { formatDateTime, nearestDestination } from "./services/geo";
 import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
+import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
 
 type View = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
 
@@ -81,13 +82,13 @@ function App() {
       const firebaseUser = await signInWithConfiguredProvider(email, password);
       authUid = firebaseUser?.uid;
     } catch (error) {
-      const hasLocalAccount = data.users.some((candidate) => candidate.email.toLowerCase() === email.toLowerCase() && candidate.password === password);
+      const hasLocalAccount = Boolean(authenticateLocalUser(data, email, password));
       if (!hasLocalAccount) {
         return error instanceof Error ? error.message : "Firebase login failed.";
       }
     }
 
-    let user = data.users.find((candidate) => candidate.email.toLowerCase() === email.toLowerCase() && candidate.password === password);
+    let user = authUid ? findUserByEmail(data, email) : authenticateLocalUser(data, email, password);
     if (!user && authUid) {
       user = {
         id: createId("user"),
@@ -115,8 +116,9 @@ function App() {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    if (data.users.some((user) => user.email.toLowerCase() === email.toLowerCase())) {
-      return "An account with this email already exists.";
+    const precheck = validateTouristAccount(data, { name, email, password });
+    if (precheck.error) {
+      return precheck.error;
     }
 
     let authUid: string | undefined;
@@ -127,17 +129,13 @@ function App() {
       return error instanceof Error ? error.message : "Firebase registration failed.";
     }
 
-    const user: User = {
-      id: createId("user"),
-      authUid,
-      name,
-      email,
-      password,
-      role: "tourist",
-      createdAt: new Date().toISOString(),
-    };
-    const nextData = { ...data, users: [...data.users, user] };
-    commitData(nextData);
+    const created = createTouristAccount(data, { name, email, password, authUid });
+    if (created.error || !created.user || !created.data) {
+      return created.error ?? "Unable to create tourist account.";
+    }
+
+    const user = created.user;
+    commitData(created.data);
     setSessionUserId(user.id);
     saveSession(user.id);
     setView("overview");

@@ -7,12 +7,15 @@ This file tracks implementation testing against the DPP test plan. Keep screensh
 | Check | Command | Current Result |
 | --- | --- | --- |
 | TypeScript and production build | `npm run build` | Passing |
-| AI/service tests | `npm test` | Passing: 5 tests |
+| Service tests | `npm test` | Passing: 11 tests |
 
 ## DPP Test Mapping
 
 | DPP ID | Area | Current Coverage |
 | --- | --- | --- |
+| FT1 | User registration | Covered by `src/services/accounts.test.ts` |
+| FT2 | User login | Covered by `src/services/accounts.test.ts` |
+| FT3 | Invalid login | Covered by `src/services/accounts.test.ts` |
 | FT10 | Recommendation generation | Covered by `src/services/analytics.test.ts` |
 | FT12 | AI analysis display/data | Covered at service level by K-Means, Decision Tree, and evaluation tests |
 | AIT1 | K-Means clustering | Confirms valid completed trips receive cluster records |
