@@ -46,11 +46,11 @@ Completion gate:
 - [x] Separate trip sessions from movement records.
 - [x] Separate destinations from recommendation output.
 - [x] Build the first local storage layer for prototype use.
-- [ ] Finalize Firestore collection design.
-- [ ] Write Firestore security rules for tourist/admin access.
-- [ ] Add database seed data for destinations.
-- [ ] Add migration notes from local storage to Firebase.
-- [ ] Document the final ERD in the report or project docs.
+- [x] Finalize Firestore collection design.
+- [x] Write Firestore security rules for tourist/admin access.
+- [x] Add database seed data for destinations.
+- [x] Add migration notes from local storage to Firebase.
+- [x] Document the final ERD in the report or project docs.
 
 Completion gate:
 
@@ -64,7 +64,7 @@ Completion gate:
 - [x] Add administrator login path.
 - [x] Add role-based navigation in the UI.
 - [ ] Replace demo/local authentication with Firebase Authentication.
-- [ ] Store user role safely in Firestore.
+- [x] Store user role safely in Firestore.
 - [ ] Add protected route handling.
 - [ ] Block tourists from administrator pages.
 - [ ] Block administrators from tourist-only trip tracking actions.
@@ -84,8 +84,8 @@ Completion gate:
 - [x] Add browser geolocation watch support.
 - [x] Add demo movement point fallback for local testing.
 - [x] Store movement points locally with trip IDs and timestamps.
-- [ ] Store trip sessions in Firestore.
-- [ ] Store movement records in Firestore.
+- [x] Store trip sessions in Firestore.
+- [x] Store movement records in Firestore.
 - [ ] Handle browser permission denial cleanly.
 - [ ] Handle browser geolocation timeout cleanly.
 - [x] Prevent movement collection before consent.
@@ -109,8 +109,8 @@ Completion gate:
 - [ ] Add destination detail screen or panel.
 - [ ] Show previously visited places clearly.
 - [ ] Add route history selection by trip.
-- [ ] Add map loading/error state.
-- [ ] Add marker category styling.
+- [x] Add map loading/error state.
+- [x] Add marker category styling.
 - [ ] Verify map behavior on Chrome, Edge, and Firefox.
 - [ ] Check OpenStreetMap attribution remains visible.
 
@@ -132,7 +132,7 @@ Completion gate:
 - [x] Add destination edit function.
 - [x] Add destination delete function.
 - [x] Add dashboard summary export or evidence screenshot flow.
-- [ ] Add admin-only Firestore reads/writes.
+- [x] Add admin-only Firestore reads/writes.
 - [ ] Add empty-state handling for no movement data.
 
 Completion gate:
@@ -155,7 +155,7 @@ Completion gate:
 - [x] Prepare labelled sample records for tourist profiles.
 - [x] Report Decision Tree accuracy.
 - [x] Report confusion matrix.
-- [ ] Store AI analysis results in Firestore.
+- [x] Store AI analysis results in Firestore.
 - [x] Show AI result explanation in admin dashboard.
 - [x] Handle insufficient movement data without misleading output.
 
@@ -172,7 +172,7 @@ Completion gate:
 - [x] Use recent location distance in scoring.
 - [x] Show recommendation cards to tourist.
 - [x] Connect recommendation logic to real AI output.
-- [ ] Store recommendation results in Firestore.
+- [x] Store recommendation results in Firestore.
 - [x] Prevent already visited destinations from being repeatedly suggested.
 - [x] Add fallback recommendation for insufficient data.
 - [x] Add explanation text for why each destination is suggested.
@@ -188,12 +188,12 @@ Completion gate:
 - [ ] Enable Firebase Authentication.
 - [ ] Enable Firestore.
 - [ ] Add Firebase config to `.env.local`.
-- [ ] Add Firebase client module.
+- [x] Add Firebase client module.
 - [ ] Replace local user storage with Firebase Authentication.
-- [ ] Replace local app data storage with Firestore reads/writes.
-- [ ] Add Firestore security rules.
-- [ ] Add Firestore indexes if needed.
-- [ ] Add seed script or admin seed screen for destinations.
+- [x] Replace local app data storage with Firestore reads/writes.
+- [x] Add Firestore security rules.
+- [x] Add Firestore indexes if needed.
+- [x] Add seed script or admin seed screen for destinations.
 - [ ] Test account creation in Firebase.
 - [ ] Test tourist data isolation.
 - [ ] Test admin access to movement summaries.
@@ -210,7 +210,7 @@ Completion gate:
 - [x] Add explicit explanation of what location data is stored.
 - [x] Add option to stop tracking clearly.
 - [x] Add data deletion/reset option for tourist prototype testing.
-- [ ] Enforce role-based Firestore rules.
+- [x] Enforce role-based Firestore rules.
 - [ ] Prevent unauthenticated access to protected pages.
 - [ ] Validate form inputs.
 - [ ] Add loading and error handling around Firebase operations.
@@ -328,6 +328,6 @@ Completion gate:
 - [x] First recommendation logic exists.
 - [x] GitHub remote is connected locally.
 - [x] Frontend K-Means and Decision Tree prototype logic exists.
-- [ ] Firebase project credentials and Firestore rules are not completed yet.
+- [ ] Firebase project credentials are not completed yet.
 - [ ] Formal screenshot/usability testing evidence is not produced yet.
 - [ ] Final report evidence/screenshots are not collected yet.

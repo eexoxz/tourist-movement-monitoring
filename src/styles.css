@@ -319,9 +319,14 @@ button:disabled {
   gap: 14px;
 }
 
+.map-frame {
+  position: relative;
+  min-height: 580px;
+}
+
 .map-view {
   width: 100%;
-  min-height: 580px;
+  height: 580px;
   border: 1px solid #d8d0bf;
   border-radius: 8px;
   overflow: hidden;
@@ -332,11 +337,37 @@ button:disabled {
 .destination-marker {
   display: grid;
   place-items: center;
+  width: 28px;
+  height: 28px;
   border: 2px solid #ffffff;
   border-radius: 999px;
   color: #ffffff;
-  background: #d97706;
+  background: #0f766e;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.28);
+}
+
+.destination-marker-cultural {
+  background: #7c3aed;
+}
+
+.destination-marker-nature {
+  background: #15803d;
+}
+
+.destination-marker-urban {
+  background: #2563eb;
+}
+
+.destination-marker-heritage {
+  background: #b45309;
+}
+
+.destination-marker-food {
+  background: #be123c;
+}
+
+.destination-marker-coastal {
+  background: #0284c7;
 }
 
 .destination-marker span {
@@ -346,6 +377,57 @@ button:disabled {
   height: 100%;
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.map-status,
+.map-legend {
+  position: absolute;
+  z-index: 500;
+  border: 1px solid #d8d0bf;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+}
+
+.map-status {
+  top: 14px;
+  left: 14px;
+  padding: 10px 12px;
+  color: #475569;
+  font-weight: 800;
+}
+
+.map-legend {
+  right: 14px;
+  bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  max-width: min(420px, calc(100% - 28px));
+  padding: 10px;
+}
+
+.map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #344155;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.map-legend i {
+  position: static;
+  width: 20px;
+  height: 20px;
+  font-style: normal;
+  box-shadow: none;
+}
+
+.map-legend i span {
+  color: #ffffff;
+  font-size: 0.65rem;
 }
 
 .panel,

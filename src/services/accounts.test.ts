@@ -44,6 +44,7 @@ describe("accounts service", () => {
       authUid: "firebase-user-1",
     });
 
+    expect(result.user?.id).toBe("firebase-user-1");
     expect(result.user?.authUid).toBe("firebase-user-1");
     expect(result.user?.password).toBe("");
   });

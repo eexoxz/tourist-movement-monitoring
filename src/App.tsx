@@ -107,9 +107,9 @@ function App() {
     };
   }, []);
 
-  const commitData = (nextData: AppData) => {
+  const commitData = (nextData: AppData, actor: User | null = currentUser) => {
     setData(nextData);
-    saveData(nextData);
+    saveData(nextData, actor);
   };
 
   const login = async (email: string, password: string) => {
@@ -127,7 +127,7 @@ function App() {
     let user = authUid ? findUserByEmail(data, email) : authenticateLocalUser(data, email, password);
     if (!user && authUid) {
       user = {
-        id: createId("user"),
+        id: authUid,
         authUid,
         name: email.split("@")[0],
         email,
@@ -135,10 +135,10 @@ function App() {
         role: "tourist",
         createdAt: new Date().toISOString(),
       };
-      commitData({ ...data, users: [...data.users, user] });
+      commitData({ ...data, users: [...data.users, user] }, user);
     } else if (user && authUid && user.authUid !== authUid) {
       user = { ...user, authUid };
-      commitData({ ...data, users: data.users.map((candidate) => (candidate.id === user?.id ? user : candidate)) });
+      commitData({ ...data, users: data.users.map((candidate) => (candidate.id === user?.id ? user : candidate)) }, user);
     }
 
     if (!user) {
@@ -171,7 +171,7 @@ function App() {
     }
 
     const user = created.user;
-    commitData(created.data);
+    commitData(created.data, user);
     setSessionUserId(user.id);
     saveSession(user.id);
     setView("overview");

@@ -44,7 +44,9 @@ Firebase setup:
 3. Fill in the `VITE_FIREBASE_*` values from the Firebase web app settings.
 4. Restart the app.
 
-Without `.env`, the app stays in local prototype mode. With Firebase config, app data is mirrored to Firestore under `prototype/appData`, while browser storage remains a local backup.
+Without `.env`, the app stays in local prototype mode. With Firebase config, app data is saved to Firestore collections while browser storage remains a local backup.
+
+The Firestore collection design, migration notes, rules, and indexes are documented in `docs/firebase-schema.md`. Deployable Firebase files are included as `firebase.json`, `firestore.rules`, and `firestore.indexes.json`.
 
 Project roadmap:
 

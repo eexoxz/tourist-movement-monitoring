@@ -57,7 +57,7 @@ export function createTouristAccount(data: AppData, input: RegisterInput) {
   }
 
   const user: User = {
-    id: createId("user"),
+    id: input.authUid ?? createId("user"),
     authUid: input.authUid,
     name: validation.name,
     email: validation.email,

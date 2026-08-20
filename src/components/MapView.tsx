@@ -1,12 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import type { Destination, MovementPoint } from "../types";
+import type { Destination, DestinationCategory, MovementPoint } from "../types";
 
 type MapViewProps = {
   points: MovementPoint[];
   destinations: Destination[];
   activePoint?: MovementPoint;
 };
+
+const categoryLabels: Record<DestinationCategory, string> = {
+  cultural: "C",
+  nature: "N",
+  urban: "U",
+  heritage: "H",
+  food: "F",
+  coastal: "B",
+};
+
+function escapeHtml(value: string) {
+  const element = document.createElement("div");
+  element.textContent = value;
+  return element.innerHTML;
+}
 
 function icon(className: string, label: string) {
   return L.divIcon({
@@ -20,22 +35,30 @@ function icon(className: string, label: string) {
 export function MapView({ points, destinations, activePoint }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) {
       return;
     }
 
-    mapRef.current = L.map(containerRef.current, {
-      zoomControl: false,
-      attributionControl: true,
-    }).setView([3.1478, 101.6937], 13);
+    try {
+      mapRef.current = L.map(containerRef.current, {
+        zoomControl: false,
+        attributionControl: true,
+      }).setView([3.1478, 101.6937], 13);
 
-    L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(mapRef.current);
+      L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors",
+      })
+        .on("load", () => setMapStatus("ready"))
+        .on("tileerror", () => setMapStatus("error"))
+        .addTo(mapRef.current);
+    } catch {
+      setMapStatus("error");
+    }
 
     return () => {
       mapRef.current?.remove();
@@ -54,10 +77,10 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
 
     destinations.forEach((destination) => {
       L.marker([destination.latitude, destination.longitude], {
-        icon: icon("destination-marker", destination.name.slice(0, 1)),
+        icon: icon(`destination-marker destination-marker-${destination.category}`, categoryLabels[destination.category]),
         title: destination.name,
       })
-        .bindPopup(`<strong>${destination.name}</strong><br>${destination.category}<br>${destination.city}`)
+        .bindPopup(`<strong>${escapeHtml(destination.name)}</strong><br>${escapeHtml(destination.category)}<br>${escapeHtml(destination.city)}`)
         .addTo(layer);
     });
 
@@ -90,5 +113,20 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
     };
   }, [points, destinations, activePoint]);
 
-  return <div ref={containerRef} className="map-view" aria-label="Movement map" />;
+  return (
+    <div className="map-frame">
+      <div ref={containerRef} className="map-view" aria-label="Movement map" />
+      {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? "Loading map" : "Map tiles could not be loaded"}</div>}
+      <div className="map-legend" aria-label="Destination marker categories">
+        {Object.entries(categoryLabels).map(([category, label]) => (
+          <span key={category}>
+            <i className={`destination-marker destination-marker-${category}`}>
+              <span>{label}</span>
+            </i>
+            {category}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
