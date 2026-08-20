@@ -84,6 +84,44 @@ describe("movement service", () => {
     expect(valid.data?.points.some((point) => point.id === valid.point?.id)).toBe(true);
   });
 
+  it("filters duplicate movement points recorded too close together", () => {
+    const activeData: AppData = {
+      ...initialData,
+      trips: [
+        ...initialData.trips,
+        {
+          id: "trip-active",
+          userId: "tourist-demo",
+          status: "active",
+          startedAt: new Date().toISOString(),
+          consentId: "consent-demo",
+        },
+      ],
+      points: [
+        ...initialData.points,
+        {
+          id: "point-active-1",
+          tripId: "trip-active",
+          latitude: 3.1478,
+          longitude: 101.6937,
+          accuracyMeters: 25,
+          recordedAt: new Date().toISOString(),
+          source: "demo",
+        },
+      ],
+    };
+
+    const duplicate = appendMovementPoint(activeData, {
+      tripId: "trip-active",
+      latitude: 3.14781,
+      longitude: 101.69371,
+      accuracyMeters: 25,
+      source: "demo",
+    });
+
+    expect(duplicate.error).toContain("too close");
+  });
+
   it("stops an active trip and records completion", () => {
     const started = startTripSession(
       {

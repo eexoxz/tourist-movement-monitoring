@@ -21,11 +21,12 @@ import {
 import { MapView } from "./components/MapView";
 import type { AppData, Destination, DestinationCategory, DestinationDemand, TravelPlan, User, UserRole } from "./types";
 import { clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
-import { formatDateTime, nearestDestination } from "./services/geo";
+import { formatDateTime } from "./services/geo";
 import { calculateDestinationDemand, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 import { authProviderName, registerWithConfiguredProvider, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
+import { getDailyMovementTrend, getDestinationCategoryCoverage, getMovementRecords, getProfileDistribution, getTourists, summarizeDashboard } from "./services/dashboard";
 import {
   appendMovementPoint,
   deleteTouristMovementData,
@@ -47,6 +48,22 @@ const demoRoute = [
   [3.1556, 101.7139],
   [3.1579, 101.7116],
 ] as const;
+
+function geolocationErrorMessage(error: GeolocationPositionError) {
+  if (error.code === error.PERMISSION_DENIED) {
+    return "Location permission was denied. Tracking was stopped and no browser movement point was saved.";
+  }
+
+  if (error.code === error.POSITION_UNAVAILABLE) {
+    return "Current location is unavailable. Check device location settings or add a demo point for prototype testing.";
+  }
+
+  if (error.code === error.TIMEOUT) {
+    return "Location request timed out. Move to a clearer signal area or try again.";
+  }
+
+  return error.message || "Location could not be read by the browser.";
+}
 
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
@@ -438,7 +455,19 @@ function TouristWorkspace({
         setTrackingMessage("Live movement point recorded.");
       },
       (error) => {
-        setTrackingMessage(error.message || "Location permission was denied by the browser.");
+        if (error.code === error.PERMISSION_DENIED) {
+          if (watchId.current !== null) {
+            navigator.geolocation.clearWatch(watchId.current);
+            watchId.current = null;
+          }
+
+          const stopped = stopActiveTrip(loadData(), user.id);
+          if (stopped.data) {
+            onDataChange(refreshAllRecommendations(stopped.data));
+          }
+        }
+
+        setTrackingMessage(geolocationErrorMessage(error));
       },
       {
         enableHighAccuracy: true,
@@ -527,7 +556,7 @@ function TouristWorkspace({
               <ShieldCheck size={22} />
               <div>
                 <strong>{currentConsent ? "Location consent granted" : "Location consent required"}</strong>
-                <p>Movement recording starts only after consent is granted and a trip session is active.</p>
+                <p>Movement recording starts only after consent is granted and a trip session is active. Saved records include coordinates, accuracy, timestamp, and the trip ID used for route history and recommendations.</p>
               </div>
             </div>
 
@@ -584,7 +613,7 @@ function TouristWorkspace({
 
             <section className="privacy-actions">
               <strong>Privacy control</strong>
-              <p>Movement data remains linked to your tourist account for route history and recommendations.</p>
+              <p>Movement data remains linked to your tourist account for route history and recommendations. You can stop tracking, revoke consent, or delete your prototype movement history at any time.</p>
               <button className="secondary-action wide danger" onClick={deleteMyMovementData} disabled={userTrips.length === 0}>
                 <Trash2 size={18} />
                 Delete my movement data
@@ -679,12 +708,11 @@ function TouristWorkspace({
 }
 
 function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: View; onDataChange: (data: AppData) => void }) {
-  const tourists = data.users.filter((user) => user.role === "tourist");
-  const completedTrips = data.trips.filter((trip) => trip.status === "completed");
-  const categories = data.destinations.reduce<Record<string, number>>((totals, destination) => {
-    totals[destination.category] = (totals[destination.category] ?? 0) + 1;
-    return totals;
-  }, {});
+  const tourists = getTourists(data);
+  const summary = useMemo(() => summarizeDashboard(data), [data]);
+  const categoryCoverage = useMemo(() => getDestinationCategoryCoverage(data), [data]);
+  const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
+  const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
   const [destinationForm, setDestinationForm] = useState({
     name: "",
@@ -696,9 +724,8 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
   });
   const [destinationMessage, setDestinationMessage] = useState<string | null>(null);
 
-  const visibleTrips = selectedTouristId === "all" ? data.trips : data.trips.filter((trip) => trip.userId === selectedTouristId);
-  const visibleTripIds = new Set(visibleTrips.map((trip) => trip.id));
-  const allPoints = data.points.filter((point) => visibleTripIds.has(point.tripId));
+  const movementRecords = useMemo(() => getMovementRecords(data, selectedTouristId), [data, selectedTouristId]);
+  const allPoints = movementRecords.map((record) => record.point);
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const travelPlan = useMemo(() => createMovementBasedTravelPlan(data), [data]);
@@ -739,18 +766,15 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
         <div className="two-column">
           <MapView points={allPoints} destinations={data.destinations} />
           <section className="list-panel">
-            {allPoints.map((point) => {
-              const trip = data.trips.find((candidate) => candidate.id === point.tripId);
-              const user = data.users.find((candidate) => candidate.id === trip?.userId);
-              const nearest = nearestDestination(point, data.destinations);
+            {movementRecords.map((record) => {
               return (
-                <article className="record-card" key={point.id}>
+                <article className="record-card" key={record.point.id}>
                   <div>
-                    <strong>{user?.name ?? "Unknown tourist"}</strong>
-                    <span>{formatDateTime(point.recordedAt)}</span>
+                    <strong>{record.tourist?.name ?? "Unknown tourist"}</strong>
+                    <span>{formatDateTime(record.point.recordedAt)}</span>
                   </div>
                   <p>
-                    {point.latitude.toFixed(4)}, {point.longitude.toFixed(4)} near {nearest?.destination.name ?? "unmapped destination"}
+                    {record.point.latitude.toFixed(4)}, {record.point.longitude.toFixed(4)} near {record.nearestDestinationName}
                   </p>
                 </article>
               );
@@ -878,22 +902,27 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
         demand={destinationDemand}
         destinations={data.destinations}
         profile={`${tourists.length} tourist profiles`}
-        pointCount={data.points.length}
+        pointCount={summary.movementPointCount}
         plan={travelPlan}
       />
       <MetricGrid
         items={[
           ["Tourists", tourists.length.toString()],
-          ["Completed trips", completedTrips.length.toString()],
-          ["Movement points", data.points.length.toString()],
-          ["Destinations", data.destinations.length.toString()],
+          ["Consented", summary.consentedTouristCount.toString()],
+          ["Completed trips", summary.completedTripCount.toString()],
+          ["Movement points", summary.movementPointCount.toString()],
+          ["Destinations", summary.destinationCount.toString()],
         ]}
       />
       <div className="two-column">
         <MapView points={allPoints} destinations={data.destinations} />
         <section className="panel">
           <h2>Destination Coverage</h2>
-          <CategoryBars values={categories} />
+          <CategoryBars values={categoryCoverage} />
+          <h2>Movement Trend</h2>
+          <CategoryBars values={movementTrend} />
+          <h2>Tourist Profiles</h2>
+          <CategoryBars values={profileDistribution} />
           <h2>Movement Demand</h2>
           <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
           <h2>Travel Plan Signal</h2>

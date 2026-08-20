@@ -1,5 +1,6 @@
 import type { AppData, LocationConsent, MovementPoint, TripSession } from "../types";
 import { createId } from "./storage";
+import { distanceKm } from "./geo";
 
 type MovementInput = {
   tripId: string;
@@ -74,6 +75,21 @@ export function appendMovementPoint(data: AppData, input: MovementInput) {
   const trip = data.trips.find((candidate) => candidate.id === input.tripId);
   if (!trip || trip.status !== "active") {
     return { error: "Start a trip before saving a movement point." };
+  }
+
+  const previousPoint = data.points
+    .filter((point) => point.tripId === trip.id)
+    .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
+  const candidate = {
+    latitude: input.latitude,
+    longitude: input.longitude,
+  };
+
+  if (previousPoint) {
+    const secondsApart = Math.abs(Date.now() - new Date(previousPoint.recordedAt).getTime()) / 1000;
+    if (distanceKm(previousPoint, candidate) < 0.04 && secondsApart < 60) {
+      return { error: "Movement point is too close to the previous point and was not saved." };
+    }
   }
 
   const point: MovementPoint = {

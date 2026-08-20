@@ -17,7 +17,7 @@ The project should be handled as staged delivery with completion gates. It does 
 - [ ] Connect local repository to a GitHub remote.
 - [ ] Push first working branch to GitHub.
 - [ ] Confirm GitHub Actions passes on GitHub.
-- [ ] Add clear environment setup notes for Firebase.
+- [x] Add clear environment setup notes for Firebase.
 
 Completion gate:
 
@@ -88,10 +88,10 @@ Completion gate:
 - [ ] Store movement records in Firestore.
 - [ ] Handle browser permission denial cleanly.
 - [ ] Handle browser geolocation timeout cleanly.
-- [ ] Prevent movement collection before consent.
+- [x] Prevent movement collection before consent.
 - [ ] Add active trip recovery if the page reloads.
-- [ ] Add minimum movement filtering to avoid duplicate/noisy points.
-- [ ] Add clear user message for tracking accuracy limitations.
+- [x] Add minimum movement filtering to avoid duplicate/noisy points.
+- [x] Add clear user message for tracking accuracy limitations.
 
 Completion gate:
 
@@ -126,10 +126,11 @@ Completion gate:
 - [x] Show movement record list.
 - [x] Add destination creation form.
 - [x] Show basic destination category distribution.
-- [ ] Add dashboard charts for movement trends.
-- [ ] Add date/trip/tourist filters.
-- [ ] Add destination edit function.
-- [ ] Add destination delete function.
+- [x] Add dashboard charts for movement trends.
+- [x] Add tourist filters.
+- [ ] Add date/trip filters.
+- [x] Add destination edit function.
+- [x] Add destination delete function.
 - [ ] Add dashboard summary export or evidence screenshot flow.
 - [ ] Add admin-only Firestore reads/writes.
 - [ ] Add empty-state handling for no movement data.
@@ -144,19 +145,19 @@ Completion gate:
 - [x] Add first cluster-like grouping output.
 - [x] Add category count analysis.
 - [x] Add silhouette-like score placeholder for UI evidence.
-- [ ] Implement actual K-Means clustering.
-- [ ] Decide whether K-Means runs in frontend JavaScript, a backend function, or a Python analysis script.
+- [x] Implement actual K-Means clustering.
+- [x] Decide whether K-Means runs in frontend JavaScript, a backend function, or a Python analysis script.
 - [ ] Prepare prototype movement dataset for AI testing.
-- [ ] Prepare destination category features.
-- [ ] Select and justify K value.
-- [ ] Calculate and record silhouette score from the real clustering output.
-- [ ] Implement actual Decision Tree classification.
-- [ ] Prepare labelled sample records for tourist profiles.
-- [ ] Report Decision Tree accuracy.
-- [ ] Report confusion matrix.
+- [x] Prepare destination category features.
+- [x] Select and justify K value.
+- [x] Calculate and record silhouette score from the real clustering output.
+- [x] Implement actual Decision Tree classification.
+- [x] Prepare labelled sample records for tourist profiles.
+- [x] Report Decision Tree accuracy.
+- [x] Report confusion matrix.
 - [ ] Store AI analysis results in Firestore.
-- [ ] Show AI result explanation in admin dashboard.
-- [ ] Handle insufficient movement data without misleading output.
+- [x] Show AI result explanation in admin dashboard.
+- [x] Handle insufficient movement data without misleading output.
 
 Completion gate:
 
@@ -170,12 +171,12 @@ Completion gate:
 - [x] Use unvisited destination priority.
 - [x] Use recent location distance in scoring.
 - [x] Show recommendation cards to tourist.
-- [ ] Connect recommendation logic to real AI output.
+- [x] Connect recommendation logic to real AI output.
 - [ ] Store recommendation results in Firestore.
-- [ ] Prevent already visited destinations from being repeatedly suggested.
-- [ ] Add fallback recommendation for insufficient data.
-- [ ] Add explanation text for why each destination is suggested.
-- [ ] Add recommendation test cases.
+- [x] Prevent already visited destinations from being repeatedly suggested.
+- [x] Add fallback recommendation for insufficient data.
+- [x] Add explanation text for why each destination is suggested.
+- [x] Add recommendation test cases.
 
 Completion gate:
 
@@ -205,10 +206,10 @@ Completion gate:
 
 - [x] Show consent before tracking.
 - [x] Keep project scope prototype-level.
-- [ ] Add privacy note near location consent.
-- [ ] Add explicit explanation of what location data is stored.
-- [ ] Add option to stop tracking clearly.
-- [ ] Add data deletion/reset option for tourist prototype testing.
+- [x] Add privacy note near location consent.
+- [x] Add explicit explanation of what location data is stored.
+- [x] Add option to stop tracking clearly.
+- [x] Add data deletion/reset option for tourist prototype testing.
 - [ ] Enforce role-based Firestore rules.
 - [ ] Prevent unauthenticated access to protected pages.
 - [ ] Validate form inputs.
@@ -325,9 +326,8 @@ Completion gate:
 - [x] Map display exists.
 - [x] Admin dashboard shell exists.
 - [x] First recommendation logic exists.
-- [ ] Firebase is not integrated yet.
-- [ ] Real AI models are not integrated yet.
-- [ ] Formal testing evidence is not produced yet.
-- [ ] GitHub remote is not connected yet.
+- [x] GitHub remote is connected locally.
+- [x] Frontend K-Means and Decision Tree prototype logic exists.
+- [ ] Firebase project credentials and Firestore rules are not completed yet.
+- [ ] Formal screenshot/usability testing evidence is not produced yet.
 - [ ] Final report evidence/screenshots are not collected yet.
-
