@@ -110,6 +110,7 @@ Completion gate:
 - [x] Show destination movement demand inside tourist destination information.
 - [x] Show previously visited places clearly.
 - [x] Add route history selection by trip.
+- [x] Show trip-level distance, duration, accuracy, and visited-stop summaries.
 - [x] Add map loading/error state.
 - [x] Add marker category styling.
 - [ ] Verify map behavior on Chrome, Edge, and Firefox.
@@ -135,6 +136,7 @@ Completion gate:
 - [x] Add destination edit function.
 - [x] Add destination delete function.
 - [x] Add dashboard summary export or evidence screenshot flow.
+- [x] Include trip distance and duration evidence in movement CSV export.
 - [x] Add configurable movement-based travel plan builder for administrator planning.
 - [x] Add admin-only Firestore reads/writes.
 - [x] Add empty-state handling for no movement data.

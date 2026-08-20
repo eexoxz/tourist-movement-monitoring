@@ -83,6 +83,9 @@ describe("dashboard service", () => {
     expect(csv).toContain('"tourist","trip_id","recorded_at"');
     expect(csv).toContain('"Demo Tourist"');
     expect(csv).toContain('"Merdeka Square"');
+    expect(csv).toContain('"trip_distance_km"');
+    expect(csv).toContain('"trip_duration_minutes"');
+    expect(csv).toContain('"trip_visited_destinations"');
   });
 
   it("counts destination coverage across every supported category", () => {

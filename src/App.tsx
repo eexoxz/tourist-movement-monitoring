@@ -29,6 +29,7 @@ import type {
   Recommendation,
   TravelPlan,
   TravelPlanOptions,
+  TripSummary,
   User,
   UserRole,
 } from "./types";
@@ -70,6 +71,8 @@ import {
   revokeLocationConsent,
   startTripSession,
   stopActiveTrip,
+  summarizeTrip,
+  summarizeUserTrips,
 } from "./services/movement";
 
 const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
@@ -470,6 +473,9 @@ function TouristWorkspace({
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? userTrips[0];
   const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
+  const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
+  const selectedTripSummary = selectedTrip ? summarizeTrip(data, selectedTrip.id) : null;
+  const tripSummaries = useMemo(() => summarizeUserTrips(data, user.id), [data, user.id]);
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
@@ -721,6 +727,7 @@ function TouristWorkspace({
             <MetricGrid
               items={[
                 ["Active points", activePoints.length.toString()],
+                ["Active distance", `${activeTripSummary?.distanceKm ?? 0} km`],
                 ["Completed trips", userTrips.filter((trip) => trip.status === "completed").length.toString()],
                 ["Live watch", isLiveTracking ? "Active" : activeTrip ? "Paused" : "Off"],
                 ["Profile", latestAnalysis?.profile ?? "Pending"],
@@ -740,15 +747,19 @@ function TouristWorkspace({
         <div className="two-column">
           <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
           <section className="list-panel">
+            {selectedTripSummary && <TripSummaryPanel summary={selectedTripSummary} />}
             {userTrips.map((trip) => {
               const points = data.points.filter((point) => point.tripId === trip.id);
+              const summary = tripSummaries.find((row) => row.tripId === trip.id);
               return (
                 <button className={selectedTrip?.id === trip.id ? "record-card selectable active" : "record-card selectable"} key={trip.id} onClick={() => setSelectedTripId(trip.id)}>
                   <div>
                     <strong>{formatDateTime(trip.startedAt)}</strong>
                     <span>{trip.status}</span>
                   </div>
-                  <p>{points.length} movement points recorded</p>
+                  <p>
+                    {points.length} point(s), {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {summary?.visitedDestinationCount ?? 0} visited destination(s)
+                  </p>
                 </button>
               );
             })}
@@ -1300,6 +1311,36 @@ function MetricGrid({ items }: { items: [string, string][] }) {
           <strong>{value}</strong>
         </article>
       ))}
+    </section>
+  );
+}
+
+function TripSummaryPanel({ summary }: { summary: TripSummary }) {
+  return (
+    <section className="trip-summary">
+      <h2>Selected Trip Summary</h2>
+      <div>
+        <span>
+          <strong>{summary.distanceKm}</strong>
+          km
+        </span>
+        <span>
+          <strong>{summary.durationMinutes}</strong>
+          min
+        </span>
+        <span>
+          <strong>{summary.pointCount}</strong>
+          points
+        </span>
+        <span>
+          <strong>{summary.visitedDestinationCount}</strong>
+          stops
+        </span>
+        <span>
+          <strong>{summary.averageAccuracyMeters}</strong>
+          m accuracy
+        </span>
+      </div>
     </section>
   );
 }

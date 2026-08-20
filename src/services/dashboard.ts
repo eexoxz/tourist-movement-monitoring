@@ -1,5 +1,5 @@
 import type { AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, User } from "../types";
-import { nearestDestination } from "./geo";
+import { distanceKm, nearestDestination } from "./geo";
 
 export type MovementRecordView = {
   point: MovementPoint;
@@ -116,7 +116,40 @@ function csvCell(value: string | number | null | undefined) {
 }
 
 export function buildMovementRecordsCsv(records: MovementRecordView[]) {
-  const header = ["tourist", "trip_id", "recorded_at", "latitude", "longitude", "accuracy_meters", "nearest_destination", "destination_category", "source"];
+  const header = [
+    "tourist",
+    "trip_id",
+    "recorded_at",
+    "latitude",
+    "longitude",
+    "accuracy_meters",
+    "nearest_destination",
+    "destination_category",
+    "source",
+    "trip_distance_km",
+    "trip_duration_minutes",
+    "trip_visited_destinations",
+  ];
+  const summaries = new Map(
+    Array.from(new Set(records.map((record) => record.trip?.id ?? record.point.tripId))).map((tripId) => {
+      const tripRecords = records
+        .filter((record) => (record.trip?.id ?? record.point.tripId) === tripId)
+        .sort((a, b) => new Date(a.point.recordedAt).getTime() - new Date(b.point.recordedAt).getTime());
+      const distance = tripRecords.slice(1).reduce((total, record, index) => total + distanceKm(tripRecords[index].point, record.point), 0);
+      const startedAt = tripRecords[0]?.point.recordedAt ?? tripRecords[0]?.trip?.startedAt;
+      const endedAt = tripRecords.at(-1)?.point.recordedAt ?? tripRecords[0]?.trip?.endedAt ?? startedAt;
+      const visited = new Set(tripRecords.map((record) => record.nearestDestinationName).filter((name) => name !== "Unmapped destination"));
+
+      return [
+        tripId,
+        {
+          distanceKm: Number(distance.toFixed(2)),
+          durationMinutes: startedAt && endedAt ? Math.max(0, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)) : 0,
+          visitedDestinationCount: visited.size,
+        },
+      ] as const;
+    })
+  );
   const rows = records.map((record) => [
     record.tourist?.name ?? "Unknown tourist",
     record.trip?.id ?? record.point.tripId,
@@ -127,6 +160,9 @@ export function buildMovementRecordsCsv(records: MovementRecordView[]) {
     record.nearestDestinationName,
     record.nearestDestinationCategory ?? "",
     record.point.source,
+    summaries.get(record.trip?.id ?? record.point.tripId)?.distanceKm ?? 0,
+    summaries.get(record.trip?.id ?? record.point.tripId)?.durationMinutes ?? 0,
+    summaries.get(record.trip?.id ?? record.point.tripId)?.visitedDestinationCount ?? 0,
   ]);
 
   return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");

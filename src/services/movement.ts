@@ -1,4 +1,4 @@
-import type { AppData, LocationConsent, MovementPoint, TripSession } from "../types";
+import type { AppData, LocationConsent, MovementPoint, TripSession, TripSummary } from "../types";
 import { createId } from "./storage";
 import { distanceKm, nearestDestination } from "./geo";
 
@@ -36,6 +36,44 @@ export function getVisitedDestinationIds(data: AppData, userId: string, maxDista
     });
 
   return visited;
+}
+
+function getTripPoints(data: AppData, tripId: string) {
+  return data.points.filter((point) => point.tripId === tripId).sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+}
+
+export function summarizeTrip(data: AppData, tripId: string): TripSummary {
+  const points = getTripPoints(data, tripId);
+  const trip = data.trips.find((candidate) => candidate.id === tripId);
+  const visitedDestinationIds = new Set<string>();
+  const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
+
+  points.forEach((point) => {
+    const nearest = nearestDestination(point, data.destinations);
+    if (nearest && nearest.distance <= 1.2) {
+      visitedDestinationIds.add(nearest.destination.id);
+    }
+  });
+
+  const startedAt = points[0]?.recordedAt ?? trip?.startedAt;
+  const endedAt = points.at(-1)?.recordedAt ?? trip?.endedAt ?? startedAt;
+  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)) : 0;
+  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(points.reduce((total, point) => total + point.accuracyMeters, 0) / points.length);
+
+  return {
+    tripId,
+    pointCount: points.length,
+    distanceKm: Number(distance.toFixed(2)),
+    durationMinutes,
+    visitedDestinationCount: visitedDestinationIds.size,
+    averageAccuracyMeters,
+    firstRecordedAt: points[0]?.recordedAt,
+    lastRecordedAt: points.at(-1)?.recordedAt,
+  };
+}
+
+export function summarizeUserTrips(data: AppData, userId: string) {
+  return getUserTrips(data, userId).map((trip) => summarizeTrip(data, trip.id));
 }
 
 export function grantLocationConsent(data: AppData, userId: string) {

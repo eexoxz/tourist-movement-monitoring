@@ -11,6 +11,8 @@ import {
   revokeLocationConsent,
   startTripSession,
   stopActiveTrip,
+  summarizeTrip,
+  summarizeUserTrips,
 } from "./movement";
 
 describe("movement service", () => {
@@ -186,5 +188,18 @@ describe("movement service", () => {
     expect(visited.has("merdeka-square")).toBe(true);
     expect(visited.has("klcc-park")).toBe(true);
     expect(visited.has("penang-hill")).toBe(false);
+  });
+
+  it("summarizes route distance, duration, accuracy, and visited destinations", () => {
+    const summary = summarizeTrip(initialData, "trip-demo-1");
+    const userSummaries = summarizeUserTrips(initialData, "tourist-demo");
+
+    expect(summary.pointCount).toBe(4);
+    expect(summary.distanceKm).toBeGreaterThan(0);
+    expect(summary.durationMinutes).toBeGreaterThan(0);
+    expect(summary.averageAccuracyMeters).toBeGreaterThan(0);
+    expect(summary.visitedDestinationCount).toBe(4);
+    expect(userSummaries).toHaveLength(1);
+    expect(userSummaries[0].tripId).toBe("trip-demo-1");
   });
 });

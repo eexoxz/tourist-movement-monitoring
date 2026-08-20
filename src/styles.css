@@ -280,6 +280,7 @@ button:disabled {
 .panel,
 .list-panel,
 .movement-demand,
+.trip-summary,
 .auth-panel,
 .analysis-card,
 .empty-state {
@@ -305,6 +306,40 @@ button:disabled {
   margin-top: 12px;
   color: #111827;
   font-size: 1.85rem;
+}
+
+.trip-summary {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.trip-summary h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.trip-summary > div {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.trip-summary span {
+  min-width: 0;
+  padding: 10px;
+  border-radius: 8px;
+  color: #596575;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.trip-summary strong {
+  display: block;
+  color: #0f766e;
+  font-size: 1.12rem;
 }
 
 .two-column {
@@ -1243,6 +1278,7 @@ textarea {
 
   .nav-list,
   .metric-grid,
+  .trip-summary > div,
   .recommendation-list,
   .analysis-grid,
   .action-row,

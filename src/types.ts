@@ -56,6 +56,17 @@ export type TripSession = {
   consentId: string;
 };
 
+export type TripSummary = {
+  tripId: string;
+  pointCount: number;
+  distanceKm: number;
+  durationMinutes: number;
+  visitedDestinationCount: number;
+  averageAccuracyMeters: number;
+  firstRecordedAt?: string;
+  lastRecordedAt?: string;
+};
+
 export type LocationConsent = {
   id: string;
   userId: string;
