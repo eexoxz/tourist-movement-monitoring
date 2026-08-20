@@ -31,6 +31,12 @@ Build check:
 npm run build
 ```
 
+Automated tests:
+
+```bash
+npm test
+```
+
 Firebase setup:
 
 1. Create a Firebase web app with Authentication and Firestore enabled.

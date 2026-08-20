@@ -12,7 +12,7 @@ export const initialData: AppData = {
       email: "tourist@example.com",
       password: "tourist123",
       role: "tourist",
-      expectedProfile: "cultural",
+      expectedProfile: "mixed",
       createdAt: hoursAgo(120),
     },
     {
