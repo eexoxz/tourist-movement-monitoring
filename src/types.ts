@@ -74,6 +74,9 @@ export type AnalysisResult = {
   decisionRuleCount: number;
   decisionPath: string[];
   silhouetteScore: number;
+  clusterDistance: number;
+  clusterLabel: string;
+  clusterCentroid: Record<DestinationCategory, number>;
   categoryCounts: Record<DestinationCategory, number>;
   dataPointCount: number;
   method: "k-means";
@@ -96,6 +99,13 @@ export type Recommendation = {
   userId: string;
   destinationId: string;
   score: number;
+  scoreBreakdown: {
+    profileFit: number;
+    clusterPattern: number;
+    movementDemand: number;
+    proximity: number;
+    unvisited: number;
+  };
   reason: string;
   generatedAt: string;
 };
@@ -118,10 +128,27 @@ export type TravelPlanStop = {
   suggestedMinutes: number;
 };
 
+export type TravelPlanAudience = TouristProfile | "movement";
+
+export type TravelPlanOptions = {
+  audience?: TravelPlanAudience;
+  city?: string;
+  maxStops?: number;
+  minimumTier?: DestinationDemand["tier"];
+  diversifyCategories?: boolean;
+};
+
 export type TravelPlan = {
   title: string;
   generatedAt: string;
   summary: string;
+  criteria: {
+    audience: TravelPlanAudience;
+    city: string;
+    maxStops: number;
+    minimumTier: DestinationDemand["tier"];
+    diversifyCategories: boolean;
+  };
   stops: TravelPlanStop[];
 };
 

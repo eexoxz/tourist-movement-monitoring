@@ -2,12 +2,14 @@ import type {
   AnalysisResult,
   AiEvaluation,
   AppData,
+  Destination,
   DestinationDemand,
   DestinationCategory,
   MovementPoint,
   Recommendation,
   TouristProfile,
   TravelPlan,
+  TravelPlanOptions,
   TripSession,
 } from "../types";
 import { createId } from "./storage";
@@ -40,6 +42,14 @@ type DecisionTreeResult = {
   path: string[];
   depth: number;
   evaluatedRules: number;
+};
+
+type ClusterAssignment = {
+  cluster: number;
+  silhouetteScore: number;
+  centroid: number[];
+  distanceToCentroid: number;
+  label: string;
 };
 
 function emptyCounts(): Record<DestinationCategory, number> {
@@ -225,6 +235,30 @@ function vectorFromCounts(counts: Record<DestinationCategory, number>) {
   return categories.map((category) => counts[category] / total);
 }
 
+function centroidRecord(vector: number[]) {
+  return categories.reduce<Record<DestinationCategory, number>>((values, category, index) => {
+    values[category] = Number((vector[index] * 100).toFixed(1));
+    return values;
+  }, emptyCounts());
+}
+
+function clusterLabel(vector: number[]) {
+  const ranked = categories
+    .map((category, index) => ({ category, weight: vector[index] }))
+    .sort((a, b) => b.weight - a.weight)
+    .filter((item) => item.weight > 0.05);
+
+  if (ranked.length === 0) {
+    return "Sparse movement cluster";
+  }
+
+  if (ranked.length === 1) {
+    return `${ranked[0].category} movement cluster`;
+  }
+
+  return `${ranked[0].category}/${ranked[1].category} movement cluster`;
+}
+
 function euclidean(a: number[], b: number[]) {
   return Math.sqrt(a.reduce((sum, value, index) => sum + Math.pow(value - b[index], 2), 0));
 }
@@ -262,7 +296,7 @@ function createTripFeatures(data: AppData): TripFeature[] {
 
 function runKMeans(features: TripFeature[]) {
   if (features.length === 0) {
-    return new Map<string, { cluster: number; silhouetteScore: number }>();
+    return new Map<string, ClusterAssignment>();
   }
 
   const k = Math.min(3, features.length);
@@ -289,6 +323,9 @@ function runKMeans(features: TripFeature[]) {
       {
         cluster: assignments[index],
         silhouetteScore: silhouetteForFeature(features, assignments, index, k),
+        centroid: centroids[assignments[index]],
+        distanceToCentroid: Number(euclidean(feature.vector, centroids[assignments[index]]).toFixed(3)),
+        label: clusterLabel(centroids[assignments[index]]),
       },
     ])
   );
@@ -355,6 +392,13 @@ function demandTier(score: number): DestinationDemand["tier"] {
 
   return "low";
 }
+
+const demandTierWeight: Record<DestinationDemand["tier"], number> = {
+  low: 1,
+  emerging: 2,
+  medium: 3,
+  high: 4,
+};
 
 function calculateApproachSignals(data: AppData, destinationId: string) {
   const destination = data.destinations.find((candidate) => candidate.id === destinationId);
@@ -457,6 +501,9 @@ export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | 
     decisionRuleCount: classification.evaluatedRules,
     decisionPath: classification.path,
     silhouetteScore: 0,
+    clusterDistance: 0,
+    clusterLabel: clusterLabel(vectorFromCounts(counts)),
+    clusterCentroid: centroidRecord(vectorFromCounts(counts)),
     categoryCounts: counts,
     dataPointCount: points.length,
     method: "k-means",
@@ -470,7 +517,13 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
   const generatedAt = new Date().toISOString();
 
   return features.map((feature) => {
-    const cluster = clusters.get(feature.trip.id) ?? { cluster: 0, silhouetteScore: 0 };
+    const cluster = clusters.get(feature.trip.id) ?? {
+      cluster: 0,
+      silhouetteScore: 0,
+      centroid: feature.vector,
+      distanceToCentroid: 0,
+      label: clusterLabel(feature.vector),
+    };
     const classification = classifyWithDecisionTree(feature.counts);
 
     return {
@@ -484,6 +537,9 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
       decisionRuleCount: classification.evaluatedRules,
       decisionPath: classification.path,
       silhouetteScore: cluster.silhouetteScore,
+      clusterDistance: cluster.distanceToCentroid,
+      clusterLabel: cluster.label,
+      clusterCentroid: centroidRecord(cluster.centroid),
       categoryCounts: feature.counts,
       dataPointCount: feature.pointCount,
       method: "k-means",
@@ -510,14 +566,27 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
     .filter((destination) => !visited.has(destination.id))
     .map((destination) => {
       const demand = demandByDestination.get(destination.id);
-      const profileScore = profileMatchesCategory(profile, destination.category) ? 45 : 12;
-      const unvisitedScore = 25;
-      const distanceScore = latestPoint ? Math.max(0, 30 - distanceKm(latestPoint, destination) * 1.4) : 14;
-      const movementScore = demand ? Math.round(demand.popularityScore * 0.22) : 0;
-      const score = Math.min(100, Math.round(profileScore + unvisitedScore + distanceScore + movementScore));
+      const profileScore = profileMatchesCategory(profile, destination.category) ? 28 : 8;
+      const clusterScore = analysis ? Math.round((analysis.clusterCentroid[destination.category] / 100) * 24) : 0;
+      const unvisitedScore = 20;
+      const distanceScore = latestPoint ? Math.max(0, 22 - distanceKm(latestPoint, destination) * 1.2) : 12;
+      const movementScore = demand ? Math.round(demand.popularityScore * 0.2) : 0;
+      const scoreBreakdown = {
+        profileFit: profileScore,
+        clusterPattern: clusterScore,
+        movementDemand: movementScore,
+        proximity: Math.round(distanceScore),
+        unvisited: unvisitedScore,
+      };
+      const score = Math.min(
+        100,
+        scoreBreakdown.profileFit + scoreBreakdown.clusterPattern + scoreBreakdown.unvisited + scoreBreakdown.proximity + scoreBreakdown.movementDemand
+      );
       const reason =
         !hasPersonalizedAnalysis
           ? "Fallback suggestion shown because the movement history is still too limited for a personalised AI result."
+          : clusterScore >= 12
+          ? `Matches the ${profile} travel profile and the strongest K-Means cluster pattern from the tourist route.`
           : demand && demand.tier !== "low"
           ? `Matches the ${profile} travel profile and has strong movement demand from recorded tourist routes.`
           : profile === "mixed"
@@ -529,6 +598,7 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
         userId,
         destinationId: destination.id,
         score,
+        scoreBreakdown,
         reason,
         generatedAt: new Date().toISOString(),
       };
@@ -610,41 +680,94 @@ export function evaluateAiOutput(data: AppData): AiEvaluation {
   };
 }
 
-export function createMovementBasedTravelPlan(data: AppData): TravelPlan {
+function normalizeTravelPlanOptions(options: TravelPlanOptions = {}): Required<TravelPlanOptions> {
+  return {
+    audience: options.audience ?? "movement",
+    city: options.city?.trim() || "all",
+    maxStops: Math.min(8, Math.max(1, Math.round(options.maxStops ?? 5))),
+    minimumTier: options.minimumTier ?? "emerging",
+    diversifyCategories: options.diversifyCategories ?? true,
+  };
+}
+
+function travelPlanAudienceBonus(audience: Required<TravelPlanOptions>["audience"], destination: Destination) {
+  if (audience === "movement" || audience === "mixed") {
+    return 0;
+  }
+
+  return profileMatchesCategory(audience, destination.category) ? 30 : -8;
+}
+
+export function createMovementBasedTravelPlan(data: AppData, options?: TravelPlanOptions): TravelPlan {
+  const criteria = normalizeTravelPlanOptions(options);
   const demandRows = calculateDestinationDemand(data);
+  const selectedDestinationIds = new Set<string>();
   const selectedCategories = new Set<DestinationCategory>();
-  const selected = demandRows
-    .filter((row) => row.popularityScore > 0)
-    .filter((row) => {
+  const candidates = demandRows
+    .map((row) => {
       const destination = data.destinations.find((candidate) => candidate.id === row.destinationId);
-      if (!destination) {
-        return false;
-      }
-
-      if (selectedCategories.has(destination.category) && selectedCategories.size < 4) {
-        return false;
-      }
-
-      selectedCategories.add(destination.category);
-      return true;
+      return destination
+        ? {
+            row,
+            destination,
+            planScore: row.popularityScore + travelPlanAudienceBonus(criteria.audience, destination),
+          }
+        : null;
     })
-    .slice(0, 5);
+    .filter((candidate): candidate is { row: DestinationDemand; destination: Destination; planScore: number } => Boolean(candidate))
+    .filter(({ row, destination }) => row.popularityScore > 0 && demandTierWeight[row.tier] >= demandTierWeight[criteria.minimumTier] && (criteria.city === "all" || destination.city === criteria.city))
+    .sort((a, b) => b.planScore - a.planScore || b.row.popularityScore - a.row.popularityScore);
+
+  const selected: typeof candidates = [];
+
+  candidates.forEach((candidate) => {
+    if (selected.length >= criteria.maxStops || selectedDestinationIds.has(candidate.row.destinationId)) {
+      return;
+    }
+
+    const categoryAlreadySelected = selectedCategories.has(candidate.destination.category);
+    const remainingNewCategoryExists = candidates.some(
+      (other) =>
+        !selectedDestinationIds.has(other.row.destinationId) &&
+        !selectedCategories.has(other.destination.category) &&
+        other.destination.category !== candidate.destination.category
+    );
+
+    if (criteria.diversifyCategories && categoryAlreadySelected && remainingNewCategoryExists) {
+      return;
+    }
+
+    selected.push(candidate);
+    selectedDestinationIds.add(candidate.row.destinationId);
+    selectedCategories.add(candidate.destination.category);
+  });
+
+  if (selected.length < criteria.maxStops) {
+    candidates.forEach((candidate) => {
+      if (selected.length < criteria.maxStops && !selectedDestinationIds.has(candidate.row.destinationId)) {
+        selected.push(candidate);
+        selectedDestinationIds.add(candidate.row.destinationId);
+      }
+    });
+  }
+
+  const audienceText = criteria.audience === "movement" ? "overall movement demand" : `${criteria.audience} tourist patterns`;
+  const cityText = criteria.city === "all" ? "all prototype cities" : criteria.city;
 
   return {
     title: "Movement-Based Suggested Route",
     generatedAt: new Date().toISOString(),
     summary:
       selected.length === 0
-        ? "Not enough movement records have been collected yet to create a demand-led travel plan."
-        : "Suggested route based on destinations receiving the strongest tourist movement signals in the prototype data.",
-    stops: selected.map((row, index) => {
-      const destination = data.destinations.find((candidate) => candidate.id === row.destinationId);
-
+        ? `No destinations match the selected ${criteria.minimumTier} demand threshold for ${cityText}.`
+        : `Suggested route for ${audienceText}, filtered to ${cityText}, using ${criteria.minimumTier}+ movement demand signals.`,
+    criteria,
+    stops: selected.map(({ row, destination, planScore }, index) => {
       return {
         destinationId: row.destinationId,
         order: index + 1,
-        reason: `${row.tier} demand: ${row.movementPointCount} nearby points and ${row.approachSignalCount} approach signal(s) from ${Math.max(row.uniqueTouristCount, row.approachingTouristCount)} tourist profile(s).`,
-        suggestedMinutes: destination?.averageVisitMinutes ?? 60,
+        reason: `${row.tier} demand, planning score ${Math.max(0, Math.round(planScore))}: ${row.movementPointCount} nearby points, ${row.recentPointCount} recent points, and ${row.approachSignalCount} approach signal(s) from ${Math.max(row.uniqueTouristCount, row.approachingTouristCount)} tourist profile(s).`,
+        suggestedMinutes: destination.averageVisitMinutes,
       };
     }),
   };

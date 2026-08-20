@@ -634,6 +634,51 @@ button:disabled {
   line-height: 1.5;
 }
 
+.plan-builder {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.plan-builder label {
+  display: grid;
+  gap: 6px;
+  color: #344155;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.plan-builder .checkbox-field {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  align-self: end;
+  min-height: 42px;
+}
+
+.checkbox-field input {
+  width: auto;
+}
+
+.plan-criteria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plan-criteria span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #0f172a;
+  background: #ecfeff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .demand-card small {
   padding: 5px 9px;
   border-radius: 999px;
@@ -693,6 +738,40 @@ button:disabled {
   grid-template-columns: 1fr;
 }
 
+.recommendation-card .recommendation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.recommendation-card .recommendation-meta span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #14532d;
+  background: #dcfce7;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.recommendation-card .score-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+  gap: 8px;
+}
+
+.recommendation-card .score-breakdown span {
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: #334155;
+  background: #f1f5f9;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-align: center;
+}
+
 meter {
   width: 100%;
   height: 10px;
@@ -709,6 +788,13 @@ meter {
 .analysis-card h2 {
   margin: 12px 0 0;
   font-size: 1.2rem;
+}
+
+.analysis-card h3 {
+  margin: 14px 0 0;
+  font-size: 0.82rem;
+  color: #475569;
+  text-transform: uppercase;
 }
 
 .analysis-card p {
@@ -1068,9 +1154,14 @@ textarea {
   .analysis-grid,
   .action-row,
   .field-pair,
+  .plan-builder,
   .profile-switch,
   .page-header {
     grid-template-columns: 1fr;
+  }
+
+  .recommendation-card .score-breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .page-header {

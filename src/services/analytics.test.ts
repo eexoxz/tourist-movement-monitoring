@@ -25,6 +25,13 @@ describe("analytics service", () => {
     expect(data.analyses.every((analysis) => analysis.decisionTreeDepth >= 2)).toBe(true);
     expect(data.analyses.every((analysis) => analysis.decisionRuleCount >= 2)).toBe(true);
     expect(data.analyses.some((analysis) => analysis.decisionPath.some((step) => step.startsWith("Rule 3")))).toBe(true);
+    expect(data.analyses.every((analysis) => analysis.clusterLabel.includes("cluster"))).toBe(true);
+    expect(data.analyses.every((analysis) => analysis.clusterDistance >= 0)).toBe(true);
+    expect(data.analyses.every((analysis) => Object.values(analysis.clusterCentroid).some((value) => value > 0))).toBe(true);
+    expect(data.recommendations.some((recommendation) => recommendation.scoreBreakdown.clusterPattern > 0)).toBe(true);
+    expect(
+      data.recommendations.every((recommendation) => recommendation.score === Math.min(100, Object.values(recommendation.scoreBreakdown).reduce((sum, value) => sum + value, 0)))
+    ).toBe(true);
   });
 
   it("reports AI evaluation evidence for labelled demo records", () => {
@@ -99,6 +106,24 @@ describe("analytics service", () => {
     expect(plan.summary).toContain("movement");
   });
 
+  it("creates configurable travel plans for tourism administrators", () => {
+    const plan = createMovementBasedTravelPlan(initialData, {
+      audience: "nature",
+      city: "Penang",
+      maxStops: 2,
+      minimumTier: "low",
+      diversifyCategories: false,
+    });
+    const planDestinations = plan.stops.map((stop) => initialData.destinations.find((destination) => destination.id === stop.destinationId));
+
+    expect(plan.criteria.audience).toBe("nature");
+    expect(plan.criteria.city).toBe("Penang");
+    expect(plan.stops.length).toBeGreaterThan(0);
+    expect(plan.stops.length).toBeLessThanOrEqual(2);
+    expect(planDestinations.every((destination) => destination?.city === "Penang")).toBe(true);
+    expect(plan.summary).toContain("nature");
+  });
+
   it("exports the movement-based travel plan as CSV", () => {
     const plan = createMovementBasedTravelPlan(initialData);
     const csv = buildTravelPlanCsv(plan, initialData);
@@ -129,5 +154,10 @@ describe("analytics service", () => {
 
     expect(recommendations.length).toBeGreaterThan(0);
     expect(recommendations[0].reason).toContain("Fallback suggestion");
+    expect(recommendations[0].scoreBreakdown.profileFit).toBeGreaterThan(0);
+    expect(recommendations[0].scoreBreakdown.clusterPattern).toBe(0);
+    expect(recommendations[0].scoreBreakdown.movementDemand).toBeGreaterThanOrEqual(0);
+    expect(recommendations[0].scoreBreakdown.proximity).toBeGreaterThan(0);
+    expect(recommendations[0].scoreBreakdown.unvisited).toBe(20);
   });
 });

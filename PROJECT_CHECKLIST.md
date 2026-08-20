@@ -132,6 +132,7 @@ Completion gate:
 - [x] Add destination edit function.
 - [x] Add destination delete function.
 - [x] Add dashboard summary export or evidence screenshot flow.
+- [x] Add configurable movement-based travel plan builder for administrator planning.
 - [x] Add admin-only Firestore reads/writes.
 - [x] Add empty-state handling for no movement data.
 
@@ -172,10 +173,13 @@ Completion gate:
 - [x] Use recent location distance in scoring.
 - [x] Show recommendation cards to tourist.
 - [x] Connect recommendation logic to real AI output.
+- [x] Use K-Means cluster pattern in recommendation scoring.
 - [x] Store recommendation results in Firestore.
 - [x] Prevent already visited destinations from being repeatedly suggested.
 - [x] Add fallback recommendation for insufficient data.
 - [x] Add explanation text for why each destination is suggested.
+- [x] Show score breakdown for recommendation evidence.
+- [x] Show tourist movement demand beside recommendation output.
 - [x] Add recommendation test cases.
 
 Completion gate:
@@ -214,6 +218,7 @@ Completion gate:
 - [x] Prevent unauthenticated access to protected pages.
 - [x] Validate form inputs.
 - [x] Add loading and error handling around Firebase operations.
+- [x] Normalize older local and Firestore prototype data during app loading.
 - [ ] Confirm main pages load under the three-second target in normal testing.
 
 Completion gate:

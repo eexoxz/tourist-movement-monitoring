@@ -18,7 +18,19 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import type { AppData, AppView, Destination, DestinationCategory, DestinationDemand, MovementPoint, TravelPlan, User, UserRole } from "./types";
+import type {
+  AppData,
+  AppView,
+  Destination,
+  DestinationCategory,
+  DestinationDemand,
+  MovementPoint,
+  Recommendation,
+  TravelPlan,
+  TravelPlanOptions,
+  User,
+  UserRole,
+} from "./types";
 import { coerceViewForRole, getDefaultViewForRole } from "./services/access";
 import { clearSession, createId, getStorageMode, loadCloudData, loadData, resetData, saveData } from "./services/storage";
 import { formatDateTime } from "./services/geo";
@@ -51,6 +63,8 @@ import {
 } from "./services/movement";
 
 const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
+type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
+type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 
 const demoRoute = [
   [3.142, 101.6894],
@@ -747,7 +761,10 @@ function TouristWorkspace({
           </button>
         }
       >
-        <RecommendationList recommendations={recommendations} destinations={data.destinations} />
+        <div className="two-column">
+          <RecommendationList recommendations={recommendations} destinations={data.destinations} demand={destinationDemand} />
+          <MovementDemandList title="Where Tourists Are Moving" demand={destinationDemand.slice(0, 6)} destinations={data.destinations} />
+        </div>
       </Page>
     );
   }
@@ -793,6 +810,11 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
   const [selectedTripId, setSelectedTripId] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [planAudience, setPlanAudience] = useState<PlanAudience>("movement");
+  const [planCity, setPlanCity] = useState("all");
+  const [planMaxStops, setPlanMaxStops] = useState(5);
+  const [planMinimumTier, setPlanMinimumTier] = useState<PlanTier>("emerging");
+  const [planDiversifyCategories, setPlanDiversifyCategories] = useState(true);
   const [destinationForm, setDestinationForm] = useState({
     name: "",
     city: "",
@@ -817,7 +839,18 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
   const allPoints = movementRecords.map((record) => record.point);
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
-  const travelPlan = useMemo(() => createMovementBasedTravelPlan(data), [data]);
+  const travelPlan = useMemo(
+    () =>
+      createMovementBasedTravelPlan(data, {
+        audience: planAudience,
+        city: planCity,
+        maxStops: planMaxStops,
+        minimumTier: planMinimumTier,
+        diversifyCategories: planDiversifyCategories,
+      }),
+    [data, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
+  );
+  const cityOptions = useMemo(() => Array.from(new Set(data.destinations.map((destination) => destination.city))).sort(), [data.destinations]);
   const filteredTouristCount = new Set(movementRecords.map((record) => record.trip?.userId).filter(Boolean)).size;
   const filteredTripCount = new Set(movementRecords.map((record) => record.point.tripId)).size;
   const hasRecordFilters = selectedTouristId !== "all" || selectedTripId !== "all" || Boolean(fromDate) || Boolean(toDate);
@@ -1026,11 +1059,13 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
                 <div className="cluster-badge">Cluster {analysis.cluster + 1}</div>
                 <h2>{user?.name ?? "Unknown tourist"}</h2>
                 <p>{analysis.profile} tourist profile</p>
-                <strong>Silhouette {analysis.silhouetteScore}</strong>
+                <strong>{analysis.clusterLabel}</strong>
                 <small>
                   {analysis.dataPointCount} points processed by {analysis.method} + {analysis.classifier}
                 </small>
                 <div className="tree-metrics">
+                  <span>Silhouette {analysis.silhouetteScore}</span>
+                  <span>Centroid distance {analysis.clusterDistance}</span>
                   <span>Confidence {Math.round(analysis.classificationConfidence * 100)}%</span>
                   <span>Depth {analysis.decisionTreeDepth}</span>
                   <span>{analysis.decisionRuleCount} rules</span>
@@ -1040,6 +1075,9 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
                     <li key={step}>{step}</li>
                   ))}
                 </ul>
+                <h3>K-Means Centroid</h3>
+                <CategoryBars values={analysis.clusterCentroid} />
+                <h3>Trip Category Counts</h3>
                 <CategoryBars values={analysis.categoryCounts} />
               </article>
             );
@@ -1097,6 +1135,46 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
               <Download size={18} />
               CSV
             </button>
+          </div>
+          <div className="plan-builder" aria-label="Travel plan controls">
+            <label>
+              Audience
+              <select value={planAudience} onChange={(event) => setPlanAudience(event.target.value as PlanAudience)}>
+                <option value="movement">Overall movement</option>
+                <option value="mixed">Mixed tourists</option>
+                <option value="cultural">Cultural tourists</option>
+                <option value="nature">Nature tourists</option>
+                <option value="urban">Urban tourists</option>
+              </select>
+            </label>
+            <label>
+              City
+              <select value={planCity} onChange={(event) => setPlanCity(event.target.value)}>
+                <option value="all">All cities</option>
+                {cityOptions.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Stops
+              <input type="number" min={1} max={8} value={planMaxStops} onChange={(event) => setPlanMaxStops(Number(event.target.value))} />
+            </label>
+            <label>
+              Demand
+              <select value={planMinimumTier} onChange={(event) => setPlanMinimumTier(event.target.value as PlanTier)}>
+                <option value="low">Low+</option>
+                <option value="emerging">Emerging+</option>
+                <option value="medium">Medium+</option>
+                <option value="high">High only</option>
+              </select>
+            </label>
+            <label className="checkbox-field">
+              <input type="checkbox" checked={planDiversifyCategories} onChange={(event) => setPlanDiversifyCategories(event.target.checked)} />
+              Diverse categories
+            </label>
           </div>
           <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
           <h2>Recent Recommendation Output</h2>
@@ -1312,6 +1390,12 @@ function TravelPlanPanel({ plan, destinations }: { plan: TravelPlan; destination
   return (
     <section className="travel-plan">
       <p>{plan.summary}</p>
+      <div className="plan-criteria">
+        <span>{plan.criteria.audience === "movement" ? "Movement demand" : `${plan.criteria.audience} profile`}</span>
+        <span>{plan.criteria.city === "all" ? "All cities" : plan.criteria.city}</span>
+        <span>{plan.criteria.minimumTier}+ demand</span>
+        <span>{plan.criteria.maxStops} stop limit</span>
+      </div>
       {plan.stops.map((stop) => {
         const destination = destinations.find((candidate) => candidate.id === stop.destinationId);
         if (!destination) {
@@ -1458,10 +1542,12 @@ function DestinationManager({ destinations, onChange }: { destinations: Destinat
 function RecommendationList({
   recommendations,
   destinations,
+  demand = [],
   compact = false,
 }: {
-  recommendations: { destinationId: string; score: number; reason: string; id: string }[];
+  recommendations: Recommendation[];
   destinations: Destination[];
+  demand?: DestinationDemand[];
   compact?: boolean;
 }) {
   if (recommendations.length === 0) {
@@ -1475,6 +1561,7 @@ function RecommendationList({
         if (!destination) {
           return null;
         }
+        const demandRow = demand.find((row) => row.destinationId === destination.id);
 
         return (
           <article className="recommendation-card" key={recommendation.id}>
@@ -1482,7 +1569,19 @@ function RecommendationList({
               <strong>{destination.name}</strong>
               <span>{destination.city}</span>
             </div>
+            <div className="recommendation-meta">
+              <span>{destination.category}</span>
+              <span>{demandRow ? `${demandRow.tier} demand` : "No demand signal"}</span>
+              <span>{demandRow ? `${demandRow.popularityScore}% movement score` : "0% movement score"}</span>
+            </div>
             <p>{recommendation.reason}</p>
+            <div className="score-breakdown" aria-label={`Score breakdown for ${destination.name}`}>
+              <span>Profile {recommendation.scoreBreakdown.profileFit}</span>
+              <span>Cluster {recommendation.scoreBreakdown.clusterPattern}</span>
+              <span>Movement {recommendation.scoreBreakdown.movementDemand}</span>
+              <span>Nearby {recommendation.scoreBreakdown.proximity}</span>
+              <span>New {recommendation.scoreBreakdown.unvisited}</span>
+            </div>
             <meter value={recommendation.score} min={0} max={100} />
             <small>Score {recommendation.score}</small>
           </article>

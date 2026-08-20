@@ -20,15 +20,17 @@ const FIRESTORE_COLLECTIONS = {
 export function loadData(): AppData {
   const raw = localStorage.getItem(DATA_KEY);
   if (!raw) {
-    saveData(initialData);
-    return initialData;
+    saveLocalData(initialData);
+    return normalizeAppData(initialData);
   }
 
   try {
-    return JSON.parse(raw) as AppData;
+    const data = normalizeAppData(JSON.parse(raw) as Partial<AppData>);
+    saveLocalData(data);
+    return data;
   } catch {
-    saveData(initialData);
-    return initialData;
+    saveLocalData(initialData);
+    return normalizeAppData(initialData);
   }
 }
 
@@ -56,6 +58,21 @@ export function createId(prefix: string) {
 export function publicUser(user: User) {
   const { password: _password, ...safeUser } = user;
   return safeUser;
+}
+
+export function normalizeAppData(value: Partial<AppData> | null | undefined): AppData {
+  const data = value ?? {};
+  const destinations = Array.isArray(data.destinations) && data.destinations.length > 0 ? data.destinations : initialData.destinations;
+
+  return {
+    users: asArray<User>(data.users),
+    consents: asArray<LocationConsent>(data.consents),
+    trips: asArray<TripSession>(data.trips),
+    points: asArray<MovementPoint>(data.points),
+    destinations: destinations.map(normalizeDestination),
+    analyses: asArray<Partial<AnalysisResult>>(data.analyses).map(normalizeAnalysis),
+    recommendations: asArray<Partial<Recommendation>>(data.recommendations).map(normalizeRecommendation),
+  };
 }
 
 export function resetData() {
@@ -93,7 +110,7 @@ export async function loadCloudData() {
     users.length > 0 || consents.length > 0 || trips.length > 0 || points.length > 0 || destinations.length > 0 || analyses.length > 0 || recommendations.length > 0;
 
   if (hasStructuredData) {
-    const data: AppData = {
+    const data = normalizeAppData({
       users: users.map((user) => ({ ...user, password: "" })),
       consents,
       trips,
@@ -101,13 +118,13 @@ export async function loadCloudData() {
       destinations,
       analyses,
       recommendations,
-    };
+    });
     saveLocalData(data);
     return data;
   }
 
   const legacySnapshot = await getDoc(doc(services.db, LEGACY_DATA_COLLECTION, LEGACY_DATA_DOCUMENT));
-  const data = legacySnapshot.exists() ? (legacySnapshot.data() as AppData) : initialData;
+  const data = normalizeAppData(legacySnapshot.exists() ? (legacySnapshot.data() as Partial<AppData>) : initialData);
 
   await saveCloudData(data);
   saveLocalData(data);
@@ -181,6 +198,72 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
 
 function saveLocalData(data: AppData) {
   localStorage.setItem(DATA_KEY, JSON.stringify(data));
+}
+
+function asArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+function normalizeDestination(destination: Destination): Destination {
+  const fallback = initialData.destinations.find((candidate) => candidate.id === destination.id);
+  return {
+    ...destination,
+    averageVisitMinutes: Number.isFinite(destination.averageVisitMinutes) ? destination.averageVisitMinutes : fallback?.averageVisitMinutes ?? 60,
+  };
+}
+
+function normalizeAnalysis(analysis: Partial<AnalysisResult>): AnalysisResult {
+  return {
+    tripId: analysis.tripId ?? "",
+    userId: analysis.userId ?? "",
+    cluster: analysis.cluster ?? 0,
+    profile: analysis.profile ?? "mixed",
+    classifier: "decision-tree",
+    classificationConfidence: analysis.classificationConfidence ?? 0,
+    decisionTreeDepth: analysis.decisionTreeDepth ?? 0,
+    decisionRuleCount: analysis.decisionRuleCount ?? analysis.decisionPath?.length ?? 0,
+    decisionPath: analysis.decisionPath ?? [],
+    silhouetteScore: analysis.silhouetteScore ?? 0,
+    clusterDistance: analysis.clusterDistance ?? 0,
+    clusterLabel: analysis.clusterLabel ?? "Unlabelled movement cluster",
+    clusterCentroid: {
+      cultural: analysis.clusterCentroid?.cultural ?? 0,
+      nature: analysis.clusterCentroid?.nature ?? 0,
+      urban: analysis.clusterCentroid?.urban ?? 0,
+      heritage: analysis.clusterCentroid?.heritage ?? 0,
+      food: analysis.clusterCentroid?.food ?? 0,
+      coastal: analysis.clusterCentroid?.coastal ?? 0,
+    },
+    categoryCounts: {
+      cultural: analysis.categoryCounts?.cultural ?? 0,
+      nature: analysis.categoryCounts?.nature ?? 0,
+      urban: analysis.categoryCounts?.urban ?? 0,
+      heritage: analysis.categoryCounts?.heritage ?? 0,
+      food: analysis.categoryCounts?.food ?? 0,
+      coastal: analysis.categoryCounts?.coastal ?? 0,
+    },
+    dataPointCount: analysis.dataPointCount ?? 0,
+    method: "k-means",
+    generatedAt: analysis.generatedAt ?? new Date().toISOString(),
+  };
+}
+
+function normalizeRecommendation(recommendation: Partial<Recommendation>): Recommendation {
+  return {
+    id: recommendation.id ?? createId("recommendation"),
+    userId: recommendation.userId ?? "",
+    destinationId: recommendation.destinationId ?? "",
+    score: recommendation.score ?? 0,
+    scoreBreakdown: {
+      profileFit: recommendation.scoreBreakdown?.profileFit ?? 0,
+      clusterPattern: recommendation.scoreBreakdown?.clusterPattern ?? 0,
+      movementDemand: recommendation.scoreBreakdown?.movementDemand ?? 0,
+      proximity: recommendation.scoreBreakdown?.proximity ?? 0,
+      unvisited: recommendation.scoreBreakdown?.unvisited ?? 0,
+    },
+    reason: recommendation.reason ?? "Recommendation restored from older prototype data.",
+    generatedAt: recommendation.generatedAt ?? new Date().toISOString(),
+  };
 }
 
 function cleanFirestoreData<T>(value: T) {

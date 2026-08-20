@@ -1,6 +1,6 @@
 # Tourist Movement Monitoring
 
-Prototype web application for consent-based tourist movement tracking, route visualization, administrator monitoring, and explainable travel recommendation.
+Prototype web application for consent-based tourist movement tracking, route visualization, administrator monitoring, configurable movement-based travel planning, and explainable travel recommendation.
 
 The current implementation runs locally with browser storage so the main project flow is usable without Firebase credentials. The data shape is ready to move into Firebase Authentication and Firestore once the Firebase project is created.
 
