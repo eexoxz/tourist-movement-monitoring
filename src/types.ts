@@ -18,6 +18,7 @@ export type User = {
   email: string;
   password: string;
   role: UserRole;
+  expectedProfile?: TouristProfile;
   createdAt: string;
 };
 
@@ -64,11 +65,25 @@ export type AnalysisResult = {
   userId: string;
   cluster: number;
   profile: TouristProfile;
+  classifier: "decision-tree";
+  classificationConfidence: number;
+  decisionPath: string[];
   silhouetteScore: number;
   categoryCounts: Record<DestinationCategory, number>;
   dataPointCount: number;
   method: "k-means";
   generatedAt: string;
+};
+
+export type AiEvaluation = {
+  generatedAt: string;
+  labelledRecordCount: number;
+  correctClassificationCount: number;
+  classificationAccuracy: number;
+  averageSilhouetteScore: number;
+  validClusteredRecordCount: number;
+  insufficientTripCount: number;
+  confusionMatrix: Record<TouristProfile, Record<TouristProfile, number>>;
 };
 
 export type Recommendation = {

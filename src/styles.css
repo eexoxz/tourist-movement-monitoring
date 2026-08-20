@@ -610,6 +610,43 @@ textarea {
   color: #657181;
 }
 
+.decision-path {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: #4b5563;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.matrix-table {
+  display: grid;
+  grid-template-columns: 120px repeat(4, minmax(90px, 1fr));
+  overflow-x: auto;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+}
+
+.matrix-table > * {
+  min-width: 90px;
+  padding: 10px;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #172033;
+  background: #ffffff;
+  text-align: center;
+}
+
+.matrix-table > strong {
+  background: #f1f5f9;
+  font-size: 0.82rem;
+}
+
+.matrix-table > span {
+  font-weight: 800;
+}
+
 .card-actions,
 .form-heading {
   display: flex;
@@ -671,8 +708,14 @@ textarea {
   .recommendation-list,
   .analysis-grid,
   .action-row,
-  .field-pair {
+  .field-pair,
+  .page-header {
     grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    display: grid;
+    align-items: start;
   }
 
   .page-header h1,

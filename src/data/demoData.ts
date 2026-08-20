@@ -12,6 +12,7 @@ export const initialData: AppData = {
       email: "tourist@example.com",
       password: "tourist123",
       role: "tourist",
+      expectedProfile: "cultural",
       createdAt: hoursAgo(120),
     },
     {
@@ -28,6 +29,7 @@ export const initialData: AppData = {
       email: "nature@example.com",
       password: "nature123",
       role: "tourist",
+      expectedProfile: "nature",
       createdAt: hoursAgo(96),
     },
   ],

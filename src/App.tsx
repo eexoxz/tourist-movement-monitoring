@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
   Compass,
@@ -22,7 +22,7 @@ import { MapView } from "./components/MapView";
 import type { AppData, Destination, DestinationCategory, LocationConsent, MovementPoint, TripSession, User, UserRole } from "./types";
 import { clearSession, createId, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
-import { refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
+import { evaluateAiOutput, refreshAllRecommendations, refreshAnalysis } from "./services/analytics";
 
 type View = "overview" | "tracking" | "history" | "recommendations" | "dashboard" | "records" | "destinations" | "ai";
 
@@ -547,6 +547,7 @@ function TouristWorkspace({
           ["Trips", userTrips.length.toString()],
           ["Movement points", tripPoints.length.toString()],
           ["Tourist profile", latestAnalysis?.profile ?? "Pending"],
+          ["Decision confidence", latestAnalysis ? `${Math.round(latestAnalysis.classificationConfidence * 100)}%` : "Pending"],
           ["Recommendations", recommendations.length.toString()],
         ]}
       />
@@ -581,6 +582,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
   const visibleTrips = selectedTouristId === "all" ? data.trips : data.trips.filter((trip) => trip.userId === selectedTouristId);
   const visibleTripIds = new Set(visibleTrips.map((trip) => trip.id));
   const allPoints = data.points.filter((point) => visibleTripIds.has(point.tripId));
+  const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
 
   const addDestination = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -707,6 +709,14 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
           </button>
         }
       >
+        <MetricGrid
+          items={[
+            ["Clustered records", aiEvaluation.validClusteredRecordCount.toString()],
+            ["Labelled records", aiEvaluation.labelledRecordCount.toString()],
+            ["Decision accuracy", `${Math.round(aiEvaluation.classificationAccuracy * 100)}%`],
+            ["Avg silhouette", aiEvaluation.averageSilhouetteScore.toString()],
+          ]}
+        />
         <div className="analysis-grid">
           {data.analyses.map((analysis) => {
             const user = data.users.find((candidate) => candidate.id === analysis.userId);
@@ -716,13 +726,21 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: Vie
                 <h2>{user?.name ?? "Unknown tourist"}</h2>
                 <p>{analysis.profile} tourist profile</p>
                 <strong>Silhouette {analysis.silhouetteScore}</strong>
-                <small>{analysis.dataPointCount} points processed by {analysis.method}</small>
+                <small>
+                  {analysis.dataPointCount} points processed by {analysis.method} + {analysis.classifier}
+                </small>
+                <ul className="decision-path">
+                  {analysis.decisionPath.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ul>
                 <CategoryBars values={analysis.categoryCounts} />
               </article>
             );
           })}
           {data.analyses.length === 0 && <EmptyState text="AI analysis appears after a tourist completes a trip with at least two movement points." />}
         </div>
+        <ConfusionMatrix values={aiEvaluation.confusionMatrix} />
       </Page>
     );
   }
@@ -1000,6 +1018,30 @@ function CategoryBars({ values }: { values: Record<string, number> }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function ConfusionMatrix({ values }: { values: Record<string, Record<string, number>> }) {
+  const profiles = ["cultural", "nature", "urban", "mixed"];
+
+  return (
+    <section className="panel">
+      <h2>Decision Tree Test Matrix</h2>
+      <div className="matrix-table" role="table" aria-label="Decision Tree confusion matrix">
+        <span />
+        {profiles.map((profile) => (
+          <strong key={profile}>Predicted {profile}</strong>
+        ))}
+        {profiles.map((actual) => (
+          <Fragment key={actual}>
+            <strong key={`${actual}-label`}>Actual {actual}</strong>
+            {profiles.map((predicted) => (
+              <span key={`${actual}-${predicted}`}>{values[actual]?.[predicted] ?? 0}</span>
+            ))}
+          </Fragment>
+        ))}
+      </div>
+    </section>
   );
 }
 
