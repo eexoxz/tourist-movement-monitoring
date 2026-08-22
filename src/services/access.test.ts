@@ -14,8 +14,9 @@ describe("access service", () => {
   });
 
   it("keeps administrator users out of tourist-only tracking views", () => {
-    expect(getAllowedViewsForRole("admin")).toEqual(["dashboard", "records", "destinations", "ai"]);
+    expect(getAllowedViewsForRole("admin")).toEqual(["dashboard", "destinations"]);
     expect(canAccessView("admin", "tracking")).toBe(false);
+    expect(coerceViewForRole("admin", "records")).toBe("dashboard");
     expect(coerceViewForRole("admin", "history")).toBe("dashboard");
   });
 });

@@ -2,8 +2,19 @@
   color-scheme: light;
   font-family:
     "Plus Jakarta Sans", Manrope, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #172033;
-  background: #f6f3eb;
+  --ink: #172033;
+  --muted: #596575;
+  --surface: #fffdf8;
+  --canvas: #f7f4ed;
+  --line: #e4ded1;
+  --teal: #0f766e;
+  --teal-dark: #064e3b;
+  --mint: #e6fbf4;
+  --coral: #e85d75;
+  --coral-soft: #ffe7ec;
+  --sun: #f6b73c;
+  color: var(--ink);
+  background: var(--canvas);
 }
 
 * {
@@ -47,8 +58,8 @@ button:disabled {
   min-height: 100vh;
   background:
     linear-gradient(125deg, rgba(15, 118, 110, 0.08), transparent 34%),
-    linear-gradient(315deg, rgba(245, 158, 11, 0.1), transparent 28%),
-    #f6f3eb;
+    linear-gradient(315deg, rgba(232, 93, 117, 0.1), transparent 28%),
+    var(--canvas);
 }
 
 .sidebar {
@@ -77,7 +88,7 @@ button:disabled {
   height: 44px;
   border-radius: 8px;
   color: #ffffff;
-  background: linear-gradient(135deg, #0f766e, #f59e0b);
+  background: linear-gradient(135deg, var(--teal), var(--coral));
 }
 
 .brand strong,
@@ -226,16 +237,16 @@ button:disabled {
   gap: 14px;
   align-items: start;
   padding: 18px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid #b7efe6;
   border-radius: 8px;
-  background: #f0fdf4;
+  background: linear-gradient(135deg, var(--mint), #fff8f9);
 }
 
 .tracking-status-card span {
   min-width: 102px;
   padding: 7px 10px;
   border-radius: 999px;
-  color: #064e3b;
+  color: var(--teal-dark);
   background: #ccfbf1;
   font-size: 0.78rem;
   font-weight: 900;
@@ -318,6 +329,48 @@ button:disabled {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
+}
+
+.recommendation-page {
+  display: grid;
+  gap: 16px;
+}
+
+.recommendation-profile-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(120px, 0.28fr);
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #b7efe6;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.1), transparent 54%),
+    linear-gradient(315deg, rgba(232, 93, 117, 0.11), transparent 44%),
+    #ffffff;
+}
+
+.recommendation-profile-card div {
+  display: grid;
+  gap: 5px;
+}
+
+.recommendation-profile-card span {
+  color: #4d6b5d;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.recommendation-profile-card strong {
+  color: #111827;
+  font-size: 1.24rem;
+}
+
+.recommendation-profile-card p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.5;
 }
 
 .profile-setup {
@@ -776,13 +829,21 @@ button:disabled {
 .primary-action {
   border: 0;
   color: #ffffff;
-  background: #0f766e;
+  background: linear-gradient(135deg, var(--teal), #0b8f81);
+  box-shadow: 0 10px 20px rgba(15, 118, 110, 0.16);
 }
 
 .secondary-action {
   border: 1px solid #d8d0bf;
   color: #172033;
   background: #ffffff;
+}
+
+.secondary-action:hover,
+.map-current-button:hover {
+  border-color: rgba(232, 93, 117, 0.42);
+  color: var(--teal-dark);
+  background: var(--coral-soft);
 }
 
 .wide {
@@ -867,8 +928,8 @@ button:disabled {
 }
 
 .destination-card small.visited-tag {
-  color: #7c2d12;
-  background: #ffedd5;
+  color: #9f1239;
+  background: var(--coral-soft);
 }
 
 .destination-card small.demand-tag {
@@ -963,7 +1024,7 @@ button:disabled {
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  color: #064e3b;
+  color: var(--teal-dark);
   background: #ccfbf1;
   font-weight: 900;
 }
@@ -1043,7 +1104,7 @@ button:disabled {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #14b8a6, #f59e0b);
+  background: linear-gradient(90deg, #14b8a6, var(--coral));
 }
 
 .travel-plan {
@@ -1112,6 +1173,107 @@ button:disabled {
   font-size: 0.76rem;
   font-weight: 800;
   text-align: center;
+}
+
+.recommendation-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal-card {
+  width: min(760px, 100%);
+  max-height: min(92vh, 900px);
+  overflow: auto;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+}
+
+.destination-modal {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.modal-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-heading span {
+  color: #4d6b5d;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.modal-heading h2 {
+  margin: 4px 0 0;
+  font-size: 1.6rem;
+}
+
+.destination-modal > p,
+.recommendation-reason p {
+  margin: 0;
+  color: #596575;
+  line-height: 1.55;
+}
+
+.destination-modal .map-frame {
+  min-height: 300px;
+}
+
+.destination-modal .map-view {
+  height: 300px;
+}
+
+.destination-modal dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.destination-modal dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.destination-modal dt {
+  color: #657181;
+}
+
+.destination-modal dd {
+  margin: 0;
+  color: #172033;
+  font-weight: 800;
+  text-align: right;
+}
+
+.recommendation-reason {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f0fdf4;
 }
 
 meter {
@@ -1196,7 +1358,7 @@ meter {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #0f766e;
+  background: linear-gradient(90deg, var(--teal), #14b8a6);
 }
 
 .bar-row strong {
@@ -1236,7 +1398,7 @@ textarea {
   min-height: 100vh;
   padding: 24px;
   background:
-    linear-gradient(135deg, rgba(15, 118, 110, 0.78), rgba(245, 158, 11, 0.26)),
+    linear-gradient(135deg, rgba(15, 118, 110, 0.8), rgba(232, 93, 117, 0.28)),
     url("https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=1600&q=80") center/cover;
 }
 
@@ -1291,9 +1453,42 @@ textarea {
 }
 
 .segmented-control button.active {
-  color: #0f172a;
+  color: var(--teal-dark);
   background: #ffffff;
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.09);
+}
+
+.admin-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(760px, 100%);
+}
+
+.admin-tab-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-tab-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+}
+
+.admin-tab-heading h2,
+.admin-tab-heading p {
+  margin: 0;
+}
+
+.admin-tab-heading p {
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .role-switch {
@@ -1450,6 +1645,15 @@ textarea {
   flex-wrap: wrap;
 }
 
+.admin-filter-toolbar {
+  justify-content: flex-start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+}
+
 .toolbar-input {
   min-height: 44px;
   max-width: 155px;
@@ -1585,6 +1789,7 @@ textarea {
   .trip-summary > div,
   .recommendation-list,
   .analysis-grid,
+  .admin-tabs,
   .action-row,
   .field-pair,
   .alert-card,
@@ -1661,7 +1866,8 @@ textarea {
 
   .tracking-status-card,
   .mobile-action-row,
-  .trip-preview-stats {
+  .trip-preview-stats,
+  .recommendation-profile-card {
     grid-template-columns: 1fr;
   }
 
@@ -1674,6 +1880,29 @@ textarea {
 
   .recommendation-card .score-breakdown {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recommendation-card-footer,
+  .destination-modal dl div,
+  .admin-tab-heading {
+    display: grid;
+    justify-items: start;
+  }
+
+  .admin-filter-toolbar .toolbar-select,
+  .admin-filter-toolbar .toolbar-input,
+  .admin-filter-toolbar .secondary-action {
+    width: 100%;
+    max-width: none;
+  }
+
+  .modal-overlay {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .modal-card {
+    max-height: 90vh;
   }
 
   .page-header {

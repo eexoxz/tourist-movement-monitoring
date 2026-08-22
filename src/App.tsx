@@ -2,7 +2,6 @@ import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState } from "
 import {
   BarChart3,
   Compass,
-  Database,
   Download,
   Eye,
   EyeOff,
@@ -87,6 +86,7 @@ import {
 const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
+type AdminDashboardTab = "overview" | "records" | "ai";
 type AuthResult = { error?: string; message?: string };
 type RememberedLogin = { email: string; password: string };
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
@@ -404,9 +404,7 @@ function App() {
     currentUser.role === "admin"
       ? ([
           ["dashboard", "Dashboard", BarChart3],
-          ["records", "Records", Database],
           ["destinations", "Destinations", MapPinned],
-          ["ai", "AI Analysis", Sparkles],
         ] as const)
       : ([
           ["overview", "Home", Compass],
@@ -706,6 +704,7 @@ function TouristWorkspace({
   const [isLiveTracking, setIsLiveTracking] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
+  const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
   const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? userTrips[0];
@@ -717,6 +716,7 @@ function TouristWorkspace({
   const recentTrip = recentTrips[0];
   const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
+  const selectedRecommendation = recommendations.find((recommendation) => recommendation.id === selectedRecommendationId) ?? null;
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
   const displayName = getDisplayName(user);
@@ -1059,6 +1059,8 @@ function TouristWorkspace({
   }
 
   if (view === "recommendations") {
+    const topRecommendations = recommendations.slice(0, 3);
+
     return (
       <Page
         title="Places To Visit"
@@ -1070,10 +1072,36 @@ function TouristWorkspace({
           </button>
         }
       >
-        <div className="two-column">
-          <RecommendationList recommendations={recommendations} destinations={data.destinations} demand={destinationDemand} />
-          <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 6)} destinations={data.destinations} />
-        </div>
+        <section className="recommendation-page">
+          <section className="recommendation-profile-card">
+            <div>
+              <span>Latest travel category</span>
+              <strong>{latestAnalysis ? `${latestAnalysis.profile} Tourist` : "Learning from your trips"}</strong>
+            </div>
+            <div>
+              <span>Cluster</span>
+              <strong>{latestAnalysis ? `Cluster ${latestAnalysis.cluster}` : "Pending"}</strong>
+            </div>
+            <p>
+              {latestAnalysis
+                ? `Your recent route pattern is closest to ${latestAnalysis.clusterLabel}. Recommendations prioritise matching places you have not visited.`
+                : "Complete a trip with at least two movement points to unlock personalised recommendations. Basic suggestions may still appear from your preferences and nearby movement demand."}
+            </p>
+          </section>
+
+          <RecommendationList recommendations={topRecommendations} destinations={data.destinations} demand={destinationDemand} onSelect={setSelectedRecommendationId} />
+
+          <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
+        </section>
+
+        {selectedRecommendation && (
+          <DestinationModal
+            recommendation={selectedRecommendation}
+            destination={data.destinations.find((destination) => destination.id === selectedRecommendation.destinationId) ?? null}
+            demand={destinationDemand.find((row) => row.destinationId === selectedRecommendation.destinationId)}
+            onClose={() => setSelectedRecommendationId(null)}
+          />
+        )}
       </Page>
     );
   }
@@ -1339,6 +1367,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
   const [selectedTripId, setSelectedTripId] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [adminTab, setAdminTab] = useState<AdminDashboardTab>("overview");
   const [planAudience, setPlanAudience] = useState<PlanAudience>("movement");
   const [planCity, setPlanCity] = useState("all");
   const [planMaxStops, setPlanMaxStops] = useState(5);
@@ -1445,79 +1474,72 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
     URL.revokeObjectURL(url);
   };
 
-  if (view === "records") {
-    return (
-      <Page
-        title="Movement Records"
-        eyebrow="Administrator workspace"
-        actions={
-          <div className="filter-toolbar">
-            <select
-              className="toolbar-select"
-              value={selectedTouristId}
-              onChange={(event) => {
-                setSelectedTouristId(event.target.value);
-                setSelectedTripId("all");
-              }}
-            >
-              <option value="all">All tourists</option>
-              {tourists.map((tourist) => (
-                <option key={tourist.id} value={tourist.id}>
-                  {tourist.name}
-                </option>
-              ))}
-            </select>
-            <select className="toolbar-select" value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
-              <option value="all">All trips</option>
-              {tripOptions.map((trip) => (
-                <option key={trip.id} value={trip.id}>
-                  {formatDateTime(trip.startedAt)} - {trip.status}
-                </option>
-              ))}
-            </select>
-            <input className="toolbar-input" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} aria-label="From date" />
-            <input className="toolbar-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} aria-label="To date" />
-            <button className="secondary-action" onClick={resetRecordFilters} disabled={!hasRecordFilters}>
-              <RotateCcw size={18} />
-              Reset
-            </button>
-            <button className="secondary-action" onClick={exportFilteredRecords} disabled={movementRecords.length === 0}>
-              <Download size={18} />
-              CSV
-            </button>
-          </div>
-        }
-      >
-        <MetricGrid
-          items={[
-            ["Filtered records", movementRecords.length.toString()],
-            ["Trips matched", filteredTripCount.toString()],
-            ["Tourists shown", filteredTouristCount.toString()],
-            ["Date range", fromDate || toDate ? "Custom" : "All"],
-          ]}
-        />
-        <div className="two-column">
-          <MovementMap points={allPoints} destinations={data.destinations} />
-          <section className="list-panel">
-            {movementRecords.map((record) => {
-              return (
-                <article className="record-card" key={record.point.id}>
-                  <div>
-                    <strong>{record.tourist?.name ?? "Unknown tourist"}</strong>
-                    <span>{formatDateTime(record.point.recordedAt)}</span>
-                  </div>
-                  <p>
-                    {record.point.latitude.toFixed(4)}, {record.point.longitude.toFixed(4)} near {record.nearestDestinationName}
-                  </p>
-                </article>
-              );
-            })}
-            {allPoints.length === 0 && <EmptyState text="No movement records match this filter." />}
-          </section>
-        </div>
-      </Page>
-    );
-  }
+  const movementRecordsPanel = (
+    <div className="admin-tab-panel">
+      <div className="filter-toolbar admin-filter-toolbar">
+        <select
+          className="toolbar-select"
+          value={selectedTouristId}
+          onChange={(event) => {
+            setSelectedTouristId(event.target.value);
+            setSelectedTripId("all");
+          }}
+        >
+          <option value="all">All tourists</option>
+          {tourists.map((tourist) => (
+            <option key={tourist.id} value={tourist.id}>
+              {tourist.name}
+            </option>
+          ))}
+        </select>
+        <select className="toolbar-select" value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
+          <option value="all">All trips</option>
+          {tripOptions.map((trip) => (
+            <option key={trip.id} value={trip.id}>
+              {formatDateTime(trip.startedAt)} - {trip.status}
+            </option>
+          ))}
+        </select>
+        <input className="toolbar-input" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} aria-label="From date" />
+        <input className="toolbar-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} aria-label="To date" />
+        <button className="secondary-action" onClick={resetRecordFilters} disabled={!hasRecordFilters}>
+          <RotateCcw size={18} />
+          Reset
+        </button>
+        <button className="secondary-action" onClick={exportFilteredRecords} disabled={movementRecords.length === 0}>
+          <Download size={18} />
+          CSV
+        </button>
+      </div>
+      <MetricGrid
+        items={[
+          ["Filtered records", movementRecords.length.toString()],
+          ["Trips matched", filteredTripCount.toString()],
+          ["Tourists shown", filteredTouristCount.toString()],
+          ["Date range", fromDate || toDate ? "Custom" : "All"],
+        ]}
+      />
+      <div className="two-column">
+        <MovementMap points={allPoints} destinations={data.destinations} />
+        <section className="list-panel">
+          {movementRecords.map((record) => {
+            return (
+              <article className="record-card" key={record.point.id}>
+                <div>
+                  <strong>{record.tourist?.name ?? "Unknown tourist"}</strong>
+                  <span>{formatDateTime(record.point.recordedAt)}</span>
+                </div>
+                <p>
+                  {record.point.latitude.toFixed(4)}, {record.point.longitude.toFixed(4)} near {record.nearestDestinationName}
+                </p>
+              </article>
+            );
+          })}
+          {allPoints.length === 0 && <EmptyState text="No movement records match this filter." />}
+        </section>
+      </div>
+    </div>
+  );
 
   if (view === "destinations") {
     return (
@@ -1571,63 +1593,62 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
     );
   }
 
-  if (view === "ai") {
-    return (
-      <Page
-        title="AI Analysis"
-        eyebrow="Administrator workspace"
-        actions={
-          <button className="secondary-action" onClick={recomputeAi}>
-            <RotateCcw size={18} />
-            Recompute
-          </button>
-        }
-      >
-        <MetricGrid
-          items={[
-            ["Clustered records", aiEvaluation.validClusteredRecordCount.toString()],
-            ["Labelled records", aiEvaluation.labelledRecordCount.toString()],
-            ["Decision accuracy", `${Math.round(aiEvaluation.classificationAccuracy * 100)}%`],
-            ["Avg silhouette", aiEvaluation.averageSilhouetteScore.toString()],
-          ]}
-        />
-        <div className="analysis-grid">
-          {data.analyses.map((analysis) => {
-            const user = data.users.find((candidate) => candidate.id === analysis.userId);
-            return (
-              <article className="analysis-card" key={`${analysis.tripId}-${analysis.generatedAt}`}>
-                <div className="cluster-badge">Cluster {analysis.cluster + 1}</div>
-                <h2>{user?.name ?? "Unknown tourist"}</h2>
-                <p>{analysis.profile} tourist profile</p>
-                <strong>{analysis.clusterLabel}</strong>
-                <small>
-                  {analysis.dataPointCount} points processed by {analysis.method} + {analysis.classifier}
-                </small>
-                <div className="tree-metrics">
-                  <span>Silhouette {analysis.silhouetteScore}</span>
-                  <span>Centroid distance {analysis.clusterDistance}</span>
-                  <span>Confidence {Math.round(analysis.classificationConfidence * 100)}%</span>
-                  <span>Depth {analysis.decisionTreeDepth}</span>
-                  <span>{analysis.decisionRuleCount} rules</span>
-                </div>
-                <ul className="decision-path">
-                  {analysis.decisionPath.map((step) => (
-                    <li key={step}>{step}</li>
-                  ))}
-                </ul>
-                <h3>K-Means Centroid</h3>
-                <CategoryBars values={analysis.clusterCentroid} />
-                <h3>Trip Category Counts</h3>
-                <CategoryBars values={analysis.categoryCounts} />
-              </article>
-            );
-          })}
-          {data.analyses.length === 0 && <EmptyState text="AI analysis appears after a tourist completes a trip with at least two movement points." />}
+  const aiResultsPanel = (
+    <div className="admin-tab-panel">
+      <div className="admin-tab-heading">
+        <div>
+          <h2>AI Results</h2>
+          <p>K-Means grouping and Decision Tree classification used to support recommendation results.</p>
         </div>
-        <ConfusionMatrix values={aiEvaluation.confusionMatrix} />
-      </Page>
-    );
-  }
+        <button className="secondary-action" onClick={recomputeAi}>
+          <RotateCcw size={18} />
+          Recompute
+        </button>
+      </div>
+      <MetricGrid
+        items={[
+          ["Clustered records", aiEvaluation.validClusteredRecordCount.toString()],
+          ["Labelled records", aiEvaluation.labelledRecordCount.toString()],
+          ["Decision accuracy", `${Math.round(aiEvaluation.classificationAccuracy * 100)}%`],
+          ["Avg silhouette", aiEvaluation.averageSilhouetteScore.toString()],
+        ]}
+      />
+      <div className="analysis-grid">
+        {data.analyses.map((analysis) => {
+          const user = data.users.find((candidate) => candidate.id === analysis.userId);
+          return (
+            <article className="analysis-card" key={`${analysis.tripId}-${analysis.generatedAt}`}>
+              <div className="cluster-badge">Cluster {analysis.cluster + 1}</div>
+              <h2>{user?.name ?? "Unknown tourist"}</h2>
+              <p>{analysis.profile} tourist profile</p>
+              <strong>{analysis.clusterLabel}</strong>
+              <small>
+                {analysis.dataPointCount} points processed by {analysis.method} + {analysis.classifier}
+              </small>
+              <div className="tree-metrics">
+                <span>Silhouette {analysis.silhouetteScore}</span>
+                <span>Centroid distance {analysis.clusterDistance}</span>
+                <span>Confidence {Math.round(analysis.classificationConfidence * 100)}%</span>
+                <span>Depth {analysis.decisionTreeDepth}</span>
+                <span>{analysis.decisionRuleCount} rules</span>
+              </div>
+              <ul className="decision-path">
+                {analysis.decisionPath.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ul>
+              <h3>K-Means Centroid</h3>
+              <CategoryBars values={analysis.clusterCentroid} />
+              <h3>Trip Category Counts</h3>
+              <CategoryBars values={analysis.categoryCounts} />
+            </article>
+          );
+        })}
+        {data.analyses.length === 0 && <EmptyState text="AI analysis appears after a tourist completes a trip with at least two movement points." />}
+      </div>
+      <ConfusionMatrix values={aiEvaluation.confusionMatrix} />
+    </div>
+  );
 
   return (
     <Page
@@ -1640,89 +1661,105 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
         </button>
       }
     >
-      <MovementPulseHero
-        mode="admin"
-        demand={destinationDemand}
-        destinations={data.destinations}
-        profile={`${tourists.length} tourist profiles`}
-        pointCount={summary.movementPointCount}
-        plan={travelPlan}
-      />
-      <MetricGrid
-        items={[
-          ["Tourists", tourists.length.toString()],
-          ["Consented", summary.consentedTouristCount.toString()],
-          ["Completed trips", summary.completedTripCount.toString()],
-          ["Movement points", summary.movementPointCount.toString()],
-          ["Destinations", summary.destinationCount.toString()],
-          ["Alerts", movementAlerts.length.toString()],
-        ]}
-      />
-      <div className="two-column">
-        <MovementMap points={allPoints} destinations={data.destinations} />
-        <section className="panel">
-          {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
-          <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
-          <h2>Destination Coverage</h2>
-          <CategoryBars values={categoryCoverage} />
-          <h2>Movement Trend</h2>
-          <CategoryBars values={movementTrend} />
-          <h2>Tourist Profiles</h2>
-          <CategoryBars values={profileDistribution} />
-          <h2>Movement Demand</h2>
-          <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
-          <div className="section-heading">
-            <h2>Travel Plan Signal</h2>
-            <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
-              <Download size={18} />
-              CSV
-            </button>
-          </div>
-          <div className="plan-builder" aria-label="Travel plan controls">
-            <label>
-              Audience
-              <select value={planAudience} onChange={(event) => setPlanAudience(event.target.value as PlanAudience)}>
-                <option value="movement">Overall movement</option>
-                <option value="mixed">Mixed tourists</option>
-                <option value="cultural">Cultural tourists</option>
-                <option value="nature">Nature tourists</option>
-                <option value="urban">Urban tourists</option>
-              </select>
-            </label>
-            <label>
-              City
-              <select value={planCity} onChange={(event) => setPlanCity(event.target.value)}>
-                <option value="all">All cities</option>
-                {cityOptions.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Stops
-              <input type="number" min={1} max={8} value={planMaxStops} onChange={(event) => setPlanMaxStops(Number(event.target.value))} />
-            </label>
-            <label>
-              Demand
-              <select value={planMinimumTier} onChange={(event) => setPlanMinimumTier(event.target.value as PlanTier)}>
-                <option value="low">Low+</option>
-                <option value="emerging">Emerging+</option>
-                <option value="medium">Medium+</option>
-                <option value="high">High only</option>
-              </select>
-            </label>
-            <label className="checkbox-field">
-              <input type="checkbox" checked={planDiversifyCategories} onChange={(event) => setPlanDiversifyCategories(event.target.checked)} />
-              Diverse categories
-            </label>
-          </div>
-          <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
-          <h2>Recent Recommendation Output</h2>
-          <RecommendationList recommendations={data.recommendations.slice(0, 4)} destinations={data.destinations} compact />
-        </section>
+      <div className="segmented-control admin-tabs" aria-label="Administrator dashboard sections">
+        <button className={adminTab === "overview" ? "active" : ""} type="button" onClick={() => setAdminTab("overview")}>
+          Overview
+        </button>
+        <button className={adminTab === "records" ? "active" : ""} type="button" onClick={() => setAdminTab("records")}>
+          Movement Records
+        </button>
+        <button className={adminTab === "ai" ? "active" : ""} type="button" onClick={() => setAdminTab("ai")}>
+          AI Results
+        </button>
       </div>
+
+      {adminTab === "overview" && (
+        <div className="admin-tab-panel">
+          <MovementPulseHero
+            mode="admin"
+            demand={destinationDemand}
+            destinations={data.destinations}
+            profile={`${tourists.length} tourist profiles`}
+            pointCount={summary.movementPointCount}
+            plan={travelPlan}
+          />
+          <MetricGrid
+            items={[
+              ["Tourists", tourists.length.toString()],
+              ["Consented", summary.consentedTouristCount.toString()],
+              ["Completed trips", summary.completedTripCount.toString()],
+              ["Movement points", summary.movementPointCount.toString()],
+              ["Destinations", summary.destinationCount.toString()],
+              ["Alerts", movementAlerts.length.toString()],
+            ]}
+          />
+          <div className="two-column">
+            <MovementMap points={allPoints} destinations={data.destinations} />
+            <section className="panel">
+              {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
+              <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
+              <h2>Destination Coverage</h2>
+              <CategoryBars values={categoryCoverage} />
+              <h2>Movement Trend</h2>
+              <CategoryBars values={movementTrend} />
+              <h2>Movement Demand</h2>
+              <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
+              <div className="section-heading">
+                <h2>Travel Plan Signal</h2>
+                <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
+                  <Download size={18} />
+                  CSV
+                </button>
+              </div>
+              <div className="plan-builder" aria-label="Travel plan controls">
+                <label>
+                  Audience
+                  <select value={planAudience} onChange={(event) => setPlanAudience(event.target.value as PlanAudience)}>
+                    <option value="movement">Overall movement</option>
+                    <option value="mixed">Mixed tourists</option>
+                    <option value="cultural">Cultural tourists</option>
+                    <option value="nature">Nature tourists</option>
+                    <option value="urban">Urban tourists</option>
+                  </select>
+                </label>
+                <label>
+                  City
+                  <select value={planCity} onChange={(event) => setPlanCity(event.target.value)}>
+                    <option value="all">All cities</option>
+                    {cityOptions.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Stops
+                  <input type="number" min={1} max={8} value={planMaxStops} onChange={(event) => setPlanMaxStops(Number(event.target.value))} />
+                </label>
+                <label>
+                  Demand
+                  <select value={planMinimumTier} onChange={(event) => setPlanMinimumTier(event.target.value as PlanTier)}>
+                    <option value="low">Low+</option>
+                    <option value="emerging">Emerging+</option>
+                    <option value="medium">Medium+</option>
+                    <option value="high">High only</option>
+                  </select>
+                </label>
+                <label className="checkbox-field">
+                  <input type="checkbox" checked={planDiversifyCategories} onChange={(event) => setPlanDiversifyCategories(event.target.checked)} />
+                  Diverse categories
+                </label>
+              </div>
+              <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
+              <h2>Recent Recommendation Output</h2>
+              <RecommendationList recommendations={data.recommendations.slice(0, 4)} destinations={data.destinations} compact />
+            </section>
+          </div>
+        </div>
+      )}
+      {adminTab === "records" && movementRecordsPanel}
+      {adminTab === "ai" && aiResultsPanel}
     </Page>
   );
 }
@@ -1944,6 +1981,60 @@ function DestinationDetail({ destination, demand }: { destination: Destination; 
         )}
       </dl>
     </section>
+  );
+}
+
+function DestinationModal({
+  recommendation,
+  destination,
+  demand,
+  onClose,
+}: {
+  recommendation: Recommendation;
+  destination: Destination | null;
+  demand?: DestinationDemand;
+  onClose: () => void;
+}) {
+  if (!destination) {
+    return null;
+  }
+
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={`${destination.name} details`}>
+      <section className="modal-card destination-modal">
+        <div className="modal-heading">
+          <div>
+            <span>{destination.category}</span>
+            <h2>{destination.name}</h2>
+          </div>
+          <button className="secondary-action icon-action" type="button" onClick={onClose} title="Close destination details">
+            <X size={18} />
+          </button>
+        </div>
+        <p>{destination.description}</p>
+        <MovementMap points={[]} destinations={[destination]} />
+        <dl>
+          <div>
+            <dt>Coordinates</dt>
+            <dd>
+              {destination.latitude.toFixed(4)}, {destination.longitude.toFixed(4)}
+            </dd>
+          </div>
+          <div>
+            <dt>Recommendation score</dt>
+            <dd>{recommendation.score}</dd>
+          </div>
+          <div>
+            <dt>Movement demand</dt>
+            <dd>{demand ? `${demand.tier} (${demand.popularityScore}%)` : "No signal yet"}</dd>
+          </div>
+        </dl>
+        <section className="recommendation-reason">
+          <strong>Why this place?</strong>
+          <p>{recommendation.reason}</p>
+        </section>
+      </section>
+    </div>
   );
 }
 
@@ -2177,14 +2268,16 @@ function RecommendationList({
   destinations,
   demand = [],
   compact = false,
+  onSelect,
 }: {
   recommendations: Recommendation[];
   destinations: Destination[];
   demand?: DestinationDemand[];
   compact?: boolean;
+  onSelect?: (recommendationId: string) => void;
 }) {
   if (recommendations.length === 0) {
-    return <EmptyState text="Complete a trip with movement points to generate recommendations." />;
+    return <EmptyState text="Complete another trip to unlock stronger personalised recommendations." />;
   }
 
   return (
@@ -2211,12 +2304,17 @@ function RecommendationList({
             <div className="score-breakdown" aria-label={`Score breakdown for ${destination.name}`}>
               <span>Profile {recommendation.scoreBreakdown.profileFit}</span>
               <span>Cluster {recommendation.scoreBreakdown.clusterPattern}</span>
-              <span>Movement {recommendation.scoreBreakdown.movementDemand}</span>
-              <span>Nearby {recommendation.scoreBreakdown.proximity}</span>
               <span>New {recommendation.scoreBreakdown.unvisited}</span>
             </div>
             <meter value={recommendation.score} min={0} max={100} />
-            <small>Score {recommendation.score}</small>
+            <div className="recommendation-card-footer">
+              <small>Score {recommendation.score}</small>
+              {onSelect && (
+                <button className="secondary-action compact-action" type="button" onClick={() => onSelect(recommendation.id)}>
+                  View Destination
+                </button>
+              )}
+            </div>
           </article>
         );
       })}

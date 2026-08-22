@@ -11,8 +11,8 @@ Tourist authentication -> consent-based trip tracking -> stored movement route -
 - [x] Keep the system as an academic prototype for selected Malaysian tourist locations.
 - [x] Support only two user roles: Tourist and Tourism Administrator.
 - [x] Use React, Firebase Authentication, Cloud Firestore, Browser Geolocation API, OpenStreetMap, Leaflet, K-Means and Decision Tree logic.
-- [ ] Keep the finished app to seven main pages only.
-- [ ] Prefer tabs, modals, expandable rows and side panels over extra pages.
+- [x] Keep the finished app to seven main pages only.
+- [x] Prefer tabs, modals, expandable rows and side panels over extra pages.
 - [ ] Remove or hide features that make the app look like a commercial tourism platform.
 
 Do not build:
@@ -39,7 +39,7 @@ Current alignment notes:
 - [x] Tourist tracking, trips, recommendations and profile setup exist.
 - [x] Administrator dashboard and destination management exist.
 - [x] Refine navigation so Tourist Home and Trip Tracking are one main page.
-- [ ] Refine administrator navigation so Dashboard contains Overview, Movement Records and AI Results as tabs.
+- [x] Refine administrator navigation so Dashboard contains Overview, Movement Records and AI Results as tabs.
 - [ ] Decide whether Profile should remain a main nav item or become a profile menu/panel to preserve the seven-page scope.
 
 ## Navigation And Access
@@ -54,7 +54,7 @@ Current alignment notes:
 - [ ] Wrong-role access redirects to the authorised home page.
 - [ ] Remove Tourist/Admin selector style from the login page in the final Firebase flow.
 - [x] Keep Tourist mobile navigation simple: Home, Trips, Recommendations, Profile menu.
-- [ ] Keep Administrator navigation simple: Dashboard, Destinations, Logout.
+- [x] Keep Administrator navigation simple: Dashboard, Destinations, Logout.
 
 ## Page 1: Login
 
@@ -143,13 +143,13 @@ Current alignment notes:
 - [x] Visited/unvisited logic exists.
 - [x] Destination information panel exists.
 - [x] Insufficient-data fallback exists.
-- [ ] Display only the top three recommended destinations.
-- [ ] Add profile section with latest Tourist Category, Cluster ID, analysis date and short category explanation.
-- [ ] Open destination details in a modal instead of another page/large dashboard panel.
-- [ ] Destination modal should show name, category, description, map marker, latitude and longitude.
-- [ ] Recommendation formula should be explainable as Profile Match + Cluster Pattern Match + Unvisited Priority.
-- [ ] Clearly label preference-based fallback suggestions as basic suggestions.
-- [ ] Ask the Tourist to complete another trip when data is insufficient.
+- [x] Display only the top three recommended destinations.
+- [x] Add profile section with latest Tourist Category, Cluster ID, analysis date and short category explanation.
+- [x] Open destination details in a modal instead of another page/large dashboard panel.
+- [x] Destination modal should show name, category, description, map marker, latitude and longitude.
+- [x] Recommendation formula should be explainable as Profile Match + Cluster Pattern Match + Unvisited Priority.
+- [x] Clearly label preference-based fallback suggestions as basic suggestions.
+- [x] Ask the Tourist to complete another trip when data is insufficient.
 
 ## Page 6: Tourism Administrator Dashboard
 
@@ -161,8 +161,8 @@ Current alignment notes:
 - [x] K-Means and Decision Tree outputs exist.
 - [x] Charts exist.
 - [x] Recent/filtered movement data exists.
-- [ ] Refactor admin into one dashboard route with tabs: Overview, Movement Records, AI Results.
-- [ ] Overview tab should show Total Tourists, Total completed trips, Total movement records and Total destinations.
+- [x] Refactor admin into one dashboard route with tabs: Overview, Movement Records, AI Results.
+- [x] Overview tab should show Total Tourists, Total completed trips, Total movement records and Total destinations.
 - [ ] Keep only one or two useful charts.
 - [ ] Add trips-over-time chart if not already clear enough.
 - [ ] Add Tourist Category distribution or destination-category visits chart.
@@ -216,7 +216,7 @@ Current alignment notes:
 - [ ] Simplify user-facing AI output so it is understandable to non-technical users.
 - [ ] K-Means input should clearly use Cultural, Nature, Urban proportions and unique destinations visited.
 - [ ] Decision Tree output should be Cultural Tourist, Nature Tourist, Urban Tourist or Mixed Tourist.
-- [ ] Recommendation output should be exactly top three unvisited destinations.
+- [x] Recommendation output should be exactly top three unvisited destinations.
 - [ ] Do not show unsupported personalised results when movement data is insufficient.
 - [ ] Clearly label prepared demo records as demonstration data.
 
