@@ -236,6 +236,17 @@ Current alignment notes:
 - [ ] Test Tourist flow at mobile width.
 - [ ] Test Chrome, Edge and Firefox.
 
+## Notification System
+
+- [x] Add reusable app-level toast notifications.
+- [x] Show pop-up feedback for login, registration and email verification errors.
+- [x] Show pop-up feedback for trip tracking, location permission, profile save and data deletion events.
+- [x] Show pop-up feedback for destination add, edit, delete and AI refresh actions.
+- [x] Keep inline messages where they help form accessibility and local context.
+- [ ] Audit every remaining failure path and connect it to the shared notification system.
+- [ ] Add retry buttons for recoverable Firebase and geolocation failures where useful.
+- [ ] Test notification placement on mobile tourist pages and desktop administrator pages.
+
 ## Required Demonstration Flow
 
 - [ ] Tourist registers a new account.

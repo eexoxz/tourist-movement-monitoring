@@ -88,6 +88,14 @@ type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 type AdminDashboardTab = "overview" | "records" | "ai";
 type AuthResult = { error?: string; message?: string };
+type NotificationTone = "success" | "error" | "info" | "warning";
+type AppNotification = {
+  id: string;
+  tone: NotificationTone;
+  title: string;
+  message?: string;
+};
+type NotifyFn = (notification: Omit<AppNotification, "id">) => void;
 type RememberedLogin = { email: string; password: string };
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
@@ -208,7 +216,16 @@ function App() {
   const [view, setView] = useState<AppView>("overview");
   const safeView = currentUser ? coerceViewForRole(currentUser.role, view) : view;
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const watchId = useRef<number | null>(null);
+
+  const notify: NotifyFn = (notification) => {
+    setNotifications((current) => [...current.slice(-2), { ...notification, id: createId("notification") }]);
+  };
+
+  const dismissNotification = (id: string) => {
+    setNotifications((current) => current.filter((notification) => notification.id !== id));
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -228,6 +245,11 @@ function App() {
       .catch(() => {
         if (isMounted) {
           setSyncStatus("Local mode; Firebase sync unavailable");
+          notify({
+            tone: "warning",
+            title: "Firebase sync unavailable",
+            message: "The app is still usable, but data is currently saved on this device.",
+          });
         }
       });
 
@@ -250,6 +272,11 @@ function App() {
       })
       .catch(() => {
         setSyncStatus("Saved on this device; cloud retry pending");
+        notify({
+          tone: "warning",
+          title: "Cloud save needs retry",
+          message: "Your change was kept locally. Firestore did not accept the latest sync.",
+        });
       });
   };
 
@@ -384,6 +411,7 @@ function App() {
     setData(freshData);
     setSessionUserId(null);
     setView("overview");
+    notify({ tone: "info", title: "Demo data reset", message: "The prototype data has been restored to its prepared sample state." });
   };
 
   const exportData = () => {
@@ -394,10 +422,16 @@ function App() {
     link.download = `tourist-movement-export-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    notify({ tone: "success", title: "Export started", message: "The current prototype data is downloading as a JSON file." });
   };
 
   if (!currentUser) {
-    return <AuthScreen onLogin={login} onRegister={register} onResendVerification={resendVerification} />;
+    return (
+      <>
+        <AuthScreen onLogin={login} onRegister={register} onResendVerification={resendVerification} notify={notify} />
+        <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
+      </>
+    );
   }
 
   const roleViews =
@@ -467,11 +501,12 @@ function App() {
 
       <main className="content">
         {currentUser.role === "admin" ? (
-          <AdminWorkspace data={data} view={safeView} onDataChange={commitData} />
+          <AdminWorkspace data={data} view={safeView} onDataChange={commitData} notify={notify} />
         ) : (
-          <TouristWorkspace data={data} view={safeView} user={currentUser} onDataChange={commitData} onViewChange={setView} watchId={watchId} />
+          <TouristWorkspace data={data} view={safeView} user={currentUser} onDataChange={commitData} onViewChange={setView} watchId={watchId} notify={notify} />
         )}
       </main>
+      <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
     </div>
   );
 }
@@ -480,10 +515,12 @@ function AuthScreen({
   onLogin,
   onRegister,
   onResendVerification,
+  notify,
 }: {
   onLogin: (email: string, password: string) => Promise<AuthResult>;
   onRegister: (name: string, email: string, password: string) => Promise<AuthResult>;
   onResendVerification: (email: string, password: string) => Promise<AuthResult>;
+  notify: NotifyFn;
 }) {
   const [rememberedLogin] = useState(() => loadRememberedLogin());
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -525,18 +562,21 @@ function AuthScreen({
     if (!isValidEmail(normalizedEmail)) {
       setError("Enter a valid email address.");
       setMessage(null);
+      notify({ tone: "error", title: "Email does not look right", message: "Use a real email address, for example name@example.com." });
       return;
     }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       setMessage(null);
+      notify({ tone: "error", title: "Password is too short", message: "Use at least 6 characters before continuing." });
       return;
     }
 
     if (mode === "register" && name.trim().length < 2) {
       setError("Enter a name with at least two characters.");
       setMessage(null);
+      notify({ tone: "error", title: "Name is missing", message: "Enter at least two characters for the tourist profile name." });
       return;
     }
 
@@ -546,6 +586,13 @@ function AuthScreen({
     const result = mode === "login" ? await onLogin(normalizedEmail, password) : await onRegister(name, normalizedEmail, password);
     setError(result.error ?? null);
     setMessage(result.message ?? null);
+    if (result.error) {
+      notify({ tone: "error", title: mode === "login" ? "Login failed" : "Registration failed", message: result.error });
+    } else if (result.message) {
+      notify({ tone: "success", title: mode === "login" ? "Login ready" : "Account created", message: result.message });
+    } else {
+      notify({ tone: "success", title: mode === "login" ? "Logged in" : "Account created", message: "You can continue using the app." });
+    }
     if (!result.error) {
       if (rememberLogin) {
         saveRememberedLogin(normalizedEmail, password);
@@ -562,12 +609,14 @@ function AuthScreen({
     if (!isValidEmail(normalizedEmail)) {
       setError("Enter a valid email address before resending verification.");
       setMessage(null);
+      notify({ tone: "error", title: "Email does not look right", message: "Enter the email address used for this Firebase account." });
       return;
     }
 
     if (password.length < 6) {
       setError("Enter the password for this account before resending verification.");
       setMessage(null);
+      notify({ tone: "error", title: "Password required", message: "Enter this account password before requesting another verification email." });
       return;
     }
 
@@ -577,6 +626,11 @@ function AuthScreen({
     const result = await onResendVerification(normalizedEmail, password);
     setError(result.error ?? null);
     setMessage(result.message ?? null);
+    notify({
+      tone: result.error ? "error" : "success",
+      title: result.error ? "Verification failed" : "Verification email sent",
+      message: result.error ?? result.message,
+    });
     setIsSubmitting(false);
   };
 
@@ -685,6 +739,7 @@ function TouristWorkspace({
   onDataChange,
   onViewChange,
   watchId,
+  notify,
 }: {
   data: AppData;
   view: AppView;
@@ -692,6 +747,7 @@ function TouristWorkspace({
   onDataChange: (data: AppData, actor?: User | null) => void;
   onViewChange: (view: AppView) => void;
   watchId: React.MutableRefObject<number | null>;
+  notify: NotifyFn;
 }) {
   const userTrips = getUserTrips(data, user.id);
   const activeTrip = getActiveTrip(data, user.id);
@@ -722,6 +778,11 @@ function TouristWorkspace({
   const displayName = getDisplayName(user);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
 
+  const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
+    setTrackingMessage(message);
+    notify({ tone, title, message });
+  };
+
   useEffect(() => {
     if (!activeTrip && isLiveTracking) {
       setIsLiveTracking(false);
@@ -730,6 +791,7 @@ function TouristWorkspace({
 
   const grantConsent = () => {
     onDataChange(grantLocationConsent(data, user.id));
+    notify({ tone: "success", title: "Location consent saved", message: "You can start a tracked trip when you are ready." });
   };
 
   const appendPoint = (tripId: string, latitude: number, longitude: number, accuracyMeters: number, source: "browser" | "demo") => {
@@ -742,7 +804,7 @@ function TouristWorkspace({
     });
 
     if (result.error || !result.data) {
-      setTrackingMessage(result.error ?? "Movement point could not be saved.");
+      showTrackingNotice("error", "Movement point not saved", result.error ?? "Movement point could not be saved.");
       return false;
     }
 
@@ -752,14 +814,14 @@ function TouristWorkspace({
 
   const startLocationWatch = (tripId: string, message: string) => {
     if (!navigator.geolocation) {
-      setTrackingMessage("Browser geolocation is unavailable. Demo points can still be added manually.");
+      showTrackingNotice("warning", "Browser location unavailable", "Browser geolocation is unavailable. Demo points can still be added manually.");
       setIsLiveTracking(false);
       return false;
     }
 
     if (watchId.current !== null) {
       setIsLiveTracking(true);
-      setTrackingMessage("Live browser tracking is already active.");
+      showTrackingNotice("info", "Tracking already active", "Live browser tracking is already active.");
       return true;
     }
 
@@ -782,7 +844,7 @@ function TouristWorkspace({
           }
         }
 
-        setTrackingMessage(geolocationErrorMessage(error));
+        showTrackingNotice("error", "Location tracking stopped", geolocationErrorMessage(error));
       },
       {
         enableHighAccuracy: true,
@@ -792,14 +854,14 @@ function TouristWorkspace({
     );
 
     setIsLiveTracking(true);
-    setTrackingMessage(message);
+    showTrackingNotice("success", "Trip tracking active", message);
     return true;
   };
 
   const startTrip = () => {
     const result = startTripSession(data, user.id);
     if (result.error || !result.trip || !result.data) {
-      setTrackingMessage(result.error ?? "Trip could not be started.");
+      showTrackingNotice("error", "Trip could not start", result.error ?? "Trip could not be started.");
       return;
     }
 
@@ -809,7 +871,7 @@ function TouristWorkspace({
 
   const resumeLiveTracking = () => {
     if (!activeTrip) {
-      setTrackingMessage("No active trip is available to resume.");
+      showTrackingNotice("warning", "No active trip", "No active trip is available to resume.");
       return;
     }
 
@@ -829,12 +891,12 @@ function TouristWorkspace({
 
     const result = stopActiveTrip(data, user.id);
     if (result.error || !result.data) {
-      setTrackingMessage(result.error ?? "Trip could not be stopped.");
+      showTrackingNotice("error", "Trip could not stop", result.error ?? "Trip could not be stopped.");
       return;
     }
 
     onDataChange(refreshAnalysis(result.data, user.id));
-    setTrackingMessage("Trip stopped and recommendation analysis refreshed.");
+    showTrackingNotice("success", "Trip completed", "Trip stopped and recommendation analysis refreshed.");
   };
 
   const addDemoPoint = () => {
@@ -845,24 +907,25 @@ function TouristWorkspace({
     const currentPoints = data.points.filter((point) => point.tripId === activeTrip.id);
     const [latitude, longitude] = demoRoute[currentPoints.length % demoRoute.length];
     if (appendPoint(activeTrip.id, latitude, longitude, 32, "demo")) {
-      setTrackingMessage("Demo movement point added to the active trip.");
+      showTrackingNotice("success", "Demo point added", "Demo movement point added to the active trip.");
     }
   };
 
   const addManualPoint = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!activeTrip) {
-      setTrackingMessage("Start a trip before saving a manual movement point.");
+      showTrackingNotice("warning", "Start a trip first", "Start a trip before saving a manual movement point.");
       return;
     }
 
     if (appendPoint(activeTrip.id, Number(manualLocation.latitude), Number(manualLocation.longitude), Number(manualLocation.accuracyMeters), "demo")) {
-      setTrackingMessage("Manual movement point saved to the active trip.");
+      showTrackingNotice("success", "Manual point saved", "Manual movement point saved to the active trip.");
     }
   };
 
   const refreshRecommendations = () => {
     onDataChange(refreshAnalysis(data, user.id));
+    notify({ tone: "success", title: "Recommendations refreshed", message: "Your latest trip analysis has been recalculated." });
   };
 
   const revokeConsent = () => {
@@ -874,7 +937,7 @@ function TouristWorkspace({
 
     const nextData = revokeLocationConsent(data, user.id);
     onDataChange(refreshAllRecommendations(nextData));
-    setTrackingMessage("Location consent revoked. Active tracking has been stopped.");
+    showTrackingNotice("info", "Location consent revoked", "Location consent revoked. Active tracking has been stopped.");
   };
 
   const deleteMyMovementData = () => {
@@ -887,7 +950,7 @@ function TouristWorkspace({
     const nextData = deleteTouristMovementData(data, user.id);
     onDataChange(refreshAllRecommendations(nextData));
     setSelectedTripId("");
-    setTrackingMessage("Your movement history and AI recommendation records were deleted.");
+    showTrackingNotice("success", "Movement data deleted", "Your movement history and AI recommendation records were deleted.");
   };
 
   const saveProfile = (nextUser: User) => {
@@ -898,11 +961,13 @@ function TouristWorkspace({
     localStorage.removeItem(getProfileSkipKey(user.id));
     setProfileSetupSkipped(false);
     onDataChange(refreshAllRecommendations(nextData), nextUser);
+    notify({ tone: "success", title: "Profile saved", message: "Your travel preferences will be used for recommendations." });
   };
 
   const skipProfileSetup = () => {
     localStorage.setItem(getProfileSkipKey(user.id), "true");
     setProfileSetupSkipped(true);
+    notify({ tone: "info", title: "Profile skipped", message: "You can complete your travel profile later from the Profile page." });
   };
 
   if (view === "profile") {
@@ -1356,7 +1421,51 @@ function TouristProfileForm({
   );
 }
 
-function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: AppView; onDataChange: (data: AppData) => void }) {
+function ToastViewport({ notifications, onDismiss }: { notifications: AppNotification[]; onDismiss: (id: string) => void }) {
+  useEffect(() => {
+    if (notifications.length === 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      onDismiss(notifications[0].id);
+    }, 4200);
+
+    return () => window.clearTimeout(timer);
+  }, [notifications, onDismiss]);
+
+  if (notifications.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="toast-stack" aria-live="polite" aria-label="Application notifications">
+      {notifications.map((notification) => (
+        <article className={`toast toast-${notification.tone}`} key={notification.id}>
+          <div>
+            <strong>{notification.title}</strong>
+            {notification.message && <p>{notification.message}</p>}
+          </div>
+          <button type="button" onClick={() => onDismiss(notification.id)} title="Dismiss notification">
+            <X size={16} />
+          </button>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function AdminWorkspace({
+  data,
+  view,
+  onDataChange,
+  notify,
+}: {
+  data: AppData;
+  view: AppView;
+  onDataChange: (data: AppData) => void;
+  notify: NotifyFn;
+}) {
   const tourists = getTourists(data);
   const summary = useMemo(() => summarizeDashboard(data), [data]);
   const categoryCoverage = useMemo(() => getDestinationCategoryCoverage(data), [data]);
@@ -1424,17 +1533,21 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
     event.preventDefault();
     const result = addDestinationRecord(data.destinations, destinationForm);
     if (result.error || !result.destinations) {
-      setDestinationMessage(result.error ?? "Destination could not be saved.");
+      const message = result.error ?? "Destination could not be saved.";
+      setDestinationMessage(message);
+      notify({ tone: "error", title: "Destination not saved", message });
       return;
     }
 
     onDataChange(refreshAllRecommendations({ ...data, destinations: result.destinations }));
     setDestinationForm({ name: "", city: "", category: "cultural", latitude: "3.1478", longitude: "101.6937", description: "" });
     setDestinationMessage("Destination saved.");
+    notify({ tone: "success", title: "Destination saved", message: "Recommendations and dashboard signals were refreshed." });
   };
 
   const recomputeAi = () => {
     onDataChange(refreshAllRecommendations(data));
+    notify({ tone: "success", title: "AI analysis refreshed", message: "K-Means, Decision Tree output and recommendations were recalculated." });
   };
 
   const resetRecordFilters = () => {
@@ -1587,7 +1700,7 @@ function AdminWorkspace({ data, view, onDataChange }: { data: AppData; view: App
             {destinationMessage && <p className="status-message">{destinationMessage}</p>}
           </form>
 
-          <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} />
+          <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} />
         </div>
       </Page>
     );
@@ -2141,7 +2254,7 @@ function TravelPlanPanel({ plan, destinations }: { plan: TravelPlan; destination
   );
 }
 
-function DestinationManager({ destinations, onChange }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void }) {
+function DestinationManager({ destinations, onChange, notify }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; notify: NotifyFn }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const editingDestination = destinations.find((destination) => destination.id === editingId) ?? null;
   const [form, setForm] = useState<Destination | null>(null);
@@ -2165,24 +2278,31 @@ function DestinationManager({ destinations, onChange }: { destinations: Destinat
 
     const result = updateDestinationRecord(destinations, form);
     if (result.error || !result.destinations) {
-      setMessage(result.error ?? "Destination could not be updated.");
+      const message = result.error ?? "Destination could not be updated.";
+      setMessage(message);
+      notify({ tone: "error", title: "Destination not updated", message });
       return;
     }
 
     onChange(result.destinations);
     setMessage("Destination updated.");
+    notify({ tone: "success", title: "Destination updated", message: `${form.name} was saved.` });
     cancelEdit();
   };
 
   const removeDestination = (destinationId: string) => {
+    const destinationName = destinations.find((destination) => destination.id === destinationId)?.name ?? "Destination";
     const result = deleteDestinationRecord(destinations, destinationId);
     if (result.error || !result.destinations) {
-      setMessage(result.error ?? "Destination could not be deleted.");
+      const message = result.error ?? "Destination could not be deleted.";
+      setMessage(message);
+      notify({ tone: "error", title: "Destination not deleted", message });
       return;
     }
 
     onChange(result.destinations);
     setMessage("Destination deleted.");
+    notify({ tone: "success", title: "Destination deleted", message: `${destinationName} was removed from the destination list.` });
     if (editingId === destinationId) {
       cancelEdit();
     }

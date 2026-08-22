@@ -858,6 +858,76 @@ button:disabled {
   background: #fff7ed;
 }
 
+.toast-stack {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 100;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 28px));
+  pointer-events: none;
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 10px;
+  align-items: start;
+  padding: 14px;
+  border: 1px solid #d8d0bf;
+  border-left-width: 5px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  pointer-events: auto;
+}
+
+.toast strong,
+.toast p {
+  margin: 0;
+}
+
+.toast strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.94rem;
+}
+
+.toast p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.toast button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  color: #475569;
+  background: #f8fafc;
+}
+
+.toast-success {
+  border-left-color: var(--teal);
+}
+
+.toast-error {
+  border-left-color: #dc2626;
+}
+
+.toast-warning {
+  border-left-color: var(--sun);
+}
+
+.toast-info {
+  border-left-color: #2563eb;
+}
+
 .privacy-actions {
   display: grid;
   gap: 8px;
@@ -1807,6 +1877,13 @@ textarea {
 
   .tourist-shell .content {
     padding: 18px 14px 96px;
+  }
+
+  .tourist-shell .toast-stack {
+    top: 12px;
+    right: 10px;
+    left: 10px;
+    width: auto;
   }
 
   .tourist-shell .sidebar {
