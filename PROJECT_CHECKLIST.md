@@ -262,9 +262,9 @@ Current alignment notes:
 
 ## Map Experience
 
-- [ ] Keep Leaflet/OpenStreetMap as the map engine unless the project scope changes.
-- [ ] Make the map feel visually aligned with the app through custom markers, route styling and calmer controls.
-- [ ] Reduce unnecessary map visual noise where possible so tracking and destination signals are easier to understand.
+- [x] Keep Leaflet/OpenStreetMap as the map engine unless the project scope changes.
+- [x] Make the map feel visually aligned with the app through custom markers, route styling and calmer controls.
+- [x] Reduce unnecessary map visual noise where possible so tracking and destination signals are easier to understand.
 - [ ] Add a simplified tourist map mode focused on current location, route, destination markers and selected place details.
 - [ ] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 

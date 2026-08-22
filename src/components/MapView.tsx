@@ -9,13 +9,13 @@ type MapViewProps = {
   activePoint?: MovementPoint;
 };
 
-const categoryLabels: Record<DestinationCategory, string> = {
-  cultural: "C",
-  nature: "N",
-  urban: "U",
-  heritage: "H",
-  food: "F",
-  coastal: "B",
+const categoryMeta: Record<DestinationCategory, { label: string; name: string }> = {
+  cultural: { label: "C", name: "Cultural" },
+  nature: { label: "N", name: "Nature" },
+  urban: { label: "U", name: "Urban" },
+  heritage: { label: "H", name: "Heritage" },
+  food: { label: "F", name: "Food" },
+  coastal: { label: "B", name: "Coastal" },
 };
 
 function escapeHtml(value: string) {
@@ -24,12 +24,25 @@ function escapeHtml(value: string) {
   return element.innerHTML;
 }
 
-function icon(className: string, label: string) {
+function destinationIcon(category: DestinationCategory) {
+  const meta = categoryMeta[category];
+
   return L.divIcon({
-    className,
-    html: `<span>${label}</span>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+    className: `destination-marker destination-marker-${category}`,
+    html: `<span>${meta.label}</span>`,
+    iconSize: [34, 40],
+    iconAnchor: [17, 34],
+    popupAnchor: [0, -32],
+  });
+}
+
+function routeIcon(type: "start" | "end" | "current") {
+  return L.divIcon({
+    className: `route-marker route-marker-${type}`,
+    html: `<span>${type === "start" ? "S" : type === "end" ? "E" : ""}</span>`,
+    iconSize: type === "current" ? [32, 32] : [24, 24],
+    iconAnchor: type === "current" ? [16, 16] : [12, 12],
+    popupAnchor: [0, -12],
   });
 }
 
@@ -47,12 +60,13 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
       mapRef.current = L.map(containerRef.current, {
         zoomControl: false,
         attributionControl: true,
+        scrollWheelZoom: false,
       }).setView([3.1478, 101.6937], 13);
 
       L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
         maxZoom: 19,
-        attribution: "&copy; OpenStreetMap contributors",
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
       })
         .on("load", () => setMapStatus("ready"))
         .on("tileerror", () => setMapStatus("error"))
@@ -78,31 +92,46 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
 
     destinations.forEach((destination) => {
       L.marker([destination.latitude, destination.longitude], {
-        icon: icon(`destination-marker destination-marker-${destination.category}`, categoryLabels[destination.category]),
+        icon: destinationIcon(destination.category),
         title: destination.name,
       })
-        .bindPopup(`<strong>${escapeHtml(destination.name)}</strong><br>${escapeHtml(destination.category)}<br>${escapeHtml(destination.city)}`)
+        .bindPopup(
+          `<strong>${escapeHtml(destination.name)}</strong><br>${escapeHtml(categoryMeta[destination.category].name)} destination<br>${escapeHtml(destination.city)}`
+        )
         .addTo(layer);
     });
 
     if (route.length > 0) {
       L.polyline(route, {
-        color: "#2563eb",
+        color: "#ffffff",
+        weight: 9,
+        opacity: 0.95,
+        lineCap: "round",
+        lineJoin: "round",
+      }).addTo(layer);
+
+      L.polyline(route, {
+        color: "#0f766e",
         weight: 5,
-        opacity: 0.78,
+        opacity: 0.88,
+        lineCap: "round",
+        lineJoin: "round",
       }).addTo(layer);
 
       points.forEach((point, index) => {
         L.circleMarker([point.latitude, point.longitude], {
-          radius: index === points.length - 1 ? 8 : 5,
-          color: "#0f172a",
-          fillColor: index === points.length - 1 ? "#22c55e" : "#38bdf8",
-          fillOpacity: 0.9,
+          radius: index === points.length - 1 ? 6 : 4,
+          color: "#ffffff",
+          fillColor: index === points.length - 1 ? "#e85d75" : "#14b8a6",
+          fillOpacity: 0.95,
           weight: 2,
         })
           .bindPopup(`Movement point ${index + 1}<br>${new Date(point.recordedAt).toLocaleString()}`)
           .addTo(layer);
       });
+
+      L.marker(route[0], { icon: routeIcon("start"), title: "Trip start" }).bindPopup("Trip start").addTo(layer);
+      L.marker(route[route.length - 1], { icon: routeIcon("end"), title: "Trip end" }).bindPopup("Trip end").addTo(layer);
 
       map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
     } else if (activePoint) {
@@ -110,12 +139,9 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
     }
 
     if (activePoint) {
-      L.circleMarker([activePoint.latitude, activePoint.longitude], {
-        radius: 10,
-        color: "#ffffff",
-        fillColor: "#0f766e",
-        fillOpacity: 1,
-        weight: 3,
+      L.marker([activePoint.latitude, activePoint.longitude], {
+        icon: routeIcon("current"),
+        title: "Current location",
       })
         .bindPopup("Current location")
         .addTo(layer);
@@ -134,6 +160,8 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
     mapRef.current?.setView([activePoint.latitude, activePoint.longitude], 16);
   };
 
+  const visibleCategories = Array.from(new Set(destinations.map((destination) => destination.category)));
+
   return (
     <div className="map-frame">
       <div ref={containerRef} className="map-view" aria-label="Movement map" />
@@ -143,13 +171,13 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
           Centre on current location
         </button>
       )}
-      <div className="map-legend" aria-label="Destination marker categories">
-        {Object.entries(categoryLabels).map(([category, label]) => (
+      <div className="map-legend" aria-label="Visible destination marker categories">
+        {visibleCategories.map((category) => (
           <span key={category}>
             <i className={`destination-marker destination-marker-${category}`}>
-              <span>{label}</span>
+              <span>{categoryMeta[category].label}</span>
             </i>
-            {category}
+            {categoryMeta[category].name}
           </span>
         ))}
       </div>
