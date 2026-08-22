@@ -109,15 +109,40 @@ export function MapView({ points, destinations, activePoint }: MapViewProps) {
       map.setView([activePoint.latitude, activePoint.longitude], 15);
     }
 
+    if (activePoint) {
+      L.circleMarker([activePoint.latitude, activePoint.longitude], {
+        radius: 10,
+        color: "#ffffff",
+        fillColor: "#0f766e",
+        fillOpacity: 1,
+        weight: 3,
+      })
+        .bindPopup("Current location")
+        .addTo(layer);
+    }
+
     return () => {
       layer.remove();
     };
   }, [points, destinations, activePoint]);
 
+  const centerOnActivePoint = () => {
+    if (!activePoint) {
+      return;
+    }
+
+    mapRef.current?.setView([activePoint.latitude, activePoint.longitude], 16);
+  };
+
   return (
     <div className="map-frame">
       <div ref={containerRef} className="map-view" aria-label="Movement map" />
       {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? "Loading map" : "Map tiles could not be loaded"}</div>}
+      {activePoint && (
+        <button className="map-current-button" type="button" onClick={centerOnActivePoint}>
+          Centre on current location
+        </button>
+      )}
       <div className="map-legend" aria-label="Destination marker categories">
         {Object.entries(categoryLabels).map(([category, label]) => (
           <span key={category}>

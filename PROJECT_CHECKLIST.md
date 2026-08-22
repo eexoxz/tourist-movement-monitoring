@@ -1,344 +1,307 @@
-# Project Completion Checklist
+# Lean FYP Build Checklist
 
-This checklist is based on the DPP scope for the Smart Tourist Movement Monitoring Web Application with AI-Based Travel Recommendation.
+This checklist follows the lean DPP build brief for the Smart Tourist Movement Monitoring Web Application with AI-Based Travel Recommendation.
 
-The project should be handled as staged delivery with completion gates. It does not need to be pure waterfall, because the DPP uses an adapted Agile method, but each phase below should be stable before depending on it too heavily.
+The goal is one complete, reliable academic prototype flow:
 
-## Phase 0: Project Foundation
+Tourist authentication -> consent-based trip tracking -> stored movement route -> K-Means cluster -> Decision Tree tourist category -> three relevant recommendations -> administrator movement review and destination management.
 
-- [x] Create standalone project folder outside the Codex dated workspace.
-- [x] Initialize React web application structure.
-- [x] Use normal project naming.
-- [x] Set up npm-based tooling.
-- [x] Add `package-lock.json`.
-- [x] Add local startup helpers for Windows.
-- [x] Add Git repository.
-- [x] Add GitHub Actions CI workflow.
-- [ ] Connect local repository to a GitHub remote.
-- [ ] Push first working branch to GitHub.
-- [ ] Confirm GitHub Actions passes on GitHub.
-- [x] Add clear environment setup notes for Firebase.
+## Scope Decision
 
-Completion gate:
+- [x] Keep the system as an academic prototype for selected Malaysian tourist locations.
+- [x] Support only two user roles: Tourist and Tourism Administrator.
+- [x] Use React, Firebase Authentication, Cloud Firestore, Browser Geolocation API, OpenStreetMap, Leaflet, K-Means and Decision Tree logic.
+- [ ] Keep the finished app to seven main pages only.
+- [ ] Prefer tabs, modals, expandable rows and side panels over extra pages.
+- [ ] Remove or hide features that make the app look like a commercial tourism platform.
 
-- [ ] A fresh clone can run `npm install`, `npm run build`, and `npm run dev`.
-- [ ] The GitHub repository contains the current source and CI workflow.
+Do not build:
 
-## Phase 1: Requirements And Scope Lock
+- [x] No booking, payments, hotels or flights.
+- [x] No reviews, social posting or messaging.
+- [x] No AI chatbot or LLM feature.
+- [x] No emergency monitoring or nationwide live tracking.
+- [x] No travel agency, researcher or government integration accounts.
 
-- [x] Identify direct user roles: Tourist and Tourism Administrator.
-- [x] Extract DPP functional requirements FR1 to FR14.
-- [x] Extract DPP non-functional requirements NFR1 to NFR11.
-- [x] Confirm system boundary as an academic prototype.
-- [x] Confirm excluded scope: nationwide deployment, commercial release, government database integration, and large-scale public use.
-- [ ] Convert FR1 to FR14 into GitHub issues or project board tasks.
-- [ ] Convert NFR1 to NFR11 into testable acceptance checks.
-- [ ] Define selected Malaysian tourist locations for the prototype dataset.
-- [ ] Decide final Firebase project name and deployment environment.
+## Seven Main Pages
 
-Completion gate:
+- [ ] Page 1: Login.
+- [ ] Page 2: Tourist Registration.
+- [ ] Page 3: Tourist Home and Trip Tracking.
+- [ ] Page 4: Trip History and Trip Details.
+- [ ] Page 5: Travel Recommendations.
+- [ ] Page 6: Tourism Administrator Dashboard.
+- [ ] Page 7: Destination Management.
 
-- [ ] Every DPP requirement has an implementation task and a test/evidence task.
+Current alignment notes:
 
-## Phase 2: Data Model And Architecture
+- [x] Login/register UI exists.
+- [x] Tourist tracking, trips, recommendations and profile setup exist.
+- [x] Administrator dashboard and destination management exist.
+- [x] Refine navigation so Tourist Home and Trip Tracking are one main page.
+- [ ] Refine administrator navigation so Dashboard contains Overview, Movement Records and AI Results as tabs.
+- [ ] Decide whether Profile should remain a main nav item or become a profile menu/panel to preserve the seven-page scope.
 
-- [x] Draft local data entities for users, consents, trips, movement points, destinations, AI analysis, and recommendations.
-- [x] Separate trip sessions from movement records.
-- [x] Separate destinations from recommendation output.
-- [x] Build the first local storage layer for prototype use.
-- [x] Finalize Firestore collection design.
-- [x] Write Firestore security rules for tourist/admin access.
-- [x] Add database seed data for destinations.
-- [x] Add migration notes from local storage to Firebase.
-- [x] Document the final ERD in the report or project docs.
+## Navigation And Access
 
-Completion gate:
+- [x] Tourist role and Administrator role exist.
+- [x] UI navigation changes based on role.
+- [x] Firebase mode requires real Firebase Authentication accounts.
+- [x] Tourists cannot manually choose the Administrator role during registration.
+- [ ] Tourist login redirects to `/app/home`.
+- [ ] Administrator login redirects to `/admin/dashboard`.
+- [ ] Unauthenticated users return to `/login`.
+- [ ] Wrong-role access redirects to the authorised home page.
+- [ ] Remove Tourist/Admin selector style from the login page in the final Firebase flow.
+- [x] Keep Tourist mobile navigation simple: Home, Trips, Recommendations, Profile menu.
+- [ ] Keep Administrator navigation simple: Dashboard, Destinations, Logout.
 
-- [ ] Firebase data structure matches the DPP ERD and supports all user flows.
-- [ ] Movement data access is restricted by role.
+## Page 1: Login
 
-## Phase 3: Authentication And Role Access
+- [x] Email field.
+- [x] Password field.
+- [x] Show/hide password.
+- [x] Clear invalid-login message.
+- [x] Loading state during authentication.
+- [x] Prevent repeated submission while loading.
+- [x] Keep signed-in session through Firebase Authentication.
+- [x] Read role after login.
+- [x] Resend email verification in Firebase mode.
+- [x] Validate email format before Firebase login.
+- [x] Remove misleading default demo credentials from Firebase login.
+- [ ] Create Tourist Account link should go to a clear registration screen.
+- [ ] Forgot Password link only if core flow is stable.
 
-- [x] Add tourist login screen.
-- [x] Add tourist registration flow.
-- [x] Add administrator login path.
-- [x] Add role-based navigation in the UI.
-- [x] Replace demo/local authentication with Firebase Authentication when Firebase is configured.
-- [x] Store user role safely in Firestore.
-- [x] Add protected route handling.
-- [x] Block tourists from administrator pages.
-- [x] Block administrators from tourist-only trip tracking actions.
-- [x] Add logout verification.
-- [x] Add invalid login feedback tests.
+## Page 2: Tourist Registration
 
-Completion gate:
+- [x] Name field exists.
+- [x] Email field exists.
+- [x] Password field exists.
+- [x] Firebase account creation exists.
+- [x] Firestore user record creation exists.
+- [x] Email verification sending exists.
+- [x] Tourist profile/preferences setup exists after login.
+- [ ] Add confirm password.
+- [ ] Validate matching passwords.
+- [ ] Collect initial preferred categories during registration or immediately after registration.
+- [ ] Create/store a clearer Tourist Profile document or equivalent structured profile data.
+- [ ] Redirect to `/app/home` after successful registration or verification.
+- [x] Do not request browser location permission during registration.
+- [x] Do not provide Administrator registration.
 
-- [x] Users must log in before accessing protected tourist or administrator features.
-- [x] Role access cannot be bypassed through manual URL changes or browser state edits.
+## Page 3: Tourist Home And Trip Tracking
 
-## Phase 4: Tourist Movement Tracking
+- [x] Mobile-friendly tourist home exists.
+- [x] Tracking status exists.
+- [x] Location consent gate exists.
+- [x] Start trip action exists.
+- [x] Stop trip action exists.
+- [x] Browser Geolocation watch exists.
+- [x] Movement coordinates save with timestamp and accuracy.
+- [x] Leaflet map exists.
+- [x] OpenStreetMap tiles exist.
+- [x] Destination markers exist.
+- [x] Recorded route polyline exists.
+- [x] Permission denied handling exists.
+- [x] Position unavailable and timeout messages exist.
+- [x] Insufficient/no-trip state exists.
+- [x] Demo point support exists for prototype testing.
+- [x] Combine home dashboard and live tracking into one final Tourist page.
+- [x] Show current-location marker clearly.
+- [x] Add Centre on Current Location control.
+- [x] Add stop confirmation.
+- [ ] Show tracking states as Not Started, Active or Completed.
+- [x] Display: "Keep this page open while your trip is being recorded."
+- [x] Add a short three-step new-user guide.
+- [x] Add Start Your First Trip action.
+- [ ] Show completed-trip summary with date, start/end time, duration, points, recognised destinations and analysis status.
+- [ ] Add View Trip History and View Recommendations actions after a completed trip.
+- [x] Make Start and Stop buttons full-width on mobile.
 
-- [x] Add location consent gate.
-- [x] Add start trip action.
-- [x] Add stop trip action.
-- [x] Add browser geolocation watch support.
-- [x] Add demo movement point fallback for local testing.
-- [x] Store movement points locally with trip IDs and timestamps.
-- [x] Store trip sessions in Firestore.
-- [x] Store movement records in Firestore.
-- [x] Handle browser permission denial cleanly.
-- [x] Handle browser geolocation timeout cleanly.
-- [x] Prevent movement collection before consent.
-- [x] Add active trip recovery if the page reloads.
-- [x] Add minimum movement filtering to avoid duplicate/noisy points.
-- [x] Add clear user message for tracking accuracy limitations.
+## Page 4: Trip History And Trip Details
 
-Completion gate:
+- [x] Trip history exists.
+- [x] Selected trip route map exists.
+- [x] Trip summary includes distance, duration, points and visited stops.
+- [x] No-trip empty state exists.
+- [ ] Sort trips with the most recent first.
+- [ ] Show start and end times clearly.
+- [ ] Show tracking status.
+- [ ] Show recognised destinations count.
+- [ ] Open selected trip details in a modal, expandable section or side panel.
+- [ ] Trip detail should include start marker, end marker and visited destination markers.
+- [ ] Trip detail should include Cluster ID, Tourist Category, generated recommendations and analysis status.
+- [ ] Add loading, failed-load, analysis-processing and insufficient-data states.
+- [ ] Remove trip editing/deletion from final scope.
 
-- [x] A tourist can start and stop a trip, and the resulting movement records are saved under the correct user and trip.
-- [x] No movement record is created before consent is granted.
+## Page 5: Travel Recommendations
 
-## Phase 5: Map Visualization And Destination Information
+- [x] Recommendation page exists.
+- [x] Destination recommendation cards exist.
+- [x] Recommendation score exists.
+- [x] Recommendation reason exists.
+- [x] Visited/unvisited logic exists.
+- [x] Destination information panel exists.
+- [x] Insufficient-data fallback exists.
+- [ ] Display only the top three recommended destinations.
+- [ ] Add profile section with latest Tourist Category, Cluster ID, analysis date and short category explanation.
+- [ ] Open destination details in a modal instead of another page/large dashboard panel.
+- [ ] Destination modal should show name, category, description, map marker, latitude and longitude.
+- [ ] Recommendation formula should be explainable as Profile Match + Cluster Pattern Match + Unvisited Priority.
+- [ ] Clearly label preference-based fallback suggestions as basic suggestions.
+- [ ] Ask the Tourist to complete another trip when data is insufficient.
 
-- [x] Add Leaflet map.
-- [x] Use OpenStreetMap tile layer.
-- [x] Show destination markers.
-- [x] Show tourist movement route line.
-- [x] Show movement point popups.
-- [x] Show destination list.
-- [x] Add destination detail screen or panel.
-- [x] Show destination movement demand inside tourist destination information.
-- [x] Show previously visited places clearly.
-- [x] Add route history selection by trip.
-- [x] Show trip-level distance, duration, accuracy, and visited-stop summaries.
-- [x] Add map loading/error state.
-- [x] Add marker category styling.
-- [ ] Verify map behavior on Chrome, Edge, and Firefox.
-- [x] Check OpenStreetMap attribution remains visible.
+## Page 6: Tourism Administrator Dashboard
 
-Completion gate:
+- [x] Administrator dashboard exists.
+- [x] Summary cards exist.
+- [x] Movement records exist.
+- [x] Movement map exists.
+- [x] AI result section exists.
+- [x] K-Means and Decision Tree outputs exist.
+- [x] Charts exist.
+- [x] Recent/filtered movement data exists.
+- [ ] Refactor admin into one dashboard route with tabs: Overview, Movement Records, AI Results.
+- [ ] Overview tab should show Total Tourists, Total completed trips, Total movement records and Total destinations.
+- [ ] Keep only one or two useful charts.
+- [ ] Add trips-over-time chart if not already clear enough.
+- [ ] Add Tourist Category distribution or destination-category visits chart.
+- [ ] Movement Records tab should list Trip ID, Tourist, date, duration, movement-point count, destinations visited, Cluster ID and Tourist Category.
+- [ ] Movement record details should open in expandable row, modal or side panel.
+- [ ] Administrators may review movement records but cannot edit individual coordinates.
+- [ ] AI Results tab should show selected K value, cluster size, dominant pattern, cluster description and recommendation result.
+- [ ] Keep confusion matrix/accuracy only if supported by labelled data and useful for report evidence.
 
-- [x] Tourist can view current/latest route, previous movement history, and destination details on the map.
+## Page 7: Destination Management
 
-## Phase 6: Administrator Dashboard
+- [x] Destination list exists.
+- [x] Add destination exists.
+- [x] Edit destination exists.
+- [x] Delete destination exists.
+- [x] Latitude/longitude validation exists.
+- [ ] Use Add/Edit modal instead of always showing long inline forms.
+- [ ] Limit final fixed categories to Cultural, Nature and Urban unless DPP/report justifies extra categories.
+- [ ] Show loading state while saving.
+- [ ] Show clear success/failure message.
+- [ ] Require confirmation before deletion.
+- [ ] Include destination name in the delete confirmation message.
+- [ ] Keep search, filters and coordinate picker deferred until CRUD is stable.
 
-- [x] Add administrator dashboard route.
-- [x] Show tourist count, trip count, movement point count, and destination count.
-- [x] Show all movement records on map.
-- [x] Show movement record list.
-- [x] Add destination creation form.
-- [x] Show basic destination category distribution.
-- [x] Add dashboard charts for movement trends.
-- [x] Add movement alert signals for high-demand destinations.
-- [x] Add movement alert CSV export.
-- [x] Add tourist filters.
-- [x] Add date/trip filters.
-- [x] Add destination edit function.
-- [x] Add destination delete function.
-- [x] Add dashboard summary export or evidence screenshot flow.
-- [x] Include trip distance and duration evidence in movement CSV export.
-- [x] Add configurable movement-based travel plan builder for administrator planning.
-- [x] Add admin-only Firestore reads/writes.
-- [x] Add empty-state handling for no movement data.
+## Firebase Data And Security
 
-Completion gate:
-
-- [x] Tourism Administrator can review movement records, understand travel patterns, and manage destination information.
-
-## Phase 7: AI Analysis
-
-- [x] Add first explainable profile inference logic.
-- [x] Add first cluster-like grouping output.
-- [x] Add category count analysis.
-- [x] Add silhouette-like score placeholder for UI evidence.
-- [x] Implement actual K-Means clustering.
-- [x] Decide whether K-Means runs in frontend JavaScript, a backend function, or a Python analysis script.
-- [x] Prepare prototype movement dataset for AI testing.
-- [x] Prepare destination category features.
-- [x] Select and justify K value.
-- [x] Calculate and record silhouette score from the real clustering output.
-- [x] Implement actual Decision Tree classification.
-- [x] Prepare labelled sample records for tourist profiles.
-- [x] Report Decision Tree accuracy.
-- [x] Report confusion matrix.
-- [x] Store AI analysis results in Firestore.
-- [x] Show AI result explanation in admin dashboard.
-- [x] Handle insufficient movement data without misleading output.
-
-Completion gate:
-
-- [x] Valid movement data produces a cluster, tourist category, and explainable AI result.
-- [x] AI testing evidence includes cluster interpretation, silhouette score, classification accuracy, and confusion matrix where data allows.
-
-## Phase 8: Recommendation Engine
-
-- [x] Add first recommendation scoring flow.
-- [x] Use profile match in recommendation scoring.
-- [x] Use unvisited destination priority.
-- [x] Use recent location distance in scoring.
-- [x] Show recommendation cards to tourist.
-- [x] Connect recommendation logic to real AI output.
-- [x] Use K-Means cluster pattern in recommendation scoring.
-- [x] Store recommendation results in Firestore.
-- [x] Prevent already visited destinations from being repeatedly suggested.
-- [x] Add fallback recommendation for insufficient data.
-- [x] Add explanation text for why each destination is suggested.
-- [x] Show score breakdown for recommendation evidence.
-- [x] Show tourist movement demand beside recommendation output.
-- [x] Add recommendation test cases.
-
-Completion gate:
-
-- [x] Tourist receives relevant destination suggestions based on movement history, tourist profile, cluster pattern, and unvisited destination rule.
-
-## Phase 9: Firebase Integration
-
-- [ ] Create Firebase project.
-- [ ] Enable Firebase Authentication.
-- [ ] Enable Firestore.
-- [ ] Add Firebase config to `.env.local`.
-- [x] Add Firebase client module.
-- [x] Replace local user storage with Firebase Authentication when Firebase is configured.
-- [x] Replace local app data storage with Firestore reads/writes.
-- [x] Add Firestore security rules.
-- [x] Add Firestore indexes if needed.
-- [x] Add seed script or admin seed screen for destinations.
+- [x] Firebase Authentication integration exists.
+- [x] Cloud Firestore integration exists.
+- [x] Firestore rules exist.
+- [x] Passwords are not stored for Firebase-backed users.
+- [x] Tourist-owned movement data is scoped by user.
+- [x] Admin-only destination write rules exist.
+- [ ] Confirm Firebase project, Authentication and Firestore are fully enabled.
+- [ ] Confirm `.env` or `.env.local` values are present locally and ignored by Git.
+- [ ] Decide whether to keep current collection names or migrate closer to the DPP names.
+- [ ] Required DPP collections to map or document: users, tourist_profiles, tourist_preferences, location_consents, trip_sessions, movement_records, destination_categories, destinations, ai_analyses, recommendations.
 - [ ] Test account creation in Firebase.
 - [ ] Test tourist data isolation.
-- [ ] Test admin access to movement summaries.
+- [ ] Test admin access to summaries and destination management.
+- [ ] Confirm app still works after clearing browser local storage.
 
-Completion gate:
+## Lean AI Implementation
 
-- [ ] The app works after clearing browser local storage because all important data is stored in Firebase.
+- [x] K-Means clustering exists.
+- [x] Decision Tree classification exists.
+- [x] Recommendation scoring exists.
+- [x] Insufficient-data handling exists.
+- [x] Prepared demo movement records exist.
+- [x] Classification explanation path exists.
+- [x] Confusion matrix and accuracy evidence exist in prototype logic.
+- [ ] Simplify user-facing AI output so it is understandable to non-technical users.
+- [ ] K-Means input should clearly use Cultural, Nature, Urban proportions and unique destinations visited.
+- [ ] Decision Tree output should be Cultural Tourist, Nature Tourist, Urban Tourist or Mixed Tourist.
+- [ ] Recommendation output should be exactly top three unvisited destinations.
+- [ ] Do not show unsupported personalised results when movement data is insufficient.
+- [ ] Clearly label prepared demo records as demonstration data.
 
-## Phase 10: Privacy, Security, And Reliability
+## Mobile And Usability
 
-- [x] Show consent before tracking.
-- [x] Keep project scope prototype-level.
-- [x] Add privacy note near location consent.
-- [x] Add explicit explanation of what location data is stored.
-- [x] Add option to stop tracking clearly.
-- [x] Add data deletion/reset option for tourist prototype testing.
-- [x] Ensure tourist-owned Firestore movement records can be deleted during privacy reset.
-- [x] Enforce role-based Firestore rules.
-- [x] Prevent unauthenticated access to protected pages.
-- [x] Validate form inputs.
-- [x] Add loading and error handling around Firebase operations.
-- [x] Normalize older local and Firestore prototype data during app loading.
-- [ ] Confirm main pages load under the three-second target in normal testing.
+- [x] Tourist pages are being redesigned mobile-first.
+- [x] Password visibility exists.
+- [x] Profile setup exists.
+- [x] Form labels are above fields.
+- [x] Touch-sized buttons mostly exist.
+- [x] Body text should be at least 16px on Tourist pages.
+- [ ] Avoid horizontal scrolling on Tourist pages.
+- [x] Make key trip controls easy to reach.
+- [x] Let the map use most of the tracking screen.
+- [x] Add visible keyboard focus states.
+- [ ] Add retry actions where failures are recoverable.
+- [ ] Test Tourist flow at mobile width.
+- [ ] Test Chrome, Edge and Firefox.
 
-Completion gate:
+## Required Demonstration Flow
 
-- [ ] Security and privacy requirements NFR3, NFR4, and NFR5 are testable and pass.
+- [ ] Tourist registers a new account.
+- [ ] Tourist verifies/logs in.
+- [ ] Tourist completes or skips profile setup.
+- [ ] Tourist grants location permission.
+- [ ] Tourist starts and stops a short trip.
+- [ ] Tourist views a prepared previous trip route.
+- [ ] Tourist sees Tourist Category and three recommendations.
+- [ ] Administrator logs in.
+- [ ] Administrator finds the trip in Movement Records.
+- [ ] Administrator reviews dashboard charts and AI result.
+- [ ] Administrator adds or edits one destination.
+- [ ] Tourist and Administrator can log out.
 
-## Phase 11: Functional Testing
+## Functional Requirement Coverage
 
-- [ ] FT1: Tourist registration creates a new account.
-- [ ] FT2: Correct login reaches the correct user interface.
-- [ ] FT3: Incorrect login is rejected.
-- [ ] FT4: Location permission returns current location.
-- [ ] FT5: Location denial prevents tracking.
-- [ ] FT6: Start/stop trip stores trip session and movement records.
-- [ ] FT7: Map shows current location, route history, and destination markers.
-- [ ] FT8: Movement history retrieves stored trip records.
-- [ ] FT9: Destination selection shows correct details.
-- [ ] FT10: Recommendation generation displays suitable destinations.
-- [ ] FT11: Admin dashboard displays movement records, summaries, and charts.
-- [ ] FT12: AI analysis section shows cluster, tourist category, and recommendation output.
-- [ ] FT13: Admin can add, edit, or delete destination records.
-- [ ] FT14: Logout ends the user session.
+- [ ] FR1 Register a new account.
+- [ ] FR2 Log in.
+- [ ] FR3 Allow location access.
+- [ ] FR4 Start and stop tracking.
+- [ ] FR5 View current location.
+- [ ] FR6 View movement history and routes.
+- [ ] FR7 View destination information.
+- [ ] FR8 Receive travel recommendations.
+- [ ] FR9 Administrator login.
+- [ ] FR10 View Tourist movement records.
+- [ ] FR11 Review movement trends and charts.
+- [ ] FR12 View AI analysis results.
+- [ ] FR13 Manage destination information.
+- [ ] FR14 View movement summaries.
+- [ ] FT14 Logout.
 
-Completion gate:
+## Acceptance Criteria
 
-- [ ] All critical functional tests pass without unresolved blocking defects.
+- [ ] All seven main pages work.
+- [ ] FR1 to FR14 can be demonstrated.
+- [ ] FT1 to FT14 can be tested.
+- [ ] Tourists and Administrators reach only authorised areas.
+- [ ] Movement is never recorded before permission is granted.
+- [ ] A Tourist can register, track a trip, view history and receive recommendations.
+- [ ] An Administrator can view summaries, charts and AI results.
+- [ ] An Administrator can add, edit and delete a destination.
+- [ ] Main pages load within three seconds under standard testing.
+- [ ] Core actions do not crash the app or lose stored records.
+- [ ] Main tasks work at mobile-browser width.
+- [ ] Valid AI input produces a cluster, Tourist Category and recommendations.
+- [ ] Insufficient AI input produces a clear message instead of a misleading result.
 
-## Phase 12: Non-Functional Testing
+## Exhibition Preparation
 
-- [ ] NFT1: Main pages load within three seconds under standard testing conditions.
-- [ ] NFT2: Protected pages reject unauthenticated access.
-- [ ] NFT3: Tracking cannot begin without browser location permission.
-- [ ] NFT4: Repeated login, map viewing, tracking, and dashboard actions do not crash.
-- [ ] NFT5: Tourist and administrator tasks can be completed with minimal confusion.
-- [ ] NFT6: Main pages work in selected Chrome, Edge, and Firefox versions.
-- [ ] NFT7: Database accepts additional users, destinations, movement records, and recommendation records.
-- [ ] NFT8: File/module structure remains separated by major function.
+- [ ] Prepare one Tourist account with several completed sample trips.
+- [ ] Prepare one Tourism Administrator account.
+- [ ] Seed several Cultural, Nature and Urban destinations.
+- [ ] Prepare movement records for K-Means.
+- [ ] Prepare labelled records for Decision Tree testing.
+- [ ] Prepare one insufficient-data example.
+- [ ] Prepare at least one recommendation result for each Tourist Category.
+- [ ] Clearly label prepared records as demonstration data.
+- [ ] Capture screenshots for login, registration, tracking, route map, history, recommendations, admin dashboard, AI result, destination management, Firebase Auth and Firestore records.
 
-Completion gate:
+## Current Build Snapshot
 
-- [ ] Non-functional requirements NFR1 to NFR11 have evidence.
-
-## Phase 13: Usability Testing
-
-- [ ] Prepare usability test script.
-- [ ] Prepare feedback form with 1 to 5 rating scale.
-- [ ] UT1: Tourist registers a new account.
-- [ ] UT2: Tourist logs in and reaches tourist interface.
-- [ ] UT3: Tourist grants location access and starts tracking.
-- [ ] UT4: Tourist views movement history on the map.
-- [ ] UT5: Tourist views recommended destinations.
-- [ ] UT6: Administrator logs in and reaches dashboard.
-- [ ] UT7: Administrator views movement summaries.
-- [ ] UT8: Administrator manages destination information.
-- [ ] Record task success rate.
-- [ ] Record task completion time.
-- [ ] Record user satisfaction score.
-- [ ] Summarize usability issues and refinements.
-
-Completion gate:
-
-- [ ] At least 80% of assigned tasks are completed successfully.
-- [ ] Average user satisfaction is at least 4 out of 5.
-
-## Phase 14: Report Evidence And Screenshots
-
-- [ ] Capture registration screen.
-- [ ] Capture login screen.
-- [ ] Capture location permission/tracking screen.
-- [ ] Capture recorded coordinate data.
-- [ ] Capture trip route map.
-- [ ] Capture destination marker/detail screen.
-- [ ] Capture recommendation output.
-- [ ] Capture admin dashboard.
-- [ ] Capture dashboard chart output.
-- [ ] Capture destination management screen.
-- [ ] Capture Firebase user record.
-- [ ] Capture Firestore movement records.
-- [ ] Capture AI cluster result.
-- [ ] Capture Decision Tree profile result.
-- [ ] Capture testing result tables.
-
-Completion gate:
-
-- [ ] Every implemented DPP feature has screenshot or data evidence for the final report.
-
-## Phase 15: Final Polish And Submission Readiness
-
-- [ ] Remove unused demo-only code or clearly label it as prototype/demo data.
-- [ ] Replace placeholder metrics with real test results.
-- [ ] Check spelling and UI labels.
-- [ ] Check responsive layout on laptop and mobile widths.
-- [ ] Confirm OpenStreetMap attribution is visible.
-- [ ] Confirm all buttons have clear states.
-- [ ] Confirm no secrets are committed to Git.
-- [ ] Confirm `.env.local` is ignored.
-- [ ] Confirm README run instructions work on your machine.
-- [ ] Confirm final build passes.
-- [ ] Push final version to GitHub.
-- [ ] Tag or mark final submission commit.
-
-Completion gate:
-
-- [ ] Final submitted system matches the DPP scope and has implementation, test, and report evidence.
-
-## Current Reality Snapshot
-
-- [x] UI prototype exists.
-- [x] Local browser-storage flow exists.
-- [x] Map display exists.
-- [x] Admin dashboard shell exists.
-- [x] First recommendation logic exists.
-- [x] GitHub remote is connected locally.
-- [x] Frontend K-Means and Decision Tree prototype logic exists.
-- [ ] Firebase project credentials are not completed yet.
-- [ ] Formal screenshot/usability testing evidence is not produced yet.
-- [ ] Final report evidence/screenshots are not collected yet.
+- [x] The project already has a strong working prototype foundation.
+- [x] The app already covers most of the technical DPP requirements in some form.
+- [x] The tourist UX is improving but still needs to be simplified around the seven-page flow.
+- [x] Firebase integration is active but still needs final testing and data-structure confirmation.
+- [ ] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
+- [ ] Report/evidence work should come after the app flow is stable.

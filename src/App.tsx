@@ -410,7 +410,6 @@ function App() {
         ] as const)
       : ([
           ["overview", "Home", Compass],
-          ["tracking", "Track", Navigation],
           ["history", "Trips", MapPinned],
           ["recommendations", "Places", Sparkles],
           ["profile", "Profile", UserRound],
@@ -700,6 +699,7 @@ function TouristWorkspace({
   const activeTrip = getActiveTrip(data, user.id);
   const currentConsent = getGrantedConsent(data, user.id);
   const tripPoints = data.points.filter((point) => userTrips.some((trip) => trip.id === point.tripId));
+  const activePoints = activeTrip ? data.points.filter((point) => point.tripId === activeTrip.id) : [];
   const latestAnalysis = data.analyses.filter((analysis) => analysis.userId === user.id).sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
   const recommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
@@ -713,6 +713,9 @@ function TouristWorkspace({
   const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
   const selectedTripSummary = selectedTrip ? summarizeTrip(data, selectedTrip.id) : null;
   const tripSummaries = useMemo(() => summarizeUserTrips(data, user.id), [data, user.id]);
+  const recentTrips = useMemo(() => [...userTrips].sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()), [userTrips]);
+  const recentTrip = recentTrips[0];
+  const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
@@ -814,6 +817,10 @@ function TouristWorkspace({
   };
 
   const stopTrip = () => {
+    if (!window.confirm("Stop recording this trip?")) {
+      return;
+    }
+
     if (watchId.current !== null) {
       navigator.geolocation.clearWatch(watchId.current);
       watchId.current = null;
@@ -929,8 +936,6 @@ function TouristWorkspace({
   }
 
   if (view === "tracking") {
-    const activePoints = activeTrip ? data.points.filter((point) => point.tripId === activeTrip.id) : [];
-
     return (
       <Page title="Track My Trip" eyebrow="Tourist">
         <div className="two-column">
@@ -1075,35 +1080,124 @@ function TouristWorkspace({
 
   return (
     <Page title={displayName ? `Welcome back, ${displayName}` : "Plan Your Visit"} eyebrow="Tourist">
-      <TouristNextAction
-        hasConsent={Boolean(currentConsent)}
-        hasActiveTrip={Boolean(activeTrip)}
-        isLiveTracking={isLiveTracking}
-        pointCount={tripPoints.length}
-        recommendationCount={recommendations.length}
-        onAllowLocation={grantConsent}
-        onStartTrip={startTrip}
-        onResumeTrip={resumeLiveTracking}
-        onOpenPlaces={() => onViewChange("recommendations")}
-        onOpenTracking={() => onViewChange("tracking")}
-      />
+      <section className="tourist-home-flow">
+        <div className="tracking-status-card">
+          <span>{isLiveTracking ? "Active" : activeTrip ? "Paused" : recentTrip ? "Completed" : "Not Started"}</span>
+          <div>
+            <h2>{activeTrip ? "Your trip is being recorded" : recentTrip ? "Ready for your next trip" : "Start your first tracked trip"}</h2>
+            <p>
+              {activeTrip
+                ? "Keep this page open while your trip is being recorded."
+                : recentTrip
+                  ? "Use Home when you are ready to record another route."
+                  : "Allow location, start a trip, and the app will use your route to improve recommendations."}
+            </p>
+          </div>
+        </div>
 
-      <div className="tourist-home-grid">
-        <div className="stack">
-          <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} />
-          <section className="tourist-section">
-            <div className="section-heading">
-              <h2>Recommended For You</h2>
-              <button className="secondary-action compact-action" onClick={() => onViewChange("recommendations")}>
-                <Sparkles size={16} />
-                View all
+        <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} activePoint={activePoints.at(-1) ?? tripPoints.at(-1)} />
+
+        <section className="mobile-trip-controls">
+          <div className="consent-box">
+            <ShieldCheck size={22} />
+            <div>
+              <strong>{currentConsent ? "Location is allowed" : "Allow location first"}</strong>
+              <p>{currentConsent ? "You can start a trip whenever you are ready." : "Location is requested only when you choose to record a trip."}</p>
+            </div>
+          </div>
+
+          {!currentConsent && (
+            <button className="primary-action wide" onClick={grantConsent}>
+              <ShieldCheck size={18} />
+              Allow Location Access
+            </button>
+          )}
+
+          {currentConsent && (
+            <div className="mobile-action-row">
+              <button className="primary-action" onClick={startTrip} disabled={Boolean(activeTrip)}>
+                <Play size={18} />
+                Start Trip
+              </button>
+              <button className="secondary-action" onClick={stopTrip} disabled={!activeTrip}>
+                <Square size={18} />
+                Stop Trip
               </button>
             </div>
-            <RecommendationList recommendations={recommendations.slice(0, 2)} destinations={data.destinations} demand={destinationDemand} compact />
+          )}
+
+          {activeTrip && !isLiveTracking && (
+            <button className="secondary-action wide" onClick={resumeLiveTracking}>
+              <Navigation size={18} />
+              Resume tracking
+            </button>
+          )}
+
+          {activeTrip && (
+            <button className="secondary-action wide" onClick={addDemoPoint}>
+              Add demo movement point
+            </button>
+          )}
+
+          {trackingMessage && <p className="status-message">{trackingMessage}</p>}
+
+          {userTrips.length === 0 && (
+            <section className="new-user-guide">
+              <strong>How it works</strong>
+              <ol>
+                <li>Allow location when you are ready to record.</li>
+                <li>Start a trip and keep this page open.</li>
+                <li>Stop the trip to update your travel category and recommendations.</li>
+              </ol>
+            </section>
+          )}
+        </section>
+
+        <MetricGrid
+          items={[
+            ["Trip status", isLiveTracking ? "Active" : activeTrip ? "Paused" : recentTrip ? "Completed" : "Not Started"],
+            ["Saved points", (activeTrip ? activePoints.length : tripPoints.length).toString()],
+            ["Latest category", latestAnalysis?.profile ?? "Learning"],
+            ["Distance", `${activeTripSummary?.distanceKm ?? recentTripSummary?.distanceKm ?? 0} km`],
+          ]}
+        />
+
+        <section className="tourist-section">
+          <div className="section-heading">
+            <h2>Recommended For You</h2>
+            <button className="secondary-action compact-action" onClick={() => onViewChange("recommendations")}>
+              <Sparkles size={16} />
+              View all
+            </button>
+          </div>
+          <RecommendationList recommendations={recommendations.slice(0, 3)} destinations={data.destinations} demand={destinationDemand} compact />
+        </section>
+
+        {recentTrip ? (
+          <section className="tourist-section recent-trip-card">
+            <div className="section-heading">
+              <h2>Recent Trip</h2>
+              <button className="secondary-action compact-action" onClick={() => onViewChange("history")}>
+                <MapPinned size={16} />
+                View trips
+              </button>
+            </div>
+            <p>{formatDateTime(recentTrip.startedAt)}</p>
+            <div className="trip-preview-stats">
+              <span>{recentTrip.status}</span>
+              <span>{recentTripSummary?.durationMinutes ?? 0} min</span>
+              <span>{recentTripSummary?.pointCount ?? 0} points</span>
+              <span>{recentTripSummary?.visitedDestinationCount ?? 0} stops</span>
+            </div>
           </section>
-        </div>
-        <div className="stack">
-          <MovementMap points={tripPoints} destinations={data.destinations} />
+        ) : null}
+
+        <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
+
+        <section className="tourist-section">
+          <div className="section-heading">
+            <h2>Destination Info</h2>
+          </div>
           <DestinationPanel
             destinations={data.destinations.slice(0, 6)}
             demand={destinationDemand}
@@ -1112,17 +1206,8 @@ function TouristWorkspace({
             onSelect={setSelectedDestinationId}
           />
           {selectedDestination && <DestinationDetail destination={selectedDestination} demand={destinationDemand.find((row) => row.destinationId === selectedDestination.id)} />}
-        </div>
-      </div>
-
-      <MetricGrid
-        items={[
-          ["Trips saved", userTrips.length.toString()],
-          ["Route points", tripPoints.length.toString()],
-          ["Travel style", latestAnalysis?.profile ?? "Learning"],
-          ["Confidence", latestAnalysis ? `${Math.round(latestAnalysis.classificationConfidence * 100)}%` : "Learning"],
-        ]}
-      />
+        </section>
+      </section>
     </Page>
   );
 }
@@ -1240,79 +1325,6 @@ function TouristProfileForm({
         </div>
       </section>
     </form>
-  );
-}
-
-function TouristNextAction({
-  hasConsent,
-  hasActiveTrip,
-  isLiveTracking,
-  pointCount,
-  recommendationCount,
-  onAllowLocation,
-  onStartTrip,
-  onResumeTrip,
-  onOpenPlaces,
-  onOpenTracking,
-}: {
-  hasConsent: boolean;
-  hasActiveTrip: boolean;
-  isLiveTracking: boolean;
-  pointCount: number;
-  recommendationCount: number;
-  onAllowLocation: () => void;
-  onStartTrip: () => void;
-  onResumeTrip: () => void;
-  onOpenPlaces: () => void;
-  onOpenTracking: () => void;
-}) {
-  const title = !hasConsent ? "Ready when you allow location" : hasActiveTrip ? "Your trip is in progress" : recommendationCount > 0 ? "Your places are ready" : "Start a trip to get better suggestions";
-  const message = !hasConsent
-    ? "Turn on location once, then start a trip when you begin moving."
-    : hasActiveTrip
-      ? `${pointCount} route point(s) saved so far.`
-      : recommendationCount > 0
-        ? `${recommendationCount} recommendation(s) are based on your route history.`
-        : "A short route is enough for the app to learn your travel style.";
-
-  return (
-    <section className="tourist-next-card">
-      <div>
-        <span>{isLiveTracking ? "Recording now" : hasActiveTrip ? "Trip paused" : hasConsent ? "Location allowed" : "Location off"}</span>
-        <h2>{title}</h2>
-        <p>{message}</p>
-      </div>
-      <div className="tourist-next-actions">
-        {!hasConsent ? (
-          <button className="primary-action" onClick={onAllowLocation}>
-            <ShieldCheck size={18} />
-            Allow location
-          </button>
-        ) : hasActiveTrip ? (
-          <>
-            <button className="primary-action" onClick={isLiveTracking ? onOpenTracking : onResumeTrip}>
-              <Navigation size={18} />
-              {isLiveTracking ? "View trip" : "Resume trip"}
-            </button>
-            <button className="secondary-action" onClick={onOpenTracking}>
-              <MapPinned size={18} />
-              Trip controls
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="primary-action" onClick={onStartTrip}>
-              <Play size={18} />
-              Start trip
-            </button>
-            <button className="secondary-action" onClick={onOpenPlaces}>
-              <Sparkles size={18} />
-              See places
-            </button>
-          </>
-        )}
-      </div>
-    </section>
   );
 }
 
