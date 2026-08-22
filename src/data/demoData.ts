@@ -115,20 +115,24 @@ const travelPreferencesByProfile: Record<TouristProfile, DestinationCategory[]> 
 
 const routesByProfile: Record<TouristProfile, string[][]> = {
   cultural: [
-    ["batu-caves", "islamic-arts-museum", "merdeka-square", "central-market", "merdeka-square"],
-    ["george-town-heritage-zone", "jonker-street", "merdeka-square", "islamic-arts-museum", "central-market"],
+    ["batu-caves", "thean-hou-temple", "islamic-arts-museum", "kwai-chai-hong", "merdeka-square"],
+    ["kek-lok-si-temple", "george-town-heritage-zone", "hin-bus-depot", "jonker-street", "concubine-lane"],
+    ["mari-mari-cultural-village", "sarawak-cultural-village", "islamic-arts-museum", "thean-hou-temple", "kwai-chai-hong"],
   ],
   nature: [
-    ["perdana-botanical-garden", "penang-hill", "tanjung-aru", "perdana-botanical-garden", "penang-hill"],
-    ["penang-hill", "perdana-botanical-garden", "klcc-park", "tanjung-aru", "perdana-botanical-garden"],
+    ["perdana-botanical-garden", "taman-botani-putrajaya", "sekinchan-paddy-gallery", "perdana-botanical-garden", "klcc-park"],
+    ["penang-hill", "kek-lok-si-temple", "tanjung-aru", "mari-mari-cultural-village", "penang-hill"],
+    ["semenggoh-nature-reserve", "sarawak-cultural-village", "tanjung-aru", "sekinchan-paddy-gallery", "taman-botani-putrajaya"],
   ],
   urban: [
-    ["klcc-park", "central-market", "jonker-street", "klcc-park", "central-market"],
-    ["central-market", "klcc-park", "merdeka-square", "jonker-street", "central-market"],
+    ["klcc-park", "kampung-baru-kl", "central-market", "kwai-chai-hong", "hin-bus-depot"],
+    ["central-market", "klcc-park", "kampung-baru-kl", "jonker-street", "concubine-lane"],
+    ["hin-bus-depot", "george-town-heritage-zone", "central-market", "klcc-park", "kampung-baru-kl"],
   ],
   mixed: [
-    ["merdeka-square", "perdana-botanical-garden", "klcc-park", "central-market", "islamic-arts-museum"],
-    ["george-town-heritage-zone", "penang-hill", "central-market", "klcc-park", "jonker-street"],
+    ["merdeka-square", "perdana-botanical-garden", "klcc-park", "kampung-baru-kl", "islamic-arts-museum"],
+    ["george-town-heritage-zone", "penang-hill", "hin-bus-depot", "kek-lok-si-temple", "central-market"],
+    ["kellies-castle", "concubine-lane", "sekinchan-paddy-gallery", "taman-botani-putrajaya", "thean-hou-temple"],
   ],
 };
 

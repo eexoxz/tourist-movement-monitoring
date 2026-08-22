@@ -27,12 +27,14 @@ Do not build:
 
 ## Malaysia Destination Scope
 
-- [ ] Keep destination data focused on Malaysian tourist locations only.
-- [ ] Include places beyond obvious major landmarks, such as locally known food streets, heritage walks, parks, viewpoints, markets and neighbourhood spots.
-- [ ] Cover multiple Malaysian states/cities instead of making the prototype only Kuala Lumpur-heavy.
-- [ ] Label destination categories consistently so K-Means and Decision Tree evidence stays explainable.
-- [ ] Add a balanced mix of Cultural, Nature and Urban destinations, with Food, Heritage and Coastal only where they help the report.
-- [ ] Avoid making recommendations look like a generic “top 10 tourist attractions” list.
+- [x] Keep destination data focused on Malaysian tourist locations only.
+- [x] Include places beyond obvious major landmarks, such as locally known food streets, heritage walks, parks, viewpoints, markets and neighbourhood spots.
+- [x] Keep famous landmarks visible where tourist movement would realistically be high, but do not let them dominate every recommendation.
+- [x] Verify each seeded destination is real, currently existing and suitable for tourist visits before adding it to the app.
+- [x] Cover multiple Malaysian states/cities instead of making the prototype only Kuala Lumpur-heavy.
+- [x] Label destination categories consistently so K-Means and Decision Tree evidence stays explainable.
+- [x] Add a balanced mix of Cultural, Nature and Urban destinations, with Food, Heritage and Coastal only where they help the report.
+- [x] Avoid making recommendations look like a generic “top 10 tourist attractions” list.
 
 ## Seven Main Pages
 
@@ -257,6 +259,14 @@ Current alignment notes:
 - [ ] Add retry actions where failures are recoverable.
 - [ ] Test Tourist flow at mobile width.
 - [ ] Test Chrome, Edge and Firefox.
+
+## Map Experience
+
+- [ ] Keep Leaflet/OpenStreetMap as the map engine unless the project scope changes.
+- [ ] Make the map feel visually aligned with the app through custom markers, route styling and calmer controls.
+- [ ] Reduce unnecessary map visual noise where possible so tracking and destination signals are easier to understand.
+- [ ] Add a simplified tourist map mode focused on current location, route, destination markers and selected place details.
+- [ ] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System
 

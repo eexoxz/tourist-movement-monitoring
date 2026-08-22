@@ -239,8 +239,7 @@ function App() {
 
         const refreshed = refreshAllRecommendations(cloudData);
         setData(refreshed);
-        saveData(refreshed);
-        setSyncStatus("Synced with Firebase Firestore");
+        setSyncStatus("Loaded from Firebase Firestore");
       })
       .catch(() => {
         if (isMounted) {

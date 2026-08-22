@@ -92,11 +92,11 @@ describe("dashboard service", () => {
     const coverage = getDestinationCategoryCoverage(initialData);
 
     expect(coverage).toEqual({
-      cultural: 2,
-      nature: 2,
-      urban: 1,
-      heritage: 2,
-      food: 2,
+      cultural: 6,
+      nature: 5,
+      urban: 2,
+      heritage: 5,
+      food: 3,
       coastal: 1,
     });
   });
