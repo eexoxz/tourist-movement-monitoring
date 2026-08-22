@@ -1538,6 +1538,32 @@ textarea {
   gap: 18px;
 }
 
+.demo-data-banner {
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid #b7efe6;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.1), transparent 60%),
+    #ffffff;
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+}
+
+.demo-data-banner strong,
+.demo-data-banner p {
+  margin: 0;
+}
+
+.demo-data-banner strong {
+  color: var(--teal-dark);
+}
+
+.demo-data-banner p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .admin-tab-heading {
   display: flex;
   align-items: center;

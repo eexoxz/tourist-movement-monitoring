@@ -16,6 +16,7 @@ const FIRESTORE_COLLECTIONS = {
   analyses: "analyses",
   recommendations: "recommendations",
 } as const;
+const FIRESTORE_BATCH_LIMIT = 450;
 
 export function loadData(): AppData {
   const raw = localStorage.getItem(DATA_KEY);
@@ -76,7 +77,7 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
 }
 
 export function resetData() {
-  saveData(initialData);
+  saveLocalData(initialData);
   clearSession();
   return initialData;
 }
@@ -147,22 +148,44 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
 
   const actorId = currentActor.id;
   const db = services.db;
-  const batch = writeBatch(services.db);
+  type FirestoreWriteBatch = ReturnType<typeof writeBatch>;
+  let batch = writeBatch(db);
+  let batchWriteCount = 0;
+
+  const queueWrite = async (write: (currentBatch: FirestoreWriteBatch) => void) => {
+    write(batch);
+    batchWriteCount += 1;
+
+    if (batchWriteCount >= FIRESTORE_BATCH_LIMIT) {
+      await batch.commit();
+      batch = writeBatch(db);
+      batchWriteCount = 0;
+    }
+  };
+
+  const commitQueuedWrites = async () => {
+    if (batchWriteCount > 0) {
+      await batch.commit();
+      batch = writeBatch(db);
+      batchWriteCount = 0;
+    }
+  };
+
   const syncCollection = async <T>(name: string, rows: T[], getId: (row: T) => string) => {
     const existing = await getDocs(collection(db, name));
     const nextIds = new Set<string>();
 
-    rows.forEach((row) => {
+    for (const row of rows) {
       const id = getId(row);
       nextIds.add(id);
-      batch.set(doc(db, name, id), cleanFirestoreData(row) as Record<string, unknown>);
-    });
+      await queueWrite((currentBatch) => currentBatch.set(doc(db, name, id), cleanFirestoreData(row) as Record<string, unknown>));
+    }
 
-    existing.docs.forEach((snapshot) => {
+    for (const snapshot of existing.docs) {
       if (!nextIds.has(snapshot.id)) {
-        batch.delete(snapshot.ref);
+        await queueWrite((currentBatch) => currentBatch.delete(snapshot.ref));
       }
-    });
+    }
   };
 
   if (currentActor?.role === "tourist") {
@@ -174,31 +197,35 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     const nextAnalysisIds = new Set(data.analyses.filter((analysis) => analysis.userId === currentActor.id).map((analysis) => analysis.tripId));
     const nextRecommendationIds = new Set(data.recommendations.filter((recommendation) => recommendation.userId === currentActor.id).map((recommendation) => recommendation.id));
 
-    batch.set(doc(db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>);
+    await queueWrite((currentBatch) =>
+      currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>)
+    );
 
-    data.consents.filter((consent) => consent.userId === currentActor.id).forEach((consent) => {
-      batch.set(doc(db, FIRESTORE_COLLECTIONS.consents, consent.id), cleanFirestoreData(consent) as Record<string, unknown>);
-    });
-    data.trips.filter((trip) => trip.userId === currentActor.id).forEach((trip) => {
-      batch.set(doc(db, FIRESTORE_COLLECTIONS.trips, trip.id), cleanFirestoreData(trip) as Record<string, unknown>);
-    });
-    data.points.filter((point) => ownTripIds.has(point.tripId)).forEach((point) => {
-      batch.set(doc(db, FIRESTORE_COLLECTIONS.movementPoints, point.id), cleanFirestoreData(point) as Record<string, unknown>);
-    });
-    data.analyses.filter((analysis) => analysis.userId === currentActor.id).forEach((analysis) => {
-      batch.set(doc(db, FIRESTORE_COLLECTIONS.analyses, analysis.tripId), cleanFirestoreData(analysis) as Record<string, unknown>);
-    });
-    data.recommendations.filter((recommendation) => recommendation.userId === currentActor.id).forEach((recommendation) => {
-      batch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>);
-    });
+    for (const consent of data.consents.filter((row) => row.userId === currentActor.id)) {
+      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.consents, consent.id), cleanFirestoreData(consent) as Record<string, unknown>));
+    }
+    for (const trip of data.trips.filter((row) => row.userId === currentActor.id)) {
+      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.trips, trip.id), cleanFirestoreData(trip) as Record<string, unknown>));
+    }
+    for (const point of data.points.filter((row) => ownTripIds.has(row.tripId))) {
+      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.movementPoints, point.id), cleanFirestoreData(point) as Record<string, unknown>));
+    }
+    for (const analysis of data.analyses.filter((row) => row.userId === currentActor.id)) {
+      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.analyses, analysis.tripId), cleanFirestoreData(analysis) as Record<string, unknown>));
+    }
+    for (const recommendation of data.recommendations.filter((row) => row.userId === currentActor.id)) {
+      await queueWrite((currentBatch) =>
+        currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>)
+      );
+    }
 
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.consents, nextConsentIds);
-    existingTrips.docs.forEach((snapshot) => {
+    for (const snapshot of existingTrips.docs) {
       const trip = snapshot.data() as TripSession;
       if (trip.userId === currentActor.id && !nextTripIds.has(snapshot.id)) {
-        batch.delete(snapshot.ref);
+        await queueWrite((currentBatch) => currentBatch.delete(snapshot.ref));
       }
-    });
+    }
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.movementPoints, nextPointIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.analyses, nextAnalysisIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds);
@@ -212,16 +239,16 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await syncCollection(FIRESTORE_COLLECTIONS.recommendations, data.recommendations, (recommendation) => recommendation.id);
   }
 
-  await batch.commit();
+  await commitQueuedWrites();
   return true;
 
   async function deleteMissingOwnedDocs(name: string, nextIds: Set<string>) {
     const existing = await getDocs(query(collection(db, name), where("userId", "==", actorId)));
-    existing.docs.forEach((snapshot) => {
+    for (const snapshot of existing.docs) {
       if (!nextIds.has(snapshot.id)) {
-        batch.delete(snapshot.ref);
+        await queueWrite((currentBatch) => currentBatch.delete(snapshot.ref));
       }
-    });
+    }
   }
 }
 

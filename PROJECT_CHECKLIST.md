@@ -9,6 +9,7 @@ Tourist authentication -> consent-based trip tracking -> stored movement route -
 ## Scope Decision
 
 - [x] Keep the system as an academic prototype for selected Malaysian tourist locations.
+- [x] Keep the app scope Malaysia-only for this FYP build.
 - [x] Support only two user roles: Tourist and Tourism Administrator.
 - [x] Use React, Firebase Authentication, Cloud Firestore, Browser Geolocation API, OpenStreetMap, Leaflet, K-Means and Decision Tree logic.
 - [x] Keep the finished app to seven main pages only.
@@ -22,6 +23,16 @@ Do not build:
 - [x] No AI chatbot or LLM feature.
 - [x] No emergency monitoring or nationwide live tracking.
 - [x] No travel agency, researcher or government integration accounts.
+- [x] No Singapore or other-country expansion unless the DPP/report scope changes.
+
+## Malaysia Destination Scope
+
+- [ ] Keep destination data focused on Malaysian tourist locations only.
+- [ ] Include places beyond obvious major landmarks, such as locally known food streets, heritage walks, parks, viewpoints, markets and neighbourhood spots.
+- [ ] Cover multiple Malaysian states/cities instead of making the prototype only Kuala Lumpur-heavy.
+- [ ] Label destination categories consistently so K-Means and Decision Tree evidence stays explainable.
+- [ ] Add a balanced mix of Cultural, Nature and Urban destinations, with Food, Heritage and Coastal only where they help the report.
+- [ ] Avoid making recommendations look like a generic “top 10 tourist attractions” list.
 
 ## Seven Main Pages
 
@@ -218,7 +229,18 @@ Current alignment notes:
 - [ ] Decision Tree output should be Cultural Tourist, Nature Tourist, Urban Tourist or Mixed Tourist.
 - [x] Recommendation output should be exactly top three unvisited destinations.
 - [ ] Do not show unsupported personalised results when movement data is insufficient.
-- [ ] Clearly label prepared demo records as demonstration data.
+- [x] Clearly label prepared demo records as demonstration data.
+
+## Demonstration Dataset
+
+- [x] Seed at least 100 synthetic Tourist users for FYP demonstration.
+- [x] Seed synthetic location consent records, completed trips and movement points.
+- [x] Keep generated movement records deterministic so reset/demo testing is repeatable.
+- [x] Keep original demo login accounts available.
+- [x] Support chunked Firestore saves for larger demonstration datasets.
+- [ ] Keep synthetic seed size large enough for dashboard/AI evidence but small enough for fast local testing and Firebase sync.
+- [ ] Add an administrator control to regenerate or reload the demonstration dataset on demand.
+- [ ] Document in the report that seeded movement records are synthetic demonstration data, not real collected tourist data.
 
 ## Mobile And Usability
 
@@ -305,7 +327,7 @@ Current alignment notes:
 - [ ] Prepare labelled records for Decision Tree testing.
 - [ ] Prepare one insufficient-data example.
 - [ ] Prepare at least one recommendation result for each Tourist Category.
-- [ ] Clearly label prepared records as demonstration data.
+- [x] Clearly label prepared records as demonstration data.
 - [ ] Capture screenshots for login, registration, tracking, route map, history, recommendations, admin dashboard, AI result, destination management, Firebase Auth and Firestore records.
 
 ## Current Build Snapshot

@@ -18,12 +18,12 @@ describe("dashboard service", () => {
     const summary = summarizeDashboard(initialData);
 
     expect(summary).toEqual({
-      touristCount: 4,
-      consentedTouristCount: 4,
+      touristCount: initialData.users.filter((user) => user.role === "tourist").length,
+      consentedTouristCount: initialData.consents.filter((consent) => consent.granted).length,
       activeTripCount: 0,
-      completedTripCount: 4,
-      movementPointCount: 15,
-      destinationCount: 10,
+      completedTripCount: initialData.trips.filter((trip) => trip.status === "completed").length,
+      movementPointCount: initialData.points.length,
+      destinationCount: initialData.destinations.length,
     });
   });
 
@@ -35,7 +35,7 @@ describe("dashboard service", () => {
   it("lists tourist accounts separately from administrator accounts", () => {
     const tourists = getTourists(initialData);
 
-    expect(tourists).toHaveLength(4);
+    expect(tourists.length).toBeGreaterThanOrEqual(100);
     expect(tourists.every((tourist) => tourist.role === "tourist")).toBe(true);
   });
 
@@ -107,8 +107,10 @@ describe("dashboard service", () => {
     const trend = getDailyMovementTrend(initialData, 30);
     const totalTrendPoints = Object.values(trend).reduce((total, count) => total + count, 0);
 
-    expect(profiles.mixed).toBe(1);
-    expect(profiles.nature).toBe(1);
+    expect(profiles.mixed).toBeGreaterThan(1);
+    expect(profiles.nature).toBeGreaterThan(1);
+    expect(profiles.cultural).toBeGreaterThan(1);
+    expect(profiles.urban).toBeGreaterThan(1);
     expect(Object.keys(trend)).toHaveLength(30);
     expect(totalTrendPoints).toBe(initialData.points.length);
   });

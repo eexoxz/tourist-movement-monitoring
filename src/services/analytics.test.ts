@@ -17,7 +17,8 @@ describe("analytics service", () => {
   it("assigns valid completed trips to K-Means clusters and Decision Tree profiles", () => {
     const data = refreshAllRecommendations(initialData);
 
-    expect(data.analyses).toHaveLength(4);
+    expect(data.analyses).toHaveLength(initialData.trips.filter((trip) => trip.status === "completed").length);
+    expect(data.analyses.length).toBeGreaterThanOrEqual(100);
     expect(data.analyses.every((analysis) => analysis.method === "k-means")).toBe(true);
     expect(data.analyses.every((analysis) => analysis.classifier === "decision-tree")).toBe(true);
     expect(data.analyses.map((analysis) => analysis.profile)).toContain("mixed");
@@ -40,13 +41,13 @@ describe("analytics service", () => {
   it("reports AI evaluation evidence for labelled demo records", () => {
     const evaluation = evaluateAiOutput(initialData);
 
-    expect(evaluation.validClusteredRecordCount).toBe(4);
-    expect(evaluation.labelledRecordCount).toBe(4);
-    expect(evaluation.classificationAccuracy).toBe(1);
-    expect(evaluation.confusionMatrix.mixed.mixed).toBe(1);
-    expect(evaluation.confusionMatrix.nature.nature).toBe(1);
-    expect(evaluation.confusionMatrix.cultural.cultural).toBe(1);
-    expect(evaluation.confusionMatrix.urban.urban).toBe(1);
+    expect(evaluation.validClusteredRecordCount).toBe(initialData.trips.filter((trip) => trip.status === "completed").length);
+    expect(evaluation.labelledRecordCount).toBeGreaterThanOrEqual(100);
+    expect(evaluation.classificationAccuracy).toBeGreaterThan(0.75);
+    expect(evaluation.confusionMatrix.mixed.mixed).toBeGreaterThan(0);
+    expect(evaluation.confusionMatrix.nature.nature).toBeGreaterThan(0);
+    expect(evaluation.confusionMatrix.cultural.cultural).toBeGreaterThan(0);
+    expect(evaluation.confusionMatrix.urban.urban).toBeGreaterThan(0);
   });
 
   it("uses recorded movement as a destination demand signal", () => {

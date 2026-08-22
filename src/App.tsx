@@ -407,7 +407,7 @@ function App() {
     }
 
     const freshData = refreshAllRecommendations(resetData());
-    saveData(freshData);
+    saveData(freshData, currentUser);
     setData(freshData);
     setSessionUserId(null);
     setView("overview");
@@ -1774,6 +1774,14 @@ function AdminWorkspace({
         </button>
       }
     >
+      <section className="demo-data-banner">
+        <strong>Demonstration dataset</strong>
+        <p>
+          This prototype includes prepared synthetic movement records so the dashboard, K-Means clustering, Decision Tree classification and recommendation flow can be demonstrated without
+          recruiting real tourists.
+        </p>
+      </section>
+
       <div className="segmented-control admin-tabs" aria-label="Administrator dashboard sections">
         <button className={adminTab === "overview" ? "active" : ""} type="button" onClick={() => setAdminTab("overview")}>
           Overview

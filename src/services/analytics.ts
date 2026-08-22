@@ -595,7 +595,7 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
   });
 }
 
-export function recommendForUser(userId: string, data: AppData, analysis?: AnalysisResult): Recommendation[] {
+export function recommendForUser(userId: string, data: AppData, analysis?: AnalysisResult, destinationDemand?: DestinationDemand[]): Recommendation[] {
   const userTrips = data.trips.filter((trip) => trip.userId === userId);
   const points = data.points.filter((point) => userTrips.some((trip) => trip.id === point.tripId));
   const visited = new Set(
@@ -607,7 +607,7 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
   const latestPoint = points.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
   const profile = analysis?.profile ?? "mixed";
   const hasPersonalizedAnalysis = Boolean(analysis);
-  const demandByDestination = new Map(calculateDestinationDemand(data).map((demand) => [demand.destinationId, demand]));
+  const demandByDestination = new Map((destinationDemand ?? calculateDestinationDemand(data)).map((demand) => [demand.destinationId, demand]));
 
   return data.destinations
     .filter((destination) => !visited.has(destination.id))
@@ -660,7 +660,8 @@ export function refreshAnalysis(data: AppData, userId: string): AppData {
     .filter((analysis) => analysis.userId === userId)
     .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
   const recommendationData = { ...data, analyses };
-  const recommendations = recommendForUser(userId, recommendationData, latestAnalysis);
+  const destinationDemand = calculateDestinationDemand(recommendationData);
+  const recommendations = recommendForUser(userId, recommendationData, latestAnalysis, destinationDemand);
 
   return {
     ...data,
@@ -673,11 +674,12 @@ export function refreshAllRecommendations(data: AppData): AppData {
   const analyses = analyzeAllTrips(data);
   const users = data.users.filter((user) => user.role === "tourist");
   const withAnalyses = { ...data, analyses };
+  const destinationDemand = calculateDestinationDemand(withAnalyses);
   const recommendations = users.flatMap((user) => {
     const latestAnalysis = analyses
       .filter((analysis) => analysis.userId === user.id)
       .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
-    return recommendForUser(user.id, withAnalyses, latestAnalysis);
+    return recommendForUser(user.id, withAnalyses, latestAnalysis, destinationDemand);
   });
 
   return { ...withAnalyses, recommendations };
