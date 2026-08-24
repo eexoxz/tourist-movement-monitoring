@@ -132,6 +132,17 @@ function analysisKey(analysis: AnalysisResult) {
   return `${analysis.tripId}:${analysis.generatedAt}`;
 }
 
+function getRecognizedDestinationNames(points: MovementPoint[], destinations: Destination[]) {
+  const names = points
+    .map((point) => {
+      const nearest = nearestDestination(point, destinations);
+      return nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
+    })
+    .filter((name): name is string => Boolean(name));
+
+  return Array.from(new Set(names));
+}
+
 function geolocationErrorMessage(error: GeolocationPositionError) {
   if (error.code === error.PERMISSION_DENIED) {
     return "Location permission was denied. Tracking was stopped and no browser movement point was saved.";
@@ -923,16 +934,19 @@ function TouristWorkspace({
     ? data.analyses.find((analysis) => analysis.tripId === selectedTrip.id && analysis.userId === user.id) ?? null
     : null;
   const selectedTripDestinationNames = useMemo(() => {
-    const names = selectedTripPoints
-      .map((point) => {
-        const nearest = nearestDestination(point, data.destinations);
-        return nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
-      })
-      .filter((name): name is string => Boolean(name));
-
-    return Array.from(new Set(names));
+    return getRecognizedDestinationNames(selectedTripPoints, data.destinations);
   }, [selectedTripPoints, data.destinations]);
   const selectedTripRecommendations = recommendations.slice(0, 3);
+  const latestCompletedTrip = recentTrips.find((trip) => trip.status === "completed") ?? null;
+  const latestCompletedTripPoints = latestCompletedTrip ? data.points.filter((point) => point.tripId === latestCompletedTrip.id) : [];
+  const latestCompletedTripSummary = latestCompletedTrip ? summarizeTrip(data, latestCompletedTrip.id) : null;
+  const latestCompletedTripAnalysis = latestCompletedTrip
+    ? data.analyses.find((analysis) => analysis.tripId === latestCompletedTrip.id && analysis.userId === user.id) ?? null
+    : null;
+  const latestCompletedTripDestinationNames = useMemo(() => {
+    return getRecognizedDestinationNames(latestCompletedTripPoints, data.destinations);
+  }, [latestCompletedTripPoints, data.destinations]);
+  const tripStateLabel = activeTrip ? "Active" : latestCompletedTrip ? "Completed" : "Not Started";
   const recentTrip = recentTrips[0];
   const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
@@ -1060,6 +1074,7 @@ function TouristWorkspace({
     }
 
     onDataChange(refreshAnalysis(result.data, user.id));
+    setSelectedTripId(result.tripId);
     showTrackingNotice("success", "Trip completed", "Trip stopped and recommendation analysis refreshed.");
   };
 
@@ -1233,6 +1248,20 @@ function TouristWorkspace({
 
             {trackingMessage && <p className="status-message">{trackingMessage}</p>}
 
+            {latestCompletedTrip && latestCompletedTripSummary && (
+              <CompletedTripSummary
+                trip={latestCompletedTrip}
+                summary={latestCompletedTripSummary}
+                destinationNames={latestCompletedTripDestinationNames}
+                analysis={latestCompletedTripAnalysis}
+                onViewHistory={() => {
+                  setSelectedTripId(latestCompletedTrip.id);
+                  onViewChange("history");
+                }}
+                onViewRecommendations={() => onViewChange("recommendations")}
+              />
+            )}
+
             <section className="privacy-actions">
               <strong>Privacy</strong>
               <p>Your route can be deleted from your tourist account at any time.</p>
@@ -1246,7 +1275,7 @@ function TouristWorkspace({
               items={[
                 ["Points saved", activePoints.length.toString()],
                 ["Distance", `${activeTripSummary?.distanceKm ?? 0} km`],
-                ["Trip status", isLiveTracking ? "Recording" : activeTrip ? "Paused" : "Off"],
+                ["Trip status", tripStateLabel],
                 ["Profile", latestAnalysis?.profile ?? "Learning"],
               ]}
             />
@@ -1401,7 +1430,7 @@ function TouristWorkspace({
     <Page title={displayName ? `Welcome back, ${displayName}` : "Plan Your Visit"} eyebrow="Tourist">
       <section className="tourist-home-flow">
         <div className="tracking-status-card">
-          <span>{isLiveTracking ? "Active" : activeTrip ? "Paused" : recentTrip ? "Completed" : "Not Started"}</span>
+          <span>{tripStateLabel}</span>
           <div>
             <h2>{activeTrip ? "Your trip is being recorded" : recentTrip ? "Ready for your next trip" : "Start your first tracked trip"}</h2>
             <p>
@@ -1474,12 +1503,26 @@ function TouristWorkspace({
 
         <MetricGrid
           items={[
-            ["Trip status", isLiveTracking ? "Active" : activeTrip ? "Paused" : recentTrip ? "Completed" : "Not Started"],
+            ["Trip status", tripStateLabel],
             ["Saved points", (activeTrip ? activePoints.length : tripPoints.length).toString()],
             ["Latest category", latestAnalysis?.profile ?? "Learning"],
             ["Distance", `${activeTripSummary?.distanceKm ?? recentTripSummary?.distanceKm ?? 0} km`],
           ]}
         />
+
+        {latestCompletedTrip && latestCompletedTripSummary && (
+          <CompletedTripSummary
+            trip={latestCompletedTrip}
+            summary={latestCompletedTripSummary}
+            destinationNames={latestCompletedTripDestinationNames}
+            analysis={latestCompletedTripAnalysis}
+            onViewHistory={() => {
+              setSelectedTripId(latestCompletedTrip.id);
+              onViewChange("history");
+            }}
+            onViewRecommendations={() => onViewChange("recommendations")}
+          />
+        )}
 
         <section className="tourist-section">
           <div className="section-heading">
@@ -2341,6 +2384,72 @@ function MetricGrid({ items }: { items: [string, string][] }) {
           <strong>{value}</strong>
         </article>
       ))}
+    </section>
+  );
+}
+
+function CompletedTripSummary({
+  trip,
+  summary,
+  destinationNames,
+  analysis,
+  onViewHistory,
+  onViewRecommendations,
+}: {
+  trip: { id: string; startedAt: string; endedAt?: string };
+  summary: TripSummary;
+  destinationNames: string[];
+  analysis: AnalysisResult | null;
+  onViewHistory: () => void;
+  onViewRecommendations: () => void;
+}) {
+  const analysisStatus = analysis ? "Complete" : summary.pointCount >= 2 ? "Ready to refresh" : "Needs at least 2 movement points";
+
+  return (
+    <section className="completed-trip-card">
+      <div className="section-heading">
+        <div>
+          <span>Completed Trip</span>
+          <h2>{formatDateTime(trip.startedAt)}</h2>
+        </div>
+      </div>
+      <div className="completed-trip-grid">
+        <div>
+          <small>Started</small>
+          <strong>{formatDateTime(trip.startedAt)}</strong>
+        </div>
+        <div>
+          <small>Ended</small>
+          <strong>{trip.endedAt ? formatDateTime(trip.endedAt) : "Just now"}</strong>
+        </div>
+        <div>
+          <small>Duration</small>
+          <strong>{summary.durationMinutes} min</strong>
+        </div>
+        <div>
+          <small>Movement points</small>
+          <strong>{summary.pointCount}</strong>
+        </div>
+        <div>
+          <small>Recognised stops</small>
+          <strong>{summary.visitedDestinationCount}</strong>
+        </div>
+        <div>
+          <small>Analysis status</small>
+          <strong>{analysisStatus}</strong>
+        </div>
+      </div>
+      <p>{destinationNames.length > 0 ? destinationNames.join(", ") : "No nearby saved destination was recognised for this trip yet."}</p>
+      <div className="completed-trip-actions">
+        <button className="secondary-action" type="button" onClick={onViewHistory}>
+          <MapPinned size={18} />
+          View Trip History
+        </button>
+        <button className="primary-action" type="button" onClick={onViewRecommendations}>
+          <Sparkles size={18} />
+          View Recommendations
+        </button>
+      </div>
     </section>
   );
 }

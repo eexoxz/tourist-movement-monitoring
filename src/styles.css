@@ -299,6 +299,73 @@ button:disabled {
   line-height: 1.45;
 }
 
+.completed-trip-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #b7efe6;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 64%),
+    #ffffff;
+  box-shadow: 0 14px 28px rgba(73, 55, 32, 0.08);
+}
+
+.completed-trip-card .section-heading {
+  align-items: flex-start;
+}
+
+.completed-trip-card span {
+  color: var(--teal-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.completed-trip-card h2,
+.completed-trip-card p {
+  margin: 0;
+}
+
+.completed-trip-card p {
+  color: #596575;
+  line-height: 1.5;
+}
+
+.completed-trip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.completed-trip-grid div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: #fbfaf6;
+}
+
+.completed-trip-grid small {
+  display: block;
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.completed-trip-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.completed-trip-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .recent-trip-card > p {
   margin: 0;
   color: #596575;
@@ -2374,6 +2441,8 @@ textarea {
 
   .tracking-status-card,
   .mobile-action-row,
+  .completed-trip-grid,
+  .completed-trip-actions,
   .trip-preview-stats,
   .recommendation-profile-card {
     grid-template-columns: 1fr;

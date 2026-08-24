@@ -40,7 +40,7 @@ Do not build:
 
 - [ ] Page 1: Login.
 - [ ] Page 2: Tourist Registration.
-- [ ] Page 3: Tourist Home and Trip Tracking.
+- [x] Page 3: Tourist Home and Trip Tracking.
 - [ ] Page 4: Trip History and Trip Details.
 - [ ] Page 5: Travel Recommendations.
 - [ ] Page 6: Tourism Administrator Dashboard.
@@ -123,12 +123,12 @@ Current alignment notes:
 - [x] Show current-location marker clearly.
 - [x] Add Centre on Current Location control.
 - [x] Add stop confirmation.
-- [ ] Show tracking states as Not Started, Active or Completed.
+- [x] Show tracking states as Not Started, Active or Completed.
 - [x] Display: "Keep this page open while your trip is being recorded."
 - [x] Add a short three-step new-user guide.
 - [x] Add Start Your First Trip action.
-- [ ] Show completed-trip summary with date, start/end time, duration, points, recognised destinations and analysis status.
-- [ ] Add View Trip History and View Recommendations actions after a completed trip.
+- [x] Show completed-trip summary with date, start/end time, duration, points, recognised destinations and analysis status.
+- [x] Add View Trip History and View Recommendations actions after a completed trip.
 - [x] Make Start and Stop buttons full-width on mobile.
 
 ## Page 4: Trip History And Trip Details
