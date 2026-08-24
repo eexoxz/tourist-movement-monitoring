@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import type {
+  AnalysisResult,
   AppData,
   AppView,
   Destination,
@@ -69,7 +70,6 @@ import { addDestinationRecord, deleteDestinationRecord, destinationCategories, u
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
-  getDestinationCategoryCoverage,
   getMovementDataStatus,
   getMovementRecords,
   getMovementTripRecords,
@@ -126,6 +126,10 @@ const demoRoute = [
   [3.1556, 101.7139],
   [3.1579, 101.7116],
 ] as const;
+
+function analysisKey(analysis: AnalysisResult) {
+  return `${analysis.tripId}:${analysis.generatedAt}`;
+}
 
 function geolocationErrorMessage(error: GeolocationPositionError) {
   if (error.code === error.PERMISSION_DENIED) {
@@ -1689,7 +1693,6 @@ function AdminWorkspace({
 }) {
   const tourists = getTourists(data);
   const summary = useMemo(() => summarizeDashboard(data), [data]);
-  const categoryCoverage = useMemo(() => getDestinationCategoryCoverage(data), [data]);
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
   const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data]);
@@ -1703,6 +1706,7 @@ function AdminWorkspace({
   const [planMaxStops, setPlanMaxStops] = useState(5);
   const [planMinimumTier, setPlanMinimumTier] = useState<PlanTier>("emerging");
   const [planDiversifyCategories, setPlanDiversifyCategories] = useState(true);
+  const [selectedAnalysisKey, setSelectedAnalysisKey] = useState<string | null>(null);
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
   const movementRecords = useMemo(
@@ -1747,6 +1751,38 @@ function AdminWorkspace({
   const hasRecordFilters = selectedTouristId !== "all" || selectedTripId !== "all" || Boolean(fromDate) || Boolean(toDate);
   const [selectedRecordTripId, setSelectedRecordTripId] = useState<string | null>(null);
   const selectedRecord = movementTripRecords.find((record) => record.trip.id === selectedRecordTripId) ?? movementTripRecords[0] ?? null;
+  const analysisRows = useMemo(
+    () => [...data.analyses].sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()),
+    [data.analyses]
+  );
+  const selectedAnalysis = analysisRows.find((analysis) => analysisKey(analysis) === selectedAnalysisKey) ?? analysisRows[0] ?? null;
+  const selectedAnalysisUser = selectedAnalysis ? data.users.find((candidate) => candidate.id === selectedAnalysis.userId) ?? null : null;
+  const selectedAnalysisTrip = selectedAnalysis ? data.trips.find((candidate) => candidate.id === selectedAnalysis.tripId) ?? null : null;
+  const selectedAnalysisRecommendations = selectedAnalysis ? data.recommendations.filter((recommendation) => recommendation.userId === selectedAnalysis.userId).slice(0, 3) : [];
+  const selectedKValue = aiEvaluation.validClusteredRecordCount > 0 ? Math.min(3, aiEvaluation.validClusteredRecordCount) : 0;
+  const selectedClusterSize = selectedAnalysis ? analysisRows.filter((analysis) => analysis.cluster === selectedAnalysis.cluster).length : 0;
+  const clusterSummaries = useMemo(
+    () =>
+      Array.from(new Set(analysisRows.map((analysis) => analysis.cluster)))
+        .sort((a, b) => a - b)
+        .map((cluster) => {
+          const records = analysisRows.filter((analysis) => analysis.cluster === cluster);
+          const profileCounts = records.reduce<Record<string, number>>((totals, analysis) => {
+            totals[analysis.profile] = (totals[analysis.profile] ?? 0) + 1;
+            return totals;
+          }, {});
+          const dominantProfile = Object.entries(profileCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "mixed";
+
+          return {
+            cluster,
+            size: records.length,
+            label: records[0]?.clusterLabel ?? "Unlabelled cluster",
+            dominantProfile,
+            averageSilhouette: records.length ? Number((records.reduce((total, analysis) => total + analysis.silhouetteScore, 0) / records.length).toFixed(2)) : 0,
+          };
+        }),
+    [analysisRows]
+  );
 
   useEffect(() => {
     if (selectedTripId !== "all" && !tripOptions.some((trip) => trip.id === selectedTripId)) {
@@ -1759,6 +1795,12 @@ function AdminWorkspace({
       setSelectedRecordTripId(null);
     }
   }, [movementTripRecords, selectedRecordTripId]);
+
+  useEffect(() => {
+    if (selectedAnalysisKey && !analysisRows.some((analysis) => analysisKey(analysis) === selectedAnalysisKey)) {
+      setSelectedAnalysisKey(null);
+    }
+  }, [analysisRows, selectedAnalysisKey]);
 
   const recomputeAi = () => {
     onDataChange(refreshAllRecommendations(data));
@@ -1941,7 +1983,7 @@ function AdminWorkspace({
       <div className="admin-tab-heading">
         <div>
           <h2>AI Results</h2>
-          <p>K-Means grouping and Decision Tree classification used to support recommendation results.</p>
+          <p>K-Means groups similar movement patterns, then the Decision Tree explains the tourist category used for recommendations.</p>
         </div>
         <button className="secondary-action" onClick={recomputeAi}>
           <RotateCcw size={18} />
@@ -1953,43 +1995,137 @@ function AdminWorkspace({
           ["Clustered records", aiEvaluation.validClusteredRecordCount.toString()],
           ["Labelled records", aiEvaluation.labelledRecordCount.toString()],
           ["Decision accuracy", `${Math.round(aiEvaluation.classificationAccuracy * 100)}%`],
-          ["Avg silhouette", aiEvaluation.averageSilhouetteScore.toString()],
+          ["Selected K", selectedKValue.toString()],
         ]}
       />
-      <div className="analysis-grid">
-        {data.analyses.map((analysis) => {
-          const user = data.users.find((candidate) => candidate.id === analysis.userId);
-          return (
-            <article className="analysis-card" key={`${analysis.tripId}-${analysis.generatedAt}`}>
-              <div className="cluster-badge">Cluster {analysis.cluster + 1}</div>
-              <h2>{user?.name ?? "Unknown tourist"}</h2>
-              <p>{analysis.profile} tourist profile</p>
-              <strong>{analysis.clusterLabel}</strong>
-              <small>
-                {analysis.dataPointCount} points processed by {analysis.method} + {analysis.classifier}
-              </small>
-              <div className="tree-metrics">
-                <span>Silhouette {analysis.silhouetteScore}</span>
-                <span>Centroid distance {analysis.clusterDistance}</span>
-                <span>Confidence {Math.round(analysis.classificationConfidence * 100)}%</span>
-                <span>Depth {analysis.decisionTreeDepth}</span>
-                <span>{analysis.decisionRuleCount} rules</span>
+      <div className="ai-results-layout">
+        <section className="panel ai-cluster-panel">
+          <div className="section-heading">
+            <h2>K-Means Cluster Summary</h2>
+            <span>K = {selectedKValue}</span>
+          </div>
+          <div className="cluster-summary-grid">
+            {clusterSummaries.map((summary) => (
+              <article key={summary.cluster}>
+                <strong>Cluster {summary.cluster + 1}</strong>
+                <span>{summary.size} trip(s)</span>
+                <p>{summary.label}</p>
+                <small>
+                  Dominant category: {summary.dominantProfile} | Avg silhouette {summary.averageSilhouette}
+                </small>
+              </article>
+            ))}
+            {clusterSummaries.length === 0 && <EmptyState text="K-Means results appear after completed trips contain enough movement points." />}
+          </div>
+          <h2>Tourist Category Distribution</h2>
+          <CategoryBars values={profileDistribution} />
+        </section>
+
+        <section className="list-panel ai-analysis-list">
+          {analysisRows.map((analysis) => {
+            const user = data.users.find((candidate) => candidate.id === analysis.userId);
+            const active = selectedAnalysis ? analysisKey(selectedAnalysis) === analysisKey(analysis) : false;
+
+            return (
+              <button className={active ? "record-card selectable active" : "record-card selectable"} key={analysisKey(analysis)} onClick={() => setSelectedAnalysisKey(analysisKey(analysis))} type="button">
+                <div>
+                  <strong>{user?.name ?? "Unknown tourist"}</strong>
+                  <span>Cluster {analysis.cluster + 1}</span>
+                </div>
+                <p>{analysis.clusterLabel}</p>
+                <div className="record-metrics">
+                  <span>{analysis.profile} Tourist</span>
+                  <span>{analysis.dataPointCount} points</span>
+                  <span>{Math.round(analysis.classificationConfidence * 100)}% confidence</span>
+                </div>
+              </button>
+            );
+          })}
+          {analysisRows.length === 0 && <EmptyState text="AI analysis appears after a tourist completes a trip with at least two movement points." />}
+        </section>
+
+        {selectedAnalysis && (
+          <aside className="ai-detail-panel">
+            <span>Selected AI Result</span>
+            <h2>{selectedAnalysisUser?.name ?? "Unknown tourist"}</h2>
+            <dl>
+              <div>
+                <dt>Trip ID</dt>
+                <dd className="mono-text">{selectedAnalysis.tripId}</dd>
               </div>
+              <div>
+                <dt>Trip date</dt>
+                <dd>{selectedAnalysisTrip ? formatDateTime(selectedAnalysisTrip.startedAt) : "Unknown"}</dd>
+              </div>
+              <div>
+                <dt>K-Means result</dt>
+                <dd>
+                  Cluster {selectedAnalysis.cluster + 1} of K={selectedKValue} ({selectedClusterSize} trip(s))
+                </dd>
+              </div>
+              <div>
+                <dt>Dominant pattern</dt>
+                <dd>{selectedAnalysis.clusterLabel}</dd>
+              </div>
+              <div>
+                <dt>Cluster description</dt>
+                <dd>
+                  The route is closest to a centroid weighted toward {selectedAnalysis.clusterLabel.replace(" movement cluster", "")}. Its centroid distance is {selectedAnalysis.clusterDistance}.
+                </dd>
+              </div>
+              <div>
+                <dt>Decision Tree output</dt>
+                <dd>
+                  {selectedAnalysis.profile} Tourist, {Math.round(selectedAnalysis.classificationConfidence * 100)}% confidence
+                </dd>
+              </div>
+              <div>
+                <dt>Generated</dt>
+                <dd>{formatDateTime(selectedAnalysis.generatedAt)}</dd>
+              </div>
+            </dl>
+            <div className="tree-metrics">
+              <span>Silhouette {selectedAnalysis.silhouetteScore}</span>
+              <span>Depth {selectedAnalysis.decisionTreeDepth}</span>
+              <span>{selectedAnalysis.decisionRuleCount} rules</span>
+            </div>
+            <section className="ai-detail-section">
+              <h3>Decision Path</h3>
               <ul className="decision-path">
-                {analysis.decisionPath.map((step) => (
+                {selectedAnalysis.decisionPath.map((step) => (
                   <li key={step}>{step}</li>
                 ))}
               </ul>
-              <h3>K-Means Centroid</h3>
-              <CategoryBars values={analysis.clusterCentroid} />
-              <h3>Trip Category Counts</h3>
-              <CategoryBars values={analysis.categoryCounts} />
-            </article>
-          );
-        })}
-        {data.analyses.length === 0 && <EmptyState text="AI analysis appears after a tourist completes a trip with at least two movement points." />}
+            </section>
+            <section className="ai-detail-section">
+              <h3>K-Means Input Pattern</h3>
+              <CategoryBars values={selectedAnalysis.categoryCounts} />
+            </section>
+            <section className="ai-detail-section">
+              <h3>Recommendation Result</h3>
+              {selectedAnalysisRecommendations.length > 0 ? (
+                <div className="ai-recommendation-result">
+                  {selectedAnalysisRecommendations.map((recommendation) => {
+                    const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
+
+                    return destination ? (
+                      <span key={recommendation.id}>
+                        {destination.name}
+                        <small>
+                          {destination.city} | score {recommendation.score}
+                        </small>
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              ) : (
+                <p>No recommendation result is currently available for this tourist.</p>
+              )}
+            </section>
+          </aside>
+        )}
       </div>
-      <ConfusionMatrix values={aiEvaluation.confusionMatrix} />
+      {aiEvaluation.labelledRecordCount > 0 && <ConfusionMatrix values={aiEvaluation.confusionMatrix} />}
     </div>
   );
 
@@ -2049,8 +2185,6 @@ function AdminWorkspace({
             <section className="panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
               <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
-              <h2>Destination Coverage</h2>
-              <CategoryBars values={categoryCoverage} />
               <h2>Movement Trend</h2>
               <CategoryBars values={movementTrend} />
               <h2>Movement Demand</h2>
@@ -2104,7 +2238,7 @@ function AdminWorkspace({
               </div>
               <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
               <h2>Recent Recommendation Output</h2>
-              <RecommendationList recommendations={data.recommendations.slice(0, 4)} destinations={data.destinations} compact />
+              <RecommendationList recommendations={data.recommendations.slice(0, 3)} destinations={data.destinations} compact />
             </section>
           </div>
         </div>

@@ -171,6 +171,7 @@ describe("analytics service", () => {
 
     const recommendations = recommendForUser("tourist-demo", sparseData);
 
+    expect(recommendations).toHaveLength(3);
     expect(recommendations.length).toBeGreaterThan(0);
     expect(recommendations[0].reason).toContain("Fallback suggestion");
     expect(recommendations[0].scoreBreakdown.profileFit).toBeGreaterThan(0);

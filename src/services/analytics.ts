@@ -651,7 +651,7 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
       };
     })
     .sort((a, b) => b.score - a.score)
-    .slice(0, 4);
+    .slice(0, 3);
 }
 
 export function refreshAnalysis(data: AppData, userId: string): AppData {

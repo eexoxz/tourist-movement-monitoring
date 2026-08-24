@@ -1142,7 +1142,8 @@ button:disabled {
 
 .movement-trip-card .mono-text,
 .record-detail-panel .mono-text,
-.trip-detail-panel .mono-text {
+.trip-detail-panel .mono-text,
+.ai-detail-panel .mono-text {
   overflow-wrap: anywhere;
   color: #334155;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -1167,7 +1168,8 @@ button:disabled {
 }
 
 .record-detail-panel,
-.trip-detail-panel {
+.trip-detail-panel,
+.ai-detail-panel {
   display: grid;
   gap: 12px;
   padding: 16px;
@@ -1180,7 +1182,8 @@ button:disabled {
 }
 
 .record-detail-panel > span,
-.trip-detail-panel > span {
+.trip-detail-panel > span,
+.ai-detail-panel > span {
   color: var(--teal-dark);
   font-size: 0.78rem;
   font-weight: 900;
@@ -1193,18 +1196,23 @@ button:disabled {
 .record-detail-panel dl,
 .trip-detail-panel h2,
 .trip-detail-panel p,
-.trip-detail-panel dl {
+.trip-detail-panel dl,
+.ai-detail-panel h2,
+.ai-detail-panel p,
+.ai-detail-panel dl {
   margin: 0;
 }
 
 .record-detail-panel dl,
-.trip-detail-panel dl {
+.trip-detail-panel dl,
+.ai-detail-panel dl {
   display: grid;
   gap: 10px;
 }
 
 .record-detail-panel dl div,
-.trip-detail-panel dl div {
+.trip-detail-panel dl div,
+.ai-detail-panel dl div {
   display: grid;
   gap: 3px;
   padding-bottom: 10px;
@@ -1212,14 +1220,16 @@ button:disabled {
 }
 
 .record-detail-panel dt,
-.trip-detail-panel dt {
+.trip-detail-panel dt,
+.ai-detail-panel dt {
   color: #64748b;
   font-size: 0.76rem;
   font-weight: 800;
 }
 
 .record-detail-panel dd,
-.trip-detail-panel dd {
+.trip-detail-panel dd,
+.ai-detail-panel dd {
   margin: 0;
   color: #0f172a;
   font-weight: 800;
@@ -1227,7 +1237,8 @@ button:disabled {
 }
 
 .record-detail-panel p,
-.trip-detail-panel p {
+.trip-detail-panel p,
+.ai-detail-panel p {
   color: #6b7280;
   line-height: 1.5;
 }
@@ -1645,6 +1656,96 @@ meter {
 
 .analysis-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ai-results-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(300px, 0.85fr) minmax(340px, 1.3fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.ai-cluster-panel {
+  min-width: 0;
+}
+
+.ai-cluster-panel > h2 {
+  margin-top: 4px;
+}
+
+.cluster-summary-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.cluster-summary-grid article {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid #d8d0bf;
+  border-radius: 8px;
+  background: #fbfaf6;
+}
+
+.cluster-summary-grid strong {
+  color: #0f766e;
+}
+
+.cluster-summary-grid span,
+.cluster-summary-grid small {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.cluster-summary-grid p {
+  margin: 0;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.ai-analysis-list {
+  max-height: 760px;
+  overflow: auto;
+}
+
+.ai-detail-panel {
+  position: sticky;
+  top: 18px;
+}
+
+.ai-detail-section {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #eee5d5;
+}
+
+.ai-detail-section h3 {
+  margin: 0;
+  color: #475569;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.ai-recommendation-result {
+  display: grid;
+  gap: 8px;
+}
+
+.ai-recommendation-result span {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid #ccfbf1;
+  border-radius: 8px;
+  background: #f0fdfa;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.ai-recommendation-result small {
+  color: #64748b;
+  font-size: 0.78rem;
 }
 
 .analysis-card {
@@ -2152,8 +2253,13 @@ textarea {
   .auth-panel,
   .movement-hero,
   .profile-setup-card,
-  .destination-admin-grid {
+  .destination-admin-grid,
+  .ai-results-layout {
     grid-template-columns: 1fr;
+  }
+
+  .ai-detail-panel {
+    position: static;
   }
 
   .profile-setup-copy {
@@ -2300,7 +2406,8 @@ textarea {
   }
 
   .record-detail-panel,
-  .trip-detail-panel {
+  .trip-detail-panel,
+  .ai-detail-panel {
     padding: 14px;
   }
 

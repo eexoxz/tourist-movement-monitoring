@@ -176,14 +176,14 @@ Current alignment notes:
 - [x] Recent/filtered movement data exists.
 - [x] Refactor admin into one dashboard route with tabs: Overview, Movement Records, AI Results.
 - [x] Overview tab should show Total Tourists, Total completed trips, Total movement records and Total destinations.
-- [ ] Keep only one or two useful charts.
-- [ ] Add trips-over-time chart if not already clear enough.
-- [ ] Add Tourist Category distribution or destination-category visits chart.
+- [x] Keep only one or two useful charts.
+- [x] Add trips-over-time chart if not already clear enough.
+- [x] Add Tourist Category distribution or destination-category visits chart.
 - [x] Movement Records tab should list Trip ID, Tourist, date, duration, movement-point count, destinations visited, Cluster ID and Tourist Category.
 - [x] Movement record details should open in expandable row, modal or side panel.
 - [x] Administrators may review movement records but cannot edit individual coordinates.
-- [ ] AI Results tab should show selected K value, cluster size, dominant pattern, cluster description and recommendation result.
-- [ ] Keep confusion matrix/accuracy only if supported by labelled data and useful for report evidence.
+- [x] AI Results tab should show selected K value, cluster size, dominant pattern, cluster description and recommendation result.
+- [x] Keep confusion matrix/accuracy only if supported by labelled data and useful for report evidence.
 
 ## Page 7: Destination Management
 
@@ -226,7 +226,7 @@ Current alignment notes:
 - [x] Prepared demo movement records exist.
 - [x] Classification explanation path exists.
 - [x] Confusion matrix and accuracy evidence exist in prototype logic.
-- [ ] Simplify user-facing AI output so it is understandable to non-technical users.
+- [x] Simplify user-facing AI output so it is understandable to non-technical users.
 - [ ] K-Means input should clearly use Cultural, Nature, Urban proportions and unique destinations visited.
 - [ ] Decision Tree output should be Cultural Tourist, Nature Tourist, Urban Tourist or Mixed Tourist.
 - [x] Recommendation output should be exactly top three unvisited destinations.
