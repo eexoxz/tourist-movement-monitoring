@@ -955,6 +955,11 @@ function TouristWorkspace({
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
   const displayName = getDisplayName(user);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
+  const hasPersonalizedRecommendations = Boolean(latestAnalysis);
+  const recommendationHeading = hasPersonalizedRecommendations ? "Recommended For You" : "Basic Suggestions";
+  const recommendationSupportText = hasPersonalizedRecommendations
+    ? "These places use your latest movement pattern, tourist category and unvisited destination list."
+    : "These are general suggestions from destination demand and your current location until a completed trip creates an AI result.";
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -1336,7 +1341,7 @@ function TouristWorkspace({
                 </dl>
 
                 <div className="trip-detail-recommendations">
-                  <strong>Current generated recommendations</strong>
+                  <strong>{hasPersonalizedRecommendations ? "Current generated recommendations" : "Basic suggestions"}</strong>
                   {selectedTripRecommendations.length > 0 ? (
                     selectedTripRecommendations.map((recommendation) => {
                       const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
@@ -1396,7 +1401,7 @@ function TouristWorkspace({
           <section className="recommendation-profile-card">
             <div>
               <span>Latest travel category</span>
-              <strong>{latestAnalysis ? `${latestAnalysis.profile} Tourist` : "Learning from your trips"}</strong>
+              <strong>{latestAnalysis ? `${latestAnalysis.profile} Tourist` : "Not enough movement data yet"}</strong>
             </div>
             <div>
               <span>Cluster</span>
@@ -1409,7 +1414,20 @@ function TouristWorkspace({
             </p>
           </section>
 
-          <RecommendationList recommendations={topRecommendations} destinations={data.destinations} demand={destinationDemand} onSelect={setSelectedRecommendationId} />
+          {!hasPersonalizedRecommendations && (
+            <section className="recommendation-mode-notice">
+              <strong>Basic suggestion mode</strong>
+              <p>AI personalisation is locked until your movement history has enough usable points. These suggestions are safe to browse, but they are not final Tourist Category results.</p>
+            </section>
+          )}
+
+          <RecommendationList
+            recommendations={topRecommendations}
+            destinations={data.destinations}
+            demand={destinationDemand}
+            personalized={hasPersonalizedRecommendations}
+            onSelect={setSelectedRecommendationId}
+          />
 
           <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
         </section>
@@ -1526,13 +1544,16 @@ function TouristWorkspace({
 
         <section className="tourist-section">
           <div className="section-heading">
-            <h2>Recommended For You</h2>
+            <div>
+              <h2>{recommendationHeading}</h2>
+              <p>{recommendationSupportText}</p>
+            </div>
             <button className="secondary-action compact-action" onClick={() => onViewChange("recommendations")}>
               <Sparkles size={16} />
               View all
             </button>
           </div>
-          <RecommendationList recommendations={recommendations.slice(0, 3)} destinations={data.destinations} demand={destinationDemand} compact />
+          <RecommendationList recommendations={recommendations.slice(0, 3)} destinations={data.destinations} demand={destinationDemand} personalized={hasPersonalizedRecommendations} compact />
         </section>
 
         {recentTrip ? (
@@ -2996,17 +3017,19 @@ function RecommendationList({
   recommendations,
   destinations,
   demand = [],
+  personalized = true,
   compact = false,
   onSelect,
 }: {
   recommendations: Recommendation[];
   destinations: Destination[];
   demand?: DestinationDemand[];
+  personalized?: boolean;
   compact?: boolean;
   onSelect?: (recommendationId: string) => void;
 }) {
   if (recommendations.length === 0) {
-    return <EmptyState text="Complete another trip to unlock stronger personalised recommendations." />;
+    return <EmptyState text={personalized ? "Complete another trip to unlock stronger personalised recommendations." : "No basic suggestions are available yet."} />;
   }
 
   return (
@@ -3025,14 +3048,15 @@ function RecommendationList({
               <span>{destination.city}</span>
             </div>
             <div className="recommendation-meta">
+              {!personalized && <span className="basic-suggestion-tag">Basic suggestion</span>}
               <span>{destination.category}</span>
               <span>{demandRow ? `${demandRow.tier} demand` : "No demand signal"}</span>
               <span>{demandRow ? `${demandRow.popularityScore}% movement score` : "0% movement score"}</span>
             </div>
             <p>{recommendation.reason}</p>
             <div className="score-breakdown" aria-label={`Score breakdown for ${destination.name}`}>
-              <span>Profile {recommendation.scoreBreakdown.profileFit}</span>
-              <span>Cluster {recommendation.scoreBreakdown.clusterPattern}</span>
+              <span>{personalized ? "Profile" : "Basic fit"} {recommendation.scoreBreakdown.profileFit}</span>
+              <span>{personalized ? `Cluster ${recommendation.scoreBreakdown.clusterPattern}` : "AI cluster pending"}</span>
               <span>New {recommendation.scoreBreakdown.unvisited}</span>
             </div>
             <meter value={recommendation.score} min={0} max={100} />

@@ -230,7 +230,7 @@ Current alignment notes:
 - [x] K-Means input should clearly use Cultural, Nature, Urban proportions and unique destinations visited.
 - [x] Decision Tree output should be Cultural Tourist, Nature Tourist, Urban Tourist or Mixed Tourist.
 - [x] Recommendation output should be exactly top three unvisited destinations.
-- [ ] Do not show unsupported personalised results when movement data is insufficient.
+- [x] Do not show unsupported personalised results when movement data is insufficient.
 - [x] Clearly label prepared demo records as demonstration data.
 
 ## Demonstration Dataset

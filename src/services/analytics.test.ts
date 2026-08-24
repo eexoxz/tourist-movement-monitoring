@@ -178,7 +178,8 @@ describe("analytics service", () => {
 
     expect(recommendations).toHaveLength(3);
     expect(recommendations.length).toBeGreaterThan(0);
-    expect(recommendations[0].reason).toContain("Fallback suggestion");
+    expect(recommendations[0].reason).toContain("Basic suggestion");
+    expect(recommendations[0].reason).not.toContain("Matches the");
     expect(recommendations[0].scoreBreakdown.profileFit).toBeGreaterThan(0);
     expect(recommendations[0].scoreBreakdown.clusterPattern).toBe(0);
     expect(recommendations[0].scoreBreakdown.movementDemand).toBeGreaterThanOrEqual(0);

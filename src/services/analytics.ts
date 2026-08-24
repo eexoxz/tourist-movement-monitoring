@@ -703,7 +703,7 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
       );
       const reason =
         !hasPersonalizedAnalysis
-          ? "Fallback suggestion shown because the movement history is still too limited for a personalised AI result."
+          ? "Basic suggestion shown until enough movement history is available for AI analysis."
           : clusterScore >= 12
           ? `Matches the ${profile} travel profile and the strongest K-Means cluster pattern from the tourist route.`
           : demand && demand.tier !== "low"
