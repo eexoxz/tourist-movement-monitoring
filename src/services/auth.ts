@@ -1,5 +1,6 @@
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 import type { User as FirebaseUser } from "firebase/auth";
+import type { User } from "../types";
 
 export async function signInWithConfiguredProvider(email: string, password: string) {
   const services = getFirebaseServices();
@@ -22,6 +23,21 @@ export async function registerWithConfiguredProvider(email: string, password: st
   const credential = await createUserWithEmailAndPassword(services.auth, email, password);
   await sendVerificationEmail(credential.user);
   return credential.user;
+}
+
+export async function getConfiguredUserRecord(uid: string): Promise<User | null> {
+  const services = getFirebaseServices();
+  if (!services) {
+    return null;
+  }
+
+  const { doc, getDoc } = await import("firebase/firestore");
+  const snapshot = await getDoc(doc(services.db, "users", uid));
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return { ...(snapshot.data() as Omit<User, "password">), id: snapshot.id, password: "" };
 }
 
 export async function sendVerificationEmail(user?: FirebaseUser | null) {

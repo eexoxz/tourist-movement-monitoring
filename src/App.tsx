@@ -57,6 +57,7 @@ import {
 } from "./services/analytics";
 import {
   authProviderName,
+  getConfiguredUserRecord,
   hasConfiguredAuth,
   registerWithConfiguredProvider,
   sendVerificationEmail,
@@ -71,6 +72,7 @@ import {
   getDestinationCategoryCoverage,
   getMovementDataStatus,
   getMovementRecords,
+  getMovementTripRecords,
   getProfileDistribution,
   getTourists,
   getTripFilterOptions,
@@ -217,6 +219,14 @@ function inferExpectedProfileFromPreferences(preferences: DestinationCategory[])
   return ranked[0][1] > 0 && ranked[0][1] > ranked[1][1] ? ranked[0][0] : "mixed";
 }
 
+function mergeUserRecord(data: AppData, user: User): AppData {
+  const nextUsers = data.users.some((candidate) => candidate.id === user.id || candidate.email.toLowerCase() === user.email.toLowerCase())
+    ? data.users.map((candidate) => (candidate.id === user.id || candidate.email.toLowerCase() === user.email.toLowerCase() ? { ...candidate, ...user } : candidate))
+    : [...data.users, user];
+
+  return { ...data, users: nextUsers };
+}
+
 function getCurrentPathname() {
   return typeof window === "undefined" ? "/" : window.location.pathname;
 }
@@ -243,6 +253,7 @@ function App() {
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const watchId = useRef<number | null>(null);
+  const lastSyncWarningAt = useRef(0);
 
   const notify: NotifyFn = (notification) => {
     setNotifications((current) => [...current.slice(-2), { ...notification, id: createId("notification") }]);
@@ -250,6 +261,16 @@ function App() {
 
   const dismissNotification = (id: string) => {
     setNotifications((current) => current.filter((notification) => notification.id !== id));
+  };
+
+  const notifySyncIssue = (title: string, message: string) => {
+    const now = Date.now();
+    if (now - lastSyncWarningAt.current < 30000) {
+      return;
+    }
+
+    lastSyncWarningAt.current = now;
+    notify({ tone: "warning", title, message });
   };
 
   const goToAuthMode = (mode: AuthMode) => {
@@ -285,11 +306,7 @@ function App() {
       .catch(() => {
         if (isMounted) {
           setSyncStatus("Local mode; Firebase sync unavailable");
-          notify({
-            tone: "warning",
-            title: "Firebase sync unavailable",
-            message: "The app is still usable, but data is currently saved on this device.",
-          });
+          notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
         }
       });
 
@@ -351,23 +368,21 @@ function App() {
       })
       .catch(() => {
         setSyncStatus("Saved on this device; cloud retry pending");
-        notify({
-          tone: "warning",
-          title: "Cloud save needs retry",
-          message: "Your change was kept locally. Firestore did not accept the latest sync.",
-        });
+        notifySyncIssue("Cloud save needs retry", "Your change was kept locally. Firestore did not accept the latest sync.");
       });
   };
 
   const login = async (email: string, password: string): Promise<AuthResult> => {
     let authUid: string | undefined;
+    let firebaseStoredUser: User | null = null;
     const firebaseMode = hasConfiguredAuth();
 
     if (firebaseMode) {
       try {
         const firebaseUser = await signInWithConfiguredProvider(email, password);
         authUid = firebaseUser?.uid;
-        const storedUser = findUserByEmail(data, email);
+        firebaseStoredUser = authUid ? await getConfiguredUserRecord(authUid).catch(() => null) : null;
+        const storedUser = firebaseStoredUser ?? findUserByEmail(data, email);
         if (firebaseUser && !firebaseUser.emailVerified && storedUser?.role !== "admin") {
           await sendVerificationEmail(firebaseUser).catch(() => undefined);
           await signOutConfiguredProvider().catch(() => undefined);
@@ -387,7 +402,7 @@ function App() {
       return {};
     }
 
-    let user = authUid ? findUserByEmail(data, email) : null;
+    let user = authUid ? firebaseStoredUser ?? data.users.find((candidate) => candidate.id === authUid || candidate.authUid === authUid) ?? findUserByEmail(data, email) : null;
     if (!user && authUid) {
       user = {
         id: authUid,
@@ -399,9 +414,9 @@ function App() {
         createdAt: new Date().toISOString(),
       };
       commitData({ ...data, users: [...data.users, user] }, user);
-    } else if (user && authUid && user.authUid !== authUid) {
+    } else if (user && authUid && (user.authUid !== authUid || !data.users.some((candidate) => candidate.id === user?.id))) {
       user = { ...user, authUid };
-      commitData({ ...data, users: data.users.map((candidate) => (candidate.id === user?.id ? user : candidate)) }, user);
+      setData(mergeUserRecord(data, user));
     }
 
     if (!user) {
@@ -893,12 +908,12 @@ function TouristWorkspace({
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
-  const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? userTrips[0];
-  const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
   const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
-  const selectedTripSummary = selectedTrip ? summarizeTrip(data, selectedTrip.id) : null;
   const tripSummaries = useMemo(() => summarizeUserTrips(data, user.id), [data, user.id]);
   const recentTrips = useMemo(() => [...userTrips].sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()), [userTrips]);
+  const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? recentTrips[0];
+  const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
+  const selectedTripSummary = selectedTrip ? summarizeTrip(data, selectedTrip.id) : null;
   const recentTrip = recentTrips[0];
   const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
@@ -1231,7 +1246,7 @@ function TouristWorkspace({
           <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
           <section className="list-panel">
             {selectedTripSummary && <TripSummaryPanel summary={selectedTripSummary} />}
-            {userTrips.map((trip) => {
+            {recentTrips.map((trip) => {
               const points = data.points.filter((point) => point.tripId === trip.id);
               const summary = tripSummaries.find((row) => row.tripId === trip.id);
               return (
@@ -1243,6 +1258,7 @@ function TouristWorkspace({
                   <p>
                     {points.length} point(s), {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {summary?.visitedDestinationCount ?? 0} visited destination(s)
                   </p>
+                  <small>{trip.endedAt ? `Ended ${formatDateTime(trip.endedAt)}` : "Trip still active"}</small>
                 </button>
               );
             })}
@@ -1612,15 +1628,6 @@ function AdminWorkspace({
   const [planMaxStops, setPlanMaxStops] = useState(5);
   const [planMinimumTier, setPlanMinimumTier] = useState<PlanTier>("emerging");
   const [planDiversifyCategories, setPlanDiversifyCategories] = useState(true);
-  const [destinationForm, setDestinationForm] = useState({
-    name: "",
-    city: "",
-    category: "cultural",
-    latitude: "3.1478",
-    longitude: "101.6937",
-    description: "",
-  });
-  const [destinationMessage, setDestinationMessage] = useState<string | null>(null);
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
   const movementRecords = useMemo(
@@ -1633,7 +1640,18 @@ function AdminWorkspace({
       }),
     [data, selectedTouristId, selectedTripId, fromDate, toDate]
   );
-  const allPoints = movementRecords.map((record) => record.point);
+  const movementTripRecords = useMemo(
+    () =>
+      getMovementTripRecords(data, {
+        touristId: selectedTouristId,
+        tripId: selectedTripId,
+        fromDate,
+        toDate,
+      }),
+    [data, selectedTouristId, selectedTripId, fromDate, toDate]
+  );
+  const filteredPoints = movementRecords.map((record) => record.point);
+  const allDashboardPoints = data.points;
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const movementAlerts = useMemo(() => calculateMovementAlerts(data), [data]);
@@ -1649,9 +1667,11 @@ function AdminWorkspace({
     [data, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
   );
   const cityOptions = useMemo(() => Array.from(new Set(data.destinations.map((destination) => destination.city))).sort(), [data.destinations]);
-  const filteredTouristCount = new Set(movementRecords.map((record) => record.trip?.userId).filter(Boolean)).size;
-  const filteredTripCount = new Set(movementRecords.map((record) => record.point.tripId)).size;
+  const filteredTouristCount = new Set(movementTripRecords.map((record) => record.trip.userId)).size;
+  const filteredTripCount = movementTripRecords.length;
   const hasRecordFilters = selectedTouristId !== "all" || selectedTripId !== "all" || Boolean(fromDate) || Boolean(toDate);
+  const [selectedRecordTripId, setSelectedRecordTripId] = useState<string | null>(null);
+  const selectedRecord = movementTripRecords.find((record) => record.trip.id === selectedRecordTripId) ?? movementTripRecords[0] ?? null;
 
   useEffect(() => {
     if (selectedTripId !== "all" && !tripOptions.some((trip) => trip.id === selectedTripId)) {
@@ -1659,21 +1679,11 @@ function AdminWorkspace({
     }
   }, [selectedTripId, tripOptions]);
 
-  const addDestination = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const result = addDestinationRecord(data.destinations, destinationForm);
-    if (result.error || !result.destinations) {
-      const message = result.error ?? "Destination could not be saved.";
-      setDestinationMessage(message);
-      notify({ tone: "error", title: "Destination not saved", message });
-      return;
+  useEffect(() => {
+    if (selectedRecordTripId && !movementTripRecords.some((record) => record.trip.id === selectedRecordTripId)) {
+      setSelectedRecordTripId(null);
     }
-
-    onDataChange(refreshAllRecommendations({ ...data, destinations: result.destinations }));
-    setDestinationForm({ name: "", city: "", category: "cultural", latitude: "3.1478", longitude: "101.6937", description: "" });
-    setDestinationMessage("Destination saved.");
-    notify({ tone: "success", title: "Destination saved", message: "Recommendations and dashboard signals were refreshed." });
-  };
+  }, [movementTripRecords, selectedRecordTripId]);
 
   const recomputeAi = () => {
     onDataChange(refreshAllRecommendations(data));
@@ -1763,22 +1773,81 @@ function AdminWorkspace({
         ]}
       />
       <div className="two-column">
-        <MovementMap points={allPoints} destinations={data.destinations} />
-        <section className="list-panel">
-          {movementRecords.map((record) => {
-            return (
-              <article className="record-card" key={record.point.id}>
+        <MovementMap points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints} destinations={data.destinations} />
+        <section className="admin-records-layout">
+          <div className="list-panel">
+            {movementTripRecords.map((record) => {
+              const profile = record.analysis ? `${record.analysis.profile} Tourist` : "Pending";
+              const destinationText = record.destinationNames.length > 0 ? record.destinationNames.join(", ") : "No recognised destination yet";
+
+              return (
+                <button
+                  className={selectedRecord?.trip.id === record.trip.id ? "record-card movement-trip-card selectable active" : "record-card movement-trip-card selectable"}
+                  key={record.trip.id}
+                  onClick={() => setSelectedRecordTripId(record.trip.id)}
+                  type="button"
+                >
+                  <div>
+                    <strong>{record.tourist?.name ?? "Unknown tourist"}</strong>
+                    <span>{record.trip.status}</span>
+                  </div>
+                  <small className="mono-text">{record.trip.id}</small>
+                  <p>{destinationText}</p>
+                  <div className="record-metrics">
+                    <span>{formatDateTime(record.trip.startedAt)}</span>
+                    <span>{record.summary.durationMinutes} min</span>
+                    <span>{record.summary.pointCount} points</span>
+                    <span>{record.summary.visitedDestinationCount} stops</span>
+                    <span>{record.analysis ? `Cluster ${record.analysis.cluster + 1}` : "Cluster pending"}</span>
+                    <span>{profile}</span>
+                  </div>
+                </button>
+              );
+            })}
+            {movementTripRecords.length === 0 && <EmptyState text="No movement records match this filter." />}
+          </div>
+
+          {selectedRecord && (
+            <aside className="record-detail-panel">
+              <span>Selected Movement Record</span>
+              <h2>{selectedRecord.tourist?.name ?? "Unknown tourist"}</h2>
+              <dl>
                 <div>
-                  <strong>{record.tourist?.name ?? "Unknown tourist"}</strong>
-                  <span>{formatDateTime(record.point.recordedAt)}</span>
+                  <dt>Trip ID</dt>
+                  <dd className="mono-text">{selectedRecord.trip.id}</dd>
                 </div>
-                <p>
-                  {record.point.latitude.toFixed(4)}, {record.point.longitude.toFixed(4)} near {record.nearestDestinationName}
-                </p>
-              </article>
-            );
-          })}
-          {allPoints.length === 0 && <EmptyState text="No movement records match this filter." />}
+                <div>
+                  <dt>Date</dt>
+                  <dd>{formatDateTime(selectedRecord.trip.startedAt)}</dd>
+                </div>
+                <div>
+                  <dt>Duration</dt>
+                  <dd>{selectedRecord.summary.durationMinutes} minutes</dd>
+                </div>
+                <div>
+                  <dt>Movement points</dt>
+                  <dd>{selectedRecord.summary.pointCount}</dd>
+                </div>
+                <div>
+                  <dt>Destinations visited</dt>
+                  <dd>{selectedRecord.destinationNames.length > 0 ? selectedRecord.destinationNames.join(", ") : "Not recognised yet"}</dd>
+                </div>
+                <div>
+                  <dt>Cluster ID</dt>
+                  <dd>{selectedRecord.analysis ? `Cluster ${selectedRecord.analysis.cluster + 1}` : "Pending"}</dd>
+                </div>
+                <div>
+                  <dt>Tourist Category</dt>
+                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.profile} Tourist` : "Pending analysis"}</dd>
+                </div>
+                <div>
+                  <dt>Analysis status</dt>
+                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.classifier} generated ${formatDateTime(selectedRecord.analysis.generatedAt)}` : "Waiting for enough trip data"}</dd>
+                </div>
+              </dl>
+              <p>Administrators can review movement records, but individual coordinates are read-only.</p>
+            </aside>
+          )}
         </section>
       </div>
     </div>
@@ -1787,51 +1856,7 @@ function AdminWorkspace({
   if (view === "destinations") {
     return (
       <Page title="Destination Management" eyebrow="Administrator workspace">
-        <div className="two-column">
-          <form className="panel destination-form" onSubmit={addDestination}>
-            <h2>Add Destination</h2>
-            <label>
-              Name
-              <input value={destinationForm.name} onChange={(event) => setDestinationForm({ ...destinationForm, name: event.target.value })} required />
-            </label>
-            <label>
-              City
-              <input value={destinationForm.city} onChange={(event) => setDestinationForm({ ...destinationForm, city: event.target.value })} required />
-            </label>
-            <label>
-              Category
-              <select value={destinationForm.category} onChange={(event) => setDestinationForm({ ...destinationForm, category: event.target.value })}>
-                <option value="cultural">Cultural</option>
-                <option value="nature">Nature</option>
-                <option value="urban">Urban</option>
-                <option value="heritage">Heritage</option>
-                <option value="food">Food</option>
-                <option value="coastal">Coastal</option>
-              </select>
-            </label>
-            <div className="field-pair">
-              <label>
-                Latitude
-                <input value={destinationForm.latitude} onChange={(event) => setDestinationForm({ ...destinationForm, latitude: event.target.value })} required />
-              </label>
-              <label>
-                Longitude
-                <input value={destinationForm.longitude} onChange={(event) => setDestinationForm({ ...destinationForm, longitude: event.target.value })} required />
-              </label>
-            </div>
-            <label>
-              Description
-              <textarea value={destinationForm.description} onChange={(event) => setDestinationForm({ ...destinationForm, description: event.target.value })} required />
-            </label>
-            <button className="primary-action" type="submit">
-              <MapPinned size={18} />
-              Save destination
-            </button>
-            {destinationMessage && <p className="status-message">{destinationMessage}</p>}
-          </form>
-
-          <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} />
-        </div>
+        <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} />
       </Page>
     );
   }
@@ -1945,7 +1970,7 @@ function AdminWorkspace({
             ]}
           />
           <div className="two-column">
-            <MovementMap points={allPoints} destinations={data.destinations} />
+            <MovementMap points={allDashboardPoints} destinations={data.destinations} />
             <section className="panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
               <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
@@ -2392,89 +2417,184 @@ function TravelPlanPanel({ plan, destinations }: { plan: TravelPlan; destination
   );
 }
 
+type DestinationFormState = {
+  name: string;
+  city: string;
+  category: DestinationCategory;
+  latitude: string;
+  longitude: string;
+  averageVisitMinutes: string;
+  description: string;
+};
+
+function createDestinationForm(destination?: Destination): DestinationFormState {
+  return {
+    name: destination?.name ?? "",
+    city: destination?.city ?? "",
+    category: destination?.category ?? "cultural",
+    latitude: destination ? String(destination.latitude) : "3.1478",
+    longitude: destination ? String(destination.longitude) : "101.6937",
+    averageVisitMinutes: destination ? String(destination.averageVisitMinutes) : "60",
+    description: destination?.description ?? "",
+  };
+}
+
 function DestinationManager({ destinations, onChange, notify }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; notify: NotifyFn }) {
+  const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const editingDestination = destinations.find((destination) => destination.id === editingId) ?? null;
-  const [form, setForm] = useState<Destination | null>(null);
+  const [form, setForm] = useState<DestinationFormState>(() => createDestinationForm());
+  const [deleteTarget, setDeleteTarget] = useState<Destination | null>(null);
+  const [savingAction, setSavingAction] = useState<"add" | "edit" | "delete" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  const openAddModal = () => {
+    setForm(createDestinationForm());
+    setEditingId(null);
+    setModalMode("add");
+    setMessage(null);
+  };
 
   const startEdit = (destination: Destination) => {
     setEditingId(destination.id);
-    setForm(destination);
+    setForm(createDestinationForm(destination));
+    setModalMode("edit");
+    setMessage(null);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setForm(null);
-  };
-
-  const saveEdit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!form) {
+  const closeFormModal = () => {
+    if (savingAction) {
       return;
     }
 
-    const result = updateDestinationRecord(destinations, form);
+    setModalMode(null);
+    setEditingId(null);
+    setForm(createDestinationForm());
+  };
+
+  const saveDestination = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const action = modalMode;
+    if (!action) {
+      return;
+    }
+
+    setSavingAction(action);
+    const result =
+      action === "add"
+        ? addDestinationRecord(destinations, form)
+        : updateDestinationRecord(destinations, {
+            ...form,
+            id: editingId ?? "",
+          });
+
     if (result.error || !result.destinations) {
-      const message = result.error ?? "Destination could not be updated.";
+      const message = result.error ?? (action === "add" ? "Destination could not be saved." : "Destination could not be updated.");
       setMessage(message);
-      notify({ tone: "error", title: "Destination not updated", message });
+      setSavingAction(null);
+      notify({ tone: "error", title: action === "add" ? "Destination not saved" : "Destination not updated", message });
       return;
     }
 
     onChange(result.destinations);
-    setMessage("Destination updated.");
-    notify({ tone: "success", title: "Destination updated", message: `${form.name} was saved.` });
-    cancelEdit();
+    setMessage(action === "add" ? "Destination saved." : "Destination updated.");
+    setSavingAction(null);
+    setModalMode(null);
+    setEditingId(null);
+    setForm(createDestinationForm());
+    notify({
+      tone: "success",
+      title: action === "add" ? "Destination saved" : "Destination updated",
+      message: `${form.name.trim()} was ${action === "add" ? "added to" : "updated in"} the destination list.`,
+    });
   };
 
-  const removeDestination = (destinationId: string) => {
-    const destinationName = destinations.find((destination) => destination.id === destinationId)?.name ?? "Destination";
-    const result = deleteDestinationRecord(destinations, destinationId);
+  const confirmDelete = () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    setSavingAction("delete");
+    const result = deleteDestinationRecord(destinations, deleteTarget.id);
     if (result.error || !result.destinations) {
       const message = result.error ?? "Destination could not be deleted.";
       setMessage(message);
+      setSavingAction(null);
       notify({ tone: "error", title: "Destination not deleted", message });
       return;
     }
 
     onChange(result.destinations);
     setMessage("Destination deleted.");
-    notify({ tone: "success", title: "Destination deleted", message: `${destinationName} was removed from the destination list.` });
-    if (editingId === destinationId) {
-      cancelEdit();
+    setSavingAction(null);
+    notify({ tone: "success", title: "Destination deleted", message: `${deleteTarget.name} was removed from the destination list.` });
+    if (editingId === deleteTarget.id) {
+      setEditingId(null);
+      setModalMode(null);
     }
+    setDeleteTarget(null);
   };
 
   return (
-    <section className="list-panel">
-      {destinations.map((destination) => (
-        <article className="destination-card editable" key={destination.id}>
+    <>
+      <section className="destination-management-panel">
+        <div className="section-heading">
           <div>
-            <strong>{destination.name}</strong>
-            <span>{destination.city}</span>
+            <h2>Destinations</h2>
+            <p>{destinations.length} Malaysian tourist destination records available for recommendation and movement analysis.</p>
           </div>
-          <p>{destination.description}</p>
-          <small>{destination.category}</small>
-          <div className="card-actions">
-            <button className="secondary-action icon-action" onClick={() => startEdit(destination)} type="button" title="Edit destination">
-              <Pencil size={16} />
-            </button>
-            <button className="secondary-action icon-action danger" onClick={() => removeDestination(destination.id)} type="button" title="Delete destination" disabled={destinations.length <= 1}>
-              <Trash2 size={16} />
-            </button>
-          </div>
-        </article>
-      ))}
-      {message && <p className="status-message">{message}</p>}
-      {editingDestination && form && (
-        <form className="panel destination-form edit-form" onSubmit={saveEdit}>
-          <div className="form-heading">
-            <h2>Edit Destination</h2>
-            <button className="secondary-action icon-action" type="button" onClick={cancelEdit} title="Cancel edit">
-              <X size={16} />
-            </button>
-          </div>
+          <button className="primary-action compact-action" type="button" onClick={openAddModal}>
+            <MapPinned size={17} />
+            Add
+          </button>
+        </div>
+
+        {message && <p className="status-message">{message}</p>}
+
+        <section className="destination-admin-grid">
+          {destinations.map((destination) => (
+            <article className="destination-card editable" key={destination.id}>
+              <div>
+                <strong>{destination.name}</strong>
+                <span>{destination.city}</span>
+              </div>
+              <p>{destination.description}</p>
+              <div className="tag-row">
+                <small>{destination.category}</small>
+                <small>{destination.averageVisitMinutes} min visit</small>
+              </div>
+              <div className="card-actions">
+                <button className="secondary-action icon-action" onClick={() => startEdit(destination)} type="button" title="Edit destination">
+                  <Pencil size={16} />
+                </button>
+                <button
+                  className="secondary-action icon-action danger"
+                  onClick={() => setDeleteTarget(destination)}
+                  type="button"
+                  title="Delete destination"
+                  disabled={destinations.length <= 1}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </article>
+          ))}
+        </section>
+      </section>
+
+      {modalMode && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={modalMode === "add" ? "Add destination" : "Edit destination"}>
+          <form className="modal-card destination-modal destination-form-modal" onSubmit={saveDestination}>
+            <div className="modal-heading">
+              <div>
+                <span>Destination Management</span>
+                <h2>{modalMode === "add" ? "Add Destination" : "Edit Destination"}</h2>
+              </div>
+              <button className="secondary-action icon-action" type="button" onClick={closeFormModal} title="Close destination form" disabled={Boolean(savingAction)}>
+                <X size={18} />
+              </button>
+            </div>
+
           <label>
             Name
             <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
@@ -2496,16 +2616,16 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
           <div className="field-pair">
             <label>
               Latitude
-              <input type="number" step="any" value={form.latitude} onChange={(event) => setForm({ ...form, latitude: Number(event.target.value) })} required />
+              <input type="number" step="any" value={form.latitude} onChange={(event) => setForm({ ...form, latitude: event.target.value })} required />
             </label>
             <label>
               Longitude
-              <input type="number" step="any" value={form.longitude} onChange={(event) => setForm({ ...form, longitude: Number(event.target.value) })} required />
+              <input type="number" step="any" value={form.longitude} onChange={(event) => setForm({ ...form, longitude: event.target.value })} required />
             </label>
           </div>
           <label>
             Average visit minutes
-            <input type="number" min="1" value={form.averageVisitMinutes} onChange={(event) => setForm({ ...form, averageVisitMinutes: Number(event.target.value) })} required />
+            <input type="number" min="1" value={form.averageVisitMinutes} onChange={(event) => setForm({ ...form, averageVisitMinutes: event.target.value })} required />
           </label>
           <label>
             Description
@@ -2513,11 +2633,38 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
           </label>
           <button className="primary-action" type="submit">
             <Save size={18} />
-            Save changes
+            {savingAction ? "Saving" : modalMode === "add" ? "Save destination" : "Save changes"}
           </button>
-        </form>
+          </form>
+        </div>
       )}
-    </section>
+
+      {deleteTarget && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={`Delete ${deleteTarget.name}`}>
+          <section className="modal-card destination-modal confirm-modal">
+            <div className="modal-heading">
+              <div>
+                <span>Delete Destination</span>
+                <h2>{deleteTarget.name}</h2>
+              </div>
+              <button className="secondary-action icon-action" type="button" onClick={() => setDeleteTarget(null)} title="Cancel delete" disabled={Boolean(savingAction)}>
+                <X size={18} />
+              </button>
+            </div>
+            <p>This will remove {deleteTarget.name} from the destination list and refresh recommendation results that depend on destination data.</p>
+            <div className="modal-actions">
+              <button className="secondary-action" type="button" onClick={() => setDeleteTarget(null)} disabled={Boolean(savingAction)}>
+                Cancel
+              </button>
+              <button className="primary-action danger" type="button" onClick={confirmDelete} disabled={Boolean(savingAction)}>
+                <Trash2 size={18} />
+                {savingAction === "delete" ? "Deleting" : "Delete destination"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </>
   );
 }
 

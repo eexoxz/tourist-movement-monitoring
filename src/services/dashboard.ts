@@ -1,5 +1,6 @@
-import type { AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, User } from "../types";
+import type { AnalysisResult, AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
 import { distanceKm, nearestDestination } from "./geo";
+import { summarizeTrip } from "./movement";
 
 export type MovementRecordView = {
   point: MovementPoint;
@@ -7,6 +8,15 @@ export type MovementRecordView = {
   tourist: User | null;
   nearestDestinationName: string;
   nearestDestinationCategory: DestinationCategory | null;
+};
+
+export type MovementTripRecordView = {
+  trip: TripSession;
+  tourist: User | null;
+  summary: TripSummary;
+  points: MovementPoint[];
+  destinationNames: string[];
+  analysis: AnalysisResult | null;
 };
 
 export type DashboardSummary = {
@@ -76,6 +86,15 @@ function isWithinDateRange(recordedAt: string, filters: MovementRecordFilters) {
   return (!filters.fromDate || dateKey >= filters.fromDate) && (!filters.toDate || dateKey <= filters.toDate);
 }
 
+function tripMatchesDateRange(trip: TripSession, points: MovementPoint[], filters: MovementRecordFilters) {
+  if (!filters.fromDate && !filters.toDate) {
+    return true;
+  }
+
+  const tripDates = [trip.startedAt, trip.endedAt, ...points.map((point) => point.recordedAt)].filter((date): date is string => Boolean(date));
+  return tripDates.some((date) => isWithinDateRange(date, filters));
+}
+
 export function getMovementRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementRecordView[] {
   const normalized = normalizeMovementFilters(filters);
   const visibleTrips =
@@ -108,6 +127,38 @@ export function getTripFilterOptions(data: AppData, touristId = "all") {
   return data.trips
     .filter((trip) => touristId === "all" || trip.userId === touristId)
     .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+}
+
+export function getMovementTripRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementTripRecordView[] {
+  const normalized = normalizeMovementFilters(filters);
+
+  return data.trips
+    .filter((trip) => !normalized.touristId || normalized.touristId === "all" || trip.userId === normalized.touristId)
+    .filter((trip) => !normalized.tripId || normalized.tripId === "all" || trip.id === normalized.tripId)
+    .map((trip) => {
+      const points = data.points.filter((point) => point.tripId === trip.id).sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+      const destinationNames = Array.from(
+        new Set(
+          points
+            .map((point) => {
+              const nearest = nearestDestination(point, data.destinations);
+              return nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
+            })
+            .filter(Boolean)
+        )
+      ) as string[];
+
+      return {
+        trip,
+        tourist: data.users.find((user) => user.id === trip.userId) ?? null,
+        summary: summarizeTrip(data, trip.id),
+        points,
+        destinationNames,
+        analysis: data.analyses.find((analysis) => analysis.tripId === trip.id) ?? null,
+      };
+    })
+    .filter((record) => tripMatchesDateRange(record.trip, record.points, normalized))
+    .sort((a, b) => new Date(b.trip.startedAt).getTime() - new Date(a.trip.startedAt).getTime());
 }
 
 function csvCell(value: string | number | null | undefined) {

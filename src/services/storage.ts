@@ -92,6 +92,10 @@ export async function loadCloudData() {
     return null;
   }
 
+  if (!services.auth.currentUser) {
+    return null;
+  }
+
   const { collection, doc, getDoc, getDocs } = await import("firebase/firestore");
   const readCollection = async <T>(name: string) => {
     const snapshot = await getDocs(collection(services.db, name));
@@ -138,8 +142,12 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     return false;
   }
 
+  if (!services.auth.currentUser) {
+    return false;
+  }
+
   const { collection, doc, getDocs, query, where, writeBatch } = await import("firebase/firestore");
-  const authUid = services.auth.currentUser?.uid;
+  const authUid = services.auth.currentUser.uid;
   const currentActor = actor ?? data.users.find((user) => user.authUid === authUid || user.id === authUid);
 
   if (!currentActor) {

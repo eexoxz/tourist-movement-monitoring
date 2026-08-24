@@ -7,6 +7,7 @@ import {
   getDestinationCategoryCoverage,
   getMovementDataStatus,
   getMovementRecords,
+  getMovementTripRecords,
   getProfileDistribution,
   getTourists,
   getTripFilterOptions,
@@ -74,6 +75,30 @@ describe("dashboard service", () => {
 
     expect(trips).toHaveLength(1);
     expect(trips[0].id).toBe("trip-demo-1");
+  });
+
+  it("summarizes movement records by trip for administrator review", () => {
+    const refreshed = refreshAllRecommendations(initialData);
+    const records = getMovementTripRecords(refreshed, "tourist-demo");
+
+    expect(records).toHaveLength(1);
+    expect(records[0].trip.id).toBe("trip-demo-1");
+    expect(records[0].tourist?.name).toBe("Demo Tourist");
+    expect(records[0].summary.pointCount).toBe(4);
+    expect(records[0].destinationNames.length).toBeGreaterThan(0);
+    expect(records[0].analysis?.profile).toBeDefined();
+  });
+
+  it("filters administrator trip records by selected trip and date range", () => {
+    const dateKey = initialData.trips.find((trip) => trip.id === "trip-demo-2")!.startedAt.slice(0, 10);
+    const records = getMovementTripRecords(initialData, {
+      tripId: "trip-demo-2",
+      fromDate: dateKey,
+      toDate: dateKey,
+    });
+
+    expect(records).toHaveLength(1);
+    expect(records[0].trip.id).toBe("trip-demo-2");
   });
 
   it("builds a CSV export from visible movement records", () => {

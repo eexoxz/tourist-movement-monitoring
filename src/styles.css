@@ -944,6 +944,11 @@ button:disabled {
   box-shadow: 0 10px 20px rgba(15, 118, 110, 0.16);
 }
 
+.primary-action.danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 10px 20px rgba(220, 38, 38, 0.16);
+}
+
 .secondary-action {
   border: 1px solid #d8d0bf;
   color: #172033;
@@ -1063,6 +1068,31 @@ button:disabled {
   gap: 12px;
 }
 
+.destination-management-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.destination-management-panel > .section-heading {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+}
+
+.destination-management-panel .section-heading p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.destination-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .record-card,
 .destination-card,
 .recommendation-card,
@@ -1092,6 +1122,98 @@ button:disabled {
 .recommendation-card small {
   color: #657181;
   font-size: 0.84rem;
+}
+
+.admin-records-layout {
+  display: grid;
+  gap: 14px;
+}
+
+.movement-trip-card {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+}
+
+.movement-trip-card .mono-text,
+.record-detail-panel .mono-text {
+  overflow-wrap: anywhere;
+  color: #334155;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.76rem;
+}
+
+.record-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.record-metrics span {
+  min-height: 30px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f7f4ec;
+  color: #344155;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.record-detail-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #d8d0bf;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 58%),
+    #ffffff;
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+}
+
+.record-detail-panel > span {
+  color: var(--teal-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.record-detail-panel h2,
+.record-detail-panel p,
+.record-detail-panel dl {
+  margin: 0;
+}
+
+.record-detail-panel dl {
+  display: grid;
+  gap: 10px;
+}
+
+.record-detail-panel dl div {
+  display: grid;
+  gap: 3px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee5d5;
+}
+
+.record-detail-panel dt {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.record-detail-panel dd {
+  margin: 0;
+  color: #0f172a;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.record-detail-panel p {
+  color: #6b7280;
+  line-height: 1.5;
 }
 
 .destination-card small {
@@ -1389,6 +1511,14 @@ button:disabled {
   padding: 18px;
 }
 
+.destination-form-modal {
+  width: min(680px, 100%);
+}
+
+.confirm-modal {
+  width: min(520px, 100%);
+}
+
 .modal-heading {
   display: flex;
   align-items: start;
@@ -1455,6 +1585,12 @@ button:disabled {
   padding: 12px;
   border-radius: 8px;
   background: #f0fdf4;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 meter {
@@ -1548,6 +1684,7 @@ meter {
 }
 
 .destination-form label,
+.destination-form-modal label,
 .mini-form label,
 .auth-form label,
 .profile-form-grid label {
@@ -1969,7 +2106,8 @@ textarea {
   .two-column,
   .auth-panel,
   .movement-hero,
-  .profile-setup-card {
+  .profile-setup-card,
+  .destination-admin-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2096,9 +2234,15 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .record-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .recommendation-card-footer,
   .destination-modal dl div,
-  .admin-tab-heading {
+  .admin-tab-heading,
+  .destination-management-panel > .section-heading,
+  .modal-actions {
     display: grid;
     justify-items: start;
   }
@@ -2108,6 +2252,10 @@ textarea {
   .admin-filter-toolbar .secondary-action {
     width: 100%;
     max-width: none;
+  }
+
+  .record-detail-panel {
+    padding: 14px;
   }
 
   .modal-overlay {

@@ -137,9 +137,9 @@ Current alignment notes:
 - [x] Selected trip route map exists.
 - [x] Trip summary includes distance, duration, points and visited stops.
 - [x] No-trip empty state exists.
-- [ ] Sort trips with the most recent first.
-- [ ] Show start and end times clearly.
-- [ ] Show tracking status.
+- [x] Sort trips with the most recent first.
+- [x] Show start and end times clearly.
+- [x] Show tracking status.
 - [ ] Show recognised destinations count.
 - [ ] Open selected trip details in a modal, expandable section or side panel.
 - [ ] Trip detail should include start marker, end marker and visited destination markers.
@@ -179,9 +179,9 @@ Current alignment notes:
 - [ ] Keep only one or two useful charts.
 - [ ] Add trips-over-time chart if not already clear enough.
 - [ ] Add Tourist Category distribution or destination-category visits chart.
-- [ ] Movement Records tab should list Trip ID, Tourist, date, duration, movement-point count, destinations visited, Cluster ID and Tourist Category.
-- [ ] Movement record details should open in expandable row, modal or side panel.
-- [ ] Administrators may review movement records but cannot edit individual coordinates.
+- [x] Movement Records tab should list Trip ID, Tourist, date, duration, movement-point count, destinations visited, Cluster ID and Tourist Category.
+- [x] Movement record details should open in expandable row, modal or side panel.
+- [x] Administrators may review movement records but cannot edit individual coordinates.
 - [ ] AI Results tab should show selected K value, cluster size, dominant pattern, cluster description and recommendation result.
 - [ ] Keep confusion matrix/accuracy only if supported by labelled data and useful for report evidence.
 
@@ -192,12 +192,12 @@ Current alignment notes:
 - [x] Edit destination exists.
 - [x] Delete destination exists.
 - [x] Latitude/longitude validation exists.
-- [ ] Use Add/Edit modal instead of always showing long inline forms.
+- [x] Use Add/Edit modal instead of always showing long inline forms.
 - [ ] Limit final fixed categories to Cultural, Nature and Urban unless DPP/report justifies extra categories.
-- [ ] Show loading state while saving.
-- [ ] Show clear success/failure message.
-- [ ] Require confirmation before deletion.
-- [ ] Include destination name in the delete confirmation message.
+- [x] Show loading state while saving.
+- [x] Show clear success/failure message.
+- [x] Require confirmation before deletion.
+- [x] Include destination name in the delete confirmation message.
 - [ ] Keep search, filters and coordinate picker deferred until CRUD is stable.
 
 ## Firebase Data And Security
