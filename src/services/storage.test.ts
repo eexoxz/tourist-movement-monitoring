@@ -78,6 +78,8 @@ describe("storage service", () => {
     expect(normalized.analyses[0].clusterLabel).toBe("Unlabelled movement cluster");
     expect(normalized.analyses[0].decisionTreeDepth).toBe(0);
     expect(normalized.analyses[0].clusterCentroid.urban).toBe(0);
+    expect(normalized.analyses[0].kMeansInput.uniqueDestinations).toBe(0);
+    expect(normalized.analyses[0].kMeansCentroid.urbanProportion).toBe(0);
     expect(normalized.points[0].userId).toBe("tourist-old");
   });
 });

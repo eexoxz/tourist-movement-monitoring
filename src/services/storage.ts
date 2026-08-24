@@ -1,5 +1,5 @@
 import { initialData } from "../data/demoData";
-import type { AnalysisResult, AppData, Destination, LocationConsent, MovementPoint, Recommendation, TripSession, User } from "../types";
+import type { AnalysisResult, AppData, Destination, KMeansFeatureVector, LocationConsent, MovementPoint, Recommendation, TripSession, User } from "../types";
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
@@ -285,6 +285,22 @@ function normalizeMovementPoint(point: MovementPoint, data: Partial<AppData>): M
 }
 
 function normalizeAnalysis(analysis: Partial<AnalysisResult>): AnalysisResult {
+  const clusterCentroid = {
+    cultural: analysis.clusterCentroid?.cultural ?? 0,
+    nature: analysis.clusterCentroid?.nature ?? 0,
+    urban: analysis.clusterCentroid?.urban ?? 0,
+    heritage: analysis.clusterCentroid?.heritage ?? 0,
+    food: analysis.clusterCentroid?.food ?? 0,
+    coastal: analysis.clusterCentroid?.coastal ?? 0,
+  };
+  const kMeansInput = normalizeKMeansFeatureVector(analysis.kMeansInput);
+  const kMeansCentroid = normalizeKMeansFeatureVector(analysis.kMeansCentroid, {
+    culturalProportion: clusterCentroid.cultural + clusterCentroid.heritage,
+    natureProportion: clusterCentroid.nature + clusterCentroid.coastal,
+    urbanProportion: clusterCentroid.urban + clusterCentroid.food,
+    uniqueDestinations: 0,
+  });
+
   return {
     tripId: analysis.tripId ?? "",
     userId: analysis.userId ?? "",
@@ -298,14 +314,9 @@ function normalizeAnalysis(analysis: Partial<AnalysisResult>): AnalysisResult {
     silhouetteScore: analysis.silhouetteScore ?? 0,
     clusterDistance: analysis.clusterDistance ?? 0,
     clusterLabel: analysis.clusterLabel ?? "Unlabelled movement cluster",
-    clusterCentroid: {
-      cultural: analysis.clusterCentroid?.cultural ?? 0,
-      nature: analysis.clusterCentroid?.nature ?? 0,
-      urban: analysis.clusterCentroid?.urban ?? 0,
-      heritage: analysis.clusterCentroid?.heritage ?? 0,
-      food: analysis.clusterCentroid?.food ?? 0,
-      coastal: analysis.clusterCentroid?.coastal ?? 0,
-    },
+    kMeansInput,
+    kMeansCentroid,
+    clusterCentroid,
     categoryCounts: {
       cultural: analysis.categoryCounts?.cultural ?? 0,
       nature: analysis.categoryCounts?.nature ?? 0,
@@ -317,6 +328,15 @@ function normalizeAnalysis(analysis: Partial<AnalysisResult>): AnalysisResult {
     dataPointCount: analysis.dataPointCount ?? 0,
     method: "k-means",
     generatedAt: analysis.generatedAt ?? new Date().toISOString(),
+  };
+}
+
+function normalizeKMeansFeatureVector(value?: Partial<KMeansFeatureVector>, fallback?: KMeansFeatureVector): KMeansFeatureVector {
+  return {
+    culturalProportion: value?.culturalProportion ?? fallback?.culturalProportion ?? 0,
+    natureProportion: value?.natureProportion ?? fallback?.natureProportion ?? 0,
+    urbanProportion: value?.urbanProportion ?? fallback?.urbanProportion ?? 0,
+    uniqueDestinations: value?.uniqueDestinations ?? fallback?.uniqueDestinations ?? 0,
   };
 }
 

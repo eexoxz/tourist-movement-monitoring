@@ -26,6 +26,7 @@ import type {
   Destination,
   DestinationCategory,
   DestinationDemand,
+  KMeansFeatureVector,
   MovementAlert,
   MovementPoint,
   Recommendation,
@@ -2070,7 +2071,8 @@ function AdminWorkspace({
               <div>
                 <dt>Cluster description</dt>
                 <dd>
-                  The route is closest to a centroid weighted toward {selectedAnalysis.clusterLabel.replace(" movement cluster", "")}. Its centroid distance is {selectedAnalysis.clusterDistance}.
+                  The route is closest to a centroid with {selectedAnalysis.kMeansCentroid.culturalProportion}% cultural, {selectedAnalysis.kMeansCentroid.natureProportion}% nature,{" "}
+                  {selectedAnalysis.kMeansCentroid.urbanProportion}% urban, and about {selectedAnalysis.kMeansCentroid.uniqueDestinations} unique destination(s).
                 </dd>
               </div>
               <div>
@@ -2099,7 +2101,11 @@ function AdminWorkspace({
             </section>
             <section className="ai-detail-section">
               <h3>K-Means Input Pattern</h3>
-              <CategoryBars values={selectedAnalysis.categoryCounts} />
+              <KMeansFeatureBars features={selectedAnalysis.kMeansInput} />
+            </section>
+            <section className="ai-detail-section">
+              <h3>K-Means Cluster Centroid</h3>
+              <KMeansFeatureBars features={selectedAnalysis.kMeansCentroid} />
             </section>
             <section className="ai-detail-section">
               <h3>Recommendation Result</h3>
@@ -2948,6 +2954,32 @@ function CategoryBars({ values }: { values: Record<string, number> }) {
             <i style={{ width: `${Math.max(8, (value / max) * 100)}%` }} />
           </div>
           <strong>{value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function KMeansFeatureBars({ features }: { features: KMeansFeatureVector }) {
+  const rows = [
+    { label: "Cultural proportion", value: features.culturalProportion, width: features.culturalProportion, suffix: "%" },
+    { label: "Nature proportion", value: features.natureProportion, width: features.natureProportion, suffix: "%" },
+    { label: "Urban proportion", value: features.urbanProportion, width: features.urbanProportion, suffix: "%" },
+    { label: "Unique destinations", value: features.uniqueDestinations, width: Math.min(100, (features.uniqueDestinations / 10) * 100), suffix: "" },
+  ];
+
+  return (
+    <div className="kmeans-feature-bars">
+      {rows.map((row) => (
+        <div className="bar-row" key={row.label}>
+          <span>{row.label}</span>
+          <div>
+            <i style={{ width: `${Math.max(8, row.width)}%` }} />
+          </div>
+          <strong>
+            {row.value}
+            {row.suffix}
+          </strong>
         </div>
       ))}
     </div>

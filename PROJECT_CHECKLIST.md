@@ -227,8 +227,8 @@ Current alignment notes:
 - [x] Classification explanation path exists.
 - [x] Confusion matrix and accuracy evidence exist in prototype logic.
 - [x] Simplify user-facing AI output so it is understandable to non-technical users.
-- [ ] K-Means input should clearly use Cultural, Nature, Urban proportions and unique destinations visited.
-- [ ] Decision Tree output should be Cultural Tourist, Nature Tourist, Urban Tourist or Mixed Tourist.
+- [x] K-Means input should clearly use Cultural, Nature, Urban proportions and unique destinations visited.
+- [x] Decision Tree output should be Cultural Tourist, Nature Tourist, Urban Tourist or Mixed Tourist.
 - [x] Recommendation output should be exactly top three unvisited destinations.
 - [ ] Do not show unsupported personalised results when movement data is insufficient.
 - [x] Clearly label prepared demo records as demonstration data.

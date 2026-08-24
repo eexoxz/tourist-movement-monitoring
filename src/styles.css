@@ -1795,7 +1795,8 @@ meter {
   font-weight: 800;
 }
 
-.category-bars {
+.category-bars,
+.kmeans-feature-bars {
   display: grid;
   gap: 10px;
   margin-top: 14px;
@@ -1827,6 +1828,10 @@ meter {
 .bar-row strong {
   color: #172033;
   text-align: right;
+}
+
+.kmeans-feature-bars .bar-row {
+  grid-template-columns: 150px minmax(0, 1fr) 54px;
 }
 
 .destination-form label,

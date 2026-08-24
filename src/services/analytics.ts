@@ -5,6 +5,7 @@ import type {
   Destination,
   DestinationDemand,
   DestinationCategory,
+  KMeansFeatureVector,
   MovementAlert,
   MovementPoint,
   Recommendation,
@@ -17,10 +18,13 @@ import { createId } from "./storage";
 import { distanceKm, nearestDestination } from "./geo";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
+const kMeansFeatureNames: Array<keyof KMeansFeatureVector> = ["culturalProportion", "natureProportion", "urbanProportion", "uniqueDestinations"];
+const uniqueDestinationScale = 10;
 type TripFeature = {
   trip: TripSession;
   counts: Record<DestinationCategory, number>;
   vector: number[];
+  kMeansInput: KMeansFeatureVector;
   profile: TouristProfile;
   pointCount: number;
 };
@@ -75,6 +79,19 @@ function categoryCounts(points: MovementPoint[], data: AppData) {
   });
 
   return counts;
+}
+
+function matchedDestinationIds(points: MovementPoint[], data: AppData) {
+  const ids = new Set<string>();
+
+  prepareMovementPoints(points).forEach((point) => {
+    const nearest = nearestDestination(point, data.destinations);
+    if (nearest && nearest.distance <= 1.2) {
+      ids.add(nearest.destination.id);
+    }
+  });
+
+  return ids;
 }
 
 function prepareMovementPoints(points: MovementPoint[]) {
@@ -227,37 +244,71 @@ function classifyWithDecisionTree(counts: Record<DestinationCategory, number>): 
   };
 }
 
-function vectorFromCounts(counts: Record<DestinationCategory, number>) {
-  const total = Math.max(
-    1,
-    categories.reduce((sum, category) => sum + counts[category], 0)
-  );
-
-  return categories.map((category) => counts[category] / total);
+function groupedProfileCounts(counts: Record<DestinationCategory, number>) {
+  return {
+    cultural: counts.cultural + counts.heritage,
+    nature: counts.nature + counts.coastal,
+    urban: counts.urban + counts.food,
+  };
 }
 
-function centroidRecord(vector: number[]) {
-  return categories.reduce<Record<DestinationCategory, number>>((values, category, index) => {
-    values[category] = Number((vector[index] * 100).toFixed(1));
-    return values;
-  }, emptyCounts());
+function kMeansInputFromCounts(counts: Record<DestinationCategory, number>, uniqueDestinationCount: number): KMeansFeatureVector {
+  const grouped = groupedProfileCounts(counts);
+  const total = Math.max(1, grouped.cultural + grouped.nature + grouped.urban);
+
+  return {
+    culturalProportion: Number(((grouped.cultural / total) * 100).toFixed(1)),
+    natureProportion: Number(((grouped.nature / total) * 100).toFixed(1)),
+    urbanProportion: Number(((grouped.urban / total) * 100).toFixed(1)),
+    uniqueDestinations: uniqueDestinationCount,
+  };
+}
+
+function vectorFromKMeansInput(input: KMeansFeatureVector) {
+  return [
+    input.culturalProportion / 100,
+    input.natureProportion / 100,
+    input.urbanProportion / 100,
+    Math.min(uniqueDestinationScale, input.uniqueDestinations) / uniqueDestinationScale,
+  ];
+}
+
+function kMeansFeatureRecord(vector: number[]): KMeansFeatureVector {
+  return {
+    culturalProportion: Number(((vector[0] ?? 0) * 100).toFixed(1)),
+    natureProportion: Number(((vector[1] ?? 0) * 100).toFixed(1)),
+    urbanProportion: Number(((vector[2] ?? 0) * 100).toFixed(1)),
+    uniqueDestinations: Number(((vector[3] ?? 0) * uniqueDestinationScale).toFixed(1)),
+  };
+}
+
+function legacyCentroidRecord(vector: number[]) {
+  return {
+    cultural: Number(((vector[0] ?? 0) * 100).toFixed(1)),
+    nature: Number(((vector[1] ?? 0) * 100).toFixed(1)),
+    urban: Number(((vector[2] ?? 0) * 100).toFixed(1)),
+    heritage: 0,
+    food: 0,
+    coastal: 0,
+  };
 }
 
 function clusterLabel(vector: number[]) {
-  const ranked = categories
-    .map((category, index) => ({ category, weight: vector[index] }))
+  const ranked = kMeansFeatureNames.slice(0, 3)
+    .map((feature, index) => ({ profile: feature.replace("Proportion", ""), weight: vector[index] }))
     .sort((a, b) => b.weight - a.weight)
     .filter((item) => item.weight > 0.05);
+  const variety = (vector[3] ?? 0) >= 0.45 ? "varied-route" : "focused-route";
 
   if (ranked.length === 0) {
     return "Sparse movement cluster";
   }
 
   if (ranked.length === 1) {
-    return `${ranked[0].category} movement cluster`;
+    return `${ranked[0].profile} ${variety} cluster`;
   }
 
-  return `${ranked[0].category}/${ranked[1].category} movement cluster`;
+  return `${ranked[0].profile}/${ranked[1].profile} ${variety} cluster`;
 }
 
 function euclidean(a: number[], b: number[]) {
@@ -282,12 +333,14 @@ function createTripFeatures(data: AppData): TripFeature[] {
       }
 
       const counts = categoryCounts(points, data);
-      const vector = vectorFromCounts(counts);
+      const kMeansInput = kMeansInputFromCounts(counts, matchedDestinationIds(points, data).size);
+      const vector = vectorFromKMeansInput(kMeansInput);
 
       return {
         trip,
         counts,
         vector,
+        kMeansInput,
         profile: inferProfile(counts),
         pointCount: points.length,
       };
@@ -376,6 +429,18 @@ function profileMatchesCategory(profile: TouristProfile, category: DestinationCa
   }
 
   return category === "urban" || category === "food";
+}
+
+function categoryToKMeansFeature(category: DestinationCategory): keyof KMeansFeatureVector {
+  if (category === "cultural" || category === "heritage") {
+    return "culturalProportion";
+  }
+
+  if (category === "nature" || category === "coastal") {
+    return "natureProportion";
+  }
+
+  return "urbanProportion";
 }
 
 function demandTier(score: number): DestinationDemand["tier"] {
@@ -535,6 +600,8 @@ export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | 
   }
 
   const counts = categoryCounts(points, data);
+  const kMeansInput = kMeansInputFromCounts(counts, matchedDestinationIds(points, data).size);
+  const vector = vectorFromKMeansInput(kMeansInput);
   const classification = classifyWithDecisionTree(counts);
 
   return {
@@ -549,8 +616,10 @@ export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | 
     decisionPath: classification.path,
     silhouetteScore: 0,
     clusterDistance: 0,
-    clusterLabel: clusterLabel(vectorFromCounts(counts)),
-    clusterCentroid: centroidRecord(vectorFromCounts(counts)),
+    clusterLabel: clusterLabel(vector),
+    kMeansInput,
+    kMeansCentroid: kMeansFeatureRecord(vector),
+    clusterCentroid: legacyCentroidRecord(vector),
     categoryCounts: counts,
     dataPointCount: points.length,
     method: "k-means",
@@ -586,7 +655,9 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
       silhouetteScore: cluster.silhouetteScore,
       clusterDistance: cluster.distanceToCentroid,
       clusterLabel: cluster.label,
-      clusterCentroid: centroidRecord(cluster.centroid),
+      kMeansInput: feature.kMeansInput,
+      kMeansCentroid: kMeansFeatureRecord(cluster.centroid),
+      clusterCentroid: legacyCentroidRecord(cluster.centroid),
       categoryCounts: feature.counts,
       dataPointCount: feature.pointCount,
       method: "k-means",
@@ -614,7 +685,8 @@ export function recommendForUser(userId: string, data: AppData, analysis?: Analy
     .map((destination) => {
       const demand = demandByDestination.get(destination.id);
       const profileScore = profileMatchesCategory(profile, destination.category) ? 28 : 8;
-      const clusterScore = analysis ? Math.round((analysis.clusterCentroid[destination.category] / 100) * 24) : 0;
+      const clusterFeature = categoryToKMeansFeature(destination.category);
+      const clusterScore = analysis ? Math.round((analysis.kMeansCentroid[clusterFeature] / 100) * 24) : 0;
       const unvisitedScore = 20;
       const distanceScore = latestPoint ? Math.max(0, 22 - distanceKm(latestPoint, destination) * 1.2) : 12;
       const movementScore = demand ? Math.round(demand.popularityScore * 0.2) : 0;

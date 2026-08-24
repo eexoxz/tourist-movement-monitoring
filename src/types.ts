@@ -12,6 +12,13 @@ export type DestinationCategory =
 
 export type TouristProfile = "cultural" | "nature" | "urban" | "mixed";
 
+export type KMeansFeatureVector = {
+  culturalProportion: number;
+  natureProportion: number;
+  urbanProportion: number;
+  uniqueDestinations: number;
+};
+
 export type TripStatus = "active" | "completed";
 
 export type User = {
@@ -93,6 +100,8 @@ export type AnalysisResult = {
   silhouetteScore: number;
   clusterDistance: number;
   clusterLabel: string;
+  kMeansInput: KMeansFeatureVector;
+  kMeansCentroid: KMeansFeatureVector;
   clusterCentroid: Record<DestinationCategory, number>;
   categoryCounts: Record<DestinationCategory, number>;
   dataPointCount: number;

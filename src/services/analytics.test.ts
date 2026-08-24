@@ -32,6 +32,11 @@ describe("analytics service", () => {
     expect(data.analyses.every((analysis) => analysis.clusterLabel.includes("cluster"))).toBe(true);
     expect(data.analyses.every((analysis) => analysis.clusterDistance >= 0)).toBe(true);
     expect(data.analyses.every((analysis) => Object.values(analysis.clusterCentroid).some((value) => value > 0))).toBe(true);
+    expect(data.analyses.every((analysis) => analysis.kMeansInput.culturalProportion + analysis.kMeansInput.natureProportion + analysis.kMeansInput.urbanProportion > 0)).toBe(true);
+    expect(data.analyses.every((analysis) => analysis.kMeansInput.uniqueDestinations >= 1)).toBe(true);
+    expect(data.analyses.every((analysis) => analysis.kMeansCentroid.culturalProportion + analysis.kMeansCentroid.natureProportion + analysis.kMeansCentroid.urbanProportion > 0)).toBe(
+      true
+    );
     expect(data.recommendations.some((recommendation) => recommendation.scoreBreakdown.clusterPattern > 0)).toBe(true);
     expect(
       data.recommendations.every((recommendation) => recommendation.score === Math.min(100, Object.values(recommendation.scoreBreakdown).reduce((sum, value) => sum + value, 0)))
