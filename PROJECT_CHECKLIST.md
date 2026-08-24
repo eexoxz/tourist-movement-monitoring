@@ -61,10 +61,10 @@ Current alignment notes:
 - [x] UI navigation changes based on role.
 - [x] Firebase mode requires real Firebase Authentication accounts.
 - [x] Tourists cannot manually choose the Administrator role during registration.
-- [ ] Tourist login redirects to `/app/home`.
-- [ ] Administrator login redirects to `/admin/dashboard`.
-- [ ] Unauthenticated users return to `/login`.
-- [ ] Wrong-role access redirects to the authorised home page.
+- [x] Tourist login redirects to `/app/home`.
+- [x] Administrator login redirects to `/admin/dashboard`.
+- [x] Unauthenticated users return to `/login`.
+- [x] Wrong-role access redirects to the authorised home page.
 - [ ] Remove Tourist/Admin selector style from the login page in the final Firebase flow.
 - [x] Keep Tourist mobile navigation simple: Home, Trips, Recommendations, Profile menu.
 - [x] Keep Administrator navigation simple: Dashboard, Destinations, Logout.
@@ -94,8 +94,8 @@ Current alignment notes:
 - [x] Firestore user record creation exists.
 - [x] Email verification sending exists.
 - [x] Tourist profile/preferences setup exists after login.
-- [ ] Add confirm password.
-- [ ] Validate matching passwords.
+- [x] Add confirm password.
+- [x] Validate matching passwords.
 - [ ] Collect initial preferred categories during registration or immediately after registration.
 - [ ] Create/store a clearer Tourist Profile document or equivalent structured profile data.
 - [ ] Redirect to `/app/home` after successful registration or verification.

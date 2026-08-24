@@ -34,7 +34,15 @@ import type {
   User,
   UserRole,
 } from "./types";
-import { coerceViewForRole, getDefaultViewForRole } from "./services/access";
+import {
+  coerceViewForRole,
+  getAuthModeFromPath,
+  getDefaultViewForRole,
+  getPathForAuthMode,
+  getPathForView,
+  getViewFromPath,
+  type AuthMode,
+} from "./services/access";
 import { clearSession, createId, getStorageMode, loadCloudData, loadData, resetData, saveData } from "./services/storage";
 import { formatDateTime } from "./services/geo";
 import {
@@ -209,11 +217,28 @@ function inferExpectedProfileFromPreferences(preferences: DestinationCategory[])
   return ranked[0][1] > 0 && ranked[0][1] > ranked[1][1] ? ranked[0][0] : "mixed";
 }
 
+function getCurrentPathname() {
+  return typeof window === "undefined" ? "/" : window.location.pathname;
+}
+
+function replaceBrowserPath(path: string) {
+  if (typeof window !== "undefined" && window.location.pathname !== path) {
+    window.history.replaceState(null, "", path);
+  }
+}
+
+function pushBrowserPath(path: string) {
+  if (typeof window !== "undefined" && window.location.pathname !== path) {
+    window.history.pushState(null, "", path);
+  }
+}
+
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const currentUser = data.users.find((user) => user.id === sessionUserId) ?? null;
-  const [view, setView] = useState<AppView>("overview");
+  const [view, setView] = useState<AppView>(() => getViewFromPath(getCurrentPathname()) ?? "overview");
+  const [authMode, setAuthMode] = useState<AuthMode>(() => getAuthModeFromPath(getCurrentPathname()) ?? "login");
   const safeView = currentUser ? coerceViewForRole(currentUser.role, view) : view;
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -225,6 +250,22 @@ function App() {
 
   const dismissNotification = (id: string) => {
     setNotifications((current) => current.filter((notification) => notification.id !== id));
+  };
+
+  const goToAuthMode = (mode: AuthMode) => {
+    setAuthMode(mode);
+    pushBrowserPath(getPathForAuthMode(mode));
+  };
+
+  const goToView = (nextView: AppView) => {
+    const activeUser = currentUser;
+    if (!activeUser) {
+      return;
+    }
+
+    const nextSafeView = coerceViewForRole(activeUser.role, nextView);
+    setView(nextSafeView);
+    pushBrowserPath(getPathForView(activeUser.role, nextSafeView));
   };
 
   useEffect(() => {
@@ -262,6 +303,45 @@ function App() {
       setView(safeView);
     }
   }, [currentUser, safeView, view]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const pathname = getCurrentPathname();
+
+      if (!currentUser) {
+        setAuthMode(getAuthModeFromPath(pathname) ?? "login");
+        return;
+      }
+
+      const pathView = getViewFromPath(pathname) ?? getDefaultViewForRole(currentUser.role);
+      setView(coerceViewForRole(currentUser.role, pathView));
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentUser]);
+
+  useEffect(() => {
+    const pathname = getCurrentPathname();
+
+    if (!currentUser) {
+      const nextMode = getAuthModeFromPath(pathname) ?? authMode;
+      if (nextMode !== authMode) {
+        setAuthMode(nextMode);
+      }
+      replaceBrowserPath(getPathForAuthMode(nextMode));
+      return;
+    }
+
+    const pathView = getViewFromPath(pathname);
+    const nextView = coerceViewForRole(currentUser.role, pathView ?? safeView);
+    if (nextView !== safeView) {
+      setView(nextView);
+      return;
+    }
+
+    replaceBrowserPath(getPathForView(currentUser.role, nextView));
+  }, [authMode, currentUser, safeView]);
 
   const commitData = (nextData: AppData, actor: User | null = currentUser) => {
     setData(nextData);
@@ -303,6 +383,7 @@ function App() {
       }
       setSessionUserId(localUser.id);
       setView(getDefaultViewForRole(localUser.role));
+      replaceBrowserPath(getPathForView(localUser.role, getDefaultViewForRole(localUser.role)));
       return {};
     }
 
@@ -329,6 +410,7 @@ function App() {
 
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));
+    replaceBrowserPath(getPathForView(user.role, getDefaultViewForRole(user.role)));
     return {};
   };
 
@@ -362,6 +444,7 @@ function App() {
     commitData(created.data, user);
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));
+    replaceBrowserPath(getPathForView(user.role, getDefaultViewForRole(user.role)));
     return {};
   };
 
@@ -397,6 +480,7 @@ function App() {
     await signOutConfiguredProvider().catch(() => undefined);
     clearSession();
     setSessionUserId(null);
+    replaceBrowserPath(getPathForAuthMode("login"));
   };
 
   const resetPrototype = () => {
@@ -410,6 +494,7 @@ function App() {
     setData(freshData);
     setSessionUserId(null);
     setView("overview");
+    replaceBrowserPath(getPathForAuthMode("login"));
     notify({ tone: "info", title: "Demo data reset", message: "The prototype data has been restored to its prepared sample state." });
   };
 
@@ -427,7 +512,7 @@ function App() {
   if (!currentUser) {
     return (
       <>
-        <AuthScreen onLogin={login} onRegister={register} onResendVerification={resendVerification} notify={notify} />
+        <AuthScreen mode={authMode} onModeChange={goToAuthMode} onLogin={login} onRegister={register} onResendVerification={resendVerification} notify={notify} />
         <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
       </>
     );
@@ -461,7 +546,7 @@ function App() {
 
         <nav className="nav-list" aria-label="Primary navigation">
           {roleViews.map(([key, label, Icon]) => (
-            <button key={key} className={safeView === key ? "nav-item active" : "nav-item"} onClick={() => setView(key)}>
+            <button key={key} className={safeView === key ? "nav-item active" : "nav-item"} onClick={() => goToView(key)}>
               <Icon size={18} />
               {label}
             </button>
@@ -502,7 +587,7 @@ function App() {
         {currentUser.role === "admin" ? (
           <AdminWorkspace data={data} view={safeView} onDataChange={commitData} notify={notify} />
         ) : (
-          <TouristWorkspace data={data} view={safeView} user={currentUser} onDataChange={commitData} onViewChange={setView} watchId={watchId} notify={notify} />
+          <TouristWorkspace data={data} view={safeView} user={currentUser} onDataChange={commitData} onViewChange={goToView} watchId={watchId} notify={notify} />
         )}
       </main>
       <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
@@ -511,22 +596,26 @@ function App() {
 }
 
 function AuthScreen({
+  mode,
+  onModeChange,
   onLogin,
   onRegister,
   onResendVerification,
   notify,
 }: {
+  mode: AuthMode;
+  onModeChange: (mode: AuthMode) => void;
   onLogin: (email: string, password: string) => Promise<AuthResult>;
   onRegister: (name: string, email: string, password: string) => Promise<AuthResult>;
   onResendVerification: (email: string, password: string) => Promise<AuthResult>;
   notify: NotifyFn;
 }) {
   const [rememberedLogin] = useState(() => loadRememberedLogin());
-  const [mode, setMode] = useState<"login" | "register">("login");
   const [roleHint, setRoleHint] = useState<UserRole | "nature" | "culture" | "urban">("tourist");
   const [name, setName] = useState("");
   const [email, setEmail] = useState(rememberedLogin?.email ?? "");
   const [password, setPassword] = useState(rememberedLogin?.password ?? "");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(Boolean(rememberedLogin));
   const [error, setError] = useState<string | null>(null);
@@ -576,6 +665,13 @@ function AuthScreen({
       setError("Enter a name with at least two characters.");
       setMessage(null);
       notify({ tone: "error", title: "Name is missing", message: "Enter at least two characters for the tourist profile name." });
+      return;
+    }
+
+    if (mode === "register" && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setMessage(null);
+      notify({ tone: "error", title: "Passwords do not match", message: "Retype the same password in both password fields." });
       return;
     }
 
@@ -644,10 +740,26 @@ function AuthScreen({
 
         <form className="auth-form" onSubmit={submit} noValidate>
           <div className="segmented-control" role="tablist" aria-label="Authentication mode">
-            <button type="button" className={mode === "login" ? "active" : ""} onClick={() => setMode("login")}>
+            <button
+              type="button"
+              className={mode === "login" ? "active" : ""}
+              onClick={() => {
+                setError(null);
+                setMessage(null);
+                onModeChange("login");
+              }}
+            >
               Login
             </button>
-            <button type="button" className={mode === "register" ? "active" : ""} onClick={() => setMode("register")}>
+            <button
+              type="button"
+              className={mode === "register" ? "active" : ""}
+              onClick={() => {
+                setError(null);
+                setMessage(null);
+                onModeChange("register");
+              }}
+            >
               Register
             </button>
           </div>
@@ -696,6 +808,25 @@ function AuthScreen({
               </button>
             </span>
           </label>
+
+          {mode === "register" && (
+            <label>
+              Confirm Password
+              <span className="password-field">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                />
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? "Hide password" : "Show password"}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </span>
+            </label>
+          )}
 
           <label className="checkbox-field remember-login">
             <input
