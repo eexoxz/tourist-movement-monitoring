@@ -1129,6 +1129,11 @@ button:disabled {
   gap: 14px;
 }
 
+.trip-history-panel {
+  display: grid;
+  gap: 14px;
+}
+
 .movement-trip-card {
   width: 100%;
   color: inherit;
@@ -1136,7 +1141,8 @@ button:disabled {
 }
 
 .movement-trip-card .mono-text,
-.record-detail-panel .mono-text {
+.record-detail-panel .mono-text,
+.trip-detail-panel .mono-text {
   overflow-wrap: anywhere;
   color: #334155;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -1160,7 +1166,8 @@ button:disabled {
   font-weight: 800;
 }
 
-.record-detail-panel {
+.record-detail-panel,
+.trip-detail-panel {
   display: grid;
   gap: 12px;
   padding: 16px;
@@ -1172,7 +1179,8 @@ button:disabled {
   box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
 }
 
-.record-detail-panel > span {
+.record-detail-panel > span,
+.trip-detail-panel > span {
   color: var(--teal-dark);
   font-size: 0.78rem;
   font-weight: 900;
@@ -1182,38 +1190,75 @@ button:disabled {
 
 .record-detail-panel h2,
 .record-detail-panel p,
-.record-detail-panel dl {
+.record-detail-panel dl,
+.trip-detail-panel h2,
+.trip-detail-panel p,
+.trip-detail-panel dl {
   margin: 0;
 }
 
-.record-detail-panel dl {
+.record-detail-panel dl,
+.trip-detail-panel dl {
   display: grid;
   gap: 10px;
 }
 
-.record-detail-panel dl div {
+.record-detail-panel dl div,
+.trip-detail-panel dl div {
   display: grid;
   gap: 3px;
   padding-bottom: 10px;
   border-bottom: 1px solid #eee5d5;
 }
 
-.record-detail-panel dt {
+.record-detail-panel dt,
+.trip-detail-panel dt {
   color: #64748b;
   font-size: 0.76rem;
   font-weight: 800;
 }
 
-.record-detail-panel dd {
+.record-detail-panel dd,
+.trip-detail-panel dd {
   margin: 0;
   color: #0f172a;
   font-weight: 800;
   line-height: 1.45;
 }
 
-.record-detail-panel p {
+.record-detail-panel p,
+.trip-detail-panel p {
   color: #6b7280;
   line-height: 1.5;
+}
+
+.trip-detail-recommendations {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f0fdfa;
+}
+
+.trip-detail-recommendations strong {
+  color: #0f766e;
+  font-size: 0.9rem;
+}
+
+.trip-detail-recommendations span {
+  display: grid;
+  gap: 2px;
+  padding: 9px 10px;
+  border: 1px solid #ccfbf1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.trip-detail-recommendations small {
+  color: #64748b;
+  font-size: 0.76rem;
 }
 
 .destination-card small {
@@ -2254,7 +2299,8 @@ textarea {
     max-width: none;
   }
 
-  .record-detail-panel {
+  .record-detail-panel,
+  .trip-detail-panel {
     padding: 14px;
   }
 

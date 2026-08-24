@@ -140,12 +140,12 @@ Current alignment notes:
 - [x] Sort trips with the most recent first.
 - [x] Show start and end times clearly.
 - [x] Show tracking status.
-- [ ] Show recognised destinations count.
-- [ ] Open selected trip details in a modal, expandable section or side panel.
-- [ ] Trip detail should include start marker, end marker and visited destination markers.
-- [ ] Trip detail should include Cluster ID, Tourist Category, generated recommendations and analysis status.
-- [ ] Add loading, failed-load, analysis-processing and insufficient-data states.
-- [ ] Remove trip editing/deletion from final scope.
+- [x] Show recognised destinations count.
+- [x] Open selected trip details in a modal, expandable section or side panel.
+- [x] Trip detail should include start marker, end marker and visited destination markers.
+- [x] Trip detail should include Cluster ID, Tourist Category, generated recommendations and analysis status.
+- [x] Add loading, failed-load, analysis-processing and insufficient-data states.
+- [x] Remove trip editing/deletion from final scope.
 
 ## Page 5: Travel Recommendations
 

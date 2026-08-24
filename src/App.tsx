@@ -44,7 +44,7 @@ import {
   type AuthMode,
 } from "./services/access";
 import { clearSession, createId, getStorageMode, loadCloudData, loadData, resetData, saveData } from "./services/storage";
-import { formatDateTime } from "./services/geo";
+import { formatDateTime, nearestDestination } from "./services/geo";
 import {
   buildMovementAlertsCsv,
   buildTravelPlanCsv,
@@ -914,6 +914,20 @@ function TouristWorkspace({
   const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? recentTrips[0];
   const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
   const selectedTripSummary = selectedTrip ? summarizeTrip(data, selectedTrip.id) : null;
+  const selectedTripAnalysis = selectedTrip
+    ? data.analyses.find((analysis) => analysis.tripId === selectedTrip.id && analysis.userId === user.id) ?? null
+    : null;
+  const selectedTripDestinationNames = useMemo(() => {
+    const names = selectedTripPoints
+      .map((point) => {
+        const nearest = nearestDestination(point, data.destinations);
+        return nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
+      })
+      .filter((name): name is string => Boolean(name));
+
+    return Array.from(new Set(names));
+  }, [selectedTripPoints, data.destinations]);
+  const selectedTripRecommendations = recommendations.slice(0, 3);
   const recentTrip = recentTrips[0];
   const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
@@ -1244,25 +1258,86 @@ function TouristWorkspace({
       <Page title="My Trips" eyebrow="Tourist">
         <div className="two-column">
           <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
-          <section className="list-panel">
+          <section className="trip-history-panel">
             {selectedTripSummary && <TripSummaryPanel summary={selectedTripSummary} />}
-            {recentTrips.map((trip) => {
-              const points = data.points.filter((point) => point.tripId === trip.id);
-              const summary = tripSummaries.find((row) => row.tripId === trip.id);
-              return (
-                <button className={selectedTrip?.id === trip.id ? "record-card selectable active" : "record-card selectable"} key={trip.id} onClick={() => setSelectedTripId(trip.id)}>
+            {selectedTrip && selectedTripSummary && (
+              <aside className="trip-detail-panel">
+                <span>Selected Trip</span>
+                <h2>{formatDateTime(selectedTrip.startedAt)}</h2>
+                <dl>
                   <div>
-                    <strong>{formatDateTime(trip.startedAt)}</strong>
-                    <span>{trip.status}</span>
+                    <dt>Status</dt>
+                    <dd>{selectedTrip.status === "completed" ? "Completed" : "Active"}</dd>
                   </div>
-                  <p>
-                    {points.length} point(s), {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {summary?.visitedDestinationCount ?? 0} visited destination(s)
-                  </p>
-                  <small>{trip.endedAt ? `Ended ${formatDateTime(trip.endedAt)}` : "Trip still active"}</small>
-                </button>
-              );
-            })}
-            {userTrips.length === 0 && <EmptyState text="Your saved trips will appear here after you start tracking." />}
+                  <div>
+                    <dt>Started</dt>
+                    <dd>{formatDateTime(selectedTrip.startedAt)}</dd>
+                  </div>
+                  <div>
+                    <dt>Ended</dt>
+                    <dd>{selectedTrip.endedAt ? formatDateTime(selectedTrip.endedAt) : "Trip still active"}</dd>
+                  </div>
+                  <div>
+                    <dt>Recognised stops</dt>
+                    <dd>{selectedTripDestinationNames.length > 0 ? selectedTripDestinationNames.join(", ") : "No nearby saved destination recognised yet"}</dd>
+                  </div>
+                  <div>
+                    <dt>Analysis status</dt>
+                    <dd>
+                      {selectedTripAnalysis
+                        ? "Complete"
+                        : selectedTripSummary.pointCount >= 2
+                          ? "Ready to refresh"
+                          : "Needs at least 2 movement points"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Tourist category</dt>
+                    <dd>{selectedTripAnalysis ? `${selectedTripAnalysis.profile} Tourist` : "Pending"}</dd>
+                  </div>
+                  <div>
+                    <dt>Cluster ID</dt>
+                    <dd>{selectedTripAnalysis ? `Cluster ${selectedTripAnalysis.cluster + 1}` : "Pending"}</dd>
+                  </div>
+                </dl>
+
+                <div className="trip-detail-recommendations">
+                  <strong>Current generated recommendations</strong>
+                  {selectedTripRecommendations.length > 0 ? (
+                    selectedTripRecommendations.map((recommendation) => {
+                      const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
+
+                      return destination ? (
+                        <span key={recommendation.id}>
+                          {destination.name} <small>{destination.city}</small>
+                        </span>
+                      ) : null;
+                    })
+                  ) : (
+                    <p>Complete a trip with enough movement data to generate recommendations.</p>
+                  )}
+                </div>
+              </aside>
+            )}
+            <section className="list-panel">
+              {recentTrips.map((trip) => {
+                const points = data.points.filter((point) => point.tripId === trip.id);
+                const summary = tripSummaries.find((row) => row.tripId === trip.id);
+                return (
+                  <button className={selectedTrip?.id === trip.id ? "record-card selectable active" : "record-card selectable"} key={trip.id} onClick={() => setSelectedTripId(trip.id)}>
+                    <div>
+                      <strong>{formatDateTime(trip.startedAt)}</strong>
+                      <span>{trip.status === "completed" ? "Completed" : "Active"}</span>
+                    </div>
+                    <p>
+                      {points.length} point(s), {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {summary?.visitedDestinationCount ?? 0} recognised stop(s)
+                    </p>
+                    <small>{trip.endedAt ? `Ended ${formatDateTime(trip.endedAt)}` : "Trip still active"}</small>
+                  </button>
+                );
+              })}
+              {userTrips.length === 0 && <EmptyState text="Your saved trips will appear here after you start tracking." />}
+            </section>
           </section>
         </div>
       </Page>
