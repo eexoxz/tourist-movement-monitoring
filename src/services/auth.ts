@@ -53,6 +53,17 @@ export async function sendVerificationEmail(user?: FirebaseUser | null) {
   return true;
 }
 
+export async function sendPasswordResetToConfiguredProvider(email: string) {
+  const services = getFirebaseServices();
+  if (!services) {
+    return false;
+  }
+
+  const { sendPasswordResetEmail } = await import("firebase/auth");
+  await sendPasswordResetEmail(services.auth, email);
+  return true;
+}
+
 export async function refreshConfiguredUser() {
   const services = getFirebaseServices();
   const currentUser = services?.auth.currentUser;

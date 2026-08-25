@@ -18,7 +18,18 @@ export function normalizeEmail(email: string) {
 }
 
 export function isValidEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const normalizedEmail = normalizeEmail(email);
+  if (normalizedEmail.includes("..")) {
+    return false;
+  }
+
+  if (!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(normalizedEmail)) {
+    return false;
+  }
+
+  const domain = normalizedEmail.split("@")[1];
+  const labels = domain.split(".");
+  return labels.every((label) => label.length > 0 && !label.startsWith("-") && !label.endsWith("-")) && labels.at(-1)!.length >= 2;
 }
 
 export function authenticateLocalUser(data: AppData, email: string, password: string) {

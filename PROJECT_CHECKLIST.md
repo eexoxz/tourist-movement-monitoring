@@ -83,7 +83,7 @@ Current alignment notes:
 - [x] Validate email format before Firebase login.
 - [x] Remove misleading default demo credentials from Firebase login.
 - [x] Create Tourist Account link should go to a clear registration screen.
-- [ ] Forgot Password link only if core flow is stable.
+- [x] Forgot Password link only if core flow is stable.
 
 ## Page 2: Tourist Registration
 
@@ -256,7 +256,7 @@ Current alignment notes:
 - [x] Make key trip controls easy to reach.
 - [x] Let the map use most of the tracking screen.
 - [x] Add visible keyboard focus states.
-- [ ] Add retry actions where failures are recoverable.
+- [x] Add retry actions where failures are recoverable.
 - [ ] Test Tourist flow at mobile width.
 - [ ] Test Chrome, Edge and Firefox.
 

@@ -171,6 +171,27 @@ button:disabled {
   line-height: 1.35;
 }
 
+.status-retry-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 36px;
+  margin-top: 6px;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 8px;
+  color: var(--teal-dark);
+  background: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.status-retry-button:hover {
+  border-color: rgba(15, 118, 110, 0.42);
+  background: #ecfdf5;
+}
+
 .nav-item.utility {
   color: #0f766e;
 }
@@ -1977,6 +1998,12 @@ textarea {
   text-underline-offset: 4px;
 }
 
+.auth-secondary-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 textarea {
   min-height: 94px;
   resize: vertical;
@@ -2418,6 +2445,7 @@ textarea {
   .recommendation-list,
   .analysis-grid,
   .admin-tabs,
+  .auth-secondary-actions,
   .action-row,
   .field-pair,
   .alert-card,

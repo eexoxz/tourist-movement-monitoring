@@ -5,6 +5,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  KeyRound,
   LogOut,
   MapPinned,
   Navigation,
@@ -62,6 +63,7 @@ import {
   getConfiguredUserRecord,
   hasConfiguredAuth,
   registerWithConfiguredProvider,
+  sendPasswordResetToConfiguredProvider,
   sendVerificationEmail,
   signInWithConfiguredProvider,
   signOutConfiguredProvider,
@@ -276,6 +278,7 @@ function App() {
   const [authMode, setAuthMode] = useState<AuthMode>(() => getAuthModeFromPath(getCurrentPathname()) ?? "login");
   const safeView = currentUser ? coerceViewForRole(currentUser.role, view) : view;
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
+  const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const watchId = useRef<number | null>(null);
   const lastSyncWarningAt = useRef(0);
@@ -395,6 +398,29 @@ function App() {
         setSyncStatus("Saved on this device; cloud retry pending");
         notifySyncIssue("Cloud save needs retry", "Your change was kept locally. Firestore did not accept the latest sync.");
       });
+  };
+
+  const retryCloudSync = async () => {
+    if (!currentUser) {
+      return;
+    }
+
+    setIsRetryingSync(true);
+    try {
+      const synced = await saveData(data, currentUser);
+      if (synced) {
+        setSyncStatus("Saved to Firestore collections");
+        notify({ tone: "success", title: "Cloud sync restored", message: "The latest local data was saved to Firestore." });
+      } else {
+        setSyncStatus("Saved on this device; cloud retry pending");
+        notify({ tone: "warning", title: "Cloud sync still unavailable", message: "The app is still keeping changes locally on this device." });
+      }
+    } catch {
+      setSyncStatus("Saved on this device; cloud retry pending");
+      notify({ tone: "warning", title: "Cloud sync still unavailable", message: "Firestore did not accept the retry. Check Firebase rules and connection." });
+    } finally {
+      setIsRetryingSync(false);
+    }
   };
 
   const login = async (email: string, password: string): Promise<AuthResult> => {
@@ -522,6 +548,19 @@ function App() {
     }
   };
 
+  const sendPasswordReset = async (email: string): Promise<AuthResult> => {
+    if (!hasConfiguredAuth()) {
+      return { error: "Password reset is only available in Firebase mode." };
+    }
+
+    try {
+      const sent = await sendPasswordResetToConfiguredProvider(email);
+      return sent ? { message: "Password reset email sent. Check your inbox or spam folder." } : { error: "Firebase password reset is not configured." };
+    } catch (error) {
+      return { error: friendlyAuthError(error, "Password reset email could not be sent.") };
+    }
+  };
+
   const logout = async () => {
     if (watchId.current !== null) {
       navigator.geolocation.clearWatch(watchId.current);
@@ -563,7 +602,15 @@ function App() {
   if (!currentUser) {
     return (
       <>
-        <AuthScreen mode={authMode} onModeChange={goToAuthMode} onLogin={login} onRegister={register} onResendVerification={resendVerification} notify={notify} />
+        <AuthScreen
+          mode={authMode}
+          onModeChange={goToAuthMode}
+          onLogin={login}
+          onRegister={register}
+          onResendVerification={resendVerification}
+          onPasswordReset={sendPasswordReset}
+          notify={notify}
+        />
         <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
       </>
     );
@@ -615,6 +662,12 @@ function App() {
         <div className="status-pill">
           <span>{authProviderName()}</span>
           <strong>{syncStatus}</strong>
+          {hasConfiguredAuth() && (
+            <button className="status-retry-button" type="button" onClick={retryCloudSync} disabled={isRetryingSync}>
+              <RotateCcw size={15} />
+              {isRetryingSync ? "Retrying" : "Retry sync"}
+            </button>
+          )}
         </div>
 
         <div className="sidebar-tools">
@@ -652,6 +705,7 @@ function AuthScreen({
   onLogin,
   onRegister,
   onResendVerification,
+  onPasswordReset,
   notify,
 }: {
   mode: AuthMode;
@@ -659,6 +713,7 @@ function AuthScreen({
   onLogin: (email: string, password: string) => Promise<AuthResult>;
   onRegister: (draft: TouristRegistrationDraft) => Promise<AuthResult>;
   onResendVerification: (email: string, password: string) => Promise<AuthResult>;
+  onPasswordReset: (email: string) => Promise<AuthResult>;
   notify: NotifyFn;
 }) {
   const [rememberedLogin] = useState(() => loadRememberedLogin());
@@ -813,6 +868,30 @@ function AuthScreen({
     setIsSubmitting(false);
   };
 
+  const requestPasswordReset = async () => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError("Enter a valid email address before requesting a password reset.");
+      setMessage(null);
+      notify({ tone: "error", title: "Email does not look right", message: "Enter the email address for the Firebase account." });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    setMessage(null);
+    const result = await onPasswordReset(normalizedEmail);
+    setError(result.error ?? null);
+    setMessage(result.message ?? null);
+    notify({
+      tone: result.error ? "error" : "success",
+      title: result.error ? "Reset failed" : "Password reset sent",
+      message: result.error ?? result.message,
+    });
+    setIsSubmitting(false);
+  };
+
   return (
     <main className="auth-layout">
       <section className="auth-panel">
@@ -960,10 +1039,16 @@ function AuthScreen({
           </button>
 
           {firebaseMode && mode === "login" && (
-            <button className="secondary-action" type="button" onClick={resendVerification} disabled={isSubmitting}>
-              <RotateCcw size={18} />
-              Resend verification email
-            </button>
+            <div className="auth-secondary-actions">
+              <button className="secondary-action" type="button" onClick={resendVerification} disabled={isSubmitting}>
+                <RotateCcw size={18} />
+                Resend verification email
+              </button>
+              <button className="secondary-action" type="button" onClick={requestPasswordReset} disabled={isSubmitting}>
+                <KeyRound size={18} />
+                Forgot password
+              </button>
+            </div>
           )}
 
           <button className="auth-mode-link" type="button" onClick={() => switchAuthMode(mode === "login" ? "register" : "login")}>

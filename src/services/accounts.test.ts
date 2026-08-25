@@ -18,6 +18,9 @@ describe("accounts service", () => {
 
   it("validates tourist registration input", () => {
     expect(isValidEmail("newtourist@example.com")).toBe(true);
+    expect(isValidEmail("newtourist@example")).toBe(false);
+    expect(isValidEmail("newtourist@example..com")).toBe(false);
+    expect(isValidEmail("newtourist@-example.com")).toBe(false);
     expect(validateTouristAccount(initialData, { name: "A", email: "newtourist@example.com", password: "secret1" }).error).toContain("name");
     expect(validateTouristAccount(initialData, { name: "New Tourist", email: "bad-email", password: "secret1" }).error).toContain("valid email");
     expect(validateTouristAccount(initialData, { name: "New Tourist", email: "newtourist@example.com", password: "123" }).error).toContain("at least 6");
