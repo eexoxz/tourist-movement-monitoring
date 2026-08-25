@@ -48,7 +48,7 @@ import {
   getViewFromPath,
   type AuthMode,
 } from "./services/access";
-import { clearSession, createId, getStorageMode, loadCloudData, loadData, resetData, saveData } from "./services/storage";
+import { clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
 import {
   buildMovementAlertsCsv,
@@ -62,6 +62,7 @@ import {
 } from "./services/analytics";
 import {
   authProviderName,
+  getConfiguredAuthState,
   getConfiguredUserRecord,
   hasConfiguredAuth,
   registerWithConfiguredProvider,
@@ -286,8 +287,8 @@ function pushBrowserPath(path: string) {
 
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
-  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
-  const currentUser = data.users.find((user) => user.id === sessionUserId) ?? null;
+  const [sessionUserId, setSessionUserId] = useState<string | null>(() => loadSession());
+  const currentUser = data.users.find((user) => user.id === sessionUserId || user.authUid === sessionUserId) ?? null;
   const [view, setView] = useState<AppView>(() => getViewFromPath(getCurrentPathname()) ?? "overview");
   const [authMode, setAuthMode] = useState<AuthMode>(() => getAuthModeFromPath(getCurrentPathname()) ?? "login");
   const safeView = currentUser ? coerceViewForRole(currentUser.role, view) : view;
@@ -333,24 +334,44 @@ function App() {
 
   useEffect(() => {
     let isMounted = true;
-    clearSession();
 
-    loadCloudData()
-      .then((cloudData) => {
+    const hydrateCloudData = async () => {
+      try {
+        const firebaseUser = hasConfiguredAuth() ? await getConfiguredAuthState() : null;
+        if (!isMounted) {
+          return;
+        }
+
+        if (hasConfiguredAuth() && !firebaseUser) {
+          clearSession();
+          setSessionUserId(null);
+        }
+
+        if (firebaseUser?.uid) {
+          saveSession(firebaseUser.uid);
+          setSessionUserId(firebaseUser.uid);
+        }
+
+        const cloudData = await loadCloudData();
         if (!isMounted || !cloudData) {
           return;
         }
 
         const refreshed = refreshAllRecommendations(cloudData);
         setData(refreshed);
+        if (firebaseUser?.uid && refreshed.users.some((user) => user.id === firebaseUser.uid || user.authUid === firebaseUser.uid)) {
+          setSessionUserId(firebaseUser.uid);
+        }
         setSyncStatus("Loaded from Firebase Firestore");
-      })
-      .catch(() => {
+      } catch {
         if (isMounted) {
           setSyncStatus("Local mode; Firebase sync unavailable");
           notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
         }
-      });
+      }
+    };
+
+    void hydrateCloudData();
 
     return () => {
       isMounted = false;
@@ -461,6 +482,7 @@ function App() {
       if (!localUser) {
         return { error: "Invalid email or password." };
       }
+      saveSession(localUser.id);
       setSessionUserId(localUser.id);
       setView(getDefaultViewForRole(localUser.role));
       replaceBrowserPath(getPathForView(localUser.role, getDefaultViewForRole(localUser.role)));
@@ -488,7 +510,8 @@ function App() {
       return { error: "Invalid email or password." };
     }
 
-    setSessionUserId(user.id);
+    saveSession(authUid ?? user.id);
+    setSessionUserId(authUid ?? user.id);
     setView(getDefaultViewForRole(user.role));
     replaceBrowserPath(getPathForView(user.role, getDefaultViewForRole(user.role)));
     return {};
@@ -533,6 +556,7 @@ function App() {
     }
 
     commitData(created.data, user);
+    saveSession(user.id);
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));
     replaceBrowserPath(getPathForView(user.role, getDefaultViewForRole(user.role)));

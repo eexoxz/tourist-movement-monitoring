@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
-import { FIRESTORE_COLLECTIONS, loadData, normalizeAppData } from "./storage";
+import { clearSession, createId, FIRESTORE_COLLECTIONS, loadData, loadSession, normalizeAppData, saveSession } from "./storage";
 
 describe("storage service", () => {
   it("uses DPP-aligned Firestore collection names for new writes", () => {
@@ -98,6 +98,33 @@ describe("storage service", () => {
     expect(normalized.analyses[0].kMeansInput.uniqueDestinations).toBe(0);
     expect(normalized.analyses[0].kMeansCentroid.urbanProportion).toBe(0);
     expect(normalized.points[0].userId).toBe("tourist-old");
+  });
+
+  it("creates ids when randomUUID is unavailable on LAN preview origins", () => {
+    vi.stubGlobal("crypto", {
+      getRandomValues: (bytes: Uint8Array) => {
+        bytes.set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+        return bytes;
+      },
+    });
+
+    expect(createId("point")).toBe("point-0102030405060708090a0b0c0d0e0f10");
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps a saved user session available across reloads", () => {
+    const storage = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => storage.set(key, value),
+      removeItem: (key: string) => storage.delete(key),
+    });
+
+    saveSession("user-123");
+    expect(loadSession()).toBe("user-123");
+    clearSession();
+    expect(loadSession()).toBeNull();
+    vi.unstubAllGlobals();
   });
 
   it("restores the prepared dataset when browser storage has been cleared", () => {

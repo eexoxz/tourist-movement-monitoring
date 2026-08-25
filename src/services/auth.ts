@@ -8,7 +8,8 @@ export async function signInWithConfiguredProvider(email: string, password: stri
     return null;
   }
 
-  const { signInWithEmailAndPassword } = await import("firebase/auth");
+  const { browserLocalPersistence, setPersistence, signInWithEmailAndPassword } = await import("firebase/auth");
+  await setPersistence(services.auth, browserLocalPersistence);
   const credential = await signInWithEmailAndPassword(services.auth, email, password);
   return credential.user;
 }
@@ -19,10 +20,34 @@ export async function registerWithConfiguredProvider(email: string, password: st
     return null;
   }
 
-  const { createUserWithEmailAndPassword } = await import("firebase/auth");
+  const { browserLocalPersistence, createUserWithEmailAndPassword, setPersistence } = await import("firebase/auth");
+  await setPersistence(services.auth, browserLocalPersistence);
   const credential = await createUserWithEmailAndPassword(services.auth, email, password);
   await sendVerificationEmail(credential.user);
   return credential.user;
+}
+
+export async function getConfiguredAuthState() {
+  const services = getFirebaseServices();
+  if (!services) {
+    return null;
+  }
+
+  const { onAuthStateChanged } = await import("firebase/auth");
+  return new Promise<FirebaseUser | null>((resolve) => {
+    let unsubscribe = () => undefined;
+    unsubscribe = onAuthStateChanged(
+      services.auth,
+      (user) => {
+        unsubscribe();
+        resolve(user);
+      },
+      () => {
+        unsubscribe();
+        resolve(null);
+      }
+    );
+  });
 }
 
 export async function getConfiguredUserRecord(uid: string): Promise<User | null> {
