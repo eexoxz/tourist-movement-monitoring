@@ -98,7 +98,7 @@ Current alignment notes:
 - [x] Validate matching passwords.
 - [x] Collect initial preferred categories during registration or immediately after registration.
 - [x] Create/store a clearer Tourist Profile document or equivalent structured profile data.
-- [ ] Redirect to `/app/home` after successful registration or verification.
+- [x] Redirect to `/app/home` after successful registration or verification.
 - [x] Do not request browser location permission during registration.
 - [x] Do not provide Administrator registration.
 
@@ -193,7 +193,7 @@ Current alignment notes:
 - [x] Delete destination exists.
 - [x] Latitude/longitude validation exists.
 - [x] Use Add/Edit modal instead of always showing long inline forms.
-- [ ] Limit final fixed categories to Cultural, Nature and Urban unless DPP/report justifies extra categories.
+- [x] Keep Cultural, Nature and Urban as primary AI categories, with Food, Heritage and Coastal justified as supporting Malaysian destination labels.
 - [x] Show loading state while saving.
 - [x] Show clear success/failure message.
 - [x] Require confirmation before deletion.
@@ -213,8 +213,8 @@ Current alignment notes:
 - [x] Decide whether to keep current collection names or migrate closer to the DPP names.
 - [x] Required DPP collections to map or document: users, tourist_profiles, tourist_preferences, location_consents, trip_sessions, movement_records, destination_categories, destinations, ai_analyses, recommendations.
 - [x] Test account creation in Firebase.
-- [ ] Test tourist data isolation.
-- [ ] Test admin access to summaries and destination management.
+- [x] Test tourist data isolation.
+- [x] Test admin access to summaries and destination management.
 - [x] Confirm app still works after clearing browser local storage.
 
 ## Lean AI Implementation
@@ -257,7 +257,7 @@ Current alignment notes:
 - [x] Let the map use most of the tracking screen.
 - [x] Add visible keyboard focus states.
 - [x] Add retry actions where failures are recoverable.
-- [ ] Test Tourist flow at mobile width.
+- [x] Test Tourist flow at mobile width.
 - [ ] Test Chrome, Edge and Firefox.
 
 ## Map Experience
@@ -275,9 +275,9 @@ Current alignment notes:
 - [x] Show pop-up feedback for trip tracking, location permission, profile save and data deletion events.
 - [x] Show pop-up feedback for destination add, edit, delete and AI refresh actions.
 - [x] Keep inline messages where they help form accessibility and local context.
-- [ ] Audit every remaining failure path and connect it to the shared notification system.
+- [x] Audit every remaining failure path and connect it to the shared notification system.
 - [x] Add retry buttons for recoverable Firebase and geolocation failures where useful.
-- [ ] Test notification placement on mobile tourist pages and desktop administrator pages.
+- [x] Test notification placement on mobile tourist pages and desktop administrator pages.
 
 ## Required Demonstration Flow
 
@@ -324,7 +324,7 @@ Current alignment notes:
 - [x] An Administrator can add, edit and delete a destination.
 - [x] Main pages load within three seconds under standard testing.
 - [x] Core actions do not crash the app or lose stored records.
-- [ ] Main tasks work at mobile-browser width.
+- [x] Main tasks work at mobile-browser width.
 - [x] Valid AI input produces a cluster, Tourist Category and recommendations.
 - [x] Insufficient AI input produces a clear message instead of a misleading result.
 
@@ -347,4 +347,4 @@ Current alignment notes:
 - [x] The tourist UX is improving but still needs to be simplified around the seven-page flow.
 - [x] Firebase integration is active but still needs final testing and data-structure confirmation.
 - [x] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
-- [ ] Report/evidence work should come after the app flow is stable.
+- [x] Report/evidence work should come after the app flow is stable.

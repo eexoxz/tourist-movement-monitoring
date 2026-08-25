@@ -50,6 +50,12 @@ describe("access service", () => {
     expect(getPathForView("admin", "recommendations")).toBe("/admin/dashboard");
   });
 
+  it("lands successful tourist authentication on the tourist home route", () => {
+    const touristHome = getPathForView("tourist", getDefaultViewForRole("tourist"));
+
+    expect(touristHome).toBe("/app/home");
+  });
+
   it("reads app views from browser paths", () => {
     expect(getViewFromPath("/app/home")).toBe("overview");
     expect(getViewFromPath("/app/trips")).toBe("history");
