@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
+import { renderToStaticMarkup } from "react-dom/server";
+import { Building2, Landmark, Trees, Utensils, Waves, X, type LucideIcon } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, MovementPoint } from "../types";
+import { distanceKm, formatDateTime } from "../services/geo";
 
 type MapViewProps = {
   points: MovementPoint[];
@@ -10,13 +13,21 @@ type MapViewProps = {
   mode?: "tourist" | "admin";
 };
 
-const categoryMeta: Record<DestinationCategory, { label: string; name: string }> = {
-  cultural: { label: "C", name: "Cultural" },
-  nature: { label: "N", name: "Nature" },
-  urban: { label: "U", name: "Urban" },
-  heritage: { label: "H", name: "Heritage" },
-  food: { label: "F", name: "Food" },
-  coastal: { label: "B", name: "Coastal" },
+type DestinationSignal = {
+  nearbyPointCount: number;
+  uniqueTouristCount: number;
+  latestRecordedAt?: string;
+  distanceFromActiveKm?: number;
+  tier: "high" | "medium" | "emerging" | "low";
+};
+
+const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; name: string }> = {
+  cultural: { Icon: Landmark, name: "Cultural" },
+  nature: { Icon: Trees, name: "Nature" },
+  urban: { Icon: Building2, name: "Urban" },
+  heritage: { Icon: Landmark, name: "Heritage" },
+  food: { Icon: Utensils, name: "Food" },
+  coastal: { Icon: Waves, name: "Coastal" },
 };
 
 function escapeHtml(value: string) {
@@ -25,15 +36,47 @@ function escapeHtml(value: string) {
   return element.innerHTML;
 }
 
-function destinationIcon(category: DestinationCategory) {
+function categoryIconHtml(category: DestinationCategory, size = 16) {
+  const Icon = categoryMeta[category].Icon;
+  return renderToStaticMarkup(<Icon size={size} strokeWidth={2.7} aria-hidden="true" />);
+}
+
+function getDestinationSignal(destination: Destination, points: MovementPoint[], activePoint?: MovementPoint): DestinationSignal {
+  const nearbyPoints = points.filter((point) => distanceKm(point, destination) <= 1.2);
+  const uniqueTouristIds = new Set(nearbyPoints.map((point) => point.userId || point.tripId));
+  const latestPoint = [...nearbyPoints].sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
+  const nearbyPointCount = nearbyPoints.length;
+  const uniqueTouristCount = uniqueTouristIds.size;
+  const tier =
+    nearbyPointCount >= 12 || uniqueTouristCount >= 5
+      ? "high"
+      : nearbyPointCount >= 6 || uniqueTouristCount >= 3
+        ? "medium"
+        : nearbyPointCount >= 2 || uniqueTouristCount >= 1
+          ? "emerging"
+          : "low";
+
+  return {
+    nearbyPointCount,
+    uniqueTouristCount,
+    latestRecordedAt: latestPoint?.recordedAt,
+    distanceFromActiveKm: activePoint ? distanceKm(activePoint, destination) : undefined,
+    tier,
+  };
+}
+
+function destinationIcon(category: DestinationCategory, signal: DestinationSignal) {
   const meta = categoryMeta[category];
+  const size = signal.tier === "high" ? 46 : signal.tier === "medium" ? 42 : signal.tier === "emerging" ? 38 : 34;
+  const iconSize = Math.round(size * 0.44);
+  const badge = signal.nearbyPointCount > 0 ? `<b>${signal.nearbyPointCount}</b>` : "";
 
   return L.divIcon({
-    className: `destination-marker destination-marker-${category}`,
-    html: `<span>${meta.label}</span>`,
-    iconSize: [34, 40],
-    iconAnchor: [17, 34],
-    popupAnchor: [0, -32],
+    className: `destination-marker destination-marker-${category} destination-marker-${signal.tier}`,
+    html: `<span>${categoryIconHtml(category, iconSize)}</span>${badge}<small>${meta.name}</small>`,
+    iconSize: [size, size + 8],
+    iconAnchor: [size / 2, size + 2],
+    popupAnchor: [0, -size],
   });
 }
 
@@ -51,10 +94,28 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
   const visibleDestinations = useMemo(
     () => (mode === "tourist" ? destinations.slice(0, points.length > 0 || activePoint ? 12 : 8) : destinations),
     [activePoint, destinations, mode, points.length]
   );
+  const destinationSignals = useMemo(
+    () => new Map(visibleDestinations.map((destination) => [destination.id, getDestinationSignal(destination, points, activePoint)])),
+    [activePoint, points, visibleDestinations]
+  );
+  const selectedDestination = visibleDestinations.find((destination) => destination.id === selectedDestinationId) ?? null;
+  const selectedSignal = selectedDestination ? destinationSignals.get(selectedDestination.id) : null;
+
+  useEffect(() => {
+    if (visibleDestinations.length === 1) {
+      setSelectedDestinationId(visibleDestinations[0].id);
+      return;
+    }
+
+    if (selectedDestinationId && !visibleDestinations.some((destination) => destination.id === selectedDestinationId)) {
+      setSelectedDestinationId(null);
+    }
+  }, [selectedDestinationId, visibleDestinations]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) {
@@ -96,13 +157,33 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
     const route = points.map((point) => [point.latitude, point.longitude] as [number, number]);
 
     visibleDestinations.forEach((destination) => {
+      const signal = destinationSignals.get(destination.id) ?? getDestinationSignal(destination, points, activePoint);
+      const circleRadius = signal.tier === "high" ? 620 : signal.tier === "medium" ? 520 : signal.tier === "emerging" ? 430 : 320;
+      const selectDestination = () => {
+        setSelectedDestinationId(destination.id);
+        map.panTo([destination.latitude, destination.longitude], { animate: true });
+      };
+
+      L.circle([destination.latitude, destination.longitude], {
+        radius: circleRadius,
+        color: "rgba(15, 118, 110, 0.34)",
+        fillColor: "rgba(15, 118, 110, 0.11)",
+        fillOpacity: signal.tier === "low" ? 0.06 : 0.12,
+        weight: signal.tier === "low" ? 1 : 2,
+        interactive: true,
+      })
+        .on("click", selectDestination)
+        .bindTooltip(destination.name, { direction: "top", opacity: 0.92 })
+        .addTo(layer);
+
       L.marker([destination.latitude, destination.longitude], {
-        icon: destinationIcon(destination.category),
+        icon: destinationIcon(destination.category, signal),
         title: destination.name,
       })
         .bindPopup(
-          `<strong>${escapeHtml(destination.name)}</strong><br>${escapeHtml(categoryMeta[destination.category].name)} destination<br>${escapeHtml(destination.city)}`
+          `<section class="map-popup"><strong>${escapeHtml(destination.name)}</strong><span>${escapeHtml(categoryMeta[destination.category].name)} destination in ${escapeHtml(destination.city)}</span><p>${escapeHtml(destination.description)}</p><dl><div><dt>Movement points</dt><dd>${signal.nearbyPointCount}</dd></div><div><dt>Demand signal</dt><dd>${signal.tier}</dd></div></dl></section>`
         )
+        .on("click", selectDestination)
         .addTo(layer);
     });
 
@@ -131,12 +212,16 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
           fillOpacity: 0.95,
           weight: 2,
         })
-          .bindPopup(`Movement point ${index + 1}<br>${new Date(point.recordedAt).toLocaleString()}`)
+          .bindPopup(
+            `<section class="map-popup"><strong>Movement point ${index + 1}</strong><span>${formatDateTime(point.recordedAt)}</span><dl><div><dt>Accuracy</dt><dd>${point.accuracyMeters}m</dd></div><div><dt>Source</dt><dd>${point.source}</dd></div></dl></section>`
+          )
           .addTo(layer);
       });
 
-      L.marker(route[0], { icon: routeIcon("start"), title: "Trip start" }).bindPopup("Trip start").addTo(layer);
-      L.marker(route[route.length - 1], { icon: routeIcon("end"), title: "Trip end" }).bindPopup("Trip end").addTo(layer);
+      L.marker(route[0], { icon: routeIcon("start"), title: "Trip start" }).bindPopup(`<strong>Trip start</strong><br>${formatDateTime(points[0].recordedAt)}`).addTo(layer);
+      L.marker(route[route.length - 1], { icon: routeIcon("end"), title: "Trip end" })
+        .bindPopup(`<strong>Trip end</strong><br>${formatDateTime(points.at(-1)!.recordedAt)}`)
+        .addTo(layer);
 
       map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
     } else if (activePoint) {
@@ -148,14 +233,14 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
         icon: routeIcon("current"),
         title: "Current location",
       })
-        .bindPopup("Current location")
+        .bindPopup(`<strong>Current location</strong><br>${formatDateTime(activePoint.recordedAt)}`)
         .addTo(layer);
     }
 
     return () => {
       layer.remove();
     };
-  }, [points, visibleDestinations, activePoint]);
+  }, [points, visibleDestinations, activePoint, destinationSignals]);
 
   const centerOnActivePoint = () => {
     if (!activePoint) {
@@ -166,6 +251,14 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
   };
 
   const visibleCategories = Array.from(new Set(visibleDestinations.map((destination) => destination.category)));
+  const topSignals = [...visibleDestinations]
+    .map((destination) => ({
+      destination,
+      signal: destinationSignals.get(destination.id) ?? getDestinationSignal(destination, points, activePoint),
+    }))
+    .filter((row) => row.signal.nearbyPointCount > 0)
+    .sort((a, b) => b.signal.nearbyPointCount - a.signal.nearbyPointCount)
+    .slice(0, 3);
 
   return (
     <div className={mode === "tourist" ? "map-frame tourist-map-mode" : "map-frame"}>
@@ -181,12 +274,73 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
         {visibleCategories.map((category) => (
           <span key={category}>
             <i className={`destination-marker destination-marker-${category}`}>
-              <span>{categoryMeta[category].label}</span>
+              <span dangerouslySetInnerHTML={{ __html: categoryIconHtml(category, 13) }} />
             </i>
             {categoryMeta[category].name}
           </span>
         ))}
       </div>
+      <section className={selectedDestination ? "map-detail-panel visible" : "map-detail-panel"} aria-live="polite">
+        {selectedDestination && selectedSignal ? (
+          <>
+            <button
+              className="map-detail-close"
+              type="button"
+              onClick={() => setSelectedDestinationId(null)}
+              title="Close place details"
+              aria-label="Close place details"
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+            <span>{categoryMeta[selectedDestination.category].name} destination</span>
+            <h2>{selectedDestination.name}</h2>
+            <p>{selectedDestination.description}</p>
+            <dl>
+              <div>
+                <dt>City</dt>
+                <dd>{selectedDestination.city}</dd>
+              </div>
+              <div>
+                <dt>Movement signal</dt>
+                <dd>{selectedSignal.tier}</dd>
+              </div>
+              <div>
+                <dt>Nearby points</dt>
+                <dd>{selectedSignal.nearbyPointCount}</dd>
+              </div>
+              <div>
+                <dt>Tourist profiles</dt>
+                <dd>{selectedSignal.uniqueTouristCount}</dd>
+              </div>
+              {selectedSignal.distanceFromActiveKm !== undefined && (
+                <div>
+                  <dt>From current point</dt>
+                  <dd>{selectedSignal.distanceFromActiveKm.toFixed(2)} km</dd>
+                </div>
+              )}
+              <div>
+                <dt>Suggested visit</dt>
+                <dd>{selectedDestination.averageVisitMinutes} min</dd>
+              </div>
+            </dl>
+            {selectedSignal.latestRecordedAt && <small>Latest route signal: {formatDateTime(selectedSignal.latestRecordedAt)}</small>}
+          </>
+        ) : topSignals.length > 0 ? (
+          <>
+            <span>{mode === "tourist" ? "Nearby movement" : "Top map signals"}</span>
+            <h2>{topSignals[0].destination.name}</h2>
+            <p>
+              {topSignals[0].signal.nearbyPointCount} movement point(s) are near this destination. Click any place marker or shaded area to inspect it.
+            </p>
+          </>
+        ) : (
+          <>
+            <span>Interactive map</span>
+            <h2>Tap a place marker</h2>
+            <p>Destination details are shown from the app catalogue without using extra place APIs.</p>
+          </>
+        )}
+      </section>
     </div>
   );
 }

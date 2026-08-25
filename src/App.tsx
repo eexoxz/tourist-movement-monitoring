@@ -20,7 +20,6 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { demoDatasetMetadata, initialData } from "./data/demoData";
 import type {
   AnalysisResult,
   AppData,
@@ -75,14 +74,11 @@ import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEm
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import {
   buildMovementRecordsCsv,
-  getDemoReadiness,
   getDailyMovementTrend,
-  getFunctionalRequirementCoverage,
   getMovementDataStatus,
   getMovementRecords,
   getMovementTripRecords,
   getProfileDistribution,
-  getRequiredDemoFlowCoverage,
   getTourists,
   getTripFilterOptions,
   summarizeDashboard,
@@ -2025,9 +2021,6 @@ function AdminWorkspace({
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
   const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data]);
-  const demoReadiness = useMemo(() => getDemoReadiness(data), [data]);
-  const demoFlowCoverage = useMemo(() => getRequiredDemoFlowCoverage(data), [data]);
-  const functionalCoverage = useMemo(() => getFunctionalRequirementCoverage(data), [data]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
   const [selectedTripId, setSelectedTripId] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
@@ -2137,25 +2130,6 @@ function AdminWorkspace({
   const recomputeAi = () => {
     onDataChange(refreshAllRecommendations(data));
     notify({ tone: "success", title: "AI analysis refreshed", message: "K-Means, Decision Tree output and recommendations were recalculated." });
-  };
-
-  const reloadDemoDataset = () => {
-    if (!window.confirm("Reload the prepared demonstration dataset? This replaces the current local prototype data.")) {
-      return;
-    }
-
-    const preparedData = refreshAllRecommendations(initialData);
-    onDataChange(preparedData);
-    setSelectedTouristId("all");
-    setSelectedTripId("all");
-    setSelectedRecordTripId(null);
-    setSelectedAnalysisKey(null);
-    setAdminTab("overview");
-    notify({
-      tone: "success",
-      title: "Demonstration dataset loaded",
-      message: `${demoDatasetMetadata.generatedTouristCount} seeded tourists, completed trips, movement records and AI recommendations are ready for presentation.`,
-    });
   };
 
   const resetRecordFilters = () => {
@@ -2496,20 +2470,6 @@ function AdminWorkspace({
         </button>
       }
     >
-      <section className="demo-data-banner">
-        <div>
-          <strong>Demonstration dataset</strong>
-          <p>
-            This prototype includes prepared synthetic movement records so the dashboard, K-Means clustering, Decision Tree classification and recommendation flow can be demonstrated without
-            recruiting real tourists.
-          </p>
-        </div>
-        <button className="secondary-action" type="button" onClick={reloadDemoDataset}>
-          <RotateCcw size={18} />
-          Reload prepared data
-        </button>
-      </section>
-
       <div className="segmented-control admin-tabs" aria-label="Administrator dashboard sections">
         <button className={adminTab === "overview" ? "active" : ""} type="button" onClick={() => setAdminTab("overview")}>
           Overview
@@ -2532,9 +2492,6 @@ function AdminWorkspace({
             pointCount={summary.movementPointCount}
             plan={travelPlan}
           />
-          <DemoReadinessPanel readiness={demoReadiness} />
-          <DemoCoveragePanel title="Required Demonstration Flow" coverage={demoFlowCoverage} />
-          <DemoCoveragePanel title="Functional Requirement Coverage" coverage={functionalCoverage} compact />
           <MetricGrid
             items={[
               ["Tourists", tourists.length.toString()],
@@ -2611,54 +2568,6 @@ function AdminWorkspace({
       {adminTab === "records" && movementRecordsPanel}
       {adminTab === "ai" && aiResultsPanel}
     </Page>
-  );
-}
-
-function DemoReadinessPanel({ readiness }: { readiness: ReturnType<typeof getDemoReadiness> }) {
-  return (
-    <section className="demo-readiness-panel">
-      <div className="section-heading">
-        <div>
-          <h2>Demo Readiness</h2>
-          <p>Evidence checklist for presenting the prepared synthetic tourist movement dataset.</p>
-        </div>
-        <strong>{Math.round(readiness.completionRate * 100)}%</strong>
-      </div>
-      <div className="demo-readiness-grid">
-        {readiness.items.map((item) => (
-          <article className={item.ready ? "demo-readiness-item ready" : "demo-readiness-item"} key={item.id}>
-            <span>{item.ready ? "Ready" : "Needs attention"}</span>
-            <strong>{item.label}</strong>
-            <p>{item.value}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function DemoCoveragePanel({ title, coverage, compact = false }: { title: string; coverage: ReturnType<typeof getRequiredDemoFlowCoverage>; compact?: boolean }) {
-  return (
-    <section className="demo-coverage-panel">
-      <div className="section-heading">
-        <div>
-          <h2>{title}</h2>
-          <p>
-            {coverage.readyCount} of {coverage.totalCount} item(s) are currently demonstrable from the implemented app flow and prepared data.
-          </p>
-        </div>
-        <strong>{Math.round(coverage.completionRate * 100)}%</strong>
-      </div>
-      <div className={compact ? "demo-coverage-list compact" : "demo-coverage-list"}>
-        {coverage.items.map((item) => (
-          <article className={item.ready ? "demo-coverage-item ready" : "demo-coverage-item"} key={item.id}>
-            <span>{item.ready ? "Ready" : "Needs work"}</span>
-            <strong>{item.label}</strong>
-            <p>{item.evidence}</p>
-          </article>
-        ))}
-      </div>
-    </section>
   );
 }
 
