@@ -35,7 +35,7 @@ export async function getConfiguredAuthState() {
 
   const { onAuthStateChanged } = await import("firebase/auth");
   return new Promise<FirebaseUser | null>((resolve) => {
-    let unsubscribe = () => undefined;
+    let unsubscribe = () => {};
     unsubscribe = onAuthStateChanged(
       services.auth,
       (user) => {
