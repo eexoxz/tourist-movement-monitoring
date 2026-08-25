@@ -7,6 +7,13 @@ const GENERATED_TRIPS_PER_TOURIST = 2;
 const GENERATED_POINTS_PER_TRIP = 5;
 const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString();
 
+export const demoDatasetMetadata = {
+  generatedTouristCount: GENERATED_TOURIST_COUNT,
+  generatedTripsPerTourist: GENERATED_TRIPS_PER_TOURIST,
+  generatedPointsPerTrip: GENERATED_POINTS_PER_TRIP,
+  namedDemoAccountCount: 5,
+} as const;
+
 const baseUsers: User[] = [
   {
     id: "tourist-demo",

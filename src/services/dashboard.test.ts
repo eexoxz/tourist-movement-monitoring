@@ -4,6 +4,7 @@ import { refreshAllRecommendations } from "./analytics";
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
+  getDemoReadiness,
   getDestinationCategoryCoverage,
   getMovementDataStatus,
   getMovementRecords,
@@ -38,6 +39,15 @@ describe("dashboard service", () => {
 
     expect(tourists.length).toBeGreaterThanOrEqual(100);
     expect(tourists.every((tourist) => tourist.role === "tourist")).toBe(true);
+  });
+
+  it("reports whether the prepared demonstration dataset is presentation-ready", () => {
+    const readiness = getDemoReadiness(refreshAllRecommendations(initialData));
+
+    expect(readiness.readyCount).toBe(readiness.totalCount);
+    expect(readiness.completionRate).toBe(1);
+    expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("128");
+    expect(readiness.items.find((item) => item.id === "movement-records")?.ready).toBe(true);
   });
 
   it("filters movement records by selected tourist and enriches each point", () => {

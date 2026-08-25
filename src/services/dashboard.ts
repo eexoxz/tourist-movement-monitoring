@@ -33,6 +33,20 @@ export type MovementDataStatus = {
   message: string;
 };
 
+export type DemoReadinessItem = {
+  id: string;
+  label: string;
+  value: string;
+  ready: boolean;
+};
+
+export type DemoReadiness = {
+  readyCount: number;
+  totalCount: number;
+  completionRate: number;
+  items: DemoReadinessItem[];
+};
+
 export type MovementRecordFilters = {
   touristId?: string;
   tripId?: string;
@@ -69,6 +83,68 @@ export function getMovementDataStatus(data: AppData): MovementDataStatus {
   return {
     hasMovementData: true,
     message: `${data.points.length} movement records are available for monitoring and recommendation analysis.`,
+  };
+}
+
+export function getDemoReadiness(data: AppData): DemoReadiness {
+  const tourists = getTourists(data);
+  const seededTourists = tourists.filter((tourist) => tourist.id.startsWith("tourist-seed-"));
+  const demoAccounts = ["tourist-demo", "tourist-nature-demo", "tourist-cultural-demo", "tourist-urban-demo", "admin-demo"];
+  const completedTrips = data.trips.filter((trip) => trip.status === "completed");
+  const touristProfilesWithPreferences = tourists.filter((tourist) => tourist.travelPreferences && tourist.travelPreferences.length > 0);
+  const usersWithRecommendations = new Set(data.recommendations.map((recommendation) => recommendation.userId));
+
+  const items: DemoReadinessItem[] = [
+    {
+      id: "seeded-tourists",
+      label: "Synthetic tourist profiles",
+      value: `${seededTourists.length} seeded`,
+      ready: seededTourists.length >= 100,
+    },
+    {
+      id: "demo-accounts",
+      label: "Named login accounts",
+      value: `${demoAccounts.filter((id) => data.users.some((user) => user.id === id)).length}/${demoAccounts.length} available`,
+      ready: demoAccounts.every((id) => data.users.some((user) => user.id === id)),
+    },
+    {
+      id: "completed-trips",
+      label: "Completed trip history",
+      value: `${completedTrips.length} trips`,
+      ready: completedTrips.length >= 20,
+    },
+    {
+      id: "movement-records",
+      label: "Movement records",
+      value: `${data.points.length} points`,
+      ready: data.points.length >= 500 && data.points.length <= 1500,
+    },
+    {
+      id: "profile-preferences",
+      label: "Tourist preferences",
+      value: `${touristProfilesWithPreferences.length} profiles`,
+      ready: touristProfilesWithPreferences.length >= 100,
+    },
+    {
+      id: "ai-analyses",
+      label: "AI analysis results",
+      value: `${data.analyses.length} analysed trips`,
+      ready: data.analyses.length >= 20,
+    },
+    {
+      id: "recommendations",
+      label: "Recommendation output",
+      value: `${usersWithRecommendations.size} tourists`,
+      ready: usersWithRecommendations.size >= 20,
+    },
+  ];
+  const readyCount = items.filter((item) => item.ready).length;
+
+  return {
+    readyCount,
+    totalCount: items.length,
+    completionRate: Number((readyCount / items.length).toFixed(2)),
+    items,
   };
 }
 

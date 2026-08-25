@@ -240,8 +240,8 @@ Current alignment notes:
 - [x] Keep generated movement records deterministic so reset/demo testing is repeatable.
 - [x] Keep original demo login accounts available.
 - [x] Support chunked Firestore saves for larger demonstration datasets.
-- [ ] Keep synthetic seed size large enough for dashboard/AI evidence but small enough for fast local testing and Firebase sync.
-- [ ] Add an administrator control to regenerate or reload the demonstration dataset on demand.
+- [x] Keep synthetic seed size large enough for dashboard/AI evidence but small enough for fast local testing and Firebase sync.
+- [x] Add an administrator control to regenerate or reload the demonstration dataset on demand.
 - [ ] Document in the report that seeded movement records are synthetic demonstration data, not real collected tourist data.
 
 ## Mobile And Usability
@@ -286,11 +286,11 @@ Current alignment notes:
 - [x] Tourist completes or skips profile setup.
 - [ ] Tourist grants location permission.
 - [ ] Tourist starts and stops a short trip.
-- [ ] Tourist views a prepared previous trip route.
+- [x] Tourist views a prepared previous trip route.
 - [ ] Tourist sees Tourist Category and three recommendations.
 - [ ] Administrator logs in.
-- [ ] Administrator finds the trip in Movement Records.
-- [ ] Administrator reviews dashboard charts and AI result.
+- [x] Administrator finds the trip in Movement Records.
+- [x] Administrator reviews dashboard charts and AI result.
 - [ ] Administrator adds or edits one destination.
 - [ ] Tourist and Administrator can log out.
 
@@ -346,5 +346,5 @@ Current alignment notes:
 - [x] The app already covers most of the technical DPP requirements in some form.
 - [x] The tourist UX is improving but still needs to be simplified around the seven-page flow.
 - [x] Firebase integration is active but still needs final testing and data-structure confirmation.
-- [ ] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
+- [x] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
 - [ ] Report/evidence work should come after the app flow is stable.

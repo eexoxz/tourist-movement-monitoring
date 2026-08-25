@@ -2126,7 +2126,9 @@ textarea {
 }
 
 .demo-data-banner {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 5px;
   padding: 14px 16px;
   border: 1px solid #b7efe6;
@@ -2149,6 +2151,73 @@ textarea {
 .demo-data-banner p {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.demo-readiness-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #d9efe9;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+}
+
+.demo-readiness-panel > .section-heading > strong {
+  display: grid;
+  place-items: center;
+  min-width: 64px;
+  min-height: 44px;
+  border-radius: 8px;
+  color: var(--teal-dark);
+  background: #ccfbf1;
+  font-size: 1.1rem;
+}
+
+.demo-readiness-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.demo-readiness-item {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #f4c7c7;
+  border-radius: 8px;
+  background: #fff7f7;
+}
+
+.demo-readiness-item.ready {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.demo-readiness-item span {
+  color: #b91c1c;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.demo-readiness-item.ready span {
+  color: #047857;
+}
+
+.demo-readiness-item strong,
+.demo-readiness-item p {
+  margin: 0;
+}
+
+.demo-readiness-item strong {
+  color: #172033;
+  line-height: 1.25;
+}
+
+.demo-readiness-item p {
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .admin-tab-heading {
@@ -2469,6 +2538,10 @@ textarea {
     grid-column: auto;
     justify-content: flex-start;
   }
+
+  .demo-readiness-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -2545,6 +2618,16 @@ textarea {
     padding: 6px 4px;
     font-size: 0.74rem;
     text-align: center;
+  }
+
+  .demo-data-banner,
+  .demo-readiness-panel .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .demo-readiness-grid {
+    grid-template-columns: 1fr;
   }
 
   .profile-setup {
