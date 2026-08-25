@@ -2220,6 +2220,78 @@ textarea {
   line-height: 1.4;
 }
 
+.demo-coverage-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.05);
+}
+
+.demo-coverage-panel > .section-heading > strong {
+  display: grid;
+  place-items: center;
+  min-width: 64px;
+  min-height: 44px;
+  border-radius: 8px;
+  color: #7c2d12;
+  background: #ffedd5;
+  font-size: 1.1rem;
+}
+
+.demo-coverage-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.demo-coverage-list.compact {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.demo-coverage-item {
+  display: grid;
+  gap: 6px;
+  min-height: 118px;
+  padding: 12px;
+  border: 1px solid #f4c7c7;
+  border-radius: 8px;
+  background: #fff7f7;
+}
+
+.demo-coverage-item.ready {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.demo-coverage-item span {
+  color: #b91c1c;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.demo-coverage-item.ready span {
+  color: #047857;
+}
+
+.demo-coverage-item strong,
+.demo-coverage-item p {
+  margin: 0;
+}
+
+.demo-coverage-item strong {
+  color: #172033;
+  line-height: 1.25;
+}
+
+.demo-coverage-item p {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 .admin-tab-heading {
   display: flex;
   align-items: center;
@@ -2542,6 +2614,11 @@ textarea {
   .demo-readiness-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .demo-coverage-list,
+  .demo-coverage-list.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -2621,12 +2698,15 @@ textarea {
   }
 
   .demo-data-banner,
-  .demo-readiness-panel .section-heading {
+  .demo-readiness-panel .section-heading,
+  .demo-coverage-panel .section-heading {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .demo-readiness-grid {
+  .demo-readiness-grid,
+  .demo-coverage-list,
+  .demo-coverage-list.compact {
     grid-template-columns: 1fr;
   }
 

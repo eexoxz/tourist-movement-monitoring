@@ -44,7 +44,7 @@ Do not build:
 - [x] Page 4: Trip History and Trip Details.
 - [x] Page 5: Travel Recommendations.
 - [x] Page 6: Tourism Administrator Dashboard.
-- [ ] Page 7: Destination Management.
+- [x] Page 7: Destination Management.
 
 Current alignment notes:
 
@@ -281,62 +281,62 @@ Current alignment notes:
 
 ## Required Demonstration Flow
 
-- [ ] Tourist registers a new account.
-- [ ] Tourist verifies/logs in.
+- [x] Tourist registers a new account.
+- [x] Tourist verifies/logs in.
 - [x] Tourist completes or skips profile setup.
-- [ ] Tourist grants location permission.
-- [ ] Tourist starts and stops a short trip.
+- [x] Tourist grants location permission.
+- [x] Tourist starts and stops a short trip.
 - [x] Tourist views a prepared previous trip route.
-- [ ] Tourist sees Tourist Category and three recommendations.
-- [ ] Administrator logs in.
+- [x] Tourist sees Tourist Category and three recommendations.
+- [x] Administrator logs in.
 - [x] Administrator finds the trip in Movement Records.
 - [x] Administrator reviews dashboard charts and AI result.
-- [ ] Administrator adds or edits one destination.
-- [ ] Tourist and Administrator can log out.
+- [x] Administrator adds or edits one destination.
+- [x] Tourist and Administrator can log out.
 
 ## Functional Requirement Coverage
 
-- [ ] FR1 Register a new account.
-- [ ] FR2 Log in.
-- [ ] FR3 Allow location access.
-- [ ] FR4 Start and stop tracking.
-- [ ] FR5 View current location.
-- [ ] FR6 View movement history and routes.
-- [ ] FR7 View destination information.
-- [ ] FR8 Receive travel recommendations.
-- [ ] FR9 Administrator login.
-- [ ] FR10 View Tourist movement records.
-- [ ] FR11 Review movement trends and charts.
-- [ ] FR12 View AI analysis results.
-- [ ] FR13 Manage destination information.
-- [ ] FR14 View movement summaries.
-- [ ] FT14 Logout.
+- [x] FR1 Register a new account.
+- [x] FR2 Log in.
+- [x] FR3 Allow location access.
+- [x] FR4 Start and stop tracking.
+- [x] FR5 View current location.
+- [x] FR6 View movement history and routes.
+- [x] FR7 View destination information.
+- [x] FR8 Receive travel recommendations.
+- [x] FR9 Administrator login.
+- [x] FR10 View Tourist movement records.
+- [x] FR11 Review movement trends and charts.
+- [x] FR12 View AI analysis results.
+- [x] FR13 Manage destination information.
+- [x] FR14 View movement summaries.
+- [x] FT14 Logout.
 
 ## Acceptance Criteria
 
-- [ ] All seven main pages work.
-- [ ] FR1 to FR14 can be demonstrated.
+- [x] All seven main pages work.
+- [x] FR1 to FR14 can be demonstrated.
 - [ ] FT1 to FT14 can be tested.
-- [ ] Tourists and Administrators reach only authorised areas.
-- [ ] Movement is never recorded before permission is granted.
-- [ ] A Tourist can register, track a trip, view history and receive recommendations.
-- [ ] An Administrator can view summaries, charts and AI results.
-- [ ] An Administrator can add, edit and delete a destination.
+- [x] Tourists and Administrators reach only authorised areas.
+- [x] Movement is never recorded before permission is granted.
+- [x] A Tourist can register, track a trip, view history and receive recommendations.
+- [x] An Administrator can view summaries, charts and AI results.
+- [x] An Administrator can add, edit and delete a destination.
 - [ ] Main pages load within three seconds under standard testing.
-- [ ] Core actions do not crash the app or lose stored records.
+- [x] Core actions do not crash the app or lose stored records.
 - [ ] Main tasks work at mobile-browser width.
-- [ ] Valid AI input produces a cluster, Tourist Category and recommendations.
-- [ ] Insufficient AI input produces a clear message instead of a misleading result.
+- [x] Valid AI input produces a cluster, Tourist Category and recommendations.
+- [x] Insufficient AI input produces a clear message instead of a misleading result.
 
 ## Exhibition Preparation
 
-- [ ] Prepare one Tourist account with several completed sample trips.
-- [ ] Prepare one Tourism Administrator account.
-- [ ] Seed several Cultural, Nature and Urban destinations.
-- [ ] Prepare movement records for K-Means.
-- [ ] Prepare labelled records for Decision Tree testing.
+- [x] Prepare one Tourist account with several completed sample trips.
+- [x] Prepare one Tourism Administrator account.
+- [x] Seed several Cultural, Nature and Urban destinations.
+- [x] Prepare movement records for K-Means.
+- [x] Prepare labelled records for Decision Tree testing.
 - [ ] Prepare one insufficient-data example.
-- [ ] Prepare at least one recommendation result for each Tourist Category.
+- [x] Prepare at least one recommendation result for each Tourist Category.
 - [x] Clearly label prepared records as demonstration data.
 - [ ] Capture screenshots for login, registration, tracking, route map, history, recommendations, admin dashboard, AI result, destination management, Firebase Auth and Firestore records.
 

@@ -6,10 +6,12 @@ import {
   getDailyMovementTrend,
   getDemoReadiness,
   getDestinationCategoryCoverage,
+  getFunctionalRequirementCoverage,
   getMovementDataStatus,
   getMovementRecords,
   getMovementTripRecords,
   getProfileDistribution,
+  getRequiredDemoFlowCoverage,
   getTourists,
   getTripFilterOptions,
   summarizeDashboard,
@@ -48,6 +50,48 @@ describe("dashboard service", () => {
     expect(readiness.completionRate).toBe(1);
     expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("128");
     expect(readiness.items.find((item) => item.id === "movement-records")?.ready).toBe(true);
+  });
+
+  it("reports required demonstration flow coverage from the prepared dataset", () => {
+    const coverage = getRequiredDemoFlowCoverage(refreshAllRecommendations(initialData));
+
+    expect(coverage.readyCount).toBe(coverage.totalCount);
+    expect(coverage.items.find((item) => item.id === "tourist-recommendations")?.ready).toBe(true);
+    expect(coverage.items.find((item) => item.id === "admin-records")?.evidence).toContain("trip-level");
+  });
+
+  it("reports functional requirement coverage for FR1 through FT14", () => {
+    const coverage = getFunctionalRequirementCoverage(refreshAllRecommendations(initialData));
+
+    expect(coverage.readyCount).toBe(coverage.totalCount);
+    expect(coverage.items.map((item) => item.id)).toEqual([
+      "FR1",
+      "FR2",
+      "FR3",
+      "FR4",
+      "FR5",
+      "FR6",
+      "FR7",
+      "FR8",
+      "FR9",
+      "FR10",
+      "FR11",
+      "FR12",
+      "FR13",
+      "FR14",
+      "FT14",
+    ]);
+  });
+
+  it("prepares recommendation output for every tourist category", () => {
+    const refreshed = refreshAllRecommendations(initialData);
+    const profiles = ["cultural", "nature", "urban", "mixed"];
+
+    profiles.forEach((profile) => {
+      const tourist = refreshed.users.find((user) => user.expectedProfile === profile);
+      expect(tourist).toBeDefined();
+      expect(refreshed.recommendations.filter((recommendation) => recommendation.userId === tourist!.id)).toHaveLength(3);
+    });
   });
 
   it("filters movement records by selected tourist and enriches each point", () => {

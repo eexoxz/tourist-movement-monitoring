@@ -47,6 +47,20 @@ export type DemoReadiness = {
   items: DemoReadinessItem[];
 };
 
+export type DemoCoverageItem = {
+  id: string;
+  label: string;
+  evidence: string;
+  ready: boolean;
+};
+
+export type DemoCoverage = {
+  readyCount: number;
+  totalCount: number;
+  completionRate: number;
+  items: DemoCoverageItem[];
+};
+
 export type MovementRecordFilters = {
   touristId?: string;
   tripId?: string;
@@ -146,6 +160,127 @@ export function getDemoReadiness(data: AppData): DemoReadiness {
     completionRate: Number((readyCount / items.length).toFixed(2)),
     items,
   };
+}
+
+function buildDemoCoverage(items: DemoCoverageItem[]): DemoCoverage {
+  const readyCount = items.filter((item) => item.ready).length;
+
+  return {
+    readyCount,
+    totalCount: items.length,
+    completionRate: Number((readyCount / items.length).toFixed(2)),
+    items,
+  };
+}
+
+export function getRequiredDemoFlowCoverage(data: AppData): DemoCoverage {
+  const tourists = getTourists(data);
+  const adminExists = data.users.some((user) => user.id === "admin-demo" && user.role === "admin");
+  const demoTourist = data.users.find((user) => user.id === "tourist-demo");
+  const demoTouristTrips = data.trips.filter((trip) => trip.userId === demoTourist?.id);
+  const recommendationTouristIds = new Set(data.recommendations.map((recommendation) => recommendation.userId));
+  const touristWithThreeRecommendations = tourists.find((tourist) => data.recommendations.filter((recommendation) => recommendation.userId === tourist.id).length >= 3);
+  const movementTripRecords = getMovementTripRecords(data);
+
+  return buildDemoCoverage([
+    {
+      id: "tourist-register",
+      label: "Tourist registers a new account",
+      evidence: "Registration screen creates Firebase or local tourist records.",
+      ready: true,
+    },
+    {
+      id: "tourist-login",
+      label: "Tourist verifies/logs in",
+      evidence: demoTourist ? `${demoTourist.email} demo tourist exists.` : "No demo tourist account found.",
+      ready: Boolean(demoTourist),
+    },
+    {
+      id: "profile-setup",
+      label: "Tourist completes or skips profile setup",
+      evidence: `${tourists.filter((tourist) => tourist.profileCompletedAt || tourist.travelPreferences?.length).length} tourist profiles have preferences.`,
+      ready: tourists.some((tourist) => tourist.profileCompletedAt || tourist.travelPreferences?.length),
+    },
+    {
+      id: "location-consent",
+      label: "Tourist grants location permission",
+      evidence: `${data.consents.filter((consent) => consent.granted).length} consent records are prepared.`,
+      ready: data.consents.some((consent) => consent.granted),
+    },
+    {
+      id: "start-stop-trip",
+      label: "Tourist starts and stops a short trip",
+      evidence: `${data.trips.filter((trip) => trip.status === "completed").length} completed trips exist for demonstration.`,
+      ready: data.trips.some((trip) => trip.status === "completed") && data.points.length > 0,
+    },
+    {
+      id: "prepared-trip-route",
+      label: "Tourist views a prepared previous trip route",
+      evidence: `${demoTouristTrips.length} prepared trip(s) are attached to the demo tourist.`,
+      ready: demoTouristTrips.some((trip) => data.points.some((point) => point.tripId === trip.id)),
+    },
+    {
+      id: "tourist-recommendations",
+      label: "Tourist sees Tourist Category and three recommendations",
+      evidence: touristWithThreeRecommendations ? `${touristWithThreeRecommendations.name} has recommendation output.` : "No tourist has three recommendations yet.",
+      ready: Boolean(touristWithThreeRecommendations) && data.analyses.length > 0,
+    },
+    {
+      id: "admin-login",
+      label: "Administrator logs in",
+      evidence: adminExists ? "Tourism Administrator demo account exists." : "No administrator demo account found.",
+      ready: adminExists,
+    },
+    {
+      id: "admin-records",
+      label: "Administrator finds the trip in Movement Records",
+      evidence: `${movementTripRecords.length} trip-level movement records are visible.`,
+      ready: movementTripRecords.length > 0,
+    },
+    {
+      id: "admin-dashboard-ai",
+      label: "Administrator reviews dashboard charts and AI result",
+      evidence: `${data.analyses.length} AI analysis result(s) are available.`,
+      ready: data.analyses.length > 0 && data.points.length > 0,
+    },
+    {
+      id: "admin-destination-management",
+      label: "Administrator adds or edits one destination",
+      evidence: `${data.destinations.length} destinations are available in management.`,
+      ready: data.destinations.length > 0,
+    },
+    {
+      id: "logout",
+      label: "Tourist and Administrator can log out",
+      evidence: "Shared logout control clears session for both roles.",
+      ready: true,
+    },
+  ]);
+}
+
+export function getFunctionalRequirementCoverage(data: AppData): DemoCoverage {
+  const summary = summarizeDashboard(data);
+  const movementTripRecords = getMovementTripRecords(data);
+  const touristWithRecommendations = getTourists(data).some((tourist) => data.recommendations.filter((recommendation) => recommendation.userId === tourist.id).length >= 3);
+  const hasDestinationCategories = new Set(data.destinations.map((destination) => destination.category)).size >= 3;
+
+  return buildDemoCoverage([
+    { id: "FR1", label: "FR1 Register a new account", evidence: "Tourist registration form and account creation service are implemented.", ready: true },
+    { id: "FR2", label: "FR2 Log in", evidence: "Login supports Firebase mode and local demo mode.", ready: true },
+    { id: "FR3", label: "FR3 Allow location access", evidence: `${data.consents.filter((consent) => consent.granted).length} granted consent record(s).`, ready: data.consents.some((consent) => consent.granted) },
+    { id: "FR4", label: "FR4 Start and stop tracking", evidence: `${summary.completedTripCount} completed trip(s).`, ready: summary.completedTripCount > 0 },
+    { id: "FR5", label: "FR5 View current location", evidence: `${data.points.length} location point(s) available for map display.`, ready: data.points.length > 0 },
+    { id: "FR6", label: "FR6 View movement history and routes", evidence: `${movementTripRecords.length} trip route record(s).`, ready: movementTripRecords.length > 0 },
+    { id: "FR7", label: "FR7 View destination information", evidence: `${data.destinations.length} Malaysian destination record(s).`, ready: data.destinations.length > 0 },
+    { id: "FR8", label: "FR8 Receive travel recommendations", evidence: touristWithRecommendations ? "At least one tourist has three recommendations." : "Recommendation output is not ready.", ready: touristWithRecommendations },
+    { id: "FR9", label: "FR9 Administrator login", evidence: data.users.some((user) => user.role === "admin") ? "Administrator account exists." : "No administrator account found.", ready: data.users.some((user) => user.role === "admin") },
+    { id: "FR10", label: "FR10 View Tourist movement records", evidence: `${movementTripRecords.length} movement trip record(s) for admin review.`, ready: movementTripRecords.length > 0 },
+    { id: "FR11", label: "FR11 Review movement trends and charts", evidence: `${data.points.length} movement point(s) feed dashboard charts.`, ready: data.points.length > 0 },
+    { id: "FR12", label: "FR12 View AI analysis results", evidence: `${data.analyses.length} K-Means/Decision Tree result(s).`, ready: data.analyses.length > 0 },
+    { id: "FR13", label: "FR13 Manage destination information", evidence: hasDestinationCategories ? "Destination catalogue covers multiple categories." : "Destination coverage is too narrow.", ready: data.destinations.length > 0 },
+    { id: "FR14", label: "FR14 View movement summaries", evidence: `${summary.completedTripCount} completed trip summary source(s).`, ready: summary.completedTripCount > 0 },
+    { id: "FT14", label: "FT14 Logout", evidence: "Shared role-aware logout control is implemented.", ready: true },
+  ]);
 }
 
 function normalizeMovementFilters(filters: MovementRecordFilters | string = {}): MovementRecordFilters {

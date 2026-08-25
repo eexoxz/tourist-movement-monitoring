@@ -76,10 +76,12 @@ import {
   buildMovementRecordsCsv,
   getDemoReadiness,
   getDailyMovementTrend,
+  getFunctionalRequirementCoverage,
   getMovementDataStatus,
   getMovementRecords,
   getMovementTripRecords,
   getProfileDistribution,
+  getRequiredDemoFlowCoverage,
   getTourists,
   getTripFilterOptions,
   summarizeDashboard,
@@ -1978,6 +1980,8 @@ function AdminWorkspace({
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
   const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data]);
   const demoReadiness = useMemo(() => getDemoReadiness(data), [data]);
+  const demoFlowCoverage = useMemo(() => getRequiredDemoFlowCoverage(data), [data]);
+  const functionalCoverage = useMemo(() => getFunctionalRequirementCoverage(data), [data]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
   const [selectedTripId, setSelectedTripId] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
@@ -2483,6 +2487,8 @@ function AdminWorkspace({
             plan={travelPlan}
           />
           <DemoReadinessPanel readiness={demoReadiness} />
+          <DemoCoveragePanel title="Required Demonstration Flow" coverage={demoFlowCoverage} />
+          <DemoCoveragePanel title="Functional Requirement Coverage" coverage={functionalCoverage} compact />
           <MetricGrid
             items={[
               ["Tourists", tourists.length.toString()],
@@ -2578,6 +2584,31 @@ function DemoReadinessPanel({ readiness }: { readiness: ReturnType<typeof getDem
             <span>{item.ready ? "Ready" : "Needs attention"}</span>
             <strong>{item.label}</strong>
             <p>{item.value}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DemoCoveragePanel({ title, coverage, compact = false }: { title: string; coverage: ReturnType<typeof getRequiredDemoFlowCoverage>; compact?: boolean }) {
+  return (
+    <section className="demo-coverage-panel">
+      <div className="section-heading">
+        <div>
+          <h2>{title}</h2>
+          <p>
+            {coverage.readyCount} of {coverage.totalCount} item(s) are currently demonstrable from the implemented app flow and prepared data.
+          </p>
+        </div>
+        <strong>{Math.round(coverage.completionRate * 100)}%</strong>
+      </div>
+      <div className={compact ? "demo-coverage-list compact" : "demo-coverage-list"}>
+        {coverage.items.map((item) => (
+          <article className={item.ready ? "demo-coverage-item ready" : "demo-coverage-item"} key={item.id}>
+            <span>{item.ready ? "Ready" : "Needs work"}</span>
+            <strong>{item.label}</strong>
+            <p>{item.evidence}</p>
           </article>
         ))}
       </div>
