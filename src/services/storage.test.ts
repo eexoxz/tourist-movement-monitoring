@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
-import { FIRESTORE_COLLECTIONS, normalizeAppData } from "./storage";
+import { FIRESTORE_COLLECTIONS, loadData, normalizeAppData } from "./storage";
 
 describe("storage service", () => {
   it("uses DPP-aligned Firestore collection names for new writes", () => {
@@ -98,5 +98,21 @@ describe("storage service", () => {
     expect(normalized.analyses[0].kMeansInput.uniqueDestinations).toBe(0);
     expect(normalized.analyses[0].kMeansCentroid.urbanProportion).toBe(0);
     expect(normalized.points[0].userId).toBe("tourist-old");
+  });
+
+  it("restores the prepared dataset when browser storage has been cleared", () => {
+    const storage = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => storage.set(key, value),
+      removeItem: (key: string) => storage.delete(key),
+    });
+
+    const data = loadData();
+
+    expect(data.users.length).toBeGreaterThanOrEqual(initialData.users.length);
+    expect(data.destinations).toHaveLength(initialData.destinations.length);
+    expect(data.trips.length).toBeGreaterThan(0);
+    vi.unstubAllGlobals();
   });
 });

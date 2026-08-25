@@ -1110,6 +1110,7 @@ function TouristWorkspace({
   const recommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
   const [isLiveTracking, setIsLiveTracking] = useState(false);
+  const [locationRetryAvailable, setLocationRetryAvailable] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
@@ -1187,8 +1188,11 @@ function TouristWorkspace({
   };
 
   const startLocationWatch = (tripId: string, message: string) => {
+    setLocationRetryAvailable(false);
+
     if (!navigator.geolocation) {
       showTrackingNotice("warning", "Browser location unavailable", "Browser geolocation is unavailable. Demo points can still be added manually.");
+      setLocationRetryAvailable(true);
       setIsLiveTracking(false);
       return false;
     }
@@ -1203,6 +1207,7 @@ function TouristWorkspace({
       (position) => {
         appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
         setTrackingMessage("Live movement point recorded.");
+        setLocationRetryAvailable(false);
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
@@ -1218,6 +1223,7 @@ function TouristWorkspace({
           }
         }
 
+        setLocationRetryAvailable(error.code !== error.PERMISSION_DENIED);
         showTrackingNotice("error", "Location tracking stopped", geolocationErrorMessage(error));
       },
       {
@@ -1262,6 +1268,7 @@ function TouristWorkspace({
       watchId.current = null;
     }
     setIsLiveTracking(false);
+    setLocationRetryAvailable(false);
 
     const result = stopActiveTrip(data, user.id);
     if (result.error || !result.data) {
@@ -1309,6 +1316,7 @@ function TouristWorkspace({
       watchId.current = null;
     }
     setIsLiveTracking(false);
+    setLocationRetryAvailable(false);
 
     const nextData = revokeLocationConsent(data, user.id);
     onDataChange(refreshAllRecommendations(nextData));
@@ -1444,6 +1452,13 @@ function TouristWorkspace({
 
             {trackingMessage && <p className="status-message">{trackingMessage}</p>}
 
+            {locationRetryAvailable && activeTrip && (
+              <button className="secondary-action wide" type="button" onClick={resumeLiveTracking}>
+                <RotateCcw size={18} />
+                Try location again
+              </button>
+            )}
+
             {latestCompletedTrip && latestCompletedTripSummary && (
               <CompletedTripSummary
                 trip={latestCompletedTrip}
@@ -1477,7 +1492,7 @@ function TouristWorkspace({
             />
           </section>
 
-          <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} />
+          <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} mode="tourist" />
         </div>
       </Page>
     );
@@ -1487,7 +1502,7 @@ function TouristWorkspace({
     return (
       <Page title="My Trips" eyebrow="Tourist">
         <div className="two-column">
-          <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} />
+          <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} mode="tourist" />
           <section className="trip-history-panel">
             {selectedTripSummary && <TripSummaryPanel summary={selectedTripSummary} />}
             {selectedTrip && selectedTripSummary && (
@@ -1652,7 +1667,7 @@ function TouristWorkspace({
           </div>
         </div>
 
-        <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} activePoint={activePoints.at(-1) ?? tripPoints.at(-1)} />
+        <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} activePoint={activePoints.at(-1) ?? tripPoints.at(-1)} mode="tourist" />
 
         <section className="mobile-trip-controls">
           <div className="consent-box">
@@ -1697,6 +1712,13 @@ function TouristWorkspace({
           )}
 
           {trackingMessage && <p className="status-message">{trackingMessage}</p>}
+
+          {locationRetryAvailable && activeTrip && (
+            <button className="secondary-action wide" type="button" onClick={resumeLiveTracking}>
+              <RotateCcw size={18} />
+              Try location again
+            </button>
+          )}
 
           {userTrips.length === 0 && (
             <section className="new-user-guide">
@@ -2631,7 +2653,17 @@ function Page({ title, eyebrow, actions, children }: { title: string; eyebrow: s
   );
 }
 
-function MovementMap({ points, destinations, activePoint }: { points: MovementPoint[]; destinations: Destination[]; activePoint?: MovementPoint }) {
+function MovementMap({
+  points,
+  destinations,
+  activePoint,
+  mode = "admin",
+}: {
+  points: MovementPoint[];
+  destinations: Destination[];
+  activePoint?: MovementPoint;
+  mode?: "tourist" | "admin";
+}) {
   return (
     <Suspense
       fallback={
@@ -2641,7 +2673,7 @@ function MovementMap({ points, destinations, activePoint }: { points: MovementPo
         </div>
       }
     >
-      <MapView points={points} destinations={destinations} activePoint={activePoint} />
+      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} />
     </Suspense>
   );
 }
@@ -2930,7 +2962,7 @@ function DestinationModal({
           </button>
         </div>
         <p>{destination.description}</p>
-        <MovementMap points={[]} destinations={[destination]} />
+        <MovementMap points={[]} destinations={[destination]} mode="tourist" />
         <dl>
           <div>
             <dt>Coordinates</dt>
@@ -3088,6 +3120,26 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
   const [deleteTarget, setDeleteTarget] = useState<Destination | null>(null);
   const [savingAction, setSavingAction] = useState<"add" | "edit" | "delete" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
+
+  const filteredDestinations = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    return destinations.filter((destination) => {
+      const matchesCategory = categoryFilter === "all" || destination.category === categoryFilter;
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        [destination.name, destination.city, destination.description, destination.category].some((value) => value.toLowerCase().includes(normalizedSearch));
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [categoryFilter, destinations, searchTerm]);
+
+  const resetDestinationFilters = () => {
+    setSearchTerm("");
+    setCategoryFilter("all");
+  };
 
   const openAddModal = () => {
     setForm(createDestinationForm());
@@ -3193,8 +3245,30 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
 
         {message && <p className="status-message">{message}</p>}
 
+        <div className="destination-filter-toolbar">
+          <label>
+            Find destination
+            <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, city or category" />
+          </label>
+          <label>
+            Category
+            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value as DestinationCategory | "all")}>
+              <option value="all">All categories</option>
+              {destinationCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="secondary-action compact-action" type="button" onClick={resetDestinationFilters} disabled={!searchTerm && categoryFilter === "all"}>
+            <RotateCcw size={16} />
+            Reset
+          </button>
+        </div>
+
         <section className="destination-admin-grid">
-          {destinations.map((destination) => (
+          {filteredDestinations.map((destination) => (
             <article className="destination-card editable" key={destination.id}>
               <div>
                 <strong>{destination.name}</strong>
@@ -3221,6 +3295,7 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
               </div>
             </article>
           ))}
+          {filteredDestinations.length === 0 && <EmptyState text="No destination records match the current search and category filter." />}
         </section>
       </section>
 

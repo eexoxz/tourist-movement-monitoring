@@ -14,7 +14,7 @@ Tourist authentication -> consent-based trip tracking -> stored movement route -
 - [x] Use React, Firebase Authentication, Cloud Firestore, Browser Geolocation API, OpenStreetMap, Leaflet, K-Means and Decision Tree logic.
 - [x] Keep the finished app to seven main pages only.
 - [x] Prefer tabs, modals, expandable rows and side panels over extra pages.
-- [ ] Remove or hide features that make the app look like a commercial tourism platform.
+- [x] Remove or hide features that make the app look like a commercial tourism platform.
 
 Do not build:
 
@@ -198,7 +198,7 @@ Current alignment notes:
 - [x] Show clear success/failure message.
 - [x] Require confirmation before deletion.
 - [x] Include destination name in the delete confirmation message.
-- [ ] Keep search, filters and coordinate picker deferred until CRUD is stable.
+- [x] Add search and category filters after destination CRUD is stable; keep coordinate picking out of scope unless it becomes necessary.
 
 ## Firebase Data And Security
 
@@ -208,14 +208,14 @@ Current alignment notes:
 - [x] Passwords are not stored for Firebase-backed users.
 - [x] Tourist-owned movement data is scoped by user.
 - [x] Admin-only destination write rules exist.
-- [ ] Confirm Firebase project, Authentication and Firestore are fully enabled.
-- [ ] Confirm `.env` or `.env.local` values are present locally and ignored by Git.
+- [x] Confirm Firebase project, Authentication and Firestore are fully enabled.
+- [x] Confirm `.env` or `.env.local` values are present locally and ignored by Git.
 - [x] Decide whether to keep current collection names or migrate closer to the DPP names.
 - [x] Required DPP collections to map or document: users, tourist_profiles, tourist_preferences, location_consents, trip_sessions, movement_records, destination_categories, destinations, ai_analyses, recommendations.
-- [ ] Test account creation in Firebase.
+- [x] Test account creation in Firebase.
 - [ ] Test tourist data isolation.
 - [ ] Test admin access to summaries and destination management.
-- [ ] Confirm app still works after clearing browser local storage.
+- [x] Confirm app still works after clearing browser local storage.
 
 ## Lean AI Implementation
 
@@ -252,7 +252,7 @@ Current alignment notes:
 - [x] Form labels are above fields.
 - [x] Touch-sized buttons mostly exist.
 - [x] Body text should be at least 16px on Tourist pages.
-- [ ] Avoid horizontal scrolling on Tourist pages.
+- [x] Avoid horizontal scrolling on Tourist pages.
 - [x] Make key trip controls easy to reach.
 - [x] Let the map use most of the tracking screen.
 - [x] Add visible keyboard focus states.
@@ -265,8 +265,8 @@ Current alignment notes:
 - [x] Keep Leaflet/OpenStreetMap as the map engine unless the project scope changes.
 - [x] Make the map feel visually aligned with the app through custom markers, route styling and calmer controls.
 - [x] Reduce unnecessary map visual noise where possible so tracking and destination signals are easier to understand.
-- [ ] Add a simplified tourist map mode focused on current location, route, destination markers and selected place details.
-- [ ] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
+- [x] Add a simplified tourist map mode focused on current location, route, destination markers and selected place details.
+- [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System
 
@@ -276,7 +276,7 @@ Current alignment notes:
 - [x] Show pop-up feedback for destination add, edit, delete and AI refresh actions.
 - [x] Keep inline messages where they help form accessibility and local context.
 - [ ] Audit every remaining failure path and connect it to the shared notification system.
-- [ ] Add retry buttons for recoverable Firebase and geolocation failures where useful.
+- [x] Add retry buttons for recoverable Firebase and geolocation failures where useful.
 - [ ] Test notification placement on mobile tourist pages and desktop administrator pages.
 
 ## Required Demonstration Flow
@@ -316,13 +316,13 @@ Current alignment notes:
 
 - [x] All seven main pages work.
 - [x] FR1 to FR14 can be demonstrated.
-- [ ] FT1 to FT14 can be tested.
+- [x] FT1 to FT14 can be tested.
 - [x] Tourists and Administrators reach only authorised areas.
 - [x] Movement is never recorded before permission is granted.
 - [x] A Tourist can register, track a trip, view history and receive recommendations.
 - [x] An Administrator can view summaries, charts and AI results.
 - [x] An Administrator can add, edit and delete a destination.
-- [ ] Main pages load within three seconds under standard testing.
+- [x] Main pages load within three seconds under standard testing.
 - [x] Core actions do not crash the app or lose stored records.
 - [ ] Main tasks work at mobile-browser width.
 - [x] Valid AI input produces a cluster, Tourist Category and recommendations.
@@ -335,7 +335,7 @@ Current alignment notes:
 - [x] Seed several Cultural, Nature and Urban destinations.
 - [x] Prepare movement records for K-Means.
 - [x] Prepare labelled records for Decision Tree testing.
-- [ ] Prepare one insufficient-data example.
+- [x] Prepare one insufficient-data example.
 - [x] Prepare at least one recommendation result for each Tourist Category.
 - [x] Clearly label prepared records as demonstration data.
 - [ ] Capture screenshots for login, registration, tracking, route map, history, recommendations, admin dashboard, AI result, destination management, Firebase Auth and Firestore records.

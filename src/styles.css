@@ -21,10 +21,17 @@
   box-sizing: border-box;
 }
 
+html,
+#root {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 button,
@@ -762,6 +769,7 @@ button:disabled {
 
 .map-frame {
   position: relative;
+  min-width: 0;
   min-height: 580px;
 }
 
@@ -804,6 +812,26 @@ button:disabled {
   background: rgba(255, 253, 248, 0.84);
   color: #5b6577;
   font-size: 0.68rem;
+}
+
+.tourist-map-mode .map-view {
+  border-color: rgba(15, 118, 110, 0.24);
+  box-shadow: 0 16px 34px rgba(15, 118, 110, 0.1);
+}
+
+.map-mode-label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 420;
+  padding: 8px 10px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 8px;
+  color: var(--teal-dark);
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .map-view-placeholder {
@@ -950,6 +978,10 @@ button:disabled {
   font-weight: 800;
 }
 
+.tourist-map-mode .map-status {
+  top: 58px;
+}
+
 .map-current-button {
   position: absolute;
   left: 14px;
@@ -1003,6 +1035,14 @@ button:disabled {
 .map-legend i span {
   color: #ffffff;
   font-size: 0.65rem;
+}
+
+.tourist-map-mode .map-legend {
+  right: 12px;
+  bottom: 14px;
+  max-width: min(300px, calc(100% - 24px));
+  gap: 7px;
+  padding: 8px;
 }
 
 .panel,
@@ -1215,10 +1255,38 @@ button:disabled {
   line-height: 1.45;
 }
 
+.destination-filter-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.destination-filter-toolbar label {
+  display: grid;
+  gap: 7px;
+  color: #334155;
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.destination-filter-toolbar input,
+.destination-filter-toolbar select {
+  width: 100%;
+}
+
 .destination-admin-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+.destination-admin-grid .empty-state {
+  grid-column: 1 / -1;
 }
 
 .record-card,
@@ -2635,6 +2703,7 @@ textarea {
   .recommendation-list,
   .analysis-grid,
   .admin-tabs,
+  .destination-filter-toolbar,
   .auth-secondary-actions,
   .profile-summary-grid,
   .action-row,
@@ -2766,7 +2835,8 @@ textarea {
 
   .admin-filter-toolbar .toolbar-select,
   .admin-filter-toolbar .toolbar-input,
-  .admin-filter-toolbar .secondary-action {
+  .admin-filter-toolbar .secondary-action,
+  .destination-filter-toolbar .secondary-action {
     width: 100%;
     max-width: none;
   }

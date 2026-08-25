@@ -13,11 +13,15 @@ import {
   refreshAllRecommendations,
 } from "./analytics";
 
+function countAnalyzableCompletedTrips(data: AppData) {
+  return data.trips.filter((trip) => trip.status === "completed" && data.points.filter((point) => point.tripId === trip.id).length >= 2).length;
+}
+
 describe("analytics service", () => {
   it("assigns valid completed trips to K-Means clusters and Decision Tree profiles", () => {
     const data = refreshAllRecommendations(initialData);
 
-    expect(data.analyses).toHaveLength(initialData.trips.filter((trip) => trip.status === "completed").length);
+    expect(data.analyses).toHaveLength(countAnalyzableCompletedTrips(initialData));
     expect(data.analyses.length).toBeGreaterThanOrEqual(100);
     expect(data.analyses.every((analysis) => analysis.method === "k-means")).toBe(true);
     expect(data.analyses.every((analysis) => analysis.classifier === "decision-tree")).toBe(true);
@@ -46,7 +50,7 @@ describe("analytics service", () => {
   it("reports AI evaluation evidence for labelled demo records", () => {
     const evaluation = evaluateAiOutput(initialData);
 
-    expect(evaluation.validClusteredRecordCount).toBe(initialData.trips.filter((trip) => trip.status === "completed").length);
+    expect(evaluation.validClusteredRecordCount).toBe(countAnalyzableCompletedTrips(initialData));
     expect(evaluation.labelledRecordCount).toBeGreaterThanOrEqual(100);
     expect(evaluation.classificationAccuracy).toBeGreaterThan(0.75);
     expect(evaluation.confusionMatrix.mixed.mixed).toBeGreaterThan(0);

@@ -79,6 +79,20 @@ const baseUsers: User[] = [
     profileCompletedAt: hoursAgo(72),
     createdAt: hoursAgo(72),
   },
+  {
+    id: "tourist-insufficient-demo",
+    name: "Learning Demo Tourist",
+    email: "learning@example.com",
+    password: "learning123",
+    role: "tourist",
+    expectedProfile: "mixed",
+    travelPreferences: ["cultural", "nature", "urban"],
+    tripPace: "balanced",
+    travelGroup: "solo",
+    accessibilityPreference: "none",
+    profileCompletedAt: hoursAgo(66),
+    createdAt: hoursAgo(66),
+  },
 ];
 
 const baseConsents: LocationConsent[] = [
@@ -86,6 +100,7 @@ const baseConsents: LocationConsent[] = [
   { id: "consent-nature-demo", userId: "tourist-nature-demo", granted: true, grantedAt: hoursAgo(28) },
   { id: "consent-cultural-demo", userId: "tourist-cultural-demo", granted: true, grantedAt: hoursAgo(56) },
   { id: "consent-urban-demo", userId: "tourist-urban-demo", granted: true, grantedAt: hoursAgo(12) },
+  { id: "consent-insufficient-demo", userId: "tourist-insufficient-demo", granted: true, grantedAt: hoursAgo(6) },
 ];
 
 const baseTrips: TripSession[] = [
@@ -93,6 +108,7 @@ const baseTrips: TripSession[] = [
   { id: "trip-demo-2", userId: "tourist-nature-demo", status: "completed", startedAt: hoursAgo(28), endedAt: hoursAgo(25), consentId: "consent-nature-demo" },
   { id: "trip-cultural-demo", userId: "tourist-cultural-demo", status: "completed", startedAt: hoursAgo(56), endedAt: hoursAgo(53), consentId: "consent-cultural-demo" },
   { id: "trip-urban-demo", userId: "tourist-urban-demo", status: "completed", startedAt: hoursAgo(12), endedAt: hoursAgo(9), consentId: "consent-urban-demo" },
+  { id: "trip-insufficient-demo", userId: "tourist-insufficient-demo", status: "completed", startedAt: hoursAgo(6), endedAt: hoursAgo(5.7), consentId: "consent-insufficient-demo" },
 ];
 
 const basePoints: MovementPoint[] = [
@@ -111,6 +127,7 @@ const basePoints: MovementPoint[] = [
   { id: "point-urban-2", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 3.1579, longitude: 101.7116, accuracyMeters: 30, recordedAt: hoursAgo(11.2), source: "demo" },
   { id: "point-urban-3", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 3.1457, longitude: 101.6954, accuracyMeters: 26, recordedAt: hoursAgo(10.1), source: "demo" },
   { id: "point-urban-4", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 2.196, longitude: 102.2477, accuracyMeters: 40, recordedAt: hoursAgo(9.3), source: "demo" },
+  { id: "point-insufficient-1", tripId: "trip-insufficient-demo", userId: "tourist-insufficient-demo", latitude: 3.1478, longitude: 101.6937, accuracyMeters: 35, recordedAt: hoursAgo(5.9), source: "demo" },
 ];
 
 const travelPreferencesByProfile: Record<TouristProfile, DestinationCategory[]> = {
