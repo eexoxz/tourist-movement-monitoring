@@ -85,6 +85,7 @@ import {
 } from "./services/dashboard";
 import {
   appendMovementPoint,
+  createSampleTripForUser,
   deleteTouristMovementData,
   getActiveTrip,
   getGrantedConsent,
@@ -1313,6 +1314,28 @@ function TouristWorkspace({
     }
   };
 
+  const createSampleRoute = () => {
+    if (activeTrip) {
+      showTrackingNotice("warning", "Finish active trip first", "Finish the current trip before adding a completed sample route.");
+      return;
+    }
+
+    const result = createSampleTripForUser(data, user.id);
+    if (result.error || !result.data || !result.tripId) {
+      showTrackingNotice("error", "Sample route unavailable", result.error ?? "Sample route could not be created.");
+      return;
+    }
+
+    const refreshed = refreshAnalysis(result.data, user.id);
+    onDataChange(refreshed, user);
+    setSelectedTripId(result.tripId);
+    showTrackingNotice(
+      "success",
+      "Sample Malaysia route added",
+      `${result.pointCount} movement point(s) were added to your account so distance, route history, AI analysis and recommendations can be tested.`
+    );
+  };
+
   const addManualPoint = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!activeTrip) {
@@ -1447,6 +1470,11 @@ function TouristWorkspace({
 
             <button className="secondary-action wide" onClick={addDemoPoint} disabled={!activeTrip}>
               Add demo movement point
+            </button>
+
+            <button className="secondary-action wide" onClick={createSampleRoute} disabled={Boolean(activeTrip)}>
+              <Compass size={18} />
+              Add sample Malaysia route
             </button>
 
             <form className="mini-form" onSubmit={addManualPoint}>
@@ -1730,6 +1758,11 @@ function TouristWorkspace({
               Add demo movement point
             </button>
           )}
+
+          <button className="secondary-action wide" onClick={createSampleRoute} disabled={Boolean(activeTrip)}>
+            <Compass size={18} />
+            Add sample Malaysia route
+          </button>
 
           {trackingMessage && <p className="status-message">{trackingMessage}</p>}
 

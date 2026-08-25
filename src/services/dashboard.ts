@@ -131,7 +131,7 @@ export function getDemoReadiness(data: AppData): DemoReadiness {
       id: "movement-records",
       label: "Movement records",
       value: `${data.points.length} points`,
-      ready: data.points.length >= 500 && data.points.length <= 1500,
+      ready: data.points.length >= 1200,
     },
     {
       id: "profile-preferences",

@@ -48,7 +48,7 @@ describe("dashboard service", () => {
 
     expect(readiness.readyCount).toBe(readiness.totalCount);
     expect(readiness.completionRate).toBe(1);
-    expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("128");
+    expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("300");
     expect(readiness.items.find((item) => item.id === "movement-records")?.ready).toBe(true);
   });
 

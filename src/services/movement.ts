@@ -1,4 +1,4 @@
-import type { AppData, LocationConsent, MovementPoint, TripSession, TripSummary } from "../types";
+import type { AppData, LocationConsent, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
 import { createId } from "./storage";
 import { distanceKm, nearestDestination } from "./geo";
 
@@ -8,6 +8,13 @@ type MovementInput = {
   longitude: number;
   accuracyMeters: number;
   source: MovementPoint["source"];
+};
+
+const sampleRouteDestinationIds: Record<TouristProfile, string[]> = {
+  cultural: ["thean-hou-temple", "islamic-arts-museum", "merdeka-square", "kwai-chai-hong", "central-market", "batu-caves"],
+  nature: ["perdana-botanical-garden", "klcc-park", "taman-botani-putrajaya", "sekinchan-paddy-gallery", "perdana-botanical-garden", "klcc-park"],
+  urban: ["kampung-baru-kl", "klcc-park", "central-market", "kwai-chai-hong", "merdeka-square", "kampung-baru-kl"],
+  mixed: ["islamic-arts-museum", "perdana-botanical-garden", "merdeka-square", "central-market", "kampung-baru-kl", "klcc-park"],
 };
 
 export function getUserTrips(data: AppData, userId: string) {
@@ -87,6 +94,86 @@ export function grantLocationConsent(data: AppData, userId: string) {
   return {
     ...data,
     consents: [...data.consents.filter((item) => item.userId !== userId), consent],
+  };
+}
+
+function inferSampleProfile(user: User): TouristProfile {
+  if (user.expectedProfile) {
+    return user.expectedProfile;
+  }
+
+  const preferences = user.travelPreferences ?? [];
+  if (preferences.some((category) => category === "nature" || category === "coastal")) {
+    return "nature";
+  }
+
+  if (preferences.some((category) => category === "urban" || category === "food")) {
+    return "urban";
+  }
+
+  if (preferences.some((category) => category === "cultural" || category === "heritage")) {
+    return "cultural";
+  }
+
+  return "mixed";
+}
+
+function samplePointTime(startedAt: Date, index: number) {
+  return new Date(startedAt.getTime() + index * 18 * 60 * 1000).toISOString();
+}
+
+export function createSampleTripForUser(data: AppData, userId: string) {
+  const user = data.users.find((candidate) => candidate.id === userId);
+  if (!user) {
+    return { error: "The current tourist account could not be found." };
+  }
+
+  const profile = inferSampleProfile(user);
+  const routeDestinations = sampleRouteDestinationIds[profile]
+    .map((destinationId) => data.destinations.find((destination) => destination.id === destinationId))
+    .filter((destination): destination is NonNullable<typeof destination> => Boolean(destination));
+
+  if (routeDestinations.length < 2) {
+    return { error: "Not enough saved destinations are available to create a sample route." };
+  }
+
+  const startedAt = new Date(Date.now() - 2.2 * 60 * 60 * 1000);
+  const consent: LocationConsent = {
+    id: createId("consent"),
+    userId,
+    granted: true,
+    grantedAt: new Date(startedAt.getTime() - 6 * 60 * 1000).toISOString(),
+  };
+  const tripId = createId("trip");
+  const trip: TripSession = {
+    id: tripId,
+    userId,
+    status: "completed",
+    startedAt: startedAt.toISOString(),
+    endedAt: samplePointTime(startedAt, routeDestinations.length - 1),
+    consentId: consent.id,
+  };
+  const points: MovementPoint[] = routeDestinations.map((destination, index) => ({
+    id: createId("point"),
+    tripId,
+    userId,
+    latitude: destination.latitude,
+    longitude: destination.longitude,
+    accuracyMeters: 18 + (index % 5) * 4,
+    recordedAt: samplePointTime(startedAt, index),
+    source: "demo",
+  }));
+
+  return {
+    tripId,
+    pointCount: points.length,
+    profile,
+    data: {
+      ...data,
+      consents: [...data.consents.filter((item) => item.userId !== userId), consent],
+      trips: [...data.trips, trip],
+      points: [...data.points, ...points],
+    },
   };
 }
 

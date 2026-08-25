@@ -2,9 +2,9 @@ import { destinations } from "./destinations";
 import type { AppData, Destination, DestinationCategory, LocationConsent, MovementPoint, TouristProfile, TripSession, User } from "../types";
 
 const now = new Date();
-const GENERATED_TOURIST_COUNT = 128;
+const GENERATED_TOURIST_COUNT = 300;
 const GENERATED_TRIPS_PER_TOURIST = 2;
-const GENERATED_POINTS_PER_TRIP = 5;
+const GENERATED_POINTS_PER_TRIP = 6;
 const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString();
 
 export const demoDatasetMetadata = {

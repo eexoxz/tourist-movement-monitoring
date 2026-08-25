@@ -3,6 +3,7 @@ import { initialData } from "../data/demoData";
 import type { AppData } from "../types";
 import {
   appendMovementPoint,
+  createSampleTripForUser,
   deleteTouristMovementData,
   getActiveTrip,
   getGrantedConsent,
@@ -201,5 +202,21 @@ describe("movement service", () => {
     expect(summary.visitedDestinationCount).toBe(4);
     expect(userSummaries).toHaveLength(1);
     expect(userSummaries[0].tripId).toBe("trip-demo-1");
+  });
+
+  it("creates a completed sample Malaysia route for the current tourist", () => {
+    const data: AppData = {
+      ...initialData,
+      trips: initialData.trips.filter((trip) => trip.userId !== "tourist-demo"),
+      points: initialData.points.filter((point) => point.userId !== "tourist-demo"),
+    };
+    const result = createSampleTripForUser(data, "tourist-demo");
+    const pointCount = result.pointCount ?? 0;
+
+    expect(result.error).toBeUndefined();
+    expect(pointCount).toBeGreaterThanOrEqual(5);
+    expect(result.data?.trips.find((trip) => trip.id === result.tripId)?.status).toBe("completed");
+    expect(result.data?.points.filter((point) => point.tripId === result.tripId)).toHaveLength(pointCount);
+    expect(summarizeTrip(result.data!, result.tripId!).distanceKm).toBeGreaterThan(0);
   });
 });
