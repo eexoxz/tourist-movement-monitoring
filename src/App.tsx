@@ -43,6 +43,7 @@ import {
   getDefaultViewForRole,
   getPathForAuthMode,
   getPathForView,
+  getPrimaryViewsForRole,
   getViewFromPath,
   type AuthMode,
 } from "./services/access";
@@ -244,6 +245,15 @@ function inferExpectedProfileFromPreferences(preferences: DestinationCategory[])
   const ranked = [...scores].sort((a, b) => b[1] - a[1]);
 
   return ranked[0][1] > 0 && ranked[0][1] > ranked[1][1] ? ranked[0][0] : "mixed";
+}
+
+function formatTravelPreferenceList(preferences?: DestinationCategory[]) {
+  if (!preferences || preferences.length === 0) {
+    return "Not set yet";
+  }
+
+  const labels = new Map(preferenceOptions.map((option) => [option.value, option.label]));
+  return preferences.map((preference) => labels.get(preference) ?? preference).join(", ");
 }
 
 function mergeUserRecord(data: AppData, user: User): AppData {
@@ -626,8 +636,8 @@ function App() {
           ["overview", "Home", Compass],
           ["history", "Trips", MapPinned],
           ["recommendations", "Places", Sparkles],
-          ["profile", "Profile", UserRound],
         ] as const);
+  const primaryViews = getPrimaryViewsForRole(currentUser.role);
 
   return (
     <div className={currentUser.role === "tourist" ? "app-shell tourist-shell" : "app-shell admin-shell"}>
@@ -643,7 +653,7 @@ function App() {
         </div>
 
         <nav className="nav-list" aria-label="Primary navigation">
-          {roleViews.map(([key, label, Icon]) => (
+          {roleViews.filter(([key]) => primaryViews.includes(key)).map(([key, label, Icon]) => (
             <button key={key} className={safeView === key ? "nav-item active" : "nav-item"} onClick={() => goToView(key)}>
               <Icon size={18} />
               {label}
@@ -651,13 +661,23 @@ function App() {
           ))}
         </nav>
 
-        <div className="account-strip">
-          <UserRound size={18} />
-          <div>
-            <strong>{currentUser.name}</strong>
-            <span>{currentUser.role === "admin" ? "Tourism Administrator" : "Tourist"}</span>
+        {currentUser.role === "tourist" ? (
+          <button className="account-strip account-action" onClick={() => goToView("profile")}>
+            <UserRound size={18} />
+            <div>
+              <strong>{currentUser.name}</strong>
+              <span>Travel profile</span>
+            </div>
+          </button>
+        ) : (
+          <div className="account-strip">
+            <UserRound size={18} />
+            <div>
+              <strong>{currentUser.name}</strong>
+              <span>Tourism Administrator</span>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="status-pill">
           <span>{authProviderName()}</span>
@@ -1318,12 +1338,12 @@ function TouristWorkspace({
   const skipProfileSetup = () => {
     localStorage.setItem(getProfileSkipKey(user.id), "true");
     setProfileSetupSkipped(true);
-    notify({ tone: "info", title: "Profile skipped", message: "You can complete your travel profile later from the Profile page." });
+    notify({ tone: "info", title: "Profile skipped", message: "You can complete your travel profile later from Home." });
   };
 
   if (view === "profile") {
     return (
-      <Page title="My Profile" eyebrow="Tourist">
+      <Page title="Travel Profile" eyebrow="Tourist">
         <TouristProfileForm
           user={user}
           title="Travel Preferences"
@@ -1694,6 +1714,33 @@ function TouristWorkspace({
             ["Distance", `${activeTripSummary?.distanceKm ?? recentTripSummary?.distanceKm ?? 0} km`],
           ]}
         />
+
+        <section className="tourist-section profile-summary-card">
+          <div className="section-heading">
+            <div>
+              <h2>Travel Profile</h2>
+              <p>Your preferences give the app a starting point before movement history becomes strong enough for AI recommendations.</p>
+            </div>
+            <button className="secondary-action compact-action" onClick={() => onViewChange("profile")}>
+              <UserRound size={16} />
+              {user.profileCompletedAt ? "Edit" : "Complete"}
+            </button>
+          </div>
+          <div className="profile-summary-grid">
+            <div>
+              <small>Name</small>
+              <strong>{displayName || "Not set yet"}</strong>
+            </div>
+            <div>
+              <small>Interests</small>
+              <strong>{formatTravelPreferenceList(user.travelPreferences)}</strong>
+            </div>
+            <div>
+              <small>Pace</small>
+              <strong>{user.tripPace ?? "balanced"}</strong>
+            </div>
+          </div>
+        </section>
 
         {latestCompletedTrip && latestCompletedTripSummary && (
           <CompletedTripSummary

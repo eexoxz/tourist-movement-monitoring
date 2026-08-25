@@ -3,6 +3,7 @@ import type { AppView, UserRole } from "../types";
 export type AuthMode = "login" | "register";
 
 const touristViews: AppView[] = ["overview", "tracking", "history", "recommendations", "profile"];
+const touristPrimaryViews: AppView[] = ["overview", "history", "recommendations"];
 const adminViews: AppView[] = ["dashboard", "destinations"];
 
 const touristViewPaths: Partial<Record<AppView, string>> = {
@@ -25,6 +26,10 @@ const authModePaths: Record<AuthMode, string> = {
 
 export function getAllowedViewsForRole(role: UserRole) {
   return role === "admin" ? adminViews : touristViews;
+}
+
+export function getPrimaryViewsForRole(role: UserRole) {
+  return role === "admin" ? adminViews : touristPrimaryViews;
 }
 
 export function getDefaultViewForRole(role: UserRole): AppView {

@@ -41,9 +41,9 @@ Do not build:
 - [x] Page 1: Login.
 - [x] Page 2: Tourist Registration.
 - [x] Page 3: Tourist Home and Trip Tracking.
-- [ ] Page 4: Trip History and Trip Details.
-- [ ] Page 5: Travel Recommendations.
-- [ ] Page 6: Tourism Administrator Dashboard.
+- [x] Page 4: Trip History and Trip Details.
+- [x] Page 5: Travel Recommendations.
+- [x] Page 6: Tourism Administrator Dashboard.
 - [ ] Page 7: Destination Management.
 
 Current alignment notes:
@@ -53,7 +53,7 @@ Current alignment notes:
 - [x] Administrator dashboard and destination management exist.
 - [x] Refine navigation so Tourist Home and Trip Tracking are one main page.
 - [x] Refine administrator navigation so Dashboard contains Overview, Movement Records and AI Results as tabs.
-- [ ] Decide whether Profile should remain a main nav item or become a profile menu/panel to preserve the seven-page scope.
+- [x] Decide whether Profile should remain a main nav item or become a profile menu/panel to preserve the seven-page scope.
 
 ## Navigation And Access
 
@@ -283,7 +283,7 @@ Current alignment notes:
 
 - [ ] Tourist registers a new account.
 - [ ] Tourist verifies/logs in.
-- [ ] Tourist completes or skips profile setup.
+- [x] Tourist completes or skips profile setup.
 - [ ] Tourist grants location permission.
 - [ ] Tourist starts and stops a short trip.
 - [ ] Tourist views a prepared previous trip route.
