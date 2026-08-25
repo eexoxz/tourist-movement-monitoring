@@ -1,8 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
-import { normalizeAppData } from "./storage";
+import { FIRESTORE_COLLECTIONS, normalizeAppData } from "./storage";
 
 describe("storage service", () => {
+  it("uses DPP-aligned Firestore collection names for new writes", () => {
+    expect(Object.values(FIRESTORE_COLLECTIONS)).toEqual(
+      expect.arrayContaining([
+        "users",
+        "tourist_profiles",
+        "tourist_preferences",
+        "location_consents",
+        "trip_sessions",
+        "movement_records",
+        "destination_categories",
+        "destinations",
+        "ai_analyses",
+        "recommendations",
+      ])
+    );
+  });
+
   it("normalizes older prototype data into the current app shape", () => {
     const legacyData = {
       users: [

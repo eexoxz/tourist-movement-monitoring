@@ -20,8 +20,31 @@ service cloud.firestore {
         && get(userPath(request.auth.uid)).data.role == "admin";
     }
 
-    function isTouristOwner(userId) {
-      return isOwnUser(userId) || isAdmin();
+    function ownsAuthBackedUser() {
+      return signedIn()
+        && (
+          request.resource.data.authUid == request.auth.uid
+          || request.resource.data.userId == request.auth.uid
+          || request.resource.data.id == request.auth.uid
+        );
+    }
+
+    function ownsExistingRecord() {
+      return signedIn()
+        && (
+          resource.data.authUid == request.auth.uid
+          || resource.data.userId == request.auth.uid
+          || resource.data.id == request.auth.uid
+        );
+    }
+
+    function ownsRequestedRecord() {
+      return signedIn()
+        && (
+          request.resource.data.authUid == request.auth.uid
+          || request.resource.data.userId == request.auth.uid
+          || request.resource.data.id == request.auth.uid
+        );
     }
 
     function isValidCoordinate(latitude, longitude) {
@@ -33,61 +56,77 @@ service cloud.firestore {
         && longitude <= 180;
     }
 
+    function canReadOwnedRecord() {
+      return isAdmin() || ownsExistingRecord();
+    }
+
+    function canCreateOwnedRecord() {
+      return isAdmin() || ownsRequestedRecord();
+    }
+
+    function canUpdateOwnedRecord() {
+      return isAdmin() || (ownsExistingRecord() && ownsRequestedRecord());
+    }
+
     match /users/{userId} {
       allow read: if isOwnUser(userId) || isAdmin();
-      allow create: if isOwnUser(userId)
-        && request.resource.data.role == "tourist"
-        && request.resource.data.authUid == request.auth.uid;
-      allow update: if isOwnUser(userId)
-        && request.resource.data.role == resource.data.role
-        && request.resource.data.authUid == request.auth.uid;
+      allow create: if isAdmin()
+        || (
+          isOwnUser(userId)
+          && request.resource.data.role == "tourist"
+          && request.resource.data.authUid == request.auth.uid
+        );
+      allow update: if isAdmin()
+        || (
+          isOwnUser(userId)
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.authUid == request.auth.uid
+        );
       allow delete: if false;
     }
 
-    match /consents/{consentId} {
-      allow read: if isTouristOwner(resource.data.userId);
-      allow create, update: if signedIn()
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.granted is bool;
-      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+    match /tourist_profiles/{profileId} {
+      allow read: if isAdmin() || ownsExistingRecord() || isOwnUser(profileId);
+      allow create, update: if isAdmin() || ownsAuthBackedUser() || isOwnUser(profileId);
+      allow delete: if false;
     }
 
-    match /trips/{tripId} {
-      allow read: if isTouristOwner(resource.data.userId);
-      allow create: if signedIn()
-        && request.resource.data.userId == request.auth.uid
+    match /tourist_preferences/{preferenceId} {
+      allow read: if isAdmin() || ownsExistingRecord() || isOwnUser(preferenceId);
+      allow create, update: if isAdmin() || ownsAuthBackedUser() || isOwnUser(preferenceId);
+      allow delete: if false;
+    }
+
+    match /location_consents/{consentId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord() && request.resource.data.granted is bool;
+      allow update: if canUpdateOwnedRecord() && request.resource.data.granted is bool;
+      allow delete: if isAdmin() || ownsExistingRecord();
+    }
+
+    match /trip_sessions/{tripId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord()
         && request.resource.data.status in ["active", "completed"];
-      allow update: if signedIn()
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId;
-      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+      allow update: if canUpdateOwnedRecord()
+        && request.resource.data.status in ["active", "completed"];
+      allow delete: if isAdmin() || ownsExistingRecord();
     }
 
-    match /movementPoints/{pointId} {
-      allow read: if isAdmin()
-        || (signedIn() && resource.data.userId == request.auth.uid)
-        || (
-          signedIn()
-          && exists(/databases/$(database)/documents/trips/$(resource.data.tripId))
-          && get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.userId == request.auth.uid
-        );
-      allow create: if signedIn()
+    match /movement_records/{pointId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord()
         && isValidCoordinate(request.resource.data.latitude, request.resource.data.longitude)
-        && request.resource.data.userId == request.auth.uid
         && request.resource.data.tripId is string;
-      allow update: if signedIn()
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.tripId == resource.data.tripId
-        && isValidCoordinate(request.resource.data.latitude, request.resource.data.longitude);
-      allow delete: if signedIn()
-        && (
-          resource.data.userId == request.auth.uid
-          || (
-            exists(/databases/$(database)/documents/trips/$(resource.data.tripId))
-            && get(/databases/$(database)/documents/trips/$(resource.data.tripId)).data.userId == request.auth.uid
-          )
-        );
+      allow update: if canUpdateOwnedRecord()
+        && isValidCoordinate(request.resource.data.latitude, request.resource.data.longitude)
+        && request.resource.data.tripId is string;
+      allow delete: if isAdmin() || ownsExistingRecord();
+    }
+
+    match /destination_categories/{categoryId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /destinations/{destinationId} {
@@ -97,18 +136,52 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    match /analyses/{analysisId} {
-      allow read: if isTouristOwner(resource.data.userId);
-      allow create, update: if isAdmin()
-        || (signedIn() && request.resource.data.userId == request.auth.uid);
-      allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+    match /ai_analyses/{analysisId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord();
+      allow update: if canUpdateOwnedRecord();
+      allow delete: if isAdmin() || ownsExistingRecord();
     }
 
     match /recommendations/{recommendationId} {
-      allow read: if isTouristOwner(resource.data.userId);
-      allow create, update: if isAdmin()
-        || (signedIn() && request.resource.data.userId == request.auth.uid);
-      allow delete: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord();
+      allow update: if canUpdateOwnedRecord();
+      allow delete: if isAdmin() || ownsExistingRecord();
+    }
+
+    match /consents/{consentId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord() && request.resource.data.granted is bool;
+      allow update: if canUpdateOwnedRecord() && request.resource.data.granted is bool;
+      allow delete: if isAdmin() || ownsExistingRecord();
+    }
+
+    match /trips/{tripId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord()
+        && request.resource.data.status in ["active", "completed"];
+      allow update: if canUpdateOwnedRecord()
+        && request.resource.data.status in ["active", "completed"];
+      allow delete: if isAdmin() || ownsExistingRecord();
+    }
+
+    match /movementPoints/{pointId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord()
+        && isValidCoordinate(request.resource.data.latitude, request.resource.data.longitude)
+        && request.resource.data.tripId is string;
+      allow update: if canUpdateOwnedRecord()
+        && isValidCoordinate(request.resource.data.latitude, request.resource.data.longitude)
+        && request.resource.data.tripId is string;
+      allow delete: if isAdmin() || ownsExistingRecord();
+    }
+
+    match /analyses/{analysisId} {
+      allow read: if canReadOwnedRecord();
+      allow create: if canCreateOwnedRecord();
+      allow update: if canUpdateOwnedRecord();
+      allow delete: if isAdmin() || ownsExistingRecord();
     }
   }
 }

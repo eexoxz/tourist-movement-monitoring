@@ -50,7 +50,7 @@ Firebase setup:
 
 Without `.env`, the app stays in local prototype mode. With Firebase config, app data is saved to Firestore collections while browser storage remains a local backup. Firebase Email/Password authentication must be enabled, and tourist users must verify their email after registration.
 
-The Firestore collection design, migration notes, rules, and indexes are documented in `docs/firebase-schema.md`. Deployable Firebase files are included as `firebase.json`, `firestore.rules`, and `firestore.indexes.json`.
+The Firestore collection design, migration notes, rules, and indexes are documented in `docs/firebase-schema.md`. New saves use the DPP-aligned collections `users`, `tourist_profiles`, `tourist_preferences`, `location_consents`, `trip_sessions`, `movement_records`, `destination_categories`, `destinations`, `ai_analyses`, and `recommendations`. Deployable Firebase files are included as `firebase.json`, `firestore.rules`, and `firestore.indexes.json`.
 
 Project roadmap:
 

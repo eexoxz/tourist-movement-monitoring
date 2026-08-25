@@ -38,8 +38,8 @@ Do not build:
 
 ## Seven Main Pages
 
-- [ ] Page 1: Login.
-- [ ] Page 2: Tourist Registration.
+- [x] Page 1: Login.
+- [x] Page 2: Tourist Registration.
 - [x] Page 3: Tourist Home and Trip Tracking.
 - [ ] Page 4: Trip History and Trip Details.
 - [ ] Page 5: Travel Recommendations.
@@ -65,7 +65,7 @@ Current alignment notes:
 - [x] Administrator login redirects to `/admin/dashboard`.
 - [x] Unauthenticated users return to `/login`.
 - [x] Wrong-role access redirects to the authorised home page.
-- [ ] Remove Tourist/Admin selector style from the login page in the final Firebase flow.
+- [x] Remove Tourist/Admin selector style from the login page in the final Firebase flow.
 - [x] Keep Tourist mobile navigation simple: Home, Trips, Recommendations, Profile menu.
 - [x] Keep Administrator navigation simple: Dashboard, Destinations, Logout.
 
@@ -82,7 +82,7 @@ Current alignment notes:
 - [x] Resend email verification in Firebase mode.
 - [x] Validate email format before Firebase login.
 - [x] Remove misleading default demo credentials from Firebase login.
-- [ ] Create Tourist Account link should go to a clear registration screen.
+- [x] Create Tourist Account link should go to a clear registration screen.
 - [ ] Forgot Password link only if core flow is stable.
 
 ## Page 2: Tourist Registration
@@ -96,8 +96,8 @@ Current alignment notes:
 - [x] Tourist profile/preferences setup exists after login.
 - [x] Add confirm password.
 - [x] Validate matching passwords.
-- [ ] Collect initial preferred categories during registration or immediately after registration.
-- [ ] Create/store a clearer Tourist Profile document or equivalent structured profile data.
+- [x] Collect initial preferred categories during registration or immediately after registration.
+- [x] Create/store a clearer Tourist Profile document or equivalent structured profile data.
 - [ ] Redirect to `/app/home` after successful registration or verification.
 - [x] Do not request browser location permission during registration.
 - [x] Do not provide Administrator registration.
@@ -210,8 +210,8 @@ Current alignment notes:
 - [x] Admin-only destination write rules exist.
 - [ ] Confirm Firebase project, Authentication and Firestore are fully enabled.
 - [ ] Confirm `.env` or `.env.local` values are present locally and ignored by Git.
-- [ ] Decide whether to keep current collection names or migrate closer to the DPP names.
-- [ ] Required DPP collections to map or document: users, tourist_profiles, tourist_preferences, location_consents, trip_sessions, movement_records, destination_categories, destinations, ai_analyses, recommendations.
+- [x] Decide whether to keep current collection names or migrate closer to the DPP names.
+- [x] Required DPP collections to map or document: users, tourist_profiles, tourist_preferences, location_consents, trip_sessions, movement_records, destination_categories, destinations, ai_analyses, recommendations.
 - [ ] Test account creation in Firebase.
 - [ ] Test tourist data isolation.
 - [ ] Test admin access to summaries and destination management.

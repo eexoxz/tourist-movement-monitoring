@@ -99,6 +99,15 @@ type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 type AdminDashboardTab = "overview" | "records" | "ai";
 type AuthResult = { error?: string; message?: string };
+type TouristRegistrationDraft = {
+  name: string;
+  email: string;
+  password: string;
+  travelPreferences: DestinationCategory[];
+  tripPace: User["tripPace"];
+  travelGroup: User["travelGroup"];
+  accessibilityPreference: User["accessibilityPreference"];
+};
 type NotificationTone = "success" | "error" | "info" | "warning";
 type AppNotification = {
   id: string;
@@ -445,21 +454,32 @@ function App() {
     return {};
   };
 
-  const register = async (name: string, email: string, password: string): Promise<AuthResult> => {
-    const precheck = validateTouristAccount(data, { name, email, password });
+  const register = async (draft: TouristRegistrationDraft): Promise<AuthResult> => {
+    const expectedProfile = inferExpectedProfileFromPreferences(draft.travelPreferences);
+    const precheck = validateTouristAccount(data, { name: draft.name, email: draft.email, password: draft.password });
     if (precheck.error) {
       return { error: precheck.error };
     }
 
     let authUid: string | undefined;
     try {
-      const firebaseUser = await registerWithConfiguredProvider(email, password);
+      const firebaseUser = await registerWithConfiguredProvider(draft.email, draft.password);
       authUid = firebaseUser?.uid;
     } catch (error) {
       return { error: friendlyAuthError(error, "Firebase registration failed.") };
     }
 
-    const created = createTouristAccount(data, { name, email, password, authUid });
+    const created = createTouristAccount(data, {
+      name: draft.name,
+      email: draft.email,
+      password: draft.password,
+      authUid,
+      travelPreferences: draft.travelPreferences,
+      expectedProfile,
+      tripPace: draft.tripPace,
+      travelGroup: draft.travelGroup,
+      accessibilityPreference: draft.accessibilityPreference,
+    });
     if (created.error || !created.user || !created.data) {
       return { error: created.error ?? "Unable to create tourist account." };
     }
@@ -637,7 +657,7 @@ function AuthScreen({
   mode: AuthMode;
   onModeChange: (mode: AuthMode) => void;
   onLogin: (email: string, password: string) => Promise<AuthResult>;
-  onRegister: (name: string, email: string, password: string) => Promise<AuthResult>;
+  onRegister: (draft: TouristRegistrationDraft) => Promise<AuthResult>;
   onResendVerification: (email: string, password: string) => Promise<AuthResult>;
   notify: NotifyFn;
 }) {
@@ -647,6 +667,9 @@ function AuthScreen({
   const [email, setEmail] = useState(rememberedLogin?.email ?? "");
   const [password, setPassword] = useState(rememberedLogin?.password ?? "");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [registrationPreferences, setRegistrationPreferences] = useState<DestinationCategory[]>(["cultural", "nature"]);
+  const [registrationPace, setRegistrationPace] = useState<User["tripPace"]>("balanced");
+  const [registrationGroup, setRegistrationGroup] = useState<User["travelGroup"]>("solo");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(Boolean(rememberedLogin));
   const [error, setError] = useState<string | null>(null);
@@ -706,10 +729,28 @@ function AuthScreen({
       return;
     }
 
+    if (mode === "register" && registrationPreferences.length === 0) {
+      setError("Choose at least one travel preference.");
+      setMessage(null);
+      notify({ tone: "error", title: "Travel preference missing", message: "Choose at least one place type so the tourist profile has a useful starting point." });
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     setMessage(null);
-    const result = mode === "login" ? await onLogin(normalizedEmail, password) : await onRegister(name, normalizedEmail, password);
+    const result =
+      mode === "login"
+        ? await onLogin(normalizedEmail, password)
+        : await onRegister({
+            name,
+            email: normalizedEmail,
+            password,
+            travelPreferences: registrationPreferences,
+            tripPace: registrationPace,
+            travelGroup: registrationGroup,
+            accessibilityPreference: "none",
+          });
     setError(result.error ?? null);
     setMessage(result.message ?? null);
     if (result.error) {
@@ -727,6 +768,18 @@ function AuthScreen({
       }
     }
     setIsSubmitting(false);
+  };
+
+  const switchAuthMode = (nextMode: AuthMode) => {
+    setError(null);
+    setMessage(null);
+    onModeChange(nextMode);
+  };
+
+  const toggleRegistrationPreference = (preference: DestinationCategory) => {
+    setRegistrationPreferences((current) =>
+      current.includes(preference) ? current.filter((candidate) => candidate !== preference) : [...current, preference]
+    );
   };
 
   const resendVerification = async () => {
@@ -774,22 +827,14 @@ function AuthScreen({
             <button
               type="button"
               className={mode === "login" ? "active" : ""}
-              onClick={() => {
-                setError(null);
-                setMessage(null);
-                onModeChange("login");
-              }}
+              onClick={() => switchAuthMode("login")}
             >
               Login
             </button>
             <button
               type="button"
               className={mode === "register" ? "active" : ""}
-              onClick={() => {
-                setError(null);
-                setMessage(null);
-                onModeChange("register");
-              }}
+              onClick={() => switchAuthMode("register")}
             >
               Register
             </button>
@@ -859,6 +904,39 @@ function AuthScreen({
             </label>
           )}
 
+          {mode === "register" && (
+            <fieldset className="auth-preference-panel">
+              <legend>Start with your travel style</legend>
+              <div className="preference-grid">
+                {preferenceOptions.map((option) => (
+                  <label className={registrationPreferences.includes(option.value) ? "preference-chip active" : "preference-chip"} key={option.value}>
+                    <input type="checkbox" checked={registrationPreferences.includes(option.value)} onChange={() => toggleRegistrationPreference(option.value)} />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+              <div className="field-pair">
+                <label>
+                  Travel pace
+                  <select value={registrationPace} onChange={(event) => setRegistrationPace(event.target.value as User["tripPace"])}>
+                    <option value="relaxed">Relaxed</option>
+                    <option value="balanced">Balanced</option>
+                    <option value="packed">Packed schedule</option>
+                  </select>
+                </label>
+                <label>
+                  Travelling with
+                  <select value={registrationGroup} onChange={(event) => setRegistrationGroup(event.target.value as User["travelGroup"])}>
+                    <option value="solo">Solo</option>
+                    <option value="couple">Partner</option>
+                    <option value="family">Family</option>
+                    <option value="friends">Friends</option>
+                  </select>
+                </label>
+              </div>
+            </fieldset>
+          )}
+
           <label className="checkbox-field remember-login">
             <input
               type="checkbox"
@@ -887,6 +965,10 @@ function AuthScreen({
               Resend verification email
             </button>
           )}
+
+          <button className="auth-mode-link" type="button" onClick={() => switchAuthMode(mode === "login" ? "register" : "login")}>
+            {mode === "login" ? "Create Tourist Account" : "Already have an account? Login"}
+          </button>
         </form>
       </section>
     </main>

@@ -7,11 +7,14 @@ This schema supports the DPP prototype with Firebase Authentication and Firestor
 | Collection | Document ID | Purpose |
 | --- | --- | --- |
 | `users` | Firebase Auth UID for Firebase users | Tourist/admin profile, role, email, display name, creation date |
-| `consents` | Consent record ID | Location consent state for each tourist |
-| `trips` | Trip session ID | Active/completed tourist trip sessions |
-| `movementPoints` | Movement point ID | Tourist owner, latitude, longitude, accuracy, timestamp, source, and trip link |
+| `tourist_profiles` | Tourist user ID | Public tourist profile details without passwords |
+| `tourist_preferences` | Tourist user ID | Travel preferences, expected tourist profile, pace, group type, and accessibility preference |
+| `location_consents` | Consent record ID | Location consent state for each tourist |
+| `trip_sessions` | Trip session ID | Active/completed tourist trip sessions |
+| `movement_records` | Movement point ID | Tourist owner, latitude, longitude, accuracy, timestamp, source, and trip link |
+| `destination_categories` | Category ID | Category metadata for the Malaysian destination catalogue |
 | `destinations` | Destination ID | Malaysian destination catalogue used by maps and recommendations |
-| `analyses` | Trip ID | K-Means cluster, Decision Tree profile, silhouette score, explanation path |
+| `ai_analyses` | Trip ID | K-Means cluster, Decision Tree profile, silhouette score, explanation path |
 | `recommendations` | Recommendation ID | Generated destination suggestions for a tourist |
 
 ## Role Model
@@ -22,9 +25,9 @@ New Firebase tourist accounts use the Firebase Auth UID as the `users` document 
 
 ## Migration Notes
 
-The app still works without Firebase credentials by using local browser storage. When Firebase is configured, the storage adapter writes the same app data into structured Firestore collections. If an older `prototype/appData` document exists, the adapter reads it once and migrates it into the collection layout. Older movement point records are normalized with a tourist owner from their linked trip so tourist data deletion can remove the correct Firestore documents.
+The app still works without Firebase credentials by using local browser storage. When Firebase is configured, the storage adapter writes the same app data into structured Firestore collections. If an older `prototype/appData` document exists, the adapter reads it once and migrates it into the collection layout. Older collection names from early development (`consents`, `trips`, `movementPoints`, `analyses`) are still read as fallback collections, but new saves use the DPP-aligned names above.
 
-The local demo account passwords are never written into Firestore. Firebase-backed user records store `authUid`, `name`, `email`, `role`, and `createdAt`.
+The local demo account passwords are never written into Firestore. Firebase-backed user records store `authUid`, `name`, `email`, `role`, and `createdAt`. Tourist profile and preference records are split into `tourist_profiles` and `tourist_preferences` so the Firestore database view matches the project data model.
 
 ## Deployment Files
 

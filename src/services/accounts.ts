@@ -1,4 +1,4 @@
-import type { AppData, User } from "../types";
+import type { AppData, DestinationCategory, User } from "../types";
 import { createId } from "./storage";
 
 type RegisterInput = {
@@ -6,6 +6,11 @@ type RegisterInput = {
   email: string;
   password: string;
   authUid?: string;
+  travelPreferences?: DestinationCategory[];
+  expectedProfile?: User["expectedProfile"];
+  tripPace?: User["tripPace"];
+  travelGroup?: User["travelGroup"];
+  accessibilityPreference?: User["accessibilityPreference"];
 };
 
 export function normalizeEmail(email: string) {
@@ -63,6 +68,11 @@ export function createTouristAccount(data: AppData, input: RegisterInput) {
     email: validation.email,
     password: input.authUid ? "" : validation.password,
     role: "tourist",
+    expectedProfile: input.expectedProfile,
+    travelPreferences: input.travelPreferences,
+    tripPace: input.tripPace,
+    travelGroup: input.travelGroup,
+    accessibilityPreference: input.accessibilityPreference,
     createdAt: new Date().toISOString(),
   };
 

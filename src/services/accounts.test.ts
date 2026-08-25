@@ -28,10 +28,20 @@ describe("accounts service", () => {
       name: "New Tourist",
       email: "  NEWTOURIST@Example.com ",
       password: "secret1",
+      travelPreferences: ["nature", "coastal"],
+      expectedProfile: "nature",
+      tripPace: "relaxed",
+      travelGroup: "family",
+      accessibilityPreference: "low-walking",
     });
 
     expect(result.error).toBeUndefined();
     expect(result.user?.email).toBe("newtourist@example.com");
+    expect(result.user?.travelPreferences).toEqual(["nature", "coastal"]);
+    expect(result.user?.expectedProfile).toBe("nature");
+    expect(result.user?.tripPace).toBe("relaxed");
+    expect(result.user?.travelGroup).toBe("family");
+    expect(result.user?.accessibilityPreference).toBe("low-walking");
     expect(result.data?.users).toHaveLength(initialData.users.length + 1);
     expect(findUserByEmail(result.data!, "newtourist@example.com")?.name).toBe("New Tourist");
   });
