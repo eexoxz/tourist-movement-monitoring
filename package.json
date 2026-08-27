@@ -4,9 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run build && vite preview --host 127.0.0.1 --configLoader runner",
+    "dev": "npm run build && vite preview --host 127.0.0.1 --port 4175 --strictPort --configLoader runner",
+    "dev:mobile": "npm run build && vite preview --host 0.0.0.0 --port 4175 --strictPort --configLoader runner",
     "build": "tsc --noEmit && vite build --configLoader runner",
-    "preview": "vite preview --host 127.0.0.1 --configLoader runner",
+    "preview": "vite preview --host 127.0.0.1 --port 4175 --strictPort --configLoader runner",
+    "preview:mobile": "vite preview --host 0.0.0.0 --port 4175 --strictPort --configLoader runner",
     "start": "npm run preview",
     "test": "vitest run --config vitest.config.ts --configLoader runner",
     "typecheck": "tsc --noEmit"

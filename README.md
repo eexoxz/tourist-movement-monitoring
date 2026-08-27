@@ -21,11 +21,21 @@ npm install
 npm run dev
 ```
 
+Open `http://localhost:4175/login` on the same laptop.
+
 If your global npm command is misconfigured, run the Windows helper instead:
 
 ```powershell
 .\start.bat
 ```
+
+For phone testing on the same Wi-Fi, run:
+
+```powershell
+.\start-mobile.bat
+```
+
+Then open the network URL shown in the terminal, for example `http://192.168.50.176:4175/login`.
 
 Use `npm run preview` after a build when you only want to reopen the latest compiled version.
 

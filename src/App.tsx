@@ -47,7 +47,7 @@ import {
   getViewFromPath,
   type AuthMode,
 } from "./services/access";
-import { clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
 import {
   buildMovementAlertsCsv,
@@ -456,17 +456,24 @@ function App() {
   };
 
   const login = async (email: string, password: string): Promise<AuthResult> => {
-    let authUid: string | undefined;
-    let firebaseStoredUser: User | null = null;
     const firebaseMode = hasConfiguredAuth();
+    const localEmailUser = findUserByEmail(data, email);
 
     if (firebaseMode) {
+      let authUid: string | undefined;
+      let firebaseStoredUser: User | null = null;
+
       try {
         const firebaseUser = await signInWithConfiguredProvider(email, password);
         authUid = firebaseUser?.uid;
-        firebaseStoredUser = authUid ? await getConfiguredUserRecord(authUid).catch(() => null) : null;
-        const storedUser = firebaseStoredUser ?? findUserByEmail(data, email);
-        if (firebaseUser && !firebaseUser.emailVerified && storedUser?.role !== "admin") {
+        if (!authUid) {
+          return { error: "Firebase login could not return a user account." };
+        }
+
+        const needsFirestoreProfile = !localEmailUser || localEmailUser.role === "admin";
+        firebaseStoredUser = needsFirestoreProfile ? await getConfiguredUserRecord(authUid).catch(() => null) : null;
+        const loginRole = firebaseStoredUser?.role ?? localEmailUser?.role ?? "tourist";
+        if (firebaseUser && !firebaseUser.emailVerified && loginRole !== "admin") {
           await sendVerificationEmail(firebaseUser).catch(() => undefined);
           await signOutConfiguredProvider().catch(() => undefined);
           return { error: "Verify your email first. A fresh verification email has been sent." };
@@ -474,43 +481,65 @@ function App() {
       } catch (error) {
         return { error: friendlyAuthError(error, "Firebase login failed.") };
       }
-    } else {
-      const localUser = authenticateLocalUser(data, email, password);
-      if (!localUser) {
-        return { error: "Invalid email or password." };
+
+      if (localEmailUser?.role === "admin" && firebaseStoredUser?.role !== "admin") {
+        await signOutConfiguredProvider().catch(() => undefined);
+        return {
+          error:
+            "This Firebase account is not linked as an admin in Firestore yet. Add a users document using this Firebase UID with role set to admin, then log in again.",
+        };
       }
-      saveSession(localUser.id);
-      setSessionUserId(localUser.id);
-      setView(getDefaultViewForRole(localUser.role));
-      replaceBrowserPath(getPathForView(localUser.role, getDefaultViewForRole(localUser.role)));
+
+      const user =
+        firebaseStoredUser ??
+        (localEmailUser
+          ? { ...localEmailUser, id: authUid, authUid, password: "" }
+          : {
+              id: authUid,
+              authUid,
+              name: email.split("@")[0],
+              email,
+              password: "",
+              role: "tourist" as const,
+              createdAt: new Date().toISOString(),
+            });
+      const nextData = mergeUserRecord(data, { ...user, authUid });
+      const defaultView = getDefaultViewForRole(user.role);
+
+      cacheLocalData(nextData);
+      setData(nextData);
+      saveSession(authUid);
+      setSessionUserId(authUid);
+      setView(defaultView);
+      replaceBrowserPath(getPathForView(user.role, defaultView));
+
+      void loadCloudData({ ...user, authUid })
+        .then((cloudData) => {
+          if (!cloudData) {
+            setSyncStatus("Signed in; local backup ready");
+            return;
+          }
+
+          const refreshed = refreshAllRecommendations(mergeUserRecord(cloudData, { ...user, authUid }));
+          cacheLocalData(refreshed);
+          setData(refreshed);
+          setSyncStatus("Loaded from Firebase Firestore");
+        })
+        .catch(() => {
+          setSyncStatus("Signed in; cloud refresh needs retry");
+        });
+
       return {};
     }
 
-    let user = authUid ? firebaseStoredUser ?? data.users.find((candidate) => candidate.id === authUid || candidate.authUid === authUid) ?? findUserByEmail(data, email) : null;
-    if (!user && authUid) {
-      user = {
-        id: authUid,
-        authUid,
-        name: email.split("@")[0],
-        email,
-        password: "",
-        role: "tourist",
-        createdAt: new Date().toISOString(),
-      };
-      commitData({ ...data, users: [...data.users, user] }, user);
-    } else if (user && authUid && (user.authUid !== authUid || !data.users.some((candidate) => candidate.id === user?.id))) {
-      user = { ...user, authUid };
-      setData(mergeUserRecord(data, user));
-    }
-
-    if (!user) {
+    const localUser = authenticateLocalUser(data, email, password);
+    if (!localUser) {
       return { error: "Invalid email or password." };
     }
-
-    saveSession(authUid ?? user.id);
-    setSessionUserId(authUid ?? user.id);
-    setView(getDefaultViewForRole(user.role));
-    replaceBrowserPath(getPathForView(user.role, getDefaultViewForRole(user.role)));
+    saveSession(localUser.id);
+    setSessionUserId(localUser.id);
+    setView(getDefaultViewForRole(localUser.role));
+    replaceBrowserPath(getPathForView(localUser.role, getDefaultViewForRole(localUser.role)));
     return {};
   };
 

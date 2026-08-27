@@ -75,6 +75,10 @@ export function saveData(data: AppData, actor?: User | null) {
   return saveCloudData(data, actor);
 }
 
+export function cacheLocalData(data: AppData) {
+  saveLocalData(data);
+}
+
 export function loadSession(): string | null {
   return localStorage.getItem(SESSION_KEY);
 }
@@ -133,7 +137,7 @@ export function getStorageMode() {
   return isFirebaseConfigured() ? "Firestore collections + local backup" : "Local browser storage";
 }
 
-export async function loadCloudData() {
+export async function loadCloudData(fallbackActor?: User | null) {
   const services = getFirebaseServices();
   if (!services) {
     return null;
@@ -190,7 +194,8 @@ export async function loadCloudData() {
   };
 
   const currentUserRecord = await readDocument<Omit<User, "password">>(FIRESTORE_COLLECTIONS.users, authUid);
-  const isAdminUser = currentUserRecord?.role === "admin";
+  const fallbackCurrentUser = fallbackActor && (fallbackActor.id === authUid || fallbackActor.authUid === authUid) ? fallbackActor : null;
+  const isAdminUser = currentUserRecord?.role === "admin" || fallbackCurrentUser?.role === "admin";
   const readScopedCollection = isAdminUser ? readCollection : readOwnedCollection;
   const readScopedPreferredCollection = isAdminUser ? readPreferredCollection : readPreferredOwnedCollection;
   const userRows = isAdminUser ? readCollection<Omit<User, "password">>(FIRESTORE_COLLECTIONS.users) : Promise.resolve(currentUserRecord ? [currentUserRecord] : []);
@@ -234,7 +239,7 @@ export async function loadCloudData() {
   const legacySnapshot = await getDoc(doc(services.db, LEGACY_DATA_COLLECTION, LEGACY_DATA_DOCUMENT));
   const data = normalizeAppData(legacySnapshot.exists() ? (legacySnapshot.data() as Partial<AppData>) : initialData);
 
-  await saveCloudData(data);
+  await saveCloudData(data, fallbackCurrentUser);
   saveLocalData(data);
   return data;
 }

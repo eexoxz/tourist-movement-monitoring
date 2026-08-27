@@ -2,26 +2,42 @@ import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 import type { User as FirebaseUser } from "firebase/auth";
 import type { User } from "../types";
 
-export async function signInWithConfiguredProvider(email: string, password: string) {
+let persistenceSetup: Promise<void> | null = null;
+
+async function ensureLocalPersistence() {
   const services = getFirebaseServices();
   if (!services) {
     return null;
   }
 
-  const { browserLocalPersistence, setPersistence, signInWithEmailAndPassword } = await import("firebase/auth");
-  await setPersistence(services.auth, browserLocalPersistence);
+  if (!persistenceSetup) {
+    persistenceSetup = import("firebase/auth").then(async ({ browserLocalPersistence, setPersistence }) => {
+      await setPersistence(services.auth, browserLocalPersistence);
+    });
+  }
+
+  await persistenceSetup;
+  return services;
+}
+
+export async function signInWithConfiguredProvider(email: string, password: string) {
+  const services = await ensureLocalPersistence();
+  if (!services) {
+    return null;
+  }
+
+  const { signInWithEmailAndPassword } = await import("firebase/auth");
   const credential = await signInWithEmailAndPassword(services.auth, email, password);
   return credential.user;
 }
 
 export async function registerWithConfiguredProvider(email: string, password: string) {
-  const services = getFirebaseServices();
+  const services = await ensureLocalPersistence();
   if (!services) {
     return null;
   }
 
-  const { browserLocalPersistence, createUserWithEmailAndPassword, setPersistence } = await import("firebase/auth");
-  await setPersistence(services.auth, browserLocalPersistence);
+  const { createUserWithEmailAndPassword } = await import("firebase/auth");
   const credential = await createUserWithEmailAndPassword(services.auth, email, password);
   await sendVerificationEmail(credential.user);
   return credential.user;
