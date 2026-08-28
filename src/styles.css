@@ -2628,6 +2628,13 @@ textarea {
   color: #596575;
 }
 
+.field-hint {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .empty-state {
   display: flex;
   align-items: center;

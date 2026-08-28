@@ -1,0 +1,16 @@
+export const nationalityOptions = [
+  "Australia",
+  "Brunei",
+  "China",
+  "India",
+  "Indonesia",
+  "Japan",
+  "Malaysia",
+  "Philippines",
+  "Singapore",
+  "South Korea",
+  "Thailand",
+  "United Kingdom",
+  "United States",
+  "Vietnam",
+] as const;

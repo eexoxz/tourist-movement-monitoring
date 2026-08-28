@@ -75,6 +75,7 @@ import {
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import { malaysiaFestivalEvents } from "./data/festivals";
+import { nationalityOptions } from "./data/nationalities";
 import { formatFestivalDate, getFestivalDestinationMatches, getUpcomingFestivals } from "./services/festivals";
 import {
   buildMovementRecordsCsv,
@@ -112,10 +113,6 @@ type TouristRegistrationDraft = {
   name: string;
   email: string;
   password: string;
-  travelPreferences: DestinationCategory[];
-  tripPace: User["tripPace"];
-  travelGroup: User["travelGroup"];
-  accessibilityPreference: User["accessibilityPreference"];
   nationality: string;
   passportNumber: string;
   termsAccepted: boolean;
@@ -140,6 +137,8 @@ const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = 
   { value: "food", label: "Food" },
   { value: "coastal", label: "Coastal" },
 ];
+
+const malaysiaStateCount = 14;
 
 const demoRoute = [
   [3.142, 101.6894],
@@ -263,6 +262,35 @@ function formatTravelPreferenceList(preferences?: DestinationCategory[]) {
 
   const labels = new Map(preferenceOptions.map((option) => [option.value, option.label]));
   return preferences.map((preference) => labels.get(preference) ?? preference).join(", ");
+}
+
+function formatFestivalScope(event: FestivalEvent) {
+  if (event.scope === "national" || event.states.length >= malaysiaStateCount) {
+    return "Nationwide";
+  }
+
+  if (event.states.length >= malaysiaStateCount - 3) {
+    const excludedStates = [
+      "Johor",
+      "Kedah",
+      "Kelantan",
+      "Melaka",
+      "Negeri Sembilan",
+      "Pahang",
+      "Penang",
+      "Perak",
+      "Perlis",
+      "Sabah",
+      "Sarawak",
+      "Selangor",
+      "Terengganu",
+      "Federal Territories",
+    ].filter((state) => !event.states.includes(state as (typeof event.states)[number]));
+
+    return excludedStates.length > 0 ? `All states except ${excludedStates.join(", ")}` : "Nationwide";
+  }
+
+  return event.states.join(", ");
 }
 
 function mergeUserRecord(data: AppData, user: User): AppData {
@@ -551,7 +579,6 @@ function App() {
   };
 
   const register = async (draft: TouristRegistrationDraft): Promise<AuthResult> => {
-    const expectedProfile = inferExpectedProfileFromPreferences(draft.travelPreferences);
     const precheck = validateTouristAccount(data, {
       name: draft.name,
       email: draft.email,
@@ -577,11 +604,6 @@ function App() {
       email: draft.email,
       password: draft.password,
       authUid,
-      travelPreferences: draft.travelPreferences,
-      expectedProfile,
-      tripPace: draft.tripPace,
-      travelGroup: draft.travelGroup,
-      accessibilityPreference: draft.accessibilityPreference,
       nationality: draft.nationality,
       passportNumber: draft.passportNumber,
       termsAccepted: draft.termsAccepted,
@@ -816,9 +838,6 @@ function AuthScreen({
   const [nationality, setNationality] = useState("");
   const [passportNumber, setPassportNumber] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [registrationPreferences, setRegistrationPreferences] = useState<DestinationCategory[]>(["cultural", "nature"]);
-  const [registrationPace, setRegistrationPace] = useState<User["tripPace"]>("balanced");
-  const [registrationGroup, setRegistrationGroup] = useState<User["travelGroup"]>("solo");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(Boolean(rememberedLogin));
   const [error, setError] = useState<string | null>(null);
@@ -878,14 +897,14 @@ function AuthScreen({
       return;
     }
 
-    if (mode === "register" && nationality.trim().length < 2) {
-      setError("Enter your nationality.");
+    if (mode === "register" && !(nationalityOptions as readonly string[]).includes(nationality.trim())) {
+      setError("Choose your nationality from the list.");
       setMessage(null);
-      notify({ tone: "error", title: "Nationality missing", message: "Enter the nationality shown on your travel document." });
+      notify({ tone: "error", title: "Nationality missing", message: "Choose the nationality shown on your travel document." });
       return;
     }
 
-    if (mode === "register" && !/^[A-Za-z0-9 ]{5,24}$/.test(passportNumber.trim())) {
+    if (mode === "register" && !/^[A-Za-z0-9 ]{5,20}$/.test(passportNumber.trim())) {
       setError("Enter a valid passport number using letters or numbers.");
       setMessage(null);
       notify({ tone: "error", title: "Passport number missing", message: "Use 5 to 20 letters or numbers from the passport." });
@@ -899,13 +918,6 @@ function AuthScreen({
       return;
     }
 
-    if (mode === "register" && registrationPreferences.length === 0) {
-      setError("Choose at least one travel preference.");
-      setMessage(null);
-      notify({ tone: "error", title: "Travel preference missing", message: "Choose at least one place type so the tourist profile has a useful starting point." });
-      return;
-    }
-
     setIsSubmitting(true);
     setError(null);
     setMessage(null);
@@ -916,10 +928,6 @@ function AuthScreen({
             name,
             email: normalizedEmail,
             password,
-            travelPreferences: registrationPreferences,
-            tripPace: registrationPace,
-            travelGroup: registrationGroup,
-            accessibilityPreference: "none",
             nationality,
             passportNumber,
             termsAccepted,
@@ -947,12 +955,6 @@ function AuthScreen({
     setError(null);
     setMessage(null);
     onModeChange(nextMode);
-  };
-
-  const toggleRegistrationPreference = (preference: DestinationCategory) => {
-    setRegistrationPreferences((current) =>
-      current.includes(preference) ? current.filter((candidate) => candidate !== preference) : [...current, preference]
-    );
   };
 
   const resendVerification = async () => {
@@ -1105,46 +1107,21 @@ function AuthScreen({
             <div className="field-pair">
               <label>
                 Nationality
-                <input value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name" required />
+                <select value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name" required>
+                  <option value="">Select nationality</option>
+                  {nationalityOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 Passport Number
-                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" required />
+                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" placeholder="Example: A12345678" required />
+                <small className="field-hint">Use 5 to 20 letters or numbers, for example A12345678.</small>
               </label>
             </div>
-          )}
-
-          {mode === "register" && (
-            <fieldset className="auth-preference-panel">
-              <legend>Start with your travel style</legend>
-              <div className="preference-grid">
-                {preferenceOptions.map((option) => (
-                  <label className={registrationPreferences.includes(option.value) ? "preference-chip active" : "preference-chip"} key={option.value}>
-                    <input type="checkbox" checked={registrationPreferences.includes(option.value)} onChange={() => toggleRegistrationPreference(option.value)} />
-                    {option.label}
-                  </label>
-                ))}
-              </div>
-              <div className="field-pair">
-                <label>
-                  Travel pace
-                  <select value={registrationPace} onChange={(event) => setRegistrationPace(event.target.value as User["tripPace"])}>
-                    <option value="relaxed">Relaxed</option>
-                    <option value="balanced">Balanced</option>
-                    <option value="packed">Packed schedule</option>
-                  </select>
-                </label>
-                <label>
-                  Travelling with
-                  <select value={registrationGroup} onChange={(event) => setRegistrationGroup(event.target.value as User["travelGroup"])}>
-                    <option value="solo">Solo</option>
-                    <option value="couple">Partner</option>
-                    <option value="family">Family</option>
-                    <option value="friends">Friends</option>
-                  </select>
-                </label>
-              </div>
-            </fieldset>
           )}
 
           {mode === "register" && (
@@ -3092,7 +3069,7 @@ function FestivalCalendarPanel({
               </span>
               <div>
                 <strong>{event.name}</strong>
-                <small>{event.scope === "national" ? "Nationwide" : event.states.join(", ")}</small>
+                <small>{formatFestivalScope(event)}</small>
               </div>
               <p>{event.description}</p>
               {matchedDestinations.length > 0 && (

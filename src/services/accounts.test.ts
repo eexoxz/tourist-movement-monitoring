@@ -34,6 +34,7 @@ describe("accounts service", () => {
     expect(validateTouristAccount(initialData, { ...validRegistration, email: "bad-email" }).error).toContain("valid email");
     expect(validateTouristAccount(initialData, { ...validRegistration, password: "123" }).error).toContain("at least 6");
     expect(validateTouristAccount(initialData, { ...validRegistration, nationality: "" }).error).toContain("nationality");
+    expect(validateTouristAccount(initialData, { ...validRegistration, nationality: "Neverland" }).error).toContain("nationality");
     expect(validateTouristAccount(initialData, { ...validRegistration, passportNumber: "A1" }).error).toContain("passport");
     expect(validateTouristAccount(initialData, { ...validRegistration, termsAccepted: false }).error).toContain("privacy");
   });

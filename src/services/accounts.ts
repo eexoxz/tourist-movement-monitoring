@@ -1,4 +1,5 @@
 import type { AppData, DestinationCategory, User } from "../types";
+import { nationalityOptions } from "../data/nationalities";
 import { createId } from "./storage";
 
 type RegisterInput = {
@@ -43,6 +44,10 @@ export function isValidPassportNumber(passportNumber: string) {
   return /^[A-Z0-9]{5,20}$/.test(normalizePassportNumber(passportNumber));
 }
 
+export function isValidNationality(nationality: string) {
+  return (nationalityOptions as readonly string[]).includes(nationality.trim());
+}
+
 export function authenticateLocalUser(data: AppData, email: string, password: string) {
   const normalizedEmail = normalizeEmail(email);
   return data.users.find((candidate) => candidate.email.toLowerCase() === normalizedEmail && candidate.password === password) ?? null;
@@ -72,8 +77,8 @@ export function validateTouristAccount(data: AppData, input: RegisterInput) {
     return { error: "Password must be at least 6 characters." };
   }
 
-  if (nationality.length < 2) {
-    return { error: "Enter your nationality." };
+  if (!isValidNationality(nationality)) {
+    return { error: "Choose your nationality from the list." };
   }
 
   if (!isValidPassportNumber(passportNumber)) {
