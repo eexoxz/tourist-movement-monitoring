@@ -130,9 +130,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
       }).setView([3.1478, 101.6937], 13);
 
       L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
-        attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        attribution: "&copy; OpenStreetMap contributors",
       })
         .on("load", () => setMapStatus("ready"))
         .on("tileerror", () => setMapStatus("error"))

@@ -1784,6 +1784,108 @@ button:disabled {
   font-size: 1.15rem;
 }
 
+.festival-calendar {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
+}
+
+.festival-calendar.compact {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.festival-list {
+  display: grid;
+  gap: 10px;
+}
+
+.festival-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.festival-card > div:not(.festival-destinations) {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.festival-card strong {
+  color: #102033;
+  line-height: 1.25;
+}
+
+.festival-card small {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.festival-card p {
+  margin: 0;
+  color: #596575;
+  line-height: 1.5;
+}
+
+.festival-badge,
+.festival-destinations span {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #064e3b;
+  background: #ccfbf1;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.festival-badge-national {
+  color: #7c2d12;
+  background: #ffedd5;
+}
+
+.festival-badge-religious {
+  color: #581c87;
+  background: #f3e8ff;
+}
+
+.festival-badge-heritage,
+.festival-badge-royal {
+  color: #713f12;
+  background: #fef3c7;
+}
+
+.festival-badge-harvest {
+  color: #14532d;
+  background: #dcfce7;
+}
+
+.festival-destinations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.festival-destinations span {
+  color: #334155;
+  background: #f1f5f9;
+}
+
 .movement-demand.compact {
   padding: 0;
   border: 0;
@@ -2316,6 +2418,26 @@ textarea {
 
 .auth-preference-panel .preference-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.auth-terms-panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #b7efe6;
+  border-radius: 8px;
+  background: #f0fdfa;
+}
+
+.auth-terms-panel strong {
+  color: var(--teal-dark);
+}
+
+.auth-terms-panel p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
 
 .auth-mode-link {
@@ -2904,6 +3026,7 @@ textarea {
   }
 
   .recommendation-card-footer,
+  .festival-card > div:not(.festival-destinations),
   .destination-modal dl div,
   .admin-tab-heading,
   .destination-management-panel > .section-heading,

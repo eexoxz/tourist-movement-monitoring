@@ -1,6 +1,7 @@
 import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
+  CalendarDays,
   Compass,
   Download,
   Eye,
@@ -28,6 +29,7 @@ import type {
   DestinationCategory,
   DestinationDemand,
   KMeansFeatureVector,
+  FestivalEvent,
   MovementAlert,
   MovementPoint,
   Recommendation,
@@ -72,6 +74,8 @@ import {
 } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
+import { malaysiaFestivalEvents } from "./data/festivals";
+import { formatFestivalDate, getFestivalDestinationMatches, getUpcomingFestivals } from "./services/festivals";
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
@@ -112,6 +116,9 @@ type TouristRegistrationDraft = {
   tripPace: User["tripPace"];
   travelGroup: User["travelGroup"];
   accessibilityPreference: User["accessibilityPreference"];
+  nationality: string;
+  passportNumber: string;
+  termsAccepted: boolean;
 };
 type NotificationTone = "success" | "error" | "info" | "warning";
 type AppNotification = {
@@ -545,7 +552,14 @@ function App() {
 
   const register = async (draft: TouristRegistrationDraft): Promise<AuthResult> => {
     const expectedProfile = inferExpectedProfileFromPreferences(draft.travelPreferences);
-    const precheck = validateTouristAccount(data, { name: draft.name, email: draft.email, password: draft.password });
+    const precheck = validateTouristAccount(data, {
+      name: draft.name,
+      email: draft.email,
+      password: draft.password,
+      nationality: draft.nationality,
+      passportNumber: draft.passportNumber,
+      termsAccepted: draft.termsAccepted,
+    });
     if (precheck.error) {
       return { error: precheck.error };
     }
@@ -568,6 +582,9 @@ function App() {
       tripPace: draft.tripPace,
       travelGroup: draft.travelGroup,
       accessibilityPreference: draft.accessibilityPreference,
+      nationality: draft.nationality,
+      passportNumber: draft.passportNumber,
+      termsAccepted: draft.termsAccepted,
     });
     if (created.error || !created.user || !created.data) {
       return { error: created.error ?? "Unable to create tourist account." };
@@ -796,6 +813,9 @@ function AuthScreen({
   const [email, setEmail] = useState(rememberedLogin?.email ?? "");
   const [password, setPassword] = useState(rememberedLogin?.password ?? "");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [nationality, setNationality] = useState("");
+  const [passportNumber, setPassportNumber] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [registrationPreferences, setRegistrationPreferences] = useState<DestinationCategory[]>(["cultural", "nature"]);
   const [registrationPace, setRegistrationPace] = useState<User["tripPace"]>("balanced");
   const [registrationGroup, setRegistrationGroup] = useState<User["travelGroup"]>("solo");
@@ -858,6 +878,27 @@ function AuthScreen({
       return;
     }
 
+    if (mode === "register" && nationality.trim().length < 2) {
+      setError("Enter your nationality.");
+      setMessage(null);
+      notify({ tone: "error", title: "Nationality missing", message: "Enter the nationality shown on your travel document." });
+      return;
+    }
+
+    if (mode === "register" && !/^[A-Za-z0-9 ]{5,24}$/.test(passportNumber.trim())) {
+      setError("Enter a valid passport number using letters or numbers.");
+      setMessage(null);
+      notify({ tone: "error", title: "Passport number missing", message: "Use 5 to 20 letters or numbers from the passport." });
+      return;
+    }
+
+    if (mode === "register" && !termsAccepted) {
+      setError("Accept the data privacy and tourist safety terms before creating an account.");
+      setMessage(null);
+      notify({ tone: "error", title: "Consent required", message: "Read and accept the data privacy notice before registering." });
+      return;
+    }
+
     if (mode === "register" && registrationPreferences.length === 0) {
       setError("Choose at least one travel preference.");
       setMessage(null);
@@ -879,6 +920,9 @@ function AuthScreen({
             tripPace: registrationPace,
             travelGroup: registrationGroup,
             accessibilityPreference: "none",
+            nationality,
+            passportNumber,
+            termsAccepted,
           });
     setError(result.error ?? null);
     setMessage(result.message ?? null);
@@ -1058,6 +1102,19 @@ function AuthScreen({
           )}
 
           {mode === "register" && (
+            <div className="field-pair">
+              <label>
+                Nationality
+                <input value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name" required />
+              </label>
+              <label>
+                Passport Number
+                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" required />
+              </label>
+            </div>
+          )}
+
+          {mode === "register" && (
             <fieldset className="auth-preference-panel">
               <legend>Start with your travel style</legend>
               <div className="preference-grid">
@@ -1088,6 +1145,20 @@ function AuthScreen({
                 </label>
               </div>
             </fieldset>
+          )}
+
+          {mode === "register" && (
+            <section className="auth-terms-panel">
+              <strong>Data privacy and tourist safety</strong>
+              <p>
+                The app stores your profile, consent choice, trip route points and recommendation results so tourism administrators can monitor movement trends.
+                Passport and nationality details are kept with your account for identity support if assistance is needed during a recorded trip.
+              </p>
+              <label className="checkbox-field remember-login">
+                <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} required />
+                I agree to consent-based location tracking and account data storage.
+              </label>
+            </section>
           )}
 
           <label className="checkbox-field remember-login">
@@ -1194,6 +1265,7 @@ function TouristWorkspace({
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const selectedRecommendation = recommendations.find((recommendation) => recommendation.id === selectedRecommendationId) ?? null;
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
+  const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
   const displayName = getDisplayName(user);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
@@ -1713,6 +1785,8 @@ function TouristWorkspace({
           />
 
           <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
+
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
         </section>
 
         {selectedRecommendation && (
@@ -1898,6 +1972,8 @@ function TouristWorkspace({
         ) : null}
 
         <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
+
+        <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
 
         <section className="tourist-section">
           <div className="section-heading">
@@ -2121,6 +2197,7 @@ function AdminWorkspace({
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const movementAlerts = useMemo(() => calculateMovementAlerts(data), [data]);
+  const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const travelPlan = useMemo(
     () =>
       createMovementBasedTravelPlan(data, {
@@ -2573,6 +2650,7 @@ function AdminWorkspace({
               <CategoryBars values={movementTrend} />
               <h2>Movement Demand</h2>
               <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
+              <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
               <div className="section-heading">
                 <h2>Travel Plan Signal</h2>
                 <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
@@ -2980,6 +3058,56 @@ function DestinationModal({
         </section>
       </section>
     </div>
+  );
+}
+
+function FestivalCalendarPanel({
+  events,
+  destinations,
+  compact = false,
+}: {
+  events: FestivalEvent[];
+  destinations: Destination[];
+  compact?: boolean;
+}) {
+  const visibleEvents = events.slice(0, compact ? 4 : 8);
+
+  return (
+    <section className={compact ? "festival-calendar compact" : "festival-calendar"}>
+      <div className="section-heading">
+        <div>
+          <h2>Malaysia Festival Calendar</h2>
+          <p>Upcoming national and state events that can influence tourist flow and trip planning.</p>
+        </div>
+      </div>
+      <div className="festival-list">
+        {visibleEvents.map((event) => {
+          const matchedDestinations = getFestivalDestinationMatches(event, destinations).slice(0, 3);
+
+          return (
+            <article className="festival-card" key={event.id}>
+              <span className={`festival-badge festival-badge-${event.category}`}>
+                <CalendarDays size={15} />
+                {formatFestivalDate(event)}
+              </span>
+              <div>
+                <strong>{event.name}</strong>
+                <small>{event.scope === "national" ? "Nationwide" : event.states.join(", ")}</small>
+              </div>
+              <p>{event.description}</p>
+              {matchedDestinations.length > 0 && (
+                <div className="festival-destinations">
+                  {matchedDestinations.map((destination) => (
+                    <span key={destination.id}>{destination.name}</span>
+                  ))}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+      {visibleEvents.length === 0 && <EmptyState text="No festival planning signals are inside the current date range." />}
+    </section>
   );
 }
 

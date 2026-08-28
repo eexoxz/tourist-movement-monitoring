@@ -12,6 +12,26 @@ export type DestinationCategory =
 
 export type TouristProfile = "cultural" | "nature" | "urban" | "mixed";
 
+export type MalaysianState =
+  | "Johor"
+  | "Kedah"
+  | "Kelantan"
+  | "Melaka"
+  | "Negeri Sembilan"
+  | "Pahang"
+  | "Penang"
+  | "Perak"
+  | "Perlis"
+  | "Sabah"
+  | "Sarawak"
+  | "Selangor"
+  | "Terengganu"
+  | "Federal Territories";
+
+export type FestivalScope = "national" | "state";
+
+export type FestivalCategory = "national" | "religious" | "cultural" | "heritage" | "royal" | "harvest";
+
 export type KMeansFeatureVector = {
   culturalProportion: number;
   natureProportion: number;
@@ -33,6 +53,10 @@ export type User = {
   tripPace?: "relaxed" | "balanced" | "packed";
   travelGroup?: "solo" | "couple" | "family" | "friends";
   accessibilityPreference?: "none" | "low-walking" | "wheelchair-friendly";
+  nationality?: string;
+  passportNumber?: string;
+  termsAcceptedAt?: string;
+  privacyAcceptedAt?: string;
   profileCompletedAt?: string;
   createdAt: string;
 };
@@ -46,6 +70,18 @@ export type Destination = {
   city: string;
   description: string;
   averageVisitMinutes: number;
+};
+
+export type FestivalEvent = {
+  id: string;
+  name: string;
+  date: string;
+  endDate?: string;
+  scope: FestivalScope;
+  states: MalaysianState[];
+  category: FestivalCategory;
+  description: string;
+  destinationIds: string[];
 };
 
 export type MovementPoint = {

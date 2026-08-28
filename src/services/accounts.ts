@@ -11,6 +11,9 @@ type RegisterInput = {
   tripPace?: User["tripPace"];
   travelGroup?: User["travelGroup"];
   accessibilityPreference?: User["accessibilityPreference"];
+  nationality?: string;
+  passportNumber?: string;
+  termsAccepted?: boolean;
 };
 
 export function normalizeEmail(email: string) {
@@ -32,6 +35,14 @@ export function isValidEmail(email: string) {
   return labels.every((label) => label.length > 0 && !label.startsWith("-") && !label.endsWith("-")) && labels.at(-1)!.length >= 2;
 }
 
+export function normalizePassportNumber(passportNumber: string) {
+  return passportNumber.trim().toUpperCase().replace(/\s+/g, "");
+}
+
+export function isValidPassportNumber(passportNumber: string) {
+  return /^[A-Z0-9]{5,20}$/.test(normalizePassportNumber(passportNumber));
+}
+
 export function authenticateLocalUser(data: AppData, email: string, password: string) {
   const normalizedEmail = normalizeEmail(email);
   return data.users.find((candidate) => candidate.email.toLowerCase() === normalizedEmail && candidate.password === password) ?? null;
@@ -46,6 +57,8 @@ export function validateTouristAccount(data: AppData, input: RegisterInput) {
   const name = input.name.trim();
   const email = normalizeEmail(input.email);
   const password = input.password;
+  const nationality = input.nationality?.trim() ?? "";
+  const passportNumber = normalizePassportNumber(input.passportNumber ?? "");
 
   if (name.length < 2) {
     return { error: "Enter a name with at least two characters." };
@@ -59,11 +72,23 @@ export function validateTouristAccount(data: AppData, input: RegisterInput) {
     return { error: "Password must be at least 6 characters." };
   }
 
+  if (nationality.length < 2) {
+    return { error: "Enter your nationality." };
+  }
+
+  if (!isValidPassportNumber(passportNumber)) {
+    return { error: "Enter a valid passport number using 5 to 20 letters or numbers." };
+  }
+
+  if (!input.termsAccepted) {
+    return { error: "Accept the data privacy and tourist safety terms before creating an account." };
+  }
+
   if (findUserByEmail(data, email)) {
     return { error: "An account with this email already exists." };
   }
 
-  return { name, email, password };
+  return { name, email, password, nationality, passportNumber };
 }
 
 export function createTouristAccount(data: AppData, input: RegisterInput) {
@@ -84,6 +109,10 @@ export function createTouristAccount(data: AppData, input: RegisterInput) {
     tripPace: input.tripPace,
     travelGroup: input.travelGroup,
     accessibilityPreference: input.accessibilityPreference,
+    nationality: validation.nationality,
+    passportNumber: validation.passportNumber,
+    termsAcceptedAt: new Date().toISOString(),
+    privacyAcceptedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
   };
 

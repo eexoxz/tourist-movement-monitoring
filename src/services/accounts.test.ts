@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./accounts";
 
+const validRegistration = {
+  name: "New Tourist",
+  email: "newtourist@example.com",
+  password: "secret1",
+  nationality: "Malaysia",
+  passportNumber: "A12345678",
+  termsAccepted: true,
+};
+
 describe("accounts service", () => {
   it("authenticates a valid local tourist account", () => {
     const user = authenticateLocalUser(initialData, "tourist@example.com", "tourist123");
@@ -21,16 +30,19 @@ describe("accounts service", () => {
     expect(isValidEmail("newtourist@example")).toBe(false);
     expect(isValidEmail("newtourist@example..com")).toBe(false);
     expect(isValidEmail("newtourist@-example.com")).toBe(false);
-    expect(validateTouristAccount(initialData, { name: "A", email: "newtourist@example.com", password: "secret1" }).error).toContain("name");
-    expect(validateTouristAccount(initialData, { name: "New Tourist", email: "bad-email", password: "secret1" }).error).toContain("valid email");
-    expect(validateTouristAccount(initialData, { name: "New Tourist", email: "newtourist@example.com", password: "123" }).error).toContain("at least 6");
+    expect(validateTouristAccount(initialData, { ...validRegistration, name: "A" }).error).toContain("name");
+    expect(validateTouristAccount(initialData, { ...validRegistration, email: "bad-email" }).error).toContain("valid email");
+    expect(validateTouristAccount(initialData, { ...validRegistration, password: "123" }).error).toContain("at least 6");
+    expect(validateTouristAccount(initialData, { ...validRegistration, nationality: "" }).error).toContain("nationality");
+    expect(validateTouristAccount(initialData, { ...validRegistration, passportNumber: "A1" }).error).toContain("passport");
+    expect(validateTouristAccount(initialData, { ...validRegistration, termsAccepted: false }).error).toContain("privacy");
   });
 
   it("creates a tourist account with normalized email", () => {
     const result = createTouristAccount(initialData, {
-      name: "New Tourist",
+      ...validRegistration,
       email: "  NEWTOURIST@Example.com ",
-      password: "secret1",
+      passportNumber: " a123 45678 ",
       travelPreferences: ["nature", "coastal"],
       expectedProfile: "nature",
       tripPace: "relaxed",
@@ -40,6 +52,10 @@ describe("accounts service", () => {
 
     expect(result.error).toBeUndefined();
     expect(result.user?.email).toBe("newtourist@example.com");
+    expect(result.user?.nationality).toBe("Malaysia");
+    expect(result.user?.passportNumber).toBe("A12345678");
+    expect(result.user?.termsAcceptedAt).toBeTruthy();
+    expect(result.user?.privacyAcceptedAt).toBeTruthy();
     expect(result.user?.travelPreferences).toEqual(["nature", "coastal"]);
     expect(result.user?.expectedProfile).toBe("nature");
     expect(result.user?.tripPace).toBe("relaxed");
@@ -55,6 +71,9 @@ describe("accounts service", () => {
       email: "cloud@example.com",
       password: "secret1",
       authUid: "firebase-user-1",
+      nationality: "Indonesia",
+      passportNumber: "B12345678",
+      termsAccepted: true,
     });
 
     expect(result.user?.id).toBe("firebase-user-1");
@@ -67,6 +86,9 @@ describe("accounts service", () => {
       name: "Demo Tourist",
       email: "TOURIST@example.com",
       password: "secret1",
+      nationality: "Malaysia",
+      passportNumber: "A12345678",
+      termsAccepted: true,
     });
 
     expect(result.error).toContain("already exists");
