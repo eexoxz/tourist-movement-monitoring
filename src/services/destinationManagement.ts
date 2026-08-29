@@ -9,6 +9,7 @@ type DestinationInput = {
   category: DestinationCategory | string;
   latitude: number | string;
   longitude: number | string;
+  address?: string;
   description: string;
   averageVisitMinutes?: number | string;
 };
@@ -24,6 +25,7 @@ function toNumber(value: number | string) {
 export function validateDestination(input: DestinationInput) {
   const name = input.name.trim();
   const city = input.city.trim();
+  const address = input.address?.trim() ?? "";
   const description = input.description.trim();
   const latitude = toNumber(input.latitude);
   const longitude = toNumber(input.longitude);
@@ -64,6 +66,7 @@ export function validateDestination(input: DestinationInput) {
       category: input.category as DestinationCategory,
       latitude,
       longitude,
+      address: address || `${city}, Malaysia`,
       description,
       averageVisitMinutes,
     },

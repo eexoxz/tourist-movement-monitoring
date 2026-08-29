@@ -1786,11 +1786,13 @@ button:disabled {
 
 .festival-calendar {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   padding: 18px;
   border: 1px solid #e4ded1;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
+  background:
+    linear-gradient(90deg, rgba(15, 118, 110, 0.09), transparent 32%),
+    rgba(255, 255, 255, 0.94);
   box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
 }
 
@@ -1802,7 +1804,8 @@ button:disabled {
 
 .festival-list {
   display: grid;
-  gap: 10px;
+  gap: 0;
+  border-top: 1px solid #dce7e2;
 }
 
 .festival-filter {
@@ -1825,29 +1828,88 @@ button:disabled {
 
 .festival-card {
   display: grid;
-  gap: 8px;
-  padding: 14px;
-  border: 1px solid #dde4e0;
-  border-radius: 8px;
-  background: #ffffff;
+  grid-template-columns: minmax(128px, 0.22fr) minmax(0, 1fr);
+  gap: 18px;
+  padding: 16px 0;
+  border-bottom: 1px solid #dce7e2;
+  background: transparent;
 }
 
-.festival-card > div:not(.festival-destinations) {
+.festival-date-rail {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-height: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  color: #064e3b;
+  background: #ccfbf1;
+}
+
+.festival-date-rail strong {
+  color: inherit;
+  font-size: 0.94rem;
+  line-height: 1.25;
+}
+
+.festival-date-rail span {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: #334155;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.festival-card-religious .festival-date-rail {
+  color: #581c87;
+  background: #f3e8ff;
+}
+
+.festival-card-national .festival-date-rail {
+  color: #7c2d12;
+  background: #ffedd5;
+}
+
+.festival-card-heritage .festival-date-rail,
+.festival-card-royal .festival-date-rail {
+  color: #713f12;
+  background: #fef3c7;
+}
+
+.festival-card-harvest .festival-date-rail {
+  color: #14532d;
+  background: #dcfce7;
+}
+
+.festival-card-main {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  align-content: center;
+}
+
+.festival-card-heading {
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: 10px;
 }
 
-.festival-card strong {
+.festival-card h3 {
+  margin: 0;
   color: #102033;
+  font-size: 1.05rem;
   line-height: 1.25;
 }
 
-.festival-card small {
+.festival-card-heading small {
   color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.8rem;
+  font-weight: 900;
   text-align: right;
 }
 
@@ -1868,7 +1930,11 @@ button:disabled {
   line-height: 1.4;
 }
 
-.festival-badge,
+.festival-insight-row {
+  display: grid;
+  gap: 8px;
+}
+
 .festival-destinations span {
   display: inline-flex;
   align-items: center;
@@ -1881,27 +1947,6 @@ button:disabled {
   background: #ccfbf1;
   font-size: 0.76rem;
   font-weight: 900;
-}
-
-.festival-badge-national {
-  color: #7c2d12;
-  background: #ffedd5;
-}
-
-.festival-badge-religious {
-  color: #581c87;
-  background: #f3e8ff;
-}
-
-.festival-badge-heritage,
-.festival-badge-royal {
-  color: #713f12;
-  background: #fef3c7;
-}
-
-.festival-badge-harvest {
-  color: #14532d;
-  background: #dcfce7;
 }
 
 .festival-destinations {
@@ -2657,6 +2702,15 @@ textarea {
   color: #596575;
 }
 
+.auth-identity-fields {
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+.auth-identity-fields label {
+  align-content: start;
+}
+
 .field-hint {
   color: #64748b;
   font-size: 0.78rem;
@@ -3000,6 +3054,7 @@ textarea {
   }
 
   .tracking-status-card,
+  .festival-card,
   .mobile-action-row,
   .completed-trip-grid,
   .completed-trip-actions,
@@ -3073,6 +3128,11 @@ textarea {
 
   .festival-filter {
     width: 100%;
+  }
+
+  .festival-date-rail {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
   }
 
   .admin-filter-toolbar .toolbar-select,

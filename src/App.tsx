@@ -1075,7 +1075,7 @@ function AuthScreen({
           )}
 
           {mode === "register" && (
-            <div className="field-pair">
+            <div className="field-pair auth-identity-fields">
               <label>
                 Nationality
                 <select value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name" required>
@@ -2933,10 +2933,8 @@ function DestinationDetail({ destination, demand }: { destination: Destination; 
           <dd>{destination.averageVisitMinutes} minutes</dd>
         </div>
         <div>
-          <dt>Coordinates</dt>
-          <dd>
-            {destination.latitude.toFixed(4)}, {destination.longitude.toFixed(4)}
-          </dd>
+          <dt>Address / Area</dt>
+          <dd>{destination.address ?? `${destination.city}, Malaysia`}</dd>
         </div>
         {demand && (
           <>
@@ -2986,10 +2984,8 @@ function DestinationModal({
         <MovementMap points={[]} destinations={[destination]} mode="tourist" />
         <dl>
           <div>
-            <dt>Coordinates</dt>
-            <dd>
-              {destination.latitude.toFixed(4)}, {destination.longitude.toFixed(4)}
-            </dd>
+            <dt>Address / Area</dt>
+            <dd>{destination.address ?? `${destination.city}, Malaysia`}</dd>
           </div>
           <div>
             <dt>Recommendation score</dt>
@@ -3048,24 +3044,29 @@ function FestivalCalendarPanel({
           const matchedDestinations = getFestivalDestinationMatches(event, destinations).slice(0, 3);
 
           return (
-            <article className="festival-card" key={event.id}>
-              <span className={`festival-badge festival-badge-${event.category}`}>
-                <CalendarDays size={15} />
-                {formatFestivalDate(event)}
-              </span>
-              <div>
-                <strong>{event.name}</strong>
-                <small>{formatFestivalScope(event)}</small>
+            <article className={`festival-card festival-card-${event.category}`} key={event.id}>
+              <div className="festival-date-rail">
+                <CalendarDays size={17} />
+                <strong>{formatFestivalDate(event)}</strong>
+                <span>{event.category}</span>
               </div>
-              <p>{event.description}</p>
-              <small className="festival-planning-note">{getFestivalPlanningSummary(event, destinations)}</small>
-              {matchedDestinations.length > 0 && (
-                <div className="festival-destinations">
-                  {matchedDestinations.map((destination) => (
-                    <span key={destination.id}>{destination.name}</span>
-                  ))}
+              <div className="festival-card-main">
+                <div className="festival-card-heading">
+                  <h3>{event.name}</h3>
+                  <small>{formatFestivalScope(event)}</small>
                 </div>
-              )}
+                <p>{event.description}</p>
+                <div className="festival-insight-row">
+                  <small className="festival-planning-note">{getFestivalPlanningSummary(event, destinations)}</small>
+                  {matchedDestinations.length > 0 && (
+                    <div className="festival-destinations">
+                      {matchedDestinations.map((destination) => (
+                        <span key={destination.id}>{destination.name}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </article>
           );
         })}
@@ -3181,6 +3182,7 @@ function TravelPlanPanel({ plan, destinations }: { plan: TravelPlan; destination
 type DestinationFormState = {
   name: string;
   city: string;
+  address: string;
   category: DestinationCategory;
   latitude: string;
   longitude: string;
@@ -3192,6 +3194,7 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
   return {
     name: destination?.name ?? "",
     city: destination?.city ?? "",
+    address: destination?.address ?? "",
     category: destination?.category ?? "cultural",
     latitude: destination ? String(destination.latitude) : "3.1478",
     longitude: destination ? String(destination.longitude) : "101.6937",
@@ -3217,7 +3220,7 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
       const matchesCategory = categoryFilter === "all" || destination.category === categoryFilter;
       const matchesSearch =
         normalizedSearch.length === 0 ||
-        [destination.name, destination.city, destination.description, destination.category].some((value) => value.toLowerCase().includes(normalizedSearch));
+        [destination.name, destination.city, destination.address ?? "", destination.description, destination.category].some((value) => value.toLowerCase().includes(normalizedSearch));
 
       return matchesCategory && matchesSearch;
     });
@@ -3406,6 +3409,10 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
           <label>
             City
             <input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
+          </label>
+          <label>
+            Address / Area
+            <input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder="Example: Ipoh Old Town, Perak" />
           </label>
           <label>
             Category

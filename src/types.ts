@@ -68,6 +68,7 @@ export type Destination = {
   latitude: number;
   longitude: number;
   city: string;
+  address?: string;
   description: string;
   averageVisitMinutes: number;
 };
