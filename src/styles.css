@@ -1919,6 +1919,19 @@ button:disabled {
   line-height: 1.5;
 }
 
+.festival-venue {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 9px;
+  border-radius: 8px;
+  color: #0f766e;
+  background: #ecfeff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
 .festival-planning-note {
   display: block;
   padding: 8px 10px;
@@ -1958,6 +1971,13 @@ button:disabled {
 .festival-destinations span {
   color: #334155;
   background: #f1f5f9;
+}
+
+.festival-more-note {
+  margin: 0;
+  color: #596575;
+  font-size: 0.85rem;
+  font-weight: 800;
 }
 
 .movement-demand.compact {

@@ -18,7 +18,7 @@ export function getFestivalTimeframe(event: FestivalEvent) {
   };
 }
 
-export function getUpcomingFestivals(events: FestivalEvent[], fromDate = new Date(), daysAhead = 120) {
+export function getUpcomingFestivals(events: FestivalEvent[], fromDate = new Date(), daysAhead = 365) {
   const from = startOfDay(fromDate);
   const until = from + daysAhead * 24 * 60 * 60 * 1000;
 
@@ -43,7 +43,7 @@ export function formatFestivalScope(event: FestivalEvent) {
     return "Nationwide";
   }
 
-  if (event.states.length >= allMalaysianStates.length - 3) {
+  if (event.states.length >= 9) {
     const excludedStates = allMalaysianStates.filter((state) => !event.states.includes(state));
     return excludedStates.length > 0 ? `All states except ${excludedStates.join(", ")}` : "Nationwide";
   }

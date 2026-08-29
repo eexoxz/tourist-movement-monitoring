@@ -78,6 +78,7 @@ export type FestivalEvent = {
   name: string;
   date: string;
   endDate?: string;
+  venue?: string;
   scope: FestivalScope;
   states: MalaysianState[];
   category: FestivalCategory;

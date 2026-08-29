@@ -2933,7 +2933,7 @@ function DestinationDetail({ destination, demand }: { destination: Destination; 
           <dd>{destination.averageVisitMinutes} minutes</dd>
         </div>
         <div>
-          <dt>Address / Area</dt>
+          <dt>Address</dt>
           <dd>{destination.address ?? `${destination.city}, Malaysia`}</dd>
         </div>
         {demand && (
@@ -2984,7 +2984,7 @@ function DestinationModal({
         <MovementMap points={[]} destinations={[destination]} mode="tourist" />
         <dl>
           <div>
-            <dt>Address / Area</dt>
+            <dt>Address</dt>
             <dd>{destination.address ?? `${destination.city}, Malaysia`}</dd>
           </div>
           <div>
@@ -3016,7 +3016,9 @@ function FestivalCalendarPanel({
 }) {
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const filteredEvents = getFestivalsForState(events, stateFilter);
-  const visibleEvents = filteredEvents.slice(0, compact ? 4 : 8);
+  const visibleLimit = compact ? 5 : filteredEvents.length;
+  const visibleEvents = filteredEvents.slice(0, visibleLimit);
+  const hiddenEventCount = filteredEvents.length - visibleEvents.length;
 
   return (
     <section className={compact ? "festival-calendar compact" : "festival-calendar"}>
@@ -3024,7 +3026,7 @@ function FestivalCalendarPanel({
         <div>
           <h2>Malaysia Festival Calendar</h2>
           <p>
-            {visibleEvents.length} upcoming signal(s) for {stateFilter === "all" ? "Malaysia" : stateFilter} that can influence tourist flow and trip planning.
+            {filteredEvents.length} upcoming signal(s) for {stateFilter === "all" ? "Malaysia" : stateFilter} across the next 12 months.
           </p>
         </div>
         <label className="festival-filter">
@@ -3055,6 +3057,7 @@ function FestivalCalendarPanel({
                   <h3>{event.name}</h3>
                   <small>{formatFestivalScope(event)}</small>
                 </div>
+                {event.venue && <small className="festival-venue">{event.venue}</small>}
                 <p>{event.description}</p>
                 <div className="festival-insight-row">
                   <small className="festival-planning-note">{getFestivalPlanningSummary(event, destinations)}</small>
@@ -3071,6 +3074,7 @@ function FestivalCalendarPanel({
           );
         })}
       </div>
+      {hiddenEventCount > 0 && <p className="festival-more-note">{hiddenEventCount} more event signal(s) are available in the full calendar view.</p>}
       {visibleEvents.length === 0 && <EmptyState text="No festival planning signals match this state inside the current date range." />}
     </section>
   );
@@ -3411,8 +3415,8 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
             <input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
           </label>
           <label>
-            Address / Area
-            <input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder="Example: Ipoh Old Town, Perak" />
+            Address
+            <input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder="Example: Concubine Lane, Lorong Panglima, 30000 Ipoh, Perak" />
           </label>
           <label>
             Category
