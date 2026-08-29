@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { destinations } from "../data/destinations";
-import { formatFestivalDate, getFestivalDestinationMatches, getUpcomingFestivals } from "./festivals";
+import { formatFestivalDate, formatFestivalScope, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./festivals";
 
 describe("festival planning service", () => {
   it("sorts upcoming Malaysia festival signals by date", () => {
@@ -16,5 +16,14 @@ describe("festival planning service", () => {
 
     expect(formatFestivalDate(event)).toBe("1 Jun 2026 to 2 Jun 2026");
     expect(matches.map((destination) => destination.id)).toContain("sarawak-cultural-village");
+  });
+
+  it("filters festival signals by state and summarizes broad state coverage", () => {
+    const deepavali = malaysiaFestivalEvents.find((candidate) => candidate.id === "deepavali-2026")!;
+    const sarawakEvents = getFestivalsForState(malaysiaFestivalEvents, "Sarawak");
+
+    expect(sarawakEvents.map((event) => event.id)).not.toContain("deepavali-2026");
+    expect(formatFestivalScope(deepavali)).toBe("All states except Sarawak");
+    expect(getFestivalPlanningSummary(deepavali, destinations)).toContain("linked place");
   });
 });

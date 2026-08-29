@@ -1805,6 +1805,24 @@ button:disabled {
   gap: 10px;
 }
 
+.festival-filter {
+  display: grid;
+  gap: 6px;
+  min-width: 190px;
+  color: #344155;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.festival-filter select {
+  min-height: 40px;
+  padding: 8px 10px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-transform: none;
+}
+
 .festival-card {
   display: grid;
   gap: 8px;
@@ -1837,6 +1855,17 @@ button:disabled {
   margin: 0;
   color: #596575;
   line-height: 1.5;
+}
+
+.festival-planning-note {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #0f766e;
+  background: #f0fdfa;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1.4;
 }
 
 .festival-badge,
@@ -3040,6 +3069,10 @@ textarea {
   .modal-actions {
     display: grid;
     justify-items: start;
+  }
+
+  .festival-filter {
+    width: 100%;
   }
 
   .admin-filter-toolbar .toolbar-select,

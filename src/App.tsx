@@ -30,6 +30,7 @@ import type {
   DestinationDemand,
   KMeansFeatureVector,
   FestivalEvent,
+  MalaysianState,
   MovementAlert,
   MovementPoint,
   Recommendation,
@@ -74,9 +75,9 @@ import {
 } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
-import { malaysiaFestivalEvents } from "./data/festivals";
+import { allMalaysianStates, malaysiaFestivalEvents } from "./data/festivals";
 import { nationalityOptions } from "./data/nationalities";
-import { formatFestivalDate, getFestivalDestinationMatches, getUpcomingFestivals } from "./services/festivals";
+import { formatFestivalDate, formatFestivalScope, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./services/festivals";
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
@@ -138,7 +139,6 @@ const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = 
   { value: "coastal", label: "Coastal" },
 ];
 
-const malaysiaStateCount = 14;
 
 const demoRoute = [
   [3.142, 101.6894],
@@ -262,35 +262,6 @@ function formatTravelPreferenceList(preferences?: DestinationCategory[]) {
 
   const labels = new Map(preferenceOptions.map((option) => [option.value, option.label]));
   return preferences.map((preference) => labels.get(preference) ?? preference).join(", ");
-}
-
-function formatFestivalScope(event: FestivalEvent) {
-  if (event.scope === "national" || event.states.length >= malaysiaStateCount) {
-    return "Nationwide";
-  }
-
-  if (event.states.length >= malaysiaStateCount - 3) {
-    const excludedStates = [
-      "Johor",
-      "Kedah",
-      "Kelantan",
-      "Melaka",
-      "Negeri Sembilan",
-      "Pahang",
-      "Penang",
-      "Perak",
-      "Perlis",
-      "Sabah",
-      "Sarawak",
-      "Selangor",
-      "Terengganu",
-      "Federal Territories",
-    ].filter((state) => !event.states.includes(state as (typeof event.states)[number]));
-
-    return excludedStates.length > 0 ? `All states except ${excludedStates.join(", ")}` : "Nationwide";
-  }
-
-  return event.states.join(", ");
 }
 
 function mergeUserRecord(data: AppData, user: User): AppData {
@@ -3047,15 +3018,30 @@ function FestivalCalendarPanel({
   destinations: Destination[];
   compact?: boolean;
 }) {
-  const visibleEvents = events.slice(0, compact ? 4 : 8);
+  const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
+  const filteredEvents = getFestivalsForState(events, stateFilter);
+  const visibleEvents = filteredEvents.slice(0, compact ? 4 : 8);
 
   return (
     <section className={compact ? "festival-calendar compact" : "festival-calendar"}>
       <div className="section-heading">
         <div>
           <h2>Malaysia Festival Calendar</h2>
-          <p>Upcoming national and state events that can influence tourist flow and trip planning.</p>
+          <p>
+            {visibleEvents.length} upcoming signal(s) for {stateFilter === "all" ? "Malaysia" : stateFilter} that can influence tourist flow and trip planning.
+          </p>
         </div>
+        <label className="festival-filter">
+          State
+          <select value={stateFilter} onChange={(event) => setStateFilter(event.target.value as MalaysianState | "all")}>
+            <option value="all">All Malaysia</option>
+            {allMalaysianStates.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       <div className="festival-list">
         {visibleEvents.map((event) => {
@@ -3072,6 +3058,7 @@ function FestivalCalendarPanel({
                 <small>{formatFestivalScope(event)}</small>
               </div>
               <p>{event.description}</p>
+              <small className="festival-planning-note">{getFestivalPlanningSummary(event, destinations)}</small>
               {matchedDestinations.length > 0 && (
                 <div className="festival-destinations">
                   {matchedDestinations.map((destination) => (
@@ -3083,7 +3070,7 @@ function FestivalCalendarPanel({
           );
         })}
       </div>
-      {visibleEvents.length === 0 && <EmptyState text="No festival planning signals are inside the current date range." />}
+      {visibleEvents.length === 0 && <EmptyState text="No festival planning signals match this state inside the current date range." />}
     </section>
   );
 }
