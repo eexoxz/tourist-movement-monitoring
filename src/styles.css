@@ -1911,6 +1911,7 @@ button:disabled {
   font-size: 0.8rem;
   font-weight: 900;
   text-align: right;
+  white-space: nowrap;
 }
 
 .festival-card p {
@@ -1930,6 +1931,29 @@ button:disabled {
   font-size: 0.78rem;
   font-weight: 900;
   line-height: 1.35;
+}
+
+.festival-state-details {
+  width: fit-content;
+  max-width: 100%;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.festival-state-details summary {
+  cursor: pointer;
+  color: #0f766e;
+  font-weight: 900;
+}
+
+.festival-state-details div {
+  margin-top: 7px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #334155;
+  background: #f8fafc;
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 .festival-planning-note {
@@ -1973,11 +1997,22 @@ button:disabled {
   background: #f1f5f9;
 }
 
-.festival-more-note {
-  margin: 0;
-  color: #596575;
-  font-size: 0.85rem;
-  font-weight: 800;
+.festival-more-button {
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #99f6e4;
+  border-radius: 8px;
+  color: #0f766e;
+  background: #f0fdfa;
+  font-size: 0.86rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.festival-more-button:hover {
+  border-color: #5eead4;
+  background: #ccfbf1;
 }
 
 .movement-demand.compact {

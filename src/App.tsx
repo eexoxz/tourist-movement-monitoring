@@ -77,7 +77,7 @@ import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEm
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import { allMalaysianStates, malaysiaFestivalEvents } from "./data/festivals";
 import { nationalityOptions } from "./data/nationalities";
-import { formatFestivalDate, formatFestivalScope, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./services/festivals";
+import { formatFestivalCardScope, formatFestivalDate, formatFestivalScope, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./services/festivals";
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
@@ -3015,8 +3015,9 @@ function FestivalCalendarPanel({
   compact?: boolean;
 }) {
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
+  const [showFullCalendar, setShowFullCalendar] = useState(!compact);
   const filteredEvents = getFestivalsForState(events, stateFilter);
-  const visibleLimit = compact ? 5 : filteredEvents.length;
+  const visibleLimit = compact && !showFullCalendar ? 5 : filteredEvents.length;
   const visibleEvents = filteredEvents.slice(0, visibleLimit);
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
 
@@ -3055,10 +3056,16 @@ function FestivalCalendarPanel({
               <div className="festival-card-main">
                 <div className="festival-card-heading">
                   <h3>{event.name}</h3>
-                  <small>{formatFestivalScope(event)}</small>
+                  <small>{formatFestivalCardScope(event)}</small>
                 </div>
                 {event.venue && <small className="festival-venue">{event.venue}</small>}
                 <p>{event.description}</p>
+                <details className="festival-state-details">
+                  <summary>View involved states</summary>
+                  <div>
+                    <span>{formatFestivalScope(event)}</span>
+                  </div>
+                </details>
                 <div className="festival-insight-row">
                   <small className="festival-planning-note">{getFestivalPlanningSummary(event, destinations)}</small>
                   {matchedDestinations.length > 0 && (
@@ -3074,7 +3081,11 @@ function FestivalCalendarPanel({
           );
         })}
       </div>
-      {hiddenEventCount > 0 && <p className="festival-more-note">{hiddenEventCount} more event signal(s) are available in the full calendar view.</p>}
+      {hiddenEventCount > 0 && (
+        <button className="festival-more-button" type="button" onClick={() => setShowFullCalendar(true)}>
+          Show full 12-month calendar ({hiddenEventCount} more)
+        </button>
+      )}
       {visibleEvents.length === 0 && <EmptyState text="No festival planning signals match this state inside the current date range." />}
     </section>
   );

@@ -51,6 +51,18 @@ export function formatFestivalScope(event: FestivalEvent) {
   return event.states.join(", ");
 }
 
+export function formatFestivalCardScope(event: FestivalEvent) {
+  if (event.scope === "national" || event.states.length >= allMalaysianStates.length) {
+    return "Nationwide";
+  }
+
+  if (event.states.length === 1) {
+    return event.states[0];
+  }
+
+  return event.states.length >= 9 ? "Most states" : "Selected states";
+}
+
 export function formatFestivalDate(event: FestivalEvent) {
   const start = dateFormatter.format(new Date(`${event.date}T00:00:00`));
   if (!event.endDate || event.endDate === event.date) {
