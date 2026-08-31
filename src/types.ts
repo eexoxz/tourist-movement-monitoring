@@ -79,6 +79,7 @@ export type FestivalEvent = {
   date: string;
   endDate?: string;
   venue?: string;
+  recursAnnually?: boolean;
   scope: FestivalScope;
   states: MalaysianState[];
   category: FestivalCategory;

@@ -1768,7 +1768,7 @@ function TouristWorkspace({
               <strong>{upcomingFestivals.length} event signals</strong>
             </div>
             <p>
-              Use these public holidays and real tourism events as context for where tourist movement may increase, then compare them with live destination demand.
+              Use these public holidays and tourism events as context for where tourist movement may increase. Past one-time events are hidden automatically, and annual dates roll forward from the day you open the app.
             </p>
           </section>
           <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} />

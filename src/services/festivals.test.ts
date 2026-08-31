@@ -45,4 +45,17 @@ describe("festival planning service", () => {
     expect(formatFestivalStateSummaryLabel(keretapiSarong)).toBe("Exclusive to selected states");
     expect(formatFestivalStateSummaryLabel(sarawakDay)).toBe("Exclusive to Sarawak");
   });
+
+  it("keeps the calendar rolling from the current open date", () => {
+    const events = getUpcomingFestivals(malaysiaFestivalEvents, new Date("2026-11-15T08:00:00"), 365);
+    const eventIds = events.map((event) => event.id);
+    const generatedMerdeka = events.find((event) => event.id === "merdeka-2027");
+
+    expect(eventIds).not.toContain("skccm-kuching-2026");
+    expect(eventIds).toContain("christmas-2026");
+    expect(eventIds).toContain("merdeka-2027");
+    expect(eventIds).toContain("malaysia-day-2027");
+    expect(eventIds).toContain("deepavali-2027");
+    expect(generatedMerdeka?.date).toBe("2027-08-31");
+  });
 });

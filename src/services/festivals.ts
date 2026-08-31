@@ -11,6 +11,63 @@ function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
+function parseDateParts(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  return { year, month, day };
+}
+
+function formatDateForCalendar(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getEventDurationDays(event: FestivalEvent) {
+  if (!event.endDate || event.endDate === event.date) {
+    return 0;
+  }
+
+  return Math.round((startOfDay(new Date(`${event.endDate}T00:00:00`)) - startOfDay(new Date(`${event.date}T00:00:00`))) / (24 * 60 * 60 * 1000));
+}
+
+function moveRecurringEventToYear(event: FestivalEvent, year: number): FestivalEvent {
+  const { month, day } = parseDateParts(event.date);
+  const startDate = new Date(year, month - 1, day);
+  const durationDays = getEventDurationDays(event);
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + durationDays);
+  const baseId = event.id.replace(/-\d{4}$/, "");
+
+  return {
+    ...event,
+    id: `${baseId}-${year}`,
+    date: formatDateForCalendar(startDate),
+    endDate: event.endDate ? formatDateForCalendar(endDate) : undefined,
+  };
+}
+
+function expandRollingEvents(events: FestivalEvent[], fromDate: Date, daysAhead: number) {
+  const fromYear = fromDate.getFullYear();
+  const until = new Date(startOfDay(fromDate) + daysAhead * 24 * 60 * 60 * 1000);
+  const untilYear = until.getFullYear();
+  const expandedEvents = new Map<string, FestivalEvent>();
+
+  events.forEach((event) => {
+    if (!event.recursAnnually) {
+      expandedEvents.set(event.id, event);
+      return;
+    }
+
+    for (let year = fromYear; year <= untilYear; year += 1) {
+      const recurringEvent = moveRecurringEventToYear(event, year);
+      expandedEvents.set(recurringEvent.id, recurringEvent);
+    }
+  });
+
+  return Array.from(expandedEvents.values());
+}
+
 export function getFestivalTimeframe(event: FestivalEvent) {
   return {
     start: startOfDay(new Date(`${event.date}T00:00:00`)),
@@ -22,7 +79,7 @@ export function getUpcomingFestivals(events: FestivalEvent[], fromDate = new Dat
   const from = startOfDay(fromDate);
   const until = from + daysAhead * 24 * 60 * 60 * 1000;
 
-  return events
+  return expandRollingEvents(events, fromDate, daysAhead)
     .filter((event) => {
       const { start, end } = getFestivalTimeframe(event);
       return end >= from && start <= until;
