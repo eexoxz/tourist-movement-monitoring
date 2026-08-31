@@ -34,6 +34,7 @@ import type {
   MovementAlert,
   MovementPoint,
   Recommendation,
+  TouristProfile,
   TravelPlan,
   TravelPlanOptions,
   TripSummary,
@@ -51,7 +52,7 @@ import {
   type AuthMode,
 } from "./services/access";
 import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
-import { formatDateTime, nearestDestination } from "./services/geo";
+import { distanceKm, formatDateTime, nearestDestination } from "./services/geo";
 import {
   buildMovementAlertsCsv,
   buildTravelPlanCsv,
@@ -110,6 +111,7 @@ type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 type AdminDashboardTab = "overview" | "records" | "ai";
 type AuthResult = { error?: string; message?: string };
+type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
 type TouristRegistrationDraft = {
   name: string;
   email: string;
@@ -129,6 +131,13 @@ type NotifyFn = (notification: Omit<AppNotification, "id">) => void;
 type RememberedLogin = { email: string; password: string };
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
+const placeDiscoveryModes: Array<{ value: PlaceDiscoveryMode; label: string }> = [
+  { value: "recommended", label: "Best match" },
+  { value: "trending", label: "Trending" },
+  { value: "nearby", label: "Near me" },
+  { value: "events", label: "Event-linked" },
+  { value: "hidden", label: "Quieter picks" },
+];
 const demoCredentialEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
 const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = [
   { value: "cultural", label: "Culture" },
@@ -262,6 +271,34 @@ function formatTravelPreferenceList(preferences?: DestinationCategory[]) {
 
   const labels = new Map(preferenceOptions.map((option) => [option.value, option.label]));
   return preferences.map((preference) => labels.get(preference) ?? preference).join(", ");
+}
+
+function getCategoryLabel(category: DestinationCategory) {
+  return preferenceOptions.find((option) => option.value === category)?.label ?? category;
+}
+
+function formatDistance(distance?: number) {
+  if (distance === undefined) {
+    return "Location not active";
+  }
+
+  return distance < 1 ? `${Math.round(distance * 1000)} m away` : `${distance.toFixed(1)} km away`;
+}
+
+function categoryFitsProfile(category: DestinationCategory, profile?: TouristProfile) {
+  if (!profile || profile === "mixed") {
+    return true;
+  }
+
+  if (profile === "cultural") {
+    return category === "cultural" || category === "heritage";
+  }
+
+  if (profile === "nature") {
+    return category === "nature" || category === "coastal";
+  }
+
+  return category === "urban" || category === "food";
 }
 
 function mergeUserRecord(data: AppData, user: User): AppData {
@@ -1187,7 +1224,6 @@ function TouristWorkspace({
   const [locationRetryAvailable, setLocationRetryAvailable] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
-  const [selectedRecommendationId, setSelectedRecommendationId] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
   const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
@@ -1216,7 +1252,6 @@ function TouristWorkspace({
   const recentTrip = recentTrips[0];
   const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
-  const selectedRecommendation = recommendations.find((recommendation) => recommendation.id === selectedRecommendationId) ?? null;
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
@@ -1692,11 +1727,9 @@ function TouristWorkspace({
   }
 
   if (view === "recommendations") {
-    const topRecommendations = recommendations.slice(0, 3);
-
     return (
       <Page
-        title="Places To Visit"
+        title="Explore Places"
         eyebrow="Tourist"
         actions={
           <button className="secondary-action" onClick={refreshRecommendations}>
@@ -1705,51 +1738,19 @@ function TouristWorkspace({
           </button>
         }
       >
-        <section className="recommendation-page">
-          <section className="recommendation-profile-card">
-            <div>
-              <span>Latest travel category</span>
-              <strong>{latestAnalysis ? `${latestAnalysis.profile} Tourist` : "Not enough movement data yet"}</strong>
-            </div>
-            <div>
-              <span>Cluster</span>
-              <strong>{latestAnalysis ? `Cluster ${latestAnalysis.cluster}` : "Pending"}</strong>
-            </div>
-            <p>
-              {latestAnalysis
-                ? `Your recent route pattern is closest to ${latestAnalysis.clusterLabel}. Recommendations prioritise matching places you have not visited.`
-                : "Complete a trip with at least two movement points to unlock personalised recommendations. Basic suggestions may still appear from your preferences and nearby movement demand."}
-            </p>
-          </section>
-
-          {!hasPersonalizedRecommendations && (
-            <section className="recommendation-mode-notice">
-              <strong>Basic suggestion mode</strong>
-              <p>AI personalisation is locked until your movement history has enough usable points. These suggestions are safe to browse, but they are not final Tourist Category results.</p>
-            </section>
-          )}
-
-          <RecommendationList
-            recommendations={topRecommendations}
-            destinations={data.destinations}
-            demand={destinationDemand}
-            personalized={hasPersonalizedRecommendations}
-            onSelect={setSelectedRecommendationId}
-          />
-
-          <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
-
-          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact onOpenCalendar={() => onViewChange("events")} />
-        </section>
-
-        {selectedRecommendation && (
-          <DestinationModal
-            recommendation={selectedRecommendation}
-            destination={data.destinations.find((destination) => destination.id === selectedRecommendation.destinationId) ?? null}
-            demand={destinationDemand.find((row) => row.destinationId === selectedRecommendation.destinationId)}
-            onClose={() => setSelectedRecommendationId(null)}
-          />
-        )}
+        <PlaceDiscovery
+          destinations={data.destinations}
+          demand={destinationDemand}
+          festivals={upcomingFestivals}
+          recommendations={recommendations}
+          user={user}
+          latestAnalysis={latestAnalysis}
+          visitedIds={visitedDestinationIds}
+          referencePoint={activePoints.at(-1) ?? tripPoints.at(-1)}
+          selectedDestinationId={selectedDestinationId}
+          onSelectDestination={setSelectedDestinationId}
+          onOpenEvents={() => onViewChange("events")}
+        />
       </Page>
     );
   }
@@ -3535,6 +3536,311 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
       )}
     </>
   );
+}
+
+function PlaceDiscovery({
+  destinations,
+  demand,
+  festivals,
+  recommendations,
+  user,
+  latestAnalysis,
+  visitedIds,
+  referencePoint,
+  selectedDestinationId,
+  onSelectDestination,
+  onOpenEvents,
+}: {
+  destinations: Destination[];
+  demand: DestinationDemand[];
+  festivals: FestivalEvent[];
+  recommendations: Recommendation[];
+  user: User;
+  latestAnalysis: AnalysisResult | undefined;
+  visitedIds: Set<string>;
+  referencePoint?: MovementPoint;
+  selectedDestinationId?: string;
+  onSelectDestination: (id: string) => void;
+  onOpenEvents: () => void;
+}) {
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
+  const [cityFilter, setCityFilter] = useState("all");
+  const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
+  const cityOptions = useMemo(() => Array.from(new Set(destinations.map((destination) => destination.city))).sort(), [destinations]);
+  const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
+  const recommendationByDestinationId = useMemo(() => new Map(recommendations.map((recommendation) => [recommendation.destinationId, recommendation])), [recommendations]);
+  const demandByDestinationId = useMemo(() => new Map(demand.map((row) => [row.destinationId, row])), [demand]);
+  const normalizedSearch = search.trim().toLowerCase();
+
+  const rows = useMemo(() => {
+    return destinations
+      .map((destination) => {
+        const recommendation = recommendationByDestinationId.get(destination.id);
+        const demandRow = demandByDestinationId.get(destination.id);
+        const visited = visitedIds.has(destination.id);
+        const preferenceMatch = user.travelPreferences?.includes(destination.category) || categoryFitsProfile(destination.category, latestAnalysis?.profile ?? user.expectedProfile);
+        const festivalBoosted = festivalDestinationIds.has(destination.id);
+        const distance = referencePoint ? distanceKm(referencePoint, destination) : undefined;
+        const demandScore = demandRow?.popularityScore ?? 0;
+        const recommendationScore = recommendation?.score ?? 42;
+        const score = Math.round(Math.min(100, recommendationScore * 0.45 + demandScore * 0.32 + (preferenceMatch ? 14 : 0) + (festivalBoosted ? 10 : 0) + (visited ? 0 : 8)));
+        const insight = getPlaceDiscoveryInsight({ recommendation, demandRow, festivalBoosted, preferenceMatch, visited });
+
+        return {
+          destination,
+          recommendation,
+          demandRow,
+          visited,
+          preferenceMatch,
+          festivalBoosted,
+          distance,
+          score,
+          insight,
+        };
+      })
+      .filter((row) => {
+        if (categoryFilter !== "all" && row.destination.category !== categoryFilter) {
+          return false;
+        }
+
+        if (cityFilter !== "all" && row.destination.city !== cityFilter) {
+          return false;
+        }
+
+        if (mode === "events" && !row.festivalBoosted) {
+          return false;
+        }
+
+        if (mode === "hidden" && (row.demandRow?.tier === "high" || row.visited)) {
+          return false;
+        }
+
+        if (!normalizedSearch) {
+          return true;
+        }
+
+        return [row.destination.name, row.destination.city, row.destination.category, row.destination.address ?? "", row.destination.description].some((value) =>
+          value.toLowerCase().includes(normalizedSearch)
+        );
+      })
+      .sort((a, b) => {
+        if (mode === "trending") {
+          return (b.demandRow?.popularityScore ?? 0) - (a.demandRow?.popularityScore ?? 0) || b.score - a.score;
+        }
+
+        if (mode === "nearby") {
+          return (a.distance ?? Number.POSITIVE_INFINITY) - (b.distance ?? Number.POSITIVE_INFINITY) || b.score - a.score;
+        }
+
+        if (mode === "events") {
+          return Number(b.festivalBoosted) - Number(a.festivalBoosted) || b.score - a.score;
+        }
+
+        if (mode === "hidden") {
+          return (a.demandRow?.popularityScore ?? 0) - (b.demandRow?.popularityScore ?? 0) || b.score - a.score;
+        }
+
+        return b.score - a.score;
+      });
+  }, [
+    categoryFilter,
+    cityFilter,
+    demandByDestinationId,
+    destinations,
+    festivalDestinationIds,
+    latestAnalysis?.profile,
+    mode,
+    normalizedSearch,
+    recommendationByDestinationId,
+    referencePoint,
+    user.expectedProfile,
+    user.travelPreferences,
+    visitedIds,
+  ]);
+
+  const selectedRow = rows.find((row) => row.destination.id === selectedDestinationId) ?? rows[0];
+  const personalized = Boolean(latestAnalysis);
+
+  return (
+    <section className="places-page">
+      <section className="places-hero">
+        <div>
+          <span>{latestAnalysis ? `${latestAnalysis.profile} traveller` : "Discovery mode"}</span>
+          <h2>Find places that match your trip right now.</h2>
+          <p>Browse destinations using movement demand, your travel style, event timing and your latest route instead of only static ratings.</p>
+        </div>
+        <div className="places-hero-stats">
+          <span>
+            <strong>{rows.length}</strong>
+            places shown
+          </span>
+          <span>
+            <strong>{demand.filter((row) => row.popularityScore > 0).length}</strong>
+            with demand
+          </span>
+          <span>
+            <strong>{festivals.length}</strong>
+            event signals
+          </span>
+        </div>
+      </section>
+
+      {!personalized && (
+        <section className="recommendation-mode-notice">
+          <strong>Basic suggestion mode</strong>
+          <p>Complete a tracked trip to unlock AI personalisation. Until then, Places still uses demand, profile preferences and event signals for browsing.</p>
+        </section>
+      )}
+
+      <section className="places-controls" aria-label="Place discovery filters">
+        <label>
+          Search places
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by place, state, address or interest" />
+        </label>
+        <label>
+          Category
+          <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value as DestinationCategory | "all")}>
+            <option value="all">All categories</option>
+            {destinationCategories.map((category) => (
+              <option key={category} value={category}>
+                {getCategoryLabel(category)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Area
+          <select value={cityFilter} onChange={(event) => setCityFilter(event.target.value)}>
+            <option value="all">All Malaysia</option>
+            {cityOptions.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </label>
+      </section>
+
+      <div className="places-mode-row" aria-label="Place discovery mode">
+        {placeDiscoveryModes.map((option) => (
+          <button key={option.value} className={mode === option.value ? "active" : ""} type="button" onClick={() => setMode(option.value)}>
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <section className="places-discovery-layout">
+        <div className="places-results">
+          {rows.map((row) => (
+            <button
+              className={selectedRow?.destination.id === row.destination.id ? "place-discovery-card active" : "place-discovery-card"}
+              type="button"
+              key={row.destination.id}
+              onClick={() => onSelectDestination(row.destination.id)}
+            >
+              <div className="place-card-heading">
+                <div>
+                  <span>{getCategoryLabel(row.destination.category)}</span>
+                  <strong>{row.destination.name}</strong>
+                </div>
+                <small>{row.score}% fit</small>
+              </div>
+              <p>{row.insight}</p>
+              <div className="place-card-meta">
+                <span>{row.destination.city}</span>
+                <span>{row.demandRow ? `${row.demandRow.tier} demand` : "quiet signal"}</span>
+                <span>{formatDistance(row.distance)}</span>
+                {row.festivalBoosted && <span>event-linked</span>}
+                {row.visited ? <span>visited</span> : <span>new to you</span>}
+              </div>
+            </button>
+          ))}
+          {rows.length === 0 && <EmptyState text="No places match these filters yet. Try another category, area or discovery mode." />}
+        </div>
+
+        {selectedRow && (
+          <aside className="place-detail-card">
+            <span>{getCategoryLabel(selectedRow.destination.category)}</span>
+            <h2>{selectedRow.destination.name}</h2>
+            <p>{selectedRow.destination.description}</p>
+            <dl>
+              <div>
+                <dt>Address</dt>
+                <dd>{selectedRow.destination.address ?? `${selectedRow.destination.city}, Malaysia`}</dd>
+              </div>
+              <div>
+                <dt>Demand</dt>
+                <dd>{selectedRow.demandRow ? `${selectedRow.demandRow.tier} (${selectedRow.demandRow.popularityScore}%)` : "No demand signal yet"}</dd>
+              </div>
+              <div>
+                <dt>Trip fit</dt>
+                <dd>{selectedRow.preferenceMatch ? "Matches your profile" : "Different from your usual style"}</dd>
+              </div>
+              <div>
+                <dt>Event relevance</dt>
+                <dd>{selectedRow.festivalBoosted ? "Linked to upcoming calendar signals" : "No current event link"}</dd>
+              </div>
+              <div>
+                <dt>Distance</dt>
+                <dd>{formatDistance(selectedRow.distance)}</dd>
+              </div>
+              <div>
+                <dt>Average visit</dt>
+                <dd>{selectedRow.destination.averageVisitMinutes} minutes</dd>
+              </div>
+            </dl>
+            <div className="place-detail-actions">
+              <button className="secondary-action" type="button" onClick={onOpenEvents}>
+                <CalendarDays size={18} />
+                Check events
+              </button>
+            </div>
+          </aside>
+        )}
+      </section>
+    </section>
+  );
+}
+
+function getPlaceDiscoveryInsight({
+  recommendation,
+  demandRow,
+  festivalBoosted,
+  preferenceMatch,
+  visited,
+}: {
+  recommendation?: Recommendation;
+  demandRow?: DestinationDemand;
+  festivalBoosted: boolean;
+  preferenceMatch: boolean;
+  visited: boolean;
+}) {
+  if (recommendation) {
+    return recommendation.reason;
+  }
+
+  if (festivalBoosted && demandRow && demandRow.popularityScore > 0) {
+    return "Upcoming event signals and current tourist movement both point toward this area.";
+  }
+
+  if (festivalBoosted) {
+    return "Upcoming calendar events may bring more visitors to this place or nearby routes.";
+  }
+
+  if (demandRow && demandRow.tier !== "low") {
+    return "Tourist movement is already forming around this destination, so it is useful for route planning.";
+  }
+
+  if (preferenceMatch && !visited) {
+    return "This matches your travel style and gives you a new place to explore.";
+  }
+
+  if (visited) {
+    return "You have visited this before, so it is better for revisits or comparing with nearby alternatives.";
+  }
+
+  return "A quieter option that can help balance the trip if busy places feel too crowded.";
 }
 
 function RecommendationList({
