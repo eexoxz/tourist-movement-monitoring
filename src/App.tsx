@@ -37,6 +37,7 @@ import type {
   TouristProfile,
   TravelPlan,
   TravelPlanOptions,
+  TripSession,
   TripSummary,
   User,
   UserRole,
@@ -248,6 +249,48 @@ function getProfileSkipKey(userId: string) {
 function getDisplayName(user: User) {
   const name = user.name.trim();
   return name && name !== user.email && !name.includes("@") ? name : "";
+}
+
+function formatTouristProfileLabel(profile?: TouristProfile) {
+  return profile ? `${profile.charAt(0).toUpperCase()}${profile.slice(1)} tourist` : "Learning";
+}
+
+function formatTripTitle(trip: TripSession, destinationNames: string[], analysis: AnalysisResult | null) {
+  const routeLabel = destinationNames.slice(0, 2).join(" to ");
+  const profileLabel = analysis ? `${analysis.profile.charAt(0).toUpperCase()}${analysis.profile.slice(1)} route` : "Malaysia route";
+
+  if (routeLabel) {
+    return `${routeLabel} ${profileLabel}`;
+  }
+
+  return trip.status === "active" ? "Active Malaysia route" : "Malaysia trip route";
+}
+
+function getTripDiaryInsight(summary: TripSummary, analysis: AnalysisResult | null, destinationNames: string[]) {
+  if (summary.pointCount < 2) {
+    return "This trip needs at least two movement points before distance, route pattern and recommendation learning can be calculated.";
+  }
+
+  if (!analysis) {
+    return "This route has enough movement data. Refresh recommendations to let the decision tree and clustering model classify the trip.";
+  }
+
+  const visitedText =
+    destinationNames.length > 0
+      ? `It recognised movement near ${destinationNames.slice(0, 3).join(", ")}.`
+      : "It did not match a saved destination closely yet.";
+
+  return `${visitedText} The app classified this as a ${formatTouristProfileLabel(analysis.profile).toLowerCase()} pattern with ${Math.round(
+    analysis.classificationConfidence * 100
+  )}% confidence.`;
+}
+
+function getTripHealthLabel(summary: TripSummary, analysis: AnalysisResult | null) {
+  if (summary.pointCount < 2) {
+    return "Needs more movement";
+  }
+
+  return analysis ? "Analysis ready" : "Ready to analyse";
 }
 
 function inferExpectedProfileFromPreferences(preferences: DestinationCategory[]): NonNullable<User["expectedProfile"]> {
@@ -1636,92 +1679,170 @@ function TouristWorkspace({
   }
 
   if (view === "history") {
+    const completedTripCount = userTrips.filter((trip) => trip.status === "completed").length;
+    const totalDistanceKm = Number(tripSummaries.reduce((sum, summary) => sum + summary.distanceKm, 0).toFixed(1));
+    const totalRecognizedStops = tripSummaries.reduce((sum, summary) => sum + summary.visitedDestinationCount, 0);
+    const selectedTripTitle = selectedTrip ? formatTripTitle(selectedTrip, selectedTripDestinationNames, selectedTripAnalysis) : "No trip selected";
+    const selectedTripInsight = selectedTripSummary ? getTripDiaryInsight(selectedTripSummary, selectedTripAnalysis, selectedTripDestinationNames) : "";
+    const selectedTripHealth = selectedTripSummary ? getTripHealthLabel(selectedTripSummary, selectedTripAnalysis) : "Waiting for trip";
+
     return (
-      <Page title="My Trips" eyebrow="Tourist">
-        <div className="two-column">
-          <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} mode="tourist" />
-          <section className="trip-history-panel">
-            {selectedTripSummary && <TripSummaryPanel summary={selectedTripSummary} />}
-            {selectedTrip && selectedTripSummary && (
-              <aside className="trip-detail-panel">
-                <span>Selected Trip</span>
-                <h2>{formatDateTime(selectedTrip.startedAt)}</h2>
-                <dl>
-                  <div>
-                    <dt>Status</dt>
-                    <dd>{selectedTrip.status === "completed" ? "Completed" : "Active"}</dd>
-                  </div>
-                  <div>
-                    <dt>Started</dt>
-                    <dd>{formatDateTime(selectedTrip.startedAt)}</dd>
-                  </div>
-                  <div>
-                    <dt>Ended</dt>
-                    <dd>{selectedTrip.endedAt ? formatDateTime(selectedTrip.endedAt) : "Trip still active"}</dd>
-                  </div>
-                  <div>
-                    <dt>Recognised stops</dt>
-                    <dd>{selectedTripDestinationNames.length > 0 ? selectedTripDestinationNames.join(", ") : "No nearby saved destination recognised yet"}</dd>
-                  </div>
-                  <div>
-                    <dt>Analysis status</dt>
-                    <dd>
-                      {selectedTripAnalysis
-                        ? "Complete"
-                        : selectedTripSummary.pointCount >= 2
-                          ? "Ready to refresh"
-                          : "Needs at least 2 movement points"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Tourist category</dt>
-                    <dd>{selectedTripAnalysis ? `${selectedTripAnalysis.profile} Tourist` : "Pending"}</dd>
-                  </div>
-                  <div>
-                    <dt>Cluster ID</dt>
-                    <dd>{selectedTripAnalysis ? `Cluster ${selectedTripAnalysis.cluster + 1}` : "Pending"}</dd>
-                  </div>
-                </dl>
+      <Page title="Trip Diary" eyebrow="Tourist">
+        <section className="trip-diary-page">
+          <section className="trip-diary-hero">
+            <div>
+              <span>Route history</span>
+              <h2>See what each trip taught the app.</h2>
+              <p>Your saved movement becomes a simple route story, recognised stops and recommendation learning instead of raw tracking records.</p>
+            </div>
+            <div className="trip-diary-stats" aria-label="Trip diary totals">
+              <span>
+                <strong>{completedTripCount}</strong>
+                Completed
+              </span>
+              <span>
+                <strong>{totalDistanceKm}</strong>
+                km recorded
+              </span>
+              <span>
+                <strong>{totalRecognizedStops}</strong>
+                Stops found
+              </span>
+            </div>
+          </section>
 
-                <div className="trip-detail-recommendations">
-                  <strong>{hasPersonalizedRecommendations ? "Current generated recommendations" : "Basic suggestions"}</strong>
-                  {selectedTripRecommendations.length > 0 ? (
-                    selectedTripRecommendations.map((recommendation) => {
-                      const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
+          <section className="trip-diary-layout">
+            <div className="trip-diary-main">
+              <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} mode="tourist" />
 
-                      return destination ? (
-                        <span key={recommendation.id}>
-                          {destination.name} <small>{destination.city}</small>
-                        </span>
-                      ) : null;
-                    })
-                  ) : (
-                    <p>Complete a trip with enough movement data to generate recommendations.</p>
-                  )}
-                </div>
-              </aside>
-            )}
-            <section className="list-panel">
-              {recentTrips.map((trip) => {
-                const points = data.points.filter((point) => point.tripId === trip.id);
-                const summary = tripSummaries.find((row) => row.tripId === trip.id);
-                return (
-                  <button className={selectedTrip?.id === trip.id ? "record-card selectable active" : "record-card selectable"} key={trip.id} onClick={() => setSelectedTripId(trip.id)}>
+              {selectedTrip && selectedTripSummary ? (
+                <section className="trip-story-panel">
+                  <div className="section-heading">
                     <div>
-                      <strong>{formatDateTime(trip.startedAt)}</strong>
-                      <span>{trip.status === "completed" ? "Completed" : "Active"}</span>
+                      <span>Selected route</span>
+                      <h2>{selectedTripTitle}</h2>
+                      <p>{formatDateTime(selectedTrip.startedAt)}</p>
                     </div>
+                    <strong className="trip-status-badge">{selectedTrip.status === "completed" ? "Completed" : "Active"}</strong>
+                  </div>
+
+                  <div className="trip-story-metrics">
+                    <span>
+                      <strong>{selectedTripSummary.distanceKm}</strong>
+                      km
+                    </span>
+                    <span>
+                      <strong>{selectedTripSummary.durationMinutes}</strong>
+                      min
+                    </span>
+                    <span>
+                      <strong>{selectedTripSummary.pointCount}</strong>
+                      points
+                    </span>
+                    <span>
+                      <strong>{selectedTripSummary.visitedDestinationCount}</strong>
+                      stops
+                    </span>
+                    <span>
+                      <strong>{selectedTripHealth}</strong>
+                      status
+                    </span>
+                  </div>
+
+                  <p className="trip-insight">{selectedTripInsight}</p>
+
+                  <div className="trip-stop-strip" aria-label="Recognised trip stops">
+                    {selectedTripDestinationNames.length > 0 ? (
+                      selectedTripDestinationNames.map((name) => <span key={name}>{name}</span>)
+                    ) : (
+                      <small>No saved destination was close enough to this route yet.</small>
+                    )}
+                  </div>
+
+                  <section className="trip-learning-panel">
+                    <div>
+                      <span>Tourist pattern</span>
+                      <strong>{formatTouristProfileLabel(selectedTripAnalysis?.profile)}</strong>
+                    </div>
+                    <div>
+                      <span>AI method</span>
+                      <strong>{selectedTripAnalysis ? "Decision tree + clustering" : "Waiting for analysis"}</strong>
+                    </div>
+                    <div>
+                      <span>Confidence</span>
+                      <strong>{selectedTripAnalysis ? `${Math.round(selectedTripAnalysis.classificationConfidence * 100)}%` : "Pending"}</strong>
+                    </div>
+                    <div>
+                      <span>Movement group</span>
+                      <strong>{selectedTripAnalysis?.clusterLabel ?? "Pending"}</strong>
+                    </div>
+                  </section>
+
+                  {selectedTripAnalysis && (
+                    <div className="trip-decision-path">
+                      <strong>Why it decided this</strong>
+                      {selectedTripAnalysis.decisionPath.slice(0, 3).map((step) => (
+                        <span key={step}>{step}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="trip-detail-recommendations">
+                    <strong>{hasPersonalizedRecommendations ? "Places suggested after this learning" : "Places to try next"}</strong>
+                    {selectedTripRecommendations.length > 0 ? (
+                      selectedTripRecommendations.map((recommendation) => {
+                        const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
+
+                        return destination ? (
+                          <button className="trip-recommendation-link" type="button" key={recommendation.id} onClick={() => onViewChange("recommendations")}>
+                            <span>
+                              {destination.name} <small>{destination.city}</small>
+                            </span>
+                          </button>
+                        ) : null;
+                      })
+                    ) : (
+                      <p>Complete a trip with enough movement data to generate recommendations.</p>
+                    )}
+                  </div>
+                </section>
+              ) : (
+                <section className="trip-story-panel">
+                  <EmptyState text="Your saved trips will appear here after you start tracking." />
+                </section>
+              )}
+            </div>
+
+            <aside className="trip-timeline-panel">
+              <div className="section-heading">
+                <div>
+                  <span>Saved trips</span>
+                  <h2>Pick a route</h2>
+                  <p>Select a trip to inspect its map, stops and recommendation learning.</p>
+                </div>
+              </div>
+
+              {recentTrips.map((trip) => {
+                const summary = tripSummaries.find((row) => row.tripId === trip.id);
+                const points = data.points.filter((point) => point.tripId === trip.id);
+                const destinationNames = getRecognizedDestinationNames(points, data.destinations);
+                const analysis = data.analyses.find((row) => row.tripId === trip.id && row.userId === user.id) ?? null;
+
+                return (
+                  <button className={selectedTrip?.id === trip.id ? "trip-timeline-card active" : "trip-timeline-card"} key={trip.id} type="button" onClick={() => setSelectedTripId(trip.id)}>
+                    <span>{trip.status === "completed" ? "Completed trip" : "Active trip"}</span>
+                    <strong>{formatTripTitle(trip, destinationNames, analysis)}</strong>
+                    <small>{trip.endedAt ? formatDateTime(trip.endedAt) : "Trip still active"}</small>
                     <p>
-                      {points.length} point(s), {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {summary?.visitedDestinationCount ?? 0} recognised stop(s)
+                      {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} recognised stop(s)
                     </p>
-                    <small>{trip.endedAt ? `Ended ${formatDateTime(trip.endedAt)}` : "Trip still active"}</small>
                   </button>
                 );
               })}
-              {userTrips.length === 0 && <EmptyState text="Your saved trips will appear here after you start tracking." />}
-            </section>
+              {userTrips.length === 0 && <EmptyState text="Start tracking or add a sample Malaysia route to create your first trip diary entry." />}
+            </aside>
           </section>
-        </div>
+        </section>
       </Page>
     );
   }
