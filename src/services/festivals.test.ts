@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { destinations } from "../data/destinations";
-import { formatFestivalCardScope, formatFestivalDate, formatFestivalScope, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./festivals";
+import { formatFestivalDate, formatFestivalScope, formatFestivalStateSummaryLabel, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./festivals";
 
 describe("festival planning service", () => {
   it("sorts upcoming Malaysia festival signals by date", () => {
@@ -28,21 +28,21 @@ describe("festival planning service", () => {
 
     expect(sarawakEvents.map((event) => event.id)).not.toContain("deepavali-2026");
     expect(formatFestivalScope(deepavali)).toBe("All states except Sarawak");
-    expect(getFestivalPlanningSummary(deepavali, destinations)).toContain("linked place");
+    expect(getFestivalPlanningSummary(deepavali, destinations)).toContain("related place");
   });
 
   it("summarizes broad state coverage without long state lists", () => {
     const newYear = malaysiaFestivalEvents.find((candidate) => candidate.id === "new-year-2027")!;
 
     expect(formatFestivalScope(newYear)).toBe("All states except Johor, Kedah, Kelantan, Perlis, Terengganu");
-    expect(formatFestivalCardScope(newYear)).toBe("Most states");
+    expect(formatFestivalStateSummaryLabel(newYear)).toBe("Available in most states");
   });
 
   it("keeps card scope labels short for selected states", () => {
     const keretapiSarong = malaysiaFestivalEvents.find((candidate) => candidate.id === "keretapi-sarong-2026")!;
     const sarawakDay = malaysiaFestivalEvents.find((candidate) => candidate.id === "sarawak-day-2027")!;
 
-    expect(formatFestivalCardScope(keretapiSarong)).toBe("Selected states");
-    expect(formatFestivalCardScope(sarawakDay)).toBe("Sarawak");
+    expect(formatFestivalStateSummaryLabel(keretapiSarong)).toBe("Exclusive to selected states");
+    expect(formatFestivalStateSummaryLabel(sarawakDay)).toBe("Exclusive to Sarawak");
   });
 });

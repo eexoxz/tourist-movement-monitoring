@@ -51,16 +51,16 @@ export function formatFestivalScope(event: FestivalEvent) {
   return event.states.join(", ");
 }
 
-export function formatFestivalCardScope(event: FestivalEvent) {
+export function formatFestivalStateSummaryLabel(event: FestivalEvent) {
   if (event.scope === "national" || event.states.length >= allMalaysianStates.length) {
-    return "Nationwide";
+    return "Nationwide event";
   }
 
   if (event.states.length === 1) {
-    return event.states[0];
+    return `Exclusive to ${event.states[0]}`;
   }
 
-  return event.states.length >= 9 ? "Most states" : "Selected states";
+  return event.states.length >= 9 ? "Available in most states" : "Exclusive to selected states";
 }
 
 export function formatFestivalDate(event: FestivalEvent) {
@@ -84,5 +84,5 @@ export function getFestivalPlanningSummary(event: FestivalEvent, destinations: D
   }
 
   const cityNames = Array.from(new Set(matchedDestinations.map((destination) => destination.city)));
-  return `Watch ${matchedDestinations.length} linked place(s) across ${cityNames.join(", ")}.`;
+  return `Use live movement demand to compare ${matchedDestinations.length} related place(s) across ${cityNames.join(", ")}.`;
 }

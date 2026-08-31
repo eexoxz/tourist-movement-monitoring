@@ -2,8 +2,8 @@ import type { AppView, UserRole } from "../types";
 
 export type AuthMode = "login" | "register";
 
-const touristViews: AppView[] = ["overview", "tracking", "history", "recommendations", "profile"];
-const touristPrimaryViews: AppView[] = ["overview", "history", "recommendations"];
+const touristViews: AppView[] = ["overview", "tracking", "history", "recommendations", "events", "profile"];
+const touristPrimaryViews: AppView[] = ["overview", "history", "recommendations", "events"];
 const adminViews: AppView[] = ["dashboard", "destinations"];
 
 const touristViewPaths: Partial<Record<AppView, string>> = {
@@ -11,6 +11,7 @@ const touristViewPaths: Partial<Record<AppView, string>> = {
   tracking: "/app/tracking",
   history: "/app/trips",
   recommendations: "/app/recommendations",
+  events: "/app/events",
   profile: "/app/profile",
 };
 

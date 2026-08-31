@@ -472,7 +472,8 @@ button:disabled {
   box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
 }
 
-.recommendation-page {
+.recommendation-page,
+.event-calendar-page {
   display: grid;
   gap: 16px;
 }
@@ -2013,6 +2014,12 @@ button:disabled {
 .festival-more-button:hover {
   border-color: #5eead4;
   background: #ccfbf1;
+}
+
+.festival-more-button.secondary {
+  color: #475569;
+  border-color: #d7e2dc;
+  background: #ffffff;
 }
 
 .movement-demand.compact {

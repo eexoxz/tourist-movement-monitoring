@@ -18,8 +18,8 @@ describe("access service", () => {
   });
 
   it("keeps tourist users out of administrator views", () => {
-    expect(getAllowedViewsForRole("tourist")).toEqual(["overview", "tracking", "history", "recommendations", "profile"]);
-    expect(getPrimaryViewsForRole("tourist")).toEqual(["overview", "history", "recommendations"]);
+    expect(getAllowedViewsForRole("tourist")).toEqual(["overview", "tracking", "history", "recommendations", "events", "profile"]);
+    expect(getPrimaryViewsForRole("tourist")).toEqual(["overview", "history", "recommendations", "events"]);
     expect(canAccessView("tourist", "dashboard")).toBe(false);
     expect(coerceViewForRole("tourist", "records")).toBe("overview");
   });
@@ -44,6 +44,7 @@ describe("access service", () => {
   it("maps app views to role-aware browser paths", () => {
     expect(getPathForView("tourist", "overview")).toBe("/app/home");
     expect(getPathForView("tourist", "history")).toBe("/app/trips");
+    expect(getPathForView("tourist", "events")).toBe("/app/events");
     expect(getPathForView("tourist", "dashboard")).toBe("/app/home");
     expect(getPathForView("admin", "dashboard")).toBe("/admin/dashboard");
     expect(getPathForView("admin", "destinations")).toBe("/admin/destinations");
@@ -60,6 +61,7 @@ describe("access service", () => {
     expect(getViewFromPath("/app/home")).toBe("overview");
     expect(getViewFromPath("/app/trips")).toBe("history");
     expect(getViewFromPath("/app/recommendations")).toBe("recommendations");
+    expect(getViewFromPath("/app/events")).toBe("events");
     expect(getViewFromPath("/app/profile/")).toBe("profile");
     expect(getViewFromPath("/admin/dashboard")).toBe("dashboard");
     expect(getViewFromPath("/admin/destinations")).toBe("destinations");

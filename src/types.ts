@@ -1,6 +1,6 @@
 export type UserRole = "tourist" | "admin";
 
-export type AppView = "overview" | "tracking" | "history" | "recommendations" | "profile" | "dashboard" | "records" | "destinations" | "ai";
+export type AppView = "overview" | "tracking" | "history" | "recommendations" | "events" | "profile" | "dashboard" | "records" | "destinations" | "ai";
 
 export type DestinationCategory =
   | "cultural"

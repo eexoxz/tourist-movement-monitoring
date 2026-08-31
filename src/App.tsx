@@ -77,7 +77,7 @@ import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEm
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import { allMalaysianStates, malaysiaFestivalEvents } from "./data/festivals";
 import { nationalityOptions } from "./data/nationalities";
-import { formatFestivalCardScope, formatFestivalDate, formatFestivalScope, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./services/festivals";
+import { formatFestivalDate, formatFestivalScope, formatFestivalStateSummaryLabel, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./services/festivals";
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
@@ -700,6 +700,7 @@ function App() {
           ["overview", "Home", Compass],
           ["history", "Trips", MapPinned],
           ["recommendations", "Places", Sparkles],
+          ["events", "Event Calendar", CalendarDays],
         ] as const);
   const primaryViews = getPrimaryViewsForRole(currentUser.role);
 
@@ -1734,7 +1735,7 @@ function TouristWorkspace({
 
           <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
 
-          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact onOpenCalendar={() => onViewChange("events")} />
         </section>
 
         {selectedRecommendation && (
@@ -1745,6 +1746,29 @@ function TouristWorkspace({
             onClose={() => setSelectedRecommendationId(null)}
           />
         )}
+      </Page>
+    );
+  }
+
+  if (view === "events") {
+    return (
+      <Page title="Event Calendar" eyebrow="Tourist">
+        <section className="event-calendar-page">
+          <section className="recommendation-profile-card">
+            <div>
+              <span>Planning window</span>
+              <strong>Next 12 months</strong>
+            </div>
+            <div>
+              <span>Malaysia focus</span>
+              <strong>{upcomingFestivals.length} event signals</strong>
+            </div>
+            <p>
+              Use these public holidays and real tourism events as context for where tourist movement may increase, then compare them with live destination demand.
+            </p>
+          </section>
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} />
+        </section>
       </Page>
     );
   }
@@ -1921,7 +1945,7 @@ function TouristWorkspace({
 
         <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
 
-        <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
+        <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact onOpenCalendar={() => onViewChange("events")} />
 
         <section className="tourist-section">
           <div className="section-heading">
@@ -3009,10 +3033,12 @@ function FestivalCalendarPanel({
   events,
   destinations,
   compact = false,
+  onOpenCalendar,
 }: {
   events: FestivalEvent[];
   destinations: Destination[];
   compact?: boolean;
+  onOpenCalendar?: () => void;
 }) {
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const [showFullCalendar, setShowFullCalendar] = useState(!compact);
@@ -3056,12 +3082,11 @@ function FestivalCalendarPanel({
               <div className="festival-card-main">
                 <div className="festival-card-heading">
                   <h3>{event.name}</h3>
-                  <small>{formatFestivalCardScope(event)}</small>
                 </div>
                 {event.venue && <small className="festival-venue">{event.venue}</small>}
                 <p>{event.description}</p>
                 <details className="festival-state-details">
-                  <summary>View involved states</summary>
+                  <summary>{formatFestivalStateSummaryLabel(event)}</summary>
                   <div>
                     <span>{formatFestivalScope(event)}</span>
                   </div>
@@ -3082,8 +3107,13 @@ function FestivalCalendarPanel({
         })}
       </div>
       {hiddenEventCount > 0 && (
-        <button className="festival-more-button" type="button" onClick={() => setShowFullCalendar(true)}>
+        <button className="festival-more-button" type="button" onClick={onOpenCalendar ?? (() => setShowFullCalendar(true))}>
           Show full 12-month calendar ({hiddenEventCount} more)
+        </button>
+      )}
+      {compact && showFullCalendar && !onOpenCalendar && (
+        <button className="festival-more-button secondary" type="button" onClick={() => setShowFullCalendar(false)}>
+          Show fewer events
         </button>
       )}
       {visibleEvents.length === 0 && <EmptyState text="No festival planning signals match this state inside the current date range." />}
