@@ -80,9 +80,9 @@ export function getFestivalDestinationMatches(event: FestivalEvent, destinations
 export function getFestivalPlanningSummary(event: FestivalEvent, destinations: Destination[]) {
   const matchedDestinations = getFestivalDestinationMatches(event, destinations);
   if (matchedDestinations.length === 0) {
-    return "Use current movement demand to choose nearby places.";
+    return "No linked place has been added yet. Use current movement demand to find suitable nearby destinations for this state.";
   }
 
   const cityNames = Array.from(new Set(matchedDestinations.map((destination) => destination.city)));
-  return `Use live movement demand to compare ${matchedDestinations.length} related place(s) across ${cityNames.join(", ")}.`;
+  return `These places may become busier around this event. Compare demand in ${cityNames.join(", ")} before planning a route.`;
 }

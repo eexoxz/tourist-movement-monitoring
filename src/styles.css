@@ -1941,8 +1941,18 @@ button:disabled {
   font-size: 0.82rem;
 }
 
-.festival-state-details summary {
+.festival-state-details button {
+  padding: 0;
+  border: 0;
+  color: #0f766e;
+  background: transparent;
   cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.festival-state-details button,
+.festival-state-details summary {
   color: #0f766e;
   font-weight: 900;
 }

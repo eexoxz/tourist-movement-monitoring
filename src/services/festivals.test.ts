@@ -28,7 +28,7 @@ describe("festival planning service", () => {
 
     expect(sarawakEvents.map((event) => event.id)).not.toContain("deepavali-2026");
     expect(formatFestivalScope(deepavali)).toBe("All states except Sarawak");
-    expect(getFestivalPlanningSummary(deepavali, destinations)).toContain("related place");
+    expect(getFestivalPlanningSummary(deepavali, destinations)).toContain("may become busier");
   });
 
   it("summarizes broad state coverage without long state lists", () => {

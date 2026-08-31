@@ -388,6 +388,10 @@ function App() {
   }, [currentUser, safeView, view]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [safeView]);
+
+  useEffect(() => {
     const handlePopState = () => {
       const pathname = getCurrentPathname();
 
@@ -3042,10 +3046,14 @@ function FestivalCalendarPanel({
 }) {
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const [showFullCalendar, setShowFullCalendar] = useState(!compact);
+  const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
   const filteredEvents = getFestivalsForState(events, stateFilter);
   const visibleLimit = compact && !showFullCalendar ? 5 : filteredEvents.length;
   const visibleEvents = filteredEvents.slice(0, visibleLimit);
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
+  const toggleEventStates = (eventId: string) => {
+    setExpandedEventIds((currentIds) => (currentIds.includes(eventId) ? currentIds.filter((id) => id !== eventId) : [...currentIds, eventId]));
+  };
 
   return (
     <section className={compact ? "festival-calendar compact" : "festival-calendar"}>
@@ -3071,6 +3079,7 @@ function FestivalCalendarPanel({
       <div className="festival-list">
         {visibleEvents.map((event) => {
           const matchedDestinations = getFestivalDestinationMatches(event, destinations).slice(0, 3);
+          const statesExpanded = expandedEventIds.includes(event.id);
 
           return (
             <article className={`festival-card festival-card-${event.category}`} key={event.id}>
@@ -3085,12 +3094,16 @@ function FestivalCalendarPanel({
                 </div>
                 {event.venue && <small className="festival-venue">{event.venue}</small>}
                 <p>{event.description}</p>
-                <details className="festival-state-details">
-                  <summary>{formatFestivalStateSummaryLabel(event)}</summary>
-                  <div>
-                    <span>{formatFestivalScope(event)}</span>
-                  </div>
-                </details>
+                <div className="festival-state-details">
+                  <button type="button" onClick={() => toggleEventStates(event.id)} aria-expanded={statesExpanded}>
+                    {formatFestivalStateSummaryLabel(event)}
+                  </button>
+                  {statesExpanded && (
+                    <div>
+                      <span>{formatFestivalScope(event)}</span>
+                    </div>
+                  )}
+                </div>
                 <div className="festival-insight-row">
                   <small className="festival-planning-note">{getFestivalPlanningSummary(event, destinations)}</small>
                   {matchedDestinations.length > 0 && (
