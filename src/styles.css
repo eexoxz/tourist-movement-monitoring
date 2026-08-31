@@ -1898,7 +1898,7 @@ button:disabled {
 
 .trip-story-metrics {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -1934,14 +1934,13 @@ button:disabled {
 }
 
 .trip-stop-strip,
-.trip-decision-path {
+.trip-guidance-panel {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.trip-stop-strip span,
-.trip-decision-path span {
+.trip-stop-strip span {
   max-width: 100%;
   padding: 7px 10px;
   border-radius: 999px;
@@ -1956,51 +1955,32 @@ button:disabled {
   font-weight: 800;
 }
 
-.trip-learning-panel {
+.trip-guidance-panel {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  border: 1px solid #dce7e2;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #ccfbf1;
   border-radius: 8px;
-  background: #dce7e2;
+  background:
+    linear-gradient(135deg, rgba(20, 184, 166, 0.12), transparent 58%),
+    #f0fdfa;
 }
 
-.trip-learning-panel div {
+.trip-guidance-panel div {
   display: grid;
-  gap: 5px;
-  min-width: 0;
-  padding: 12px;
-  background: #ffffff;
+  gap: 6px;
 }
 
-.trip-learning-panel span {
-  color: #64748b;
-  font-size: 0.76rem;
-  font-weight: 900;
-  text-transform: uppercase;
+.trip-guidance-panel strong {
+  color: #0f766e;
 }
 
-.trip-learning-panel strong {
-  color: #06172f;
-  line-height: 1.25;
-}
-
-.trip-decision-path {
-  padding: 12px;
-  border-radius: 8px;
-  background: #fff7ed;
-}
-
-.trip-decision-path strong {
-  width: 100%;
-  color: #9a3412;
-  font-size: 0.86rem;
-}
-
-.trip-decision-path span {
-  color: #7c2d12;
-  background: #ffedd5;
+.trip-guidance-panel p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
 }
 
 .trip-recommendation-link {
@@ -3548,7 +3528,7 @@ textarea {
   .trip-diary-hero,
   .trip-diary-layout,
   .trip-story-metrics,
-  .trip-learning-panel,
+  .trip-guidance-panel,
   .recommendation-list,
   .analysis-grid,
   .admin-tabs,

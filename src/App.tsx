@@ -251,46 +251,34 @@ function getDisplayName(user: User) {
   return name && name !== user.email && !name.includes("@") ? name : "";
 }
 
-function formatTouristProfileLabel(profile?: TouristProfile) {
-  return profile ? `${profile.charAt(0).toUpperCase()}${profile.slice(1)} tourist` : "Learning";
-}
-
-function formatTripTitle(trip: TripSession, destinationNames: string[], analysis: AnalysisResult | null) {
+function formatTripTitle(trip: TripSession, destinationNames: string[]) {
   const routeLabel = destinationNames.slice(0, 2).join(" to ");
-  const profileLabel = analysis ? `${analysis.profile.charAt(0).toUpperCase()}${analysis.profile.slice(1)} route` : "Malaysia route";
 
   if (routeLabel) {
-    return `${routeLabel} ${profileLabel}`;
+    return `${routeLabel} trip`;
   }
 
-  return trip.status === "active" ? "Active Malaysia route" : "Malaysia trip route";
+  return trip.status === "active" ? "Current trip" : "Malaysia trip";
 }
 
-function getTripDiaryInsight(summary: TripSummary, analysis: AnalysisResult | null, destinationNames: string[]) {
+function getTripDiaryInsight(summary: TripSummary, destinationNames: string[]) {
   if (summary.pointCount < 2) {
-    return "This trip needs at least two movement points before distance, route pattern and recommendation learning can be calculated.";
+    return "Keep this trip recording while you move around. Once there is a little more activity, the app can suggest places that better fit your route.";
   }
 
-  if (!analysis) {
-    return "This route has enough movement data. Refresh recommendations to let the decision tree and clustering model classify the trip.";
+  if (destinationNames.length > 0) {
+    return `You spent time around ${destinationNames.slice(0, 3).join(", ")}. Use this trip to find similar places nearby and compare where visitor movement is forming next.`;
   }
 
-  const visitedText =
-    destinationNames.length > 0
-      ? `It recognised movement near ${destinationNames.slice(0, 3).join(", ")}.`
-      : "It did not match a saved destination closely yet.";
-
-  return `${visitedText} The app classified this as a ${formatTouristProfileLabel(analysis.profile).toLowerCase()} pattern with ${Math.round(
-    analysis.classificationConfidence * 100
-  )}% confidence.`;
+  return "Your route is saved. Recommendations will become more useful as your trip gets closer to known Malaysian attractions and active visitor areas.";
 }
 
-function getTripHealthLabel(summary: TripSummary, analysis: AnalysisResult | null) {
+function getTripSuggestionStatus(summary: TripSummary, analysis: AnalysisResult | null) {
   if (summary.pointCount < 2) {
-    return "Needs more movement";
+    return "Keep recording";
   }
 
-  return analysis ? "Analysis ready" : "Ready to analyse";
+  return analysis ? "Ready" : "Refresh";
 }
 
 function inferExpectedProfileFromPreferences(preferences: DestinationCategory[]): NonNullable<User["expectedProfile"]> {
@@ -1682,9 +1670,9 @@ function TouristWorkspace({
     const completedTripCount = userTrips.filter((trip) => trip.status === "completed").length;
     const totalDistanceKm = Number(tripSummaries.reduce((sum, summary) => sum + summary.distanceKm, 0).toFixed(1));
     const totalRecognizedStops = tripSummaries.reduce((sum, summary) => sum + summary.visitedDestinationCount, 0);
-    const selectedTripTitle = selectedTrip ? formatTripTitle(selectedTrip, selectedTripDestinationNames, selectedTripAnalysis) : "No trip selected";
-    const selectedTripInsight = selectedTripSummary ? getTripDiaryInsight(selectedTripSummary, selectedTripAnalysis, selectedTripDestinationNames) : "";
-    const selectedTripHealth = selectedTripSummary ? getTripHealthLabel(selectedTripSummary, selectedTripAnalysis) : "Waiting for trip";
+    const selectedTripTitle = selectedTrip ? formatTripTitle(selectedTrip, selectedTripDestinationNames) : "No trip selected";
+    const selectedTripInsight = selectedTripSummary ? getTripDiaryInsight(selectedTripSummary, selectedTripDestinationNames) : "";
+    const selectedTripSuggestionStatus = selectedTripSummary ? getTripSuggestionStatus(selectedTripSummary, selectedTripAnalysis) : "Waiting";
 
     return (
       <Page title="Trip Diary" eyebrow="Tourist">
@@ -1729,23 +1717,19 @@ function TouristWorkspace({
                   <div className="trip-story-metrics">
                     <span>
                       <strong>{selectedTripSummary.distanceKm}</strong>
-                      km
+                      km travelled
                     </span>
                     <span>
                       <strong>{selectedTripSummary.durationMinutes}</strong>
-                      min
-                    </span>
-                    <span>
-                      <strong>{selectedTripSummary.pointCount}</strong>
-                      points
+                      min spent
                     </span>
                     <span>
                       <strong>{selectedTripSummary.visitedDestinationCount}</strong>
-                      stops
+                      places noticed
                     </span>
                     <span>
-                      <strong>{selectedTripHealth}</strong>
-                      status
+                      <strong>{selectedTripSuggestionStatus}</strong>
+                      suggestions
                     </span>
                   </div>
 
@@ -1759,36 +1743,19 @@ function TouristWorkspace({
                     )}
                   </div>
 
-                  <section className="trip-learning-panel">
+                  <section className="trip-guidance-panel">
                     <div>
-                      <span>Tourist pattern</span>
-                      <strong>{formatTouristProfileLabel(selectedTripAnalysis?.profile)}</strong>
+                      <strong>What this trip is useful for</strong>
+                      <p>It helps the app compare real visitor movement around Malaysia, then turn that activity into place suggestions instead of relying only on ratings.</p>
                     </div>
-                    <div>
-                      <span>AI method</span>
-                      <strong>{selectedTripAnalysis ? "Decision tree + clustering" : "Waiting for analysis"}</strong>
-                    </div>
-                    <div>
-                      <span>Confidence</span>
-                      <strong>{selectedTripAnalysis ? `${Math.round(selectedTripAnalysis.classificationConfidence * 100)}%` : "Pending"}</strong>
-                    </div>
-                    <div>
-                      <span>Movement group</span>
-                      <strong>{selectedTripAnalysis?.clusterLabel ?? "Pending"}</strong>
-                    </div>
+                    <button className="secondary-action" type="button" onClick={() => onViewChange("recommendations")}>
+                      <Sparkles size={18} />
+                      Find places from this trip
+                    </button>
                   </section>
 
-                  {selectedTripAnalysis && (
-                    <div className="trip-decision-path">
-                      <strong>Why it decided this</strong>
-                      {selectedTripAnalysis.decisionPath.slice(0, 3).map((step) => (
-                        <span key={step}>{step}</span>
-                      ))}
-                    </div>
-                  )}
-
                   <div className="trip-detail-recommendations">
-                    <strong>{hasPersonalizedRecommendations ? "Places suggested after this learning" : "Places to try next"}</strong>
+                    <strong>{hasPersonalizedRecommendations ? "Places you may want next" : "Places to try next"}</strong>
                     {selectedTripRecommendations.length > 0 ? (
                       selectedTripRecommendations.map((recommendation) => {
                         const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
@@ -1826,12 +1793,11 @@ function TouristWorkspace({
                 const summary = tripSummaries.find((row) => row.tripId === trip.id);
                 const points = data.points.filter((point) => point.tripId === trip.id);
                 const destinationNames = getRecognizedDestinationNames(points, data.destinations);
-                const analysis = data.analyses.find((row) => row.tripId === trip.id && row.userId === user.id) ?? null;
 
                 return (
                   <button className={selectedTrip?.id === trip.id ? "trip-timeline-card active" : "trip-timeline-card"} key={trip.id} type="button" onClick={() => setSelectedTripId(trip.id)}>
                     <span>{trip.status === "completed" ? "Completed trip" : "Active trip"}</span>
-                    <strong>{formatTripTitle(trip, destinationNames, analysis)}</strong>
+                    <strong>{formatTripTitle(trip, destinationNames)}</strong>
                     <small>{trip.endedAt ? formatDateTime(trip.endedAt) : "Trip still active"}</small>
                     <p>
                       {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} recognised stop(s)
