@@ -81,6 +81,22 @@ export type TranslationKey =
   | "common.noSignalYet"
   | "common.checkLocally"
   | "common.feeMayVary"
+  | "category.cultural"
+  | "category.nature"
+  | "category.urban"
+  | "category.heritage"
+  | "category.food"
+  | "category.coastal"
+  | "profile.option.relaxed"
+  | "profile.option.balanced"
+  | "profile.option.packed"
+  | "profile.option.solo"
+  | "profile.option.partner"
+  | "profile.option.family"
+  | "profile.option.friends"
+  | "profile.option.noPreference"
+  | "profile.option.lowWalking"
+  | "profile.option.wheelchair"
   | "tourist.profile.pageTitle"
   | "tourist.profile.setupPageTitle"
   | "tourist.profile.formTitle"
@@ -152,6 +168,20 @@ export type TranslationKey =
   | "tourist.profile.pace"
   | "tourist.profile.emergencyContact"
   | "tourist.profile.notSetYet"
+  | "tourist.profile.personalSetup"
+  | "tourist.profile.preferredName"
+  | "tourist.profile.preferredNamePlaceholder"
+  | "tourist.profile.preferencesLegend"
+  | "tourist.profile.travelPace"
+  | "tourist.profile.travellingWith"
+  | "tourist.profile.walkingPreference"
+  | "tourist.profile.emergencyDescription"
+  | "tourist.profile.contactName"
+  | "tourist.profile.contactNamePlaceholder"
+  | "tourist.profile.contactPhone"
+  | "tourist.profile.contactPhonePlaceholder"
+  | "tourist.profile.relationship"
+  | "tourist.profile.relationshipPlaceholder"
   | "tourist.checkin.unknownAttraction"
   | "tourist.checkin.minVisit"
   | "tourist.checkin.currentlyCheckedIn"
@@ -213,6 +243,11 @@ export type TranslationKey =
   | "tourist.home.destinationInfo"
   | "tourist.places.profileTraveller"
   | "tourist.places.discoveryMode"
+  | "tourist.places.mode.bestMatch"
+  | "tourist.places.mode.trending"
+  | "tourist.places.mode.nearMe"
+  | "tourist.places.mode.eventLinked"
+  | "tourist.places.mode.quieter"
   | "tourist.places.heroTitle"
   | "tourist.places.heroDescription"
   | "tourist.places.placesShown"
@@ -370,6 +405,22 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "common.noSignalYet": "No signal yet",
     "common.checkLocally": "Check locally before visiting.",
     "common.feeMayVary": "Fee information may vary.",
+    "category.cultural": "Culture",
+    "category.nature": "Nature",
+    "category.urban": "City spots",
+    "category.heritage": "Heritage",
+    "category.food": "Food",
+    "category.coastal": "Coastal",
+    "profile.option.relaxed": "Relaxed",
+    "profile.option.balanced": "Balanced",
+    "profile.option.packed": "Packed schedule",
+    "profile.option.solo": "Solo",
+    "profile.option.partner": "Partner",
+    "profile.option.family": "Family",
+    "profile.option.friends": "Friends",
+    "profile.option.noPreference": "No special preference",
+    "profile.option.lowWalking": "Prefer less walking",
+    "profile.option.wheelchair": "Prefer wheelchair-friendly places",
     "tourist.profile.pageTitle": "Travel Profile",
     "tourist.profile.setupPageTitle": "Set Up Your Travel Profile",
     "tourist.profile.formTitle": "Travel Preferences",
@@ -441,6 +492,20 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.profile.pace": "Pace",
     "tourist.profile.emergencyContact": "Emergency contact",
     "tourist.profile.notSetYet": "Not set yet",
+    "tourist.profile.personalSetup": "Personal setup",
+    "tourist.profile.preferredName": "Preferred name",
+    "tourist.profile.preferredNamePlaceholder": "What should the app call you?",
+    "tourist.profile.preferencesLegend": "What kind of places do you like?",
+    "tourist.profile.travelPace": "Travel pace",
+    "tourist.profile.travellingWith": "Travelling with",
+    "tourist.profile.walkingPreference": "Walking preference",
+    "tourist.profile.emergencyDescription": "Optional, but useful if the tourist submits an SOS or incident report.",
+    "tourist.profile.contactName": "Contact name",
+    "tourist.profile.contactNamePlaceholder": "Example: Nur Aisyah",
+    "tourist.profile.contactPhone": "Contact phone",
+    "tourist.profile.contactPhonePlaceholder": "Example: +60123456789",
+    "tourist.profile.relationship": "Relationship",
+    "tourist.profile.relationshipPlaceholder": "Example: Parent, spouse, friend",
     "tourist.checkin.unknownAttraction": "Unknown attraction",
     "tourist.checkin.minVisit": "min visit",
     "tourist.checkin.currentlyCheckedIn": "Currently checked in",
@@ -502,6 +567,11 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.home.destinationInfo": "Destination Info",
     "tourist.places.profileTraveller": "traveller",
     "tourist.places.discoveryMode": "Discovery mode",
+    "tourist.places.mode.bestMatch": "Best match",
+    "tourist.places.mode.trending": "Trending",
+    "tourist.places.mode.nearMe": "Near me",
+    "tourist.places.mode.eventLinked": "Event-linked",
+    "tourist.places.mode.quieter": "Quieter picks",
     "tourist.places.heroTitle": "Find places that match your trip right now.",
     "tourist.places.heroDescription": "Browse destinations using movement demand, your travel style, event timing and your latest route instead of only static ratings.",
     "tourist.places.placesShown": "places shown",

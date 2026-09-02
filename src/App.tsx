@@ -139,12 +139,12 @@ type NotifyFn = (notification: Omit<AppNotification, "id">) => void;
 type RememberedLogin = { email: string; password: string };
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
-const placeDiscoveryModes: Array<{ value: PlaceDiscoveryMode; label: string }> = [
-  { value: "recommended", label: "Best match" },
-  { value: "trending", label: "Trending" },
-  { value: "nearby", label: "Near me" },
-  { value: "events", label: "Event-linked" },
-  { value: "hidden", label: "Quieter picks" },
+const placeDiscoveryModes: Array<{ value: PlaceDiscoveryMode; labelKey: TranslationKey }> = [
+  { value: "recommended", labelKey: "tourist.places.mode.bestMatch" },
+  { value: "trending", labelKey: "tourist.places.mode.trending" },
+  { value: "nearby", labelKey: "tourist.places.mode.nearMe" },
+  { value: "events", labelKey: "tourist.places.mode.eventLinked" },
+  { value: "hidden", labelKey: "tourist.places.mode.quieter" },
 ];
 const demoCredentialEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
 const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = [
@@ -318,7 +318,20 @@ function formatTravelPreferenceList(preferences?: DestinationCategory[]) {
   return preferences.map((preference) => labels.get(preference) ?? preference).join(", ");
 }
 
-function getCategoryLabel(category: DestinationCategory) {
+function getCategoryLabel(category: DestinationCategory, t?: (key: TranslationKey) => string) {
+  if (t) {
+    const categoryLabels: Record<DestinationCategory, TranslationKey> = {
+      cultural: "category.cultural",
+      nature: "category.nature",
+      urban: "category.urban",
+      heritage: "category.heritage",
+      food: "category.food",
+      coastal: "category.coastal",
+    };
+
+    return t(categoryLabels[category]);
+  }
+
   return preferenceOptions.find((option) => option.value === category)?.label ?? category;
 }
 
@@ -1690,6 +1703,7 @@ function TouristWorkspace({
           title={t("tourist.profile.formTitle")}
           description={t("tourist.profile.formDescription")}
           primaryLabel={t("tourist.profile.saveProfile")}
+          locale={locale}
           onSave={saveProfile}
         />
       </Page>
@@ -1705,6 +1719,7 @@ function TouristWorkspace({
           description={t("tourist.profile.setupDescription")}
           primaryLabel={t("tourist.profile.saveProfile")}
           secondaryLabel={t("tourist.profile.skipForNow")}
+          locale={locale}
           onSave={saveProfile}
           onSkip={skipProfileSetup}
         />
@@ -2386,6 +2401,7 @@ function TouristProfileForm({
   description,
   primaryLabel,
   secondaryLabel,
+  locale = "en",
   onSave,
   onSkip,
 }: {
@@ -2394,9 +2410,11 @@ function TouristProfileForm({
   description: string;
   primaryLabel: string;
   secondaryLabel?: string;
+  locale?: Locale;
   onSave: (user: User) => void;
   onSkip?: () => void;
 }) {
+  const t = (key: TranslationKey) => translate(locale, key);
   const [name, setName] = useState(getDisplayName(user));
   const [preferences, setPreferences] = useState<DestinationCategory[]>(user.travelPreferences ?? []);
   const [tripPace, setTripPace] = useState<User["tripPace"]>(user.tripPace ?? "balanced");
@@ -2433,24 +2451,24 @@ function TouristProfileForm({
     <form className="profile-setup" onSubmit={saveProfile}>
       <section className="profile-setup-card">
         <div className="profile-setup-copy">
-          <span>Personal setup</span>
+          <span>{t("tourist.profile.personalSetup")}</span>
           <h2>{title}</h2>
           <p>{description}</p>
         </div>
 
         <div className="profile-form-grid">
           <label>
-            Preferred name
-            <input value={name} onChange={(event) => setName(event.target.value)} placeholder="What should the app call you?" />
+            {t("tourist.profile.preferredName")}
+            <input value={name} onChange={(event) => setName(event.target.value)} placeholder={t("tourist.profile.preferredNamePlaceholder")} />
           </label>
 
           <fieldset>
-            <legend>What kind of places do you like?</legend>
+            <legend>{t("tourist.profile.preferencesLegend")}</legend>
             <div className="preference-grid">
               {preferenceOptions.map((option) => (
                 <label className={preferences.includes(option.value) ? "preference-chip active" : "preference-chip"} key={option.value}>
                   <input type="checkbox" checked={preferences.includes(option.value)} onChange={() => togglePreference(option.value)} />
-                  {option.label}
+                  {getCategoryLabel(option.value, t)}
                 </label>
               ))}
             </div>
@@ -2458,51 +2476,51 @@ function TouristProfileForm({
 
           <div className="field-pair">
             <label>
-              Travel pace
+              {t("tourist.profile.travelPace")}
               <select value={tripPace} onChange={(event) => setTripPace(event.target.value as User["tripPace"])}>
-                <option value="relaxed">Relaxed</option>
-                <option value="balanced">Balanced</option>
-                <option value="packed">Packed schedule</option>
+                <option value="relaxed">{t("profile.option.relaxed")}</option>
+                <option value="balanced">{t("profile.option.balanced")}</option>
+                <option value="packed">{t("profile.option.packed")}</option>
               </select>
             </label>
             <label>
-              Travelling with
+              {t("tourist.profile.travellingWith")}
               <select value={travelGroup} onChange={(event) => setTravelGroup(event.target.value as User["travelGroup"])}>
-                <option value="solo">Solo</option>
-                <option value="couple">Partner</option>
-                <option value="family">Family</option>
-                <option value="friends">Friends</option>
+                <option value="solo">{t("profile.option.solo")}</option>
+                <option value="couple">{t("profile.option.partner")}</option>
+                <option value="family">{t("profile.option.family")}</option>
+                <option value="friends">{t("profile.option.friends")}</option>
               </select>
             </label>
           </div>
 
           <label>
-            Walking preference
+            {t("tourist.profile.walkingPreference")}
             <select value={accessibilityPreference} onChange={(event) => setAccessibilityPreference(event.target.value as User["accessibilityPreference"])}>
-              <option value="none">No special preference</option>
-              <option value="low-walking">Prefer less walking</option>
-              <option value="wheelchair-friendly">Prefer wheelchair-friendly places</option>
+              <option value="none">{t("profile.option.noPreference")}</option>
+              <option value="low-walking">{t("profile.option.lowWalking")}</option>
+              <option value="wheelchair-friendly">{t("profile.option.wheelchair")}</option>
             </select>
           </label>
 
           <section className="profile-emergency-fields">
             <div>
-              <span>Emergency contact</span>
-              <p>Optional, but useful if the tourist submits an SOS or incident report.</p>
+              <span>{t("tourist.profile.emergencyContact")}</span>
+              <p>{t("tourist.profile.emergencyDescription")}</p>
             </div>
             <div className="field-pair">
               <label>
-                Contact name
-                <input value={emergencyContactName} onChange={(event) => setEmergencyContactName(event.target.value)} placeholder="Example: Nur Aisyah" />
+                {t("tourist.profile.contactName")}
+                <input value={emergencyContactName} onChange={(event) => setEmergencyContactName(event.target.value)} placeholder={t("tourist.profile.contactNamePlaceholder")} />
               </label>
               <label>
-                Contact phone
-                <input value={emergencyContactPhone} onChange={(event) => setEmergencyContactPhone(event.target.value)} placeholder="Example: +60123456789" />
+                {t("tourist.profile.contactPhone")}
+                <input value={emergencyContactPhone} onChange={(event) => setEmergencyContactPhone(event.target.value)} placeholder={t("tourist.profile.contactPhonePlaceholder")} />
               </label>
             </div>
             <label>
-              Relationship
-              <input value={emergencyContactRelation} onChange={(event) => setEmergencyContactRelation(event.target.value)} placeholder="Example: Parent, spouse, friend" />
+              {t("tourist.profile.relationship")}
+              <input value={emergencyContactRelation} onChange={(event) => setEmergencyContactRelation(event.target.value)} placeholder={t("tourist.profile.relationshipPlaceholder")} />
             </label>
           </section>
         </div>
@@ -2514,7 +2532,7 @@ function TouristProfileForm({
           </button>
           {onSkip && (
             <button className="secondary-action" type="button" onClick={onSkip}>
-              {secondaryLabel ?? "Skip"}
+              {secondaryLabel ?? t("tourist.profile.skipForNow")}
             </button>
           )}
         </div>
@@ -4487,9 +4505,9 @@ function PlaceDiscovery({
           <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value as DestinationCategory | "all")}>
             <option value="all">{t("tourist.places.allCategories")}</option>
             {destinationCategories.map((category) => (
-              <option key={category} value={category}>
-                {getCategoryLabel(category)}
-              </option>
+                <option key={category} value={category}>
+                  {getCategoryLabel(category, t)}
+                </option>
             ))}
           </select>
         </label>
@@ -4509,7 +4527,7 @@ function PlaceDiscovery({
       <div className="places-mode-row" aria-label="Place discovery mode">
         {placeDiscoveryModes.map((option) => (
           <button key={option.value} className={mode === option.value ? "active" : ""} type="button" onClick={() => setMode(option.value)}>
-            {option.label}
+            {t(option.labelKey)}
           </button>
         ))}
       </div>
@@ -4525,7 +4543,7 @@ function PlaceDiscovery({
             >
               <div className="place-card-heading">
                 <div>
-                  <span>{getCategoryLabel(row.destination.category)}</span>
+                  <span>{getCategoryLabel(row.destination.category, t)}</span>
                   <strong>{row.destination.name}</strong>
                 </div>
                 <small>{row.score}% {t("tourist.places.fit")}</small>
@@ -4545,7 +4563,7 @@ function PlaceDiscovery({
 
         {selectedRow && (
           <aside className="place-detail-card">
-            <span>{getCategoryLabel(selectedRow.destination.category)}</span>
+            <span>{getCategoryLabel(selectedRow.destination.category, t)}</span>
             <h2>{selectedRow.destination.name}</h2>
             <p>{selectedRow.destination.description}</p>
             <dl>

@@ -37,5 +37,8 @@ describe("i18n", () => {
     expect(translate("en", "tourist.events.calendarTitle")).toBe("Malaysia Festival Calendar");
     expect(translate("en", "tourist.completed.viewRecommendations")).toBe("View Recommendations");
     expect(translate("en", "tourist.recommendations.viewDestination")).toBe("View Destination");
+    expect(translate("en", "tourist.profile.preferredName")).toBe("Preferred name");
+    expect(translate("en", "tourist.profile.walkingPreference")).toBe("Walking preference");
+    expect(translate("en", "tourist.places.mode.quieter")).toBe("Quieter picks");
   });
 });
