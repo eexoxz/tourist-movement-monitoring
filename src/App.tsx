@@ -113,6 +113,8 @@ import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn, getC
 import { calculateGeofenceActivity, getActiveGeofenceWarnings } from "./services/geofencing";
 import { createIncidentReport, createSosAlert, getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "./services/safety";
 import { getTouristManagementRows } from "./services/touristManagement";
+import { CompletedTripSummary, EmptyState, MetricGrid } from "./components/SummaryCards";
+import { ToastViewport, type AppNotification, type NotificationTone, type NotifyFn } from "./components/ToastViewport";
 
 const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
@@ -128,14 +130,6 @@ type TouristRegistrationDraft = {
   passportNumber: string;
   termsAccepted: boolean;
 };
-type NotificationTone = "success" | "error" | "info" | "warning";
-type AppNotification = {
-  id: string;
-  tone: NotificationTone;
-  title: string;
-  message?: string;
-};
-type NotifyFn = (notification: Omit<AppNotification, "id">) => void;
 type RememberedLogin = { email: string; password: string };
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
@@ -2577,40 +2571,6 @@ function TouristProfileForm({
   );
 }
 
-function ToastViewport({ notifications, onDismiss }: { notifications: AppNotification[]; onDismiss: (id: string) => void }) {
-  useEffect(() => {
-    if (notifications.length === 0) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      onDismiss(notifications[0].id);
-    }, 4200);
-
-    return () => window.clearTimeout(timer);
-  }, [notifications, onDismiss]);
-
-  if (notifications.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className="toast-stack" aria-live="polite" aria-label="Application notifications">
-      {notifications.map((notification) => (
-        <article className={`toast toast-${notification.tone}`} key={notification.id}>
-          <div>
-            <strong>{notification.title}</strong>
-            {notification.message && <p>{notification.message}</p>}
-          </div>
-          <button type="button" onClick={() => onDismiss(notification.id)} title="Dismiss notification">
-            <X size={16} />
-          </button>
-        </article>
-      ))}
-    </section>
-  );
-}
-
 function AdminWorkspace({
   data,
   view,
@@ -3537,88 +3497,6 @@ function MovementPulseHero({
           <small>Movement tier</small>
           <strong>{topDemand?.tier ?? "pending"}</strong>
         </div>
-      </div>
-    </section>
-  );
-}
-
-function MetricGrid({ items }: { items: [string, string][] }) {
-  return (
-    <section className="metric-grid">
-      {items.map(([label, value]) => (
-        <article className="metric-card" key={label}>
-          <span>{label}</span>
-          <strong>{value}</strong>
-        </article>
-      ))}
-    </section>
-  );
-}
-
-function CompletedTripSummary({
-  trip,
-  summary,
-  destinationNames,
-  analysis,
-  locale = "en",
-  onViewHistory,
-  onViewRecommendations,
-}: {
-  trip: { id: string; startedAt: string; endedAt?: string };
-  summary: TripSummary;
-  destinationNames: string[];
-  analysis: AnalysisResult | null;
-  locale?: Locale;
-  onViewHistory: () => void;
-  onViewRecommendations: () => void;
-}) {
-  const t = (key: TranslationKey) => translate(locale, key);
-  const analysisStatus = analysis ? t("tourist.completed.analysisComplete") : summary.pointCount >= 2 ? t("tourist.completed.analysisReady") : t("tourist.completed.analysisNeedsPoints");
-
-  return (
-    <section className="completed-trip-card">
-      <div className="section-heading">
-        <div>
-          <span>{t("tourist.completed.title")}</span>
-          <h2>{formatDateTime(trip.startedAt)}</h2>
-        </div>
-      </div>
-      <div className="completed-trip-grid">
-        <div>
-          <small>{t("tourist.completed.started")}</small>
-          <strong>{formatDateTime(trip.startedAt)}</strong>
-        </div>
-        <div>
-          <small>{t("tourist.completed.ended")}</small>
-          <strong>{trip.endedAt ? formatDateTime(trip.endedAt) : t("common.justNow")}</strong>
-        </div>
-        <div>
-          <small>{t("tourist.completed.duration")}</small>
-          <strong>{summary.durationMinutes} min</strong>
-        </div>
-        <div>
-          <small>{t("tourist.completed.movementPoints")}</small>
-          <strong>{summary.pointCount}</strong>
-        </div>
-        <div>
-          <small>{t("tourist.completed.recognisedStops")}</small>
-          <strong>{summary.visitedDestinationCount}</strong>
-        </div>
-        <div>
-          <small>{t("tourist.completed.analysisStatus")}</small>
-          <strong>{analysisStatus}</strong>
-        </div>
-      </div>
-      <p>{destinationNames.length > 0 ? destinationNames.join(", ") : t("tourist.completed.noNearbyDestination")}</p>
-      <div className="completed-trip-actions">
-        <button className="secondary-action" type="button" onClick={onViewHistory}>
-          <MapPinned size={18} />
-          {t("tourist.completed.viewHistory")}
-        </button>
-        <button className="primary-action" type="button" onClick={onViewRecommendations}>
-          <Sparkles size={18} />
-          {t("tourist.completed.viewRecommendations")}
-        </button>
       </div>
     </section>
   );
@@ -4831,15 +4709,6 @@ function ConfusionMatrix({ values }: { values: Record<string, Record<string, num
           </Fragment>
         ))}
       </div>
-    </section>
-  );
-}
-
-function EmptyState({ text }: { text: string }) {
-  return (
-    <section className="empty-state">
-      <Sparkles size={22} />
-      <p>{text}</p>
     </section>
   );
 }

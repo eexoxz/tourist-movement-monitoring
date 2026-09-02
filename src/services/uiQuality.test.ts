@@ -7,6 +7,7 @@ const accessSource = readFileSync(resolve(process.cwd(), "src/services/access.ts
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
+const toastSource = readFileSync(resolve(process.cwd(), "src/components/ToastViewport.tsx"), "utf8");
 const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf8");
 
 describe("user interface quality guardrails", () => {
@@ -22,13 +23,13 @@ describe("user interface quality guardrails", () => {
   it("keeps recoverable failures connected to visible retry and toast patterns", () => {
     expect(appSource).toContain("Try location again");
     expect(i18nSource).toContain('"sync.retry": "Retry sync"');
-    expect(appSource).toContain("toast-stack");
+    expect(toastSource).toContain("toast-stack");
   });
 
   it("keeps toast placement usable on tourist mobile and administrator desktop layouts", () => {
     expect(stylesSource).toContain(".toast-stack");
     expect(stylesSource).toContain(".tourist-shell .toast-stack");
-    expect(appSource).toContain('aria-live="polite"');
+    expect(toastSource).toContain('aria-live="polite"');
     expect(stylesSource).toContain("width: min(380px, calc(100vw - 28px))");
     expect(stylesSource).toContain("left: 10px");
   });

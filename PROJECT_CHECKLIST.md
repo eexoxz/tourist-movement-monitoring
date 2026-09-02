@@ -371,3 +371,4 @@ Current alignment notes:
 - [x] Firebase integration is active but still needs final testing and data-structure confirmation.
 - [x] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
 - [x] Report/evidence work should come after the app flow is stable.
+- [x] Begin final code cleanup by extracting shared summary and notification components out of App.tsx.
