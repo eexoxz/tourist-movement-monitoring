@@ -21,9 +21,31 @@ Do not build:
 - [x] No booking, payments, hotels or flights.
 - [x] No reviews, social posting or messaging.
 - [x] No AI chatbot or LLM feature.
-- [x] No emergency monitoring or nationwide live tracking.
+- [x] No nationwide emergency dispatch integration or real authority integration.
 - [x] No travel agency, researcher or government integration accounts.
 - [x] No Singapore or other-country expansion unless the DPP/report scope changes.
+
+## Lecturer Review Feature Gap
+
+The supervisor review suggested the app needs more visible feature depth. Add only features that still fit the tourist movement monitoring scope and can be justified in the DPP/report.
+
+- [x] Add passport number and nationality during tourist registration.
+- [x] Add consent/T&C language for privacy, tourist data storage and consent-based location tracking.
+- [x] Add event calendar for Malaysian nationwide and state-level festivals/public holidays.
+- [x] Add reusable notification/toast system for tourist and administrator feedback.
+- [x] Add first multilingual UI foundation without using a translation API.
+- [ ] Expand language coverage across every tourist-facing page, not only login and navigation.
+- [ ] Add emergency contact details to tourist profile.
+- [ ] Add SOS/emergency assistance button for tourist side as a prototype-only safety feature.
+- [ ] Add administrator SOS/emergency monitoring section.
+- [ ] Add tourist check-in/check-out for attractions.
+- [ ] Decide whether check-in is manual only or QR-style simulation for the prototype.
+- [ ] Add incident reporting for lost item, accident, suspicious activity and general help.
+- [ ] Add administrator incident management section with status updates.
+- [ ] Add tourist management view for administrators using existing user/profile records.
+- [ ] Add geofencing warning logic around selected safe/restricted/dense areas without adding new APIs.
+- [ ] Add basic attraction practical info such as opening hours, fee note and visit tips where data is locally available.
+- [ ] Document that weather, traffic and road-closure alerts are out of scope unless approved APIs are allowed.
 
 ## Malaysia Destination Scope
 

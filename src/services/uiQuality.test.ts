@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
 const accessSource = readFileSync(resolve(process.cwd(), "src/services/access.ts"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
+const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
 const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf8");
 
@@ -14,13 +15,13 @@ describe("user interface quality guardrails", () => {
     expect(stylesSource).toContain("@media (max-width: 760px)");
     expect(stylesSource).toContain(".tourist-shell .content");
     expect(stylesSource).toContain(".tourist-shell .nav-list");
-    expect(stylesSource).toContain("grid-template-columns: repeat(3, minmax(0, 1fr))");
+    expect(stylesSource).toContain("grid-template-columns: repeat(4, minmax(0, 1fr))");
     expect(stylesSource).toContain("height: 58vh");
   });
 
   it("keeps recoverable failures connected to visible retry and toast patterns", () => {
     expect(appSource).toContain("Try location again");
-    expect(appSource).toContain("Retry sync");
+    expect(i18nSource).toContain('"sync.retry": "Retry sync"');
     expect(appSource).toContain("toast-stack");
   });
 

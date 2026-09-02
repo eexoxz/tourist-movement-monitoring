@@ -79,6 +79,7 @@ import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEm
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
 import { allMalaysianStates, malaysiaFestivalEvents } from "./data/festivals";
 import { nationalityOptions } from "./data/nationalities";
+import { isLocale, loadLocale, localeOptions, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
 import { formatFestivalDate, formatFestivalScope, formatFestivalStateSummaryLabel, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./services/festivals";
 import {
   buildMovementRecordsCsv,
@@ -356,18 +357,46 @@ function pushBrowserPath(path: string) {
   }
 }
 
+function LanguageSelector({ locale, onLocaleChange }: { locale: Locale; onLocaleChange: (locale: Locale) => void }) {
+  const label = translate(locale, "language.label");
+
+  return (
+    <label className="language-selector">
+      <span>{label}</span>
+      <select
+        value={locale}
+        onChange={(event) => {
+          const nextLocale = event.target.value;
+          if (isLocale(nextLocale)) {
+            onLocaleChange(nextLocale);
+          }
+        }}
+        aria-label={label}
+      >
+        {localeOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {translate(locale, option.labelKey)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
   const [sessionUserId, setSessionUserId] = useState<string | null>(() => loadSession());
   const currentUser = data.users.find((user) => user.id === sessionUserId || user.authUid === sessionUserId) ?? null;
   const [view, setView] = useState<AppView>(() => getViewFromPath(getCurrentPathname()) ?? "overview");
   const [authMode, setAuthMode] = useState<AuthMode>(() => getAuthModeFromPath(getCurrentPathname()) ?? "login");
+  const [locale, setLocale] = useState<Locale>(() => loadLocale());
   const safeView = currentUser ? coerceViewForRole(currentUser.role, view) : view;
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const watchId = useRef<number | null>(null);
   const lastSyncWarningAt = useRef(0);
+  const t = (key: TranslationKey) => translate(locale, key);
 
   const notify: NotifyFn = (notification) => {
     setNotifications((current) => [...current.slice(-2), { ...notification, id: createId("notification") }]);
@@ -387,6 +416,11 @@ function App() {
     notify({ tone: "warning", title, message });
   };
 
+  const changeLocale = (nextLocale: Locale) => {
+    setLocale(nextLocale);
+    saveLocale(nextLocale);
+  };
+
   const goToAuthMode = (mode: AuthMode) => {
     setAuthMode(mode);
     pushBrowserPath(getPathForAuthMode(mode));
@@ -402,6 +436,10 @@ function App() {
     setView(nextSafeView);
     pushBrowserPath(getPathForView(activeUser.role, nextSafeView));
   };
+
+  useEffect(() => {
+    document.documentElement.lang = locale === "zh" ? "zh-Hans" : locale;
+  }, [locale]);
 
   useEffect(() => {
     let isMounted = true;
@@ -750,6 +788,8 @@ function App() {
       <>
         <AuthScreen
           mode={authMode}
+          locale={locale}
+          onLocaleChange={changeLocale}
           onModeChange={goToAuthMode}
           onLogin={login}
           onRegister={register}
@@ -765,14 +805,14 @@ function App() {
   const roleViews =
     currentUser.role === "admin"
       ? ([
-          ["dashboard", "Dashboard", BarChart3],
-          ["destinations", "Destinations", MapPinned],
+          ["dashboard", t("nav.dashboard"), BarChart3],
+          ["destinations", t("nav.destinations"), MapPinned],
         ] as const)
       : ([
-          ["overview", "Home", Compass],
-          ["history", "Trips", MapPinned],
-          ["recommendations", "Places", Sparkles],
-          ["events", "Event Calendar", CalendarDays],
+          ["overview", t("nav.home"), Compass],
+          ["history", t("nav.trips"), MapPinned],
+          ["recommendations", t("nav.places"), Sparkles],
+          ["events", t("nav.events"), CalendarDays],
         ] as const);
   const primaryViews = getPrimaryViewsForRole(currentUser.role);
 
@@ -784,10 +824,12 @@ function App() {
             <MapPinned size={22} />
           </div>
           <div>
-            <strong>Tourist Movement</strong>
-            <span>Monitoring</span>
+            <strong>{t("brand.title")}</strong>
+            <span>{t("brand.subtitle")}</span>
           </div>
         </div>
+
+        <LanguageSelector locale={locale} onLocaleChange={changeLocale} />
 
         <nav className="nav-list" aria-label="Primary navigation">
           {roleViews.filter(([key]) => primaryViews.includes(key)).map(([key, label, Icon]) => (
@@ -803,7 +845,7 @@ function App() {
             <UserRound size={18} />
             <div>
               <strong>{currentUser.name}</strong>
-              <span>Travel profile</span>
+              <span>{t("nav.profile")}</span>
             </div>
           </button>
         ) : (
@@ -811,7 +853,7 @@ function App() {
             <UserRound size={18} />
             <div>
               <strong>{currentUser.name}</strong>
-              <span>Tourism Administrator</span>
+              <span>{t("nav.adminRole")}</span>
             </div>
           </div>
         )}
@@ -822,7 +864,7 @@ function App() {
           {hasConfiguredAuth() && (
             <button className="status-retry-button" type="button" onClick={retryCloudSync} disabled={isRetryingSync}>
               <RotateCcw size={15} />
-              {isRetryingSync ? "Retrying" : "Retry sync"}
+              {isRetryingSync ? t("sync.retrying") : t("sync.retry")}
             </button>
           )}
         </div>
@@ -830,17 +872,17 @@ function App() {
         <div className="sidebar-tools">
           <button className="nav-item utility" onClick={exportData} title="Export prototype data">
             <Download size={18} />
-            Export data
+            {t("nav.exportData")}
           </button>
           <button className="nav-item utility danger" onClick={resetPrototype} title="Reset prototype data">
             <RotateCcw size={18} />
-            Reset demo
+            {t("nav.resetDemo")}
           </button>
         </div>
 
         <button className="nav-item logout" onClick={logout}>
           <LogOut size={18} />
-          Logout
+          {t("nav.logout")}
         </button>
       </aside>
 
@@ -858,6 +900,8 @@ function App() {
 
 function AuthScreen({
   mode,
+  locale,
+  onLocaleChange,
   onModeChange,
   onLogin,
   onRegister,
@@ -866,6 +910,8 @@ function AuthScreen({
   notify,
 }: {
   mode: AuthMode;
+  locale: Locale;
+  onLocaleChange: (locale: Locale) => void;
   onModeChange: (mode: AuthMode) => void;
   onLogin: (email: string, password: string) => Promise<AuthResult>;
   onRegister: (draft: TouristRegistrationDraft) => Promise<AuthResult>;
@@ -888,6 +934,7 @@ function AuthScreen({
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firebaseMode = hasConfiguredAuth();
+  const t = (key: TranslationKey) => translate(locale, key);
 
   const setDemoRole = (role: UserRole | "nature" | "culture" | "urban") => {
     setRoleHint(role);
@@ -1061,30 +1108,31 @@ function AuthScreen({
       <section className="auth-panel">
         <div className="auth-copy">
           <MapPinned size={34} />
-          <h1>Smart Tourist Movement Monitoring</h1>
-          <p>Consent-based trip tracking, route visualization, dashboard monitoring, and explainable destination recommendations for selected Malaysian tourist locations.</p>
+          <h1>{t("auth.title")}</h1>
+          <p>{t("auth.description")}</p>
+          <LanguageSelector locale={locale} onLocaleChange={onLocaleChange} />
         </div>
 
         <form className="auth-form" onSubmit={submit} noValidate>
-          <div className="segmented-control" role="tablist" aria-label="Authentication mode">
+          <div className="segmented-control" role="tablist" aria-label={t("auth.mode")}>
             <button
               type="button"
               className={mode === "login" ? "active" : ""}
               onClick={() => switchAuthMode("login")}
             >
-              Login
+              {t("auth.login")}
             </button>
             <button
               type="button"
               className={mode === "register" ? "active" : ""}
               onClick={() => switchAuthMode("register")}
             >
-              Register
+              {t("auth.register")}
             </button>
           </div>
 
           {mode === "login" && !firebaseMode && (
-            <div className="segmented-control role-switch profile-switch" aria-label="Demo role">
+            <div className="segmented-control role-switch profile-switch" aria-label={t("auth.demoRole")}>
               <button type="button" className={roleHint === "tourist" ? "active" : ""} onClick={() => setDemoRole("tourist")}>
                 Mixed
               </button>
@@ -1103,26 +1151,26 @@ function AuthScreen({
             </div>
           )}
           {firebaseMode && (
-            <p className="form-hint">Firebase mode is active. Use a registered and verified Firebase account.</p>
+            <p className="form-hint">{t("auth.firebaseMode")}</p>
           )}
 
           {mode === "register" && (
             <label>
-              Name
+              {t("auth.name")}
               <input value={name} onChange={(event) => setName(event.target.value)} required />
             </label>
           )}
 
           <label>
-            Email
+            {t("auth.email")}
             <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
           </label>
 
           <label>
-            Password
+            {t("auth.password")}
             <span className="password-field">
               <input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={6} />
-              <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? "Hide password" : "Show password"}>
+              <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}>
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </span>
@@ -1130,7 +1178,7 @@ function AuthScreen({
 
           {mode === "register" && (
             <label>
-              Confirm Password
+              {t("auth.confirmPassword")}
               <span className="password-field">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -1140,7 +1188,7 @@ function AuthScreen({
                   required
                   minLength={6}
                 />
-                <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? "Hide password" : "Show password"}>
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}>
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </span>
@@ -1150,9 +1198,9 @@ function AuthScreen({
           {mode === "register" && (
             <div className="field-pair auth-identity-fields">
               <label>
-                Nationality
+                {t("auth.nationality")}
                 <select value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name" required>
-                  <option value="">Select nationality</option>
+                  <option value="">{t("auth.selectNationality")}</option>
                   {nationalityOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -1161,23 +1209,20 @@ function AuthScreen({
                 </select>
               </label>
               <label>
-                Passport Number
+                {t("auth.passportNumber")}
                 <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" placeholder="Example: A12345678" required />
-                <small className="field-hint">Use 5 to 20 letters or numbers, for example A12345678.</small>
+                <small className="field-hint">{t("auth.passportHint")}</small>
               </label>
             </div>
           )}
 
           {mode === "register" && (
             <section className="auth-terms-panel">
-              <strong>Data privacy and tourist safety</strong>
-              <p>
-                The app stores your profile, consent choice, trip route points and recommendation results so tourism administrators can monitor movement trends.
-                Passport and nationality details are kept with your account for identity support if assistance is needed during a recorded trip.
-              </p>
+              <strong>{t("auth.privacyTitle")}</strong>
+              <p>{t("auth.privacyBody")}</p>
               <label className="checkbox-field remember-login">
                 <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} required />
-                I agree to consent-based location tracking and account data storage.
+                {t("auth.privacyAgreement")}
               </label>
             </section>
           )}
@@ -1193,7 +1238,7 @@ function AuthScreen({
                 }
               }}
             />
-            Remember login on this device
+            {t("auth.rememberLogin")}
           </label>
 
           {error && <p className="form-error">{error}</p>}
@@ -1201,24 +1246,24 @@ function AuthScreen({
 
           <button className="primary-action" type="submit" disabled={isSubmitting}>
             <ShieldCheck size={18} />
-            {isSubmitting ? "Checking access" : mode === "login" ? "Enter system" : "Create tourist account"}
+            {isSubmitting ? t("auth.checkingAccess") : mode === "login" ? t("auth.enterSystem") : t("auth.createAccount")}
           </button>
 
           {firebaseMode && mode === "login" && (
             <div className="auth-secondary-actions">
               <button className="secondary-action" type="button" onClick={resendVerification} disabled={isSubmitting}>
                 <RotateCcw size={18} />
-                Resend verification email
+                {t("auth.resendVerification")}
               </button>
               <button className="secondary-action" type="button" onClick={requestPasswordReset} disabled={isSubmitting}>
                 <KeyRound size={18} />
-                Forgot password
+                {t("auth.forgotPassword")}
               </button>
             </div>
           )}
 
           <button className="auth-mode-link" type="button" onClick={() => switchAuthMode(mode === "login" ? "register" : "login")}>
-            {mode === "login" ? "Create Tourist Account" : "Already have an account? Login"}
+            {mode === "login" ? t("auth.createTouristAccount") : t("auth.alreadyHaveAccount")}
           </button>
         </form>
       </section>

@@ -117,6 +117,32 @@ button:disabled {
   margin-top: 3px;
 }
 
+.language-selector {
+  display: grid;
+  gap: 5px;
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.language-selector select {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #d7e2dc;
+  border-radius: 8px;
+  color: #102033;
+  background: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.auth-copy .language-selector {
+  width: min(230px, 100%);
+  margin-top: 18px;
+}
+
 .nav-list {
   display: grid;
   gap: 8px;
@@ -3572,6 +3598,7 @@ textarea {
   }
 
   .tourist-shell .brand,
+  .tourist-shell .language-selector,
   .tourist-shell .account-strip,
   .tourist-shell .status-pill,
   .tourist-shell .sidebar-tools,
