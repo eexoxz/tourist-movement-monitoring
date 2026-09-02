@@ -19,6 +19,7 @@ describe("storage service", () => {
         "sos_alerts",
         "incident_reports",
         "attraction_checkins",
+        "geofences",
       ])
     );
   });
@@ -112,6 +113,17 @@ describe("storage service", () => {
           checkedInAt: "2026-08-01T01:30:00.000Z",
         },
       ],
+      geofences: [
+        {
+          id: "geofence-old",
+          name: "Older zone",
+          latitude: 3.1556,
+          longitude: 101.7139,
+          radiusMeters: 500,
+          message: "Older zone message.",
+          recommendedAction: "Use normal care.",
+        },
+      ],
     };
 
     const normalized = normalizeAppData(legacyData as Parameters<typeof normalizeAppData>[0]);
@@ -128,6 +140,7 @@ describe("storage service", () => {
     expect(normalized.sosAlerts[0].status).toBe("open");
     expect(normalized.incidentReports[0].type).toBe("other");
     expect(normalized.checkIns[0].status).toBe("checked-in");
+    expect(normalized.geofences[0].type).toBe("dense");
   });
 
   it("creates ids when randomUUID is unavailable on LAN preview origins", () => {

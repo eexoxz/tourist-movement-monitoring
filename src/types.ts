@@ -76,6 +76,22 @@ export type Destination = {
   averageVisitMinutes: number;
 };
 
+export type GeoFenceType = "safe" | "restricted" | "dense";
+
+export type GeoFence = {
+  id: string;
+  name: string;
+  type: GeoFenceType;
+  city: string;
+  state: MalaysianState;
+  latitude: number;
+  longitude: number;
+  radiusMeters: number;
+  message: string;
+  recommendedAction: string;
+  destinationId?: string;
+};
+
 export type FestivalEvent = {
   id: string;
   name: string;
@@ -283,4 +299,5 @@ export type AppData = {
   sosAlerts: SosAlert[];
   incidentReports: IncidentReport[];
   checkIns: AttractionCheckIn[];
+  geofences: GeoFence[];
 };

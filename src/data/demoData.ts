@@ -1,5 +1,5 @@
 import { destinations } from "./destinations";
-import type { AppData, AttractionCheckIn, Destination, DestinationCategory, IncidentReport, LocationConsent, MovementPoint, SosAlert, TouristProfile, TripSession, User } from "../types";
+import type { AppData, AttractionCheckIn, Destination, DestinationCategory, GeoFence, IncidentReport, LocationConsent, MovementPoint, SosAlert, TouristProfile, TripSession, User } from "../types";
 
 const now = new Date();
 const GENERATED_TOURIST_COUNT = 300;
@@ -207,6 +207,74 @@ const baseCheckIns: AttractionCheckIn[] = [
   },
 ];
 
+const geofences: GeoFence[] = [
+  {
+    id: "geofence-klcc-crowd",
+    name: "KLCC crowd watch zone",
+    type: "dense",
+    city: "Kuala Lumpur",
+    state: "Federal Territories",
+    latitude: 3.1556,
+    longitude: 101.7139,
+    radiusMeters: 650,
+    message: "KLCC is receiving stronger visitor movement right now.",
+    recommendedAction: "Expect busier walkways and consider nearby alternatives if you prefer a quieter stop.",
+    destinationId: "klcc-park",
+  },
+  {
+    id: "geofence-george-town-safe",
+    name: "George Town heritage walk zone",
+    type: "safe",
+    city: "Penang",
+    state: "Penang",
+    latitude: 5.4141,
+    longitude: 100.3288,
+    radiusMeters: 900,
+    message: "You are near a monitored heritage walking area.",
+    recommendedAction: "Use check-in when you arrive at a specific attraction so your visit duration is recorded.",
+    destinationId: "george-town-heritage-zone",
+  },
+  {
+    id: "geofence-batu-caves-crowd",
+    name: "Batu Caves festival crowd zone",
+    type: "dense",
+    city: "Selangor",
+    state: "Selangor",
+    latitude: 3.2379,
+    longitude: 101.684,
+    radiusMeters: 850,
+    message: "Batu Caves can become crowded during cultural and religious periods.",
+    recommendedAction: "Plan extra time for steps, queues, and transport around the entrance area.",
+    destinationId: "batu-caves",
+  },
+  {
+    id: "geofence-jonker-night-crowd",
+    name: "Jonker Street evening crowd zone",
+    type: "dense",
+    city: "Melaka",
+    state: "Melaka",
+    latitude: 2.196,
+    longitude: 102.2477,
+    radiusMeters: 700,
+    message: "Jonker Street has a higher chance of crowding around evening market hours.",
+    recommendedAction: "Keep belongings close and use the app's incident report if something goes wrong.",
+    destinationId: "jonker-street",
+  },
+  {
+    id: "geofence-tanjung-aru-sunset",
+    name: "Tanjung Aru sunset crowd zone",
+    type: "dense",
+    city: "Kota Kinabalu",
+    state: "Sabah",
+    latitude: 5.9487,
+    longitude: 116.0474,
+    radiusMeters: 750,
+    message: "Sunset hours can bring heavier movement around Tanjung Aru Beach.",
+    recommendedAction: "Arrive earlier if you want an easier walking route and clearer pickup point.",
+    destinationId: "tanjung-aru",
+  },
+];
+
 const travelPreferencesByProfile: Record<TouristProfile, DestinationCategory[]> = {
   cultural: ["cultural", "heritage"],
   nature: ["nature", "coastal"],
@@ -349,4 +417,5 @@ export const initialData: AppData = {
   sosAlerts: baseSosAlerts,
   incidentReports: baseIncidentReports,
   checkIns: baseCheckIns,
+  geofences,
 };

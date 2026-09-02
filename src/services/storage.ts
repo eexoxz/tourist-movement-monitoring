@@ -5,9 +5,12 @@ import type {
   AttractionCheckIn,
   Destination,
   DestinationCategory,
+  GeoFence,
+  GeoFenceType,
   IncidentReport,
   KMeansFeatureVector,
   LocationConsent,
+  MalaysianState,
   MovementPoint,
   Recommendation,
   SosAlert,
@@ -35,6 +38,7 @@ export const FIRESTORE_COLLECTIONS = {
   sosAlerts: "sos_alerts",
   incidentReports: "incident_reports",
   checkIns: "attraction_checkins",
+  geofences: "geofences",
 } as const;
 
 const LEGACY_FIRESTORE_COLLECTIONS = {
@@ -132,6 +136,7 @@ export function publicUser(user: User) {
 export function normalizeAppData(value: Partial<AppData> | null | undefined): AppData {
   const data = value ?? {};
   const destinations = Array.isArray(data.destinations) && data.destinations.length > 0 ? data.destinations : initialData.destinations;
+  const geofences = Array.isArray(data.geofences) && data.geofences.length > 0 ? data.geofences : initialData.geofences;
 
   return {
     users: asArray<User>(data.users),
@@ -144,6 +149,7 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
     sosAlerts: asArray<Partial<SosAlert>>(data.sosAlerts).map(normalizeSosAlert),
     incidentReports: asArray<Partial<IncidentReport>>(data.incidentReports).map(normalizeIncidentReport),
     checkIns: asArray<Partial<AttractionCheckIn>>(data.checkIns).map(normalizeCheckIn),
+    geofences: asArray<Partial<GeoFence>>(geofences).map(normalizeGeofence),
   };
 }
 
@@ -226,7 +232,7 @@ export async function loadCloudData(fallbackActor?: User | null) {
     ? readCollection<TouristPreferenceDocument>(FIRESTORE_COLLECTIONS.touristPreferences)
     : readDocument<TouristPreferenceDocument>(FIRESTORE_COLLECTIONS.touristPreferences, authUid).then((preference) => (preference ? [preference] : []));
 
-  const [users, touristProfiles, touristPreferences, consents, trips, points, destinations, analyses, recommendations, sosAlerts, incidentReports, checkIns] = await Promise.all([
+  const [users, touristProfiles, touristPreferences, consents, trips, points, destinations, analyses, recommendations, sosAlerts, incidentReports, checkIns, geofences] = await Promise.all([
     userRows,
     profileRows,
     preferenceRows,
@@ -239,6 +245,7 @@ export async function loadCloudData(fallbackActor?: User | null) {
     readScopedCollection<SosAlert>(FIRESTORE_COLLECTIONS.sosAlerts),
     readScopedCollection<IncidentReport>(FIRESTORE_COLLECTIONS.incidentReports),
     readScopedCollection<AttractionCheckIn>(FIRESTORE_COLLECTIONS.checkIns),
+    readCollection<GeoFence>(FIRESTORE_COLLECTIONS.geofences),
   ]);
 
   const mergedUsers = mergeUserDocuments(users, touristProfiles, touristPreferences);
@@ -252,7 +259,8 @@ export async function loadCloudData(fallbackActor?: User | null) {
     recommendations.length > 0 ||
     sosAlerts.length > 0 ||
     incidentReports.length > 0 ||
-    checkIns.length > 0;
+    checkIns.length > 0 ||
+    geofences.length > 0;
 
   if (hasStructuredData) {
     const data = normalizeAppData({
@@ -266,6 +274,7 @@ export async function loadCloudData(fallbackActor?: User | null) {
       sosAlerts,
       incidentReports,
       checkIns,
+      geofences,
     });
     saveLocalData(data);
     return data;
@@ -423,6 +432,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await syncCollection(FIRESTORE_COLLECTIONS.sosAlerts, data.sosAlerts, (alert) => alert.id);
     await syncCollection(FIRESTORE_COLLECTIONS.incidentReports, data.incidentReports, (report) => report.id);
     await syncCollection(FIRESTORE_COLLECTIONS.checkIns, data.checkIns, (checkIn) => checkIn.id);
+    await syncCollection(FIRESTORE_COLLECTIONS.geofences, data.geofences, (geofence) => geofence.id);
   }
 
   await commitQueuedWrites();
@@ -679,6 +689,49 @@ function normalizeCheckIn(checkIn: Partial<AttractionCheckIn>): AttractionCheckI
     checkedOutAt: status === "checked-out" ? (checkIn.checkedOutAt ?? checkedInAt) : undefined,
     latitude: Number.isFinite(checkIn.latitude) ? checkIn.latitude : undefined,
     longitude: Number.isFinite(checkIn.longitude) ? checkIn.longitude : undefined,
+  };
+}
+
+const malaysiaStateFallback: MalaysianState = "Federal Territories";
+
+function normalizeGeofenceType(type: unknown): GeoFenceType {
+  return type === "safe" || type === "restricted" || type === "dense" ? type : "dense";
+}
+
+function normalizeMalaysianState(state: unknown): MalaysianState {
+  const states: MalaysianState[] = [
+    "Johor",
+    "Kedah",
+    "Kelantan",
+    "Melaka",
+    "Negeri Sembilan",
+    "Pahang",
+    "Penang",
+    "Perak",
+    "Perlis",
+    "Sabah",
+    "Sarawak",
+    "Selangor",
+    "Terengganu",
+    "Federal Territories",
+  ];
+
+  return states.includes(state as MalaysianState) ? (state as MalaysianState) : malaysiaStateFallback;
+}
+
+function normalizeGeofence(geofence: Partial<GeoFence>): GeoFence {
+  return {
+    id: geofence.id ?? createId("geofence"),
+    name: geofence.name ?? "Tourist monitoring zone",
+    type: normalizeGeofenceType(geofence.type),
+    city: geofence.city ?? "Malaysia",
+    state: normalizeMalaysianState(geofence.state),
+    latitude: Number.isFinite(geofence.latitude) ? geofence.latitude! : 3.1556,
+    longitude: Number.isFinite(geofence.longitude) ? geofence.longitude! : 101.7139,
+    radiusMeters: Number.isFinite(geofence.radiusMeters) ? Math.max(100, geofence.radiusMeters!) : 600,
+    message: geofence.message ?? "Tourist movement is being monitored in this area.",
+    recommendedAction: geofence.recommendedAction ?? "Use normal travel care and follow local guidance.",
+    destinationId: geofence.destinationId,
   };
 }
 

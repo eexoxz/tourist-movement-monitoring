@@ -181,6 +181,14 @@ service cloud.firestore {
       allow delete: if isAdmin() || ownsExistingRecord();
     }
 
+    match /geofences/{geofenceId} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin()
+        && isValidCoordinate(request.resource.data.latitude, request.resource.data.longitude)
+        && request.resource.data.type in ["safe", "restricted", "dense"];
+      allow delete: if isAdmin();
+    }
+
     match /consents/{consentId} {
       allow read: if canReadOwnedRecord();
       allow create: if canCreateOwnedRecord() && request.resource.data.granted is bool;

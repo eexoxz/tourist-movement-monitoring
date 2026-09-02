@@ -19,10 +19,11 @@ This schema supports the DPP prototype with Firebase Authentication and Firestor
 | `sos_alerts` | SOS alert ID | Tourist SOS assistance requests, status, timestamp, and latest available location reference |
 | `incident_reports` | Incident report ID | Tourist-submitted lost item, accident, suspicious activity, medical, or general help reports |
 | `attraction_checkins` | Check-in ID | Tourist attraction check-in/check-out records linked to a destination and optional active trip |
+| `geofences` | Geofence ID | Local safe, dense, or restricted tourist monitoring zones used for warning logic without adding another API |
 
 ## Role Model
 
-Tourist users can read and update their own profile, consent, trips, movement records, attraction check-ins, SOS requests, and incident reports. Tourism administrators can read tourist movement summaries, update safety case status, and manage destination, analysis, and recommendation records.
+Tourist users can read and update their own profile, consent, trips, movement records, attraction check-ins, SOS requests, and incident reports. Signed-in users can read geofence warning zones. Tourism administrators can read tourist movement summaries, update safety case status, and manage destination, analysis, recommendation, and geofence records.
 
 New Firebase tourist accounts use the Firebase Auth UID as the `users` document ID. Admin accounts should be created by manually setting a trusted `users/{uid}` document with `role: "admin"` after the Firebase Auth account exists.
 

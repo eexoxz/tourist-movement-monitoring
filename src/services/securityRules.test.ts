@@ -14,6 +14,7 @@ describe("Firestore security rules coverage", () => {
     expect(firestoreRules).toContain("match /sos_alerts/{alertId}");
     expect(firestoreRules).toContain("match /incident_reports/{reportId}");
     expect(firestoreRules).toContain("match /attraction_checkins/{checkInId}");
+    expect(firestoreRules).toContain("match /geofences/{geofenceId}");
   });
 
   it("lets administrators review summaries and manage destination records", () => {

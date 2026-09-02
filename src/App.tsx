@@ -110,12 +110,14 @@ import {
   summarizeUserTrips,
 } from "./services/movement";
 import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn, getCheckInDurationMinutes } from "./services/checkIns";
+import { calculateGeofenceActivity, getActiveGeofenceWarnings } from "./services/geofencing";
 import { createIncidentReport, createSosAlert, getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "./services/safety";
+import { getTouristManagementRows } from "./services/touristManagement";
 
 const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
-type AdminDashboardTab = "overview" | "records" | "safety" | "ai";
+type AdminDashboardTab = "overview" | "tourists" | "records" | "safety" | "ai";
 type AuthResult = { error?: string; message?: string };
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
 type TouristRegistrationDraft = {
@@ -1317,6 +1319,7 @@ function TouristWorkspace({
   const [incidentDescription, setIncidentDescription] = useState("");
   const [incidentLocationNote, setIncidentLocationNote] = useState("");
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
+  const geofenceNoticeKey = useRef("");
   const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
   const tripSummaries = useMemo(() => summarizeUserTrips(data, user.id), [data, user.id]);
   const recentTrips = useMemo(() => [...userTrips].sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()), [userTrips]);
@@ -1354,6 +1357,7 @@ function TouristWorkspace({
   const activeCheckInDestination = activeCheckIn ? data.destinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
   const recentCheckIns = data.checkIns.filter((checkIn) => checkIn.userId === user.id).slice(0, 3);
   const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, data.destinations)?.destination : null;
+  const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(latestKnownPoint, data.geofences), [data.geofences, latestKnownPoint]);
   const displayName = getDisplayName(user);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
   const hasPersonalizedRecommendations = Boolean(latestAnalysis);
@@ -1366,6 +1370,20 @@ function TouristWorkspace({
     setTrackingMessage(message);
     notify({ tone, title, message });
   };
+
+  useEffect(() => {
+    const warningKey = geofenceWarnings.map((warning) => warning.geofence.id).join("|");
+    if (!warningKey) {
+      geofenceNoticeKey.current = "";
+      return;
+    }
+
+    if (warningKey !== geofenceNoticeKey.current) {
+      const warning = geofenceWarnings[0];
+      geofenceNoticeKey.current = warningKey;
+      notify({ tone: warning.tone, title: warning.geofence.name, message: warning.geofence.message });
+    }
+  }, [geofenceWarnings, notify]);
 
   useEffect(() => {
     if (!activeTrip && isLiveTracking) {
@@ -2021,6 +2039,30 @@ function TouristWorkspace({
 
         <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} activePoint={activePoints.at(-1) ?? tripPoints.at(-1)} mode="tourist" />
 
+        {geofenceWarnings.length > 0 && (
+          <section className="tourist-section geofence-warning-panel">
+            <div className="section-heading">
+              <div>
+                <span>Area guidance</span>
+                <h2>Useful notice near you</h2>
+                <p>These notices use local monitoring zones and your latest saved trip point.</p>
+              </div>
+            </div>
+            <div className="geofence-warning-list">
+              {geofenceWarnings.map((warning) => (
+                <article className={`geofence-warning-card ${warning.geofence.type}`} key={warning.geofence.id}>
+                  <div>
+                    <strong>{warning.geofence.name}</strong>
+                    <span>{warning.distanceMeters} m away</span>
+                  </div>
+                  <p>{warning.geofence.message}</p>
+                  <small>{warning.geofence.recommendedAction}</small>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="mobile-trip-controls">
           <div className="consent-box">
             <ShieldCheck size={22} />
@@ -2529,6 +2571,9 @@ function AdminWorkspace({
   const [planMinimumTier, setPlanMinimumTier] = useState<PlanTier>("emerging");
   const [planDiversifyCategories, setPlanDiversifyCategories] = useState(true);
   const [selectedAnalysisKey, setSelectedAnalysisKey] = useState<string | null>(null);
+  const [touristSearch, setTouristSearch] = useState("");
+  const [touristProfileFilter, setTouristProfileFilter] = useState<TouristProfile | "all" | "incomplete">("all");
+  const [selectedManagedTouristId, setSelectedManagedTouristId] = useState<string | null>(null);
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
   const movementRecords = useMemo(
@@ -2557,6 +2602,26 @@ function AdminWorkspace({
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const movementAlerts = useMemo(() => calculateMovementAlerts(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
+  const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data]);
+  const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
+  const touristManagementRows = useMemo(() => getTouristManagementRows(data), [data]);
+  const filteredTouristManagementRows = useMemo(() => {
+    const search = touristSearch.trim().toLowerCase();
+
+    return touristManagementRows.filter((row) => {
+      const matchesSearch =
+        !search ||
+        row.tourist.name.toLowerCase().includes(search) ||
+        row.tourist.email.toLowerCase().includes(search) ||
+        (row.tourist.nationality ?? "").toLowerCase().includes(search) ||
+        (row.tourist.passportNumber ?? "").toLowerCase().includes(search);
+      const matchesProfile =
+        touristProfileFilter === "all" ||
+        (touristProfileFilter === "incomplete" ? !row.tourist.profileCompletedAt && !row.tourist.travelPreferences?.length : row.profile === touristProfileFilter);
+
+      return matchesSearch && matchesProfile;
+    });
+  }, [touristManagementRows, touristProfileFilter, touristSearch]);
   const travelPlan = useMemo(
     () =>
       createMovementBasedTravelPlan(data, {
@@ -2614,6 +2679,7 @@ function AdminWorkspace({
   const openIncidentCount = data.incidentReports.filter((report) => report.status !== "resolved").length;
   const openSafetyRecordCount = getOpenSafetyCount(data);
   const resolvedSafetyRecordCount = safetyRecords.filter((record) => record.status === "resolved").length;
+  const selectedManagedTourist = filteredTouristManagementRows.find((row) => row.tourist.id === selectedManagedTouristId) ?? filteredTouristManagementRows[0] ?? null;
   const selectedKValue = aiEvaluation.validClusteredRecordCount > 0 ? Math.min(3, aiEvaluation.validClusteredRecordCount) : 0;
   const selectedClusterSize = selectedAnalysis ? analysisRows.filter((analysis) => analysis.cluster === selectedAnalysis.cluster).length : 0;
   const clusterSummaries = useMemo(
@@ -2656,6 +2722,12 @@ function AdminWorkspace({
       setSelectedAnalysisKey(null);
     }
   }, [analysisRows, selectedAnalysisKey]);
+
+  useEffect(() => {
+    if (selectedManagedTouristId && !filteredTouristManagementRows.some((row) => row.tourist.id === selectedManagedTouristId)) {
+      setSelectedManagedTouristId(null);
+    }
+  }, [filteredTouristManagementRows, selectedManagedTouristId]);
 
   const recomputeAi = () => {
     onDataChange(refreshAllRecommendations(data));
@@ -2708,6 +2780,106 @@ function AdminWorkspace({
       message: status === "resolved" ? "The case is marked as resolved." : "The case status was saved.",
     });
   };
+
+  const touristManagementPanel = (
+    <div className="admin-tab-panel">
+      <div className="admin-tab-heading">
+        <div>
+          <h2>Tourist Management</h2>
+          <p>Review registered tourists, travel profiles, consent state, movement activity, and support needs.</p>
+        </div>
+        <strong>{filteredTouristManagementRows.length} shown</strong>
+      </div>
+      <div className="filter-toolbar admin-filter-toolbar">
+        <input className="toolbar-input" value={touristSearch} onChange={(event) => setTouristSearch(event.target.value)} placeholder="Search name, email, nationality, passport" aria-label="Search tourists" />
+        <select className="toolbar-select" value={touristProfileFilter} onChange={(event) => setTouristProfileFilter(event.target.value as TouristProfile | "all" | "incomplete")}>
+          <option value="all">All profiles</option>
+          <option value="cultural">Cultural tourists</option>
+          <option value="nature">Nature tourists</option>
+          <option value="urban">Urban tourists</option>
+          <option value="mixed">Mixed tourists</option>
+          <option value="incomplete">Incomplete profile</option>
+        </select>
+      </div>
+      <MetricGrid
+        items={[
+          ["Registered tourists", tourists.length.toString()],
+          ["With passport", tourists.filter((tourist) => tourist.passportNumber).length.toString()],
+          ["Active trips", summary.activeTripCount.toString()],
+          ["Open safety cases", openSafetyRecordCount.toString()],
+        ]}
+      />
+      <section className="tourist-management-layout">
+        <div className="list-panel tourist-management-list">
+          {filteredTouristManagementRows.map((row) => (
+            <button className={selectedManagedTourist?.tourist.id === row.tourist.id ? "tourist-management-card active" : "tourist-management-card"} key={row.tourist.id} type="button" onClick={() => setSelectedManagedTouristId(row.tourist.id)}>
+              <div>
+                <strong>{row.tourist.name}</strong>
+                <span>{row.profile ? `${row.profile} tourist` : "Profile pending"}</span>
+              </div>
+              <p>{row.tourist.nationality ?? "Nationality not provided"} · {row.consentGranted ? "Location consent active" : "No active consent"}</p>
+              <div className="record-metrics">
+                <span>{row.completedTrips} trips</span>
+                <span>{row.movementPoints} points</span>
+                <span>{row.checkIns} check-ins</span>
+                <span>{row.openSafetyCases} safety</span>
+              </div>
+            </button>
+          ))}
+          {filteredTouristManagementRows.length === 0 && <EmptyState text="No tourists match the current search or profile filter." />}
+        </div>
+
+        {selectedManagedTourist && (
+          <aside className="tourist-management-detail">
+            <span>Selected tourist</span>
+            <h2>{selectedManagedTourist.tourist.name}</h2>
+            <p>{selectedManagedTourist.latestActivityAt ? `Latest activity: ${formatDateTime(selectedManagedTourist.latestActivityAt)}` : "No movement activity has been recorded yet."}</p>
+            <dl>
+              <div>
+                <dt>Email</dt>
+                <dd>{selectedManagedTourist.tourist.email}</dd>
+              </div>
+              <div>
+                <dt>Nationality</dt>
+                <dd>{selectedManagedTourist.tourist.nationality ?? "Not provided"}</dd>
+              </div>
+              <div>
+                <dt>Passport</dt>
+                <dd>{selectedManagedTourist.tourist.passportNumber ?? "Not provided"}</dd>
+              </div>
+              <div>
+                <dt>Travel style</dt>
+                <dd>{formatTravelPreferenceList(selectedManagedTourist.tourist.travelPreferences)}</dd>
+              </div>
+              <div>
+                <dt>Emergency contact</dt>
+                <dd>
+                  {selectedManagedTourist.tourist.emergencyContactPhone
+                    ? `${selectedManagedTourist.tourist.emergencyContactName || "Saved contact"} · ${selectedManagedTourist.tourist.emergencyContactPhone}`
+                    : "Not provided"}
+                </dd>
+              </div>
+              <div>
+                <dt>Recent places</dt>
+                <dd>{selectedManagedTourist.latestDestinationNames.length > 0 ? selectedManagedTourist.latestDestinationNames.join(", ") : "No recognised places yet"}</dd>
+              </div>
+            </dl>
+            <div className="tourist-detail-actions">
+              <button className="secondary-action" type="button" onClick={() => {
+                setSelectedTouristId(selectedManagedTourist.tourist.id);
+                setAdminTab("records");
+              }}>
+                View movement records
+              </button>
+              <button className="secondary-action" type="button" onClick={() => setAdminTab("safety")}>
+                View safety cases
+              </button>
+            </div>
+          </aside>
+        )}
+      </section>
+    </div>
+  );
 
   const movementRecordsPanel = (
     <div className="admin-tab-panel">
@@ -3086,6 +3258,9 @@ function AdminWorkspace({
         <button className={adminTab === "overview" ? "active" : ""} type="button" onClick={() => setAdminTab("overview")}>
           Overview
         </button>
+        <button className={adminTab === "tourists" ? "active" : ""} type="button" onClick={() => setAdminTab("tourists")}>
+          Tourists
+        </button>
         <button className={adminTab === "records" ? "active" : ""} type="button" onClick={() => setAdminTab("records")}>
           Movement Records
         </button>
@@ -3117,6 +3292,7 @@ function AdminWorkspace({
               ["Movement alerts", movementAlerts.length.toString()],
               ["Safety cases", openSafetyRecordCount.toString()],
               ["Check-ins", data.checkIns.length.toString()],
+              ["Active zones", activeGeofenceCount.toString()],
             ]}
           />
           <div className="two-column">
@@ -3124,6 +3300,27 @@ function AdminWorkspace({
             <section className="panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
               <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
+              <section className="geofence-admin-panel">
+                <div className="section-heading">
+                  <h2>Geofence Activity</h2>
+                  <span>{activeGeofenceCount} active</span>
+                </div>
+                <div className="geofence-admin-list">
+                  {geofenceActivity.slice(0, 5).map((row) => (
+                    <article className={`geofence-admin-card ${row.geofence.type}`} key={row.geofence.id}>
+                      <div>
+                        <strong>{row.geofence.name}</strong>
+                        <span>{row.geofence.type}</span>
+                      </div>
+                      <p>{row.geofence.message}</p>
+                      <small>
+                        {row.pointCount} movement point(s), {row.touristCount} tourist(s)
+                        {row.latestRecordedAt ? ` · latest ${formatDateTime(row.latestRecordedAt)}` : ""}
+                      </small>
+                    </article>
+                  ))}
+                </div>
+              </section>
               <h2>Movement Trend</h2>
               <CategoryBars values={movementTrend} />
               <h2>Movement Demand</h2>
@@ -3183,6 +3380,7 @@ function AdminWorkspace({
           </div>
         </div>
       )}
+      {adminTab === "tourists" && touristManagementPanel}
       {adminTab === "records" && movementRecordsPanel}
       {adminTab === "safety" && safetyPanel}
       {adminTab === "ai" && aiResultsPanel}
