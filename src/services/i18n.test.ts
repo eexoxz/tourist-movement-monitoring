@@ -30,4 +30,12 @@ describe("i18n", () => {
     expect(translate("es", "tourist.safety.submitIncident")).toBe("Enviar reporte de incidente");
     expect(translate("fr", "tourist.home.stopTrip")).toBe("Arrêter le voyage");
   });
+
+  it("covers the tourist pages added after login", () => {
+    expect(translate("en", "tourist.trips.pageTitle")).toBe("Trip Diary");
+    expect(translate("en", "tourist.places.heroTitle")).toBe("Find places that match your trip right now.");
+    expect(translate("en", "tourist.events.calendarTitle")).toBe("Malaysia Festival Calendar");
+    expect(translate("en", "tourist.completed.viewRecommendations")).toBe("View Recommendations");
+    expect(translate("en", "tourist.recommendations.viewDestination")).toBe("View Destination");
+  });
 });

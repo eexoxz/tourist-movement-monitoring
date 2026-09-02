@@ -265,34 +265,34 @@ function getDisplayName(user: User) {
   return name && name !== user.email && !name.includes("@") ? name : "";
 }
 
-function formatTripTitle(trip: TripSession, destinationNames: string[]) {
+function formatTripTitle(trip: TripSession, destinationNames: string[], t: (key: TranslationKey) => string) {
   const routeLabel = destinationNames.slice(0, 2).join(" to ");
 
   if (routeLabel) {
-    return `${routeLabel} trip`;
+    return `${routeLabel} ${t("tourist.trips.tripSuffix")}`;
   }
 
-  return trip.status === "active" ? "Current trip" : "Malaysia trip";
+  return trip.status === "active" ? t("tourist.trips.currentTripTitle") : t("tourist.trips.malaysiaTripTitle");
 }
 
-function getTripDiaryInsight(summary: TripSummary, destinationNames: string[]) {
+function getTripDiaryInsight(summary: TripSummary, destinationNames: string[], t: (key: TranslationKey) => string) {
   if (summary.pointCount < 2) {
-    return "Keep this trip recording while you move around. Once there is a little more activity, the app can suggest places that better fit your route.";
+    return t("tourist.trips.insightRecording");
   }
 
   if (destinationNames.length > 0) {
-    return `You spent time around ${destinationNames.slice(0, 3).join(", ")}. Use this trip to find similar places nearby and compare where visitor movement is forming next.`;
+    return `You spent time around ${destinationNames.slice(0, 3).join(", ")}. ${t("tourist.trips.insightKnownRoute")}`;
   }
 
-  return "Your route is saved. Recommendations will become more useful as your trip gets closer to known Malaysian attractions and active visitor areas.";
+  return t("tourist.trips.insightSavedRoute");
 }
 
-function getTripSuggestionStatus(summary: TripSummary, analysis: AnalysisResult | null) {
+function getTripSuggestionStatus(summary: TripSummary, analysis: AnalysisResult | null, t: (key: TranslationKey) => string) {
   if (summary.pointCount < 2) {
-    return "Keep recording";
+    return t("tourist.trips.keepRecording");
   }
 
-  return analysis ? "Ready" : "Refresh";
+  return analysis ? t("tourist.trips.ready") : t("tourist.trips.refresh");
 }
 
 function inferExpectedProfileFromPreferences(preferences: DestinationCategory[]): NonNullable<User["expectedProfile"]> {
@@ -328,6 +328,14 @@ function formatDistance(distance?: number) {
   }
 
   return distance < 1 ? `${Math.round(distance * 1000)} m away` : `${distance.toFixed(1)} km away`;
+}
+
+function formatDistanceLabel(distance: number | undefined, t: (key: TranslationKey) => string) {
+  if (distance === undefined) {
+    return t("tourist.places.locationNotActive");
+  }
+
+  return distance < 1 ? `${Math.round(distance * 1000)} ${t("tourist.places.mAway")}` : `${distance.toFixed(1)} ${t("tourist.places.kmAway")}`;
 }
 
 function categoryFitsProfile(category: DestinationCategory, profile?: TouristProfile) {
@@ -1344,7 +1352,6 @@ function TouristWorkspace({
   const latestCompletedTripDestinationNames = useMemo(() => {
     return getRecognizedDestinationNames(latestCompletedTripPoints, data.destinations);
   }, [latestCompletedTripPoints, data.destinations]);
-  const tripStateLabel = activeTrip ? "Active" : latestCompletedTrip ? "Completed" : "Not Started";
   const recentTrip = recentTrips[0];
   const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
@@ -1361,13 +1368,14 @@ function TouristWorkspace({
   const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, data.destinations)?.destination : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(latestKnownPoint, data.geofences), [data.geofences, latestKnownPoint]);
   const displayName = getDisplayName(user);
+  const t = (key: TranslationKey) => translate(locale, key);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
   const hasPersonalizedRecommendations = Boolean(latestAnalysis);
-  const recommendationHeading = hasPersonalizedRecommendations ? "Recommended For You" : "Basic Suggestions";
+  const tripStateLabel = activeTrip ? t("common.active") : latestCompletedTrip ? t("common.completed") : t("common.notStarted");
+  const recommendationHeading = hasPersonalizedRecommendations ? t("tourist.home.recommendationsPersonalized") : t("tourist.home.recommendationsBasic");
   const recommendationSupportText = hasPersonalizedRecommendations
-    ? "These places use your latest movement pattern, tourist category and unvisited destination list."
-    : "These are general suggestions from destination demand and your current location until a completed trip creates an AI result.";
-  const t = (key: TranslationKey) => translate(locale, key);
+    ? t("tourist.home.recommendationsPersonalizedText")
+    : t("tourist.home.recommendationsBasicText");
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -1791,6 +1799,7 @@ function TouristWorkspace({
                 summary={latestCompletedTripSummary}
                 destinationNames={latestCompletedTripDestinationNames}
                 analysis={latestCompletedTripAnalysis}
+                locale={locale}
                 onViewHistory={() => {
                   setSelectedTripId(latestCompletedTrip.id);
                   onViewChange("history");
@@ -1828,31 +1837,31 @@ function TouristWorkspace({
     const completedTripCount = userTrips.filter((trip) => trip.status === "completed").length;
     const totalDistanceKm = Number(tripSummaries.reduce((sum, summary) => sum + summary.distanceKm, 0).toFixed(1));
     const totalRecognizedStops = tripSummaries.reduce((sum, summary) => sum + summary.visitedDestinationCount, 0);
-    const selectedTripTitle = selectedTrip ? formatTripTitle(selectedTrip, selectedTripDestinationNames) : "No trip selected";
-    const selectedTripInsight = selectedTripSummary ? getTripDiaryInsight(selectedTripSummary, selectedTripDestinationNames) : "";
-    const selectedTripSuggestionStatus = selectedTripSummary ? getTripSuggestionStatus(selectedTripSummary, selectedTripAnalysis) : "Waiting";
+    const selectedTripTitle = selectedTrip ? formatTripTitle(selectedTrip, selectedTripDestinationNames, t) : t("tourist.trips.noTripSelected");
+    const selectedTripInsight = selectedTripSummary ? getTripDiaryInsight(selectedTripSummary, selectedTripDestinationNames, t) : "";
+    const selectedTripSuggestionStatus = selectedTripSummary ? getTripSuggestionStatus(selectedTripSummary, selectedTripAnalysis, t) : t("common.waiting");
 
     return (
-      <Page title="Trip Diary" eyebrow="Tourist">
+      <Page title={t("tourist.trips.pageTitle")} eyebrow={t("common.tourist")}>
         <section className="trip-diary-page">
           <section className="trip-diary-hero">
             <div>
-              <span>Route history</span>
-              <h2>See what each trip taught the app.</h2>
-              <p>Your saved movement becomes a simple route story, recognised stops and recommendation learning instead of raw tracking records.</p>
+              <span>{t("tourist.trips.routeHistory")}</span>
+              <h2>{t("tourist.trips.heroTitle")}</h2>
+              <p>{t("tourist.trips.heroDescription")}</p>
             </div>
             <div className="trip-diary-stats" aria-label="Trip diary totals">
               <span>
                 <strong>{completedTripCount}</strong>
-                Completed
+                {t("common.completed")}
               </span>
               <span>
                 <strong>{totalDistanceKm}</strong>
-                km recorded
+                {t("tourist.trips.kmRecorded")}
               </span>
               <span>
                 <strong>{totalRecognizedStops}</strong>
-                Stops found
+                {t("tourist.trips.stopsFound")}
               </span>
             </div>
           </section>
@@ -1865,29 +1874,29 @@ function TouristWorkspace({
                 <section className="trip-story-panel">
                   <div className="section-heading">
                     <div>
-                      <span>Selected route</span>
+                      <span>{t("tourist.trips.selectedRoute")}</span>
                       <h2>{selectedTripTitle}</h2>
                       <p>{formatDateTime(selectedTrip.startedAt)}</p>
                     </div>
-                    <strong className="trip-status-badge">{selectedTrip.status === "completed" ? "Completed" : "Active"}</strong>
+                    <strong className="trip-status-badge">{selectedTrip.status === "completed" ? t("common.completed") : t("common.active")}</strong>
                   </div>
 
                   <div className="trip-story-metrics">
                     <span>
                       <strong>{selectedTripSummary.distanceKm}</strong>
-                      km travelled
+                      {t("tourist.trips.kmTravelled")}
                     </span>
                     <span>
                       <strong>{selectedTripSummary.durationMinutes}</strong>
-                      min spent
+                      {t("tourist.trips.minSpent")}
                     </span>
                     <span>
                       <strong>{selectedTripSummary.visitedDestinationCount}</strong>
-                      places noticed
+                      {t("tourist.trips.placesNoticed")}
                     </span>
                     <span>
                       <strong>{selectedTripSuggestionStatus}</strong>
-                      suggestions
+                      {t("tourist.trips.suggestions")}
                     </span>
                   </div>
 
@@ -1897,23 +1906,23 @@ function TouristWorkspace({
                     {selectedTripDestinationNames.length > 0 ? (
                       selectedTripDestinationNames.map((name) => <span key={name}>{name}</span>)
                     ) : (
-                      <small>No saved destination was close enough to this route yet.</small>
+                      <small>{t("tourist.trips.noSavedDestination")}</small>
                     )}
                   </div>
 
                   <section className="trip-guidance-panel">
                     <div>
-                      <strong>What this trip is useful for</strong>
-                      <p>It helps the app compare real visitor movement around Malaysia, then turn that activity into place suggestions instead of relying only on ratings.</p>
+                      <strong>{t("tourist.trips.guidanceTitle")}</strong>
+                      <p>{t("tourist.trips.guidanceText")}</p>
                     </div>
                     <button className="secondary-action" type="button" onClick={() => onViewChange("recommendations")}>
                       <Sparkles size={18} />
-                      Find places from this trip
+                      {t("tourist.trips.findPlaces")}
                     </button>
                   </section>
 
                   <div className="trip-detail-recommendations">
-                    <strong>{hasPersonalizedRecommendations ? "Places you may want next" : "Places to try next"}</strong>
+                    <strong>{hasPersonalizedRecommendations ? t("tourist.trips.personalizedNext") : t("tourist.trips.basicNext")}</strong>
                     {selectedTripRecommendations.length > 0 ? (
                       selectedTripRecommendations.map((recommendation) => {
                         const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
@@ -1927,13 +1936,13 @@ function TouristWorkspace({
                         ) : null;
                       })
                     ) : (
-                      <p>Complete a trip with enough movement data to generate recommendations.</p>
+                      <p>{t("tourist.trips.needTripForRecommendations")}</p>
                     )}
                   </div>
                 </section>
               ) : (
                 <section className="trip-story-panel">
-                  <EmptyState text="Your saved trips will appear here after you start tracking." />
+                  <EmptyState text={t("tourist.trips.emptyHistory")} />
                 </section>
               )}
             </div>
@@ -1941,9 +1950,9 @@ function TouristWorkspace({
             <aside className="trip-timeline-panel">
               <div className="section-heading">
                 <div>
-                  <span>Saved trips</span>
-                  <h2>Pick a route</h2>
-                  <p>Select a trip to inspect its map, stops and recommendation learning.</p>
+                  <span>{t("tourist.trips.savedTrips")}</span>
+                  <h2>{t("tourist.trips.pickRoute")}</h2>
+                  <p>{t("tourist.trips.pickRouteDescription")}</p>
                 </div>
               </div>
 
@@ -1954,16 +1963,16 @@ function TouristWorkspace({
 
                 return (
                   <button className={selectedTrip?.id === trip.id ? "trip-timeline-card active" : "trip-timeline-card"} key={trip.id} type="button" onClick={() => setSelectedTripId(trip.id)}>
-                    <span>{trip.status === "completed" ? "Completed trip" : "Active trip"}</span>
-                    <strong>{formatTripTitle(trip, destinationNames)}</strong>
-                    <small>{trip.endedAt ? formatDateTime(trip.endedAt) : "Trip still active"}</small>
+                    <span>{trip.status === "completed" ? t("tourist.trips.completedTrip") : t("tourist.trips.activeTrip")}</span>
+                    <strong>{formatTripTitle(trip, destinationNames, t)}</strong>
+                    <small>{trip.endedAt ? formatDateTime(trip.endedAt) : t("tourist.trips.stillActive")}</small>
                     <p>
-                      {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} recognised stop(s)
+                      {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
                     </p>
                   </button>
                 );
               })}
-              {userTrips.length === 0 && <EmptyState text="Start tracking or add a sample Malaysia route to create your first trip diary entry." />}
+              {userTrips.length === 0 && <EmptyState text={t("tourist.trips.firstEntry")} />}
             </aside>
           </section>
         </section>
@@ -1993,6 +2002,7 @@ function TouristWorkspace({
           visitedIds={visitedDestinationIds}
           referencePoint={activePoints.at(-1) ?? tripPoints.at(-1)}
           selectedDestinationId={selectedDestinationId}
+          locale={locale}
           onSelectDestination={setSelectedDestinationId}
           onOpenEvents={() => onViewChange("events")}
         />
@@ -2006,18 +2016,16 @@ function TouristWorkspace({
         <section className="event-calendar-page">
           <section className="recommendation-profile-card">
             <div>
-              <span>Planning window</span>
-              <strong>Next 12 months</strong>
+              <span>{t("tourist.events.planningWindow")}</span>
+              <strong>{t("tourist.events.next12Months")}</strong>
             </div>
             <div>
-              <span>Malaysia focus</span>
-              <strong>{upcomingFestivals.length} event signals</strong>
+              <span>{t("tourist.events.malaysiaFocus")}</span>
+              <strong>{upcomingFestivals.length} {t("tourist.events.eventSignals")}</strong>
             </div>
-            <p>
-              Use these public holidays and tourism events as context for where tourist movement may increase. Past one-time events are hidden automatically, and annual dates roll forward from the day you open the app.
-            </p>
+            <p>{t("tourist.events.pageDescription")}</p>
           </section>
-          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} />
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} />
         </section>
       </Page>
     );
@@ -2307,6 +2315,7 @@ function TouristWorkspace({
             summary={latestCompletedTripSummary}
             destinationNames={latestCompletedTripDestinationNames}
             analysis={latestCompletedTripAnalysis}
+            locale={locale}
             onViewHistory={() => {
               setSelectedTripId(latestCompletedTrip.id);
               onViewChange("history");
@@ -2323,47 +2332,48 @@ function TouristWorkspace({
             </div>
             <button className="secondary-action compact-action" onClick={() => onViewChange("recommendations")}>
               <Sparkles size={16} />
-              View all
+              {t("common.viewAll")}
             </button>
           </div>
-          <RecommendationList recommendations={recommendations.slice(0, 3)} destinations={data.destinations} demand={destinationDemand} personalized={hasPersonalizedRecommendations} compact />
+          <RecommendationList recommendations={recommendations.slice(0, 3)} destinations={data.destinations} demand={destinationDemand} personalized={hasPersonalizedRecommendations} locale={locale} compact />
         </section>
 
         {recentTrip ? (
           <section className="tourist-section recent-trip-card">
             <div className="section-heading">
-              <h2>Recent Trip</h2>
+              <h2>{t("tourist.home.recentTrip")}</h2>
               <button className="secondary-action compact-action" onClick={() => onViewChange("history")}>
                 <MapPinned size={16} />
-                View trips
+                {t("common.viewTrips")}
               </button>
             </div>
             <p>{formatDateTime(recentTrip.startedAt)}</p>
             <div className="trip-preview-stats">
-              <span>{recentTrip.status}</span>
+              <span>{recentTrip.status === "completed" ? t("common.completed") : t("common.active")}</span>
               <span>{recentTripSummary?.durationMinutes ?? 0} min</span>
-              <span>{recentTripSummary?.pointCount ?? 0} points</span>
-              <span>{recentTripSummary?.visitedDestinationCount ?? 0} stops</span>
+              <span>{recentTripSummary?.pointCount ?? 0} {t("common.points")}</span>
+              <span>{recentTripSummary?.visitedDestinationCount ?? 0} {t("common.stops")}</span>
             </div>
           </section>
         ) : null}
 
-        <MovementDemandList title="Popular Right Now" demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
+        <MovementDemandList title={t("tourist.home.popularRightNow")} demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
 
-        <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact onOpenCalendar={() => onViewChange("events")} />
+        <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} compact onOpenCalendar={() => onViewChange("events")} />
 
         <section className="tourist-section">
           <div className="section-heading">
-            <h2>Destination Info</h2>
+            <h2>{t("tourist.home.destinationInfo")}</h2>
           </div>
           <DestinationPanel
             destinations={data.destinations.slice(0, 6)}
             demand={destinationDemand}
             selectedId={selectedDestination?.id}
             visitedIds={visitedDestinationIds}
+            locale={locale}
             onSelect={setSelectedDestinationId}
           />
-          {selectedDestination && <DestinationDetail destination={selectedDestination} demand={destinationDemand.find((row) => row.destinationId === selectedDestination.id)} />}
+          {selectedDestination && <DestinationDetail destination={selectedDestination} demand={destinationDemand.find((row) => row.destinationId === selectedDestination.id)} locale={locale} />}
         </section>
       </section>
     </Page>
@@ -3496,6 +3506,7 @@ function CompletedTripSummary({
   summary,
   destinationNames,
   analysis,
+  locale = "en",
   onViewHistory,
   onViewRecommendations,
 }: {
@@ -3503,54 +3514,56 @@ function CompletedTripSummary({
   summary: TripSummary;
   destinationNames: string[];
   analysis: AnalysisResult | null;
+  locale?: Locale;
   onViewHistory: () => void;
   onViewRecommendations: () => void;
 }) {
-  const analysisStatus = analysis ? "Complete" : summary.pointCount >= 2 ? "Ready to refresh" : "Needs at least 2 movement points";
+  const t = (key: TranslationKey) => translate(locale, key);
+  const analysisStatus = analysis ? t("tourist.completed.analysisComplete") : summary.pointCount >= 2 ? t("tourist.completed.analysisReady") : t("tourist.completed.analysisNeedsPoints");
 
   return (
     <section className="completed-trip-card">
       <div className="section-heading">
         <div>
-          <span>Completed Trip</span>
+          <span>{t("tourist.completed.title")}</span>
           <h2>{formatDateTime(trip.startedAt)}</h2>
         </div>
       </div>
       <div className="completed-trip-grid">
         <div>
-          <small>Started</small>
+          <small>{t("tourist.completed.started")}</small>
           <strong>{formatDateTime(trip.startedAt)}</strong>
         </div>
         <div>
-          <small>Ended</small>
-          <strong>{trip.endedAt ? formatDateTime(trip.endedAt) : "Just now"}</strong>
+          <small>{t("tourist.completed.ended")}</small>
+          <strong>{trip.endedAt ? formatDateTime(trip.endedAt) : t("common.justNow")}</strong>
         </div>
         <div>
-          <small>Duration</small>
+          <small>{t("tourist.completed.duration")}</small>
           <strong>{summary.durationMinutes} min</strong>
         </div>
         <div>
-          <small>Movement points</small>
+          <small>{t("tourist.completed.movementPoints")}</small>
           <strong>{summary.pointCount}</strong>
         </div>
         <div>
-          <small>Recognised stops</small>
+          <small>{t("tourist.completed.recognisedStops")}</small>
           <strong>{summary.visitedDestinationCount}</strong>
         </div>
         <div>
-          <small>Analysis status</small>
+          <small>{t("tourist.completed.analysisStatus")}</small>
           <strong>{analysisStatus}</strong>
         </div>
       </div>
-      <p>{destinationNames.length > 0 ? destinationNames.join(", ") : "No nearby saved destination was recognised for this trip yet."}</p>
+      <p>{destinationNames.length > 0 ? destinationNames.join(", ") : t("tourist.completed.noNearbyDestination")}</p>
       <div className="completed-trip-actions">
         <button className="secondary-action" type="button" onClick={onViewHistory}>
           <MapPinned size={18} />
-          View Trip History
+          {t("tourist.completed.viewHistory")}
         </button>
         <button className="primary-action" type="button" onClick={onViewRecommendations}>
           <Sparkles size={18} />
-          View Recommendations
+          {t("tourist.completed.viewRecommendations")}
         </button>
       </div>
     </section>
@@ -3592,14 +3605,18 @@ function DestinationPanel({
   demand = [],
   selectedId,
   visitedIds,
+  locale = "en",
   onSelect,
 }: {
   destinations: Destination[];
   demand?: DestinationDemand[];
   selectedId?: string;
   visitedIds?: Set<string>;
+  locale?: Locale;
   onSelect?: (id: string) => void;
 }) {
+  const t = (key: TranslationKey) => translate(locale, key);
+
   return (
     <section className="list-panel">
       {destinations.map((destination) => {
@@ -3620,8 +3637,8 @@ function DestinationPanel({
             <p>{destination.description}</p>
             <div className="tag-row">
               <small>{destination.category}</small>
-              {demandRow && demandRow.popularityScore > 0 && <small className="demand-tag">{demandRow.tier} demand</small>}
-              {visited && <small className="visited-tag">Visited</small>}
+              {demandRow && demandRow.popularityScore > 0 && <small className="demand-tag">{demandRow.tier} {t("common.demand").toLowerCase()}</small>}
+              {visited && <small className="visited-tag">{t("tourist.places.visited")}</small>}
             </div>
           </button>
         );
@@ -3630,7 +3647,9 @@ function DestinationPanel({
   );
 }
 
-function DestinationDetail({ destination, demand }: { destination: Destination; demand?: DestinationDemand }) {
+function DestinationDetail({ destination, demand, locale = "en" }: { destination: Destination; demand?: DestinationDemand; locale?: Locale }) {
+  const t = (key: TranslationKey) => translate(locale, key);
+
   return (
     <section className="panel detail-panel">
       <h2>{destination.name}</h2>
@@ -3642,7 +3661,7 @@ function DestinationDetail({ destination, demand }: { destination: Destination; 
             <strong>{demand.popularityScore}%</strong>
           </div>
           <div>
-            <span>Demand Tier</span>
+            <span>{t("common.demand")}</span>
             <strong>{demand.tier}</strong>
           </div>
           <div>
@@ -3657,24 +3676,24 @@ function DestinationDetail({ destination, demand }: { destination: Destination; 
           <dd>{destination.city}</dd>
         </div>
         <div>
-          <dt>Category</dt>
+          <dt>{t("common.category")}</dt>
           <dd>{destination.category}</dd>
         </div>
         <div>
-          <dt>Average visit</dt>
-          <dd>{destination.averageVisitMinutes} minutes</dd>
+          <dt>{t("common.averageVisit")}</dt>
+          <dd>{destination.averageVisitMinutes} {t("common.minutes")}</dd>
         </div>
         <div>
-          <dt>Address</dt>
+          <dt>{t("common.address")}</dt>
           <dd>{destination.address ?? `${destination.city}, Malaysia`}</dd>
         </div>
         <div>
-          <dt>Opening hours</dt>
-          <dd>{destination.openingHours ?? "Check locally before visiting."}</dd>
+          <dt>{t("common.openingHours")}</dt>
+          <dd>{destination.openingHours ?? t("common.checkLocally")}</dd>
         </div>
         <div>
-          <dt>Fee note</dt>
-          <dd>{destination.feeNote ?? "Fee information may vary."}</dd>
+          <dt>{t("common.feeNote")}</dt>
+          <dd>{destination.feeNote ?? t("common.feeMayVary")}</dd>
         </div>
         {demand && (
           <>
@@ -3777,13 +3796,16 @@ function FestivalCalendarPanel({
   events,
   destinations,
   compact = false,
+  locale = "en",
   onOpenCalendar,
 }: {
   events: FestivalEvent[];
   destinations: Destination[];
   compact?: boolean;
+  locale?: Locale;
   onOpenCalendar?: () => void;
 }) {
+  const t = (key: TranslationKey) => translate(locale, key);
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const [showFullCalendar, setShowFullCalendar] = useState(!compact);
   const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
@@ -3799,15 +3821,15 @@ function FestivalCalendarPanel({
     <section className={compact ? "festival-calendar compact" : "festival-calendar"}>
       <div className="section-heading">
         <div>
-          <h2>Malaysia Festival Calendar</h2>
+          <h2>{t("tourist.events.calendarTitle")}</h2>
           <p>
-            {filteredEvents.length} upcoming signal(s) for {stateFilter === "all" ? "Malaysia" : stateFilter} across the next 12 months.
+            {filteredEvents.length} {t("tourist.events.upcomingSignals")} for {stateFilter === "all" ? "Malaysia" : stateFilter} across the {t("tourist.events.next12Months").toLowerCase()}.
           </p>
         </div>
         <label className="festival-filter">
-          State
+          {t("tourist.events.state")}
           <select value={stateFilter} onChange={(event) => setStateFilter(event.target.value as MalaysianState | "all")}>
-            <option value="all">All Malaysia</option>
+            <option value="all">{t("tourist.events.allMalaysia")}</option>
             {allMalaysianStates.map((state) => (
               <option key={state} value={state}>
                 {state}
@@ -3861,15 +3883,15 @@ function FestivalCalendarPanel({
       </div>
       {hiddenEventCount > 0 && (
         <button className="festival-more-button" type="button" onClick={onOpenCalendar ?? (() => setShowFullCalendar(true))}>
-          Show full 12-month calendar ({hiddenEventCount} more)
+          {t("tourist.events.showFull")} ({hiddenEventCount} more)
         </button>
       )}
       {compact && showFullCalendar && !onOpenCalendar && (
         <button className="festival-more-button secondary" type="button" onClick={() => setShowFullCalendar(false)}>
-          Show fewer events
+          {t("tourist.events.showFewer")}
         </button>
       )}
-      {visibleEvents.length === 0 && <EmptyState text="No festival planning signals match this state inside the current date range." />}
+      {visibleEvents.length === 0 && <EmptyState text={t("tourist.events.noMatches")} />}
     </section>
   );
 }
@@ -4306,6 +4328,7 @@ function PlaceDiscovery({
   visitedIds,
   referencePoint,
   selectedDestinationId,
+  locale = "en",
   onSelectDestination,
   onOpenEvents,
 }: {
@@ -4318,9 +4341,11 @@ function PlaceDiscovery({
   visitedIds: Set<string>;
   referencePoint?: MovementPoint;
   selectedDestinationId?: string;
+  locale?: Locale;
   onSelectDestination: (id: string) => void;
   onOpenEvents: () => void;
 }) {
+  const t = (key: TranslationKey) => translate(locale, key);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
   const [cityFilter, setCityFilter] = useState("all");
@@ -4343,7 +4368,7 @@ function PlaceDiscovery({
         const demandScore = demandRow?.popularityScore ?? 0;
         const recommendationScore = recommendation?.score ?? 42;
         const score = Math.round(Math.min(100, recommendationScore * 0.45 + demandScore * 0.32 + (preferenceMatch ? 14 : 0) + (festivalBoosted ? 10 : 0) + (visited ? 0 : 8)));
-        const insight = getPlaceDiscoveryInsight({ recommendation, demandRow, festivalBoosted, preferenceMatch, visited });
+        const insight = getPlaceDiscoveryInsight({ recommendation, demandRow, festivalBoosted, preferenceMatch, visited, t });
 
         return {
           destination,
@@ -4408,6 +4433,7 @@ function PlaceDiscovery({
     destinations,
     festivalDestinationIds,
     latestAnalysis?.profile,
+    locale,
     mode,
     normalizedSearch,
     recommendationByDestinationId,
@@ -4424,42 +4450,42 @@ function PlaceDiscovery({
     <section className="places-page">
       <section className="places-hero">
         <div>
-          <span>{latestAnalysis ? `${latestAnalysis.profile} traveller` : "Discovery mode"}</span>
-          <h2>Find places that match your trip right now.</h2>
-          <p>Browse destinations using movement demand, your travel style, event timing and your latest route instead of only static ratings.</p>
+          <span>{latestAnalysis ? `${latestAnalysis.profile} ${t("tourist.places.profileTraveller")}` : t("tourist.places.discoveryMode")}</span>
+          <h2>{t("tourist.places.heroTitle")}</h2>
+          <p>{t("tourist.places.heroDescription")}</p>
         </div>
         <div className="places-hero-stats">
           <span>
             <strong>{rows.length}</strong>
-            places shown
+            {t("tourist.places.placesShown")}
           </span>
           <span>
             <strong>{demand.filter((row) => row.popularityScore > 0).length}</strong>
-            with demand
+            {t("tourist.places.withDemand")}
           </span>
           <span>
             <strong>{festivals.length}</strong>
-            event signals
+            {t("tourist.places.eventSignals")}
           </span>
         </div>
       </section>
 
       {!personalized && (
         <section className="recommendation-mode-notice">
-          <strong>Basic suggestion mode</strong>
-          <p>Complete a tracked trip to unlock AI personalisation. Until then, Places still uses demand, profile preferences and event signals for browsing.</p>
+          <strong>{t("tourist.places.basicModeTitle")}</strong>
+          <p>{t("tourist.places.basicModeDescription")}</p>
         </section>
       )}
 
       <section className="places-controls" aria-label="Place discovery filters">
         <label>
-          Search places
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by place, state, address or interest" />
+          {t("tourist.places.searchLabel")}
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("tourist.places.searchPlaceholder")} />
         </label>
         <label>
-          Category
+          {t("common.category")}
           <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value as DestinationCategory | "all")}>
-            <option value="all">All categories</option>
+            <option value="all">{t("tourist.places.allCategories")}</option>
             {destinationCategories.map((category) => (
               <option key={category} value={category}>
                 {getCategoryLabel(category)}
@@ -4468,9 +4494,9 @@ function PlaceDiscovery({
           </select>
         </label>
         <label>
-          Area
+          {t("tourist.places.area")}
           <select value={cityFilter} onChange={(event) => setCityFilter(event.target.value)}>
-            <option value="all">All Malaysia</option>
+            <option value="all">{t("tourist.places.allMalaysia")}</option>
             {cityOptions.map((city) => (
               <option key={city} value={city}>
                 {city}
@@ -4502,19 +4528,19 @@ function PlaceDiscovery({
                   <span>{getCategoryLabel(row.destination.category)}</span>
                   <strong>{row.destination.name}</strong>
                 </div>
-                <small>{row.score}% fit</small>
+                <small>{row.score}% {t("tourist.places.fit")}</small>
               </div>
               <p>{row.insight}</p>
               <div className="place-card-meta">
                 <span>{row.destination.city}</span>
-                <span>{row.demandRow ? `${row.demandRow.tier} demand` : "quiet signal"}</span>
-                <span>{formatDistance(row.distance)}</span>
-                {row.festivalBoosted && <span>event-linked</span>}
-                {row.visited ? <span>visited</span> : <span>new to you</span>}
+                <span>{row.demandRow ? `${row.demandRow.tier} ${t("common.demand").toLowerCase()}` : t("tourist.places.quietSignal")}</span>
+                <span>{formatDistanceLabel(row.distance, t)}</span>
+                {row.festivalBoosted && <span>{t("tourist.places.eventLinked")}</span>}
+                {row.visited ? <span>{t("tourist.places.visited")}</span> : <span>{t("tourist.places.newToYou")}</span>}
               </div>
             </button>
           ))}
-          {rows.length === 0 && <EmptyState text="No places match these filters yet. Try another category, area or discovery mode." />}
+          {rows.length === 0 && <EmptyState text={t("tourist.places.noMatches")} />}
         </div>
 
         {selectedRow && (
@@ -4524,41 +4550,41 @@ function PlaceDiscovery({
             <p>{selectedRow.destination.description}</p>
             <dl>
               <div>
-                <dt>Address</dt>
+                <dt>{t("common.address")}</dt>
                 <dd>{selectedRow.destination.address ?? `${selectedRow.destination.city}, Malaysia`}</dd>
               </div>
               <div>
-                <dt>Demand</dt>
-                <dd>{selectedRow.demandRow ? `${selectedRow.demandRow.tier} (${selectedRow.demandRow.popularityScore}%)` : "No demand signal yet"}</dd>
+                <dt>{t("common.demand")}</dt>
+                <dd>{selectedRow.demandRow ? `${selectedRow.demandRow.tier} (${selectedRow.demandRow.popularityScore}%)` : t("common.noSignalYet")}</dd>
               </div>
               <div>
-                <dt>Trip fit</dt>
-                <dd>{selectedRow.preferenceMatch ? "Matches your profile" : "Different from your usual style"}</dd>
+                <dt>{t("tourist.places.tripFit")}</dt>
+                <dd>{selectedRow.preferenceMatch ? t("tourist.places.matchesProfile") : t("tourist.places.differentStyle")}</dd>
               </div>
               <div>
-                <dt>Event relevance</dt>
-                <dd>{selectedRow.festivalBoosted ? "Linked to upcoming calendar signals" : "No current event link"}</dd>
+                <dt>{t("tourist.places.eventRelevance")}</dt>
+                <dd>{selectedRow.festivalBoosted ? t("tourist.places.linkedUpcoming") : t("tourist.places.noCurrentEvent")}</dd>
               </div>
               <div>
-                <dt>Distance</dt>
-                <dd>{formatDistance(selectedRow.distance)}</dd>
+                <dt>{t("common.distance")}</dt>
+                <dd>{formatDistanceLabel(selectedRow.distance, t)}</dd>
               </div>
               <div>
-                <dt>Average visit</dt>
-                <dd>{selectedRow.destination.averageVisitMinutes} minutes</dd>
+                <dt>{t("common.averageVisit")}</dt>
+                <dd>{selectedRow.destination.averageVisitMinutes} {t("common.minutes")}</dd>
               </div>
               <div>
-                <dt>Opening hours</dt>
-                <dd>{selectedRow.destination.openingHours ?? "Check locally before visiting."}</dd>
+                <dt>{t("common.openingHours")}</dt>
+                <dd>{selectedRow.destination.openingHours ?? t("common.checkLocally")}</dd>
               </div>
               <div>
-                <dt>Fee note</dt>
-                <dd>{selectedRow.destination.feeNote ?? "Fee information may vary."}</dd>
+                <dt>{t("common.feeNote")}</dt>
+                <dd>{selectedRow.destination.feeNote ?? t("common.feeMayVary")}</dd>
               </div>
             </dl>
             {selectedRow.destination.visitTips && selectedRow.destination.visitTips.length > 0 && (
               <section className="visit-tips-panel compact">
-                <strong>Before you go</strong>
+                <strong>{t("tourist.places.beforeYouGo")}</strong>
                 <ul>
                   {selectedRow.destination.visitTips.map((tip) => (
                     <li key={tip}>{tip}</li>
@@ -4569,7 +4595,7 @@ function PlaceDiscovery({
             <div className="place-detail-actions">
               <button className="secondary-action" type="button" onClick={onOpenEvents}>
                 <CalendarDays size={18} />
-                Check events
+                {t("common.checkEvents")}
               </button>
             </div>
           </aside>
@@ -4585,38 +4611,40 @@ function getPlaceDiscoveryInsight({
   festivalBoosted,
   preferenceMatch,
   visited,
+  t,
 }: {
   recommendation?: Recommendation;
   demandRow?: DestinationDemand;
   festivalBoosted: boolean;
   preferenceMatch: boolean;
   visited: boolean;
+  t: (key: TranslationKey) => string;
 }) {
   if (recommendation) {
-    return recommendation.reason;
+    return recommendation.reason || t("tourist.places.insightRecommendationFallback");
   }
 
   if (festivalBoosted && demandRow && demandRow.popularityScore > 0) {
-    return "Upcoming event signals and current tourist movement both point toward this area.";
+    return t("tourist.places.insightEventDemand");
   }
 
   if (festivalBoosted) {
-    return "Upcoming calendar events may bring more visitors to this place or nearby routes.";
+    return t("tourist.places.insightEvent");
   }
 
   if (demandRow && demandRow.tier !== "low") {
-    return "Tourist movement is already forming around this destination, so it is useful for route planning.";
+    return t("tourist.places.insightDemand");
   }
 
   if (preferenceMatch && !visited) {
-    return "This matches your travel style and gives you a new place to explore.";
+    return t("tourist.places.insightPreference");
   }
 
   if (visited) {
-    return "You have visited this before, so it is better for revisits or comparing with nearby alternatives.";
+    return t("tourist.places.insightVisited");
   }
 
-  return "A quieter option that can help balance the trip if busy places feel too crowded.";
+  return t("tourist.places.insightQuiet");
 }
 
 function RecommendationList({
@@ -4624,6 +4652,7 @@ function RecommendationList({
   destinations,
   demand = [],
   personalized = true,
+  locale = "en",
   compact = false,
   onSelect,
 }: {
@@ -4631,11 +4660,14 @@ function RecommendationList({
   destinations: Destination[];
   demand?: DestinationDemand[];
   personalized?: boolean;
+  locale?: Locale;
   compact?: boolean;
   onSelect?: (recommendationId: string) => void;
 }) {
+  const t = (key: TranslationKey) => translate(locale, key);
+
   if (recommendations.length === 0) {
-    return <EmptyState text={personalized ? "Complete another trip to unlock stronger personalised recommendations." : "No basic suggestions are available yet."} />;
+    return <EmptyState text={personalized ? t("tourist.recommendations.emptyPersonalized") : t("tourist.recommendations.emptyBasic")} />;
   }
 
   return (
@@ -4654,23 +4686,23 @@ function RecommendationList({
               <span>{destination.city}</span>
             </div>
             <div className="recommendation-meta">
-              {!personalized && <span className="basic-suggestion-tag">Basic suggestion</span>}
+              {!personalized && <span className="basic-suggestion-tag">{t("tourist.recommendations.basicSuggestion")}</span>}
               <span>{destination.category}</span>
-              <span>{demandRow ? `${demandRow.tier} demand` : "No demand signal"}</span>
-              <span>{demandRow ? `${demandRow.popularityScore}% movement score` : "0% movement score"}</span>
+              <span>{demandRow ? `${demandRow.tier} ${t("common.demand").toLowerCase()}` : t("tourist.recommendations.noDemandSignal")}</span>
+              <span>{demandRow ? `${demandRow.popularityScore}% ${t("tourist.recommendations.movementScore")}` : `0% ${t("tourist.recommendations.movementScore")}`}</span>
             </div>
             <p>{recommendation.reason}</p>
             <div className="score-breakdown" aria-label={`Score breakdown for ${destination.name}`}>
-              <span>{personalized ? "Profile" : "Basic fit"} {recommendation.scoreBreakdown.profileFit}</span>
-              <span>{personalized ? `Cluster ${recommendation.scoreBreakdown.clusterPattern}` : "AI cluster pending"}</span>
-              <span>New {recommendation.scoreBreakdown.unvisited}</span>
+              <span>{personalized ? t("tourist.recommendations.profile") : t("tourist.recommendations.basicFit")} {recommendation.scoreBreakdown.profileFit}</span>
+              <span>{personalized ? `Cluster ${recommendation.scoreBreakdown.clusterPattern}` : t("tourist.recommendations.aiClusterPending")}</span>
+              <span>{t("tourist.recommendations.newPlace")} {recommendation.scoreBreakdown.unvisited}</span>
             </div>
             <meter value={recommendation.score} min={0} max={100} />
             <div className="recommendation-card-footer">
-              <small>Score {recommendation.score}</small>
+              <small>{t("tourist.recommendations.score")} {recommendation.score}</small>
               {onSelect && (
                 <button className="secondary-action compact-action" type="button" onClick={() => onSelect(recommendation.id)}>
-                  View Destination
+                  {t("tourist.recommendations.viewDestination")}
                 </button>
               )}
             </div>

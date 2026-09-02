@@ -60,6 +60,27 @@ export type TranslationKey =
   | "common.edit"
   | "common.complete"
   | "common.checkEvents"
+  | "common.viewAll"
+  | "common.viewTrips"
+  | "common.active"
+  | "common.completed"
+  | "common.notStarted"
+  | "common.waiting"
+  | "common.justNow"
+  | "common.privacy"
+  | "common.category"
+  | "common.address"
+  | "common.demand"
+  | "common.distance"
+  | "common.averageVisit"
+  | "common.openingHours"
+  | "common.feeNote"
+  | "common.minutes"
+  | "common.points"
+  | "common.stops"
+  | "common.noSignalYet"
+  | "common.checkLocally"
+  | "common.feeMayVary"
   | "tourist.profile.pageTitle"
   | "tourist.profile.setupPageTitle"
   | "tourist.profile.formTitle"
@@ -134,6 +155,122 @@ export type TranslationKey =
   | "tourist.checkin.unknownAttraction"
   | "tourist.checkin.minVisit"
   | "tourist.checkin.currentlyCheckedIn"
+  | "tourist.completed.title"
+  | "tourist.completed.started"
+  | "tourist.completed.ended"
+  | "tourist.completed.duration"
+  | "tourist.completed.movementPoints"
+  | "tourist.completed.recognisedStops"
+  | "tourist.completed.analysisStatus"
+  | "tourist.completed.analysisComplete"
+  | "tourist.completed.analysisReady"
+  | "tourist.completed.analysisNeedsPoints"
+  | "tourist.completed.noNearbyDestination"
+  | "tourist.completed.viewHistory"
+  | "tourist.completed.viewRecommendations"
+  | "tourist.trips.pageTitle"
+  | "tourist.trips.routeHistory"
+  | "tourist.trips.heroTitle"
+  | "tourist.trips.heroDescription"
+  | "tourist.trips.kmRecorded"
+  | "tourist.trips.stopsFound"
+  | "tourist.trips.selectedRoute"
+  | "tourist.trips.noTripSelected"
+  | "tourist.trips.currentTripTitle"
+  | "tourist.trips.malaysiaTripTitle"
+  | "tourist.trips.tripSuffix"
+  | "tourist.trips.keepRecording"
+  | "tourist.trips.ready"
+  | "tourist.trips.refresh"
+  | "tourist.trips.insightRecording"
+  | "tourist.trips.insightKnownRoute"
+  | "tourist.trips.insightSavedRoute"
+  | "tourist.trips.kmTravelled"
+  | "tourist.trips.minSpent"
+  | "tourist.trips.placesNoticed"
+  | "tourist.trips.suggestions"
+  | "tourist.trips.noSavedDestination"
+  | "tourist.trips.guidanceTitle"
+  | "tourist.trips.guidanceText"
+  | "tourist.trips.findPlaces"
+  | "tourist.trips.personalizedNext"
+  | "tourist.trips.basicNext"
+  | "tourist.trips.needTripForRecommendations"
+  | "tourist.trips.emptyHistory"
+  | "tourist.trips.savedTrips"
+  | "tourist.trips.pickRoute"
+  | "tourist.trips.pickRouteDescription"
+  | "tourist.trips.completedTrip"
+  | "tourist.trips.activeTrip"
+  | "tourist.trips.stillActive"
+  | "tourist.trips.firstEntry"
+  | "tourist.home.recommendationsPersonalized"
+  | "tourist.home.recommendationsBasic"
+  | "tourist.home.recommendationsPersonalizedText"
+  | "tourist.home.recommendationsBasicText"
+  | "tourist.home.recentTrip"
+  | "tourist.home.popularRightNow"
+  | "tourist.home.destinationInfo"
+  | "tourist.places.profileTraveller"
+  | "tourist.places.discoveryMode"
+  | "tourist.places.heroTitle"
+  | "tourist.places.heroDescription"
+  | "tourist.places.placesShown"
+  | "tourist.places.withDemand"
+  | "tourist.places.eventSignals"
+  | "tourist.places.basicModeTitle"
+  | "tourist.places.basicModeDescription"
+  | "tourist.places.searchLabel"
+  | "tourist.places.searchPlaceholder"
+  | "tourist.places.allCategories"
+  | "tourist.places.area"
+  | "tourist.places.allMalaysia"
+  | "tourist.places.fit"
+  | "tourist.places.locationNotActive"
+  | "tourist.places.mAway"
+  | "tourist.places.kmAway"
+  | "tourist.places.quietSignal"
+  | "tourist.places.eventLinked"
+  | "tourist.places.visited"
+  | "tourist.places.newToYou"
+  | "tourist.places.noMatches"
+  | "tourist.places.tripFit"
+  | "tourist.places.matchesProfile"
+  | "tourist.places.differentStyle"
+  | "tourist.places.eventRelevance"
+  | "tourist.places.linkedUpcoming"
+  | "tourist.places.noCurrentEvent"
+  | "tourist.places.beforeYouGo"
+  | "tourist.places.insightRecommendationFallback"
+  | "tourist.places.insightEventDemand"
+  | "tourist.places.insightEvent"
+  | "tourist.places.insightDemand"
+  | "tourist.places.insightPreference"
+  | "tourist.places.insightVisited"
+  | "tourist.places.insightQuiet"
+  | "tourist.recommendations.emptyPersonalized"
+  | "tourist.recommendations.emptyBasic"
+  | "tourist.recommendations.basicSuggestion"
+  | "tourist.recommendations.noDemandSignal"
+  | "tourist.recommendations.movementScore"
+  | "tourist.recommendations.profile"
+  | "tourist.recommendations.basicFit"
+  | "tourist.recommendations.aiClusterPending"
+  | "tourist.recommendations.newPlace"
+  | "tourist.recommendations.score"
+  | "tourist.recommendations.viewDestination"
+  | "tourist.events.planningWindow"
+  | "tourist.events.next12Months"
+  | "tourist.events.malaysiaFocus"
+  | "tourist.events.eventSignals"
+  | "tourist.events.pageDescription"
+  | "tourist.events.calendarTitle"
+  | "tourist.events.upcomingSignals"
+  | "tourist.events.state"
+  | "tourist.events.allMalaysia"
+  | "tourist.events.showFull"
+  | "tourist.events.showFewer"
+  | "tourist.events.noMatches"
   | "tourist.recommendations.pageTitle"
   | "tourist.events.pageTitle";
 
@@ -212,6 +349,27 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "common.edit": "Edit",
     "common.complete": "Complete",
     "common.checkEvents": "Check events",
+    "common.viewAll": "View all",
+    "common.viewTrips": "View trips",
+    "common.active": "Active",
+    "common.completed": "Completed",
+    "common.notStarted": "Not Started",
+    "common.waiting": "Waiting",
+    "common.justNow": "Just now",
+    "common.privacy": "Privacy",
+    "common.category": "Category",
+    "common.address": "Address",
+    "common.demand": "Demand",
+    "common.distance": "Distance",
+    "common.averageVisit": "Average visit",
+    "common.openingHours": "Opening hours",
+    "common.feeNote": "Fee note",
+    "common.minutes": "minutes",
+    "common.points": "points",
+    "common.stops": "stops",
+    "common.noSignalYet": "No signal yet",
+    "common.checkLocally": "Check locally before visiting.",
+    "common.feeMayVary": "Fee information may vary.",
     "tourist.profile.pageTitle": "Travel Profile",
     "tourist.profile.setupPageTitle": "Set Up Your Travel Profile",
     "tourist.profile.formTitle": "Travel Preferences",
@@ -286,6 +444,122 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.checkin.unknownAttraction": "Unknown attraction",
     "tourist.checkin.minVisit": "min visit",
     "tourist.checkin.currentlyCheckedIn": "Currently checked in",
+    "tourist.completed.title": "Completed Trip",
+    "tourist.completed.started": "Started",
+    "tourist.completed.ended": "Ended",
+    "tourist.completed.duration": "Duration",
+    "tourist.completed.movementPoints": "Movement points",
+    "tourist.completed.recognisedStops": "Recognised stops",
+    "tourist.completed.analysisStatus": "Analysis status",
+    "tourist.completed.analysisComplete": "Complete",
+    "tourist.completed.analysisReady": "Ready to refresh",
+    "tourist.completed.analysisNeedsPoints": "Needs at least 2 movement points",
+    "tourist.completed.noNearbyDestination": "No nearby saved destination was recognised for this trip yet.",
+    "tourist.completed.viewHistory": "View Trip History",
+    "tourist.completed.viewRecommendations": "View Recommendations",
+    "tourist.trips.pageTitle": "Trip Diary",
+    "tourist.trips.routeHistory": "Route history",
+    "tourist.trips.heroTitle": "See what each trip taught the app.",
+    "tourist.trips.heroDescription": "Your saved movement becomes a simple route story, recognised stops and recommendation learning instead of raw tracking records.",
+    "tourist.trips.kmRecorded": "km recorded",
+    "tourist.trips.stopsFound": "Stops found",
+    "tourist.trips.selectedRoute": "Selected route",
+    "tourist.trips.noTripSelected": "No trip selected",
+    "tourist.trips.currentTripTitle": "Current trip",
+    "tourist.trips.malaysiaTripTitle": "Malaysia trip",
+    "tourist.trips.tripSuffix": "trip",
+    "tourist.trips.keepRecording": "Keep recording",
+    "tourist.trips.ready": "Ready",
+    "tourist.trips.refresh": "Refresh",
+    "tourist.trips.insightRecording": "Keep this trip recording while you move around. Once there is a little more activity, the app can suggest places that better fit your route.",
+    "tourist.trips.insightKnownRoute": "Use this trip to find similar places nearby and compare where visitor movement is forming next.",
+    "tourist.trips.insightSavedRoute": "Your route is saved. Recommendations will become more useful as your trip gets closer to known Malaysian attractions and active visitor areas.",
+    "tourist.trips.kmTravelled": "km travelled",
+    "tourist.trips.minSpent": "min spent",
+    "tourist.trips.placesNoticed": "places noticed",
+    "tourist.trips.suggestions": "suggestions",
+    "tourist.trips.noSavedDestination": "No saved destination was close enough to this route yet.",
+    "tourist.trips.guidanceTitle": "What this trip is useful for",
+    "tourist.trips.guidanceText": "It helps the app compare real visitor movement around Malaysia, then turn that activity into place suggestions instead of relying only on ratings.",
+    "tourist.trips.findPlaces": "Find places from this trip",
+    "tourist.trips.personalizedNext": "Places you may want next",
+    "tourist.trips.basicNext": "Places to try next",
+    "tourist.trips.needTripForRecommendations": "Complete a trip with enough movement data to generate recommendations.",
+    "tourist.trips.emptyHistory": "Your saved trips will appear here after you start tracking.",
+    "tourist.trips.savedTrips": "Saved trips",
+    "tourist.trips.pickRoute": "Pick a route",
+    "tourist.trips.pickRouteDescription": "Select a trip to inspect its map, stops and recommendation learning.",
+    "tourist.trips.completedTrip": "Completed trip",
+    "tourist.trips.activeTrip": "Active trip",
+    "tourist.trips.stillActive": "Trip still active",
+    "tourist.trips.firstEntry": "Start tracking or add a sample Malaysia route to create your first trip diary entry.",
+    "tourist.home.recommendationsPersonalized": "Recommended For You",
+    "tourist.home.recommendationsBasic": "Basic Suggestions",
+    "tourist.home.recommendationsPersonalizedText": "These places use your latest movement pattern, tourist category and unvisited destination list.",
+    "tourist.home.recommendationsBasicText": "These are general suggestions from destination demand and your current location until a completed trip creates an AI result.",
+    "tourist.home.recentTrip": "Recent Trip",
+    "tourist.home.popularRightNow": "Popular Right Now",
+    "tourist.home.destinationInfo": "Destination Info",
+    "tourist.places.profileTraveller": "traveller",
+    "tourist.places.discoveryMode": "Discovery mode",
+    "tourist.places.heroTitle": "Find places that match your trip right now.",
+    "tourist.places.heroDescription": "Browse destinations using movement demand, your travel style, event timing and your latest route instead of only static ratings.",
+    "tourist.places.placesShown": "places shown",
+    "tourist.places.withDemand": "with demand",
+    "tourist.places.eventSignals": "event signals",
+    "tourist.places.basicModeTitle": "Basic suggestion mode",
+    "tourist.places.basicModeDescription": "Complete a tracked trip to unlock AI personalisation. Until then, Places still uses demand, profile preferences and event signals for browsing.",
+    "tourist.places.searchLabel": "Search places",
+    "tourist.places.searchPlaceholder": "Search by place, state, address or interest",
+    "tourist.places.allCategories": "All categories",
+    "tourist.places.area": "Area",
+    "tourist.places.allMalaysia": "All Malaysia",
+    "tourist.places.fit": "fit",
+    "tourist.places.locationNotActive": "Location not active",
+    "tourist.places.mAway": "m away",
+    "tourist.places.kmAway": "km away",
+    "tourist.places.quietSignal": "quiet signal",
+    "tourist.places.eventLinked": "event-linked",
+    "tourist.places.visited": "visited",
+    "tourist.places.newToYou": "new to you",
+    "tourist.places.noMatches": "No places match these filters yet. Try another category, area or discovery mode.",
+    "tourist.places.tripFit": "Trip fit",
+    "tourist.places.matchesProfile": "Matches your profile",
+    "tourist.places.differentStyle": "Different from your usual style",
+    "tourist.places.eventRelevance": "Event relevance",
+    "tourist.places.linkedUpcoming": "Linked to upcoming calendar signals",
+    "tourist.places.noCurrentEvent": "No current event link",
+    "tourist.places.beforeYouGo": "Before you go",
+    "tourist.places.insightRecommendationFallback": "This place is recommended from your latest trip pattern.",
+    "tourist.places.insightEventDemand": "Upcoming event signals and current tourist movement both point toward this area.",
+    "tourist.places.insightEvent": "Upcoming calendar events may bring more visitors to this place or nearby routes.",
+    "tourist.places.insightDemand": "Tourist movement is already forming around this destination, so it is useful for route planning.",
+    "tourist.places.insightPreference": "This matches your travel style and gives you a new place to explore.",
+    "tourist.places.insightVisited": "You have visited this before, so it is better for revisits or comparing with nearby alternatives.",
+    "tourist.places.insightQuiet": "A quieter option that can help balance the trip if busy places feel too crowded.",
+    "tourist.recommendations.emptyPersonalized": "Complete another trip to unlock stronger personalised recommendations.",
+    "tourist.recommendations.emptyBasic": "No basic suggestions are available yet.",
+    "tourist.recommendations.basicSuggestion": "Basic suggestion",
+    "tourist.recommendations.noDemandSignal": "No demand signal",
+    "tourist.recommendations.movementScore": "movement score",
+    "tourist.recommendations.profile": "Profile",
+    "tourist.recommendations.basicFit": "Basic fit",
+    "tourist.recommendations.aiClusterPending": "AI cluster pending",
+    "tourist.recommendations.newPlace": "New",
+    "tourist.recommendations.score": "Score",
+    "tourist.recommendations.viewDestination": "View Destination",
+    "tourist.events.planningWindow": "Planning window",
+    "tourist.events.next12Months": "Next 12 months",
+    "tourist.events.malaysiaFocus": "Malaysia focus",
+    "tourist.events.eventSignals": "event signals",
+    "tourist.events.pageDescription": "Use these public holidays and tourism events as context for where tourist movement may increase. Past one-time events are hidden automatically, and annual dates roll forward from the day you open the app.",
+    "tourist.events.calendarTitle": "Malaysia Festival Calendar",
+    "tourist.events.upcomingSignals": "upcoming signal(s)",
+    "tourist.events.state": "State",
+    "tourist.events.allMalaysia": "All Malaysia",
+    "tourist.events.showFull": "Show full 12-month calendar",
+    "tourist.events.showFewer": "Show fewer events",
+    "tourist.events.noMatches": "No festival planning signals match this state inside the current date range.",
     "tourist.recommendations.pageTitle": "Explore Places",
     "tourist.events.pageTitle": "Event Calendar",
   },
