@@ -1,5 +1,5 @@
 import { destinations } from "./destinations";
-import type { AppData, Destination, DestinationCategory, LocationConsent, MovementPoint, TouristProfile, TripSession, User } from "../types";
+import type { AppData, AttractionCheckIn, Destination, DestinationCategory, IncidentReport, LocationConsent, MovementPoint, SosAlert, TouristProfile, TripSession, User } from "../types";
 
 const now = new Date();
 const GENERATED_TOURIST_COUNT = 300;
@@ -28,6 +28,9 @@ const baseUsers: User[] = [
     accessibilityPreference: "none",
     nationality: "Malaysia",
     passportNumber: "MYD000001",
+    emergencyContactName: "Demo Emergency Contact",
+    emergencyContactPhone: "+60123456789",
+    emergencyContactRelation: "Sibling",
     termsAcceptedAt: hoursAgo(120),
     privacyAcceptedAt: hoursAgo(120),
     profileCompletedAt: hoursAgo(120),
@@ -54,6 +57,9 @@ const baseUsers: User[] = [
     accessibilityPreference: "low-walking",
     nationality: "Indonesia",
     passportNumber: "IDN000002",
+    emergencyContactName: "Rina Putri",
+    emergencyContactPhone: "+628123456789",
+    emergencyContactRelation: "Friend",
     termsAcceptedAt: hoursAgo(96),
     privacyAcceptedAt: hoursAgo(96),
     profileCompletedAt: hoursAgo(96),
@@ -72,6 +78,9 @@ const baseUsers: User[] = [
     accessibilityPreference: "none",
     nationality: "Singapore",
     passportNumber: "SGP000003",
+    emergencyContactName: "Tan Mei Lin",
+    emergencyContactPhone: "+6591234567",
+    emergencyContactRelation: "Partner",
     termsAcceptedAt: hoursAgo(84),
     privacyAcceptedAt: hoursAgo(84),
     profileCompletedAt: hoursAgo(84),
@@ -90,6 +99,9 @@ const baseUsers: User[] = [
     accessibilityPreference: "none",
     nationality: "Thailand",
     passportNumber: "THA000004",
+    emergencyContactName: "Araya Chai",
+    emergencyContactPhone: "+66812345678",
+    emergencyContactRelation: "Friend",
     termsAcceptedAt: hoursAgo(72),
     privacyAcceptedAt: hoursAgo(72),
     profileCompletedAt: hoursAgo(72),
@@ -108,6 +120,9 @@ const baseUsers: User[] = [
     accessibilityPreference: "none",
     nationality: "Malaysia",
     passportNumber: "MYD000005",
+    emergencyContactName: "Learning Contact",
+    emergencyContactPhone: "+60129876543",
+    emergencyContactRelation: "Parent",
     termsAcceptedAt: hoursAgo(66),
     privacyAcceptedAt: hoursAgo(66),
     profileCompletedAt: hoursAgo(66),
@@ -148,6 +163,48 @@ const basePoints: MovementPoint[] = [
   { id: "point-urban-3", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 3.1457, longitude: 101.6954, accuracyMeters: 26, recordedAt: hoursAgo(10.1), source: "demo" },
   { id: "point-urban-4", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 2.196, longitude: 102.2477, accuracyMeters: 40, recordedAt: hoursAgo(9.3), source: "demo" },
   { id: "point-insufficient-1", tripId: "trip-insufficient-demo", userId: "tourist-insufficient-demo", latitude: 3.1478, longitude: 101.6937, accuracyMeters: 35, recordedAt: hoursAgo(5.9), source: "demo" },
+];
+
+const baseSosAlerts: SosAlert[] = [
+  {
+    id: "sos-demo-open",
+    userId: "tourist-nature-demo",
+    status: "reviewing",
+    message: "Tourist requested emergency assistance from the web app.",
+    latitude: 5.4141,
+    longitude: 100.3288,
+    createdAt: hoursAgo(4.5),
+    updatedAt: hoursAgo(4.2),
+  },
+];
+
+const baseIncidentReports: IncidentReport[] = [
+  {
+    id: "incident-demo-lost-bag",
+    userId: "tourist-cultural-demo",
+    type: "lost-item",
+    status: "open",
+    description: "Lost a small backpack near the heritage walking area after leaving a cafe.",
+    locationNote: "Near Central Market",
+    latitude: 3.142,
+    longitude: 101.6894,
+    createdAt: hoursAgo(7),
+    updatedAt: hoursAgo(7),
+  },
+];
+
+const baseCheckIns: AttractionCheckIn[] = [
+  {
+    id: "checkin-demo-central-market",
+    userId: "tourist-cultural-demo",
+    destinationId: "central-market",
+    tripId: "trip-cultural-demo",
+    status: "checked-out",
+    checkedInAt: hoursAgo(55.2),
+    checkedOutAt: hoursAgo(54.7),
+    latitude: 3.142,
+    longitude: 101.6894,
+  },
 ];
 
 const travelPreferencesByProfile: Record<TouristProfile, DestinationCategory[]> = {
@@ -227,6 +284,9 @@ function createGeneratedSeedData() {
       accessibilityPreference: userIndex % 9 === 0 ? "low-walking" : "none",
       nationality: ["Malaysia", "Indonesia", "Singapore", "Thailand", "Brunei"][userIndex % 5],
       passportNumber: `FYP${sequence}26`,
+      emergencyContactName: `Emergency Contact ${sequence}`,
+      emergencyContactPhone: `+6012${String(7000000 + userIndex).padStart(7, "0")}`,
+      emergencyContactRelation: ["Friend", "Parent", "Partner", "Sibling"][userIndex % 4],
       termsAcceptedAt: hoursAgo(createdHoursAgo),
       privacyAcceptedAt: hoursAgo(createdHoursAgo),
       profileCompletedAt: hoursAgo(createdHoursAgo - 2),
@@ -286,4 +346,7 @@ export const initialData: AppData = {
   destinations,
   analyses: [],
   recommendations: [],
+  sosAlerts: baseSosAlerts,
+  incidentReports: baseIncidentReports,
+  checkIns: baseCheckIns,
 };

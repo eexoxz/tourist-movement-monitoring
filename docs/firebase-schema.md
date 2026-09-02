@@ -16,10 +16,13 @@ This schema supports the DPP prototype with Firebase Authentication and Firestor
 | `destinations` | Destination ID | Malaysian destination catalogue used by maps and recommendations |
 | `ai_analyses` | Trip ID | K-Means cluster, Decision Tree profile, silhouette score, explanation path |
 | `recommendations` | Recommendation ID | Generated destination suggestions for a tourist |
+| `sos_alerts` | SOS alert ID | Tourist SOS assistance requests, status, timestamp, and latest available location reference |
+| `incident_reports` | Incident report ID | Tourist-submitted lost item, accident, suspicious activity, medical, or general help reports |
+| `attraction_checkins` | Check-in ID | Tourist attraction check-in/check-out records linked to a destination and optional active trip |
 
 ## Role Model
 
-Tourist users can read and update their own profile, consent, trips, and movement records. Tourism administrators can read tourist movement summaries and manage destination, analysis, and recommendation records.
+Tourist users can read and update their own profile, consent, trips, movement records, attraction check-ins, SOS requests, and incident reports. Tourism administrators can read tourist movement summaries, update safety case status, and manage destination, analysis, and recommendation records.
 
 New Firebase tourist accounts use the Firebase Auth UID as the `users` document ID. Admin accounts should be created by manually setting a trusted `users/{uid}` document with `role: "admin"` after the Firebase Auth account exists.
 
@@ -31,4 +34,4 @@ The local demo account passwords are never written into Firestore. Firebase-back
 
 ## Deployment Files
 
-`firebase.json` points Firebase CLI deployments to `firestore.rules` and `firestore.indexes.json`. The rules require authentication, restrict tourist records by owner, and reserve destination/analysis/recommendation writes for administrator accounts.
+`firebase.json` points Firebase CLI deployments to `firestore.rules` and `firestore.indexes.json`. The rules require authentication, restrict tourist records by owner, allow administrators to review safety cases, and reserve destination/analysis/recommendation writes for administrator accounts.

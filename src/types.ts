@@ -55,6 +55,9 @@ export type User = {
   accessibilityPreference?: "none" | "low-walking" | "wheelchair-friendly";
   nationality?: string;
   passportNumber?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelation?: string;
   termsAcceptedAt?: string;
   privacyAcceptedAt?: string;
   profileCompletedAt?: string;
@@ -124,6 +127,47 @@ export type LocationConsent = {
   granted: boolean;
   grantedAt?: string;
   revokedAt?: string;
+};
+
+export type SafetyStatus = "open" | "reviewing" | "resolved";
+
+export type SosAlert = {
+  id: string;
+  userId: string;
+  status: SafetyStatus;
+  message: string;
+  latitude?: number;
+  longitude?: number;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
+};
+
+export type IncidentType = "lost-item" | "accident" | "suspicious-activity" | "medical" | "other";
+
+export type IncidentReport = {
+  id: string;
+  userId: string;
+  type: IncidentType;
+  status: SafetyStatus;
+  description: string;
+  locationNote?: string;
+  latitude?: number;
+  longitude?: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AttractionCheckIn = {
+  id: string;
+  userId: string;
+  destinationId: string;
+  tripId?: string;
+  status: "checked-in" | "checked-out";
+  checkedInAt: string;
+  checkedOutAt?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type AnalysisResult = {
@@ -236,4 +280,7 @@ export type AppData = {
   destinations: Destination[];
   analyses: AnalysisResult[];
   recommendations: Recommendation[];
+  sosAlerts: SosAlert[];
+  incidentReports: IncidentReport[];
+  checkIns: AttractionCheckIn[];
 };

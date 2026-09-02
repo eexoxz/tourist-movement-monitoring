@@ -11,6 +11,9 @@ describe("Firestore security rules coverage", () => {
     expect(firestoreRules).toContain("request.resource.data.userId == request.auth.uid");
     expect(firestoreRules).toContain("resource.data.userId == request.auth.uid");
     expect(firestoreRules).toContain("match /movement_records/{pointId}");
+    expect(firestoreRules).toContain("match /sos_alerts/{alertId}");
+    expect(firestoreRules).toContain("match /incident_reports/{reportId}");
+    expect(firestoreRules).toContain("match /attraction_checkins/{checkInId}");
   });
 
   it("lets administrators review summaries and manage destination records", () => {

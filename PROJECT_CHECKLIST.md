@@ -35,13 +35,13 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Add reusable notification/toast system for tourist and administrator feedback.
 - [x] Add first multilingual UI foundation without using a translation API.
 - [ ] Expand language coverage across every tourist-facing page, not only login and navigation.
-- [ ] Add emergency contact details to tourist profile.
-- [ ] Add SOS/emergency assistance button for tourist side as a prototype-only safety feature.
-- [ ] Add administrator SOS/emergency monitoring section.
-- [ ] Add tourist check-in/check-out for attractions.
-- [ ] Decide whether check-in is manual only or QR-style simulation for the prototype.
-- [ ] Add incident reporting for lost item, accident, suspicious activity and general help.
-- [ ] Add administrator incident management section with status updates.
+- [x] Add emergency contact details to tourist profile.
+- [x] Add SOS/emergency assistance button for tourist side as a prototype-only safety feature.
+- [x] Add administrator SOS/emergency monitoring section.
+- [x] Add tourist check-in/check-out for attractions.
+- [x] Decide whether check-in is manual only or QR-style simulation for the prototype.
+- [x] Add incident reporting for lost item, accident, suspicious activity and general help.
+- [x] Add administrator incident management section with status updates.
 - [ ] Add tourist management view for administrators using existing user/profile records.
 - [ ] Add geofencing warning logic around selected safe/restricted/dense areas without adding new APIs.
 - [ ] Add basic attraction practical info such as opening hours, fee note and visit tips where data is locally available.

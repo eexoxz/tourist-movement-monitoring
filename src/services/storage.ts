@@ -1,5 +1,19 @@
 import { initialData } from "../data/demoData";
-import type { AnalysisResult, AppData, Destination, DestinationCategory, KMeansFeatureVector, LocationConsent, MovementPoint, Recommendation, TripSession, User } from "../types";
+import type {
+  AnalysisResult,
+  AppData,
+  AttractionCheckIn,
+  Destination,
+  DestinationCategory,
+  IncidentReport,
+  KMeansFeatureVector,
+  LocationConsent,
+  MovementPoint,
+  Recommendation,
+  SosAlert,
+  TripSession,
+  User,
+} from "../types";
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
@@ -18,6 +32,9 @@ export const FIRESTORE_COLLECTIONS = {
   destinations: "destinations",
   aiAnalyses: "ai_analyses",
   recommendations: "recommendations",
+  sosAlerts: "sos_alerts",
+  incidentReports: "incident_reports",
+  checkIns: "attraction_checkins",
 } as const;
 
 const LEGACY_FIRESTORE_COLLECTIONS = {
@@ -124,6 +141,9 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
     destinations: destinations.map(normalizeDestination),
     analyses: asArray<Partial<AnalysisResult>>(data.analyses).map(normalizeAnalysis),
     recommendations: asArray<Partial<Recommendation>>(data.recommendations).map(normalizeRecommendation),
+    sosAlerts: asArray<Partial<SosAlert>>(data.sosAlerts).map(normalizeSosAlert),
+    incidentReports: asArray<Partial<IncidentReport>>(data.incidentReports).map(normalizeIncidentReport),
+    checkIns: asArray<Partial<AttractionCheckIn>>(data.checkIns).map(normalizeCheckIn),
   };
 }
 
@@ -206,7 +226,7 @@ export async function loadCloudData(fallbackActor?: User | null) {
     ? readCollection<TouristPreferenceDocument>(FIRESTORE_COLLECTIONS.touristPreferences)
     : readDocument<TouristPreferenceDocument>(FIRESTORE_COLLECTIONS.touristPreferences, authUid).then((preference) => (preference ? [preference] : []));
 
-  const [users, touristProfiles, touristPreferences, consents, trips, points, destinations, analyses, recommendations] = await Promise.all([
+  const [users, touristProfiles, touristPreferences, consents, trips, points, destinations, analyses, recommendations, sosAlerts, incidentReports, checkIns] = await Promise.all([
     userRows,
     profileRows,
     preferenceRows,
@@ -216,11 +236,23 @@ export async function loadCloudData(fallbackActor?: User | null) {
     readCollection<Destination>(FIRESTORE_COLLECTIONS.destinations),
     readScopedPreferredCollection<AnalysisResult>(FIRESTORE_COLLECTIONS.aiAnalyses, LEGACY_FIRESTORE_COLLECTIONS.analyses),
     readScopedCollection<Recommendation>(FIRESTORE_COLLECTIONS.recommendations),
+    readScopedCollection<SosAlert>(FIRESTORE_COLLECTIONS.sosAlerts),
+    readScopedCollection<IncidentReport>(FIRESTORE_COLLECTIONS.incidentReports),
+    readScopedCollection<AttractionCheckIn>(FIRESTORE_COLLECTIONS.checkIns),
   ]);
 
   const mergedUsers = mergeUserDocuments(users, touristProfiles, touristPreferences);
   const hasStructuredData =
-    mergedUsers.length > 0 || consents.length > 0 || trips.length > 0 || points.length > 0 || destinations.length > 0 || analyses.length > 0 || recommendations.length > 0;
+    mergedUsers.length > 0 ||
+    consents.length > 0 ||
+    trips.length > 0 ||
+    points.length > 0 ||
+    destinations.length > 0 ||
+    analyses.length > 0 ||
+    recommendations.length > 0 ||
+    sosAlerts.length > 0 ||
+    incidentReports.length > 0 ||
+    checkIns.length > 0;
 
   if (hasStructuredData) {
     const data = normalizeAppData({
@@ -231,6 +263,9 @@ export async function loadCloudData(fallbackActor?: User | null) {
       destinations,
       analyses,
       recommendations,
+      sosAlerts,
+      incidentReports,
+      checkIns,
     });
     saveLocalData(data);
     return data;
@@ -315,6 +350,9 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     const nextPointIds = new Set(data.points.filter((point) => point.userId === currentActor.id || ownTripIds.has(point.tripId)).map((point) => point.id));
     const nextAnalysisIds = new Set(data.analyses.filter((analysis) => analysis.userId === currentActor.id).map((analysis) => analysis.tripId));
     const nextRecommendationIds = new Set(data.recommendations.filter((recommendation) => recommendation.userId === currentActor.id).map((recommendation) => recommendation.id));
+    const nextSosAlertIds = new Set(data.sosAlerts.filter((alert) => alert.userId === currentActor.id).map((alert) => alert.id));
+    const nextIncidentReportIds = new Set(data.incidentReports.filter((report) => report.userId === currentActor.id).map((report) => report.id));
+    const nextCheckInIds = new Set(data.checkIns.filter((checkIn) => checkIn.userId === currentActor.id).map((checkIn) => checkIn.id));
 
     await queueWrite((currentBatch) =>
       currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>)
@@ -346,6 +384,17 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
         currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>)
       );
     }
+    for (const alert of data.sosAlerts.filter((row) => row.userId === currentActor.id)) {
+      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.sosAlerts, alert.id), cleanFirestoreData(alert) as Record<string, unknown>));
+    }
+    for (const report of data.incidentReports.filter((row) => row.userId === currentActor.id)) {
+      await queueWrite((currentBatch) =>
+        currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.incidentReports, report.id), cleanFirestoreData(report) as Record<string, unknown>)
+      );
+    }
+    for (const checkIn of data.checkIns.filter((row) => row.userId === currentActor.id)) {
+      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
+    }
 
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.locationConsents, nextConsentIds);
     for (const snapshot of existingTrips.docs) {
@@ -357,6 +406,9 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.movementRecords, nextPointIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.aiAnalyses, nextAnalysisIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.sosAlerts, nextSosAlertIds);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.incidentReports, nextIncidentReportIds);
+    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.checkIns, nextCheckInIds);
   } else {
     await syncCollection(FIRESTORE_COLLECTIONS.users, data.users.map(publicUser), (user) => user.id);
     await syncCollection(FIRESTORE_COLLECTIONS.touristProfiles, data.users.filter((user) => user.role === "tourist").map(buildTouristProfileDocument), (user) => user.id);
@@ -368,6 +420,9 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await syncCollection(FIRESTORE_COLLECTIONS.destinations, data.destinations, (destination) => destination.id);
     await syncCollection(FIRESTORE_COLLECTIONS.aiAnalyses, data.analyses, (analysis) => analysis.tripId);
     await syncCollection(FIRESTORE_COLLECTIONS.recommendations, data.recommendations, (recommendation) => recommendation.id);
+    await syncCollection(FIRESTORE_COLLECTIONS.sosAlerts, data.sosAlerts, (alert) => alert.id);
+    await syncCollection(FIRESTORE_COLLECTIONS.incidentReports, data.incidentReports, (report) => report.id);
+    await syncCollection(FIRESTORE_COLLECTIONS.checkIns, data.checkIns, (checkIn) => checkIn.id);
   }
 
   await commitQueuedWrites();
@@ -568,6 +623,62 @@ function normalizeRecommendation(recommendation: Partial<Recommendation>): Recom
     },
     reason: recommendation.reason ?? "Recommendation restored from older prototype data.",
     generatedAt: recommendation.generatedAt ?? new Date().toISOString(),
+  };
+}
+
+function normalizeSafetyStatus(status: unknown) {
+  return status === "reviewing" || status === "resolved" ? status : "open";
+}
+
+function normalizeSosAlert(alert: Partial<SosAlert>): SosAlert {
+  const createdAt = alert.createdAt ?? new Date().toISOString();
+  return {
+    id: alert.id ?? createId("sos"),
+    userId: alert.userId ?? "",
+    status: normalizeSafetyStatus(alert.status),
+    message: alert.message ?? "Tourist requested emergency assistance from the web app.",
+    latitude: Number.isFinite(alert.latitude) ? alert.latitude : undefined,
+    longitude: Number.isFinite(alert.longitude) ? alert.longitude : undefined,
+    createdAt,
+    updatedAt: alert.updatedAt ?? createdAt,
+    resolvedAt: alert.resolvedAt,
+  };
+}
+
+function normalizeIncidentType(type: unknown) {
+  return type === "lost-item" || type === "accident" || type === "suspicious-activity" || type === "medical" || type === "other" ? type : "other";
+}
+
+function normalizeIncidentReport(report: Partial<IncidentReport>): IncidentReport {
+  const createdAt = report.createdAt ?? new Date().toISOString();
+  return {
+    id: report.id ?? createId("incident"),
+    userId: report.userId ?? "",
+    type: normalizeIncidentType(report.type),
+    status: normalizeSafetyStatus(report.status),
+    description: report.description ?? "Older incident report restored from prototype data.",
+    locationNote: report.locationNote,
+    latitude: Number.isFinite(report.latitude) ? report.latitude : undefined,
+    longitude: Number.isFinite(report.longitude) ? report.longitude : undefined,
+    createdAt,
+    updatedAt: report.updatedAt ?? createdAt,
+  };
+}
+
+function normalizeCheckIn(checkIn: Partial<AttractionCheckIn>): AttractionCheckIn {
+  const checkedInAt = checkIn.checkedInAt ?? new Date().toISOString();
+  const status = checkIn.status === "checked-out" ? "checked-out" : "checked-in";
+
+  return {
+    id: checkIn.id ?? createId("checkin"),
+    userId: checkIn.userId ?? "",
+    destinationId: checkIn.destinationId ?? "",
+    tripId: checkIn.tripId,
+    status,
+    checkedInAt,
+    checkedOutAt: status === "checked-out" ? (checkIn.checkedOutAt ?? checkedInAt) : undefined,
+    latitude: Number.isFinite(checkIn.latitude) ? checkIn.latitude : undefined,
+    longitude: Number.isFinite(checkIn.longitude) ? checkIn.longitude : undefined,
   };
 }
 

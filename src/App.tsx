@@ -34,6 +34,8 @@ import type {
   MovementAlert,
   MovementPoint,
   Recommendation,
+  IncidentType,
+  SafetyStatus,
   TouristProfile,
   TravelPlan,
   TravelPlanOptions,
@@ -107,11 +109,13 @@ import {
   summarizeTrip,
   summarizeUserTrips,
 } from "./services/movement";
+import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn, getCheckInDurationMinutes } from "./services/checkIns";
+import { createIncidentReport, createSosAlert, getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "./services/safety";
 
 const MapView = lazy(() => import("./components/MapView").then((module) => ({ default: module.MapView })));
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
-type AdminDashboardTab = "overview" | "records" | "ai";
+type AdminDashboardTab = "overview" | "records" | "safety" | "ai";
 type AuthResult = { error?: string; message?: string };
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
 type TouristRegistrationDraft = {
@@ -148,6 +152,13 @@ const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = 
   { value: "heritage", label: "Heritage" },
   { value: "food", label: "Food" },
   { value: "coastal", label: "Coastal" },
+];
+const incidentTypeOptions: Array<{ value: IncidentType; label: string }> = [
+  { value: "lost-item", label: "Lost item" },
+  { value: "accident", label: "Accident" },
+  { value: "suspicious-activity", label: "Suspicious activity" },
+  { value: "medical", label: "Medical help" },
+  { value: "other", label: "Other help" },
 ];
 
 
@@ -1301,6 +1312,10 @@ function TouristWorkspace({
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
+  const [checkInDestinationId, setCheckInDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
+  const [incidentType, setIncidentType] = useState<IncidentType>("lost-item");
+  const [incidentDescription, setIncidentDescription] = useState("");
+  const [incidentLocationNote, setIncidentLocationNote] = useState("");
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
   const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
   const tripSummaries = useMemo(() => summarizeUserTrips(data, user.id), [data, user.id]);
@@ -1331,6 +1346,14 @@ function TouristWorkspace({
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
+  const latestKnownPoint = activePoints.at(-1) ?? tripPoints.at(-1);
+  const userSosAlerts = data.sosAlerts.filter((alert) => alert.userId === user.id);
+  const userIncidentReports = data.incidentReports.filter((report) => report.userId === user.id);
+  const openSafetyCount = [...userSosAlerts, ...userIncidentReports].filter((record) => record.status !== "resolved").length;
+  const activeCheckIn = getActiveCheckIn(data, user.id);
+  const activeCheckInDestination = activeCheckIn ? data.destinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
+  const recentCheckIns = data.checkIns.filter((checkIn) => checkIn.userId === user.id).slice(0, 3);
+  const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, data.destinations)?.destination : null;
   const displayName = getDisplayName(user);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
   const hasPersonalizedRecommendations = Boolean(latestAnalysis);
@@ -1553,6 +1576,75 @@ function TouristWorkspace({
     setProfileSetupSkipped(false);
     onDataChange(refreshAllRecommendations(nextData), nextUser);
     notify({ tone: "success", title: "Profile saved", message: "Your travel preferences will be used for recommendations." });
+  };
+
+  const sendSosAlert = () => {
+    if (!window.confirm("Record an SOS assistance request for tourism administrators? For real danger, call local emergency services too.")) {
+      return;
+    }
+
+    const result = createSosAlert(data, user.id, latestKnownPoint);
+    onDataChange(result.data, user);
+    notify({
+      tone: "warning",
+      title: "SOS request recorded",
+      message: latestKnownPoint ? "Your latest saved location was attached for administrator review." : "No saved location was available, but the request was recorded.",
+    });
+  };
+
+  const submitIncidentReport = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = createIncidentReport(data, {
+      userId: user.id,
+      type: incidentType,
+      description: incidentDescription,
+      locationNote: incidentLocationNote,
+      location: latestKnownPoint,
+    });
+
+    if (result.error || !result.data) {
+      notify({ tone: "error", title: "Incident report not saved", message: result.error ?? "Check the report details and try again." });
+      return;
+    }
+
+    onDataChange(result.data, user);
+    setIncidentDescription("");
+    setIncidentLocationNote("");
+    notify({ tone: "success", title: "Incident report saved", message: "Tourism administrators can review this case from the dashboard." });
+  };
+
+  const startAttractionCheckIn = () => {
+    const result = createAttractionCheckIn(data, {
+      userId: user.id,
+      destinationId: checkInDestinationId,
+      tripId: activeTrip?.id,
+      location: latestKnownPoint,
+    });
+
+    if (result.error || !result.data) {
+      notify({ tone: "error", title: "Check-in not saved", message: result.error ?? "Choose an attraction and try again." });
+      return;
+    }
+
+    const destination = data.destinations.find((candidate) => candidate.id === checkInDestinationId);
+    onDataChange(result.data, user);
+    notify({ tone: "success", title: "Checked in", message: destination ? `${destination.name} was added to your visit log.` : "Your attraction visit was added." });
+  };
+
+  const finishAttractionCheckIn = () => {
+    if (!activeCheckIn) {
+      notify({ tone: "error", title: "No active check-in", message: "There is no attraction visit to check out from." });
+      return;
+    }
+
+    const result = checkOutFromAttraction(data, activeCheckIn.id);
+    if (result.error || !result.data) {
+      notify({ tone: "error", title: "Check-out not saved", message: result.error ?? "Try again in a moment." });
+      return;
+    }
+
+    onDataChange(result.data, user);
+    notify({ tone: "success", title: "Checked out", message: "Your attraction visit duration was saved." });
   };
 
   const skipProfileSetup = () => {
@@ -1997,6 +2089,133 @@ function TouristWorkspace({
           )}
         </section>
 
+        <section className="tourist-section check-in-panel">
+          <div className="section-heading">
+            <div>
+              <span>Attraction visit</span>
+              <h2>{activeCheckInDestination ? `Checked in at ${activeCheckInDestination.name}` : "Check in when you arrive"}</h2>
+              <p>{activeCheckIn ? "Check out when you leave so the visit duration can be recorded." : "This adds a clear attraction visit record alongside your movement route."}</p>
+            </div>
+            {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
+          </div>
+
+          {!activeCheckIn && (
+            <div className="check-in-control">
+              <label>
+                Attraction
+                <select value={checkInDestinationId} onChange={(event) => setCheckInDestinationId(event.target.value)}>
+                  {data.destinations.map((destination) => (
+                    <option key={destination.id} value={destination.id}>
+                      {destination.name} · {destination.city}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button className="primary-action" type="button" onClick={startAttractionCheckIn}>
+                <MapPinned size={18} />
+                Check in
+              </button>
+            </div>
+          )}
+
+          {recommendedCheckIn && !activeCheckIn && (
+            <button className="secondary-action wide" type="button" onClick={() => setCheckInDestinationId(recommendedCheckIn.id)}>
+              Use nearest place: {recommendedCheckIn.name}
+            </button>
+          )}
+
+          {activeCheckIn && (
+            <button className="secondary-action wide" type="button" onClick={finishAttractionCheckIn}>
+              <Square size={18} />
+              Check out
+            </button>
+          )}
+
+          <div className="check-in-history">
+            {recentCheckIns.map((checkIn) => {
+              const destination = data.destinations.find((candidate) => candidate.id === checkIn.destinationId);
+
+              return (
+                <span key={checkIn.id}>
+                  <strong>{destination?.name ?? "Unknown attraction"}</strong>
+                  {checkIn.status === "checked-out" ? `${getCheckInDurationMinutes(checkIn)} min visit` : "Currently checked in"}
+                </span>
+              );
+            })}
+            {recentCheckIns.length === 0 && <small>No attraction check-ins yet.</small>}
+          </div>
+        </section>
+
+        <section className="tourist-section safety-panel">
+          <div className="section-heading">
+            <div>
+              <span>Safety support</span>
+              <h2>Need help during a trip?</h2>
+              <p>Record an SOS or incident report for tourism administrators to review in this prototype.</p>
+            </div>
+            <strong>{openSafetyCount} open</strong>
+          </div>
+
+          <div className="safety-contact-strip">
+            <div>
+              <small>Emergency contact</small>
+              <strong>{user.emergencyContactName || "Not added yet"}</strong>
+              <span>{user.emergencyContactPhone || "Add this in Travel Profile"}</span>
+            </div>
+            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("profile")}>
+              <UserRound size={16} />
+              Edit contact
+            </button>
+          </div>
+
+          <button className="primary-action danger wide" type="button" onClick={sendSosAlert}>
+            <ShieldCheck size={18} />
+            Send SOS Request
+          </button>
+          <p className="safety-disclaimer">Prototype note: this saves an assistance request for the administrator dashboard. In real danger, call local emergency services immediately.</p>
+
+          <form className="incident-form" onSubmit={submitIncidentReport}>
+            <div className="field-pair">
+              <label>
+                Incident type
+                <select value={incidentType} onChange={(event) => setIncidentType(event.target.value as IncidentType)}>
+                  {incidentTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Location note
+                <input value={incidentLocationNote} onChange={(event) => setIncidentLocationNote(event.target.value)} placeholder="Example: near entrance gate" />
+              </label>
+            </div>
+            <label>
+              What happened?
+              <textarea value={incidentDescription} onChange={(event) => setIncidentDescription(event.target.value)} placeholder="Briefly describe the issue." required />
+            </label>
+            <button className="secondary-action wide" type="submit">
+              <Save size={18} />
+              Submit incident report
+            </button>
+          </form>
+
+          <div className="safety-record-list">
+            {userSosAlerts.slice(0, 2).map((alert) => (
+              <span key={alert.id}>
+                SOS {alert.status} · {formatDateTime(alert.createdAt)}
+              </span>
+            ))}
+            {userIncidentReports.slice(0, 2).map((report) => (
+              <span key={report.id}>
+                {incidentTypeOptions.find((option) => option.value === report.type)?.label ?? "Incident"} {report.status} · {formatDateTime(report.createdAt)}
+              </span>
+            ))}
+            {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>No safety requests submitted yet.</small>}
+          </div>
+        </section>
+
         <MetricGrid
           items={[
             ["Trip status", tripStateLabel],
@@ -2029,6 +2248,10 @@ function TouristWorkspace({
             <div>
               <small>Pace</small>
               <strong>{user.tripPace ?? "balanced"}</strong>
+            </div>
+            <div>
+              <small>Emergency contact</small>
+              <strong>{user.emergencyContactName || "Not set yet"}</strong>
             </div>
           </div>
         </section>
@@ -2124,6 +2347,9 @@ function TouristProfileForm({
   const [tripPace, setTripPace] = useState<User["tripPace"]>(user.tripPace ?? "balanced");
   const [travelGroup, setTravelGroup] = useState<User["travelGroup"]>(user.travelGroup ?? "solo");
   const [accessibilityPreference, setAccessibilityPreference] = useState<User["accessibilityPreference"]>(user.accessibilityPreference ?? "none");
+  const [emergencyContactName, setEmergencyContactName] = useState(user.emergencyContactName ?? "");
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState(user.emergencyContactPhone ?? "");
+  const [emergencyContactRelation, setEmergencyContactRelation] = useState(user.emergencyContactRelation ?? "");
 
   const togglePreference = (preference: DestinationCategory) => {
     setPreferences((current) =>
@@ -2141,6 +2367,9 @@ function TouristProfileForm({
       tripPace,
       travelGroup,
       accessibilityPreference,
+      emergencyContactName: emergencyContactName.trim() || undefined,
+      emergencyContactPhone: emergencyContactPhone.trim() || undefined,
+      emergencyContactRelation: emergencyContactRelation.trim() || undefined,
       profileCompletedAt: new Date().toISOString(),
     });
   };
@@ -2200,6 +2429,27 @@ function TouristProfileForm({
               <option value="wheelchair-friendly">Prefer wheelchair-friendly places</option>
             </select>
           </label>
+
+          <section className="profile-emergency-fields">
+            <div>
+              <span>Emergency contact</span>
+              <p>Optional, but useful if the tourist submits an SOS or incident report.</p>
+            </div>
+            <div className="field-pair">
+              <label>
+                Contact name
+                <input value={emergencyContactName} onChange={(event) => setEmergencyContactName(event.target.value)} placeholder="Example: Nur Aisyah" />
+              </label>
+              <label>
+                Contact phone
+                <input value={emergencyContactPhone} onChange={(event) => setEmergencyContactPhone(event.target.value)} placeholder="Example: +60123456789" />
+              </label>
+            </div>
+            <label>
+              Relationship
+              <input value={emergencyContactRelation} onChange={(event) => setEmergencyContactRelation(event.target.value)} placeholder="Example: Parent, spouse, friend" />
+            </label>
+          </section>
         </div>
 
         <div className="profile-actions">
@@ -2332,6 +2582,38 @@ function AdminWorkspace({
   const selectedAnalysisUser = selectedAnalysis ? data.users.find((candidate) => candidate.id === selectedAnalysis.userId) ?? null : null;
   const selectedAnalysisTrip = selectedAnalysis ? data.trips.find((candidate) => candidate.id === selectedAnalysis.tripId) ?? null : null;
   const selectedAnalysisRecommendations = selectedAnalysis ? data.recommendations.filter((recommendation) => recommendation.userId === selectedAnalysis.userId).slice(0, 3) : [];
+  const safetyRecords = useMemo(
+    () =>
+      [
+        ...data.sosAlerts.map((alert) => ({
+          id: alert.id,
+          kind: "sos" as const,
+          userId: alert.userId,
+          status: alert.status,
+          title: "SOS assistance request",
+          detail: alert.message,
+          locationNote: alert.latitude !== undefined && alert.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No recent location point was available.",
+          createdAt: alert.createdAt,
+          updatedAt: alert.updatedAt,
+        })),
+        ...data.incidentReports.map((report) => ({
+          id: report.id,
+          kind: "incident" as const,
+          userId: report.userId,
+          status: report.status,
+          title: incidentTypeOptions.find((option) => option.value === report.type)?.label ?? "Incident report",
+          detail: report.description,
+          locationNote: report.locationNote || (report.latitude !== undefined && report.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No location note was provided."),
+          createdAt: report.createdAt,
+          updatedAt: report.updatedAt,
+        })),
+      ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [data.incidentReports, data.sosAlerts]
+  );
+  const openSosCount = data.sosAlerts.filter((alert) => alert.status !== "resolved").length;
+  const openIncidentCount = data.incidentReports.filter((report) => report.status !== "resolved").length;
+  const openSafetyRecordCount = getOpenSafetyCount(data);
+  const resolvedSafetyRecordCount = safetyRecords.filter((record) => record.status === "resolved").length;
   const selectedKValue = aiEvaluation.validClusteredRecordCount > 0 ? Math.min(3, aiEvaluation.validClusteredRecordCount) : 0;
   const selectedClusterSize = selectedAnalysis ? analysisRows.filter((analysis) => analysis.cluster === selectedAnalysis.cluster).length : 0;
   const clusterSummaries = useMemo(
@@ -2415,6 +2697,16 @@ function AdminWorkspace({
     link.download = `movement-alerts-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const updateSafetyStatus = (kind: "sos" | "incident", recordId: string, status: SafetyStatus) => {
+    const nextData = kind === "sos" ? updateSosStatus(data, recordId, status) : updateIncidentStatus(data, recordId, status);
+    onDataChange(nextData);
+    notify({
+      tone: "success",
+      title: "Safety case updated",
+      message: status === "resolved" ? "The case is marked as resolved." : "The case status was saved.",
+    });
   };
 
   const movementRecordsPanel = (
@@ -2550,6 +2842,78 @@ function AdminWorkspace({
       </Page>
     );
   }
+
+  const safetyPanel = (
+    <div className="admin-tab-panel">
+      <div className="admin-tab-heading">
+        <div>
+          <h2>Safety Monitoring</h2>
+          <p>Review SOS requests and tourist incident reports submitted from the mobile tourist flow.</p>
+        </div>
+        <strong>{openSafetyRecordCount} open case(s)</strong>
+      </div>
+      <MetricGrid
+        items={[
+          ["Open SOS", openSosCount.toString()],
+          ["Open incidents", openIncidentCount.toString()],
+          ["Resolved", resolvedSafetyRecordCount.toString()],
+          ["Emergency contacts", tourists.filter((tourist) => tourist.emergencyContactPhone).length.toString()],
+        ]}
+      />
+      <section className="list-panel safety-admin-list">
+        {safetyRecords.map((record) => {
+          const tourist = data.users.find((candidate) => candidate.id === record.userId);
+          const contactLine = tourist?.emergencyContactPhone
+            ? `${tourist.emergencyContactName || "Emergency contact"} · ${tourist.emergencyContactPhone}${tourist.emergencyContactRelation ? ` · ${tourist.emergencyContactRelation}` : ""}`
+            : "No emergency contact saved";
+
+          return (
+            <article className={record.kind === "sos" ? "safety-admin-card urgent" : "safety-admin-card"} key={`${record.kind}-${record.id}`}>
+              <div className="safety-admin-heading">
+                <div>
+                  <span>{record.kind === "sos" ? "SOS" : "Incident"}</span>
+                  <h3>{record.title}</h3>
+                  <p>{record.detail}</p>
+                </div>
+                <select className="safety-status-select" value={record.status} onChange={(event) => updateSafetyStatus(record.kind, record.id, event.target.value as SafetyStatus)} aria-label="Safety case status">
+                  <option value="open">Open</option>
+                  <option value="reviewing">Reviewing</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+              </div>
+              <dl className="safety-admin-meta">
+                <div>
+                  <dt>Tourist</dt>
+                  <dd>{tourist?.name ?? "Unknown tourist"}</dd>
+                </div>
+                <div>
+                  <dt>Nationality</dt>
+                  <dd>{tourist?.nationality ?? "Not provided"}</dd>
+                </div>
+                <div>
+                  <dt>Passport</dt>
+                  <dd>{tourist?.passportNumber ?? "Not provided"}</dd>
+                </div>
+                <div>
+                  <dt>Contact</dt>
+                  <dd>{contactLine}</dd>
+                </div>
+                <div>
+                  <dt>Location</dt>
+                  <dd>{record.locationNote}</dd>
+                </div>
+                <div>
+                  <dt>Submitted</dt>
+                  <dd>{formatDateTime(record.createdAt)}</dd>
+                </div>
+              </dl>
+            </article>
+          );
+        })}
+        {safetyRecords.length === 0 && <EmptyState text="No SOS requests or incident reports have been submitted yet." />}
+      </section>
+    </div>
+  );
 
   const aiResultsPanel = (
     <div className="admin-tab-panel">
@@ -2725,6 +3089,9 @@ function AdminWorkspace({
         <button className={adminTab === "records" ? "active" : ""} type="button" onClick={() => setAdminTab("records")}>
           Movement Records
         </button>
+        <button className={adminTab === "safety" ? "active" : ""} type="button" onClick={() => setAdminTab("safety")}>
+          Safety
+        </button>
         <button className={adminTab === "ai" ? "active" : ""} type="button" onClick={() => setAdminTab("ai")}>
           AI Results
         </button>
@@ -2747,7 +3114,9 @@ function AdminWorkspace({
               ["Completed trips", summary.completedTripCount.toString()],
               ["Movement points", summary.movementPointCount.toString()],
               ["Destinations", summary.destinationCount.toString()],
-              ["Alerts", movementAlerts.length.toString()],
+              ["Movement alerts", movementAlerts.length.toString()],
+              ["Safety cases", openSafetyRecordCount.toString()],
+              ["Check-ins", data.checkIns.length.toString()],
             ]}
           />
           <div className="two-column">
@@ -2815,6 +3184,7 @@ function AdminWorkspace({
         </div>
       )}
       {adminTab === "records" && movementRecordsPanel}
+      {adminTab === "safety" && safetyPanel}
       {adminTab === "ai" && aiResultsPanel}
     </Page>
   );

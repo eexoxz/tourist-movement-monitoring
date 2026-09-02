@@ -891,6 +891,143 @@ button:disabled {
   flex-wrap: wrap;
 }
 
+.profile-emergency-fields,
+.check-in-panel,
+.safety-panel,
+.incident-form,
+.check-in-history,
+.safety-record-list {
+  display: grid;
+  gap: 12px;
+}
+
+.profile-emergency-fields {
+  padding: 14px;
+  border: 1px solid #d8d0bf;
+  border-radius: 8px;
+  background: #fffdfa;
+}
+
+.profile-emergency-fields span {
+  color: var(--teal-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.profile-emergency-fields p {
+  margin: 4px 0 0;
+  color: #596575;
+  line-height: 1.45;
+}
+
+.safety-panel {
+  padding: 18px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(254, 242, 242, 0.9), rgba(255, 253, 248, 0.96) 48%),
+    #ffffff;
+}
+
+.safety-contact-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+  border: 1px solid #f1e5d0;
+  border-radius: 8px;
+  background: #fffdfa;
+}
+
+.safety-contact-strip div {
+  display: grid;
+  gap: 3px;
+}
+
+.safety-contact-strip small,
+.safety-admin-card span {
+  color: #9f3412;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.safety-contact-strip strong {
+  color: #111827;
+}
+
+.safety-contact-strip span,
+.safety-disclaimer {
+  color: #596575;
+  line-height: 1.45;
+}
+
+.safety-disclaimer {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.incident-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.safety-record-list {
+  gap: 8px;
+}
+
+.safety-record-list span,
+.safety-record-list small {
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: #475569;
+  background: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.check-in-panel {
+  padding: 18px;
+  border: 1px solid #b7efe6;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(204, 251, 241, 0.54), rgba(255, 253, 248, 0.94) 56%),
+    #ffffff;
+}
+
+.check-in-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.check-in-history {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.check-in-history span,
+.check-in-history small {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 8px;
+  color: #596575;
+  background: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.check-in-history strong {
+  color: #102033;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .movement-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 0.52fr);
@@ -3194,7 +3331,7 @@ textarea {
 }
 
 .admin-tabs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   width: min(760px, 100%);
 }
 
@@ -3224,6 +3361,91 @@ textarea {
   margin-top: 5px;
   color: var(--muted);
   line-height: 1.45;
+}
+
+.admin-tab-heading > strong {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: #7f1d1d;
+  background: #fee2e2;
+  font-size: 0.84rem;
+}
+
+.safety-admin-list {
+  display: grid;
+  gap: 12px;
+}
+
+.safety-admin-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.safety-admin-card.urgent {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.safety-admin-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 180px);
+  gap: 12px;
+  align-items: start;
+}
+
+.safety-admin-heading h3 {
+  margin: 4px 0 0;
+  color: #102033;
+  font-size: 1.1rem;
+}
+
+.safety-admin-heading p {
+  margin: 7px 0 0;
+  color: #596575;
+  line-height: 1.5;
+}
+
+.safety-status-select {
+  min-height: 42px;
+  border: 1px solid #d8d0bf;
+  border-radius: 8px;
+  color: #102033;
+  background: #ffffff;
+  font-weight: 900;
+}
+
+.safety-admin-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.safety-admin-meta div {
+  min-width: 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.safety-admin-meta dt {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.safety-admin-meta dd {
+  margin: 4px 0 0;
+  color: #102033;
+  font-weight: 900;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .role-switch {
@@ -3658,6 +3880,14 @@ textarea {
   .places-hero,
   .places-controls,
   .places-discovery-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .safety-contact-strip,
+  .check-in-control,
+  .check-in-history,
+  .safety-admin-heading,
+  .safety-admin-meta {
     grid-template-columns: 1fr;
   }
 

@@ -16,6 +16,9 @@ describe("storage service", () => {
         "destinations",
         "ai_analyses",
         "recommendations",
+        "sos_alerts",
+        "incident_reports",
+        "attraction_checkins",
       ])
     );
   });
@@ -85,6 +88,30 @@ describe("storage service", () => {
           source: "demo",
         },
       ],
+      sosAlerts: [
+        {
+          id: "sos-old",
+          userId: "tourist-old",
+          message: "Older SOS alert.",
+          createdAt: "2026-08-01T01:15:00.000Z",
+        },
+      ],
+      incidentReports: [
+        {
+          id: "incident-old",
+          userId: "tourist-old",
+          description: "Older incident report.",
+          createdAt: "2026-08-01T01:20:00.000Z",
+        },
+      ],
+      checkIns: [
+        {
+          id: "checkin-old",
+          userId: "tourist-old",
+          destinationId: "klcc-park",
+          checkedInAt: "2026-08-01T01:30:00.000Z",
+        },
+      ],
     };
 
     const normalized = normalizeAppData(legacyData as Parameters<typeof normalizeAppData>[0]);
@@ -98,6 +125,9 @@ describe("storage service", () => {
     expect(normalized.analyses[0].kMeansInput.uniqueDestinations).toBe(0);
     expect(normalized.analyses[0].kMeansCentroid.urbanProportion).toBe(0);
     expect(normalized.points[0].userId).toBe("tourist-old");
+    expect(normalized.sosAlerts[0].status).toBe("open");
+    expect(normalized.incidentReports[0].type).toBe("other");
+    expect(normalized.checkIns[0].status).toBe("checked-in");
   });
 
   it("creates ids when randomUUID is unavailable on LAN preview origins", () => {
