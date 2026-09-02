@@ -19,4 +19,15 @@ describe("i18n", () => {
     expect(translate("es", "nav.home")).toBe("Inicio");
     expect(translate("fr", "nav.home")).toBe("Accueil");
   });
+
+  it("translates key tourist workflow actions", () => {
+    expect(translate("ms", "tourist.home.startTrip")).toBe("Mulakan Perjalanan");
+    expect(translate("zh", "tourist.checkin.checkIn")).toBe("签到");
+    expect(translate("ja", "tourist.safety.sos")).toBe("SOS リクエスト送信");
+    expect(translate("ko", "tourist.recommendations.pageTitle")).toBe("장소 탐색");
+    expect(translate("pt", "tourist.events.pageTitle")).toBe("Calendário de Eventos");
+    expect(translate("ta", "tourist.profile.notSetYet")).toBe("இன்னும் அமைக்கப்படவில்லை");
+    expect(translate("es", "tourist.safety.submitIncident")).toBe("Enviar reporte de incidente");
+    expect(translate("fr", "tourist.home.stopTrip")).toBe("Arrêter le voyage");
+  });
 });
