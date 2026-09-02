@@ -3665,6 +3665,14 @@ function DestinationDetail({ destination, demand }: { destination: Destination; 
           <dt>Address</dt>
           <dd>{destination.address ?? `${destination.city}, Malaysia`}</dd>
         </div>
+        <div>
+          <dt>Opening hours</dt>
+          <dd>{destination.openingHours ?? "Check locally before visiting."}</dd>
+        </div>
+        <div>
+          <dt>Fee note</dt>
+          <dd>{destination.feeNote ?? "Fee information may vary."}</dd>
+        </div>
         {demand && (
           <>
             <div>
@@ -3678,6 +3686,16 @@ function DestinationDetail({ destination, demand }: { destination: Destination; 
           </>
         )}
       </dl>
+      {destination.visitTips && destination.visitTips.length > 0 && (
+        <section className="visit-tips-panel">
+          <strong>Visit tips</strong>
+          <ul>
+            {destination.visitTips.map((tip) => (
+              <li key={tip}>{tip}</li>
+            ))}
+          </ul>
+        </section>
+      )}
     </section>
   );
 }
@@ -3724,7 +3742,25 @@ function DestinationModal({
             <dt>Movement demand</dt>
             <dd>{demand ? `${demand.tier} (${demand.popularityScore}%)` : "No signal yet"}</dd>
           </div>
+          <div>
+            <dt>Opening hours</dt>
+            <dd>{destination.openingHours ?? "Check locally before visiting."}</dd>
+          </div>
+          <div>
+            <dt>Fee note</dt>
+            <dd>{destination.feeNote ?? "Fee information may vary."}</dd>
+          </div>
         </dl>
+        {destination.visitTips && destination.visitTips.length > 0 && (
+          <section className="visit-tips-panel">
+            <strong>Visit tips</strong>
+            <ul>
+              {destination.visitTips.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+          </section>
+        )}
         <section className="recommendation-reason">
           <strong>Why this place?</strong>
           <p>{recommendation.reason}</p>
@@ -3946,6 +3982,9 @@ type DestinationFormState = {
   latitude: string;
   longitude: string;
   averageVisitMinutes: string;
+  openingHours: string;
+  feeNote: string;
+  visitTips: string;
   description: string;
 };
 
@@ -3958,6 +3997,9 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
     latitude: destination ? String(destination.latitude) : "3.1478",
     longitude: destination ? String(destination.longitude) : "101.6937",
     averageVisitMinutes: destination ? String(destination.averageVisitMinutes) : "60",
+    openingHours: destination?.openingHours ?? "",
+    feeNote: destination?.feeNote ?? "",
+    visitTips: destination?.visitTips?.join("\n") ?? "",
     description: destination?.description ?? "",
   };
 }
@@ -4127,6 +4169,7 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
               <div className="tag-row">
                 <small>{destination.category}</small>
                 <small>{destination.averageVisitMinutes} min visit</small>
+                {destination.openingHours && <small>visit info</small>}
               </div>
               <div className="card-actions">
                 <button className="secondary-action icon-action" onClick={() => startEdit(destination)} type="button" title="Edit destination">
@@ -4196,6 +4239,18 @@ function DestinationManager({ destinations, onChange, notify }: { destinations: 
           <label>
             Average visit minutes
             <input type="number" min="1" value={form.averageVisitMinutes} onChange={(event) => setForm({ ...form, averageVisitMinutes: event.target.value })} required />
+          </label>
+          <label>
+            Opening hours
+            <input value={form.openingHours} onChange={(event) => setForm({ ...form, openingHours: event.target.value })} placeholder="Example: Usually daily; check public holiday hours" />
+          </label>
+          <label>
+            Fee note
+            <input value={form.feeNote} onChange={(event) => setForm({ ...form, feeNote: event.target.value })} placeholder="Example: Entry is normally free; activities may vary" />
+          </label>
+          <label>
+            Visit tips
+            <textarea value={form.visitTips} onChange={(event) => setForm({ ...form, visitTips: event.target.value })} placeholder="Add one tip per line" />
           </label>
           <label>
             Description
@@ -4489,7 +4544,25 @@ function PlaceDiscovery({
                 <dt>Average visit</dt>
                 <dd>{selectedRow.destination.averageVisitMinutes} minutes</dd>
               </div>
+              <div>
+                <dt>Opening hours</dt>
+                <dd>{selectedRow.destination.openingHours ?? "Check locally before visiting."}</dd>
+              </div>
+              <div>
+                <dt>Fee note</dt>
+                <dd>{selectedRow.destination.feeNote ?? "Fee information may vary."}</dd>
+              </div>
             </dl>
+            {selectedRow.destination.visitTips && selectedRow.destination.visitTips.length > 0 && (
+              <section className="visit-tips-panel compact">
+                <strong>Before you go</strong>
+                <ul>
+                  {selectedRow.destination.visitTips.map((tip) => (
+                    <li key={tip}>{tip}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
             <div className="place-detail-actions">
               <button className="secondary-action" type="button" onClick={onOpenEvents}>
                 <CalendarDays size={18} />

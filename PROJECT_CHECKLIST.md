@@ -44,7 +44,7 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Add administrator incident management section with status updates.
 - [x] Add tourist management view for administrators using existing user/profile records.
 - [x] Add geofencing warning logic around selected safe/restricted/dense areas without adding new APIs.
-- [ ] Add basic attraction practical info such as opening hours, fee note and visit tips where data is locally available.
+- [x] Add basic attraction practical info such as opening hours, fee note and visit tips where data is locally available.
 - [ ] Document that weather, traffic and road-closure alerts are out of scope unless approved APIs are allowed.
 
 ## Malaysia Destination Scope

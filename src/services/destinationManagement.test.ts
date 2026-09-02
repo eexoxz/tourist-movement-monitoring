@@ -42,10 +42,15 @@ describe("destination management service", () => {
       longitude: 101.6942,
       description: "Museum focused on Malaysian textile heritage.",
       averageVisitMinutes: 75,
+      openingHours: "Daily, 9:00 AM to 5:00 PM",
+      feeNote: "Ticket counter may apply for special galleries.",
+      visitTips: "Visit earlier in the day\nPair with Merdeka Square",
     });
 
     expect(result.error).toBeUndefined();
     expect(result.destination?.name).toBe("National Textile Museum");
+    expect(result.destination?.openingHours).toBe("Daily, 9:00 AM to 5:00 PM");
+    expect(result.destination?.visitTips).toEqual(["Visit earlier in the day", "Pair with Merdeka Square"]);
     expect(result.destinations).toHaveLength(destinations.length + 1);
   });
 
@@ -67,10 +72,12 @@ describe("destination management service", () => {
       ...destinations[0],
       averageVisitMinutes: 65,
       description: "Updated heritage destination description.",
+      feeNote: "Public square access is free.",
     });
 
     expect(result.error).toBeUndefined();
     expect(result.destination?.averageVisitMinutes).toBe(65);
+    expect(result.destination?.feeNote).toBe("Public square access is free.");
     expect(result.destinations?.find((destination) => destination.id === destinations[0].id)?.averageVisitMinutes).toBe(65);
   });
 

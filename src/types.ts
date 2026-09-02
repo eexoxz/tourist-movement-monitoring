@@ -74,6 +74,9 @@ export type Destination = {
   address?: string;
   description: string;
   averageVisitMinutes: number;
+  openingHours?: string;
+  feeNote?: string;
+  visitTips?: string[];
 };
 
 export type GeoFenceType = "safe" | "restricted" | "dense";

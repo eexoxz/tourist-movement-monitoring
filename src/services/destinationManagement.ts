@@ -12,6 +12,9 @@ type DestinationInput = {
   address?: string;
   description: string;
   averageVisitMinutes?: number | string;
+  openingHours?: string;
+  feeNote?: string;
+  visitTips?: string[] | string;
 };
 
 type DestinationUpdateInput = DestinationInput & {
@@ -22,11 +25,25 @@ function toNumber(value: number | string) {
   return typeof value === "number" ? value : Number(value);
 }
 
+function normalizeVisitTips(value: string[] | string | undefined) {
+  if (Array.isArray(value)) {
+    return value.map((tip) => tip.trim()).filter(Boolean);
+  }
+
+  return (value ?? "")
+    .split(/\r?\n/)
+    .map((tip) => tip.trim())
+    .filter(Boolean);
+}
+
 export function validateDestination(input: DestinationInput) {
   const name = input.name.trim();
   const city = input.city.trim();
   const address = input.address?.trim() ?? "";
   const description = input.description.trim();
+  const openingHours = input.openingHours?.trim() ?? "";
+  const feeNote = input.feeNote?.trim() ?? "";
+  const visitTips = normalizeVisitTips(input.visitTips);
   const latitude = toNumber(input.latitude);
   const longitude = toNumber(input.longitude);
   const averageVisitMinutes = toNumber(input.averageVisitMinutes ?? 60);
@@ -69,6 +86,9 @@ export function validateDestination(input: DestinationInput) {
       address: address || `${city}, Malaysia`,
       description,
       averageVisitMinutes,
+      openingHours: openingHours || "Check locally before visiting, especially during public holidays.",
+      feeNote: feeNote || "Fee information may vary; check the official counter or venue notice before entry.",
+      visitTips,
     },
   };
 }

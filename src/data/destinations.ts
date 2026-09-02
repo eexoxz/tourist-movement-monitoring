@@ -1,6 +1,121 @@
 import type { Destination } from "../types";
 
-export const destinations: Destination[] = [
+type PracticalDestinationInfo = Pick<Destination, "openingHours" | "feeNote" | "visitTips">;
+
+const practicalDestinationInfo: Record<string, PracticalDestinationInfo> = {
+  "merdeka-square": {
+    openingHours: "Public square, usually accessible daily.",
+    feeNote: "Outdoor square access is normally free.",
+    visitTips: ["Best paired with nearby heritage buildings.", "Go earlier in the day for easier walking and photos."],
+  },
+  "islamic-arts-museum": {
+    openingHours: "Museum hours may vary; check official notices before visiting.",
+    feeNote: "Museum ticket may apply.",
+    visitTips: ["Allow enough time for galleries across multiple floors.", "Pair with Perdana Botanical Garden or nearby heritage stops."],
+  },
+  "klcc-park": {
+    openingHours: "Public park, usually accessible daily.",
+    feeNote: "Park access is normally free.",
+    visitTips: ["Expect more visitors near evening fountain hours.", "Use nearby public transport if traffic is heavy."],
+  },
+  "batu-caves": {
+    openingHours: "Temple area is usually open daily; check notices during religious events.",
+    feeNote: "Main temple area is generally free; some cave attractions may charge separately.",
+    visitTips: ["Wear comfortable shoes for the stairs.", "Plan extra time during Thaipusam or peak holiday periods."],
+  },
+  "perdana-botanical-garden": {
+    openingHours: "Park area is usually accessible daily.",
+    feeNote: "Garden access is normally free; selected facilities may vary.",
+    visitTips: ["Bring water for longer walks.", "Good quieter alternative when central landmarks are crowded."],
+  },
+  "central-market": {
+    openingHours: "Retail and food hours vary by tenant.",
+    feeNote: "Entry is normally free; purchases depend on shop or stall.",
+    visitTips: ["Good indoor stop during hot or rainy periods.", "Pair with Chinatown and nearby heritage lanes."],
+  },
+  "penang-hill": {
+    openingHours: "Funicular and attraction hours vary; check before going.",
+    feeNote: "Funicular ticket is usually required.",
+    visitTips: ["Arrive early to reduce queue time.", "Weather can change quickly at higher elevation."],
+  },
+  "george-town-heritage-zone": {
+    openingHours: "Street area is public; museums, shops, and cafes vary.",
+    feeNote: "Walking around is normally free; individual venues may charge.",
+    visitTips: ["Use shaded walking routes where possible.", "Check in at specific stops to record visit duration."],
+  },
+  "jonker-street": {
+    openingHours: "Street activity varies; evening and weekend periods are usually busier.",
+    feeNote: "Street access is free; purchases depend on vendors.",
+    visitTips: ["Keep belongings close during crowded evening hours.", "Try side streets if the main route is packed."],
+  },
+  "tanjung-aru": {
+    openingHours: "Beachfront area is usually accessible daily.",
+    feeNote: "Beach access is normally free.",
+    visitTips: ["Arrive before sunset for easier parking and walking.", "Choose a clear meeting point if travelling with a group."],
+  },
+  "kwai-chai-hong": {
+    openingHours: "Lane access and tenant hours may vary.",
+    feeNote: "Lane access is normally free.",
+    visitTips: ["Best for short photo and cafe stops.", "Pair with Central Market or Chinatown walking routes."],
+  },
+  "kampung-baru-kl": {
+    openingHours: "Food stall and restaurant hours vary by operator.",
+    feeNote: "Area access is free; meals depend on vendor pricing.",
+    visitTips: ["Evening food movement can be heavy.", "Use public transport or ride-hailing during peak dining hours."],
+  },
+  "thean-hou-temple": {
+    openingHours: "Temple hours may vary during ceremonies and festive periods.",
+    feeNote: "Temple entry is generally free; donations may be available.",
+    visitTips: ["Respect prayer areas and dress modestly.", "Lantern seasons can increase visitor movement."],
+  },
+  "taman-botani-putrajaya": {
+    openingHours: "Park and facility hours may vary.",
+    feeNote: "General park access is usually free; rentals or facilities may charge.",
+    visitTips: ["Useful for relaxed nature routes.", "Bring sun protection for open walking paths."],
+  },
+  "sekinchan-paddy-gallery": {
+    openingHours: "Gallery hours may vary by season and operator.",
+    feeNote: "Small entry or activity fees may apply.",
+    visitTips: ["Best combined with nearby food and paddy-field viewpoints.", "Check rice-season timing if scenery matters."],
+  },
+  "kellies-castle": {
+    openingHours: "Attraction hours may vary; check local notices before visiting.",
+    feeNote: "Entry ticket is usually required.",
+    visitTips: ["Bring water as parts of the site are exposed.", "Good heritage stop when travelling around Batu Gajah or Ipoh."],
+  },
+  "concubine-lane": {
+    openingHours: "Shop, cafe, and stall hours vary.",
+    feeNote: "Street access is normally free.",
+    visitTips: ["Best explored on foot with nearby Old Town stops.", "Crowds can form quickly on weekends."],
+  },
+  "kek-lok-si-temple": {
+    openingHours: "Temple complex hours may vary by section.",
+    feeNote: "Main areas are often free; selected lifts or sections may charge.",
+    visitTips: ["Expect slopes and stairs.", "Festival lighting periods may increase crowd movement."],
+  },
+  "hin-bus-depot": {
+    openingHours: "Market, gallery, and tenant hours vary by day.",
+    feeNote: "Entry is usually free; purchases depend on tenants.",
+    visitTips: ["Weekend markets can be livelier.", "Good creative stop near George Town food routes."],
+  },
+  "mari-mari-cultural-village": {
+    openingHours: "Tour sessions and operating hours vary; booking checks are recommended.",
+    feeNote: "Tour ticket is usually required.",
+    visitTips: ["Arrive before the scheduled session.", "Allow enough time for performances and guided activities."],
+  },
+  "sarawak-cultural-village": {
+    openingHours: "Village hours and show schedules may vary.",
+    feeNote: "Entry ticket is usually required.",
+    visitTips: ["Check performance times before travelling out.", "Pair with Santubong or Damai-area stops if time allows."],
+  },
+  "semenggoh-nature-reserve": {
+    openingHours: "Wildlife viewing sessions are time-sensitive and may vary.",
+    feeNote: "Entry ticket is usually required.",
+    visitTips: ["Arrive around feeding-session windows.", "Keep distance from wildlife and follow ranger guidance."],
+  },
+};
+
+const baseDestinations: Destination[] = [
   {
     id: "merdeka-square",
     name: "Merdeka Square",
@@ -244,3 +359,8 @@ export const destinations: Destination[] = [
     averageVisitMinutes: 120,
   },
 ];
+
+export const destinations: Destination[] = baseDestinations.map((destination) => ({
+  ...destination,
+  ...practicalDestinationInfo[destination.id],
+}));

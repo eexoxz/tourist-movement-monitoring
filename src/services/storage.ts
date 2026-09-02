@@ -550,6 +550,9 @@ function normalizeDestination(destination: Destination): Destination {
   const fallback = initialData.destinations.find((candidate) => candidate.id === destination.id);
   return {
     ...destination,
+    openingHours: destination.openingHours ?? fallback?.openingHours ?? "Check locally before visiting, especially during public holidays.",
+    feeNote: destination.feeNote ?? fallback?.feeNote ?? "Fee information may vary; check the official counter or venue notice before entry.",
+    visitTips: Array.isArray(destination.visitTips) ? destination.visitTips.filter(Boolean) : fallback?.visitTips ?? [],
     averageVisitMinutes: Number.isFinite(destination.averageVisitMinutes) ? destination.averageVisitMinutes : fallback?.averageVisitMinutes ?? 60,
   };
 }

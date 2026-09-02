@@ -3072,6 +3072,32 @@ button:disabled {
   background: #f0fdf4;
 }
 
+.visit-tips-panel {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #d7f3ee;
+  border-radius: 8px;
+  background: #f0fdfa;
+}
+
+.visit-tips-panel.compact {
+  background: #fffdfa;
+}
+
+.visit-tips-panel strong {
+  color: var(--teal-dark);
+}
+
+.visit-tips-panel ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: #344155;
+  line-height: 1.45;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
