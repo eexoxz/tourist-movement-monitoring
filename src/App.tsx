@@ -2157,7 +2157,42 @@ function TouristWorkspace({
           )}
         </section>
 
-        <section className="tourist-section check-in-panel">
+        <section className="home-quick-actions" aria-label={t("tourist.home.quickActions")}>
+          <button type="button" onClick={() => onViewChange("history")}>
+            <MapPinned size={18} />
+            <span>
+              <strong>{t("tourist.home.quickTrips")}</strong>
+              <small>{t("tourist.home.quickTripsText")}</small>
+            </span>
+          </button>
+          <button type="button" onClick={() => onViewChange("recommendations")}>
+            <Sparkles size={18} />
+            <span>
+              <strong>{t("tourist.home.quickPlaces")}</strong>
+              <small>{t("tourist.home.quickPlacesText")}</small>
+            </span>
+          </button>
+          <button type="button" onClick={() => onViewChange("events")}>
+            <CalendarDays size={18} />
+            <span>
+              <strong>{t("tourist.home.quickEvents")}</strong>
+              <small>{t("tourist.home.quickEventsText")}</small>
+            </span>
+          </button>
+          <button type="button" onClick={() => onViewChange("profile")}>
+            <UserRound size={18} />
+            <span>
+              <strong>{t("tourist.home.quickProfile")}</strong>
+              <small>{t("tourist.home.quickProfileText")}</small>
+            </span>
+          </button>
+        </section>
+
+        <details className="tourist-section home-disclosure check-in-panel" open={Boolean(activeCheckIn)}>
+          <summary>
+            <span>{t("tourist.home.visitTools")}</span>
+            <strong>{activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")}</strong>
+          </summary>
           <div className="section-heading">
             <div>
               <span>{t("tourist.checkin.eyebrow")}</span>
@@ -2212,9 +2247,13 @@ function TouristWorkspace({
             })}
             {recentCheckIns.length === 0 && <small>{t("tourist.checkin.emptyHistory")}</small>}
           </div>
-        </section>
+        </details>
 
-        <section className="tourist-section safety-panel">
+        <details className="tourist-section home-disclosure safety-panel" open={openSafetyCount > 0}>
+          <summary>
+            <span>{t("tourist.safety.eyebrow")}</span>
+            <strong>{openSafetyCount} {t("tourist.safety.open")}</strong>
+          </summary>
           <div className="section-heading">
             <div>
               <span>{t("tourist.safety.eyebrow")}</span>
@@ -2282,7 +2321,7 @@ function TouristWorkspace({
             ))}
             {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}
           </div>
-        </section>
+        </details>
 
         <MetricGrid
           items={[
@@ -2339,20 +2378,6 @@ function TouristWorkspace({
           />
         )}
 
-        <section className="tourist-section">
-          <div className="section-heading">
-            <div>
-              <h2>{recommendationHeading}</h2>
-              <p>{recommendationSupportText}</p>
-            </div>
-            <button className="secondary-action compact-action" onClick={() => onViewChange("recommendations")}>
-              <Sparkles size={16} />
-              {t("common.viewAll")}
-            </button>
-          </div>
-          <RecommendationList recommendations={recommendations.slice(0, 3)} destinations={data.destinations} demand={destinationDemand} personalized={hasPersonalizedRecommendations} locale={locale} compact />
-        </section>
-
         {recentTrip ? (
           <section className="tourist-section recent-trip-card">
             <div className="section-heading">
@@ -2372,23 +2397,34 @@ function TouristWorkspace({
           </section>
         ) : null}
 
-        <MovementDemandList title={t("tourist.home.popularRightNow")} demand={destinationDemand.slice(0, 5)} destinations={data.destinations} compact />
-
-        <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} compact onOpenCalendar={() => onViewChange("events")} />
-
-        <section className="tourist-section">
-          <div className="section-heading">
-            <h2>{t("tourist.home.destinationInfo")}</h2>
-          </div>
-          <DestinationPanel
-            destinations={data.destinations.slice(0, 6)}
-            demand={destinationDemand}
-            selectedId={selectedDestination?.id}
-            visitedIds={visitedDestinationIds}
-            locale={locale}
-            onSelect={setSelectedDestinationId}
-          />
-          {selectedDestination && <DestinationDetail destination={selectedDestination} demand={destinationDemand.find((row) => row.destinationId === selectedDestination.id)} locale={locale} />}
+        <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
+          <article className="home-preview-card">
+            <span>{recommendationHeading}</span>
+            <h2>{recommendations[0] ? data.destinations.find((destination) => destination.id === recommendations[0].destinationId)?.name ?? t("tourist.home.quickPlaces") : t("tourist.home.quickPlaces")}</h2>
+            <p>{recommendationSupportText}</p>
+            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
+              <Sparkles size={16} />
+              {t("common.viewAll")}
+            </button>
+          </article>
+          <article className="home-preview-card">
+            <span>{t("tourist.home.eventsPreview")}</span>
+            <h2>{upcomingFestivals[0]?.name ?? t("tourist.home.quickEvents")}</h2>
+            <p>{t("tourist.home.eventsPreviewText")}</p>
+            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("events")}>
+              <CalendarDays size={16} />
+              {t("common.checkEvents")}
+            </button>
+          </article>
+          <article className="home-preview-card">
+            <span>{t("tourist.home.placesPreview")}</span>
+            <h2>{destinationDemand[0] ? data.destinations.find((destination) => destination.id === destinationDemand[0].destinationId)?.name ?? t("tourist.home.quickPlaces") : t("tourist.home.quickPlaces")}</h2>
+            <p>{t("tourist.home.placesPreviewText")}</p>
+            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
+              <MapPinned size={16} />
+              {t("tourist.home.openPlaces")}
+            </button>
+          </article>
         </section>
       </section>
     </Page>

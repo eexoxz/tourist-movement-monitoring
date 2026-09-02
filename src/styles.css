@@ -349,6 +349,138 @@ button:disabled {
   gap: 10px;
 }
 
+.home-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-quick-actions button,
+.home-preview-card {
+  min-width: 0;
+  border: 1px solid #d7efe8;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 28px rgba(73, 55, 32, 0.07);
+}
+
+.home-quick-actions button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 76px;
+  padding: 13px;
+  color: #102033;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-quick-actions button:hover {
+  border-color: var(--teal);
+  transform: translateY(-1px);
+}
+
+.home-quick-actions svg {
+  color: var(--teal-dark);
+}
+
+.home-quick-actions span,
+.home-preview-card {
+  display: grid;
+  gap: 4px;
+}
+
+.home-quick-actions strong,
+.home-preview-card h2 {
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.home-quick-actions small,
+.home-preview-card p {
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.home-disclosure {
+  gap: 0;
+}
+
+.home-disclosure > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+.home-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.home-disclosure > summary::after {
+  content: "+";
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--teal-dark);
+  background: #ccfbf1;
+  font-weight: 900;
+}
+
+.home-disclosure[open] {
+  gap: 12px;
+}
+
+.home-disclosure[open] > summary::after {
+  content: "-";
+}
+
+.home-disclosure > summary span {
+  color: var(--teal-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.home-disclosure > summary strong {
+  min-width: 0;
+  color: #102033;
+  text-align: right;
+}
+
+.home-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-preview-card {
+  padding: 16px;
+}
+
+.home-preview-card > span {
+  color: var(--teal-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.home-preview-card h2,
+.home-preview-card p {
+  margin: 0;
+}
+
+.home-preview-card .secondary-action {
+  align-self: end;
+  justify-self: start;
+  margin-top: 4px;
+}
+
 .new-user-guide {
   display: grid;
   gap: 8px;
@@ -4109,6 +4241,8 @@ textarea {
   .tracking-status-card,
   .festival-card,
   .mobile-action-row,
+  .home-quick-actions,
+  .home-preview-grid,
   .completed-trip-grid,
   .completed-trip-actions,
   .trip-preview-stats,
@@ -4117,6 +4251,24 @@ textarea {
   .places-controls,
   .places-discovery-layout {
     grid-template-columns: 1fr;
+  }
+
+  .home-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-quick-actions button {
+    grid-template-columns: 1fr;
+    min-height: 96px;
+  }
+
+  .home-disclosure > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .home-disclosure > summary strong {
+    grid-column: 1 / -1;
+    text-align: left;
   }
 
   .safety-contact-strip,

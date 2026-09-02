@@ -241,6 +241,22 @@ export type TranslationKey =
   | "tourist.home.recentTrip"
   | "tourist.home.popularRightNow"
   | "tourist.home.destinationInfo"
+  | "tourist.home.quickActions"
+  | "tourist.home.quickTrips"
+  | "tourist.home.quickTripsText"
+  | "tourist.home.quickPlaces"
+  | "tourist.home.quickPlacesText"
+  | "tourist.home.quickEvents"
+  | "tourist.home.quickEventsText"
+  | "tourist.home.quickProfile"
+  | "tourist.home.quickProfileText"
+  | "tourist.home.visitTools"
+  | "tourist.home.nextUp"
+  | "tourist.home.eventsPreview"
+  | "tourist.home.eventsPreviewText"
+  | "tourist.home.placesPreview"
+  | "tourist.home.placesPreviewText"
+  | "tourist.home.openPlaces"
   | "tourist.places.profileTraveller"
   | "tourist.places.discoveryMode"
   | "tourist.places.mode.bestMatch"
@@ -565,6 +581,22 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.home.recentTrip": "Recent Trip",
     "tourist.home.popularRightNow": "Popular Right Now",
     "tourist.home.destinationInfo": "Destination Info",
+    "tourist.home.quickActions": "Quick actions",
+    "tourist.home.quickTrips": "Trip diary",
+    "tourist.home.quickTripsText": "Routes, stops and trip learning.",
+    "tourist.home.quickPlaces": "Explore places",
+    "tourist.home.quickPlacesText": "Browse recommendations and demand.",
+    "tourist.home.quickEvents": "Event calendar",
+    "tourist.home.quickEventsText": "Plan around Malaysian festivals.",
+    "tourist.home.quickProfile": "Travel profile",
+    "tourist.home.quickProfileText": "Preferences and emergency contact.",
+    "tourist.home.visitTools": "Visit tools",
+    "tourist.home.nextUp": "Next up",
+    "tourist.home.eventsPreview": "Events near your plan",
+    "tourist.home.eventsPreviewText": "Upcoming public holidays and state events can affect tourist movement.",
+    "tourist.home.placesPreview": "Places to consider",
+    "tourist.home.placesPreviewText": "Use movement demand and your route history to find better places.",
+    "tourist.home.openPlaces": "Open places",
     "tourist.places.profileTraveller": "traveller",
     "tourist.places.discoveryMode": "Discovery mode",
     "tourist.places.mode.bestMatch": "Best match",

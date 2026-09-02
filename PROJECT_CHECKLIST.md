@@ -280,6 +280,7 @@ Current alignment notes:
 - [x] Add visible keyboard focus states.
 - [x] Add retry actions where failures are recoverable.
 - [x] Test Tourist flow at mobile width.
+- [x] Simplify Tourist Home so trip controls and quick actions appear before secondary content.
 - [ ] Test Chrome, Edge and Firefox.
 
 ## Map Experience
