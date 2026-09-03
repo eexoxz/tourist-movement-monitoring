@@ -298,6 +298,27 @@ button:disabled {
   gap: 16px;
 }
 
+.home-primary-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.38fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.home-today-panel {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.home-map-panel {
+  min-width: 0;
+}
+
+.home-map-panel .map-view {
+  min-height: 480px;
+}
+
 .tracking-status-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -341,6 +362,11 @@ button:disabled {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
+}
+
+.home-trip-controls {
+  align-content: start;
+  min-height: 0;
 }
 
 .mobile-action-row {
@@ -460,7 +486,25 @@ button:disabled {
 }
 
 .home-preview-card {
+  position: relative;
+  overflow: hidden;
   padding: 16px;
+}
+
+.home-preview-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--teal);
+}
+
+.event-preview::before {
+  background: #8b5cf6;
+}
+
+.demand-preview::before {
+  background: #f59e0b;
 }
 
 .home-preview-card > span {
@@ -479,6 +523,13 @@ button:disabled {
   align-self: end;
   justify-self: start;
   margin-top: 4px;
+}
+
+.home-support-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
 }
 
 .new-user-guide {
@@ -4222,6 +4273,8 @@ textarea {
   }
 
   .tracking-status-card,
+  .home-primary-grid,
+  .home-support-grid,
   .festival-card,
   .mobile-action-row,
   .home-quick-actions,
@@ -4238,6 +4291,10 @@ textarea {
 
   .home-quick-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-map-panel .map-view {
+    min-height: 380px;
   }
 
   .home-quick-actions button {

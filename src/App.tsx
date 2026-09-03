@@ -1392,6 +1392,15 @@ function TouristWorkspace({
   const recommendationSupportText = hasPersonalizedRecommendations
     ? t("tourist.home.recommendationsPersonalizedText")
     : t("tourist.home.recommendationsBasicText");
+  const activeJourneyPoints = activePoints.length ? activePoints : tripPoints;
+  const activeJourneyPoint = activePoints.at(-1) ?? tripPoints.at(-1);
+  const topRecommendationDestination = recommendations[0]
+    ? data.destinations.find((destination) => destination.id === recommendations[0].destinationId)
+    : null;
+  const topDemandDestination = destinationDemand[0]
+    ? data.destinations.find((destination) => destination.id === destinationDemand[0].destinationId)
+    : null;
+  const nextFestival = upcomingFestivals[0] ?? null;
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -2052,21 +2061,95 @@ function TouristWorkspace({
   return (
     <Page title={displayName ? `${t("tourist.home.welcomeBack")}, ${displayName}` : t("tourist.home.planTitle")} eyebrow={t("common.tourist")}>
       <section className="tourist-home-flow">
-        <div className="tracking-status-card">
-          <span>{tripStateLabel}</span>
-          <div>
-            <h2>{activeTrip ? t("tourist.home.activeTripTitle") : recentTrip ? t("tourist.home.readyNextTripTitle") : t("tourist.home.firstTripTitle")}</h2>
-            <p>
-              {activeTrip
-                ? t("tourist.home.activeTripDescription")
-                : recentTrip
-                  ? t("tourist.home.readyNextTripDescription")
-                  : t("tourist.home.firstTripDescription")}
-            </p>
-          </div>
-        </div>
+        <section className="home-primary-grid">
+          <div className="home-today-panel">
+            <div className="tracking-status-card home-status-card">
+              <span>{tripStateLabel}</span>
+              <div>
+                <h2>{activeTrip ? t("tourist.home.activeTripTitle") : recentTrip ? t("tourist.home.readyNextTripTitle") : t("tourist.home.firstTripTitle")}</h2>
+                <p>
+                  {activeTrip
+                    ? t("tourist.home.activeTripDescription")
+                    : recentTrip
+                      ? t("tourist.home.readyNextTripDescription")
+                      : t("tourist.home.firstTripDescription")}
+                </p>
+              </div>
+            </div>
 
-        <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} activePoint={activePoints.at(-1) ?? tripPoints.at(-1)} mode="tourist" locale={locale} />
+            <section className="mobile-trip-controls home-trip-controls">
+              <div className="consent-box">
+                <ShieldCheck size={22} />
+                <div>
+                  <strong>{currentConsent ? t("tourist.home.locationAllowed") : t("tourist.home.allowLocation")}</strong>
+                  <p>{currentConsent ? t("tourist.home.locationAllowedText") : t("tourist.home.locationNeededText")}</p>
+                </div>
+              </div>
+
+              {!currentConsent && (
+                <button className="primary-action wide" onClick={grantConsent}>
+                  <ShieldCheck size={18} />
+                  {t("tourist.home.allowLocation")}
+                </button>
+              )}
+
+              {currentConsent && (
+                <div className="mobile-action-row">
+                  <button className="primary-action" onClick={startTrip} disabled={Boolean(activeTrip)}>
+                    <Play size={18} />
+                    {t("tourist.home.startTrip")}
+                  </button>
+                  <button className="secondary-action" onClick={stopTrip} disabled={!activeTrip}>
+                    <Square size={18} />
+                    {t("tourist.home.stopTrip")}
+                  </button>
+                </div>
+              )}
+
+              {activeTrip && !isLiveTracking && (
+                <button className="secondary-action wide" onClick={resumeLiveTracking}>
+                  <Navigation size={18} />
+                  {t("tourist.home.resumeTracking")}
+                </button>
+              )}
+
+              {activeTrip && (
+                <button className="secondary-action wide" onClick={addDemoPoint}>
+                  {t("tourist.home.addDemoPoint")}
+                </button>
+              )}
+
+              <button className="secondary-action wide" onClick={createSampleRoute} disabled={Boolean(activeTrip)}>
+                <Compass size={18} />
+                {t("tourist.home.addSampleRoute")}
+              </button>
+
+              {trackingMessage && <p className="status-message">{trackingMessage}</p>}
+
+              {locationRetryAvailable && activeTrip && (
+                <button className="secondary-action wide" type="button" onClick={resumeLiveTracking}>
+                  <RotateCcw size={18} />
+                  {t("tourist.home.tryLocationAgain")}
+                </button>
+              )}
+
+              {userTrips.length === 0 && (
+                <section className="new-user-guide">
+                  <strong>{t("tourist.home.howItWorks")}</strong>
+                  <ol>
+                    <li>{t("tourist.home.stepAllowLocation")}</li>
+                    <li>{t("tourist.home.stepStartTrip")}</li>
+                    <li>{t("tourist.home.stepStopTrip")}</li>
+                  </ol>
+                </section>
+              )}
+            </section>
+          </div>
+
+          <div className="home-map-panel">
+            <MovementMap points={activeJourneyPoints} destinations={data.destinations} activePoint={activeJourneyPoint} mode="tourist" locale={locale} />
+          </div>
+        </section>
 
         {geofenceWarnings.length > 0 && (
           <section className="tourist-section geofence-warning-panel">
@@ -2091,74 +2174,6 @@ function TouristWorkspace({
             </div>
           </section>
         )}
-
-        <section className="mobile-trip-controls">
-          <div className="consent-box">
-            <ShieldCheck size={22} />
-            <div>
-              <strong>{currentConsent ? t("tourist.home.locationAllowed") : t("tourist.home.allowLocation")}</strong>
-              <p>{currentConsent ? t("tourist.home.locationAllowedText") : t("tourist.home.locationNeededText")}</p>
-            </div>
-          </div>
-
-          {!currentConsent && (
-            <button className="primary-action wide" onClick={grantConsent}>
-              <ShieldCheck size={18} />
-              {t("tourist.home.allowLocation")}
-            </button>
-          )}
-
-          {currentConsent && (
-            <div className="mobile-action-row">
-              <button className="primary-action" onClick={startTrip} disabled={Boolean(activeTrip)}>
-                <Play size={18} />
-                {t("tourist.home.startTrip")}
-              </button>
-              <button className="secondary-action" onClick={stopTrip} disabled={!activeTrip}>
-                <Square size={18} />
-                {t("tourist.home.stopTrip")}
-              </button>
-            </div>
-          )}
-
-          {activeTrip && !isLiveTracking && (
-            <button className="secondary-action wide" onClick={resumeLiveTracking}>
-              <Navigation size={18} />
-              {t("tourist.home.resumeTracking")}
-            </button>
-          )}
-
-          {activeTrip && (
-            <button className="secondary-action wide" onClick={addDemoPoint}>
-              {t("tourist.home.addDemoPoint")}
-            </button>
-          )}
-
-          <button className="secondary-action wide" onClick={createSampleRoute} disabled={Boolean(activeTrip)}>
-            <Compass size={18} />
-            {t("tourist.home.addSampleRoute")}
-          </button>
-
-          {trackingMessage && <p className="status-message">{trackingMessage}</p>}
-
-          {locationRetryAvailable && activeTrip && (
-            <button className="secondary-action wide" type="button" onClick={resumeLiveTracking}>
-              <RotateCcw size={18} />
-              {t("tourist.home.tryLocationAgain")}
-            </button>
-          )}
-
-          {userTrips.length === 0 && (
-            <section className="new-user-guide">
-              <strong>{t("tourist.home.howItWorks")}</strong>
-              <ol>
-                <li>{t("tourist.home.stepAllowLocation")}</li>
-                <li>{t("tourist.home.stepStartTrip")}</li>
-                <li>{t("tourist.home.stepStopTrip")}</li>
-              </ol>
-            </section>
-          )}
-        </section>
 
         <section className="home-quick-actions" aria-label={t("tourist.home.quickActions")}>
           <button type="button" onClick={() => onViewChange("history")}>
@@ -2191,169 +2206,171 @@ function TouristWorkspace({
           </button>
         </section>
 
-        <details className="tourist-section home-disclosure check-in-panel" open={Boolean(activeCheckIn)}>
-          <summary>
-            <span>{t("tourist.home.visitTools")}</span>
-            <strong>{activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")}</strong>
-          </summary>
-          <div className="section-heading">
-            <div>
-              <span>{t("tourist.checkin.eyebrow")}</span>
-              <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
-              <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
-            </div>
-            {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
-          </div>
-
-          {!activeCheckIn && (
-            <div className="check-in-control">
-              <label>
-                {t("tourist.checkin.attraction")}
-                <select value={checkInDestinationId} onChange={(event) => setCheckInDestinationId(event.target.value)}>
-                  {data.destinations.map((destination) => (
-                    <option key={destination.id} value={destination.id}>
-                      {destination.name} · {destination.city}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button className="primary-action" type="button" onClick={startAttractionCheckIn}>
-                <MapPinned size={18} />
-                {t("tourist.checkin.checkIn")}
-              </button>
-            </div>
-          )}
-
-          {recommendedCheckIn && !activeCheckIn && (
-            <button className="secondary-action wide" type="button" onClick={() => setCheckInDestinationId(recommendedCheckIn.id)}>
-              {t("tourist.checkin.useNearest")}: {recommendedCheckIn.name}
-            </button>
-          )}
-
-          {activeCheckIn && (
-            <button className="secondary-action wide" type="button" onClick={finishAttractionCheckIn}>
-              <Square size={18} />
-              {t("tourist.checkin.checkOut")}
-            </button>
-          )}
-
-          <div className="check-in-history">
-            {recentCheckIns.map((checkIn) => {
-              const destination = data.destinations.find((candidate) => candidate.id === checkIn.destinationId);
-
-              return (
-                <span key={checkIn.id}>
-                  <strong>{destination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
-                  {checkIn.status === "checked-out" ? `${getCheckInDurationMinutes(checkIn)} ${t("tourist.checkin.minVisit")}` : t("tourist.checkin.currentlyCheckedIn")}
-                </span>
-              );
-            })}
-            {recentCheckIns.length === 0 && <small>{t("tourist.checkin.emptyHistory")}</small>}
-          </div>
-        </details>
-
-        <details className="tourist-section home-disclosure safety-panel" open={openSafetyCount > 0}>
-          <summary>
-            <span>{t("tourist.safety.eyebrow")}</span>
-            <strong>{openSafetyCount} {t("tourist.safety.open")}</strong>
-          </summary>
-          <div className="section-heading">
-            <div>
-              <span>{t("tourist.safety.eyebrow")}</span>
-              <h2>{t("tourist.safety.title")}</h2>
-              <p>{t("tourist.safety.description")}</p>
-            </div>
-            <strong>{openSafetyCount} {t("tourist.safety.open")}</strong>
-          </div>
-
-          <div className="safety-contact-strip">
-            <div>
-              <small>{t("tourist.safety.emergencyContact")}</small>
-              <strong>{user.emergencyContactName || t("tourist.safety.notAdded")}</strong>
-              <span>{user.emergencyContactPhone || t("tourist.safety.addInProfile")}</span>
-            </div>
-            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("profile")}>
-              <UserRound size={16} />
-              {t("tourist.safety.editContact")}
-            </button>
-          </div>
-
-          <button className="primary-action danger wide" type="button" onClick={sendSosAlert}>
-            <ShieldCheck size={18} />
-            {t("tourist.safety.sos")}
-          </button>
-          <p className="safety-disclaimer">{t("tourist.safety.prototypeNote")}</p>
-
-          <form className="incident-form" onSubmit={submitIncidentReport}>
-            <div className="field-pair">
-              <label>
-                {t("tourist.safety.incidentType")}
-                <select value={incidentType} onChange={(event) => setIncidentType(event.target.value as IncidentType)}>
-                  {incidentTypeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {t(option.labelKey)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                {t("tourist.safety.locationNote")}
-                <input value={incidentLocationNote} onChange={(event) => setIncidentLocationNote(event.target.value)} placeholder={t("tourist.safety.locationPlaceholder")} />
-              </label>
-            </div>
-            <label>
-              {t("tourist.safety.whatHappened")}
-              <textarea value={incidentDescription} onChange={(event) => setIncidentDescription(event.target.value)} placeholder={t("tourist.safety.descriptionPlaceholder")} required />
-            </label>
-            <button className="secondary-action wide" type="submit">
-              <Save size={18} />
-              {t("tourist.safety.submitIncident")}
-            </button>
-          </form>
-
-          <div className="safety-record-list">
-            {userSosAlerts.slice(0, 2).map((alert) => (
-              <span key={alert.id}>
-                SOS {alert.status} · {formatDateTime(alert.createdAt)}
-              </span>
-            ))}
-            {userIncidentReports.slice(0, 2).map((report) => (
-              <span key={report.id}>
-                {getIncidentTypeLabel(report.type, t)} {report.status} · {formatDateTime(report.createdAt)}
-              </span>
-            ))}
-            {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}
-          </div>
-        </details>
-
         <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
-          <article className="home-preview-card">
+          <article className="home-preview-card recommendation-preview">
             <span>{recommendationHeading}</span>
-            <h2>{recommendations[0] ? data.destinations.find((destination) => destination.id === recommendations[0].destinationId)?.name ?? t("tourist.home.quickPlaces") : t("tourist.home.quickPlaces")}</h2>
+            <h2>{topRecommendationDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
             <p>{recommendationSupportText}</p>
             <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
               <Sparkles size={16} />
               {t("common.viewAll")}
             </button>
           </article>
-          <article className="home-preview-card">
+          <article className="home-preview-card event-preview">
             <span>{t("tourist.home.eventsPreview")}</span>
-            <h2>{upcomingFestivals[0]?.name ?? t("tourist.home.quickEvents")}</h2>
+            <h2>{nextFestival?.name ?? t("tourist.home.quickEvents")}</h2>
             <p>{t("tourist.home.eventsPreviewText")}</p>
             <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("events")}>
               <CalendarDays size={16} />
               {t("common.checkEvents")}
             </button>
           </article>
-          <article className="home-preview-card">
+          <article className="home-preview-card demand-preview">
             <span>{t("tourist.home.placesPreview")}</span>
-            <h2>{destinationDemand[0] ? data.destinations.find((destination) => destination.id === destinationDemand[0].destinationId)?.name ?? t("tourist.home.quickPlaces") : t("tourist.home.quickPlaces")}</h2>
+            <h2>{topDemandDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
             <p>{t("tourist.home.placesPreviewText")}</p>
             <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
               <MapPinned size={16} />
               {t("tourist.home.openPlaces")}
             </button>
           </article>
+        </section>
+
+        <section className="home-support-grid">
+          <details className="tourist-section home-disclosure check-in-panel" open={Boolean(activeCheckIn)}>
+            <summary>
+              <span>{t("tourist.home.visitTools")}</span>
+              <strong>{activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")}</strong>
+            </summary>
+            <div className="section-heading">
+              <div>
+                <span>{t("tourist.checkin.eyebrow")}</span>
+                <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
+                <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
+              </div>
+              {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
+            </div>
+
+            {!activeCheckIn && (
+              <div className="check-in-control">
+                <label>
+                  {t("tourist.checkin.attraction")}
+                  <select value={checkInDestinationId} onChange={(event) => setCheckInDestinationId(event.target.value)}>
+                    {data.destinations.map((destination) => (
+                      <option key={destination.id} value={destination.id}>
+                        {destination.name} · {destination.city}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button className="primary-action" type="button" onClick={startAttractionCheckIn}>
+                  <MapPinned size={18} />
+                  {t("tourist.checkin.checkIn")}
+                </button>
+              </div>
+            )}
+
+            {recommendedCheckIn && !activeCheckIn && (
+              <button className="secondary-action wide" type="button" onClick={() => setCheckInDestinationId(recommendedCheckIn.id)}>
+                {t("tourist.checkin.useNearest")}: {recommendedCheckIn.name}
+              </button>
+            )}
+
+            {activeCheckIn && (
+              <button className="secondary-action wide" type="button" onClick={finishAttractionCheckIn}>
+                <Square size={18} />
+                {t("tourist.checkin.checkOut")}
+              </button>
+            )}
+
+            <div className="check-in-history">
+              {recentCheckIns.map((checkIn) => {
+                const destination = data.destinations.find((candidate) => candidate.id === checkIn.destinationId);
+
+                return (
+                  <span key={checkIn.id}>
+                    <strong>{destination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
+                    {checkIn.status === "checked-out" ? `${getCheckInDurationMinutes(checkIn)} ${t("tourist.checkin.minVisit")}` : t("tourist.checkin.currentlyCheckedIn")}
+                  </span>
+                );
+              })}
+              {recentCheckIns.length === 0 && <small>{t("tourist.checkin.emptyHistory")}</small>}
+            </div>
+          </details>
+
+          <details className="tourist-section home-disclosure safety-panel" open={openSafetyCount > 0}>
+            <summary>
+              <span>{t("tourist.safety.eyebrow")}</span>
+              <strong>{openSafetyCount} {t("tourist.safety.open")}</strong>
+            </summary>
+            <div className="section-heading">
+              <div>
+                <span>{t("tourist.safety.eyebrow")}</span>
+                <h2>{t("tourist.safety.title")}</h2>
+                <p>{t("tourist.safety.description")}</p>
+              </div>
+              <strong>{openSafetyCount} {t("tourist.safety.open")}</strong>
+            </div>
+
+            <div className="safety-contact-strip">
+              <div>
+                <small>{t("tourist.safety.emergencyContact")}</small>
+                <strong>{user.emergencyContactName || t("tourist.safety.notAdded")}</strong>
+                <span>{user.emergencyContactPhone || t("tourist.safety.addInProfile")}</span>
+              </div>
+              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("profile")}>
+                <UserRound size={16} />
+                {t("tourist.safety.editContact")}
+              </button>
+            </div>
+
+            <button className="primary-action danger wide" type="button" onClick={sendSosAlert}>
+              <ShieldCheck size={18} />
+              {t("tourist.safety.sos")}
+            </button>
+            <p className="safety-disclaimer">{t("tourist.safety.prototypeNote")}</p>
+
+            <form className="incident-form" onSubmit={submitIncidentReport}>
+              <div className="field-pair">
+                <label>
+                  {t("tourist.safety.incidentType")}
+                  <select value={incidentType} onChange={(event) => setIncidentType(event.target.value as IncidentType)}>
+                    {incidentTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {t(option.labelKey)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  {t("tourist.safety.locationNote")}
+                  <input value={incidentLocationNote} onChange={(event) => setIncidentLocationNote(event.target.value)} placeholder={t("tourist.safety.locationPlaceholder")} />
+                </label>
+              </div>
+              <label>
+                {t("tourist.safety.whatHappened")}
+                <textarea value={incidentDescription} onChange={(event) => setIncidentDescription(event.target.value)} placeholder={t("tourist.safety.descriptionPlaceholder")} required />
+              </label>
+              <button className="secondary-action wide" type="submit">
+                <Save size={18} />
+                {t("tourist.safety.submitIncident")}
+              </button>
+            </form>
+
+            <div className="safety-record-list">
+              {userSosAlerts.slice(0, 2).map((alert) => (
+                <span key={alert.id}>
+                  SOS {alert.status} · {formatDateTime(alert.createdAt)}
+                </span>
+              ))}
+              {userIncidentReports.slice(0, 2).map((report) => (
+                <span key={report.id}>
+                  {getIncidentTypeLabel(report.type, t)} {report.status} · {formatDateTime(report.createdAt)}
+                </span>
+              ))}
+              {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}
+            </div>
+          </details>
         </section>
       </section>
     </Page>
