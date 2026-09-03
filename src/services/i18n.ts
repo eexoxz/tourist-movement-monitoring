@@ -303,6 +303,13 @@ export type TranslationKey =
   | "tourist.recommendations.emptyBasic"
   | "tourist.recommendations.basicSuggestion"
   | "tourist.recommendations.noDemandSignal"
+  | "tourist.recommendations.activityHigh"
+  | "tourist.recommendations.activityMedium"
+  | "tourist.recommendations.activityLow"
+  | "tourist.recommendations.matchExcellent"
+  | "tourist.recommendations.matchStrong"
+  | "tourist.recommendations.matchGood"
+  | "tourist.recommendations.matchBasic"
   | "tourist.recommendations.movementScore"
   | "tourist.recommendations.profile"
   | "tourist.recommendations.basicFit"
@@ -643,6 +650,13 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.recommendations.emptyBasic": "No basic suggestions are available yet.",
     "tourist.recommendations.basicSuggestion": "Basic suggestion",
     "tourist.recommendations.noDemandSignal": "No demand signal",
+    "tourist.recommendations.activityHigh": "Busy with visitors",
+    "tourist.recommendations.activityMedium": "Steady visitor activity",
+    "tourist.recommendations.activityLow": "Usually calmer",
+    "tourist.recommendations.matchExcellent": "Excellent match",
+    "tourist.recommendations.matchStrong": "Strong match",
+    "tourist.recommendations.matchGood": "Good match",
+    "tourist.recommendations.matchBasic": "Worth considering",
     "tourist.recommendations.movementScore": "movement score",
     "tourist.recommendations.profile": "Profile",
     "tourist.recommendations.basicFit": "Basic fit",

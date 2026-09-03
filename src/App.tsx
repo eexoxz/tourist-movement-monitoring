@@ -345,6 +345,38 @@ function formatDistanceLabel(distance: number | undefined, t: (key: TranslationK
   return distance < 1 ? `${Math.round(distance * 1000)} ${t("tourist.places.mAway")}` : `${distance.toFixed(1)} ${t("tourist.places.kmAway")}`;
 }
 
+function formatDemandActivity(tier: DestinationDemand["tier"] | undefined, t: (key: TranslationKey) => string) {
+  if (tier === "high") {
+    return t("tourist.recommendations.activityHigh");
+  }
+
+  if (tier === "medium") {
+    return t("tourist.recommendations.activityMedium");
+  }
+
+  if (tier === "low") {
+    return t("tourist.recommendations.activityLow");
+  }
+
+  return t("tourist.recommendations.noDemandSignal");
+}
+
+function formatRecommendationMatch(score: number, t: (key: TranslationKey) => string) {
+  if (score >= 82) {
+    return t("tourist.recommendations.matchExcellent");
+  }
+
+  if (score >= 68) {
+    return t("tourist.recommendations.matchStrong");
+  }
+
+  if (score >= 52) {
+    return t("tourist.recommendations.matchGood");
+  }
+
+  return t("tourist.recommendations.matchBasic");
+}
+
 function categoryFitsProfile(category: DestinationCategory, profile?: TouristProfile) {
   if (!profile || profile === "mixed") {
     return true;
@@ -1360,7 +1392,6 @@ function TouristWorkspace({
     return getRecognizedDestinationNames(latestCompletedTripPoints, data.destinations);
   }, [latestCompletedTripPoints, data.destinations]);
   const recentTrip = recentTrips[0];
-  const recentTripSummary = recentTrip ? tripSummaries.find((summary) => summary.tripId === recentTrip.id) : null;
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
@@ -2316,80 +2347,6 @@ function TouristWorkspace({
             {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}
           </div>
         </details>
-
-        <MetricGrid
-          items={[
-            [t("tourist.metrics.tripStatus"), tripStateLabel],
-            [t("tourist.metrics.savedPoints"), (activeTrip ? activePoints.length : tripPoints.length).toString()],
-            [t("tourist.metrics.latestCategory"), latestAnalysis?.profile ?? "Learning"],
-            [t("tourist.metrics.distance"), `${activeTripSummary?.distanceKm ?? recentTripSummary?.distanceKm ?? 0} km`],
-          ]}
-        />
-
-        <section className="tourist-section profile-summary-card">
-          <div className="section-heading">
-            <div>
-              <h2>{t("tourist.profile.summaryTitle")}</h2>
-              <p>{t("tourist.profile.summaryDescription")}</p>
-            </div>
-            <button className="secondary-action compact-action" onClick={() => onViewChange("profile")}>
-              <UserRound size={16} />
-              {user.profileCompletedAt ? t("common.edit") : t("common.complete")}
-            </button>
-          </div>
-          <div className="profile-summary-grid">
-            <div>
-              <small>{t("tourist.profile.name")}</small>
-              <strong>{displayName || t("tourist.profile.notSetYet")}</strong>
-            </div>
-            <div>
-              <small>{t("tourist.profile.interests")}</small>
-              <strong>{formatTravelPreferenceList(user.travelPreferences)}</strong>
-            </div>
-            <div>
-              <small>{t("tourist.profile.pace")}</small>
-              <strong>{user.tripPace ?? "balanced"}</strong>
-            </div>
-            <div>
-              <small>{t("tourist.profile.emergencyContact")}</small>
-              <strong>{user.emergencyContactName || t("tourist.profile.notSetYet")}</strong>
-            </div>
-          </div>
-        </section>
-
-        {latestCompletedTrip && latestCompletedTripSummary && (
-          <CompletedTripSummary
-            trip={latestCompletedTrip}
-            summary={latestCompletedTripSummary}
-            destinationNames={latestCompletedTripDestinationNames}
-            analysis={latestCompletedTripAnalysis}
-            locale={locale}
-            onViewHistory={() => {
-              setSelectedTripId(latestCompletedTrip.id);
-              onViewChange("history");
-            }}
-            onViewRecommendations={() => onViewChange("recommendations")}
-          />
-        )}
-
-        {recentTrip ? (
-          <section className="tourist-section recent-trip-card">
-            <div className="section-heading">
-              <h2>{t("tourist.home.recentTrip")}</h2>
-              <button className="secondary-action compact-action" onClick={() => onViewChange("history")}>
-                <MapPinned size={16} />
-                {t("common.viewTrips")}
-              </button>
-            </div>
-            <p>{formatDateTime(recentTrip.startedAt)}</p>
-            <div className="trip-preview-stats">
-              <span>{recentTrip.status === "completed" ? t("common.completed") : t("common.active")}</span>
-              <span>{recentTripSummary?.durationMinutes ?? 0} min</span>
-              <span>{recentTripSummary?.pointCount ?? 0} {t("common.points")}</span>
-              <span>{recentTripSummary?.visitedDestinationCount ?? 0} {t("common.stops")}</span>
-            </div>
-          </section>
-        ) : null}
 
         <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
           <article className="home-preview-card">
@@ -4619,19 +4576,12 @@ function RecommendationList({
             </div>
             <div className="recommendation-meta">
               {!personalized && <span className="basic-suggestion-tag">{t("tourist.recommendations.basicSuggestion")}</span>}
-              <span>{destination.category}</span>
-              <span>{demandRow ? `${demandRow.tier} ${t("common.demand").toLowerCase()}` : t("tourist.recommendations.noDemandSignal")}</span>
-              <span>{demandRow ? `${demandRow.popularityScore}% ${t("tourist.recommendations.movementScore")}` : `0% ${t("tourist.recommendations.movementScore")}`}</span>
+              <span>{getCategoryLabel(destination.category, t)}</span>
+              <span>{formatDemandActivity(demandRow?.tier, t)}</span>
             </div>
             <p>{recommendation.reason}</p>
-            <div className="score-breakdown" aria-label={`Score breakdown for ${destination.name}`}>
-              <span>{personalized ? t("tourist.recommendations.profile") : t("tourist.recommendations.basicFit")} {recommendation.scoreBreakdown.profileFit}</span>
-              <span>{personalized ? `Cluster ${recommendation.scoreBreakdown.clusterPattern}` : t("tourist.recommendations.aiClusterPending")}</span>
-              <span>{t("tourist.recommendations.newPlace")} {recommendation.scoreBreakdown.unvisited}</span>
-            </div>
-            <meter value={recommendation.score} min={0} max={100} />
             <div className="recommendation-card-footer">
-              <small>{t("tourist.recommendations.score")} {recommendation.score}</small>
+              <small>{formatRecommendationMatch(recommendation.score, t)}</small>
               {onSelect && (
                 <button className="secondary-action compact-action" type="button" onClick={() => onSelect(recommendation.id)}>
                   {t("tourist.recommendations.viewDestination")}

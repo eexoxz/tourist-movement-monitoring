@@ -368,6 +368,7 @@ Current alignment notes:
 - [x] The project already has a strong working prototype foundation.
 - [x] The app already covers most of the technical DPP requirements in some form.
 - [x] The tourist UX is improving but still needs to be simplified around the seven-page flow.
+- [x] Simplify Tourist Home by removing repeated stat/profile/trip panels and making recommendation cards less technical for normal users.
 - [x] Firebase integration is active but still needs final testing and data-structure confirmation.
 - [x] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
 - [x] Report/evidence work should come after the app flow is stable.
