@@ -5,12 +5,14 @@ import { Building2, Landmark, Trees, Utensils, Waves, X, type LucideIcon } from 
 import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
+import { translate, type Locale, type TranslationKey } from "../services/i18n";
 
 type MapViewProps = {
   points: MovementPoint[];
   destinations: Destination[];
   activePoint?: MovementPoint;
   mode?: "tourist" | "admin";
+  locale?: Locale;
 };
 
 type DestinationSignal = {
@@ -21,13 +23,13 @@ type DestinationSignal = {
   tier: "high" | "medium" | "emerging" | "low";
 };
 
-const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; name: string }> = {
-  cultural: { Icon: Landmark, name: "Cultural" },
-  nature: { Icon: Trees, name: "Nature" },
-  urban: { Icon: Building2, name: "Urban" },
-  heritage: { Icon: Landmark, name: "Heritage" },
-  food: { Icon: Utensils, name: "Food" },
-  coastal: { Icon: Waves, name: "Coastal" },
+const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; labelKey: TranslationKey }> = {
+  cultural: { Icon: Landmark, labelKey: "category.cultural" },
+  nature: { Icon: Trees, labelKey: "category.nature" },
+  urban: { Icon: Building2, labelKey: "category.urban" },
+  heritage: { Icon: Landmark, labelKey: "category.heritage" },
+  food: { Icon: Utensils, labelKey: "category.food" },
+  coastal: { Icon: Waves, labelKey: "category.coastal" },
 };
 
 function escapeHtml(value: string) {
@@ -65,7 +67,11 @@ function getDestinationSignal(destination: Destination, points: MovementPoint[],
   };
 }
 
-function destinationIcon(category: DestinationCategory, signal: DestinationSignal) {
+function tierLabelKey(tier: DestinationSignal["tier"]): TranslationKey {
+  return `map.tier.${tier}`;
+}
+
+function destinationIcon(category: DestinationCategory, signal: DestinationSignal, locale: Locale) {
   const meta = categoryMeta[category];
   const size = signal.tier === "high" ? 46 : signal.tier === "medium" ? 42 : signal.tier === "emerging" ? 38 : 34;
   const iconSize = Math.round(size * 0.44);
@@ -73,7 +79,7 @@ function destinationIcon(category: DestinationCategory, signal: DestinationSigna
 
   return L.divIcon({
     className: `destination-marker destination-marker-${category} destination-marker-${signal.tier}`,
-    html: `<span>${categoryIconHtml(category, iconSize)}</span>${badge}<small>${meta.name}</small>`,
+    html: `<span>${categoryIconHtml(category, iconSize)}</span>${badge}<small>${escapeHtml(translate(locale, meta.labelKey)).toUpperCase()}</small>`,
     iconSize: [size, size + 8],
     iconAnchor: [size / 2, size + 2],
     popupAnchor: [0, -size],
@@ -90,7 +96,7 @@ function routeIcon(type: "start" | "end" | "current") {
   });
 }
 
-export function MapView({ points, destinations, activePoint, mode = "admin" }: MapViewProps) {
+export function MapView({ points, destinations, activePoint, mode = "admin", locale = "en" }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -105,6 +111,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
   );
   const selectedDestination = visibleDestinations.find((destination) => destination.id === selectedDestinationId) ?? null;
   const selectedSignal = selectedDestination ? destinationSignals.get(selectedDestination.id) : null;
+  const t = (key: TranslationKey) => translate(locale, key);
+  const categoryLabel = (category: DestinationCategory) => t(categoryMeta[category].labelKey);
+  const signalTierLabel = (tier: DestinationSignal["tier"]) => t(tierLabelKey(tier));
 
   useEffect(() => {
     if (visibleDestinations.length === 1) {
@@ -177,11 +186,11 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
         .addTo(layer);
 
       L.marker([destination.latitude, destination.longitude], {
-        icon: destinationIcon(destination.category, signal),
+        icon: destinationIcon(destination.category, signal, locale),
         title: destination.name,
       })
         .bindPopup(
-          `<section class="map-popup"><strong>${escapeHtml(destination.name)}</strong><span>${escapeHtml(categoryMeta[destination.category].name)} destination in ${escapeHtml(destination.city)}</span><p>${escapeHtml(destination.description)}</p><dl><div><dt>Movement points</dt><dd>${signal.nearbyPointCount}</dd></div><div><dt>Demand signal</dt><dd>${signal.tier}</dd></div></dl></section>`
+          `<section class="map-popup"><strong>${escapeHtml(destination.name)}</strong><span>${escapeHtml(categoryLabel(destination.category))} · ${escapeHtml(destination.city)}</span><p>${escapeHtml(destination.description)}</p><dl><div><dt>${escapeHtml(t("map.movementPoints"))}</dt><dd>${signal.nearbyPointCount}</dd></div><div><dt>${escapeHtml(t("map.demandSignal"))}</dt><dd>${escapeHtml(signalTierLabel(signal.tier))}</dd></div></dl></section>`
         )
         .on("click", selectDestination)
         .addTo(layer);
@@ -213,14 +222,14 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
           weight: 2,
         })
           .bindPopup(
-            `<section class="map-popup"><strong>Movement point ${index + 1}</strong><span>${formatDateTime(point.recordedAt)}</span><dl><div><dt>Accuracy</dt><dd>${point.accuracyMeters}m</dd></div><div><dt>Source</dt><dd>${point.source}</dd></div></dl></section>`
+            `<section class="map-popup"><strong>${escapeHtml(t("map.movementPoint"))} ${index + 1}</strong><span>${formatDateTime(point.recordedAt)}</span><dl><div><dt>${escapeHtml(t("map.accuracy"))}</dt><dd>${point.accuracyMeters}m</dd></div><div><dt>${escapeHtml(t("map.source"))}</dt><dd>${escapeHtml(point.source)}</dd></div></dl></section>`
           )
           .addTo(layer);
       });
 
-      L.marker(route[0], { icon: routeIcon("start"), title: "Trip start" }).bindPopup(`<strong>Trip start</strong><br>${formatDateTime(points[0].recordedAt)}`).addTo(layer);
-      L.marker(route[route.length - 1], { icon: routeIcon("end"), title: "Trip end" })
-        .bindPopup(`<strong>Trip end</strong><br>${formatDateTime(points.at(-1)!.recordedAt)}`)
+      L.marker(route[0], { icon: routeIcon("start"), title: t("map.tripStart") }).bindPopup(`<strong>${escapeHtml(t("map.tripStart"))}</strong><br>${formatDateTime(points[0].recordedAt)}`).addTo(layer);
+      L.marker(route[route.length - 1], { icon: routeIcon("end"), title: t("map.tripEnd") })
+        .bindPopup(`<strong>${escapeHtml(t("map.tripEnd"))}</strong><br>${formatDateTime(points.at(-1)!.recordedAt)}`)
         .addTo(layer);
 
       map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
@@ -231,16 +240,16 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
     if (activePoint) {
       L.marker([activePoint.latitude, activePoint.longitude], {
         icon: routeIcon("current"),
-        title: "Current location",
+        title: t("map.currentLocation"),
       })
-        .bindPopup(`<strong>Current location</strong><br>${formatDateTime(activePoint.recordedAt)}`)
+        .bindPopup(`<strong>${escapeHtml(t("map.currentLocation"))}</strong><br>${formatDateTime(activePoint.recordedAt)}`)
         .addTo(layer);
     }
 
     return () => {
       layer.remove();
     };
-  }, [points, visibleDestinations, activePoint, destinationSignals]);
+  }, [points, visibleDestinations, activePoint, destinationSignals, locale]);
 
   const centerOnActivePoint = () => {
     if (!activePoint) {
@@ -262,21 +271,21 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
 
   return (
     <div className={mode === "tourist" ? "map-frame tourist-map-mode" : "map-frame"}>
-      <div ref={containerRef} className="map-view" aria-label="Movement map" />
-      {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? "Loading map" : "Map tiles could not be loaded"}</div>}
-      {mode === "tourist" && <div className="map-mode-label">Tourist map</div>}
+      <div ref={containerRef} className="map-view" aria-label={t("map.aria")} />
+      {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? t("map.loading") : t("map.error")}</div>}
+      {mode === "tourist" && <div className="map-mode-label">{t("map.touristMap")}</div>}
       {activePoint && (
         <button className="map-current-button" type="button" onClick={centerOnActivePoint}>
-          Centre on current location
+          {t("map.centerCurrentLocation")}
         </button>
       )}
-      <div className="map-legend" aria-label="Visible destination marker categories">
+      <div className="map-legend" aria-label={t("map.legendAria")}>
         {visibleCategories.map((category) => (
           <span key={category}>
             <i className={`destination-marker destination-marker-${category}`}>
               <span dangerouslySetInnerHTML={{ __html: categoryIconHtml(category, 13) }} />
             </i>
-            {categoryMeta[category].name}
+            {categoryLabel(category)}
           </span>
         ))}
       </div>
@@ -287,57 +296,57 @@ export function MapView({ points, destinations, activePoint, mode = "admin" }: M
               className="map-detail-close"
               type="button"
               onClick={() => setSelectedDestinationId(null)}
-              title="Close place details"
-              aria-label="Close place details"
+              title={t("map.closePlaceDetails")}
+              aria-label={t("map.closePlaceDetails")}
             >
               <X size={16} aria-hidden="true" />
             </button>
-            <span>{categoryMeta[selectedDestination.category].name} destination</span>
+            <span>{categoryLabel(selectedDestination.category)} {t("map.destination")}</span>
             <h2>{selectedDestination.name}</h2>
             <p>{selectedDestination.description}</p>
             <dl>
               <div>
-                <dt>City</dt>
+                <dt>{t("tourist.places.area")}</dt>
                 <dd>{selectedDestination.city}</dd>
               </div>
               <div>
-                <dt>Movement signal</dt>
-                <dd>{selectedSignal.tier}</dd>
+                <dt>{t("map.demandSignal")}</dt>
+                <dd>{signalTierLabel(selectedSignal.tier)}</dd>
               </div>
               <div>
-                <dt>Nearby points</dt>
+                <dt>{t("map.nearbyPoints")}</dt>
                 <dd>{selectedSignal.nearbyPointCount}</dd>
               </div>
               <div>
-                <dt>Tourist profiles</dt>
+                <dt>{t("map.touristProfiles")}</dt>
                 <dd>{selectedSignal.uniqueTouristCount}</dd>
               </div>
               {selectedSignal.distanceFromActiveKm !== undefined && (
                 <div>
-                  <dt>From current point</dt>
+                  <dt>{t("map.fromCurrentPoint")}</dt>
                   <dd>{selectedSignal.distanceFromActiveKm.toFixed(2)} km</dd>
                 </div>
               )}
               <div>
-                <dt>Suggested visit</dt>
-                <dd>{selectedDestination.averageVisitMinutes} min</dd>
+                <dt>{t("map.suggestedVisit")}</dt>
+                <dd>{selectedDestination.averageVisitMinutes} {t("common.minutes")}</dd>
               </div>
             </dl>
-            {selectedSignal.latestRecordedAt && <small>Latest route signal: {formatDateTime(selectedSignal.latestRecordedAt)}</small>}
+            {selectedSignal.latestRecordedAt && <small>{t("map.latestRouteSignal")}: {formatDateTime(selectedSignal.latestRecordedAt)}</small>}
           </>
         ) : topSignals.length > 0 ? (
           <>
-            <span>{mode === "tourist" ? "Nearby movement" : "Top map signals"}</span>
+            <span>{mode === "tourist" ? t("map.nearbyMovement") : t("map.topMapSignals")}</span>
             <h2>{topSignals[0].destination.name}</h2>
             <p>
-              {topSignals[0].signal.nearbyPointCount} movement point(s) are near this destination. Click any place marker or shaded area to inspect it.
+              {topSignals[0].signal.nearbyPointCount} {t("common.points")} {t("map.nearbyMovementDescription")}
             </p>
           </>
         ) : (
           <>
-            <span>Interactive map</span>
-            <h2>Tap a place marker</h2>
-            <p>Destination details are shown from the app catalogue without using extra place APIs.</p>
+            <span>{t("map.interactiveMap")}</span>
+            <h2>{t("map.tapPlaceMarker")}</h2>
+            <p>{t("map.catalogueOnlyDescription")}</p>
           </>
         )}
       </section>

@@ -34,7 +34,7 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Add event calendar for Malaysian nationwide and state-level festivals/public holidays.
 - [x] Add reusable notification/toast system for tourist and administrator feedback.
 - [x] Add first multilingual UI foundation without using a translation API.
-- [ ] Expand language coverage across every tourist-facing page, not only login and navigation.
+- [x] Expand language coverage across every tourist-facing page, not only login and navigation.
 - [x] Add emergency contact details to tourist profile.
 - [x] Add SOS/emergency assistance button for tourist side as a prototype-only safety feature.
 - [x] Add administrator SOS/emergency monitoring section.
@@ -374,3 +374,6 @@ Current alignment notes:
 - [x] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
 - [x] Report/evidence work should come after the app flow is stable.
 - [x] Begin final code cleanup by extracting shared summary and notification components out of App.tsx.
+- [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
+- [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.
+- [ ] Final cleanup: keep i18n.ts explicit for translation review, but move locale tables into separate files if it becomes hard to maintain.

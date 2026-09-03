@@ -275,7 +275,10 @@ function getTripDiaryInsight(summary: TripSummary, destinationNames: string[], t
   }
 
   if (destinationNames.length > 0) {
-    return `You spent time around ${destinationNames.slice(0, 3).join(", ")}. ${t("tourist.trips.insightKnownRoute")}`;
+    const aroundPrefix = t("tourist.trips.insightAroundPrefix");
+    const names = destinationNames.slice(0, 3).join(", ");
+    const separator = /[、在]$/.test(aroundPrefix) ? "" : " ";
+    return `${aroundPrefix}${separator}${names}${t("tourist.trips.insightAroundSuffix")} ${t("tourist.trips.insightKnownRoute")}`;
   }
 
   return t("tourist.trips.insightSavedRoute");
@@ -953,7 +956,7 @@ function App() {
 
       <main className="content">
         {currentUser.role === "admin" ? (
-          <AdminWorkspace data={data} view={safeView} onDataChange={commitData} notify={notify} />
+          <AdminWorkspace data={data} view={safeView} locale={locale} onDataChange={commitData} notify={notify} />
         ) : (
           <TouristWorkspace data={data} view={safeView} user={currentUser} locale={locale} onDataChange={commitData} onViewChange={goToView} watchId={watchId} notify={notify} />
         )}
@@ -1872,7 +1875,7 @@ function TouristWorkspace({
             />
           </section>
 
-          <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} mode="tourist" />
+          <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} mode="tourist" locale={locale} />
         </div>
       </Page>
     );
@@ -1913,7 +1916,7 @@ function TouristWorkspace({
 
           <section className="trip-diary-layout">
             <div className="trip-diary-main">
-              <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} mode="tourist" />
+              <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} mode="tourist" locale={locale} />
 
               {selectedTrip && selectedTripSummary ? (
                 <section className="trip-story-panel">
@@ -2093,7 +2096,7 @@ function TouristWorkspace({
           </div>
         </div>
 
-        <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} activePoint={activePoints.at(-1) ?? tripPoints.at(-1)} mode="tourist" />
+        <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} activePoint={activePoints.at(-1) ?? tripPoints.at(-1)} mode="tourist" locale={locale} />
 
         {geofenceWarnings.length > 0 && (
           <section className="tourist-section geofence-warning-panel">
@@ -2536,11 +2539,13 @@ function TouristProfileForm({
 function AdminWorkspace({
   data,
   view,
+  locale,
   onDataChange,
   notify,
 }: {
   data: AppData;
   view: AppView;
+  locale: Locale;
   onDataChange: (data: AppData) => void;
   notify: NotifyFn;
 }) {
@@ -2916,7 +2921,7 @@ function AdminWorkspace({
         ]}
       />
       <div className="two-column">
-        <MovementMap points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints} destinations={data.destinations} />
+        <MovementMap points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints} destinations={data.destinations} locale={locale} />
         <section className="admin-records-layout">
           <div className="list-panel">
             {movementTripRecords.map((record) => {
@@ -3285,7 +3290,7 @@ function AdminWorkspace({
             ]}
           />
           <div className="two-column">
-            <MovementMap points={allDashboardPoints} destinations={data.destinations} />
+            <MovementMap points={allDashboardPoints} destinations={data.destinations} locale={locale} />
             <section className="panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
               <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
@@ -3397,22 +3402,24 @@ function MovementMap({
   destinations,
   activePoint,
   mode = "admin",
+  locale = "en",
 }: {
   points: MovementPoint[];
   destinations: Destination[];
   activePoint?: MovementPoint;
   mode?: "tourist" | "admin";
+  locale?: Locale;
 }) {
   return (
     <Suspense
       fallback={
         <div className="map-frame">
           <div className="map-view map-view-placeholder" />
-          <div className="map-status">Loading map</div>
+          <div className="map-status">{translate(locale, "map.loading")}</div>
         </div>
       }
     >
-      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} />
+      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} locale={locale} />
     </Suspense>
   );
 }
@@ -3530,8 +3537,8 @@ function DestinationPanel({
             </div>
             <p>{destination.description}</p>
             <div className="tag-row">
-              <small>{destination.category}</small>
-              {demandRow && demandRow.popularityScore > 0 && <small className="demand-tag">{demandRow.tier} {t("common.demand").toLowerCase()}</small>}
+              <small>{formatTravelPreferenceList([destination.category], locale)}</small>
+              {demandRow && demandRow.popularityScore > 0 && <small className="demand-tag">{translate(locale, `map.tier.${demandRow.tier}` as TranslationKey)} {t("common.demand").toLowerCase()}</small>}
               {visited && <small className="visited-tag">{t("tourist.places.visited")}</small>}
             </div>
           </button>
@@ -3543,6 +3550,7 @@ function DestinationPanel({
 
 function DestinationDetail({ destination, demand, locale = "en" }: { destination: Destination; demand?: DestinationDemand; locale?: Locale }) {
   const t = (key: TranslationKey) => translate(locale, key);
+  const tierLabel = demand ? translate(locale, `map.tier.${demand.tier}` as TranslationKey) : "";
 
   return (
     <section className="panel detail-panel">
@@ -3551,27 +3559,27 @@ function DestinationDetail({ destination, demand, locale = "en" }: { destination
       {demand && (
         <div className="destination-signal">
           <div>
-            <span>Movement Score</span>
+            <span>{t("tourist.recommendations.movementScore")}</span>
             <strong>{demand.popularityScore}%</strong>
           </div>
           <div>
             <span>{t("common.demand")}</span>
-            <strong>{demand.tier}</strong>
+            <strong>{tierLabel}</strong>
           </div>
           <div>
-            <span>Tourists</span>
+            <span>{t("common.tourists")}</span>
             <strong>{Math.max(demand.uniqueTouristCount, demand.approachingTouristCount)}</strong>
           </div>
         </div>
       )}
       <dl>
         <div>
-          <dt>City</dt>
+          <dt>{t("common.city")}</dt>
           <dd>{destination.city}</dd>
         </div>
         <div>
           <dt>{t("common.category")}</dt>
-          <dd>{destination.category}</dd>
+          <dd>{formatTravelPreferenceList([destination.category], locale)}</dd>
         </div>
         <div>
           <dt>{t("common.averageVisit")}</dt>
@@ -3592,11 +3600,11 @@ function DestinationDetail({ destination, demand, locale = "en" }: { destination
         {demand && (
           <>
             <div>
-              <dt>Nearby movement</dt>
-              <dd>{demand.movementPointCount} points</dd>
+              <dt>{t("map.nearbyMovement")}</dt>
+              <dd>{demand.movementPointCount} {t("common.points")}</dd>
             </div>
             <div>
-              <dt>Approach signals</dt>
+              <dt>{t("common.approachSignals")}</dt>
               <dd>{demand.approachSignalCount}</dd>
             </div>
           </>
@@ -3604,7 +3612,7 @@ function DestinationDetail({ destination, demand, locale = "en" }: { destination
       </dl>
       {destination.visitTips && destination.visitTips.length > 0 && (
         <section className="visit-tips-panel">
-          <strong>Visit tips</strong>
+          <strong>{t("common.visitTips")}</strong>
           <ul>
             {destination.visitTips.map((tip) => (
               <li key={tip}>{tip}</li>
