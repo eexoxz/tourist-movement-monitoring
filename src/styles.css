@@ -843,9 +843,9 @@ button:disabled {
 
 .place-discovery-card {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  padding: 15px;
+  padding: 16px;
   border: 1px solid #dde4e0;
   border-radius: 8px;
   color: inherit;
@@ -856,6 +856,9 @@ button:disabled {
 
 .place-discovery-card.active {
   border-color: #0f766e;
+  background:
+    linear-gradient(135deg, rgba(20, 184, 166, 0.08), transparent 58%),
+    #ffffff;
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
 }
 
@@ -863,6 +866,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  align-items: flex-start;
 }
 
 .place-card-heading div {
@@ -882,9 +886,15 @@ button:disabled {
 
 .place-card-heading small {
   flex: 0 0 auto;
+  max-width: 130px;
+  padding: 6px 9px;
+  border-radius: 999px;
   color: #111827;
+  background: #fef3c7;
   font-size: 0.85rem;
   font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
 }
 
 .place-discovery-card p,
@@ -892,6 +902,17 @@ button:disabled {
   margin: 0;
   color: #596575;
   line-height: 1.45;
+}
+
+.place-card-address {
+  padding: 10px 12px;
+  border: 1px solid #e6efe9;
+  border-radius: 8px;
+  color: #344155;
+  background: #fbfaf6;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .place-card-meta {
