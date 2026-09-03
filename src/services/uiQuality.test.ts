@@ -51,8 +51,8 @@ describe("user interface quality guardrails", () => {
     expect(appSource).toContain("Cultural proportion");
     expect(appSource).toContain("Nature proportion");
     expect(appSource).toContain("Urban proportion");
-    expect(appSource).toContain("Food");
-    expect(appSource).toContain("Coastal");
+    expect(i18nSource).toContain('"category.food": "Food"');
+    expect(i18nSource).toContain('"category.coastal": "Coastal"');
   });
 
   it("keeps major failure paths connected to shared notifications", () => {

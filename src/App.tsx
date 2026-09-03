@@ -141,20 +141,20 @@ const placeDiscoveryModes: Array<{ value: PlaceDiscoveryMode; labelKey: Translat
   { value: "hidden", labelKey: "tourist.places.mode.quieter" },
 ];
 const demoCredentialEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
-const preferenceOptions: Array<{ value: DestinationCategory; label: string }> = [
-  { value: "cultural", label: "Culture" },
-  { value: "nature", label: "Nature" },
-  { value: "urban", label: "City spots" },
-  { value: "heritage", label: "Heritage" },
-  { value: "food", label: "Food" },
-  { value: "coastal", label: "Coastal" },
+const preferenceOptions: Array<{ value: DestinationCategory; labelKey: TranslationKey }> = [
+  { value: "cultural", labelKey: "category.cultural" },
+  { value: "nature", labelKey: "category.nature" },
+  { value: "urban", labelKey: "category.urban" },
+  { value: "heritage", labelKey: "category.heritage" },
+  { value: "food", labelKey: "category.food" },
+  { value: "coastal", labelKey: "category.coastal" },
 ];
-const incidentTypeOptions: Array<{ value: IncidentType; label: string }> = [
-  { value: "lost-item", label: "Lost item" },
-  { value: "accident", label: "Accident" },
-  { value: "suspicious-activity", label: "Suspicious activity" },
-  { value: "medical", label: "Medical help" },
-  { value: "other", label: "Other help" },
+const incidentTypeOptions: Array<{ value: IncidentType; labelKey: TranslationKey }> = [
+  { value: "lost-item", labelKey: "tourist.safety.incidentLostItem" },
+  { value: "accident", labelKey: "tourist.safety.incidentAccident" },
+  { value: "suspicious-activity", labelKey: "tourist.safety.incidentSuspicious" },
+  { value: "medical", labelKey: "tourist.safety.incidentMedical" },
+  { value: "other", labelKey: "tourist.safety.incidentOther" },
 ];
 
 
@@ -303,12 +303,12 @@ function inferExpectedProfileFromPreferences(preferences: DestinationCategory[])
   return ranked[0][1] > 0 && ranked[0][1] > ranked[1][1] ? ranked[0][0] : "mixed";
 }
 
-function formatTravelPreferenceList(preferences?: DestinationCategory[]) {
+function formatTravelPreferenceList(preferences?: DestinationCategory[], locale: Locale = "en") {
   if (!preferences || preferences.length === 0) {
-    return "Not set yet";
+    return translate(locale, "tourist.profile.notSetYet");
   }
 
-  const labels = new Map(preferenceOptions.map((option) => [option.value, option.label]));
+  const labels = new Map(preferenceOptions.map((option) => [option.value, translate(locale, option.labelKey)]));
   return preferences.map((preference) => labels.get(preference) ?? preference).join(", ");
 }
 
@@ -326,7 +326,12 @@ function getCategoryLabel(category: DestinationCategory, t?: (key: TranslationKe
     return t(categoryLabels[category]);
   }
 
-  return preferenceOptions.find((option) => option.value === category)?.label ?? category;
+  return translate("en", preferenceOptions.find((option) => option.value === category)?.labelKey ?? "category.cultural");
+}
+
+function getIncidentTypeLabel(type: IncidentType, t: (key: TranslationKey) => string) {
+  const option = incidentTypeOptions.find((candidate) => candidate.value === type);
+  return option ? t(option.labelKey) : t("tourist.safety.incidentFallback");
 }
 
 function formatDistance(distance?: number) {
@@ -2313,7 +2318,7 @@ function TouristWorkspace({
                 <select value={incidentType} onChange={(event) => setIncidentType(event.target.value as IncidentType)}>
                   {incidentTypeOptions.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}
+                      {t(option.labelKey)}
                     </option>
                   ))}
                 </select>
@@ -2341,7 +2346,7 @@ function TouristWorkspace({
             ))}
             {userIncidentReports.slice(0, 2).map((report) => (
               <span key={report.id}>
-                {incidentTypeOptions.find((option) => option.value === report.type)?.label ?? "Incident"} {report.status} · {formatDateTime(report.createdAt)}
+                {getIncidentTypeLabel(report.type, t)} {report.status} · {formatDateTime(report.createdAt)}
               </span>
             ))}
             {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}
@@ -2650,7 +2655,7 @@ function AdminWorkspace({
           kind: "incident" as const,
           userId: report.userId,
           status: report.status,
-          title: incidentTypeOptions.find((option) => option.value === report.type)?.label ?? "Incident report",
+          title: getIncidentTypeLabel(report.type, (key) => translate("en", key)),
           detail: report.description,
           locationNote: report.locationNote || (report.latitude !== undefined && report.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No location note was provided."),
           createdAt: report.createdAt,
@@ -2833,7 +2838,7 @@ function AdminWorkspace({
               </div>
               <div>
                 <dt>Travel style</dt>
-                <dd>{formatTravelPreferenceList(selectedManagedTourist.tourist.travelPreferences)}</dd>
+                <dd>{formatTravelPreferenceList(selectedManagedTourist.tourist.travelPreferences, "en")}</dd>
               </div>
               <div>
                 <dt>Emergency contact</dt>
