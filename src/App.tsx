@@ -28,13 +28,10 @@ import type {
   Destination,
   DestinationCategory,
   KMeansFeatureVector,
-  MovementPoint,
   IncidentType,
   SafetyStatus,
   TouristProfile,
   TravelPlanOptions,
-  TripSession,
-  TripSummary,
   User,
   UserRole,
 } from "./types";
@@ -107,6 +104,7 @@ import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn, getC
 import { calculateGeofenceActivity, getActiveGeofenceWarnings } from "./services/geofencing";
 import { createIncidentReport, createSosAlert, getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "./services/safety";
 import { getTouristManagementRows } from "./services/touristManagement";
+import { formatTripTitle, getRecognizedDestinationNames, getTripDiaryInsight, getTripSuggestionStatus } from "./services/tripPresentation";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CompletedTripSummary, EmptyState, MetricGrid } from "./components/SummaryCards";
 import { ToastViewport, type AppNotification, type NotificationTone, type NotifyFn } from "./components/ToastViewport";
@@ -116,6 +114,7 @@ import { MovementPulseHero } from "./components/MovementPulseHero";
 import { Page } from "./components/Page";
 import { PlaceDiscovery } from "./components/PlaceDiscovery";
 import { RecommendationList } from "./components/RecommendationList";
+import { TripDiary } from "./components/TripDiary";
 
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
@@ -160,17 +159,6 @@ const demoRoute = [
 
 function analysisKey(analysis: AnalysisResult) {
   return `${analysis.tripId}:${analysis.generatedAt}`;
-}
-
-function getRecognizedDestinationNames(points: MovementPoint[], destinations: Destination[]) {
-  const names = points
-    .map((point) => {
-      const nearest = nearestDestination(point, destinations);
-      return nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
-    })
-    .filter((name): name is string => Boolean(name));
-
-  return Array.from(new Set(names));
 }
 
 function geolocationErrorMessage(error: GeolocationPositionError) {
@@ -249,39 +237,6 @@ function getProfileSkipKey(userId: string) {
 function getDisplayName(user: User) {
   const name = user.name.trim();
   return name && name !== user.email && !name.includes("@") ? name : "";
-}
-
-function formatTripTitle(trip: TripSession, destinationNames: string[], t: (key: TranslationKey) => string) {
-  const routeLabel = destinationNames.slice(0, 2).join(" to ");
-
-  if (routeLabel) {
-    return `${routeLabel} ${t("tourist.trips.tripSuffix")}`;
-  }
-
-  return trip.status === "active" ? t("tourist.trips.currentTripTitle") : t("tourist.trips.malaysiaTripTitle");
-}
-
-function getTripDiaryInsight(summary: TripSummary, destinationNames: string[], t: (key: TranslationKey) => string) {
-  if (summary.pointCount < 2) {
-    return t("tourist.trips.insightRecording");
-  }
-
-  if (destinationNames.length > 0) {
-    const aroundPrefix = t("tourist.trips.insightAroundPrefix");
-    const names = destinationNames.slice(0, 3).join(", ");
-    const separator = /[、在]$/.test(aroundPrefix) ? "" : " ";
-    return `${aroundPrefix}${separator}${names}${t("tourist.trips.insightAroundSuffix")} ${t("tourist.trips.insightKnownRoute")}`;
-  }
-
-  return t("tourist.trips.insightSavedRoute");
-}
-
-function getTripSuggestionStatus(summary: TripSummary, analysis: AnalysisResult | null, t: (key: TranslationKey) => string) {
-  if (summary.pointCount < 2) {
-    return t("tourist.trips.keepRecording");
-  }
-
-  return analysis ? t("tourist.trips.ready") : t("tourist.trips.refresh");
 }
 
 function inferExpectedProfileFromPreferences(preferences: DestinationCategory[]): NonNullable<User["expectedProfile"]> {
@@ -1819,148 +1774,31 @@ function TouristWorkspace({
   }
 
   if (view === "history") {
-    const completedTripCount = userTrips.filter((trip) => trip.status === "completed").length;
-    const totalDistanceKm = Number(tripSummaries.reduce((sum, summary) => sum + summary.distanceKm, 0).toFixed(1));
-    const totalRecognizedStops = tripSummaries.reduce((sum, summary) => sum + summary.visitedDestinationCount, 0);
     const selectedTripTitle = selectedTrip ? formatTripTitle(selectedTrip, selectedTripDestinationNames, t) : t("tourist.trips.noTripSelected");
     const selectedTripInsight = selectedTripSummary ? getTripDiaryInsight(selectedTripSummary, selectedTripDestinationNames, t) : "";
     const selectedTripSuggestionStatus = selectedTripSummary ? getTripSuggestionStatus(selectedTripSummary, selectedTripAnalysis, t) : t("common.waiting");
 
     return (
       <Page title={t("tourist.trips.pageTitle")} eyebrow={t("common.tourist")}>
-        <section className="trip-diary-page">
-          <section className="trip-diary-hero">
-            <div>
-              <span>{t("tourist.trips.routeHistory")}</span>
-              <h2>{t("tourist.trips.heroTitle")}</h2>
-              <p>{t("tourist.trips.heroDescription")}</p>
-            </div>
-            <div className="trip-diary-stats" aria-label="Trip diary totals">
-              <span>
-                <strong>{completedTripCount}</strong>
-                {t("common.completed")}
-              </span>
-              <span>
-                <strong>{totalDistanceKm}</strong>
-                {t("tourist.trips.kmRecorded")}
-              </span>
-              <span>
-                <strong>{totalRecognizedStops}</strong>
-                {t("tourist.trips.stopsFound")}
-              </span>
-            </div>
-          </section>
-
-          <section className="trip-diary-layout">
-            <div className="trip-diary-main">
-              <MovementMap points={selectedTripPoints.length ? selectedTripPoints : tripPoints} destinations={data.destinations} mode="tourist" locale={locale} />
-
-              {selectedTrip && selectedTripSummary ? (
-                <section className="trip-story-panel">
-                  <div className="section-heading">
-                    <div>
-                      <span>{t("tourist.trips.selectedRoute")}</span>
-                      <h2>{selectedTripTitle}</h2>
-                      <p>{formatDateTime(selectedTrip.startedAt)}</p>
-                    </div>
-                    <strong className="trip-status-badge">{selectedTrip.status === "completed" ? t("common.completed") : t("common.active")}</strong>
-                  </div>
-
-                  <div className="trip-story-metrics">
-                    <span>
-                      <strong>{selectedTripSummary.distanceKm}</strong>
-                      {t("tourist.trips.kmTravelled")}
-                    </span>
-                    <span>
-                      <strong>{selectedTripSummary.durationMinutes}</strong>
-                      {t("tourist.trips.minSpent")}
-                    </span>
-                    <span>
-                      <strong>{selectedTripSummary.visitedDestinationCount}</strong>
-                      {t("tourist.trips.placesNoticed")}
-                    </span>
-                    <span>
-                      <strong>{selectedTripSuggestionStatus}</strong>
-                      {t("tourist.trips.suggestions")}
-                    </span>
-                  </div>
-
-                  <p className="trip-insight">{selectedTripInsight}</p>
-
-                  <div className="trip-stop-strip" aria-label="Recognised trip stops">
-                    {selectedTripDestinationNames.length > 0 ? (
-                      selectedTripDestinationNames.map((name) => <span key={name}>{name}</span>)
-                    ) : (
-                      <small>{t("tourist.trips.noSavedDestination")}</small>
-                    )}
-                  </div>
-
-                  <section className="trip-guidance-panel">
-                    <div>
-                      <strong>{t("tourist.trips.guidanceTitle")}</strong>
-                      <p>{t("tourist.trips.guidanceText")}</p>
-                    </div>
-                    <button className="secondary-action" type="button" onClick={() => onViewChange("recommendations")}>
-                      <Sparkles size={18} />
-                      {t("tourist.trips.findPlaces")}
-                    </button>
-                  </section>
-
-                  <div className="trip-detail-recommendations">
-                    <strong>{hasPersonalizedRecommendations ? t("tourist.trips.personalizedNext") : t("tourist.trips.basicNext")}</strong>
-                    {selectedTripRecommendations.length > 0 ? (
-                      selectedTripRecommendations.map((recommendation) => {
-                        const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
-
-                        return destination ? (
-                          <button className="trip-recommendation-link" type="button" key={recommendation.id} onClick={() => onViewChange("recommendations")}>
-                            <span>
-                              {destination.name} <small>{destination.city}</small>
-                            </span>
-                          </button>
-                        ) : null;
-                      })
-                    ) : (
-                      <p>{t("tourist.trips.needTripForRecommendations")}</p>
-                    )}
-                  </div>
-                </section>
-              ) : (
-                <section className="trip-story-panel">
-                  <EmptyState text={t("tourist.trips.emptyHistory")} />
-                </section>
-              )}
-            </div>
-
-            <aside className="trip-timeline-panel">
-              <div className="section-heading">
-                <div>
-                  <span>{t("tourist.trips.savedTrips")}</span>
-                  <h2>{t("tourist.trips.pickRoute")}</h2>
-                  <p>{t("tourist.trips.pickRouteDescription")}</p>
-                </div>
-              </div>
-
-              {recentTrips.map((trip) => {
-                const summary = tripSummaries.find((row) => row.tripId === trip.id);
-                const points = data.points.filter((point) => point.tripId === trip.id);
-                const destinationNames = getRecognizedDestinationNames(points, data.destinations);
-
-                return (
-                  <button className={selectedTrip?.id === trip.id ? "trip-timeline-card active" : "trip-timeline-card"} key={trip.id} type="button" onClick={() => setSelectedTripId(trip.id)}>
-                    <span>{trip.status === "completed" ? t("tourist.trips.completedTrip") : t("tourist.trips.activeTrip")}</span>
-                    <strong>{formatTripTitle(trip, destinationNames, t)}</strong>
-                    <small>{trip.endedAt ? formatDateTime(trip.endedAt) : t("tourist.trips.stillActive")}</small>
-                    <p>
-                      {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
-                    </p>
-                  </button>
-                );
-              })}
-              {userTrips.length === 0 && <EmptyState text={t("tourist.trips.firstEntry")} />}
-            </aside>
-          </section>
-        </section>
+        <TripDiary
+          trips={userTrips}
+          recentTrips={recentTrips}
+          tripSummaries={tripSummaries}
+          selectedTrip={selectedTrip}
+          selectedTripPoints={selectedTripPoints}
+          selectedTripSummary={selectedTripSummary}
+          selectedTripTitle={selectedTripTitle}
+          selectedTripInsight={selectedTripInsight}
+          selectedTripSuggestionStatus={selectedTripSuggestionStatus}
+          selectedTripDestinationNames={selectedTripDestinationNames}
+          selectedTripRecommendations={selectedTripRecommendations}
+          fallbackPoints={tripPoints}
+          destinations={data.destinations}
+          hasPersonalizedRecommendations={hasPersonalizedRecommendations}
+          locale={locale}
+          onSelectTrip={setSelectedTripId}
+          onViewRecommendations={() => onViewChange("recommendations")}
+        />
       </Page>
     );
   }

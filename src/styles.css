@@ -2327,6 +2327,14 @@ button:disabled {
   min-width: 0;
 }
 
+.trip-map-panel {
+  min-width: 0;
+}
+
+.trip-map-panel .map-view {
+  min-height: 430px;
+}
+
 .trip-story-panel,
 .trip-timeline-panel {
   padding: 16px;
@@ -2465,6 +2473,10 @@ button:disabled {
   background: #f8fafc;
   text-align: left;
   cursor: pointer;
+}
+
+.trip-timeline-card.active {
+  box-shadow: inset 4px 0 0 #14b8a6;
 }
 
 .trip-timeline-card:hover,
@@ -4402,6 +4414,18 @@ textarea {
 
   .trip-timeline-panel {
     position: static;
+  }
+
+  .trip-map-panel .map-view {
+    min-height: 360px;
+  }
+
+  .trip-timeline-panel {
+    gap: 10px;
+  }
+
+  .trip-timeline-card {
+    padding: 12px;
   }
 
   .map-current-button {
