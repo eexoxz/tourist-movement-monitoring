@@ -4,7 +4,7 @@ import { formatDateTime } from "../services/geo";
 import { getCheckInDurationMinutes } from "../services/checkIns";
 import type { GeoFenceWarning } from "../services/geofencing";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
-import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SosAlert, TripSession, User } from "../types";
+import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
 import { MovementMap } from "./MovementMap";
 import { Page } from "./Page";
 
@@ -66,6 +66,18 @@ type TouristHomeProps = {
 function getIncidentTypeLabel(type: IncidentType, options: IncidentOption[], t: (key: TranslationKey) => string) {
   const option = options.find((candidate) => candidate.value === type);
   return option ? t(option.labelKey) : t("tourist.safety.incidentFallback");
+}
+
+function getSafetyStatusLabel(status: SafetyStatus, t: (key: TranslationKey) => string) {
+  if (status === "resolved") {
+    return t("common.completed");
+  }
+
+  if (status === "reviewing") {
+    return t("common.waiting");
+  }
+
+  return t("common.active");
 }
 
 export function TouristHome({
@@ -420,14 +432,16 @@ export function TouristHome({
 
             <div className="safety-record-list">
               {userSosAlerts.slice(0, 2).map((alert) => (
-                <span key={alert.id}>
-                  SOS {alert.status} · {formatDateTime(alert.createdAt)}
-                </span>
+                <article className="safety-record-item" key={alert.id}>
+                  <strong>SOS · {getSafetyStatusLabel(alert.status, t)}</strong>
+                  <span>{alert.adminNote || `${t("common.waiting")} · ${formatDateTime(alert.createdAt)}`}</span>
+                </article>
               ))}
               {userIncidentReports.slice(0, 2).map((report) => (
-                <span key={report.id}>
-                  {getIncidentTypeLabel(report.type, incidentTypeOptions, t)} {report.status} · {formatDateTime(report.createdAt)}
-                </span>
+                <article className="safety-record-item" key={report.id}>
+                  <strong>{getIncidentTypeLabel(report.type, incidentTypeOptions, t)} · {getSafetyStatusLabel(report.status, t)}</strong>
+                  <span>{report.adminNote || `${t("common.waiting")} · ${formatDateTime(report.createdAt)}`}</span>
+                </article>
               ))}
               {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}
             </div>

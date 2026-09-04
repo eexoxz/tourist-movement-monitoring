@@ -160,6 +160,7 @@ export type SosAlert = {
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
+  adminNote?: string;
 };
 
 export type IncidentType = "lost-item" | "accident" | "suspicious-activity" | "medical" | "other";
@@ -175,6 +176,7 @@ export type IncidentReport = {
   longitude?: number;
   createdAt: string;
   updatedAt: string;
+  adminNote?: string;
 };
 
 export type AttractionCheckIn = {

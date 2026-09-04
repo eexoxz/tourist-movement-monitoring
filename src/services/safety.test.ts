@@ -22,11 +22,13 @@ describe("safety service", () => {
   });
 
   it("updates safety record statuses", () => {
-    const sosData = updateSosStatus(initialData, "sos-demo-open", "resolved");
-    const incidentData = updateIncidentStatus(initialData, "incident-demo-lost-bag", "reviewing");
+    const sosData = updateSosStatus(initialData, "sos-demo-open", "resolved", "Officer is calling the emergency contact.");
+    const incidentData = updateIncidentStatus(initialData, "incident-demo-lost-bag", "reviewing", "Check with the attraction counter.");
 
     expect(sosData.sosAlerts.find((alert) => alert.id === "sos-demo-open")?.status).toBe("resolved");
     expect(sosData.sosAlerts.find((alert) => alert.id === "sos-demo-open")?.resolvedAt).toBeTruthy();
+    expect(sosData.sosAlerts.find((alert) => alert.id === "sos-demo-open")?.adminNote).toBe("Officer is calling the emergency contact.");
     expect(incidentData.incidentReports.find((report) => report.id === "incident-demo-lost-bag")?.status).toBe("reviewing");
+    expect(incidentData.incidentReports.find((report) => report.id === "incident-demo-lost-bag")?.adminNote).toBe("Check with the attraction counter.");
   });
 });

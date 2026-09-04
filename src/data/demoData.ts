@@ -175,6 +175,7 @@ const baseSosAlerts: SosAlert[] = [
     longitude: 100.3288,
     createdAt: hoursAgo(4.5),
     updatedAt: hoursAgo(4.2),
+    adminNote: "A tourism officer is reviewing the request and checking the latest saved location.",
   },
 ];
 
@@ -190,6 +191,7 @@ const baseIncidentReports: IncidentReport[] = [
     longitude: 101.6894,
     createdAt: hoursAgo(7),
     updatedAt: hoursAgo(7),
+    adminNote: "Central Market staff can be contacted first because the report is tied to that area.",
   },
 ];
 

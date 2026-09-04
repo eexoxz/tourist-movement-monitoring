@@ -63,8 +63,9 @@ export function createIncidentReport(
   };
 }
 
-export function updateSosStatus(data: AppData, alertId: string, status: SafetyStatus) {
+export function updateSosStatus(data: AppData, alertId: string, status: SafetyStatus, adminNote?: string) {
   const now = new Date().toISOString();
+  const cleanAdminNote = adminNote?.trim() || undefined;
   return {
     ...data,
     sosAlerts: data.sosAlerts.map((alert) =>
@@ -74,14 +75,16 @@ export function updateSosStatus(data: AppData, alertId: string, status: SafetySt
             status,
             updatedAt: now,
             resolvedAt: status === "resolved" ? now : alert.resolvedAt,
+            adminNote: cleanAdminNote,
           }
         : alert
     ),
   };
 }
 
-export function updateIncidentStatus(data: AppData, reportId: string, status: SafetyStatus) {
+export function updateIncidentStatus(data: AppData, reportId: string, status: SafetyStatus, adminNote?: string) {
   const now = new Date().toISOString();
+  const cleanAdminNote = adminNote?.trim() || undefined;
   return {
     ...data,
     incidentReports: data.incidentReports.map((report) =>
@@ -90,6 +93,7 @@ export function updateIncidentStatus(data: AppData, reportId: string, status: Sa
             ...report,
             status,
             updatedAt: now,
+            adminNote: cleanAdminNote,
           }
         : report
     ),

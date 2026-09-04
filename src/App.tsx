@@ -1889,6 +1889,7 @@ function AdminWorkspace({
   const [touristSearch, setTouristSearch] = useState("");
   const [touristProfileFilter, setTouristProfileFilter] = useState<TouristProfile | "all" | "incomplete">("all");
   const [selectedManagedTouristId, setSelectedManagedTouristId] = useState<string | null>(null);
+  const [safetyAdminNotes, setSafetyAdminNotes] = useState<Record<string, string>>({});
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
   const movementRecords = useMemo(
@@ -1973,6 +1974,7 @@ function AdminWorkspace({
           title: "SOS assistance request",
           detail: alert.message,
           locationNote: alert.latitude !== undefined && alert.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No recent location point was available.",
+          adminNote: alert.adminNote,
           createdAt: alert.createdAt,
           updatedAt: alert.updatedAt,
         })),
@@ -1984,6 +1986,7 @@ function AdminWorkspace({
           title: getIncidentTypeLabel(report.type, (key) => translate("en", key)),
           detail: report.description,
           locationNote: report.locationNote || (report.latitude !== undefined && report.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No location note was provided."),
+          adminNote: report.adminNote,
           createdAt: report.createdAt,
           updatedAt: report.updatedAt,
         })),
@@ -2044,6 +2047,19 @@ function AdminWorkspace({
     }
   }, [filteredTouristManagementRows, selectedManagedTouristId]);
 
+  useEffect(() => {
+    setSafetyAdminNotes((current) => {
+      const next = { ...current };
+      safetyRecords.forEach((record) => {
+        const key = `${record.kind}:${record.id}`;
+        if (next[key] === undefined) {
+          next[key] = record.adminNote ?? "";
+        }
+      });
+      return next;
+    });
+  }, [safetyRecords]);
+
   const recomputeAi = () => {
     onDataChange(refreshAllRecommendations(data));
     notify({ tone: "success", title: "AI analysis refreshed", message: "K-Means, Decision Tree output and recommendations were recalculated." });
@@ -2086,13 +2102,13 @@ function AdminWorkspace({
     URL.revokeObjectURL(url);
   };
 
-  const updateSafetyStatus = (kind: "sos" | "incident", recordId: string, status: SafetyStatus) => {
-    const nextData = kind === "sos" ? updateSosStatus(data, recordId, status) : updateIncidentStatus(data, recordId, status);
+  const updateSafetyCase = (kind: "sos" | "incident", recordId: string, status: SafetyStatus, adminNote?: string) => {
+    const nextData = kind === "sos" ? updateSosStatus(data, recordId, status, adminNote) : updateIncidentStatus(data, recordId, status, adminNote);
     onDataChange(nextData);
     notify({
       tone: "success",
       title: "Safety case updated",
-      message: status === "resolved" ? "The case is marked as resolved." : "The case status was saved.",
+      message: adminNote?.trim() ? "The case status and admin response were saved." : status === "resolved" ? "The case is marked as resolved." : "The case status was saved.",
     });
   };
 
@@ -2350,6 +2366,8 @@ function AdminWorkspace({
       <section className="list-panel safety-admin-list">
         {safetyRecords.map((record) => {
           const tourist = data.users.find((candidate) => candidate.id === record.userId);
+          const caseKey = `${record.kind}:${record.id}`;
+          const noteDraft = safetyAdminNotes[caseKey] ?? record.adminNote ?? "";
           const contactLine = tourist?.emergencyContactPhone
             ? `${tourist.emergencyContactName || "Emergency contact"} · ${tourist.emergencyContactPhone}${tourist.emergencyContactRelation ? ` · ${tourist.emergencyContactRelation}` : ""}`
             : "No emergency contact saved";
@@ -2362,7 +2380,7 @@ function AdminWorkspace({
                   <h3>{record.title}</h3>
                   <p>{record.detail}</p>
                 </div>
-                <select className="safety-status-select" value={record.status} onChange={(event) => updateSafetyStatus(record.kind, record.id, event.target.value as SafetyStatus)} aria-label="Safety case status">
+                <select className="safety-status-select" value={record.status} onChange={(event) => updateSafetyCase(record.kind, record.id, event.target.value as SafetyStatus, noteDraft)} aria-label="Safety case status">
                   <option value="open">Open</option>
                   <option value="reviewing">Reviewing</option>
                   <option value="resolved">Resolved</option>
@@ -2394,6 +2412,19 @@ function AdminWorkspace({
                   <dd>{formatDateTime(record.createdAt)}</dd>
                 </div>
               </dl>
+              <div className="safety-admin-response">
+                <label>
+                  Admin response for tourist
+                  <textarea
+                    value={noteDraft}
+                    onChange={(event) => setSafetyAdminNotes((current) => ({ ...current, [caseKey]: event.target.value }))}
+                    placeholder="Example: We are reviewing this case and will contact your emergency contact if needed."
+                  />
+                </label>
+                <button className="secondary-action compact-action" type="button" onClick={() => updateSafetyCase(record.kind, record.id, record.status, noteDraft)}>
+                  Save response
+                </button>
+              </div>
             </article>
           );
         })}

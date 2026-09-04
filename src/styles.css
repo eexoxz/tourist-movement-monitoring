@@ -1182,7 +1182,7 @@ button:disabled {
   gap: 8px;
 }
 
-.safety-record-list span,
+.safety-record-item,
 .safety-record-list small {
   padding: 9px 10px;
   border-radius: 8px;
@@ -1190,6 +1190,19 @@ button:disabled {
   background: #f8fafc;
   font-size: 0.82rem;
   font-weight: 800;
+}
+
+.safety-record-item {
+  display: grid;
+  gap: 4px;
+}
+
+.safety-record-item strong {
+  color: #102033;
+}
+
+.safety-record-item span {
+  line-height: 1.45;
 }
 
 .check-in-panel {
@@ -3757,6 +3770,38 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.safety-admin-response {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding-top: 2px;
+}
+
+.safety-admin-response label {
+  display: grid;
+  gap: 7px;
+  color: #51606f;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.safety-admin-response textarea {
+  min-height: 76px;
+  resize: vertical;
+  border: 1px solid #d8d0bf;
+  border-radius: 8px;
+  color: #102033;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.45;
+  padding: 10px 12px;
+  text-transform: none;
+}
+
 .tourist-management-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
@@ -4349,7 +4394,8 @@ textarea {
   .check-in-history,
   .geofence-warning-list,
   .safety-admin-heading,
-  .safety-admin-meta {
+  .safety-admin-meta,
+  .safety-admin-response {
     grid-template-columns: 1fr;
   }
 

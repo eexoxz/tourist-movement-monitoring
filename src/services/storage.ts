@@ -655,6 +655,7 @@ function normalizeSosAlert(alert: Partial<SosAlert>): SosAlert {
     createdAt,
     updatedAt: alert.updatedAt ?? createdAt,
     resolvedAt: alert.resolvedAt,
+    adminNote: alert.adminNote,
   };
 }
 
@@ -675,6 +676,7 @@ function normalizeIncidentReport(report: Partial<IncidentReport>): IncidentRepor
     longitude: Number.isFinite(report.longitude) ? report.longitude : undefined,
     createdAt,
     updatedAt: report.updatedAt ?? createdAt,
+    adminNote: report.adminNote,
   };
 }
 
