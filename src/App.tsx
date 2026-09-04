@@ -115,7 +115,9 @@ import { Page } from "./components/Page";
 import { PlaceDiscovery } from "./components/PlaceDiscovery";
 import { RecommendationList } from "./components/RecommendationList";
 import { TouristHome } from "./components/TouristHome";
+import { TouristProfileForm } from "./components/TouristProfileForm";
 import { TripDiary } from "./components/TripDiary";
+import { formatTravelPreferenceList, getDisplayName } from "./services/profile";
 
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
@@ -133,14 +135,6 @@ type RememberedLogin = { email: string; password: string };
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
 const demoCredentialEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
-const preferenceOptions: Array<{ value: DestinationCategory; labelKey: TranslationKey }> = [
-  { value: "cultural", labelKey: "category.cultural" },
-  { value: "nature", labelKey: "category.nature" },
-  { value: "urban", labelKey: "category.urban" },
-  { value: "heritage", labelKey: "category.heritage" },
-  { value: "food", labelKey: "category.food" },
-  { value: "coastal", labelKey: "category.coastal" },
-];
 const incidentTypeOptions: Array<{ value: IncidentType; labelKey: TranslationKey }> = [
   { value: "lost-item", labelKey: "tourist.safety.incidentLostItem" },
   { value: "accident", labelKey: "tourist.safety.incidentAccident" },
@@ -233,51 +227,6 @@ function friendlyAuthError(error: unknown, fallback: string) {
 
 function getProfileSkipKey(userId: string) {
   return `${PROFILE_SKIP_KEY_PREFIX}${userId}`;
-}
-
-function getDisplayName(user: User) {
-  const name = user.name.trim();
-  return name && name !== user.email && !name.includes("@") ? name : "";
-}
-
-function inferExpectedProfileFromPreferences(preferences: DestinationCategory[]): NonNullable<User["expectedProfile"]> {
-  const culturalScore = preferences.filter((category) => category === "cultural" || category === "heritage").length;
-  const natureScore = preferences.filter((category) => category === "nature" || category === "coastal").length;
-  const urbanScore = preferences.filter((category) => category === "urban" || category === "food").length;
-  const scores = [
-    ["cultural", culturalScore],
-    ["nature", natureScore],
-    ["urban", urbanScore],
-  ] as const;
-  const ranked = [...scores].sort((a, b) => b[1] - a[1]);
-
-  return ranked[0][1] > 0 && ranked[0][1] > ranked[1][1] ? ranked[0][0] : "mixed";
-}
-
-function formatTravelPreferenceList(preferences?: DestinationCategory[], locale: Locale = "en") {
-  if (!preferences || preferences.length === 0) {
-    return translate(locale, "tourist.profile.notSetYet");
-  }
-
-  const labels = new Map(preferenceOptions.map((option) => [option.value, translate(locale, option.labelKey)]));
-  return preferences.map((preference) => labels.get(preference) ?? preference).join(", ");
-}
-
-function getCategoryLabel(category: DestinationCategory, t?: (key: TranslationKey) => string) {
-  if (t) {
-    const categoryLabels: Record<DestinationCategory, TranslationKey> = {
-      cultural: "category.cultural",
-      nature: "category.nature",
-      urban: "category.urban",
-      heritage: "category.heritage",
-      food: "category.food",
-      coastal: "category.coastal",
-    };
-
-    return t(categoryLabels[category]);
-  }
-
-  return translate("en", preferenceOptions.find((option) => option.value === category)?.labelKey ?? "category.cultural");
 }
 
 function getIncidentTypeLabel(type: IncidentType, t: (key: TranslationKey) => string) {
@@ -1905,152 +1854,6 @@ function TouristWorkspace({
       onIncidentLocationNoteChange={setIncidentLocationNote}
       onSubmitIncidentReport={submitIncidentReport}
     />
-  );
-}
-
-function TouristProfileForm({
-  user,
-  title,
-  description,
-  primaryLabel,
-  secondaryLabel,
-  locale = "en",
-  onSave,
-  onSkip,
-}: {
-  user: User;
-  title: string;
-  description: string;
-  primaryLabel: string;
-  secondaryLabel?: string;
-  locale?: Locale;
-  onSave: (user: User) => void;
-  onSkip?: () => void;
-}) {
-  const t = (key: TranslationKey) => translate(locale, key);
-  const [name, setName] = useState(getDisplayName(user));
-  const [preferences, setPreferences] = useState<DestinationCategory[]>(user.travelPreferences ?? []);
-  const [tripPace, setTripPace] = useState<User["tripPace"]>(user.tripPace ?? "balanced");
-  const [travelGroup, setTravelGroup] = useState<User["travelGroup"]>(user.travelGroup ?? "solo");
-  const [accessibilityPreference, setAccessibilityPreference] = useState<User["accessibilityPreference"]>(user.accessibilityPreference ?? "none");
-  const [emergencyContactName, setEmergencyContactName] = useState(user.emergencyContactName ?? "");
-  const [emergencyContactPhone, setEmergencyContactPhone] = useState(user.emergencyContactPhone ?? "");
-  const [emergencyContactRelation, setEmergencyContactRelation] = useState(user.emergencyContactRelation ?? "");
-
-  const togglePreference = (preference: DestinationCategory) => {
-    setPreferences((current) =>
-      current.includes(preference) ? current.filter((candidate) => candidate !== preference) : [...current, preference]
-    );
-  };
-
-  const saveProfile = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    onSave({
-      ...user,
-      name: name.trim() || user.name,
-      expectedProfile: inferExpectedProfileFromPreferences(preferences),
-      travelPreferences: preferences,
-      tripPace,
-      travelGroup,
-      accessibilityPreference,
-      emergencyContactName: emergencyContactName.trim() || undefined,
-      emergencyContactPhone: emergencyContactPhone.trim() || undefined,
-      emergencyContactRelation: emergencyContactRelation.trim() || undefined,
-      profileCompletedAt: new Date().toISOString(),
-    });
-  };
-
-  return (
-    <form className="profile-setup" onSubmit={saveProfile}>
-      <section className="profile-setup-card">
-        <div className="profile-setup-copy">
-          <span>{t("tourist.profile.personalSetup")}</span>
-          <h2>{title}</h2>
-          <p>{description}</p>
-        </div>
-
-        <div className="profile-form-grid">
-          <label>
-            {t("tourist.profile.preferredName")}
-            <input value={name} onChange={(event) => setName(event.target.value)} placeholder={t("tourist.profile.preferredNamePlaceholder")} />
-          </label>
-
-          <fieldset>
-            <legend>{t("tourist.profile.preferencesLegend")}</legend>
-            <div className="preference-grid">
-              {preferenceOptions.map((option) => (
-                <label className={preferences.includes(option.value) ? "preference-chip active" : "preference-chip"} key={option.value}>
-                  <input type="checkbox" checked={preferences.includes(option.value)} onChange={() => togglePreference(option.value)} />
-                  {getCategoryLabel(option.value, t)}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <div className="field-pair">
-            <label>
-              {t("tourist.profile.travelPace")}
-              <select value={tripPace} onChange={(event) => setTripPace(event.target.value as User["tripPace"])}>
-                <option value="relaxed">{t("profile.option.relaxed")}</option>
-                <option value="balanced">{t("profile.option.balanced")}</option>
-                <option value="packed">{t("profile.option.packed")}</option>
-              </select>
-            </label>
-            <label>
-              {t("tourist.profile.travellingWith")}
-              <select value={travelGroup} onChange={(event) => setTravelGroup(event.target.value as User["travelGroup"])}>
-                <option value="solo">{t("profile.option.solo")}</option>
-                <option value="couple">{t("profile.option.partner")}</option>
-                <option value="family">{t("profile.option.family")}</option>
-                <option value="friends">{t("profile.option.friends")}</option>
-              </select>
-            </label>
-          </div>
-
-          <label>
-            {t("tourist.profile.walkingPreference")}
-            <select value={accessibilityPreference} onChange={(event) => setAccessibilityPreference(event.target.value as User["accessibilityPreference"])}>
-              <option value="none">{t("profile.option.noPreference")}</option>
-              <option value="low-walking">{t("profile.option.lowWalking")}</option>
-              <option value="wheelchair-friendly">{t("profile.option.wheelchair")}</option>
-            </select>
-          </label>
-
-          <section className="profile-emergency-fields">
-            <div>
-              <span>{t("tourist.profile.emergencyContact")}</span>
-              <p>{t("tourist.profile.emergencyDescription")}</p>
-            </div>
-            <div className="field-pair">
-              <label>
-                {t("tourist.profile.contactName")}
-                <input value={emergencyContactName} onChange={(event) => setEmergencyContactName(event.target.value)} placeholder={t("tourist.profile.contactNamePlaceholder")} />
-              </label>
-              <label>
-                {t("tourist.profile.contactPhone")}
-                <input value={emergencyContactPhone} onChange={(event) => setEmergencyContactPhone(event.target.value)} placeholder={t("tourist.profile.contactPhonePlaceholder")} />
-              </label>
-            </div>
-            <label>
-              {t("tourist.profile.relationship")}
-              <input value={emergencyContactRelation} onChange={(event) => setEmergencyContactRelation(event.target.value)} placeholder={t("tourist.profile.relationshipPlaceholder")} />
-            </label>
-          </section>
-        </div>
-
-        <div className="profile-actions">
-          <button className="primary-action" type="submit">
-            <Save size={18} />
-            {primaryLabel}
-          </button>
-          {onSkip && (
-            <button className="secondary-action" type="button" onClick={onSkip}>
-              {secondaryLabel ?? t("tourist.profile.skipForNow")}
-            </button>
-          )}
-        </div>
-      </section>
-    </form>
   );
 }
 
