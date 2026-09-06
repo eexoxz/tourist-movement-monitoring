@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialData } from "../data/demoData";
+import { initialData, mergePreparedDemoDataset } from "../data/demoData";
 import { refreshAllRecommendations } from "./analytics";
 import {
   buildMovementRecordsCsv,
@@ -50,6 +50,35 @@ describe("dashboard service", () => {
     expect(readiness.completionRate).toBe(1);
     expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("300");
     expect(readiness.items.find((item) => item.id === "movement-records")?.ready).toBe(true);
+  });
+
+  it("adds prepared demo tourists without replacing current app users", () => {
+    const currentUser = {
+      id: "firebase-tourist",
+      name: "Current Tourist",
+      email: "current@example.com",
+      password: "",
+      role: "tourist" as const,
+      createdAt: "2026-09-01T00:00:00.000Z",
+    };
+    const merged = mergePreparedDemoDataset({
+      ...initialData,
+      users: [currentUser],
+      consents: [],
+      trips: [],
+      points: [],
+      analyses: [],
+      recommendations: [],
+      sosAlerts: [],
+      incidentReports: [],
+      checkIns: [],
+    });
+    const mergedAgain = mergePreparedDemoDataset(merged);
+
+    expect(merged.users.some((user) => user.id === currentUser.id)).toBe(true);
+    expect(merged.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(300);
+    expect(mergedAgain.users).toHaveLength(merged.users.length);
+    expect(mergedAgain.points).toHaveLength(merged.points.length);
   });
 
   it("reports required demonstration flow coverage from the prepared dataset", () => {

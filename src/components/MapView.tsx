@@ -232,7 +232,11 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
         .bindPopup(`<strong>${escapeHtml(t("map.tripEnd"))}</strong><br>${formatDateTime(points.at(-1)!.recordedAt)}`)
         .addTo(layer);
 
-      map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
+      if (activePoint && mode === "tourist") {
+        map.setView([activePoint.latitude, activePoint.longitude], 15);
+      } else {
+        map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
+      }
     } else if (activePoint) {
       map.setView([activePoint.latitude, activePoint.longitude], 15);
     }

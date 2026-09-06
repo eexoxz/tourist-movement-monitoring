@@ -421,3 +421,23 @@ export const initialData: AppData = {
   checkIns: baseCheckIns,
   geofences,
 };
+
+function mergeById<T extends { id: string }>(current: T[], prepared: T[]) {
+  const currentIds = new Set(current.map((item) => item.id));
+  return [...current, ...prepared.filter((item) => !currentIds.has(item.id))];
+}
+
+export function mergePreparedDemoDataset(data: AppData): AppData {
+  return {
+    ...data,
+    users: mergeById(data.users, initialData.users),
+    consents: mergeById(data.consents, initialData.consents),
+    trips: mergeById(data.trips, initialData.trips),
+    points: mergeById(data.points, initialData.points),
+    destinations: mergeById(data.destinations, initialData.destinations),
+    sosAlerts: mergeById(data.sosAlerts, initialData.sosAlerts),
+    incidentReports: mergeById(data.incidentReports, initialData.incidentReports),
+    checkIns: mergeById(data.checkIns, initialData.checkIns),
+    geofences: mergeById(data.geofences, initialData.geofences),
+  };
+}

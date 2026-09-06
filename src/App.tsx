@@ -70,6 +70,7 @@ import {
 } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "./services/destinationManagement";
+import { demoDatasetMetadata, mergePreparedDemoDataset } from "./data/demoData";
 import { malaysiaFestivalEvents } from "./data/festivals";
 import { nationalityOptions } from "./data/nationalities";
 import { isLocale, loadLocale, localeOptions, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
@@ -1255,8 +1256,8 @@ function TouristWorkspace({
   const recommendationSupportText = hasPersonalizedRecommendations
     ? t("tourist.home.recommendationsPersonalizedText")
     : t("tourist.home.recommendationsBasicText");
-  const activeJourneyPoints = activePoints.length ? activePoints : tripPoints;
-  const activeJourneyPoint = activePoints.at(-1) ?? tripPoints.at(-1);
+  const activeJourneyPoints = activePoints.length ? activePoints : latestCompletedTripPoints;
+  const activeJourneyPoint = activePoints.at(-1) ?? latestCompletedTripPoints.at(-1);
   const topRecommendationDestination = recommendations[0]
     ? data.destinations.find((destination) => destination.id === recommendations[0].destinationId)
     : null;
@@ -2065,6 +2066,16 @@ function AdminWorkspace({
     notify({ tone: "success", title: "AI analysis refreshed", message: "K-Means, Decision Tree output and recommendations were recalculated." });
   };
 
+  const seedDemoTourists = () => {
+    const refreshed = refreshAllRecommendations(mergePreparedDemoDataset(data));
+    onDataChange(refreshed);
+    notify({
+      tone: "success",
+      title: "Demo tourists added",
+      message: `${demoDatasetMetadata.generatedTouristCount} prepared tourist profiles and movement routes are ready for the admin dashboard.`,
+    });
+  };
+
   const resetRecordFilters = () => {
     setSelectedTouristId("all");
     setSelectedTripId("all");
@@ -2594,10 +2605,16 @@ function AdminWorkspace({
       title="Administrator Dashboard"
       eyebrow="Administrator workspace"
       actions={
-        <button className="secondary-action" onClick={recomputeAi}>
-          <RotateCcw size={18} />
-          Refresh AI
-        </button>
+        <div className="page-action-row">
+          <button className="secondary-action" onClick={seedDemoTourists}>
+            <UserRound size={18} />
+            Add demo tourists
+          </button>
+          <button className="secondary-action" onClick={recomputeAi}>
+            <RotateCcw size={18} />
+            Refresh AI
+          </button>
+        </div>
       }
     >
       <div className="segmented-control admin-tabs" aria-label="Administrator dashboard sections">
