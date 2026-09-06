@@ -1,4 +1,4 @@
-import type { AppData, LocationConsent, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
+import type { AppData, Destination, LocationConsent, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
 import { createId } from "./storage";
 import { distanceKm, nearestDestination } from "./geo";
 
@@ -122,16 +122,60 @@ function samplePointTime(startedAt: Date, index: number) {
   return new Date(startedAt.getTime() + index * 18 * 60 * 1000).toISOString();
 }
 
-export function createSampleTripForUser(data: AppData, userId: string) {
+function profileMatchesDestination(profile: TouristProfile, category: Destination["category"]) {
+  if (profile === "mixed") {
+    return true;
+  }
+
+  if (profile === "cultural") {
+    return category === "cultural" || category === "heritage";
+  }
+
+  if (profile === "nature") {
+    return category === "nature" || category === "coastal";
+  }
+
+  return category === "urban" || category === "food";
+}
+
+function getFallbackRouteDestinations(data: AppData, profile: TouristProfile) {
+  return sampleRouteDestinationIds[profile]
+    .map((destinationId) => data.destinations.find((destination) => destination.id === destinationId))
+    .filter((destination): destination is NonNullable<typeof destination> => Boolean(destination));
+}
+
+export function getLocalSampleDestinations(
+  data: AppData,
+  profile: TouristProfile,
+  referencePoint?: Pick<MovementPoint, "latitude" | "longitude">,
+  limit = 6
+) {
+  const fallbackRoute = getFallbackRouteDestinations(data, profile);
+
+  if (!referencePoint) {
+    return fallbackRoute;
+  }
+
+  const ranked = data.destinations
+    .map((destination) => ({
+      destination,
+      distance: distanceKm(referencePoint, destination),
+      profileMatch: profileMatchesDestination(profile, destination.category),
+    }))
+    .sort((a, b) => a.distance - b.distance || Number(b.profileMatch) - Number(a.profileMatch));
+  const nearby = ranked.filter((row) => row.distance <= 90).slice(0, limit).map((row) => row.destination);
+
+  return nearby.length >= 2 ? nearby : fallbackRoute;
+}
+
+export function createSampleTripForUser(data: AppData, userId: string, referencePoint?: Pick<MovementPoint, "latitude" | "longitude">) {
   const user = data.users.find((candidate) => candidate.id === userId);
   if (!user) {
     return { error: "The current tourist account could not be found." };
   }
 
   const profile = inferSampleProfile(user);
-  const routeDestinations = sampleRouteDestinationIds[profile]
-    .map((destinationId) => data.destinations.find((destination) => destination.id === destinationId))
-    .filter((destination): destination is NonNullable<typeof destination> => Boolean(destination));
+  const routeDestinations = getLocalSampleDestinations(data, profile, referencePoint);
 
   if (routeDestinations.length < 2) {
     return { error: "Not enough saved destinations are available to create a sample route." };

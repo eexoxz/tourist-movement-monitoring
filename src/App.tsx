@@ -29,6 +29,7 @@ import type {
   DestinationCategory,
   KMeansFeatureVector,
   IncidentType,
+  MovementPoint,
   SafetyStatus,
   TouristProfile,
   TravelPlanOptions,
@@ -54,6 +55,7 @@ import {
   calculateMovementAlerts,
   createMovementBasedTravelPlan,
   evaluateAiOutput,
+  recommendForUser,
   refreshAllRecommendations,
   refreshAnalysis,
 } from "./services/analytics";
@@ -92,6 +94,7 @@ import {
   deleteTouristMovementData,
   getActiveTrip,
   getGrantedConsent,
+  getLocalSampleDestinations,
   getUserTrips,
   getVisitedDestinationIds,
   grantLocationConsent,
@@ -144,14 +147,6 @@ const incidentTypeOptions: Array<{ value: IncidentType; labelKey: TranslationKey
   { value: "other", labelKey: "tourist.safety.incidentOther" },
 ];
 
-
-const demoRoute = [
-  [3.142, 101.6894],
-  [3.1457, 101.6954],
-  [3.1478, 101.6937],
-  [3.1556, 101.7139],
-  [3.1579, 101.7116],
-] as const;
 
 function analysisKey(analysis: AnalysisResult) {
   return `${analysis.tripId}:${analysis.generatedAt}`;
@@ -233,6 +228,29 @@ function getProfileSkipKey(userId: string) {
 function getIncidentTypeLabel(type: IncidentType, t: (key: TranslationKey) => string) {
   const option = incidentTypeOptions.find((candidate) => candidate.value === type);
   return option ? t(option.labelKey) : t("tourist.safety.incidentFallback");
+}
+
+function simulatedPointNear(destination: Destination, step: number) {
+  const latitudeOffset = ((step % 5) - 2) * 0.00022;
+  const longitudeOffset = (((step * 2) % 5) - 2) * 0.00022;
+
+  return {
+    latitude: Number((destination.latitude + latitudeOffset).toFixed(6)),
+    longitude: Number((destination.longitude + longitudeOffset).toFixed(6)),
+  };
+}
+
+function movementPointFromBrowserPosition(position: GeolocationPosition, tripId: string, userId: string): MovementPoint {
+  return {
+    id: `browser-current-${tripId}`,
+    tripId,
+    userId,
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+    accuracyMeters: position.coords.accuracy,
+    recordedAt: new Date(position.timestamp || Date.now()).toISOString(),
+    source: "browser",
+  };
 }
 
 function mergeUserRecord(data: AppData, user: User): AppData {
@@ -1198,13 +1216,14 @@ function TouristWorkspace({
   const tripPoints = data.points.filter((point) => userTrips.some((trip) => trip.id === point.tripId));
   const activePoints = activeTrip ? data.points.filter((point) => point.tripId === activeTrip.id) : [];
   const latestAnalysis = data.analyses.filter((analysis) => analysis.userId === user.id).sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
-  const recommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
+  const savedRecommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
   const [isLiveTracking, setIsLiveTracking] = useState(false);
   const [locationRetryAvailable, setLocationRetryAvailable] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
+  const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>();
   const [checkInDestinationId, setCheckInDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [incidentType, setIncidentType] = useState<IncidentType>("lost-item");
   const [incidentDescription, setIncidentDescription] = useState("");
@@ -1223,7 +1242,7 @@ function TouristWorkspace({
   const selectedTripDestinationNames = useMemo(() => {
     return getRecognizedDestinationNames(selectedTripPoints, data.destinations);
   }, [selectedTripPoints, data.destinations]);
-  const selectedTripRecommendations = recommendations.slice(0, 3);
+  const selectedTripRecommendations = savedRecommendations.slice(0, 3);
   const latestCompletedTrip = recentTrips.find((trip) => trip.status === "completed") ?? null;
   const latestCompletedTripPoints = latestCompletedTrip ? data.points.filter((point) => point.tripId === latestCompletedTrip.id) : [];
   const latestCompletedTripSummary = latestCompletedTrip ? summarizeTrip(data, latestCompletedTrip.id) : null;
@@ -1238,7 +1257,11 @@ function TouristWorkspace({
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
-  const latestKnownPoint = activePoints.at(-1) ?? tripPoints.at(-1);
+  const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));
+  const recommendations = useMemo(
+    () => recommendForUser(user.id, data, latestAnalysis, destinationDemand, latestKnownPoint),
+    [data, destinationDemand, latestAnalysis, latestKnownPoint, user.id]
+  );
   const userSosAlerts = data.sosAlerts.filter((alert) => alert.userId === user.id);
   const userIncidentReports = data.incidentReports.filter((report) => report.userId === user.id);
   const openSafetyCount = [...userSosAlerts, ...userIncidentReports].filter((record) => record.status !== "resolved").length;
@@ -1256,8 +1279,8 @@ function TouristWorkspace({
   const recommendationSupportText = hasPersonalizedRecommendations
     ? t("tourist.home.recommendationsPersonalizedText")
     : t("tourist.home.recommendationsBasicText");
-  const activeJourneyPoints = activePoints.length ? activePoints : latestCompletedTripPoints;
-  const activeJourneyPoint = activePoints.at(-1) ?? latestCompletedTripPoints.at(-1);
+  const activeJourneyPoints = activePoints.length ? activePoints : activeTrip ? [] : latestCompletedTripPoints;
+  const activeJourneyPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : latestCompletedTripPoints.at(-1));
   const topRecommendationDestination = recommendations[0]
     ? data.destinations.find((destination) => destination.id === recommendations[0].destinationId)
     : null;
@@ -1290,6 +1313,10 @@ function TouristWorkspace({
       setIsLiveTracking(false);
     }
   }, [activeTrip, isLiveTracking]);
+
+  useEffect(() => {
+    setLastBrowserLocation(undefined);
+  }, [user.id]);
 
   const grantConsent = () => {
     onDataChange(grantLocationConsent(data, user.id));
@@ -1330,12 +1357,26 @@ function TouristWorkspace({
       return true;
     }
 
+    const rememberBrowserPosition = (position: GeolocationPosition) => {
+      const browserPoint = movementPointFromBrowserPosition(position, tripId, user.id);
+      setLastBrowserLocation(browserPoint);
+      setLocationRetryAvailable(false);
+    };
+
+    const saveBrowserPosition = (position: GeolocationPosition) => {
+      rememberBrowserPosition(position);
+      appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
+      setTrackingMessage("Live movement point recorded.");
+    };
+
+    navigator.geolocation.getCurrentPosition(rememberBrowserPosition, undefined, {
+      enableHighAccuracy: true,
+      maximumAge: 10000,
+      timeout: 12000,
+    });
+
     watchId.current = navigator.geolocation.watchPosition(
-      (position) => {
-        appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
-        setTrackingMessage("Live movement point recorded.");
-        setLocationRetryAvailable(false);
-      },
+      saveBrowserPosition,
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
           if (watchId.current !== null) {
@@ -1413,10 +1454,22 @@ function TouristWorkspace({
       return;
     }
 
-    const currentPoints = data.points.filter((point) => point.tripId === activeTrip.id);
-    const [latitude, longitude] = demoRoute[currentPoints.length % demoRoute.length];
-    if (appendPoint(activeTrip.id, latitude, longitude, 32, "demo")) {
-      showTrackingNotice("success", "Demo point added", "Demo movement point added to the active trip.");
+    const currentPoints = data.points
+      .filter((point) => point.tripId === activeTrip.id)
+      .sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+    const anchor = currentPoints.at(-1) ?? latestKnownPoint;
+    const profile = user.expectedProfile ?? "mixed";
+    const localDestinations = getLocalSampleDestinations(data, profile, anchor);
+    const destination = localDestinations[currentPoints.length % localDestinations.length];
+
+    if (!destination) {
+      showTrackingNotice("error", "Test movement unavailable", "No saved destination is available for a test movement point.");
+      return;
+    }
+
+    const point = simulatedPointNear(destination, currentPoints.length);
+    if (appendPoint(activeTrip.id, point.latitude, point.longitude, 32, "demo")) {
+      showTrackingNotice("success", "Test movement added", `A test movement point was added near ${destination.name}.`);
     }
   };
 
@@ -1426,7 +1479,7 @@ function TouristWorkspace({
       return;
     }
 
-    const result = createSampleTripForUser(data, user.id);
+    const result = createSampleTripForUser(data, user.id, latestKnownPoint);
     if (result.error || !result.data || !result.tripId) {
       showTrackingNotice("error", "Sample route unavailable", result.error ?? "Sample route could not be created.");
       return;
@@ -1646,7 +1699,7 @@ function TouristWorkspace({
             </div>
 
             <button className="secondary-action wide" onClick={addDemoPoint} disabled={!activeTrip}>
-              Add demo movement point
+              {t("tourist.home.addDemoPoint")}
             </button>
 
             <button className="secondary-action wide" onClick={createSampleRoute} disabled={Boolean(activeTrip)}>
@@ -1718,7 +1771,13 @@ function TouristWorkspace({
             />
           </section>
 
-          <MovementMap points={activePoints.length ? activePoints : tripPoints} destinations={data.destinations} mode="tourist" locale={locale} />
+          <MovementMap
+            points={activePoints.length ? activePoints : tripPoints}
+            destinations={data.destinations}
+            activePoint={activePoints.at(-1) ?? latestKnownPoint}
+            mode="tourist"
+            locale={locale}
+          />
         </div>
       </Page>
     );
@@ -1774,7 +1833,7 @@ function TouristWorkspace({
           user={user}
           latestAnalysis={latestAnalysis}
           visitedIds={visitedDestinationIds}
-          referencePoint={activePoints.at(-1) ?? tripPoints.at(-1)}
+          referencePoint={latestKnownPoint}
           selectedDestinationId={selectedDestinationId}
           locale={locale}
           onSelectDestination={setSelectedDestinationId}

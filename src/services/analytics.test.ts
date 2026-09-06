@@ -190,4 +190,18 @@ describe("analytics service", () => {
     expect(recommendations[0].scoreBreakdown.proximity).toBeGreaterThan(0);
     expect(recommendations[0].scoreBreakdown.unvisited).toBe(20);
   });
+
+  it("prioritizes nearby destinations when the tourist has a current location", () => {
+    const recommendations = recommendForUser("tourist-demo", refreshAllRecommendations(initialData), undefined, undefined, {
+      latitude: 5.4141,
+      longitude: 100.3288,
+      recordedAt: new Date().toISOString(),
+    });
+    const recommendedDestinations = recommendations.map((recommendation) =>
+      initialData.destinations.find((destination) => destination.id === recommendation.destinationId)
+    );
+
+    expect(recommendedDestinations[0]?.city).toBe("Penang");
+    expect(recommendedDestinations.every((destination) => destination?.city === "Penang")).toBe(true);
+  });
 });

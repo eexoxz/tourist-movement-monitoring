@@ -264,6 +264,7 @@ Current alignment notes:
 - [x] Support chunked Firestore saves for larger demonstration datasets.
 - [x] Keep synthetic seed size large enough for dashboard/AI evidence but small enough for fast local testing and Firebase sync.
 - [x] Add an administrator control to regenerate or reload the demonstration dataset on demand.
+- [ ] Expand synthetic tourist movement coverage around each supported Malaysian destination/city so local dashboard examples do not depend on manual test accounts.
 - [ ] Document in the report that seeded movement records are synthetic demonstration data, not real collected tourist data.
 
 ## Mobile And Usability
@@ -289,6 +290,7 @@ Current alignment notes:
 - [x] Make the map feel visually aligned with the app through custom markers, route styling and calmer controls.
 - [x] Reduce unnecessary map visual noise where possible so tracking and destination signals are easier to understand.
 - [x] Add a simplified tourist map mode focused on current location, route, destination markers and selected place details.
+- [x] Prioritise nearby recommendations and test movement around the tourist current location when browser location is available.
 - [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System

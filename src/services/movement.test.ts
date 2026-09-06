@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
 import type { AppData } from "../types";
+import { distanceKm } from "./geo";
 import {
   appendMovementPoint,
   createSampleTripForUser,
@@ -218,5 +219,20 @@ describe("movement service", () => {
     expect(result.data?.trips.find((trip) => trip.id === result.tripId)?.status).toBe("completed");
     expect(result.data?.points.filter((point) => point.tripId === result.tripId)).toHaveLength(pointCount);
     expect(summarizeTrip(result.data!, result.tripId!).distanceKm).toBeGreaterThan(0);
+  });
+
+  it("creates a local sample route near the tourist current location when available", () => {
+    const data: AppData = {
+      ...initialData,
+      trips: initialData.trips.filter((trip) => trip.userId !== "tourist-demo"),
+      points: initialData.points.filter((point) => point.userId !== "tourist-demo"),
+    };
+    const penangPoint = { latitude: 5.4141, longitude: 100.3288 };
+    const result = createSampleTripForUser(data, "tourist-demo", penangPoint);
+    const routePoints = result.data?.points.filter((point) => point.tripId === result.tripId) ?? [];
+
+    expect(result.error).toBeUndefined();
+    expect(routePoints.length).toBeGreaterThanOrEqual(2);
+    expect(routePoints.every((point) => distanceKm(point, penangPoint) <= 90)).toBe(true);
   });
 });

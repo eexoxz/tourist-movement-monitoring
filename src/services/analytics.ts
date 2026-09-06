@@ -466,6 +466,8 @@ const demandTierWeight: Record<DestinationDemand["tier"], number> = {
   high: 4,
 };
 
+const localRecommendationRadiusKm = 90;
+
 function calculateApproachSignals(data: AppData, destinationId: string) {
   const destination = data.destinations.find((candidate) => candidate.id === destinationId);
   if (!destination) {
@@ -666,29 +668,52 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
   });
 }
 
-export function recommendForUser(userId: string, data: AppData, analysis?: AnalysisResult, destinationDemand?: DestinationDemand[]): Recommendation[] {
+export function recommendForUser(
+  userId: string,
+  data: AppData,
+  analysis?: AnalysisResult,
+  destinationDemand?: DestinationDemand[],
+  referencePoint?: Pick<MovementPoint, "latitude" | "longitude" | "recordedAt">
+): Recommendation[] {
   const userTrips = data.trips.filter((trip) => trip.userId === userId);
-  const points = data.points.filter((point) => userTrips.some((trip) => trip.id === point.tripId));
+  const completedTripIds = new Set(userTrips.filter((trip) => trip.status === "completed").map((trip) => trip.id));
+  const allUserTripIds = new Set(userTrips.map((trip) => trip.id));
+  const completedPoints = data.points.filter((point) => completedTripIds.has(point.tripId));
+  const points = data.points.filter((point) => allUserTripIds.has(point.tripId));
   const visited = new Set(
-    points
+    completedPoints
       .map((point) => nearestDestination(point, data.destinations))
       .filter((result) => result && result.distance <= 1.2)
       .map((result) => result.destination.id)
   );
-  const latestPoint = points.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
+  const latestPoint = referencePoint ?? points.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
   const profile = analysis?.profile ?? "mixed";
   const hasPersonalizedAnalysis = Boolean(analysis);
   const demandByDestination = new Map((destinationDemand ?? calculateDestinationDemand(data)).map((demand) => [demand.destinationId, demand]));
+  const availableDestinations = data.destinations.filter((destination) => !visited.has(destination.id));
+  const localDestinations = latestPoint
+    ? availableDestinations.filter((destination) => distanceKm(latestPoint, destination) <= localRecommendationRadiusKm)
+    : [];
+  const recommendationPool = localDestinations.length >= 2 ? localDestinations : availableDestinations;
 
-  return data.destinations
-    .filter((destination) => !visited.has(destination.id))
+  return recommendationPool
     .map((destination) => {
       const demand = demandByDestination.get(destination.id);
       const profileScore = profileMatchesCategory(profile, destination.category) ? 28 : 8;
       const clusterFeature = categoryToKMeansFeature(destination.category);
       const clusterScore = analysis ? Math.round((analysis.kMeansCentroid[clusterFeature] / 100) * 24) : 0;
       const unvisitedScore = 20;
-      const distanceScore = latestPoint ? Math.max(0, 22 - distanceKm(latestPoint, destination) * 1.2) : 12;
+      const distance = latestPoint ? distanceKm(latestPoint, destination) : undefined;
+      const distanceScore =
+        distance === undefined
+          ? 12
+          : distance <= 3
+            ? 42
+            : distance <= 15
+              ? 35
+              : distance <= 45
+                ? 24
+                : Math.max(0, 18 - distance * 0.35);
       const movementScore = demand ? Math.round(demand.popularityScore * 0.2) : 0;
       const scoreBreakdown = {
         profileFit: profileScore,
