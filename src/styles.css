@@ -303,21 +303,21 @@ button:disabled {
 
 .tourist-home-flow {
   display: grid;
-  gap: 16px;
+  gap: 18px;
 }
 
 .home-primary-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 0.34fr) minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(320px, 0.31fr) minmax(0, 1fr);
+  gap: 18px;
   align-items: stretch;
 }
 
 .home-today-panel {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   align-content: start;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid #d7efe8;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
@@ -326,10 +326,11 @@ button:disabled {
 
 .home-map-panel {
   min-width: 0;
+  align-self: stretch;
 }
 
 .home-map-panel .map-view {
-  min-height: 440px;
+  min-height: 460px;
 }
 
 .tracking-status-card {
@@ -345,6 +346,7 @@ button:disabled {
 
 .home-status-card {
   grid-template-columns: 1fr;
+  padding: 20px;
   box-shadow: none;
 }
 
@@ -386,6 +388,7 @@ button:disabled {
 .home-trip-controls {
   align-content: start;
   min-height: 0;
+  padding: 22px;
   box-shadow: none;
 }
 
@@ -501,14 +504,18 @@ button:disabled {
 
 .home-preview-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  grid-template-areas:
+    "recommend event"
+    "recommend demand";
+  gap: 14px;
 }
 
 .home-preview-card {
   position: relative;
   overflow: hidden;
-  padding: 16px;
+  align-content: start;
+  padding: 18px;
 }
 
 .home-preview-card::before {
@@ -527,6 +534,23 @@ button:disabled {
   background: #f59e0b;
 }
 
+.recommendation-preview {
+  grid-area: recommend;
+  min-height: 230px;
+  padding: 24px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.12), transparent 62%),
+    rgba(255, 255, 255, 0.97);
+}
+
+.event-preview {
+  grid-area: event;
+}
+
+.demand-preview {
+  grid-area: demand;
+}
+
 .home-preview-card > span {
   color: var(--teal-dark);
   font-size: 0.76rem;
@@ -537,6 +561,22 @@ button:disabled {
 .home-preview-card h2,
 .home-preview-card p {
   margin: 0;
+}
+
+.recommendation-preview h2 {
+  font-size: 1.9rem;
+}
+
+.recommendation-preview p {
+  max-width: 620px;
+  font-size: 1.02rem;
+}
+
+.home-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .home-preview-card .secondary-action {
@@ -2069,6 +2109,13 @@ button:disabled {
   background: #ffffff;
 }
 
+.secondary-action.compact {
+  min-height: 36px;
+  padding: 0 11px;
+  gap: 7px;
+  font-size: 0.82rem;
+}
+
 .secondary-action:hover,
 .map-current-button:hover {
   border-color: rgba(232, 93, 117, 0.42);
@@ -2388,6 +2435,14 @@ button:disabled {
   text-transform: uppercase;
 }
 
+.trip-story-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .trip-story-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2505,7 +2560,6 @@ button:disabled {
   color: inherit;
   background: #f8fafc;
   text-align: left;
-  cursor: pointer;
 }
 
 .trip-timeline-card.active {
@@ -2516,6 +2570,17 @@ button:disabled {
 .trip-timeline-card.active {
   border-color: #14b8a6;
   background: #f0fdfa;
+}
+
+.trip-timeline-select {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
 }
 
 .trip-timeline-card span {
@@ -2539,6 +2604,40 @@ button:disabled {
 
 .trip-timeline-card p {
   font-weight: 800;
+}
+
+.trip-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid rgba(216, 228, 224, 0.9);
+}
+
+.trip-card-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid #d8d0bf;
+  border-radius: 8px;
+  color: #334155;
+  background: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.trip-card-actions button:hover {
+  border-color: rgba(15, 118, 110, 0.34);
+  color: var(--teal-dark);
+  background: #ecfdf5;
+}
+
+.trip-card-actions button.danger:hover {
+  border-color: #fecaca;
+  color: #b91c1c;
+  background: #fff1f2;
 }
 
 .movement-trip-card {
@@ -4458,6 +4557,10 @@ textarea {
   .trip-story-panel,
   .trip-timeline-panel {
     padding: 14px;
+  }
+
+  .trip-story-actions {
+    justify-content: flex-start;
   }
 
   .trip-diary-hero h2 {

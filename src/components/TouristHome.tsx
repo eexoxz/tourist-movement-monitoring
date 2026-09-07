@@ -248,46 +248,21 @@ export function TouristHome({
           </section>
         )}
 
-        <section className="home-quick-actions" aria-label={t("tourist.home.quickActions")}>
-          <button type="button" onClick={() => onViewChange("history")}>
-            <MapPinned size={18} />
-            <span>
-              <strong>{t("tourist.home.quickTrips")}</strong>
-              <small>{t("tourist.home.quickTripsText")}</small>
-            </span>
-          </button>
-          <button type="button" onClick={() => onViewChange("recommendations")}>
-            <Sparkles size={18} />
-            <span>
-              <strong>{t("tourist.home.quickPlaces")}</strong>
-              <small>{t("tourist.home.quickPlacesText")}</small>
-            </span>
-          </button>
-          <button type="button" onClick={() => onViewChange("events")}>
-            <CalendarDays size={18} />
-            <span>
-              <strong>{t("tourist.home.quickEvents")}</strong>
-              <small>{t("tourist.home.quickEventsText")}</small>
-            </span>
-          </button>
-          <button type="button" onClick={() => onViewChange("profile")}>
-            <UserRound size={18} />
-            <span>
-              <strong>{t("tourist.home.quickProfile")}</strong>
-              <small>{t("tourist.home.quickProfileText")}</small>
-            </span>
-          </button>
-        </section>
-
         <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
           <article className="home-preview-card recommendation-preview">
             <span>{recommendationHeading}</span>
             <h2>{topRecommendationDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
             <p>{recommendationSupportText}</p>
-            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
-              <Sparkles size={16} />
-              {t("common.viewAll")}
-            </button>
+            <div className="home-preview-actions">
+              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
+                <Sparkles size={16} />
+                {t("common.viewAll")}
+              </button>
+              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("history")}>
+                <MapPinned size={16} />
+                {t("common.viewTrips")}
+              </button>
+            </div>
           </article>
           <article className="home-preview-card event-preview">
             <span>{t("tourist.home.eventsPreview")}</span>
