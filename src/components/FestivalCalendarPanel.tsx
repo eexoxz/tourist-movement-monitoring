@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { allMalaysianStates } from "../data/festivals";
 import type { Destination, FestivalEvent, MalaysianState } from "../types";
@@ -13,6 +13,9 @@ import {
 } from "../services/festivals";
 import { EmptyState } from "./SummaryCards";
 
+const compactCalendarPreviewLimit = 5;
+const fullCalendarPreviewLimit = 6;
+
 type FestivalCalendarPanelProps = {
   events: FestivalEvent[];
   destinations: Destination[];
@@ -24,12 +27,17 @@ type FestivalCalendarPanelProps = {
 export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", onOpenCalendar }: FestivalCalendarPanelProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
-  const [showFullCalendar, setShowFullCalendar] = useState(!compact);
+  const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
   const filteredEvents = getFestivalsForState(events, stateFilter);
-  const visibleLimit = compact && !showFullCalendar ? 5 : filteredEvents.length;
+  const visibleLimit = showFullCalendar ? filteredEvents.length : compact ? compactCalendarPreviewLimit : fullCalendarPreviewLimit;
   const visibleEvents = filteredEvents.slice(0, visibleLimit);
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
+
+  useEffect(() => {
+    setShowFullCalendar(false);
+  }, [stateFilter]);
+
   const toggleEventStates = (eventId: string) => {
     setExpandedEventIds((currentIds) => (currentIds.includes(eventId) ? currentIds.filter((id) => id !== eventId) : [...currentIds, eventId]));
   };
@@ -100,10 +108,10 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
       </div>
       {hiddenEventCount > 0 && (
         <button className="festival-more-button" type="button" onClick={onOpenCalendar ?? (() => setShowFullCalendar(true))}>
-          {t("tourist.events.showFull")} ({hiddenEventCount} more)
+          {t("tourist.events.showFull")} ({hiddenEventCount})
         </button>
       )}
-      {compact && showFullCalendar && !onOpenCalendar && (
+      {showFullCalendar && !onOpenCalendar && (
         <button className="festival-more-button secondary" type="button" onClick={() => setShowFullCalendar(false)}>
           {t("tourist.events.showFewer")}
         </button>

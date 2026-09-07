@@ -33,6 +33,7 @@ import type {
   SafetyStatus,
   TouristProfile,
   TravelPlanOptions,
+  TripSession,
   User,
   UserRole,
 } from "./types";
@@ -91,6 +92,7 @@ import {
 import {
   appendMovementPoint,
   createSampleTripForUser,
+  deleteTrip,
   deleteTouristMovementData,
   getActiveTrip,
   getGrantedConsent,
@@ -103,6 +105,7 @@ import {
   stopActiveTrip,
   summarizeTrip,
   summarizeUserTrips,
+  updateTripLabel,
 } from "./services/movement";
 import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn } from "./services/checkIns";
 import { calculateGeofenceActivity, getActiveGeofenceWarnings } from "./services/geofencing";
@@ -1538,6 +1541,46 @@ function TouristWorkspace({
     showTrackingNotice("success", "Movement data deleted", "Your movement history and AI recommendation records were deleted.");
   };
 
+  const renameTrip = (trip: TripSession, fallbackTitle: string) => {
+    const nextLabel = window.prompt("Rename this trip. Leave it blank to use the automatic route name.", trip.label ?? fallbackTitle);
+    if (nextLabel === null) {
+      return;
+    }
+
+    const result = updateTripLabel(data, user.id, trip.id, nextLabel);
+    if (result.error || !result.data) {
+      notify({ tone: "error", title: "Trip name not saved", message: result.error ?? "Try again in a moment." });
+      return;
+    }
+
+    onDataChange(refreshAllRecommendations(result.data));
+    notify({ tone: "success", title: "Trip name saved", message: nextLabel.trim() ? "This trip now uses your custom name." : "This trip now uses its automatic route name." });
+  };
+
+  const deleteSelectedTrip = (trip: TripSession, fallbackTitle: string) => {
+    if (!window.confirm(`Delete "${fallbackTitle}" and its saved movement points?`)) {
+      return;
+    }
+
+    if (trip.status === "active" && watchId.current !== null) {
+      navigator.geolocation.clearWatch(watchId.current);
+      watchId.current = null;
+      setIsLiveTracking(false);
+      setLocationRetryAvailable(false);
+    }
+
+    const result = deleteTrip(data, user.id, trip.id);
+    if (result.error || !result.data) {
+      notify({ tone: "error", title: "Trip not deleted", message: result.error ?? "Try again in a moment." });
+      return;
+    }
+
+    const nextTrip = recentTrips.find((candidate) => candidate.id !== trip.id);
+    onDataChange(refreshAllRecommendations(result.data));
+    setSelectedTripId(nextTrip?.id ?? "");
+    notify({ tone: "success", title: "Trip deleted", message: "The selected route and its movement points were removed." });
+  };
+
   const saveProfile = (nextUser: User) => {
     const nextData = {
       ...data,
@@ -1808,6 +1851,8 @@ function TouristWorkspace({
           locale={locale}
           onSelectTrip={setSelectedTripId}
           onViewRecommendations={() => onViewChange("recommendations")}
+          onRenameTrip={renameTrip}
+          onDeleteTrip={deleteSelectedTrip}
         />
       </Page>
     );
@@ -2707,99 +2752,135 @@ function AdminWorkspace({
           <MetricGrid
             items={[
               ["Tourists", tourists.length.toString()],
-              ["Consented", summary.consentedTouristCount.toString()],
               ["Completed trips", summary.completedTripCount.toString()],
               ["Movement points", summary.movementPointCount.toString()],
-              ["Destinations", summary.destinationCount.toString()],
               ["Movement alerts", movementAlerts.length.toString()],
               ["Safety cases", openSafetyRecordCount.toString()],
-              ["Check-ins", data.checkIns.length.toString()],
               ["Active zones", activeGeofenceCount.toString()],
             ]}
           />
-          <div className="two-column">
-            <MovementMap points={allDashboardPoints} destinations={data.destinations} locale={locale} />
-            <section className="panel">
+          <section className="admin-overview-layout">
+            <div className="admin-overview-map">
+              <MovementMap points={allDashboardPoints} destinations={data.destinations} locale={locale} />
+            </div>
+            <aside className="admin-command-panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
-              <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
-              <section className="geofence-admin-panel">
-                <div className="section-heading">
-                  <h2>Geofence Activity</h2>
-                  <span>{activeGeofenceCount} active</span>
+
+              <details className="admin-overview-section" open>
+                <summary>
+                  <span>Movement alerts</span>
+                  <strong>{movementAlerts.length} alert(s)</strong>
+                </summary>
+                <div className="admin-overview-section-body">
+                  <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
                 </div>
-                <div className="geofence-admin-list">
-                  {geofenceActivity.slice(0, 5).map((row) => (
-                    <article className={`geofence-admin-card ${row.geofence.type}`} key={row.geofence.id}>
-                      <div>
-                        <strong>{row.geofence.name}</strong>
-                        <span>{row.geofence.type}</span>
-                      </div>
-                      <p>{row.geofence.message}</p>
-                      <small>
-                        {row.pointCount} movement point(s), {row.touristCount} tourist(s)
-                        {row.latestRecordedAt ? ` · latest ${formatDateTime(row.latestRecordedAt)}` : ""}
-                      </small>
-                    </article>
-                  ))}
-                </div>
-              </section>
-              <h2>Movement Trend</h2>
-              <CategoryBars values={movementTrend} />
-              <h2>Movement Demand</h2>
-              <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
-              <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
-              <div className="section-heading">
-                <h2>Travel Plan Signal</h2>
-                <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
-                  <Download size={18} />
-                  CSV
-                </button>
-              </div>
-              <div className="plan-builder" aria-label="Travel plan controls">
-                <label>
-                  Audience
-                  <select value={planAudience} onChange={(event) => setPlanAudience(event.target.value as PlanAudience)}>
-                    <option value="movement">Overall movement</option>
-                    <option value="mixed">Mixed tourists</option>
-                    <option value="cultural">Cultural tourists</option>
-                    <option value="nature">Nature tourists</option>
-                    <option value="urban">Urban tourists</option>
-                  </select>
-                </label>
-                <label>
-                  City
-                  <select value={planCity} onChange={(event) => setPlanCity(event.target.value)}>
-                    <option value="all">All cities</option>
-                    {cityOptions.map((city) => (
-                      <option key={city} value={city}>
-                        {city}
-                      </option>
+              </details>
+
+              <details className="admin-overview-section">
+                <summary>
+                  <span>Geofence activity</span>
+                  <strong>{activeGeofenceCount} active</strong>
+                </summary>
+                <div className="admin-overview-section-body">
+                  <div className="geofence-admin-list">
+                    {geofenceActivity.slice(0, 5).map((row) => (
+                      <article className={`geofence-admin-card ${row.geofence.type}`} key={row.geofence.id}>
+                        <div>
+                          <strong>{row.geofence.name}</strong>
+                          <span>{row.geofence.type}</span>
+                        </div>
+                        <p>{row.geofence.message}</p>
+                        <small>
+                          {row.pointCount} movement point(s), {row.touristCount} tourist(s)
+                          {row.latestRecordedAt ? ` · latest ${formatDateTime(row.latestRecordedAt)}` : ""}
+                        </small>
+                      </article>
                     ))}
-                  </select>
-                </label>
-                <label>
-                  Stops
-                  <input type="number" min={1} max={8} value={planMaxStops} onChange={(event) => setPlanMaxStops(Number(event.target.value))} />
-                </label>
-                <label>
-                  Demand
-                  <select value={planMinimumTier} onChange={(event) => setPlanMinimumTier(event.target.value as PlanTier)}>
-                    <option value="low">Low+</option>
-                    <option value="emerging">Emerging+</option>
-                    <option value="medium">Medium+</option>
-                    <option value="high">High only</option>
-                  </select>
-                </label>
-                <label className="checkbox-field">
-                  <input type="checkbox" checked={planDiversifyCategories} onChange={(event) => setPlanDiversifyCategories(event.target.checked)} />
-                  Diverse categories
-                </label>
-              </div>
-              <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
-              <h2>Recent Recommendation Output</h2>
-              <RecommendationList recommendations={data.recommendations.slice(0, 3)} destinations={data.destinations} compact />
-            </section>
-          </div>
+                  </div>
+                </div>
+              </details>
+
+              <details className="admin-overview-section">
+                <summary>
+                  <span>Demand and events</span>
+                  <strong>{upcomingFestivals.length} event(s)</strong>
+                </summary>
+                <div className="admin-overview-section-body">
+                  <h2>Movement Trend</h2>
+                  <CategoryBars values={movementTrend} />
+                  <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
+                  <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
+                </div>
+              </details>
+
+              <details className="admin-overview-section">
+                <summary>
+                  <span>Travel plan signal</span>
+                  <strong>{travelPlan.stops.length} stop(s)</strong>
+                </summary>
+                <div className="admin-overview-section-body">
+                  <div className="section-heading">
+                    <h2>Travel Plan Signal</h2>
+                    <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
+                      <Download size={18} />
+                      CSV
+                    </button>
+                  </div>
+                  <div className="plan-builder" aria-label="Travel plan controls">
+                    <label>
+                      Audience
+                      <select value={planAudience} onChange={(event) => setPlanAudience(event.target.value as PlanAudience)}>
+                        <option value="movement">Overall movement</option>
+                        <option value="mixed">Mixed tourists</option>
+                        <option value="cultural">Cultural tourists</option>
+                        <option value="nature">Nature tourists</option>
+                        <option value="urban">Urban tourists</option>
+                      </select>
+                    </label>
+                    <label>
+                      City
+                      <select value={planCity} onChange={(event) => setPlanCity(event.target.value)}>
+                        <option value="all">All cities</option>
+                        {cityOptions.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Stops
+                      <input type="number" min={1} max={8} value={planMaxStops} onChange={(event) => setPlanMaxStops(Number(event.target.value))} />
+                    </label>
+                    <label>
+                      Demand
+                      <select value={planMinimumTier} onChange={(event) => setPlanMinimumTier(event.target.value as PlanTier)}>
+                        <option value="low">Low+</option>
+                        <option value="emerging">Emerging+</option>
+                        <option value="medium">Medium+</option>
+                        <option value="high">High only</option>
+                      </select>
+                    </label>
+                    <label className="checkbox-field">
+                      <input type="checkbox" checked={planDiversifyCategories} onChange={(event) => setPlanDiversifyCategories(event.target.checked)} />
+                      Diverse categories
+                    </label>
+                  </div>
+                  <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
+                </div>
+              </details>
+
+              <details className="admin-overview-section">
+                <summary>
+                  <span>Recent recommendation output</span>
+                  <strong>{data.recommendations.length} result(s)</strong>
+                </summary>
+                <div className="admin-overview-section-body">
+                  <RecommendationList recommendations={data.recommendations.slice(0, 3)} destinations={data.destinations} compact />
+                </div>
+              </details>
+            </aside>
+          </section>
         </div>
       )}
       {adminTab === "tourists" && touristManagementPanel}

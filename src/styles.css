@@ -141,6 +141,12 @@ button:disabled {
 .auth-copy .language-selector {
   width: min(230px, 100%);
   margin-top: 18px;
+  color: #dffcf4;
+}
+
+.auth-copy .language-selector select {
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 0 0 1px rgba(223, 252, 244, 0.08);
 }
 
 .nav-list {
@@ -2933,6 +2939,12 @@ button:disabled {
   border-top: 1px solid #dce7e2;
 }
 
+.festival-calendar:not(.compact) .festival-list {
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 12px;
+  border-top: 0;
+}
+
 .festival-filter {
   display: grid;
   gap: 6px;
@@ -2960,6 +2972,16 @@ button:disabled {
   background: transparent;
 }
 
+.festival-calendar:not(.compact) .festival-card {
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #dce7e2;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
 .festival-date-rail {
   display: grid;
   align-content: start;
@@ -2969,6 +2991,13 @@ button:disabled {
   border-radius: 8px;
   color: #064e3b;
   background: #ccfbf1;
+}
+
+.festival-calendar:not(.compact) .festival-date-rail {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 0;
+  border-radius: 0;
 }
 
 .festival-date-rail strong {
@@ -3015,6 +3044,10 @@ button:disabled {
   gap: 10px;
   min-width: 0;
   align-content: center;
+}
+
+.festival-calendar:not(.compact) .festival-card-main {
+  padding: 14px;
 }
 
 .festival-card-heading {
@@ -3818,6 +3851,110 @@ textarea {
   gap: 18px;
 }
 
+.admin-overview-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(340px, 0.48fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.admin-overview-map {
+  min-width: 0;
+}
+
+.admin-overview-map .map-view {
+  min-height: 560px;
+}
+
+.admin-command-panel {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.admin-overview-section {
+  overflow: hidden;
+  border: 1px solid #d7e8e1;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+}
+
+.admin-overview-section > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 56px;
+  padding: 13px 14px;
+  color: #102033;
+  cursor: pointer;
+  list-style: none;
+}
+
+.admin-overview-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-overview-section > summary::after {
+  content: "+";
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--teal-dark);
+  background: #ccfbf1;
+  font-weight: 900;
+}
+
+.admin-overview-section[open] > summary {
+  border-bottom: 1px solid #dce7e2;
+}
+
+.admin-overview-section[open] > summary::after {
+  content: "-";
+}
+
+.admin-overview-section > summary span {
+  min-width: 0;
+  color: var(--teal-dark);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-overview-section > summary strong {
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: #475569;
+  background: #f1f5f9;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.admin-overview-section-body {
+  display: grid;
+  gap: 13px;
+  padding: 14px;
+}
+
+.admin-overview-section-body > h2,
+.admin-overview-section .movement-demand h2 {
+  margin: 0;
+  color: #102033;
+  font-size: 1rem;
+}
+
+.admin-overview-section .movement-alerts {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-overview-section .movement-alerts .section-heading {
+  padding: 0;
+}
+
 .admin-tab-heading {
   display: flex;
   align-items: center;
@@ -4370,6 +4507,7 @@ textarea {
   }
 
   .two-column,
+  .admin-overview-layout,
   .auth-panel,
   .movement-hero,
   .profile-setup-card,
@@ -4403,6 +4541,10 @@ textarea {
 
   .home-map-panel .map-view {
     min-height: 440px;
+  }
+
+  .admin-overview-map .map-view {
+    min-height: 460px;
   }
 
 }
@@ -4607,6 +4749,23 @@ textarea {
 
   .places-results-footer {
     align-items: stretch;
+  }
+
+  .admin-overview-map .map-view {
+    min-height: 380px;
+  }
+
+  .admin-overview-section > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .admin-overview-section > summary strong {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .festival-calendar:not(.compact) .festival-list {
+    grid-template-columns: 1fr;
   }
 
   .place-detail-card {
