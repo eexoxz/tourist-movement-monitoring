@@ -308,15 +308,16 @@ button:disabled {
 
 .home-primary-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 0.31fr) minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 1fr;
+  gap: 14px;
   align-items: stretch;
 }
 
 .home-today-panel {
   display: grid;
-  gap: 12px;
-  align-content: start;
+  grid-template-columns: minmax(260px, 0.38fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
   padding: 16px;
   border: 1px solid #d7efe8;
   border-radius: 8px;
@@ -330,7 +331,7 @@ button:disabled {
 }
 
 .home-map-panel .map-view {
-  min-height: 460px;
+  min-height: 500px;
 }
 
 .tracking-status-card {
@@ -345,7 +346,8 @@ button:disabled {
 }
 
 .home-status-card {
-  grid-template-columns: 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
   padding: 20px;
   box-shadow: none;
 }
@@ -386,10 +388,21 @@ button:disabled {
 }
 
 .home-trip-controls {
+  grid-template-columns: minmax(250px, 1fr) minmax(230px, 0.76fr);
+  align-items: center;
   align-content: start;
   min-height: 0;
   padding: 22px;
   box-shadow: none;
+}
+
+.home-trip-controls .consent-box {
+  align-self: stretch;
+}
+
+.home-trip-controls .status-message,
+.home-trip-controls .new-user-guide {
+  grid-column: 1 / -1;
 }
 
 .mobile-action-row {
@@ -899,6 +912,30 @@ button:disabled {
 .places-results {
   display: grid;
   gap: 10px;
+}
+
+.places-results-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border: 1px dashed #b7efe6;
+  border-radius: 8px;
+  background: #effdf9;
+}
+
+.places-results-footer.subtle {
+  justify-content: center;
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.places-results-footer p {
+  margin: 0;
+  color: #4b5563;
+  font-weight: 800;
 }
 
 .place-discovery-card {
@@ -4359,6 +4396,15 @@ textarea {
     justify-content: flex-start;
   }
 
+  .home-today-panel,
+  .home-trip-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .home-map-panel .map-view {
+    min-height: 440px;
+  }
+
 }
 
 @media (max-width: 760px) {
@@ -4471,6 +4517,8 @@ textarea {
 
   .tracking-status-card,
   .home-primary-grid,
+  .home-today-panel,
+  .home-trip-controls,
   .home-support-grid,
   .festival-card,
   .mobile-action-row,
@@ -4492,6 +4540,14 @@ textarea {
 
   .home-map-panel .map-view {
     min-height: 380px;
+  }
+
+  .home-today-panel {
+    padding: 14px;
+  }
+
+  .home-trip-controls {
+    padding: 16px;
   }
 
   .home-quick-actions button {
@@ -4547,6 +4603,10 @@ textarea {
 
   .places-mode-row button {
     flex: 0 0 auto;
+  }
+
+  .places-results-footer {
+    align-items: stretch;
   }
 
   .place-detail-card {

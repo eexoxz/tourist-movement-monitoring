@@ -1,5 +1,5 @@
 import { CalendarDays } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { destinationCategories } from "../services/destinationManagement";
 import { distanceKm } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -15,6 +15,8 @@ const placeDiscoveryModes: Array<{ value: PlaceDiscoveryMode; labelKey: Translat
   { value: "events", labelKey: "tourist.places.mode.eventLinked" },
   { value: "hidden", labelKey: "tourist.places.mode.quieter" },
 ];
+
+const placePreviewLimit = 6;
 
 const categoryLabelKeys: Record<DestinationCategory, TranslationKey> = {
   cultural: "category.cultural",
@@ -153,11 +155,16 @@ export function PlaceDiscovery({
   const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
   const [cityFilter, setCityFilter] = useState("all");
   const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
+  const [showAllPlaces, setShowAllPlaces] = useState(false);
   const cityOptions = useMemo(() => Array.from(new Set(destinations.map((destination) => destination.city))).sort(), [destinations]);
   const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
   const recommendationByDestinationId = useMemo(() => new Map(recommendations.map((recommendation) => [recommendation.destinationId, recommendation])), [recommendations]);
   const demandByDestinationId = useMemo(() => new Map(demand.map((row) => [row.destinationId, row])), [demand]);
   const normalizedSearch = search.trim().toLowerCase();
+
+  useEffect(() => {
+    setShowAllPlaces(false);
+  }, [categoryFilter, cityFilter, mode, normalizedSearch]);
 
   const rows = useMemo(() => {
     return destinations
@@ -247,6 +254,8 @@ export function PlaceDiscovery({
   ]);
 
   const selectedRow = rows.find((row) => row.destination.id === selectedDestinationId) ?? rows[0];
+  const visibleRows = showAllPlaces ? rows : rows.slice(0, placePreviewLimit);
+  const hiddenPlaceCount = rows.length - visibleRows.length;
   const personalized = Boolean(latestAnalysis);
 
   return (
@@ -319,7 +328,7 @@ export function PlaceDiscovery({
 
       <section className="places-discovery-layout">
         <div className="places-results">
-          {rows.map((row) => (
+          {visibleRows.map((row) => (
             <button
               className={selectedRow?.destination.id === row.destination.id ? "place-discovery-card active" : "place-discovery-card"}
               type="button"
@@ -344,6 +353,21 @@ export function PlaceDiscovery({
               </div>
             </button>
           ))}
+          {hiddenPlaceCount > 0 && (
+            <div className="places-results-footer">
+              <p>{t("tourist.places.moreAvailable")}</p>
+              <button className="secondary-action compact-action" type="button" onClick={() => setShowAllPlaces(true)}>
+                {t("tourist.places.showMore")} ({hiddenPlaceCount})
+              </button>
+            </div>
+          )}
+          {showAllPlaces && rows.length > placePreviewLimit && (
+            <div className="places-results-footer subtle">
+              <button className="secondary-action compact-action" type="button" onClick={() => setShowAllPlaces(false)}>
+                {t("tourist.places.showFewer")}
+              </button>
+            </div>
+          )}
           {rows.length === 0 && <EmptyState text={t("tourist.places.noMatches")} />}
         </div>
 
