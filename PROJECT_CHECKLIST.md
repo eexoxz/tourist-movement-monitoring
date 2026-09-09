@@ -40,6 +40,7 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Add administrator SOS/emergency monitoring section.
 - [x] Add tourist check-in/check-out for attractions.
 - [x] Decide whether check-in is manual only or QR-style simulation for the prototype.
+- [x] Add digital tourist pass with QR-style check-in confirmation for the prototype.
 - [x] Add incident reporting for lost item, accident, suspicious activity and general help.
 - [x] Add administrator incident management section with status updates.
 - [x] Add tourist management view for administrators using existing user/profile records.
@@ -167,7 +168,7 @@ Current alignment notes:
 - [x] Trip detail should include start marker, end marker and visited destination markers.
 - [x] Trip detail should include Cluster ID, Tourist Category, generated recommendations and analysis status.
 - [x] Add loading, failed-load, analysis-processing and insufficient-data states.
-- [x] Remove trip editing/deletion from final scope.
+- [x] Add tourist-owned trip rename/delete controls while keeping raw movement-point editing out of scope.
 
 ## Page 5: Travel Recommendations
 

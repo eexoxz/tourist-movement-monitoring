@@ -7,6 +7,7 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
 import { MovementMap } from "./MovementMap";
 import { Page } from "./Page";
+import { TouristPassCard } from "./TouristPassCard";
 
 type IncidentOption = {
   value: IncidentType;
@@ -130,6 +131,7 @@ export function TouristHome({
   onSubmitIncidentReport,
 }: TouristHomeProps) {
   const t = (key: TranslationKey) => translate(locale, key);
+  const selectedCheckInDestination = destinations.find((destination) => destination.id === checkInDestinationId) ?? destinations[0] ?? null;
 
   return (
     <Page title={displayName ? `${t("tourist.home.welcomeBack")}, ${displayName}` : t("tourist.home.planTitle")} eyebrow={t("common.tourist")}>
@@ -300,21 +302,24 @@ export function TouristHome({
             </div>
 
             {!activeCheckIn && (
-              <div className="check-in-control">
-                <label>
-                  {t("tourist.checkin.attraction")}
-                  <select value={checkInDestinationId} onChange={(event) => onCheckInDestinationChange(event.target.value)}>
-                    {destinations.map((destination) => (
-                      <option key={destination.id} value={destination.id}>
-                        {destination.name} · {destination.city}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button className="primary-action" type="button" onClick={onStartAttractionCheckIn}>
-                  <MapPinned size={18} />
-                  {t("tourist.checkin.checkIn")}
-                </button>
+              <div className="check-in-stack">
+                <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
+                <div className="check-in-control">
+                  <label>
+                    {t("tourist.checkin.attraction")}
+                    <select value={checkInDestinationId} onChange={(event) => onCheckInDestinationChange(event.target.value)}>
+                      {destinations.map((destination) => (
+                        <option key={destination.id} value={destination.id}>
+                          {destination.name} · {destination.city}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button className="primary-action" type="button" onClick={onStartAttractionCheckIn}>
+                    <MapPinned size={18} />
+                    {t("tourist.checkin.confirmWithPass")}
+                  </button>
+                </div>
               </div>
             )}
 

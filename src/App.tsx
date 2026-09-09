@@ -122,6 +122,7 @@ import { Page } from "./components/Page";
 import { PlaceDiscovery } from "./components/PlaceDiscovery";
 import { RecommendationList } from "./components/RecommendationList";
 import { TouristHome } from "./components/TouristHome";
+import { TouristPassCard } from "./components/TouristPassCard";
 import { TouristProfileForm } from "./components/TouristProfileForm";
 import { TripDiary } from "./components/TripDiary";
 import { formatTravelPreferenceList, getDisplayName } from "./services/profile";
@@ -1670,14 +1671,17 @@ function TouristWorkspace({
   if (view === "profile") {
     return (
       <Page title={t("tourist.profile.pageTitle")} eyebrow={t("common.tourist")}>
-        <TouristProfileForm
-          user={user}
-          title={t("tourist.profile.formTitle")}
-          description={t("tourist.profile.formDescription")}
-          primaryLabel={t("tourist.profile.saveProfile")}
-          locale={locale}
-          onSave={saveProfile}
-        />
+        <section className="profile-page-grid">
+          <TouristProfileForm
+            user={user}
+            title={t("tourist.profile.formTitle")}
+            description={t("tourist.profile.formDescription")}
+            primaryLabel={t("tourist.profile.saveProfile")}
+            locale={locale}
+            onSave={saveProfile}
+          />
+          <TouristPassCard user={user} locale={locale} />
+        </section>
       </Page>
     );
   }
