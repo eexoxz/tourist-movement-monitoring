@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
 const accessSource = readFileSync(resolve(process.cwd(), "src/services/access.ts"), "utf8");
+const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
@@ -57,8 +58,8 @@ describe("user interface quality guardrails", () => {
   });
 
   it("keeps major failure paths connected to shared notifications", () => {
-    expect(appSource).toContain("Login failed");
-    expect(appSource).toContain("Registration failed");
+    expect(authScreenSource).toContain("Login failed");
+    expect(authScreenSource).toContain("Registration failed");
     expect(appSource).toContain("Cloud save needs retry");
     expect(appSource).toContain("Location tracking stopped");
     expect(appSource).toContain("Destination not saved");
