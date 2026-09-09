@@ -101,10 +101,18 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
   const mapRef = useRef<L.Map | null>(null);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
-  const visibleDestinations = useMemo(
-    () => (mode === "tourist" ? destinations.slice(0, points.length > 0 || activePoint ? 12 : 8) : destinations),
-    [activePoint, destinations, mode, points.length]
-  );
+  const visibleDestinations = useMemo(() => {
+    if (mode !== "tourist") {
+      return destinations;
+    }
+
+    const limit = points.length > 0 || activePoint ? 12 : 8;
+    const rankedDestinations = activePoint
+      ? [...destinations].sort((a, b) => distanceKm(activePoint, a) - distanceKm(activePoint, b))
+      : destinations;
+
+    return rankedDestinations.slice(0, limit);
+  }, [activePoint, destinations, mode, points.length]);
   const destinationSignals = useMemo(
     () => new Map(visibleDestinations.map((destination) => [destination.id, getDestinationSignal(destination, points, activePoint)])),
     [activePoint, points, visibleDestinations]

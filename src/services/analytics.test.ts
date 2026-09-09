@@ -204,4 +204,28 @@ describe("analytics service", () => {
     expect(recommendedDestinations[0]?.city).toBe("Penang");
     expect(recommendedDestinations.every((destination) => destination?.city === "Penang")).toBe(true);
   });
+
+  it("keeps fallback recommendations nearest-first when only one local destination is available", () => {
+    const penangPoint = {
+      latitude: 5.4141,
+      longitude: 100.3288,
+      recordedAt: new Date().toISOString(),
+    };
+    const sparseMalaysiaData: AppData = {
+      ...initialData,
+      trips: [],
+      points: [],
+      analyses: [],
+      recommendations: [],
+      destinations: initialData.destinations.filter((destination) => destination.city !== "Penang" || destination.id === "penang-hill"),
+    };
+
+    const recommendations = recommendForUser("tourist-new", sparseMalaysiaData, undefined, [], penangPoint);
+    const recommendedDestinations = recommendations.map((recommendation) =>
+      sparseMalaysiaData.destinations.find((destination) => destination.id === recommendation.destinationId)
+    );
+
+    expect(recommendedDestinations[0]?.id).toBe("penang-hill");
+    expect(recommendedDestinations.slice(0, 2).map((destination) => destination?.city)).not.toContain("Kuala Lumpur");
+  });
 });

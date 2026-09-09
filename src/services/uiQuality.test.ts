@@ -39,7 +39,7 @@ describe("user interface quality guardrails", () => {
   it("keeps the tourist map simpler than the administrator analysis map", () => {
     expect(mapSource).toContain('mode?: "tourist" | "admin"');
     expect(mapSource).toContain("tourist-map-mode");
-    expect(mapSource).toContain("destinations.slice");
+    expect(mapSource).toContain("rankedDestinations.slice");
   });
 
   it("keeps destination management searchable after CRUD stabilisation", () => {

@@ -293,6 +293,7 @@ Current alignment notes:
 - [x] Reduce unnecessary map visual noise where possible so tracking and destination signals are easier to understand.
 - [x] Add a simplified tourist map mode focused on current location, route, destination markers and selected place details.
 - [x] Prioritise nearby recommendations and test movement around the tourist current location when browser location is available.
+- [x] Keep fallback tourist recommendations nearest-first when local movement/location data is available.
 - [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System

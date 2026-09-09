@@ -691,10 +691,13 @@ export function recommendForUser(
   const hasPersonalizedAnalysis = Boolean(analysis);
   const demandByDestination = new Map((destinationDemand ?? calculateDestinationDemand(data)).map((demand) => [demand.destinationId, demand]));
   const availableDestinations = data.destinations.filter((destination) => !visited.has(destination.id));
+  const rankedAvailableDestinations = latestPoint
+    ? [...availableDestinations].sort((a, b) => distanceKm(latestPoint, a) - distanceKm(latestPoint, b))
+    : availableDestinations;
   const localDestinations = latestPoint
-    ? availableDestinations.filter((destination) => distanceKm(latestPoint, destination) <= localRecommendationRadiusKm)
+    ? rankedAvailableDestinations.filter((destination) => distanceKm(latestPoint, destination) <= localRecommendationRadiusKm)
     : [];
-  const recommendationPool = localDestinations.length >= 2 ? localDestinations : availableDestinations;
+  const recommendationPool = localDestinations.length > 0 ? rankedAvailableDestinations : availableDestinations;
 
   return recommendationPool
     .map((destination) => {
