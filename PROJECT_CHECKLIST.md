@@ -293,8 +293,10 @@ Current alignment notes:
 - [x] Reduce unnecessary map visual noise where possible so tracking and destination signals are easier to understand.
 - [x] Add a simplified tourist map mode focused on current location, route, destination markers and selected place details.
 - [x] Prioritise nearby recommendations and test movement around the tourist current location when browser location is available.
+- [x] Keep tourist recommendations inside the current local area whenever nearby Malaysia destinations exist.
 - [x] Keep fallback tourist recommendations nearest-first when local movement/location data is available.
 - [x] Add an active-trip local route simulator so movement recording can be demonstrated without physically travelling.
+- [x] Preserve the latest browser location and save the first trip point promptly so tourist recommendations stay local after reload/start.
 - [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System

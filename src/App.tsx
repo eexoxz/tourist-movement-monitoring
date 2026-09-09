@@ -126,6 +126,7 @@ type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 type AdminDashboardTab = "overview" | "tourists" | "records" | "safety" | "ai";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
+const LAST_BROWSER_LOCATION_KEY_PREFIX = "tourist-movement-monitoring:last-location:";
 const adminTouristPreviewLimit = 8;
 const adminMovementPreviewLimit = 8;
 const adminSafetyPreviewLimit = 5;
@@ -187,6 +188,51 @@ function friendlyAuthError(error: unknown, fallback: string) {
 
 function getProfileSkipKey(userId: string) {
   return `${PROFILE_SKIP_KEY_PREFIX}${userId}`;
+}
+
+function getLastBrowserLocationKey(userId: string) {
+  return `${LAST_BROWSER_LOCATION_KEY_PREFIX}${userId}`;
+}
+
+function isStoredMovementPoint(value: unknown): value is MovementPoint {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const point = value as Partial<MovementPoint>;
+  return (
+    typeof point.latitude === "number" &&
+    typeof point.longitude === "number" &&
+    typeof point.recordedAt === "string" &&
+    Math.abs(point.latitude) <= 90 &&
+    Math.abs(point.longitude) <= 180
+  );
+}
+
+function loadLastBrowserLocation(userId: string): MovementPoint | undefined {
+  if (typeof localStorage === "undefined") {
+    return undefined;
+  }
+
+  try {
+    const stored = localStorage.getItem(getLastBrowserLocationKey(userId));
+    const parsed = stored ? JSON.parse(stored) : null;
+    return isStoredMovementPoint(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function saveLastBrowserLocation(userId: string, point: MovementPoint) {
+  if (typeof localStorage === "undefined") {
+    return;
+  }
+
+  try {
+    localStorage.setItem(getLastBrowserLocationKey(userId), JSON.stringify(point));
+  } catch {
+    // Location still works for this session when browser storage is unavailable.
+  }
 }
 
 function getIncidentTypeLabel(type: IncidentType, t: (key: TranslationKey) => string) {
@@ -788,7 +834,7 @@ function TouristWorkspace({
   const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
-  const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>();
+  const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>(() => loadLastBrowserLocation(user.id));
   const [checkInDestinationId, setCheckInDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [incidentType, setIncidentType] = useState<IncidentType>("lost-item");
   const [incidentDescription, setIncidentDescription] = useState("");
@@ -880,15 +926,51 @@ function TouristWorkspace({
   }, [activeTrip, isLiveTracking]);
 
   useEffect(() => {
-    setLastBrowserLocation(undefined);
+    setLastBrowserLocation(loadLastBrowserLocation(user.id));
   }, [user.id]);
+
+  useEffect(() => {
+    if (!currentConsent || activeTrip || !navigator.geolocation) {
+      return;
+    }
+
+    let cancelled = false;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (cancelled) {
+          return;
+        }
+
+        const browserPoint = movementPointFromBrowserPosition(position, `browser-preview-${user.id}`, user.id);
+        setLastBrowserLocation(browserPoint);
+        saveLastBrowserLocation(user.id, browserPoint);
+      },
+      undefined,
+      {
+        enableHighAccuracy: true,
+        maximumAge: 30000,
+        timeout: 10000,
+      }
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTrip, currentConsent, user.id]);
 
   const grantConsent = () => {
     onDataChange(grantLocationConsent(data, user.id));
     notify({ tone: "success", title: "Location consent saved", message: "You can start a tracked trip when you are ready." });
   };
 
-  const appendPoint = (tripId: string, latitude: number, longitude: number, accuracyMeters: number, source: "browser" | "demo") => {
+  const appendPoint = (
+    tripId: string,
+    latitude: number,
+    longitude: number,
+    accuracyMeters: number,
+    source: "browser" | "demo",
+    options: { quietDuplicate?: boolean } = {}
+  ) => {
     const result = appendMovementPoint(loadData(), {
       tripId,
       latitude,
@@ -898,6 +980,10 @@ function TouristWorkspace({
     });
 
     if (result.error || !result.data) {
+      if (options.quietDuplicate && result.error?.includes("too close")) {
+        return false;
+      }
+
       showTrackingNotice("error", "Movement point not saved", result.error ?? "Movement point could not be saved.");
       return false;
     }
@@ -922,23 +1008,34 @@ function TouristWorkspace({
       return true;
     }
 
-    const rememberBrowserPosition = (position: GeolocationPosition) => {
+    const rememberBrowserPosition = (position: GeolocationPosition, saveInitialPoint = false) => {
       const browserPoint = movementPointFromBrowserPosition(position, tripId, user.id);
       setLastBrowserLocation(browserPoint);
+      saveLastBrowserLocation(user.id, browserPoint);
       setLocationRetryAvailable(false);
+
+      if (saveInitialPoint) {
+        appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true });
+      }
     };
 
     const saveBrowserPosition = (position: GeolocationPosition) => {
       rememberBrowserPosition(position);
-      appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser");
-      setTrackingMessage("Live movement point recorded.");
+      const saved = appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true });
+      if (saved) {
+        setTrackingMessage("Live movement point recorded.");
+      }
     };
 
-    navigator.geolocation.getCurrentPosition(rememberBrowserPosition, undefined, {
-      enableHighAccuracy: true,
-      maximumAge: 10000,
-      timeout: 12000,
-    });
+    navigator.geolocation.getCurrentPosition(
+      (position) => rememberBrowserPosition(position, true),
+      undefined,
+      {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 12000,
+      }
+    );
 
     watchId.current = navigator.geolocation.watchPosition(
       saveBrowserPosition,

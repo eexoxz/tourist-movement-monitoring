@@ -738,7 +738,16 @@ export function recommendForUser(
   const localDestinations = latestPoint
     ? rankedAvailableDestinations.filter((destination) => distanceKm(latestPoint, destination) <= localRecommendationRadiusKm)
     : [];
-  const recommendationPool = localDestinations.length > 0 ? rankedAvailableDestinations : availableDestinations;
+  const localDestinationIds = new Set(localDestinations.map((destination) => destination.id));
+  const recommendationPool =
+    localDestinations.length > 0
+      ? [
+          ...localDestinations,
+          ...rankedAvailableDestinations
+            .filter((destination) => !localDestinationIds.has(destination.id))
+            .slice(0, Math.max(0, 3 - localDestinations.length)),
+        ]
+      : availableDestinations;
 
   return recommendationPool
     .map((destination) => {
@@ -791,7 +800,7 @@ export function recommendForUser(
         generatedAt: new Date().toISOString(),
       };
     })
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => Number(localDestinationIds.has(b.destinationId)) - Number(localDestinationIds.has(a.destinationId)) || b.score - a.score)
     .slice(0, 3);
 }
 

@@ -99,6 +99,7 @@ function routeIcon(type: "start" | "end" | "current") {
 export function MapView({ points, destinations, activePoint, mode = "admin", locale = "en" }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const lastAutoFocusKeyRef = useRef("");
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
   const visibleDestinations = useMemo(() => {
@@ -239,14 +240,6 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
       L.marker(route[route.length - 1], { icon: routeIcon("end"), title: t("map.tripEnd") })
         .bindPopup(`<strong>${escapeHtml(t("map.tripEnd"))}</strong><br>${formatDateTime(points.at(-1)!.recordedAt)}`)
         .addTo(layer);
-
-      if (activePoint && mode === "tourist") {
-        map.setView([activePoint.latitude, activePoint.longitude], 15);
-      } else {
-        map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
-      }
-    } else if (activePoint) {
-      map.setView([activePoint.latitude, activePoint.longitude], 15);
     }
 
     if (activePoint) {
@@ -256,6 +249,25 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
       })
         .bindPopup(`<strong>${escapeHtml(t("map.currentLocation"))}</strong><br>${formatDateTime(activePoint.recordedAt)}`)
         .addTo(layer);
+    }
+
+    const latestRoutePoint = points.at(-1);
+    const autoFocusKey = activePoint
+      ? `active:${activePoint.latitude}:${activePoint.longitude}:${activePoint.recordedAt}`
+      : latestRoutePoint
+        ? `route:${points.length}:${latestRoutePoint.latitude}:${latestRoutePoint.longitude}:${latestRoutePoint.recordedAt}`
+        : "";
+
+    if (autoFocusKey && autoFocusKey !== lastAutoFocusKeyRef.current) {
+      lastAutoFocusKeyRef.current = autoFocusKey;
+
+      if (activePoint && mode === "tourist") {
+        map.setView([activePoint.latitude, activePoint.longitude], 15);
+      } else if (route.length > 0) {
+        map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
+      } else if (activePoint) {
+        map.setView([activePoint.latitude, activePoint.longitude], 15);
+      }
     }
 
     return () => {
