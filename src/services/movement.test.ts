@@ -5,6 +5,7 @@ import { distanceKm } from "./geo";
 import {
   appendMovementPoint,
   createSampleTripForUser,
+  deleteTrip,
   deleteTouristMovementData,
   getActiveTrip,
   getGrantedConsent,
@@ -15,6 +16,7 @@ import {
   stopActiveTrip,
   summarizeTrip,
   summarizeUserTrips,
+  updateTripLabel,
 } from "./movement";
 
 describe("movement service", () => {
@@ -180,6 +182,25 @@ describe("movement service", () => {
     expect(cleaned.trips.some((trip) => trip.userId === "tourist-demo")).toBe(false);
     expect(cleaned.points.some((point) => point.tripId === "trip-demo-1")).toBe(false);
     expect(cleaned.trips.some((trip) => trip.userId === "tourist-nature-demo")).toBe(true);
+  });
+
+  it("renames one owned trip without changing movement points", () => {
+    const result = updateTripLabel(initialData, "tourist-demo", "trip-demo-1", "Penang practice route");
+
+    expect(result.error).toBeUndefined();
+    expect(result.data?.trips.find((trip) => trip.id === "trip-demo-1")?.label).toBe("Penang practice route");
+    expect(result.data?.points.filter((point) => point.tripId === "trip-demo-1")).toHaveLength(4);
+  });
+
+  it("deletes one owned trip with its route analysis and linked visit log only", () => {
+    const result = deleteTrip(initialData, "tourist-cultural-demo", "trip-cultural-demo");
+
+    expect(result.error).toBeUndefined();
+    expect(result.data?.trips.some((trip) => trip.id === "trip-cultural-demo")).toBe(false);
+    expect(result.data?.points.some((point) => point.tripId === "trip-cultural-demo")).toBe(false);
+    expect(result.data?.analyses.some((analysis) => analysis.tripId === "trip-cultural-demo")).toBe(false);
+    expect(result.data?.checkIns.some((checkIn) => checkIn.tripId === "trip-cultural-demo")).toBe(false);
+    expect(result.data?.trips.some((trip) => trip.userId === "tourist-demo")).toBe(true);
   });
 
   it("detects destinations already visited from tourist movement records", () => {

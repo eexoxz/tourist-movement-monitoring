@@ -312,6 +312,40 @@ export function stopActiveTrip(data: AppData, userId: string) {
   };
 }
 
+export function updateTripLabel(data: AppData, userId: string, tripId: string, label: string) {
+  const trip = data.trips.find((candidate) => candidate.id === tripId);
+  if (!trip || trip.userId !== userId) {
+    return { error: "This trip could not be found in your account." };
+  }
+
+  const normalizedLabel = label.trim().slice(0, 80);
+
+  return {
+    data: {
+      ...data,
+      trips: data.trips.map((candidate) => (candidate.id === tripId ? { ...candidate, label: normalizedLabel || undefined } : candidate)),
+    },
+  };
+}
+
+export function deleteTrip(data: AppData, userId: string, tripId: string) {
+  const trip = data.trips.find((candidate) => candidate.id === tripId);
+  if (!trip || trip.userId !== userId) {
+    return { error: "This trip could not be found in your account." };
+  }
+
+  return {
+    data: {
+      ...data,
+      trips: data.trips.filter((candidate) => candidate.id !== tripId),
+      points: data.points.filter((point) => point.tripId !== tripId),
+      analyses: data.analyses.filter((analysis) => analysis.tripId !== tripId),
+      recommendations: data.recommendations.filter((recommendation) => recommendation.userId !== userId),
+      checkIns: data.checkIns.filter((checkIn) => checkIn.tripId !== tripId),
+    },
+  };
+}
+
 export function revokeLocationConsent(data: AppData, userId: string) {
   return {
     ...data,

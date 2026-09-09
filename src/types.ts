@@ -123,6 +123,7 @@ export type MovementPoint = {
 export type TripSession = {
   id: string;
   userId: string;
+  label?: string;
   status: TripStatus;
   startedAt: string;
   endedAt?: string;

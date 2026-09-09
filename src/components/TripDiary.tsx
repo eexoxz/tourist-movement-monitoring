@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Pencil, Sparkles, Trash2 } from "lucide-react";
 import { formatDateTime } from "../services/geo";
 import { formatTripTitle, getRecognizedDestinationNames } from "../services/tripPresentation";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -24,6 +24,8 @@ type TripDiaryProps = {
   locale?: Locale;
   onSelectTrip: (tripId: string) => void;
   onViewRecommendations: () => void;
+  onRenameTrip: (trip: TripSession, fallbackTitle: string) => void;
+  onDeleteTrip: (trip: TripSession, fallbackTitle: string) => void;
 };
 
 export function TripDiary({
@@ -44,6 +46,8 @@ export function TripDiary({
   locale = "en",
   onSelectTrip,
   onViewRecommendations,
+  onRenameTrip,
+  onDeleteTrip,
 }: TripDiaryProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const completedTripCount = trips.filter((trip) => trip.status === "completed").length;
@@ -88,7 +92,17 @@ export function TripDiary({
                   <h2>{selectedTripTitle}</h2>
                   <p>{formatDateTime(selectedTrip.startedAt)}</p>
                 </div>
-                <strong className="trip-status-badge">{selectedTrip.status === "completed" ? t("common.completed") : t("common.active")}</strong>
+                <div className="trip-story-actions">
+                  <strong className="trip-status-badge">{selectedTrip.status === "completed" ? t("common.completed") : t("common.active")}</strong>
+                  <button className="secondary-action compact" type="button" onClick={() => onRenameTrip(selectedTrip, selectedTripTitle)}>
+                    <Pencil size={16} />
+                    {t("tourist.trips.renameTrip")}
+                  </button>
+                  <button className="secondary-action compact danger" type="button" onClick={() => onDeleteTrip(selectedTrip, selectedTripTitle)}>
+                    <Trash2 size={16} />
+                    {t("tourist.trips.deleteTrip")}
+                  </button>
+                </div>
               </div>
 
               <div className="trip-story-metrics">
@@ -172,14 +186,26 @@ export function TripDiary({
             const destinationNames = getRecognizedDestinationNames(points, destinations);
 
             return (
-              <button className={selectedTrip?.id === trip.id ? "trip-timeline-card active" : "trip-timeline-card"} key={trip.id} type="button" onClick={() => onSelectTrip(trip.id)}>
-                <span>{trip.status === "completed" ? t("tourist.trips.completedTrip") : t("tourist.trips.activeTrip")}</span>
-                <strong>{formatTripTitle(trip, destinationNames, t)}</strong>
-                <small>{trip.endedAt ? formatDateTime(trip.endedAt) : t("tourist.trips.stillActive")}</small>
-                <p>
-                  {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
-                </p>
-              </button>
+              <article className={selectedTrip?.id === trip.id ? "trip-timeline-card active" : "trip-timeline-card"} key={trip.id}>
+                <button className="trip-timeline-select" type="button" onClick={() => onSelectTrip(trip.id)}>
+                  <span>{trip.status === "completed" ? t("tourist.trips.completedTrip") : t("tourist.trips.activeTrip")}</span>
+                  <strong>{formatTripTitle(trip, destinationNames, t)}</strong>
+                  <small>{trip.endedAt ? formatDateTime(trip.endedAt) : t("tourist.trips.stillActive")}</small>
+                  <p>
+                    {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
+                  </p>
+                </button>
+                <div className="trip-card-actions">
+                  <button type="button" onClick={() => onRenameTrip(trip, formatTripTitle(trip, destinationNames, t))}>
+                    <Pencil size={15} />
+                    {t("tourist.trips.renameTrip")}
+                  </button>
+                  <button className="danger" type="button" onClick={() => onDeleteTrip(trip, formatTripTitle(trip, destinationNames, t))}>
+                    <Trash2 size={15} />
+                    {t("tourist.trips.deleteTrip")}
+                  </button>
+                </div>
+              </article>
             );
           })}
           {trips.length === 0 && <EmptyState text={t("tourist.trips.firstEntry")} />}

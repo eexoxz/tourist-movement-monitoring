@@ -14,6 +14,11 @@ export function getRecognizedDestinationNames(points: MovementPoint[], destinati
 }
 
 export function formatTripTitle(trip: TripSession, destinationNames: string[], t: (key: TranslationKey) => string) {
+  const customLabel = trip.label?.trim();
+  if (customLabel) {
+    return customLabel;
+  }
+
   const routeLabel = destinationNames.slice(0, 2).join(" to ");
 
   if (routeLabel) {
