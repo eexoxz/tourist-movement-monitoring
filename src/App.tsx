@@ -65,7 +65,7 @@ import {
   signOutConfiguredProvider,
 } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
-import { demoDatasetMetadata, mergePreparedDemoDataset } from "./data/demoData";
+import { isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "./data/demoData";
 import { malaysiaFestivalEvents } from "./data/festivals";
 import { loadLocale, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
 import { getUpcomingFestivals } from "./services/festivals";
@@ -125,8 +125,12 @@ import { formatTravelPreferenceList, getDisplayName } from "./services/profile";
 type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 type AdminDashboardTab = "overview" | "tourists" | "records" | "safety" | "ai";
+type CommitDataOptions = {
+  localOnlyStatus?: string;
+};
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
 const LAST_BROWSER_LOCATION_KEY_PREFIX = "tourist-movement-monitoring:last-location:";
+const DEMO_DATASET_LOCAL_ONLY_STATUS = "Demo dataset loaded locally; Firestore sync skipped";
 const adminTouristPreviewLimit = 8;
 const adminMovementPreviewLimit = 8;
 const adminSafetyPreviewLimit = 5;
@@ -440,8 +444,15 @@ function App() {
     replaceBrowserPath(getPathForView(currentUser.role, nextView));
   }, [authMode, currentUser, safeView]);
 
-  const commitData = (nextData: AppData, actor: User | null = currentUser) => {
+  const commitData = (nextData: AppData, actor: User | null = currentUser, options: CommitDataOptions = {}) => {
     setData(nextData);
+
+    if (options.localOnlyStatus) {
+      cacheLocalData(nextData);
+      setSyncStatus(options.localOnlyStatus);
+      return;
+    }
+
     void saveData(nextData, actor)
       .then((synced) => {
         setSyncStatus(synced ? "Saved to Firestore collections" : "Saved to local browser storage");
@@ -1677,9 +1688,10 @@ function AdminWorkspace({
   data: AppData;
   view: AppView;
   locale: Locale;
-  onDataChange: (data: AppData) => void;
+  onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void;
   notify: NotifyFn;
 }) {
+  const t = (key: TranslationKey) => translate(locale, key);
   const tourists = getTourists(data);
   const summary = useMemo(() => summarizeDashboard(data), [data]);
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
@@ -1734,6 +1746,7 @@ function AdminWorkspace({
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
+  const demoDatasetLoaded = isPreparedDemoDatasetLoaded(data);
   const touristManagementRows = useMemo(() => getTouristManagementRows(data), [data]);
   const filteredTouristManagementRows = useMemo(() => {
     const search = touristSearch.trim().toLowerCase();
@@ -1900,12 +1913,31 @@ function AdminWorkspace({
   };
 
   const seedDemoTourists = () => {
+    if (demoDatasetLoaded) {
+      notify({
+        tone: "info",
+        title: t("admin.demo.alreadyLoadedTitle"),
+        message: t("admin.demo.alreadyLoadedMessage"),
+      });
+      return;
+    }
+
     const refreshed = refreshAllRecommendations(mergePreparedDemoDataset(data));
-    onDataChange(refreshed);
+    onDataChange(refreshed, null, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS });
     notify({
       tone: "success",
-      title: "Demo tourists added",
-      message: `${demoDatasetMetadata.generatedTouristCount} prepared tourists, ${demoDatasetMetadata.generatedTouristCount * demoDatasetMetadata.generatedTripsPerTourist} regional trips and attraction check-ins are ready for the admin dashboard.`,
+      title: t("admin.demo.loadedTitle"),
+      message: t("admin.demo.loadedMessage"),
+    });
+  };
+
+  const clearDemoTourists = () => {
+    const cleaned = refreshAllRecommendations(removeGeneratedDemoDataset(data));
+    onDataChange(cleaned, null, { localOnlyStatus: "Generated demo dataset removed locally; Firestore sync skipped" });
+    notify({
+      tone: "info",
+      title: t("admin.demo.removedTitle"),
+      message: t("admin.demo.removedMessage"),
     });
   };
 
@@ -2439,36 +2471,42 @@ function AdminWorkspace({
 
   return (
     <Page
-      title="Administrator Dashboard"
-      eyebrow="Administrator workspace"
+      title={t("admin.dashboard.title")}
+      eyebrow={t("admin.dashboard.eyebrow")}
       actions={
         <div className="page-action-row">
-          <button className="secondary-action" onClick={seedDemoTourists}>
+          <button className="secondary-action" onClick={seedDemoTourists} disabled={demoDatasetLoaded}>
             <UserRound size={18} />
-            Load demo dataset
+            {demoDatasetLoaded ? t("admin.demo.loadedButton") : t("admin.demo.loadButton")}
           </button>
+          {demoDatasetLoaded && (
+            <button className="secondary-action" onClick={clearDemoTourists}>
+              <Trash2 size={18} />
+              {t("admin.demo.removeButton")}
+            </button>
+          )}
           <button className="secondary-action" onClick={recomputeAi}>
             <RotateCcw size={18} />
-            Refresh AI
+            {t("admin.dashboard.refreshAi")}
           </button>
         </div>
       }
     >
-      <div className="segmented-control admin-tabs" aria-label="Administrator dashboard sections">
+      <div className="segmented-control admin-tabs" aria-label={t("admin.dashboard.tabsLabel")}>
         <button className={adminTab === "overview" ? "active" : ""} type="button" onClick={() => setAdminTab("overview")}>
-          Overview
+          {t("admin.tabs.overview")}
         </button>
         <button className={adminTab === "tourists" ? "active" : ""} type="button" onClick={() => setAdminTab("tourists")}>
-          Tourists
+          {t("admin.tabs.tourists")}
         </button>
         <button className={adminTab === "records" ? "active" : ""} type="button" onClick={() => setAdminTab("records")}>
-          Movement Records
+          {t("admin.tabs.records")}
         </button>
         <button className={adminTab === "safety" ? "active" : ""} type="button" onClick={() => setAdminTab("safety")}>
-          Safety
+          {t("admin.tabs.safety")}
         </button>
         <button className={adminTab === "ai" ? "active" : ""} type="button" onClick={() => setAdminTab("ai")}>
-          AI Results
+          {t("admin.tabs.ai")}
         </button>
       </div>
 

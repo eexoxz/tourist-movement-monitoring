@@ -194,15 +194,18 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
         .bindTooltip(destination.name, { direction: "top", opacity: 0.92 })
         .addTo(layer);
 
-      L.marker([destination.latitude, destination.longitude], {
+      const marker = L.marker([destination.latitude, destination.longitude], {
         icon: destinationIcon(destination.category, signal, locale),
         title: destination.name,
-      })
-        .bindPopup(
+      }).on("click", selectDestination);
+
+      if (mode !== "tourist") {
+        marker.bindPopup(
           `<section class="map-popup"><strong>${escapeHtml(destination.name)}</strong><span>${escapeHtml(categoryLabel(destination.category))} · ${escapeHtml(destination.city)}</span><p>${escapeHtml(destination.description)}</p><dl><div><dt>${escapeHtml(t("map.movementPoints"))}</dt><dd>${signal.nearbyPointCount}</dd></div><div><dt>${escapeHtml(t("map.demandSignal"))}</dt><dd>${escapeHtml(signalTierLabel(signal.tier))}</dd></div></dl></section>`
-        )
-        .on("click", selectDestination)
-        .addTo(layer);
+        );
+      }
+
+      marker.addTo(layer);
     });
 
     if (route.length > 0) {
@@ -273,7 +276,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
     return () => {
       layer.remove();
     };
-  }, [points, visibleDestinations, activePoint, destinationSignals, locale]);
+  }, [points, visibleDestinations, activePoint, destinationSignals, locale, mode]);
 
   const centerOnActivePoint = () => {
     if (!activePoint) {

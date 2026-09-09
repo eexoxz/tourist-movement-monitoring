@@ -34,7 +34,7 @@ describe("user interface quality guardrails", () => {
     expect(stylesSource).toContain(".tourist-shell .toast-stack");
     expect(toastSource).toContain('aria-live="polite"');
     expect(stylesSource).toContain("width: min(380px, calc(100vw - 28px))");
-    expect(stylesSource).toContain("z-index: 10000");
+    expect(stylesSource).toContain("z-index: 50000");
     expect(stylesSource).toContain("left: 10px");
   });
 

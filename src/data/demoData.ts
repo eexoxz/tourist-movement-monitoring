@@ -463,6 +463,18 @@ function mergeById<T extends { id: string }>(current: T[], prepared: T[]) {
   return [...current, ...prepared.filter((item) => !currentIds.has(item.id))];
 }
 
+function isGeneratedSeedUserId(userId: string) {
+  return userId.startsWith("tourist-seed-");
+}
+
+function isGeneratedSeedTripId(tripId: string) {
+  return tripId.startsWith("trip-seed-");
+}
+
+export function isPreparedDemoDatasetLoaded(data: AppData) {
+  return data.users.filter((user) => isGeneratedSeedUserId(user.id)).length >= demoDatasetMetadata.generatedTouristCount;
+}
+
 export function mergePreparedDemoDataset(data: AppData): AppData {
   return {
     ...data,
@@ -475,5 +487,18 @@ export function mergePreparedDemoDataset(data: AppData): AppData {
     incidentReports: mergeById(data.incidentReports, initialData.incidentReports),
     checkIns: mergeById(data.checkIns, initialData.checkIns),
     geofences: mergeById(data.geofences, initialData.geofences),
+  };
+}
+
+export function removeGeneratedDemoDataset(data: AppData): AppData {
+  return {
+    ...data,
+    users: data.users.filter((user) => !isGeneratedSeedUserId(user.id)),
+    consents: data.consents.filter((consent) => !isGeneratedSeedUserId(consent.userId)),
+    trips: data.trips.filter((trip) => !isGeneratedSeedTripId(trip.id) && !isGeneratedSeedUserId(trip.userId)),
+    points: data.points.filter((point) => !isGeneratedSeedTripId(point.tripId) && !isGeneratedSeedUserId(point.userId ?? "")),
+    analyses: data.analyses.filter((analysis) => !isGeneratedSeedTripId(analysis.tripId) && !isGeneratedSeedUserId(analysis.userId)),
+    recommendations: data.recommendations.filter((recommendation) => !isGeneratedSeedUserId(recommendation.userId)),
+    checkIns: data.checkIns.filter((checkIn) => !isGeneratedSeedTripId(checkIn.tripId ?? "") && !isGeneratedSeedUserId(checkIn.userId)),
   };
 }

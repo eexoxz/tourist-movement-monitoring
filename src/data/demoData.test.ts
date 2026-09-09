@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { demoDatasetMetadata, initialData } from "./demoData";
+import { demoDatasetMetadata, initialData, isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "./demoData";
 
 describe("generated demo dataset", () => {
   it("creates regional tourist movement records for every saved destination", () => {
@@ -22,5 +22,18 @@ describe("generated demo dataset", () => {
     expect(generatedPoints).toHaveLength(generatedTrips.length * demoDatasetMetadata.generatedPointsPerTrip);
     expect(generatedCheckIns.length).toBeGreaterThanOrEqual(generatedTrips.length);
     expect(destinationsWithGeneratedMovement.size).toBe(initialData.destinations.length);
+  });
+
+  it("detects, removes, and restores generated demo tourists without touching base records", () => {
+    const cleaned = removeGeneratedDemoDataset(initialData);
+    const restored = mergePreparedDemoDataset(cleaned);
+
+    expect(isPreparedDemoDatasetLoaded(initialData)).toBe(true);
+    expect(isPreparedDemoDatasetLoaded(cleaned)).toBe(false);
+    expect(cleaned.users.some((user) => user.id === "tourist-demo")).toBe(true);
+    expect(cleaned.users.some((user) => user.id.startsWith("tourist-seed-"))).toBe(false);
+    expect(cleaned.trips.some((trip) => trip.id.startsWith("trip-seed-"))).toBe(false);
+    expect(cleaned.points.some((point) => point.id.startsWith("point-seed-"))).toBe(false);
+    expect(isPreparedDemoDatasetLoaded(restored)).toBe(true);
   });
 });

@@ -54,6 +54,24 @@ export type TranslationKey =
   | "auth.alreadyHaveAccount"
   | "auth.showPassword"
   | "auth.hidePassword"
+  | "admin.dashboard.title"
+  | "admin.dashboard.eyebrow"
+  | "admin.dashboard.tabsLabel"
+  | "admin.dashboard.refreshAi"
+  | "admin.tabs.overview"
+  | "admin.tabs.tourists"
+  | "admin.tabs.records"
+  | "admin.tabs.safety"
+  | "admin.tabs.ai"
+  | "admin.demo.loadButton"
+  | "admin.demo.loadedButton"
+  | "admin.demo.removeButton"
+  | "admin.demo.loadedTitle"
+  | "admin.demo.loadedMessage"
+  | "admin.demo.alreadyLoadedTitle"
+  | "admin.demo.alreadyLoadedMessage"
+  | "admin.demo.removedTitle"
+  | "admin.demo.removedMessage"
   | "common.tourist"
   | "common.refresh"
   | "common.save"
@@ -3967,6 +3985,189 @@ const touristCoverageTranslations: Record<Locale, Partial<Record<TranslationKey,
   },
 };
 
+const adminTranslations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
+  en: {
+    "admin.dashboard.title": "Administrator Dashboard",
+    "admin.dashboard.eyebrow": "Administrator workspace",
+    "admin.dashboard.tabsLabel": "Administrator dashboard sections",
+    "admin.dashboard.refreshAi": "Refresh AI",
+    "admin.tabs.overview": "Overview",
+    "admin.tabs.tourists": "Tourists",
+    "admin.tabs.records": "Movement Records",
+    "admin.tabs.safety": "Safety",
+    "admin.tabs.ai": "AI Results",
+    "admin.demo.loadButton": "Load demo dataset",
+    "admin.demo.loadedButton": "Demo dataset loaded",
+    "admin.demo.removeButton": "Remove demo dataset",
+    "admin.demo.loadedTitle": "Demo dataset ready",
+    "admin.demo.loadedMessage": "Prepared tourist records were loaded on this device for dashboard demonstration without pushing the full dataset to Firestore.",
+    "admin.demo.alreadyLoadedTitle": "Demo dataset already loaded",
+    "admin.demo.alreadyLoadedMessage": "The prepared generated tourists are already available, so no extra records were added.",
+    "admin.demo.removedTitle": "Demo dataset removed",
+    "admin.demo.removedMessage": "Generated tourist records were removed from this device. Real registered users and saved destinations remain.",
+  },
+  ms: {
+    "admin.dashboard.title": "Papan Pemuka Pentadbir",
+    "admin.dashboard.eyebrow": "Ruang kerja pentadbir",
+    "admin.dashboard.tabsLabel": "Bahagian papan pemuka pentadbir",
+    "admin.dashboard.refreshAi": "Segar semula AI",
+    "admin.tabs.overview": "Gambaran keseluruhan",
+    "admin.tabs.tourists": "Pelancong",
+    "admin.tabs.records": "Rekod Pergerakan",
+    "admin.tabs.safety": "Keselamatan",
+    "admin.tabs.ai": "Keputusan AI",
+    "admin.demo.loadButton": "Muatkan set data demo",
+    "admin.demo.loadedButton": "Set data demo dimuatkan",
+    "admin.demo.removeButton": "Buang set data demo",
+    "admin.demo.loadedTitle": "Set data demo sedia",
+    "admin.demo.loadedMessage": "Rekod pelancong demo dimuatkan pada peranti ini untuk paparan papan pemuka tanpa menghantar keseluruhan set data ke Firestore.",
+    "admin.demo.alreadyLoadedTitle": "Set data demo sudah dimuatkan",
+    "admin.demo.alreadyLoadedMessage": "Pelancong demo yang disediakan sudah tersedia, jadi tiada rekod tambahan ditambah.",
+    "admin.demo.removedTitle": "Set data demo dibuang",
+    "admin.demo.removedMessage": "Rekod pelancong demo dibuang daripada peranti ini. Pengguna sebenar dan destinasi tersimpan dikekalkan.",
+  },
+  zh: {
+    "admin.dashboard.title": "管理员仪表板",
+    "admin.dashboard.eyebrow": "管理员工作区",
+    "admin.dashboard.tabsLabel": "管理员仪表板分区",
+    "admin.dashboard.refreshAi": "刷新 AI",
+    "admin.tabs.overview": "概览",
+    "admin.tabs.tourists": "游客",
+    "admin.tabs.records": "移动记录",
+    "admin.tabs.safety": "安全",
+    "admin.tabs.ai": "AI 结果",
+    "admin.demo.loadButton": "加载演示数据集",
+    "admin.demo.loadedButton": "演示数据已加载",
+    "admin.demo.removeButton": "移除演示数据",
+    "admin.demo.loadedTitle": "演示数据已准备好",
+    "admin.demo.loadedMessage": "演示游客记录已加载到此设备，用于展示仪表板，不会把完整数据集推送到 Firestore。",
+    "admin.demo.alreadyLoadedTitle": "演示数据已加载",
+    "admin.demo.alreadyLoadedMessage": "预设的演示游客已经可用，因此没有添加额外记录。",
+    "admin.demo.removedTitle": "演示数据已移除",
+    "admin.demo.removedMessage": "演示游客记录已从此设备移除。真实注册用户和已保存目的地会保留。",
+  },
+  ja: {
+    "admin.dashboard.title": "管理者ダッシュボード",
+    "admin.dashboard.eyebrow": "管理者ワークスペース",
+    "admin.dashboard.tabsLabel": "管理者ダッシュボードのセクション",
+    "admin.dashboard.refreshAi": "AIを更新",
+    "admin.tabs.overview": "概要",
+    "admin.tabs.tourists": "旅行者",
+    "admin.tabs.records": "移動記録",
+    "admin.tabs.safety": "安全",
+    "admin.tabs.ai": "AI結果",
+    "admin.demo.loadButton": "デモデータを読み込む",
+    "admin.demo.loadedButton": "デモデータ読み込み済み",
+    "admin.demo.removeButton": "デモデータを削除",
+    "admin.demo.loadedTitle": "デモデータの準備完了",
+    "admin.demo.loadedMessage": "ダッシュボード表示用の旅行者デモ記録をこの端末に読み込みました。全データはFirestoreへ送信されません。",
+    "admin.demo.alreadyLoadedTitle": "デモデータは読み込み済みです",
+    "admin.demo.alreadyLoadedMessage": "準備済みのデモ旅行者はすでに利用可能なので、追加記録は作成されません。",
+    "admin.demo.removedTitle": "デモデータを削除しました",
+    "admin.demo.removedMessage": "生成された旅行者デモ記録をこの端末から削除しました。実際の登録ユーザーと保存済み目的地は残ります。",
+  },
+  ko: {
+    "admin.dashboard.title": "관리자 대시보드",
+    "admin.dashboard.eyebrow": "관리자 작업 공간",
+    "admin.dashboard.tabsLabel": "관리자 대시보드 섹션",
+    "admin.dashboard.refreshAi": "AI 새로고침",
+    "admin.tabs.overview": "개요",
+    "admin.tabs.tourists": "관광객",
+    "admin.tabs.records": "이동 기록",
+    "admin.tabs.safety": "안전",
+    "admin.tabs.ai": "AI 결과",
+    "admin.demo.loadButton": "데모 데이터 불러오기",
+    "admin.demo.loadedButton": "데모 데이터 불러옴",
+    "admin.demo.removeButton": "데모 데이터 제거",
+    "admin.demo.loadedTitle": "데모 데이터 준비됨",
+    "admin.demo.loadedMessage": "대시보드 시연용 관광객 기록을 이 기기에 불러왔으며 전체 데이터는 Firestore로 전송하지 않습니다.",
+    "admin.demo.alreadyLoadedTitle": "데모 데이터가 이미 있습니다",
+    "admin.demo.alreadyLoadedMessage": "준비된 데모 관광객이 이미 사용 가능하므로 추가 기록은 생성되지 않았습니다.",
+    "admin.demo.removedTitle": "데모 데이터 제거됨",
+    "admin.demo.removedMessage": "생성된 데모 관광객 기록을 이 기기에서 제거했습니다. 실제 등록 사용자와 저장된 목적지는 유지됩니다.",
+  },
+  pt: {
+    "admin.dashboard.title": "Painel do Administrador",
+    "admin.dashboard.eyebrow": "Area do administrador",
+    "admin.dashboard.tabsLabel": "Secoes do painel do administrador",
+    "admin.dashboard.refreshAi": "Atualizar IA",
+    "admin.tabs.overview": "Visao geral",
+    "admin.tabs.tourists": "Turistas",
+    "admin.tabs.records": "Registos de movimento",
+    "admin.tabs.safety": "Seguranca",
+    "admin.tabs.ai": "Resultados de IA",
+    "admin.demo.loadButton": "Carregar dados de demo",
+    "admin.demo.loadedButton": "Dados de demo carregados",
+    "admin.demo.removeButton": "Remover dados de demo",
+    "admin.demo.loadedTitle": "Dados de demo prontos",
+    "admin.demo.loadedMessage": "Os registos de turistas preparados foram carregados neste dispositivo para demonstracao do painel sem enviar o conjunto completo para o Firestore.",
+    "admin.demo.alreadyLoadedTitle": "Dados de demo ja carregados",
+    "admin.demo.alreadyLoadedMessage": "Os turistas de demo preparados ja estao disponiveis, por isso nao foram adicionados registos extra.",
+    "admin.demo.removedTitle": "Dados de demo removidos",
+    "admin.demo.removedMessage": "Os registos de turistas de demo foram removidos deste dispositivo. Utilizadores reais registados e destinos guardados permanecem.",
+  },
+  ta: {
+    "admin.dashboard.title": "நிர்வாகி பலகை",
+    "admin.dashboard.eyebrow": "நிர்வாகி பணிப்பகுதி",
+    "admin.dashboard.tabsLabel": "நிர்வாகி பலகை பகுதிகள்",
+    "admin.dashboard.refreshAi": "AI புதுப்பி",
+    "admin.tabs.overview": "மேலோட்டம்",
+    "admin.tabs.tourists": "சுற்றுலாப் பயணிகள்",
+    "admin.tabs.records": "இயக்க பதிவுகள்",
+    "admin.tabs.safety": "பாதுகாப்பு",
+    "admin.tabs.ai": "AI முடிவுகள்",
+    "admin.demo.loadButton": "டெமோ தரவை ஏற்று",
+    "admin.demo.loadedButton": "டெமோ தரவு ஏற்றப்பட்டது",
+    "admin.demo.removeButton": "டெமோ தரவை அகற்று",
+    "admin.demo.loadedTitle": "டெமோ தரவு தயார்",
+    "admin.demo.loadedMessage": "பலகை காட்சிக்காக தயாரிக்கப்பட்ட சுற்றுலா பதிவுகள் இந்த சாதனத்தில் ஏற்றப்பட்டன; முழு தரவுத்தொகுப்பு Firestore-க்கு அனுப்பப்படவில்லை.",
+    "admin.demo.alreadyLoadedTitle": "டெமோ தரவு ஏற்கனவே உள்ளது",
+    "admin.demo.alreadyLoadedMessage": "தயாரிக்கப்பட்ட டெமோ சுற்றுலாப் பயணிகள் ஏற்கனவே உள்ளனர், எனவே கூடுதல் பதிவுகள் சேர்க்கப்படவில்லை.",
+    "admin.demo.removedTitle": "டெமோ தரவு அகற்றப்பட்டது",
+    "admin.demo.removedMessage": "உருவாக்கப்பட்ட டெமோ சுற்றுலா பதிவுகள் இந்த சாதனத்திலிருந்து அகற்றப்பட்டன. உண்மையான பயனர்கள் மற்றும் சேமித்த இடங்கள் இருக்கும்.",
+  },
+  es: {
+    "admin.dashboard.title": "Panel de Administracion",
+    "admin.dashboard.eyebrow": "Espacio de administracion",
+    "admin.dashboard.tabsLabel": "Secciones del panel de administracion",
+    "admin.dashboard.refreshAi": "Actualizar IA",
+    "admin.tabs.overview": "Resumen",
+    "admin.tabs.tourists": "Turistas",
+    "admin.tabs.records": "Registros de movimiento",
+    "admin.tabs.safety": "Seguridad",
+    "admin.tabs.ai": "Resultados de IA",
+    "admin.demo.loadButton": "Cargar datos demo",
+    "admin.demo.loadedButton": "Datos demo cargados",
+    "admin.demo.removeButton": "Quitar datos demo",
+    "admin.demo.loadedTitle": "Datos demo listos",
+    "admin.demo.loadedMessage": "Los registros turisticos preparados se cargaron en este dispositivo para mostrar el panel sin enviar todo el conjunto a Firestore.",
+    "admin.demo.alreadyLoadedTitle": "Datos demo ya cargados",
+    "admin.demo.alreadyLoadedMessage": "Los turistas demo preparados ya estan disponibles, asi que no se añadieron registros extra.",
+    "admin.demo.removedTitle": "Datos demo quitados",
+    "admin.demo.removedMessage": "Los registros turisticos demo se quitaron de este dispositivo. Los usuarios reales registrados y destinos guardados permanecen.",
+  },
+  fr: {
+    "admin.dashboard.title": "Tableau de Bord Administrateur",
+    "admin.dashboard.eyebrow": "Espace administrateur",
+    "admin.dashboard.tabsLabel": "Sections du tableau de bord administrateur",
+    "admin.dashboard.refreshAi": "Actualiser l'IA",
+    "admin.tabs.overview": "Vue d'ensemble",
+    "admin.tabs.tourists": "Touristes",
+    "admin.tabs.records": "Dossiers de mouvement",
+    "admin.tabs.safety": "Securite",
+    "admin.tabs.ai": "Resultats IA",
+    "admin.demo.loadButton": "Charger les donnees demo",
+    "admin.demo.loadedButton": "Donnees demo chargees",
+    "admin.demo.removeButton": "Supprimer les donnees demo",
+    "admin.demo.loadedTitle": "Donnees demo pretes",
+    "admin.demo.loadedMessage": "Les dossiers touristiques prepares ont ete charges sur cet appareil pour la demonstration du tableau de bord sans envoyer tout l'ensemble vers Firestore.",
+    "admin.demo.alreadyLoadedTitle": "Donnees demo deja chargees",
+    "admin.demo.alreadyLoadedMessage": "Les touristes demo prepares sont deja disponibles, donc aucun dossier supplementaire n'a ete ajoute.",
+    "admin.demo.removedTitle": "Donnees demo supprimees",
+    "admin.demo.removedMessage": "Les dossiers touristiques demo generes ont ete supprimes de cet appareil. Les vrais utilisateurs inscrits et les destinations enregistrees restent.",
+  },
+};
+
 export function isLocale(value: string): value is Locale {
   return localeOptions.some((option) => option.value === value);
 }
@@ -3981,9 +4182,19 @@ export function saveLocale(locale: Locale) {
 }
 
 export function hasDirectTranslation(locale: Locale, key: TranslationKey) {
-  return Boolean(translations[locale][key] ?? touristTranslations[locale][key] ?? touristCoverageTranslations[locale][key]);
+  return Boolean(translations[locale][key] ?? touristTranslations[locale][key] ?? touristCoverageTranslations[locale][key] ?? adminTranslations[locale][key]);
 }
 
 export function translate(locale: Locale, key: TranslationKey) {
-  return translations[locale][key] ?? touristTranslations[locale][key] ?? touristCoverageTranslations[locale][key] ?? translations.en[key] ?? key;
+  return (
+    translations[locale][key] ??
+    touristTranslations[locale][key] ??
+    touristCoverageTranslations[locale][key] ??
+    adminTranslations[locale][key] ??
+    translations.en[key] ??
+    touristTranslations.en[key] ??
+    touristCoverageTranslations.en[key] ??
+    adminTranslations.en[key] ??
+    key
+  );
 }
