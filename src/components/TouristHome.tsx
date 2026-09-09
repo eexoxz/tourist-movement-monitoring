@@ -53,6 +53,7 @@ type TouristHomeProps = {
   onStopTrip: () => void;
   onResumeLiveTracking: () => void;
   onAddDemoPoint: () => void;
+  onAddLocalTestRoute: () => void;
   onCreateSampleRoute: () => void;
   onCheckInDestinationChange: (destinationId: string) => void;
   onStartAttractionCheckIn: () => void;
@@ -120,6 +121,7 @@ export function TouristHome({
   onStopTrip,
   onResumeLiveTracking,
   onAddDemoPoint,
+  onAddLocalTestRoute,
   onCreateSampleRoute,
   onCheckInDestinationChange,
   onStartAttractionCheckIn,
@@ -191,6 +193,13 @@ export function TouristHome({
               {activeTrip && (
                 <button className="secondary-action wide" onClick={onAddDemoPoint}>
                   {t("tourist.home.addDemoPoint")}
+                </button>
+              )}
+
+              {activeTrip && (
+                <button className="secondary-action wide" onClick={onAddLocalTestRoute}>
+                  <Navigation size={18} />
+                  {t("tourist.home.simulateLocalRoute")}
                 </button>
               )}
 

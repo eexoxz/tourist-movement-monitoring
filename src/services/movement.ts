@@ -122,6 +122,16 @@ function samplePointTime(startedAt: Date, index: number) {
   return new Date(startedAt.getTime() + index * 18 * 60 * 1000).toISOString();
 }
 
+function simulatedPointNearDestination(destination: Destination, step: number) {
+  const latitudeOffset = ((step % 5) - 2) * 0.00022;
+  const longitudeOffset = (((step * 2) % 5) - 2) * 0.00022;
+
+  return {
+    latitude: Number((destination.latitude + latitudeOffset).toFixed(6)),
+    longitude: Number((destination.longitude + longitudeOffset).toFixed(6)),
+  };
+}
+
 function profileMatchesDestination(profile: TouristProfile, category: Destination["category"]) {
   if (profile === "mixed") {
     return true;
@@ -216,6 +226,51 @@ export function createSampleTripForUser(data: AppData, userId: string, reference
       ...data,
       consents: [...data.consents.filter((item) => item.userId !== userId), consent],
       trips: [...data.trips, trip],
+      points: [...data.points, ...points],
+    },
+  };
+}
+
+export function addLocalTestRouteToActiveTrip(data: AppData, userId: string, referencePoint?: Pick<MovementPoint, "latitude" | "longitude">, pointCount = 4) {
+  const user = data.users.find((candidate) => candidate.id === userId);
+  if (!user) {
+    return { error: "The current tourist account could not be found." };
+  }
+
+  const activeTrip = getActiveTrip(data, userId);
+  if (!activeTrip) {
+    return { error: "Start a trip before adding a local test route." };
+  }
+
+  const currentPoints = getTripPoints(data, activeTrip.id);
+  const anchor = currentPoints.at(-1) ?? referencePoint;
+  const routeDestinations = getLocalSampleDestinations(data, inferSampleProfile(user), anchor, Math.max(2, pointCount)).slice(0, Math.max(2, pointCount));
+
+  if (routeDestinations.length < 2) {
+    return { error: "Not enough nearby destinations are available to simulate a local route." };
+  }
+
+  const baseTime = Math.max(Date.now(), new Date(currentPoints.at(-1)?.recordedAt ?? activeTrip.startedAt).getTime());
+  const points: MovementPoint[] = routeDestinations.map((destination, index) => {
+    const point = simulatedPointNearDestination(destination, currentPoints.length + index);
+
+    return {
+      id: createId("point"),
+      tripId: activeTrip.id,
+      userId,
+      latitude: point.latitude,
+      longitude: point.longitude,
+      accuracyMeters: 22 + (index % 4) * 5,
+      recordedAt: new Date(baseTime + (index + 1) * 2 * 60 * 1000).toISOString(),
+      source: "demo",
+    };
+  });
+
+  return {
+    pointCount: points.length,
+    destinationNames: routeDestinations.map((destination) => destination.name),
+    data: {
+      ...data,
       points: [...data.points, ...points],
     },
   };

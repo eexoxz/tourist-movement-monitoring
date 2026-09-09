@@ -165,6 +165,7 @@ export type TranslationKey =
   | "tourist.home.stopTrip"
   | "tourist.home.resumeTracking"
   | "tourist.home.addDemoPoint"
+  | "tourist.home.simulateLocalRoute"
   | "tourist.home.addSampleRoute"
   | "tourist.home.tryLocationAgain"
   | "tourist.home.howItWorks"
@@ -570,6 +571,7 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.home.stopTrip": "Stop Trip",
     "tourist.home.resumeTracking": "Resume tracking",
     "tourist.home.addDemoPoint": "Add test movement",
+    "tourist.home.simulateLocalRoute": "Simulate local route",
     "tourist.home.addSampleRoute": "Add sample Malaysia route",
     "tourist.home.tryLocationAgain": "Try location again",
     "tourist.home.howItWorks": "How it works",
@@ -1276,6 +1278,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "Hentikan Perjalanan",
     "tourist.home.resumeTracking": "Sambung penjejakan",
     "tourist.home.addDemoPoint": "Tambah pergerakan ujian",
+    "tourist.home.simulateLocalRoute": "Simulasikan laluan setempat",
     "tourist.home.addSampleRoute": "Tambah laluan contoh Malaysia",
     "tourist.home.tryLocationAgain": "Cuba lokasi semula",
     "tourist.home.howItWorks": "Cara ia berfungsi",
@@ -1373,6 +1376,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "停止行程",
     "tourist.home.resumeTracking": "继续追踪",
     "tourist.home.addDemoPoint": "添加测试移动",
+    "tourist.home.simulateLocalRoute": "模拟本地路线",
     "tourist.home.addSampleRoute": "添加马来西亚示例路线",
     "tourist.home.tryLocationAgain": "重新尝试定位",
     "tourist.home.howItWorks": "使用方式",
@@ -1470,6 +1474,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "旅行終了",
     "tourist.home.resumeTracking": "追跡を再開",
     "tourist.home.addDemoPoint": "テスト移動を追加",
+    "tourist.home.simulateLocalRoute": "近くのルートをシミュレーション",
     "tourist.home.addSampleRoute": "マレーシアのサンプルルートを追加",
     "tourist.home.tryLocationAgain": "位置情報を再試行",
     "tourist.home.howItWorks": "使い方",
@@ -1567,6 +1572,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "여행 중지",
     "tourist.home.resumeTracking": "추적 재개",
     "tourist.home.addDemoPoint": "테스트 이동 추가",
+    "tourist.home.simulateLocalRoute": "근처 경로 시뮬레이션",
     "tourist.home.addSampleRoute": "말레이시아 샘플 경로 추가",
     "tourist.home.tryLocationAgain": "위치 다시 시도",
     "tourist.home.howItWorks": "작동 방식",
@@ -1664,6 +1670,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "Parar viagem",
     "tourist.home.resumeTracking": "Retomar rastreio",
     "tourist.home.addDemoPoint": "Adicionar movimento de teste",
+    "tourist.home.simulateLocalRoute": "Simular rota local",
     "tourist.home.addSampleRoute": "Adicionar rota exemplo da Malásia",
     "tourist.home.tryLocationAgain": "Tentar localização novamente",
     "tourist.home.howItWorks": "Como funciona",
@@ -1761,6 +1768,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "பயணத்தை நிறுத்து",
     "tourist.home.resumeTracking": "கண்காணிப்பைத் தொடரு",
     "tourist.home.addDemoPoint": "சோதனை நகர்வைச் சேர்",
+    "tourist.home.simulateLocalRoute": "உள்ளூர் வழித்தடத்தைச் சோதனை செய்",
     "tourist.home.addSampleRoute": "மலேசியா மாதிரி வழித்தடம் சேர்",
     "tourist.home.tryLocationAgain": "இடத்தை மீண்டும் முயற்சி",
     "tourist.home.howItWorks": "இது எப்படி செயல்படுகிறது",
@@ -1858,6 +1866,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "Detener viaje",
     "tourist.home.resumeTracking": "Reanudar seguimiento",
     "tourist.home.addDemoPoint": "Añadir movimiento de prueba",
+    "tourist.home.simulateLocalRoute": "Simular ruta local",
     "tourist.home.addSampleRoute": "Añadir ruta de ejemplo de Malasia",
     "tourist.home.tryLocationAgain": "Intentar ubicación otra vez",
     "tourist.home.howItWorks": "Cómo funciona",
@@ -1955,6 +1964,7 @@ const touristTranslations: Record<Locale, Partial<Record<TranslationKey, string>
     "tourist.home.stopTrip": "Arrêter le voyage",
     "tourist.home.resumeTracking": "Reprendre le suivi",
     "tourist.home.addDemoPoint": "Ajouter un mouvement test",
+    "tourist.home.simulateLocalRoute": "Simuler un itinéraire local",
     "tourist.home.addSampleRoute": "Ajouter une route exemple de Malaisie",
     "tourist.home.tryLocationAgain": "Réessayer la localisation",
     "tourist.home.howItWorks": "Fonctionnement",

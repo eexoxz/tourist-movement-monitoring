@@ -87,6 +87,7 @@ import {
 } from "./services/dashboard";
 import {
   appendMovementPoint,
+  addLocalTestRouteToActiveTrip,
   createSampleTripForUser,
   deleteTrip,
   deleteTouristMovementData,
@@ -1036,6 +1037,21 @@ function TouristWorkspace({
     }
   };
 
+  const addLocalTestRoute = () => {
+    const result = addLocalTestRouteToActiveTrip(loadData(), user.id, latestKnownPoint);
+    if (result.error || !result.data) {
+      showTrackingNotice("error", "Test route unavailable", result.error ?? "Local test route could not be added.");
+      return;
+    }
+
+    onDataChange(result.data, user);
+    showTrackingNotice(
+      "success",
+      "Local test route added",
+      `${result.pointCount} nearby movement points were added around ${result.destinationNames?.slice(0, 3).join(", ")}.`
+    );
+  };
+
   const createSampleRoute = () => {
     if (activeTrip) {
       showTrackingNotice("warning", "Finish active trip first", "Finish the current trip before adding a completed sample route.");
@@ -1512,6 +1528,7 @@ function TouristWorkspace({
       onStopTrip={stopTrip}
       onResumeLiveTracking={resumeLiveTracking}
       onAddDemoPoint={addDemoPoint}
+      onAddLocalTestRoute={addLocalTestRoute}
       onCreateSampleRoute={createSampleRoute}
       onCheckInDestinationChange={setCheckInDestinationId}
       onStartAttractionCheckIn={startAttractionCheckIn}

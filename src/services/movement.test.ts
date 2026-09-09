@@ -3,6 +3,7 @@ import { initialData } from "../data/demoData";
 import type { AppData } from "../types";
 import { distanceKm } from "./geo";
 import {
+  addLocalTestRouteToActiveTrip,
   appendMovementPoint,
   createSampleTripForUser,
   deleteTrip,
@@ -255,5 +256,27 @@ describe("movement service", () => {
     expect(result.error).toBeUndefined();
     expect(routePoints.length).toBeGreaterThanOrEqual(2);
     expect(routePoints.every((point) => distanceKm(point, penangPoint) <= 90)).toBe(true);
+  });
+
+  it("adds a local test route to an active trip for stationary prototype testing", () => {
+    const data: AppData = {
+      ...initialData,
+      trips: initialData.trips.filter((trip) => trip.userId !== "tourist-demo"),
+      points: initialData.points.filter((point) => point.userId !== "tourist-demo"),
+    };
+    const withConsent = grantLocationConsent(data, "tourist-demo");
+    const started = startTripSession(withConsent, "tourist-demo");
+    const penangPoint = { latitude: 5.4141, longitude: 100.3288 };
+    const result = addLocalTestRouteToActiveTrip(started.data!, "tourist-demo", penangPoint);
+    const routePoints = result.data?.points.filter((point) => point.tripId === started.trip?.id) ?? [];
+    const pointCount = result.pointCount ?? 0;
+    const summary = summarizeTrip(result.data!, started.trip!.id);
+
+    expect(result.error).toBeUndefined();
+    expect(pointCount).toBeGreaterThanOrEqual(2);
+    expect(routePoints).toHaveLength(pointCount);
+    expect(routePoints.every((point) => distanceKm(point, penangPoint) <= 90)).toBe(true);
+    expect(summary.distanceKm).toBeGreaterThan(0);
+    expect(summary.visitedDestinationCount).toBeGreaterThanOrEqual(2);
   });
 });
