@@ -2539,6 +2539,24 @@ button:disabled {
   gap: 14px;
 }
 
+.list-limit-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px dashed #b7efe6;
+  border-radius: 8px;
+  background: #f0fdfa;
+}
+
+.list-limit-footer span {
+  color: #475569;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
 .trip-history-panel {
   display: grid;
   gap: 14px;

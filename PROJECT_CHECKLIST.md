@@ -376,6 +376,7 @@ Current alignment notes:
 - [x] The tourist UX is improving but still needs to be simplified around the seven-page flow.
 - [x] Simplify Tourist Home by removing repeated stat/profile/trip panels and making recommendation cards less technical for normal users.
 - [x] Translate tourist profile categories and incident-report choices instead of leaving them as fixed English labels.
+- [x] Limit long Tourist Places and Administrator lists by default, with clear show-more controls for larger datasets.
 - [x] Firebase integration is active but still needs final testing and data-structure confirmation.
 - [x] The next development focus should be scope trimming, navigation alignment and end-to-end demonstration reliability.
 - [x] Report/evidence work should come after the app flow is stable.

@@ -16,7 +16,7 @@ const placeDiscoveryModes: Array<{ value: PlaceDiscoveryMode; labelKey: Translat
   { value: "hidden", labelKey: "tourist.places.mode.quieter" },
 ];
 
-const placePreviewLimit = 6;
+const placePreviewLimit = 4;
 
 const categoryLabelKeys: Record<DestinationCategory, TranslationKey> = {
   cultural: "category.cultural",

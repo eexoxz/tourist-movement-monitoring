@@ -129,6 +129,10 @@ type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 type AdminDashboardTab = "overview" | "tourists" | "records" | "safety" | "ai";
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
+const adminTouristPreviewLimit = 8;
+const adminMovementPreviewLimit = 8;
+const adminSafetyPreviewLimit = 5;
+const adminAiPreviewLimit = 8;
 const incidentTypeOptions: Array<{ value: IncidentType; labelKey: TranslationKey }> = [
   { value: "lost-item", labelKey: "tourist.safety.incidentLostItem" },
   { value: "accident", labelKey: "tourist.safety.incidentAccident" },
@@ -1542,6 +1546,33 @@ function TouristWorkspace({
   );
 }
 
+function ListLimitFooter({
+  hiddenCount,
+  isExpanded,
+  itemLabel,
+  pluralLabel,
+  onToggle,
+}: {
+  hiddenCount: number;
+  isExpanded: boolean;
+  itemLabel: string;
+  pluralLabel: string;
+  onToggle: () => void;
+}) {
+  if (hiddenCount <= 0 && !isExpanded) {
+    return null;
+  }
+
+  return (
+    <div className="list-limit-footer">
+      <span>{isExpanded ? `Showing all ${pluralLabel}.` : `${hiddenCount} more ${hiddenCount === 1 ? itemLabel : pluralLabel} available.`}</span>
+      <button className="secondary-action compact-action" type="button" onClick={onToggle}>
+        {isExpanded ? "Show fewer" : "Show more"}
+      </button>
+    </div>
+  );
+}
+
 function AdminWorkspace({
   data,
   view,
@@ -1575,6 +1606,10 @@ function AdminWorkspace({
   const [touristProfileFilter, setTouristProfileFilter] = useState<TouristProfile | "all" | "incomplete">("all");
   const [selectedManagedTouristId, setSelectedManagedTouristId] = useState<string | null>(null);
   const [safetyAdminNotes, setSafetyAdminNotes] = useState<Record<string, string>>({});
+  const [showAllAdminTourists, setShowAllAdminTourists] = useState(false);
+  const [showAllMovementRecords, setShowAllMovementRecords] = useState(false);
+  const [showAllSafetyCases, setShowAllSafetyCases] = useState(false);
+  const [showAllAiResults, setShowAllAiResults] = useState(false);
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
   const movementRecords = useMemo(
@@ -1683,6 +1718,14 @@ function AdminWorkspace({
   const openSafetyRecordCount = getOpenSafetyCount(data);
   const resolvedSafetyRecordCount = safetyRecords.filter((record) => record.status === "resolved").length;
   const selectedManagedTourist = filteredTouristManagementRows.find((row) => row.tourist.id === selectedManagedTouristId) ?? filteredTouristManagementRows[0] ?? null;
+  const visibleTouristManagementRows = showAllAdminTourists ? filteredTouristManagementRows : filteredTouristManagementRows.slice(0, adminTouristPreviewLimit);
+  const hiddenTouristManagementCount = filteredTouristManagementRows.length - visibleTouristManagementRows.length;
+  const visibleMovementTripRecords = showAllMovementRecords ? movementTripRecords : movementTripRecords.slice(0, adminMovementPreviewLimit);
+  const hiddenMovementRecordCount = movementTripRecords.length - visibleMovementTripRecords.length;
+  const visibleSafetyRecords = showAllSafetyCases ? safetyRecords : safetyRecords.slice(0, adminSafetyPreviewLimit);
+  const hiddenSafetyRecordCount = safetyRecords.length - visibleSafetyRecords.length;
+  const visibleAnalysisRows = showAllAiResults ? analysisRows : analysisRows.slice(0, adminAiPreviewLimit);
+  const hiddenAnalysisCount = analysisRows.length - visibleAnalysisRows.length;
   const selectedKValue = aiEvaluation.validClusteredRecordCount > 0 ? Math.min(3, aiEvaluation.validClusteredRecordCount) : 0;
   const selectedClusterSize = selectedAnalysis ? analysisRows.filter((analysis) => analysis.cluster === selectedAnalysis.cluster).length : 0;
   const clusterSummaries = useMemo(
@@ -1713,6 +1756,18 @@ function AdminWorkspace({
       setSelectedTripId("all");
     }
   }, [selectedTripId, tripOptions]);
+
+  useEffect(() => {
+    setShowAllMovementRecords(false);
+  }, [fromDate, selectedTouristId, selectedTripId, toDate]);
+
+  useEffect(() => {
+    setShowAllAdminTourists(false);
+  }, [touristProfileFilter, touristSearch]);
+
+  useEffect(() => {
+    setShowAllAiResults(false);
+  }, [adminTab]);
 
   useEffect(() => {
     if (selectedRecordTripId && !movementTripRecords.some((record) => record.trip.id === selectedRecordTripId)) {
@@ -1837,7 +1892,7 @@ function AdminWorkspace({
       />
       <section className="tourist-management-layout">
         <div className="list-panel tourist-management-list">
-          {filteredTouristManagementRows.map((row) => (
+          {visibleTouristManagementRows.map((row) => (
             <button className={selectedManagedTourist?.tourist.id === row.tourist.id ? "tourist-management-card active" : "tourist-management-card"} key={row.tourist.id} type="button" onClick={() => setSelectedManagedTouristId(row.tourist.id)}>
               <div>
                 <strong>{row.tourist.name}</strong>
@@ -1852,6 +1907,7 @@ function AdminWorkspace({
               </div>
             </button>
           ))}
+          <ListLimitFooter hiddenCount={hiddenTouristManagementCount} isExpanded={showAllAdminTourists} itemLabel="tourist record" pluralLabel="tourist records" onToggle={() => setShowAllAdminTourists((value) => !value)} />
           {filteredTouristManagementRows.length === 0 && <EmptyState text="No tourists match the current search or profile filter." />}
         </div>
 
@@ -1956,7 +2012,7 @@ function AdminWorkspace({
         <MovementMap points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints} destinations={data.destinations} locale={locale} />
         <section className="admin-records-layout">
           <div className="list-panel">
-            {movementTripRecords.map((record) => {
+            {visibleMovementTripRecords.map((record) => {
               const profile = record.analysis ? `${record.analysis.profile} Tourist` : "Pending";
               const destinationText = record.destinationNames.length > 0 ? record.destinationNames.join(", ") : "No recognised destination yet";
 
@@ -1984,6 +2040,7 @@ function AdminWorkspace({
                 </button>
               );
             })}
+            <ListLimitFooter hiddenCount={hiddenMovementRecordCount} isExpanded={showAllMovementRecords} itemLabel="movement record" pluralLabel="movement records" onToggle={() => setShowAllMovementRecords((value) => !value)} />
             {movementTripRecords.length === 0 && <EmptyState text="No movement records match this filter." />}
           </div>
 
@@ -2059,7 +2116,7 @@ function AdminWorkspace({
         ]}
       />
       <section className="list-panel safety-admin-list">
-        {safetyRecords.map((record) => {
+        {visibleSafetyRecords.map((record) => {
           const tourist = data.users.find((candidate) => candidate.id === record.userId);
           const caseKey = `${record.kind}:${record.id}`;
           const noteDraft = safetyAdminNotes[caseKey] ?? record.adminNote ?? "";
@@ -2123,6 +2180,7 @@ function AdminWorkspace({
             </article>
           );
         })}
+        <ListLimitFooter hiddenCount={hiddenSafetyRecordCount} isExpanded={showAllSafetyCases} itemLabel="safety case" pluralLabel="safety cases" onToggle={() => setShowAllSafetyCases((value) => !value)} />
         {safetyRecords.length === 0 && <EmptyState text="No SOS requests or incident reports have been submitted yet." />}
       </section>
     </div>
@@ -2172,7 +2230,7 @@ function AdminWorkspace({
         </section>
 
         <section className="list-panel ai-analysis-list">
-          {analysisRows.map((analysis) => {
+          {visibleAnalysisRows.map((analysis) => {
             const user = data.users.find((candidate) => candidate.id === analysis.userId);
             const active = selectedAnalysis ? analysisKey(selectedAnalysis) === analysisKey(analysis) : false;
 
@@ -2191,6 +2249,7 @@ function AdminWorkspace({
               </button>
             );
           })}
+          <ListLimitFooter hiddenCount={hiddenAnalysisCount} isExpanded={showAllAiResults} itemLabel="AI result" pluralLabel="AI results" onToggle={() => setShowAllAiResults((value) => !value)} />
           {analysisRows.length === 0 && <EmptyState text="AI analysis appears after a tourist completes a trip with at least two movement points." />}
         </section>
 
