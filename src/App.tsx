@@ -2180,7 +2180,7 @@ function AdminWorkspace({
     notify({
       tone: "success",
       title: "Demo tourists added",
-      message: `${demoDatasetMetadata.generatedTouristCount} prepared tourist profiles and movement routes are ready for the admin dashboard.`,
+      message: `${demoDatasetMetadata.generatedTouristCount} prepared tourists, ${demoDatasetMetadata.generatedTouristCount * demoDatasetMetadata.generatedTripsPerTourist} regional trips and attraction check-ins are ready for the admin dashboard.`,
     });
   };
 
@@ -2716,7 +2716,7 @@ function AdminWorkspace({
         <div className="page-action-row">
           <button className="secondary-action" onClick={seedDemoTourists}>
             <UserRound size={18} />
-            Add demo tourists
+            Load demo dataset
           </button>
           <button className="secondary-action" onClick={recomputeAi}>
             <RotateCcw size={18} />

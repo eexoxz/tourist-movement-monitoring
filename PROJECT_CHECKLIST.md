@@ -265,7 +265,7 @@ Current alignment notes:
 - [x] Support chunked Firestore saves for larger demonstration datasets.
 - [x] Keep synthetic seed size large enough for dashboard/AI evidence but small enough for fast local testing and Firebase sync.
 - [x] Add an administrator control to regenerate or reload the demonstration dataset on demand.
-- [ ] Expand synthetic tourist movement coverage around each supported Malaysian destination/city so local dashboard examples do not depend on manual test accounts.
+- [x] Expand synthetic tourist movement coverage around each supported Malaysian destination/city so local dashboard examples do not depend on manual test accounts.
 - [ ] Document in the report that seeded movement records are synthetic demonstration data, not real collected tourist data.
 
 ## Mobile And Usability

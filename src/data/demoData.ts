@@ -3,14 +3,16 @@ import type { AppData, AttractionCheckIn, Destination, DestinationCategory, GeoF
 
 const now = new Date();
 const GENERATED_TOURIST_COUNT = 300;
-const GENERATED_TRIPS_PER_TOURIST = 2;
+const GENERATED_TRIPS_PER_TOURIST = 3;
 const GENERATED_POINTS_PER_TRIP = 6;
+const GENERATED_CHECK_INS_PER_TRIP = 2;
 const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString();
 
 export const demoDatasetMetadata = {
   generatedTouristCount: GENERATED_TOURIST_COUNT,
   generatedTripsPerTourist: GENERATED_TRIPS_PER_TOURIST,
   generatedPointsPerTrip: GENERATED_POINTS_PER_TRIP,
+  generatedCheckInsPerTrip: GENERATED_CHECK_INS_PER_TRIP,
   namedDemoAccountCount: 5,
 } as const;
 
@@ -286,24 +288,40 @@ const travelPreferencesByProfile: Record<TouristProfile, DestinationCategory[]> 
 
 const routesByProfile: Record<TouristProfile, string[][]> = {
   cultural: [
-    ["batu-caves", "thean-hou-temple", "islamic-arts-museum", "kwai-chai-hong", "merdeka-square"],
-    ["kek-lok-si-temple", "george-town-heritage-zone", "hin-bus-depot", "jonker-street", "concubine-lane"],
-    ["mari-mari-cultural-village", "sarawak-cultural-village", "islamic-arts-museum", "thean-hou-temple", "kwai-chai-hong"],
+    ["islamic-arts-museum", "merdeka-square", "kwai-chai-hong", "central-market"],
+    ["thean-hou-temple", "kwai-chai-hong", "central-market", "merdeka-square"],
+    ["batu-caves", "thean-hou-temple", "central-market"],
+    ["kek-lok-si-temple", "george-town-heritage-zone", "hin-bus-depot"],
+    ["kellies-castle", "concubine-lane", "concubine-lane"],
+    ["mari-mari-cultural-village", "tanjung-aru", "mari-mari-cultural-village"],
+    ["sarawak-cultural-village", "semenggoh-nature-reserve", "sarawak-cultural-village"],
+    ["batu-caves", "merdeka-square", "kwai-chai-hong"],
   ],
   nature: [
-    ["perdana-botanical-garden", "taman-botani-putrajaya", "sekinchan-paddy-gallery", "perdana-botanical-garden", "klcc-park"],
-    ["penang-hill", "kek-lok-si-temple", "tanjung-aru", "mari-mari-cultural-village", "penang-hill"],
-    ["semenggoh-nature-reserve", "sarawak-cultural-village", "tanjung-aru", "sekinchan-paddy-gallery", "taman-botani-putrajaya"],
+    ["perdana-botanical-garden", "klcc-park", "perdana-botanical-garden"],
+    ["taman-botani-putrajaya", "taman-botani-putrajaya", "taman-botani-putrajaya"],
+    ["sekinchan-paddy-gallery", "sekinchan-paddy-gallery", "sekinchan-paddy-gallery"],
+    ["penang-hill", "kek-lok-si-temple", "penang-hill"],
+    ["tanjung-aru", "mari-mari-cultural-village", "tanjung-aru"],
+    ["semenggoh-nature-reserve", "sarawak-cultural-village", "semenggoh-nature-reserve"],
+    ["perdana-botanical-garden", "taman-botani-putrajaya", "klcc-park"],
   ],
   urban: [
-    ["klcc-park", "kampung-baru-kl", "central-market", "kwai-chai-hong", "hin-bus-depot"],
-    ["central-market", "klcc-park", "kampung-baru-kl", "jonker-street", "concubine-lane"],
-    ["hin-bus-depot", "george-town-heritage-zone", "central-market", "klcc-park", "kampung-baru-kl"],
+    ["klcc-park", "kampung-baru-kl", "central-market", "kwai-chai-hong"],
+    ["kampung-baru-kl", "klcc-park", "merdeka-square", "central-market"],
+    ["hin-bus-depot", "george-town-heritage-zone", "hin-bus-depot"],
+    ["jonker-street", "jonker-street", "jonker-street"],
+    ["central-market", "kampung-baru-kl", "kwai-chai-hong"],
+    ["klcc-park", "kampung-baru-kl", "klcc-park"],
   ],
   mixed: [
-    ["merdeka-square", "perdana-botanical-garden", "klcc-park", "kampung-baru-kl", "islamic-arts-museum"],
-    ["george-town-heritage-zone", "penang-hill", "hin-bus-depot", "kek-lok-si-temple", "central-market"],
-    ["kellies-castle", "concubine-lane", "sekinchan-paddy-gallery", "taman-botani-putrajaya", "thean-hou-temple"],
+    ["merdeka-square", "perdana-botanical-garden", "klcc-park"],
+    ["batu-caves", "thean-hou-temple", "sekinchan-paddy-gallery"],
+    ["george-town-heritage-zone", "penang-hill", "hin-bus-depot", "kek-lok-si-temple"],
+    ["kellies-castle", "jonker-street", "taman-botani-putrajaya"],
+    ["jonker-street", "kellies-castle", "sekinchan-paddy-gallery"],
+    ["mari-mari-cultural-village", "tanjung-aru", "jonker-street"],
+    ["sarawak-cultural-village", "semenggoh-nature-reserve", "jonker-street"],
   ],
 };
 
@@ -333,6 +351,7 @@ function createGeneratedSeedData() {
   const consents: LocationConsent[] = [];
   const trips: TripSession[] = [];
   const points: MovementPoint[] = [];
+  const checkIns: AttractionCheckIn[] = [];
 
   for (let userIndex = 0; userIndex < GENERATED_TOURIST_COUNT; userIndex += 1) {
     const sequence = String(userIndex + 1).padStart(3, "0");
@@ -400,10 +419,27 @@ function createGeneratedSeedData() {
           source: "demo",
         });
       }
+
+      Array.from(new Set(route)).slice(0, GENERATED_CHECK_INS_PER_TRIP).forEach((destinationId, checkInIndex) => {
+        const destination = destinationById(destinationId);
+        const checkedInHoursAgo = startedHoursAgo - 0.35 - checkInIndex * 0.72;
+
+        checkIns.push({
+          id: `checkin-seed-${sequence}-${tripIndex + 1}-${checkInIndex + 1}`,
+          userId,
+          destinationId,
+          tripId,
+          status: "checked-out",
+          checkedInAt: hoursAgo(checkedInHoursAgo),
+          checkedOutAt: hoursAgo(checkedInHoursAgo - destination.averageVisitMinutes / 60),
+          latitude: destination.latitude,
+          longitude: destination.longitude,
+        });
+      });
     }
   }
 
-  return { users, consents, trips, points };
+  return { users, consents, trips, points, checkIns };
 }
 
 const generatedSeedData = createGeneratedSeedData();
@@ -418,7 +454,7 @@ export const initialData: AppData = {
   recommendations: [],
   sosAlerts: baseSosAlerts,
   incidentReports: baseIncidentReports,
-  checkIns: baseCheckIns,
+  checkIns: [...baseCheckIns, ...generatedSeedData.checkIns],
   geofences,
 };
 
