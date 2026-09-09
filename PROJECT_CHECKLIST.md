@@ -263,6 +263,7 @@ Current alignment notes:
 - [x] Keep generated movement records deterministic so reset/demo testing is repeatable.
 - [x] Keep original demo login accounts available.
 - [x] Support chunked Firestore saves for larger demonstration datasets.
+- [x] Split production bundles for Firebase, map, React and icons so the app avoids oversized initial chunks.
 - [x] Keep synthetic seed size large enough for dashboard/AI evidence but small enough for fast local testing and Firebase sync.
 - [x] Add an administrator control to regenerate or reload the demonstration dataset on demand.
 - [x] Expand synthetic tourist movement coverage around each supported Malaysian destination/city so local dashboard examples do not depend on manual test accounts.

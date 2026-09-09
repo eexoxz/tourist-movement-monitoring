@@ -7,8 +7,32 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("node_modules/firebase")) {
-            return "firebase";
+          if (id.includes("node_modules/firebase/firestore") || id.includes("node_modules/@firebase/firestore")) {
+            return "firebase-firestore";
+          }
+
+          if (id.includes("node_modules/firebase/auth") || id.includes("node_modules/@firebase/auth")) {
+            return "firebase-auth";
+          }
+
+          if (id.includes("node_modules/firebase/app") || id.includes("node_modules/@firebase/app")) {
+            return "firebase-app";
+          }
+
+          if (id.includes("node_modules/firebase") || id.includes("node_modules/@firebase")) {
+            return "firebase-core";
+          }
+
+          if (id.includes("node_modules/leaflet")) {
+            return "map";
+          }
+
+          if (id.includes("node_modules/lucide-react")) {
+            return "icons";
+          }
+
+          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
+            return "react";
           }
         },
       },
