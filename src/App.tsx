@@ -65,6 +65,7 @@ import {
   signOutConfiguredProvider,
 } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
+import { translateAdmin, type AdminCopyKey } from "./services/adminI18n";
 import { isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "./data/demoData";
 import { malaysiaFestivalEvents } from "./data/festivals";
 import { loadLocale, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
@@ -1692,6 +1693,7 @@ function AdminWorkspace({
   notify: NotifyFn;
 }) {
   const t = (key: TranslationKey) => translate(locale, key);
+  const adminText = (key: AdminCopyKey, values?: Record<string, string | number>) => translateAdmin(locale, key, values);
   const tourists = getTourists(data);
   const summary = useMemo(() => summarizeDashboard(data), [data]);
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
@@ -1909,7 +1911,7 @@ function AdminWorkspace({
 
   const recomputeAi = () => {
     onDataChange(refreshAllRecommendations(data));
-    notify({ tone: "success", title: "AI analysis refreshed", message: "K-Means, Decision Tree output and recommendations were recalculated." });
+    notify({ tone: "success", title: adminText("notify.aiTitle"), message: adminText("notify.aiMessage") });
   };
 
   const seedDemoTourists = () => {
@@ -1992,28 +1994,28 @@ function AdminWorkspace({
     <div className="admin-tab-panel">
       <div className="admin-tab-heading">
         <div>
-          <h2>Tourist Management</h2>
-          <p>Review registered tourists, travel profiles, consent state, movement activity, and support needs.</p>
+          <h2>{adminText("tourists.title")}</h2>
+          <p>{adminText("tourists.description")}</p>
         </div>
-        <strong>{filteredTouristManagementRows.length} shown</strong>
+        <strong>{adminText("common.shown", { count: filteredTouristManagementRows.length })}</strong>
       </div>
       <div className="filter-toolbar admin-filter-toolbar">
-        <input className="toolbar-input" value={touristSearch} onChange={(event) => setTouristSearch(event.target.value)} placeholder="Search name, email, nationality, passport" aria-label="Search tourists" />
+        <input className="toolbar-input" value={touristSearch} onChange={(event) => setTouristSearch(event.target.value)} placeholder={adminText("tourists.search")} aria-label={adminText("tourists.search")} />
         <select className="toolbar-select" value={touristProfileFilter} onChange={(event) => setTouristProfileFilter(event.target.value as TouristProfile | "all" | "incomplete")}>
-          <option value="all">All profiles</option>
-          <option value="cultural">Cultural tourists</option>
-          <option value="nature">Nature tourists</option>
-          <option value="urban">Urban tourists</option>
-          <option value="mixed">Mixed tourists</option>
-          <option value="incomplete">Incomplete profile</option>
+          <option value="all">{adminText("tourists.allProfiles")}</option>
+          <option value="cultural">{adminText("tourists.cultural")}</option>
+          <option value="nature">{adminText("tourists.nature")}</option>
+          <option value="urban">{adminText("tourists.urban")}</option>
+          <option value="mixed">{adminText("tourists.mixed")}</option>
+          <option value="incomplete">{adminText("tourists.incomplete")}</option>
         </select>
       </div>
       <MetricGrid
         items={[
-          ["Registered tourists", tourists.length.toString()],
-          ["With passport", tourists.filter((tourist) => tourist.passportNumber).length.toString()],
-          ["Active trips", summary.activeTripCount.toString()],
-          ["Open safety cases", openSafetyRecordCount.toString()],
+          [adminText("tourists.registered"), tourists.length.toString()],
+          [adminText("tourists.withPassport"), tourists.filter((tourist) => tourist.passportNumber).length.toString()],
+          [adminText("tourists.activeTrips"), summary.activeTripCount.toString()],
+          [adminText("tourists.openSafety"), openSafetyRecordCount.toString()],
         ]}
       />
       <section className="tourist-management-layout">
@@ -2022,54 +2024,54 @@ function AdminWorkspace({
             <button className={selectedManagedTourist?.tourist.id === row.tourist.id ? "tourist-management-card active" : "tourist-management-card"} key={row.tourist.id} type="button" onClick={() => setSelectedManagedTouristId(row.tourist.id)}>
               <div>
                 <strong>{row.tourist.name}</strong>
-                <span>{row.profile ? `${row.profile} tourist` : "Profile pending"}</span>
+                <span>{row.profile ? `${row.profile} tourist` : adminText("tourists.profilePending")}</span>
               </div>
-              <p>{row.tourist.nationality ?? "Nationality not provided"} · {row.consentGranted ? "Location consent active" : "No active consent"}</p>
+              <p>{row.tourist.nationality ?? adminText("common.notProvided")} · {row.consentGranted ? adminText("tourists.locationConsentActive") : adminText("tourists.noActiveConsent")}</p>
               <div className="record-metrics">
-                <span>{row.completedTrips} trips</span>
-                <span>{row.movementPoints} points</span>
-                <span>{row.checkIns} check-ins</span>
-                <span>{row.openSafetyCases} safety</span>
+                <span>{row.completedTrips} {adminText("common.trips")}</span>
+                <span>{row.movementPoints} {adminText("common.points")}</span>
+                <span>{row.checkIns} {adminText("tourists.checkIns")}</span>
+                <span>{row.openSafetyCases} {adminText("tourists.safety")}</span>
               </div>
             </button>
           ))}
           <ListLimitFooter hiddenCount={hiddenTouristManagementCount} isExpanded={showAllAdminTourists} itemLabel="tourist record" pluralLabel="tourist records" onToggle={() => setShowAllAdminTourists((value) => !value)} />
-          {filteredTouristManagementRows.length === 0 && <EmptyState text="No tourists match the current search or profile filter." />}
+          {filteredTouristManagementRows.length === 0 && <EmptyState text={adminText("tourists.empty")} />}
         </div>
 
         {selectedManagedTourist && (
           <aside className="tourist-management-detail">
-            <span>Selected tourist</span>
+            <span>{adminText("tourists.selected")}</span>
             <h2>{selectedManagedTourist.tourist.name}</h2>
-            <p>{selectedManagedTourist.latestActivityAt ? `Latest activity: ${formatDateTime(selectedManagedTourist.latestActivityAt)}` : "No movement activity has been recorded yet."}</p>
+            <p>{selectedManagedTourist.latestActivityAt ? adminText("tourists.latestActivity", { date: formatDateTime(selectedManagedTourist.latestActivityAt) }) : adminText("tourists.noActivity")}</p>
             <dl>
               <div>
-                <dt>Email</dt>
+                <dt>{adminText("tourists.email")}</dt>
                 <dd>{selectedManagedTourist.tourist.email}</dd>
               </div>
               <div>
-                <dt>Nationality</dt>
-                <dd>{selectedManagedTourist.tourist.nationality ?? "Not provided"}</dd>
+                <dt>{adminText("tourists.nationality")}</dt>
+                <dd>{selectedManagedTourist.tourist.nationality ?? adminText("common.notProvided")}</dd>
               </div>
               <div>
-                <dt>Passport</dt>
-                <dd>{selectedManagedTourist.tourist.passportNumber ?? "Not provided"}</dd>
+                <dt>{adminText("tourists.passport")}</dt>
+                <dd>{selectedManagedTourist.tourist.passportNumber ?? adminText("common.notProvided")}</dd>
               </div>
               <div>
-                <dt>Travel style</dt>
+                <dt>{adminText("tourists.travelStyle")}</dt>
                 <dd>{formatTravelPreferenceList(selectedManagedTourist.tourist.travelPreferences, "en")}</dd>
               </div>
               <div>
-                <dt>Emergency contact</dt>
+                <dt>{adminText("tourists.emergencyContact")}</dt>
                 <dd>
                   {selectedManagedTourist.tourist.emergencyContactPhone
-                    ? `${selectedManagedTourist.tourist.emergencyContactName || "Saved contact"} · ${selectedManagedTourist.tourist.emergencyContactPhone}`
-                    : "Not provided"}
+                    ? `${selectedManagedTourist.tourist.emergencyContactName || adminText("tourists.savedContact")} · ${selectedManagedTourist.tourist.emergencyContactPhone}`
+                    : adminText("common.notProvided")}
                 </dd>
               </div>
               <div>
-                <dt>Recent places</dt>
-                <dd>{selectedManagedTourist.latestDestinationNames.length > 0 ? selectedManagedTourist.latestDestinationNames.join(", ") : "No recognised places yet"}</dd>
+                <dt>{adminText("tourists.recentPlaces")}</dt>
+                <dd>{selectedManagedTourist.latestDestinationNames.length > 0 ? selectedManagedTourist.latestDestinationNames.join(", ") : adminText("tourists.noRecognisedPlaces")}</dd>
               </div>
             </dl>
             <div className="tourist-detail-actions">
@@ -2077,10 +2079,10 @@ function AdminWorkspace({
                 setSelectedTouristId(selectedManagedTourist.tourist.id);
                 setAdminTab("records");
               }}>
-                View movement records
+                {adminText("tourists.viewMovement")}
               </button>
               <button className="secondary-action" type="button" onClick={() => setAdminTab("safety")}>
-                View safety cases
+                {adminText("tourists.viewSafety")}
               </button>
             </div>
           </aside>
@@ -2100,7 +2102,7 @@ function AdminWorkspace({
             setSelectedTripId("all");
           }}
         >
-          <option value="all">All tourists</option>
+          <option value="all">{adminText("records.allTourists")}</option>
           {tourists.map((tourist) => (
             <option key={tourist.id} value={tourist.id}>
               {tourist.name}
@@ -2108,7 +2110,7 @@ function AdminWorkspace({
           ))}
         </select>
         <select className="toolbar-select" value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
-          <option value="all">All trips</option>
+          <option value="all">{adminText("records.allTrips")}</option>
           {tripOptions.map((trip) => (
             <option key={trip.id} value={trip.id}>
               {formatDateTime(trip.startedAt)} - {trip.status}
@@ -2119,19 +2121,19 @@ function AdminWorkspace({
         <input className="toolbar-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} aria-label="To date" />
         <button className="secondary-action" onClick={resetRecordFilters} disabled={!hasRecordFilters}>
           <RotateCcw size={18} />
-          Reset
+          {adminText("common.reset")}
         </button>
         <button className="secondary-action" onClick={exportFilteredRecords} disabled={movementRecords.length === 0}>
           <Download size={18} />
-          CSV
+          {adminText("common.csv")}
         </button>
       </div>
       <MetricGrid
         items={[
-          ["Filtered records", movementRecords.length.toString()],
-          ["Trips matched", filteredTripCount.toString()],
-          ["Tourists shown", filteredTouristCount.toString()],
-          ["Date range", fromDate || toDate ? "Custom" : "All"],
+          [adminText("records.filteredRecords"), movementRecords.length.toString()],
+          [adminText("records.tripsMatched"), filteredTripCount.toString()],
+          [adminText("records.touristsShown"), filteredTouristCount.toString()],
+          [adminText("records.dateRange"), fromDate || toDate ? adminText("records.custom") : adminText("records.all")],
         ]}
       />
       <div className="two-column">
@@ -2139,8 +2141,8 @@ function AdminWorkspace({
         <section className="admin-records-layout">
           <div className="list-panel">
             {visibleMovementTripRecords.map((record) => {
-              const profile = record.analysis ? `${record.analysis.profile} Tourist` : "Pending";
-              const destinationText = record.destinationNames.length > 0 ? record.destinationNames.join(", ") : "No recognised destination yet";
+              const profile = record.analysis ? `${record.analysis.profile} Tourist` : adminText("common.pending");
+              const destinationText = record.destinationNames.length > 0 ? record.destinationNames.join(", ") : adminText("records.noRecognised");
 
               return (
                 <button
@@ -2150,7 +2152,7 @@ function AdminWorkspace({
                   type="button"
                 >
                   <div>
-                    <strong>{record.tourist?.name ?? "Unknown tourist"}</strong>
+                    <strong>{record.tourist?.name ?? adminText("common.unknownTourist")}</strong>
                     <span>{record.trip.status}</span>
                   </div>
                   <small className="mono-text">{record.trip.id}</small>
@@ -2158,57 +2160,57 @@ function AdminWorkspace({
                   <div className="record-metrics">
                     <span>{formatDateTime(record.trip.startedAt)}</span>
                     <span>{record.summary.durationMinutes} min</span>
-                    <span>{record.summary.pointCount} points</span>
+                    <span>{record.summary.pointCount} {adminText("common.points")}</span>
                     <span>{record.summary.visitedDestinationCount} stops</span>
-                    <span>{record.analysis ? `Cluster ${record.analysis.cluster + 1}` : "Cluster pending"}</span>
+                    <span>{record.analysis ? `${adminText("ai.cluster")} ${record.analysis.cluster + 1}` : adminText("records.clusterPending")}</span>
                     <span>{profile}</span>
                   </div>
                 </button>
               );
             })}
             <ListLimitFooter hiddenCount={hiddenMovementRecordCount} isExpanded={showAllMovementRecords} itemLabel="movement record" pluralLabel="movement records" onToggle={() => setShowAllMovementRecords((value) => !value)} />
-            {movementTripRecords.length === 0 && <EmptyState text="No movement records match this filter." />}
+            {movementTripRecords.length === 0 && <EmptyState text={adminText("records.empty")} />}
           </div>
 
           {selectedRecord && (
             <aside className="record-detail-panel">
-              <span>Selected Movement Record</span>
-              <h2>{selectedRecord.tourist?.name ?? "Unknown tourist"}</h2>
+              <span>{adminText("records.selected")}</span>
+              <h2>{selectedRecord.tourist?.name ?? adminText("common.unknownTourist")}</h2>
               <dl>
                 <div>
-                  <dt>Trip ID</dt>
+                  <dt>{adminText("records.tripId")}</dt>
                   <dd className="mono-text">{selectedRecord.trip.id}</dd>
                 </div>
                 <div>
-                  <dt>Date</dt>
+                  <dt>{adminText("records.date")}</dt>
                   <dd>{formatDateTime(selectedRecord.trip.startedAt)}</dd>
                 </div>
                 <div>
-                  <dt>Duration</dt>
-                  <dd>{selectedRecord.summary.durationMinutes} minutes</dd>
+                  <dt>{adminText("records.duration")}</dt>
+                  <dd>{selectedRecord.summary.durationMinutes} {adminText("common.minutes")}</dd>
                 </div>
                 <div>
-                  <dt>Movement points</dt>
+                  <dt>{adminText("overview.movementPoints")}</dt>
                   <dd>{selectedRecord.summary.pointCount}</dd>
                 </div>
                 <div>
-                  <dt>Destinations visited</dt>
-                  <dd>{selectedRecord.destinationNames.length > 0 ? selectedRecord.destinationNames.join(", ") : "Not recognised yet"}</dd>
+                  <dt>{adminText("records.destinationsVisited")}</dt>
+                  <dd>{selectedRecord.destinationNames.length > 0 ? selectedRecord.destinationNames.join(", ") : adminText("records.noRecognised")}</dd>
                 </div>
                 <div>
-                  <dt>Cluster ID</dt>
-                  <dd>{selectedRecord.analysis ? `Cluster ${selectedRecord.analysis.cluster + 1}` : "Pending"}</dd>
+                  <dt>{adminText("records.clusterId")}</dt>
+                  <dd>{selectedRecord.analysis ? `${adminText("ai.cluster")} ${selectedRecord.analysis.cluster + 1}` : adminText("common.pending")}</dd>
                 </div>
                 <div>
-                  <dt>Tourist Category</dt>
-                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.profile} Tourist` : "Pending analysis"}</dd>
+                  <dt>{adminText("records.touristCategory")}</dt>
+                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.profile} Tourist` : adminText("common.pending")}</dd>
                 </div>
                 <div>
-                  <dt>Analysis status</dt>
-                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.classifier} generated ${formatDateTime(selectedRecord.analysis.generatedAt)}` : "Waiting for enough trip data"}</dd>
+                  <dt>{adminText("records.analysisStatus")}</dt>
+                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.classifier} generated ${formatDateTime(selectedRecord.analysis.generatedAt)}` : adminText("common.pending")}</dd>
                 </div>
               </dl>
-              <p>Administrators can review movement records, but individual coordinates are read-only.</p>
+              <p>{adminText("records.readOnly")}</p>
             </aside>
           )}
         </section>
@@ -2228,17 +2230,17 @@ function AdminWorkspace({
     <div className="admin-tab-panel">
       <div className="admin-tab-heading">
         <div>
-          <h2>Safety Monitoring</h2>
-          <p>Review SOS requests and tourist incident reports submitted from the mobile tourist flow.</p>
+          <h2>{adminText("safety.title")}</h2>
+          <p>{adminText("safety.description")}</p>
         </div>
-        <strong>{openSafetyRecordCount} open case(s)</strong>
+        <strong>{adminText("safety.openCases", { count: openSafetyRecordCount })}</strong>
       </div>
       <MetricGrid
         items={[
-          ["Open SOS", openSosCount.toString()],
-          ["Open incidents", openIncidentCount.toString()],
-          ["Resolved", resolvedSafetyRecordCount.toString()],
-          ["Emergency contacts", tourists.filter((tourist) => tourist.emergencyContactPhone).length.toString()],
+          [adminText("safety.openSos"), openSosCount.toString()],
+          [adminText("safety.openIncidents"), openIncidentCount.toString()],
+          [adminText("safety.resolved"), resolvedSafetyRecordCount.toString()],
+          [adminText("safety.emergencyContacts"), tourists.filter((tourist) => tourist.emergencyContactPhone).length.toString()],
         ]}
       />
       <section className="list-panel safety-admin-list">
@@ -2247,67 +2249,67 @@ function AdminWorkspace({
           const caseKey = `${record.kind}:${record.id}`;
           const noteDraft = safetyAdminNotes[caseKey] ?? record.adminNote ?? "";
           const contactLine = tourist?.emergencyContactPhone
-            ? `${tourist.emergencyContactName || "Emergency contact"} · ${tourist.emergencyContactPhone}${tourist.emergencyContactRelation ? ` · ${tourist.emergencyContactRelation}` : ""}`
-            : "No emergency contact saved";
+            ? `${tourist.emergencyContactName || adminText("tourists.emergencyContact")} · ${tourist.emergencyContactPhone}${tourist.emergencyContactRelation ? ` · ${tourist.emergencyContactRelation}` : ""}`
+            : adminText("common.notProvided");
 
           return (
             <article className={record.kind === "sos" ? "safety-admin-card urgent" : "safety-admin-card"} key={`${record.kind}-${record.id}`}>
               <div className="safety-admin-heading">
                 <div>
-                  <span>{record.kind === "sos" ? "SOS" : "Incident"}</span>
+                  <span>{record.kind === "sos" ? adminText("safety.sos") : adminText("safety.incident")}</span>
                   <h3>{record.title}</h3>
                   <p>{record.detail}</p>
                 </div>
-                <select className="safety-status-select" value={record.status} onChange={(event) => updateSafetyCase(record.kind, record.id, event.target.value as SafetyStatus, noteDraft)} aria-label="Safety case status">
-                  <option value="open">Open</option>
-                  <option value="reviewing">Reviewing</option>
-                  <option value="resolved">Resolved</option>
+                <select className="safety-status-select" value={record.status} onChange={(event) => updateSafetyCase(record.kind, record.id, event.target.value as SafetyStatus, noteDraft)} aria-label={adminText("safety.status")}>
+                  <option value="open">{adminText("safety.open")}</option>
+                  <option value="reviewing">{adminText("safety.reviewing")}</option>
+                  <option value="resolved">{adminText("safety.resolved")}</option>
                 </select>
               </div>
               <dl className="safety-admin-meta">
                 <div>
-                  <dt>Tourist</dt>
-                  <dd>{tourist?.name ?? "Unknown tourist"}</dd>
+                  <dt>{t("common.tourist")}</dt>
+                  <dd>{tourist?.name ?? adminText("common.unknownTourist")}</dd>
                 </div>
                 <div>
-                  <dt>Nationality</dt>
-                  <dd>{tourist?.nationality ?? "Not provided"}</dd>
+                  <dt>{adminText("tourists.nationality")}</dt>
+                  <dd>{tourist?.nationality ?? adminText("common.notProvided")}</dd>
                 </div>
                 <div>
-                  <dt>Passport</dt>
-                  <dd>{tourist?.passportNumber ?? "Not provided"}</dd>
+                  <dt>{adminText("tourists.passport")}</dt>
+                  <dd>{tourist?.passportNumber ?? adminText("common.notProvided")}</dd>
                 </div>
                 <div>
-                  <dt>Contact</dt>
+                  <dt>{adminText("tourists.emergencyContact")}</dt>
                   <dd>{contactLine}</dd>
                 </div>
                 <div>
-                  <dt>Location</dt>
+                  <dt>{adminText("safety.location")}</dt>
                   <dd>{record.locationNote}</dd>
                 </div>
                 <div>
-                  <dt>Submitted</dt>
+                  <dt>{adminText("safety.submitted")}</dt>
                   <dd>{formatDateTime(record.createdAt)}</dd>
                 </div>
               </dl>
               <div className="safety-admin-response">
                 <label>
-                  Admin response for tourist
+                  {adminText("safety.responseLabel")}
                   <textarea
                     value={noteDraft}
                     onChange={(event) => setSafetyAdminNotes((current) => ({ ...current, [caseKey]: event.target.value }))}
-                    placeholder="Example: We are reviewing this case and will contact your emergency contact if needed."
+                    placeholder={adminText("safety.responsePlaceholder")}
                   />
                 </label>
                 <button className="secondary-action compact-action" type="button" onClick={() => updateSafetyCase(record.kind, record.id, record.status, noteDraft)}>
-                  Save response
+                  {adminText("safety.saveResponse")}
                 </button>
               </div>
             </article>
           );
         })}
         <ListLimitFooter hiddenCount={hiddenSafetyRecordCount} isExpanded={showAllSafetyCases} itemLabel="safety case" pluralLabel="safety cases" onToggle={() => setShowAllSafetyCases((value) => !value)} />
-        {safetyRecords.length === 0 && <EmptyState text="No SOS requests or incident reports have been submitted yet." />}
+        {safetyRecords.length === 0 && <EmptyState text={adminText("safety.empty")} />}
       </section>
     </div>
   );
@@ -2316,42 +2318,42 @@ function AdminWorkspace({
     <div className="admin-tab-panel">
       <div className="admin-tab-heading">
         <div>
-          <h2>AI Results</h2>
-          <p>K-Means groups similar movement patterns, then the Decision Tree explains the tourist category used for recommendations.</p>
+          <h2>{adminText("ai.title")}</h2>
+          <p>{adminText("ai.description")}</p>
         </div>
         <button className="secondary-action" onClick={recomputeAi}>
           <RotateCcw size={18} />
-          Recompute
+          {adminText("common.recompute")}
         </button>
       </div>
       <MetricGrid
         items={[
-          ["Clustered records", aiEvaluation.validClusteredRecordCount.toString()],
-          ["Labelled records", aiEvaluation.labelledRecordCount.toString()],
-          ["Decision accuracy", `${Math.round(aiEvaluation.classificationAccuracy * 100)}%`],
-          ["Selected K", selectedKValue.toString()],
+          [adminText("ai.clusteredRecords"), aiEvaluation.validClusteredRecordCount.toString()],
+          [adminText("ai.labelledRecords"), aiEvaluation.labelledRecordCount.toString()],
+          [adminText("ai.decisionAccuracy"), `${Math.round(aiEvaluation.classificationAccuracy * 100)}%`],
+          [adminText("ai.selectedK"), selectedKValue.toString()],
         ]}
       />
       <div className="ai-results-layout">
         <section className="panel ai-cluster-panel">
           <div className="section-heading">
-            <h2>K-Means Cluster Summary</h2>
+            <h2>{adminText("ai.clusterSummary")}</h2>
             <span>K = {selectedKValue}</span>
           </div>
           <div className="cluster-summary-grid">
             {clusterSummaries.map((summary) => (
               <article key={summary.cluster}>
-                <strong>Cluster {summary.cluster + 1}</strong>
-                <span>{summary.size} trip(s)</span>
+                <strong>{adminText("ai.cluster")} {summary.cluster + 1}</strong>
+                <span>{adminText("ai.tripCount", { count: summary.size })}</span>
                 <p>{summary.label}</p>
                 <small>
-                  Dominant category: {summary.dominantProfile} | Avg silhouette {summary.averageSilhouette}
+                  {adminText("ai.dominantCategory")}: {summary.dominantProfile} | {adminText("ai.avgSilhouette")} {summary.averageSilhouette}
                 </small>
               </article>
             ))}
-            {clusterSummaries.length === 0 && <EmptyState text="K-Means results appear after completed trips contain enough movement points." />}
+            {clusterSummaries.length === 0 && <EmptyState text={adminText("ai.noClusters")} />}
           </div>
-          <h2>Tourist Category Distribution</h2>
+          <h2>{adminText("ai.categoryDistribution")}</h2>
           <CategoryBars values={profileDistribution} />
         </section>
 
@@ -2363,60 +2365,64 @@ function AdminWorkspace({
             return (
               <button className={active ? "record-card selectable active" : "record-card selectable"} key={analysisKey(analysis)} onClick={() => setSelectedAnalysisKey(analysisKey(analysis))} type="button">
                 <div>
-                  <strong>{user?.name ?? "Unknown tourist"}</strong>
-                  <span>Cluster {analysis.cluster + 1}</span>
+                  <strong>{user?.name ?? adminText("common.unknownTourist")}</strong>
+                  <span>{adminText("ai.cluster")} {analysis.cluster + 1}</span>
                 </div>
                 <p>{analysis.clusterLabel}</p>
                 <div className="record-metrics">
                   <span>{analysis.profile} Tourist</span>
-                  <span>{analysis.dataPointCount} points</span>
-                  <span>{Math.round(analysis.classificationConfidence * 100)}% confidence</span>
+                  <span>{analysis.dataPointCount} {adminText("common.points")}</span>
+                  <span>{Math.round(analysis.classificationConfidence * 100)}% {adminText("ai.confidence")}</span>
                 </div>
               </button>
             );
           })}
-          <ListLimitFooter hiddenCount={hiddenAnalysisCount} isExpanded={showAllAiResults} itemLabel="AI result" pluralLabel="AI results" onToggle={() => setShowAllAiResults((value) => !value)} />
-          {analysisRows.length === 0 && <EmptyState text="AI analysis appears after a tourist completes a trip with at least two movement points." />}
+          <ListLimitFooter hiddenCount={hiddenAnalysisCount} isExpanded={showAllAiResults} itemLabel={adminText("ai.resultLabel")} pluralLabel="AI results" onToggle={() => setShowAllAiResults((value) => !value)} />
+          {analysisRows.length === 0 && <EmptyState text={adminText("ai.empty")} />}
         </section>
 
         {selectedAnalysis && (
           <aside className="ai-detail-panel">
-            <span>Selected AI Result</span>
-            <h2>{selectedAnalysisUser?.name ?? "Unknown tourist"}</h2>
+            <span>{adminText("ai.selectedResult")}</span>
+            <h2>{selectedAnalysisUser?.name ?? adminText("common.unknownTourist")}</h2>
             <dl>
               <div>
-                <dt>Trip ID</dt>
+                <dt>{adminText("records.tripId")}</dt>
                 <dd className="mono-text">{selectedAnalysis.tripId}</dd>
               </div>
               <div>
-                <dt>Trip date</dt>
-                <dd>{selectedAnalysisTrip ? formatDateTime(selectedAnalysisTrip.startedAt) : "Unknown"}</dd>
+                <dt>{adminText("ai.tripDate")}</dt>
+                <dd>{selectedAnalysisTrip ? formatDateTime(selectedAnalysisTrip.startedAt) : adminText("common.unknown")}</dd>
               </div>
               <div>
-                <dt>K-Means result</dt>
+                <dt>{adminText("ai.kMeansResult")}</dt>
                 <dd>
-                  Cluster {selectedAnalysis.cluster + 1} of K={selectedKValue} ({selectedClusterSize} trip(s))
+                  {adminText("ai.cluster")} {selectedAnalysis.cluster + 1} of K={selectedKValue} ({adminText("ai.tripCount", { count: selectedClusterSize })})
                 </dd>
               </div>
               <div>
-                <dt>Dominant pattern</dt>
+                <dt>{adminText("ai.dominantPattern")}</dt>
                 <dd>{selectedAnalysis.clusterLabel}</dd>
               </div>
               <div>
-                <dt>Cluster description</dt>
+                <dt>{adminText("ai.clusterDescriptionLabel")}</dt>
                 <dd>
-                  The route is closest to a centroid with {selectedAnalysis.kMeansCentroid.culturalProportion}% cultural, {selectedAnalysis.kMeansCentroid.natureProportion}% nature,{" "}
-                  {selectedAnalysis.kMeansCentroid.urbanProportion}% urban, and about {selectedAnalysis.kMeansCentroid.uniqueDestinations} unique destination(s).
+                  {adminText("ai.clusterDescription", {
+                    cultural: selectedAnalysis.kMeansCentroid.culturalProportion,
+                    nature: selectedAnalysis.kMeansCentroid.natureProportion,
+                    urban: selectedAnalysis.kMeansCentroid.urbanProportion,
+                    unique: selectedAnalysis.kMeansCentroid.uniqueDestinations,
+                  })}
                 </dd>
               </div>
               <div>
-                <dt>Decision Tree output</dt>
+                <dt>{adminText("ai.decisionOutput")}</dt>
                 <dd>
-                  {selectedAnalysis.profile} Tourist, {Math.round(selectedAnalysis.classificationConfidence * 100)}% confidence
+                  {selectedAnalysis.profile} Tourist, {Math.round(selectedAnalysis.classificationConfidence * 100)}% {adminText("ai.confidence")}
                 </dd>
               </div>
               <div>
-                <dt>Generated</dt>
+                <dt>{adminText("ai.generated")}</dt>
                 <dd>{formatDateTime(selectedAnalysis.generatedAt)}</dd>
               </div>
             </dl>
@@ -2426,7 +2432,7 @@ function AdminWorkspace({
               <span>{selectedAnalysis.decisionRuleCount} rules</span>
             </div>
             <section className="ai-detail-section">
-              <h3>Decision Path</h3>
+              <h3>{adminText("ai.decisionPath")}</h3>
               <ul className="decision-path">
                 {selectedAnalysis.decisionPath.map((step) => (
                   <li key={step}>{step}</li>
@@ -2434,15 +2440,15 @@ function AdminWorkspace({
               </ul>
             </section>
             <section className="ai-detail-section">
-              <h3>K-Means Input Pattern</h3>
+              <h3>{adminText("ai.inputPattern")}</h3>
               <KMeansFeatureBars features={selectedAnalysis.kMeansInput} />
             </section>
             <section className="ai-detail-section">
-              <h3>K-Means Cluster Centroid</h3>
+              <h3>{adminText("ai.clusterCentroid")}</h3>
               <KMeansFeatureBars features={selectedAnalysis.kMeansCentroid} />
             </section>
             <section className="ai-detail-section">
-              <h3>Recommendation Result</h3>
+              <h3>{adminText("ai.recommendationResult")}</h3>
               {selectedAnalysisRecommendations.length > 0 ? (
                 <div className="ai-recommendation-result">
                   {selectedAnalysisRecommendations.map((recommendation) => {
@@ -2459,7 +2465,7 @@ function AdminWorkspace({
                   })}
                 </div>
               ) : (
-                <p>No recommendation result is currently available for this tourist.</p>
+                <p>{adminText("ai.noRecommendation")}</p>
               )}
             </section>
           </aside>
@@ -2516,18 +2522,18 @@ function AdminWorkspace({
             mode="admin"
             demand={destinationDemand}
             destinations={data.destinations}
-            profile={`${tourists.length} tourist profiles`}
+            profile={`${tourists.length} ${adminText("overview.touristProfiles")}`}
             pointCount={summary.movementPointCount}
             plan={travelPlan}
           />
           <MetricGrid
             items={[
-              ["Tourists", tourists.length.toString()],
-              ["Completed trips", summary.completedTripCount.toString()],
-              ["Movement points", summary.movementPointCount.toString()],
-              ["Movement alerts", movementAlerts.length.toString()],
-              ["Safety cases", openSafetyRecordCount.toString()],
-              ["Active zones", activeGeofenceCount.toString()],
+              [t("common.tourist"), tourists.length.toString()],
+              [adminText("overview.completedTrips"), summary.completedTripCount.toString()],
+              [adminText("overview.movementPoints"), summary.movementPointCount.toString()],
+              [adminText("overview.movementAlerts"), movementAlerts.length.toString()],
+              [adminText("overview.safetyCases"), openSafetyRecordCount.toString()],
+              [adminText("overview.activeZones"), activeGeofenceCount.toString()],
             ]}
           />
           <section className="admin-overview-layout">
@@ -2539,8 +2545,8 @@ function AdminWorkspace({
 
               <details className="admin-overview-section" open>
                 <summary>
-                  <span>Movement alerts</span>
-                  <strong>{movementAlerts.length} alert(s)</strong>
+                  <span>{adminText("overview.movementAlertsTitle")}</span>
+                  <strong>{adminText("overview.alertCount", { count: movementAlerts.length })}</strong>
                 </summary>
                 <div className="admin-overview-section-body">
                   <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} />
@@ -2549,8 +2555,8 @@ function AdminWorkspace({
 
               <details className="admin-overview-section">
                 <summary>
-                  <span>Geofence activity</span>
-                  <strong>{activeGeofenceCount} active</strong>
+                  <span>{adminText("overview.geofenceActivity")}</span>
+                  <strong>{adminText("overview.activeCount", { count: activeGeofenceCount })}</strong>
                 </summary>
                 <div className="admin-overview-section-body">
                   <div className="geofence-admin-list">
@@ -2573,45 +2579,45 @@ function AdminWorkspace({
 
               <details className="admin-overview-section">
                 <summary>
-                  <span>Demand and events</span>
-                  <strong>{upcomingFestivals.length} event(s)</strong>
+                  <span>{adminText("overview.demandEvents")}</span>
+                  <strong>{adminText("overview.eventCount", { count: upcomingFestivals.length })}</strong>
                 </summary>
                 <div className="admin-overview-section-body">
-                  <h2>Movement Trend</h2>
+                  <h2>{adminText("overview.movementTrend")}</h2>
                   <CategoryBars values={movementTrend} />
-                  <MovementDemandList title="Top Tourist Flow" demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
+                  <MovementDemandList title={adminText("overview.topTouristFlow")} demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact />
                   <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact />
                 </div>
               </details>
 
               <details className="admin-overview-section">
                 <summary>
-                  <span>Travel plan signal</span>
-                  <strong>{travelPlan.stops.length} stop(s)</strong>
+                  <span>{adminText("overview.travelPlanSignal")}</span>
+                  <strong>{adminText("overview.stopCount", { count: travelPlan.stops.length })}</strong>
                 </summary>
                 <div className="admin-overview-section-body">
                   <div className="section-heading">
-                    <h2>Travel Plan Signal</h2>
+                    <h2>{adminText("overview.travelPlanSignal")}</h2>
                     <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
                       <Download size={18} />
-                      CSV
+                      {adminText("common.csv")}
                     </button>
                   </div>
-                  <div className="plan-builder" aria-label="Travel plan controls">
+                  <div className="plan-builder" aria-label={adminText("overview.travelPlanControls")}>
                     <label>
-                      Audience
+                      {adminText("overview.audience")}
                       <select value={planAudience} onChange={(event) => setPlanAudience(event.target.value as PlanAudience)}>
-                        <option value="movement">Overall movement</option>
-                        <option value="mixed">Mixed tourists</option>
-                        <option value="cultural">Cultural tourists</option>
-                        <option value="nature">Nature tourists</option>
-                        <option value="urban">Urban tourists</option>
+                        <option value="movement">{adminText("overview.overallMovement")}</option>
+                        <option value="mixed">{adminText("tourists.mixed")}</option>
+                        <option value="cultural">{adminText("tourists.cultural")}</option>
+                        <option value="nature">{adminText("tourists.nature")}</option>
+                        <option value="urban">{adminText("tourists.urban")}</option>
                       </select>
                     </label>
                     <label>
-                      City
+                      {adminText("overview.city")}
                       <select value={planCity} onChange={(event) => setPlanCity(event.target.value)}>
-                        <option value="all">All cities</option>
+                        <option value="all">{adminText("overview.allCities")}</option>
                         {cityOptions.map((city) => (
                           <option key={city} value={city}>
                             {city}
@@ -2620,21 +2626,21 @@ function AdminWorkspace({
                       </select>
                     </label>
                     <label>
-                      Stops
+                      {adminText("overview.stops")}
                       <input type="number" min={1} max={8} value={planMaxStops} onChange={(event) => setPlanMaxStops(Number(event.target.value))} />
                     </label>
                     <label>
-                      Demand
+                      {adminText("overview.demand")}
                       <select value={planMinimumTier} onChange={(event) => setPlanMinimumTier(event.target.value as PlanTier)}>
-                        <option value="low">Low+</option>
-                        <option value="emerging">Emerging+</option>
-                        <option value="medium">Medium+</option>
-                        <option value="high">High only</option>
+                        <option value="low">{adminText("overview.lowPlus")}</option>
+                        <option value="emerging">{adminText("overview.emergingPlus")}</option>
+                        <option value="medium">{adminText("overview.mediumPlus")}</option>
+                        <option value="high">{adminText("overview.highOnly")}</option>
                       </select>
                     </label>
                     <label className="checkbox-field">
                       <input type="checkbox" checked={planDiversifyCategories} onChange={(event) => setPlanDiversifyCategories(event.target.checked)} />
-                      Diverse categories
+                      {adminText("overview.diverseCategories")}
                     </label>
                   </div>
                   <TravelPlanPanel plan={travelPlan} destinations={data.destinations} />
@@ -2643,8 +2649,8 @@ function AdminWorkspace({
 
               <details className="admin-overview-section">
                 <summary>
-                  <span>Recent recommendation output</span>
-                  <strong>{data.recommendations.length} result(s)</strong>
+                  <span>{adminText("overview.recentRecommendations")}</span>
+                  <strong>{adminText("overview.resultCount", { count: data.recommendations.length })}</strong>
                 </summary>
                 <div className="admin-overview-section-body">
                   <RecommendationList recommendations={data.recommendations.slice(0, 3)} destinations={data.destinations} compact />

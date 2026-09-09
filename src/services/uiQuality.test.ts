@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
 const accessSource = readFileSync(resolve(process.cwd(), "src/services/access.ts"), "utf8");
 const adminAnalyticsSource = readFileSync(resolve(process.cwd(), "src/components/AdminAnalyticsWidgets.tsx"), "utf8");
+const adminI18nSource = readFileSync(resolve(process.cwd(), "src/services/adminI18n.ts"), "utf8");
 const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
 const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
@@ -65,7 +66,7 @@ describe("user interface quality guardrails", () => {
     expect(appSource).toContain("Cloud save needs retry");
     expect(appSource).toContain("Location tracking stopped");
     expect(destinationManagerSource).toContain("Destination not saved");
-    expect(appSource).toContain("AI analysis refreshed");
+    expect(adminI18nSource).toContain("AI analysis refreshed");
   });
 
   it("keeps the final navigation focused on the seven-page FYP scope", () => {
