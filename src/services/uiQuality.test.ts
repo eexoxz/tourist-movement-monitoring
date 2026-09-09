@@ -4,7 +4,9 @@ import { resolve } from "node:path";
 
 const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
 const accessSource = readFileSync(resolve(process.cwd(), "src/services/access.ts"), "utf8");
+const adminAnalyticsSource = readFileSync(resolve(process.cwd(), "src/components/AdminAnalyticsWidgets.tsx"), "utf8");
 const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
+const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
@@ -43,16 +45,16 @@ describe("user interface quality guardrails", () => {
   });
 
   it("keeps destination management searchable after CRUD stabilisation", () => {
-    expect(appSource).toContain("Find destination");
-    expect(appSource).toContain("categoryFilter");
-    expect(appSource).toContain("filteredDestinations");
+    expect(destinationManagerSource).toContain("Find destination");
+    expect(destinationManagerSource).toContain("categoryFilter");
+    expect(destinationManagerSource).toContain("filteredDestinations");
   });
 
   it("keeps supporting categories deliberate while primary AI categories stay clear", () => {
     expect(destinationManagementSource).toContain('["cultural", "nature", "urban", "heritage", "food", "coastal"]');
-    expect(appSource).toContain("Cultural proportion");
-    expect(appSource).toContain("Nature proportion");
-    expect(appSource).toContain("Urban proportion");
+    expect(adminAnalyticsSource).toContain("Cultural proportion");
+    expect(adminAnalyticsSource).toContain("Nature proportion");
+    expect(adminAnalyticsSource).toContain("Urban proportion");
     expect(i18nSource).toContain('"category.food": "Food"');
     expect(i18nSource).toContain('"category.coastal": "Coastal"');
   });
@@ -62,7 +64,7 @@ describe("user interface quality guardrails", () => {
     expect(authScreenSource).toContain("Registration failed");
     expect(appSource).toContain("Cloud save needs retry");
     expect(appSource).toContain("Location tracking stopped");
-    expect(appSource).toContain("Destination not saved");
+    expect(destinationManagerSource).toContain("Destination not saved");
     expect(appSource).toContain("AI analysis refreshed");
   });
 

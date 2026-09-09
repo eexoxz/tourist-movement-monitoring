@@ -468,66 +468,107 @@ const demandTierWeight: Record<DestinationDemand["tier"], number> = {
 
 const localRecommendationRadiusKm = 90;
 
-function calculateApproachSignals(data: AppData, destinationId: string) {
-  const destination = data.destinations.find((candidate) => candidate.id === destinationId);
-  if (!destination) {
-    return { approachSignalCount: 0, approachingTouristCount: 0 };
-  }
+type DemandAccumulator = {
+  destinationId: string;
+  movementPointCount: number;
+  touristIds: Set<string>;
+  recentPointCount: number;
+  approachSignalCount: number;
+  approachingTouristIds: Set<string>;
+  rawScore: number;
+};
 
-  let approachSignalCount = 0;
-  const approachingTouristIds = new Set<string>();
+function createDemandAccumulators(destinations: Destination[]) {
+  return new Map<string, DemandAccumulator>(
+    destinations.map((destination) => [
+      destination.id,
+      {
+        destinationId: destination.id,
+        movementPointCount: 0,
+        touristIds: new Set<string>(),
+        recentPointCount: 0,
+        approachSignalCount: 0,
+        approachingTouristIds: new Set<string>(),
+        rawScore: 0,
+      },
+    ])
+  );
+}
 
-  data.trips.forEach((trip) => {
-    const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
+function movementPointsByTrip(points: MovementPoint[]) {
+  const grouped = new Map<string, MovementPoint[]>();
 
-    points.slice(1).forEach((point, index) => {
-      const previous = points[index];
-      const previousDistance = distanceKm(previous, destination);
-      const currentDistance = distanceKm(point, destination);
-      const movedCloserBy = previousDistance - currentDistance;
-
-      if (previousDistance <= 8 && currentDistance <= 8 && movedCloserBy >= 0.08) {
-        approachSignalCount += 1;
-        approachingTouristIds.add(trip.userId);
-      }
-    });
+  points.forEach((point) => {
+    const tripPoints = grouped.get(point.tripId) ?? [];
+    tripPoints.push(point);
+    grouped.set(point.tripId, tripPoints);
   });
 
-  return {
-    approachSignalCount,
-    approachingTouristCount: approachingTouristIds.size,
-  };
+  return grouped;
 }
 
 export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
   const since = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const rows = data.destinations.map((destination) => {
-    const nearbyPoints = data.points.filter((point) => {
-      const nearest = nearestDestination(point, data.destinations);
-      return nearest?.destination.id === destination.id && nearest.distance <= 1.2;
-    });
-    const tripIds = new Set(nearbyPoints.map((point) => point.tripId));
-    const touristIds = new Set(
-      data.trips.filter((trip) => tripIds.has(trip.id)).map((trip) => trip.userId)
-    );
-    const recentPointCount = nearbyPoints.filter((point) => new Date(point.recordedAt).getTime() >= since).length;
-    const approach = calculateApproachSignals(data, destination.id);
+  const rowsByDestination = createDemandAccumulators(data.destinations);
+  const tripById = new Map(data.trips.map((trip) => [trip.id, trip]));
+  const pointsByTrip = movementPointsByTrip(data.points);
 
-    return {
-      destinationId: destination.id,
-      movementPointCount: nearbyPoints.length,
-      uniqueTouristCount: touristIds.size,
-      recentPointCount,
-      approachSignalCount: approach.approachSignalCount,
-      approachingTouristCount: approach.approachingTouristCount,
-      rawScore:
-        nearbyPoints.length * 8 +
-        touristIds.size * 18 +
-        recentPointCount * 10 +
-        approach.approachSignalCount * 12 +
-        approach.approachingTouristCount * 20,
-    };
+  data.points.forEach((point) => {
+    const nearest = nearestDestination(point, data.destinations);
+
+    if (!nearest || nearest.distance > 1.2) {
+      return;
+    }
+
+    const row = rowsByDestination.get(nearest.destination.id);
+    const trip = tripById.get(point.tripId);
+
+    if (!row) {
+      return;
+    }
+
+    row.movementPointCount += 1;
+
+    if (trip) {
+      row.touristIds.add(trip.userId);
+    }
+
+    if (new Date(point.recordedAt).getTime() >= since) {
+      row.recentPointCount += 1;
+    }
   });
+
+  data.trips.forEach((trip) => {
+    const points = prepareMovementPoints(pointsByTrip.get(trip.id) ?? []);
+
+    points.slice(1).forEach((point, index) => {
+      const previous = points[index];
+
+      data.destinations.forEach((destination) => {
+        const previousDistance = distanceKm(previous, destination);
+        const currentDistance = distanceKm(point, destination);
+        const movedCloserBy = previousDistance - currentDistance;
+
+        if (previousDistance <= 8 && currentDistance <= 8 && movedCloserBy >= 0.08) {
+          const row = rowsByDestination.get(destination.id);
+          if (row) {
+            row.approachSignalCount += 1;
+            row.approachingTouristIds.add(trip.userId);
+          }
+        }
+      });
+    });
+  });
+
+  const rows = [...rowsByDestination.values()].map((row) => ({
+    ...row,
+    rawScore:
+      row.movementPointCount * 8 +
+      row.touristIds.size * 18 +
+      row.recentPointCount * 10 +
+      row.approachSignalCount * 12 +
+      row.approachingTouristIds.size * 20,
+  }));
   const maxScore = Math.max(1, ...rows.map((row) => row.rawScore));
 
   return rows
@@ -537,10 +578,10 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
       return {
         destinationId: row.destinationId,
         movementPointCount: row.movementPointCount,
-        uniqueTouristCount: row.uniqueTouristCount,
+        uniqueTouristCount: row.touristIds.size,
         recentPointCount: row.recentPointCount,
         approachSignalCount: row.approachSignalCount,
-        approachingTouristCount: row.approachingTouristCount,
+        approachingTouristCount: row.approachingTouristIds.size,
         popularityScore,
         tier: demandTier(popularityScore),
       };
