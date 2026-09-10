@@ -298,6 +298,7 @@ Current alignment notes:
 - [x] Keep fallback tourist recommendations nearest-first when local movement/location data is available.
 - [x] Add an active-trip local route simulator so movement recording can be demonstrated without physically travelling.
 - [x] Preserve the latest browser location and save the first trip point promptly so tourist recommendations stay local after reload/start.
+- [x] Standardise tourist maps so active or selected trips show routes while overview maps show aggregate destination signals.
 - [x] Use aggregate destination demand mode on administrator overview maps so large demo datasets stay readable.
 - [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 

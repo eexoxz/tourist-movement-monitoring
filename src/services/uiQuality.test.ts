@@ -13,7 +13,9 @@ const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), 
 const listLimitFooterSource = readFileSync(resolve(process.cwd(), "src/components/ListLimitFooter.tsx"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
 const movementMapSource = readFileSync(resolve(process.cwd(), "src/components/MovementMap.tsx"), "utf8");
+const touristHomeSource = readFileSync(resolve(process.cwd(), "src/components/TouristHome.tsx"), "utf8");
 const toastSource = readFileSync(resolve(process.cwd(), "src/components/ToastViewport.tsx"), "utf8");
+const tripDiarySource = readFileSync(resolve(process.cwd(), "src/components/TripDiary.tsx"), "utf8");
 const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf8");
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
@@ -109,5 +111,9 @@ describe("user interface quality guardrails", () => {
     expect(mapSource).toContain('displayMode === "signals"');
     expect(mapSource).toContain('"999+"');
     expect(appSource).toContain('displayMode="signals"');
+    expect(appSource).toContain('displayMode={activePoints.length ? "route" : "signals"}');
+    expect(appSource).toContain('displayMode={selectedRecord?.points.length ? "route" : "signals"}');
+    expect(touristHomeSource).toContain('displayMode={activeTrip ? "route" : "signals"}');
+    expect(tripDiarySource).toContain('displayMode={selectedTripPoints.length ? "route" : "signals"}');
   });
 });

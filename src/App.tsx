@@ -1509,6 +1509,7 @@ function TouristWorkspace({
             destinations={data.destinations}
             activePoint={activePoints.at(-1) ?? latestKnownPoint}
             mode="tourist"
+            displayMode={activePoints.length ? "route" : "signals"}
             locale={locale}
           />
         </div>
@@ -2111,7 +2112,12 @@ function AdminWorkspace({
         ]}
       />
       <div className="two-column">
-        <MovementMap points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints} destinations={data.destinations} locale={locale} />
+        <MovementMap
+          points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints}
+          destinations={data.destinations}
+          displayMode={selectedRecord?.points.length ? "route" : "signals"}
+          locale={locale}
+        />
         <section className="admin-records-layout">
           <div className="list-panel">
             {visibleMovementTripRecords.map((record) => {

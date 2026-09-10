@@ -231,7 +231,14 @@ export function TouristHome({
           </div>
 
           <div className="home-map-panel">
-            <MovementMap points={activeJourneyPoints} destinations={destinations} activePoint={activeJourneyPoint} mode="tourist" locale={locale} />
+            <MovementMap
+              points={activeJourneyPoints}
+              destinations={destinations}
+              activePoint={activeJourneyPoint}
+              mode="tourist"
+              displayMode={activeTrip ? "route" : "signals"}
+              locale={locale}
+            />
           </div>
         </section>
 

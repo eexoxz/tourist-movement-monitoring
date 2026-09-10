@@ -81,7 +81,13 @@ export function TripDiary({
       <section className="trip-diary-layout">
         <div className="trip-diary-main">
           <div className="trip-map-panel">
-            <MovementMap points={selectedTripPoints.length ? selectedTripPoints : fallbackPoints} destinations={destinations} mode="tourist" locale={locale} />
+            <MovementMap
+              points={selectedTripPoints.length ? selectedTripPoints : fallbackPoints}
+              destinations={destinations}
+              mode="tourist"
+              displayMode={selectedTripPoints.length ? "route" : "signals"}
+              locale={locale}
+            />
           </div>
 
           {selectedTrip && selectedTripSummary ? (
