@@ -67,6 +67,26 @@ function routeIcon(type: "start" | "end" | "current") {
   });
 }
 
+function signalRank(tier: DestinationSignal["tier"]) {
+  return tier === "high" ? 4 : tier === "medium" ? 3 : tier === "emerging" ? 2 : 1;
+}
+
+function demandHaloRadius(signal: DestinationSignal) {
+  return signal.tier === "high" ? 620 : signal.tier === "medium" ? 520 : signal.tier === "emerging" ? 430 : 320;
+}
+
+function shouldDrawDemandHalo(signal: DestinationSignal, displayMode: MapViewProps["displayMode"], hasActivePoint: boolean) {
+  if (signal.nearbyPointCount > 0) {
+    return true;
+  }
+
+  return displayMode === "route" && hasActivePoint;
+}
+
+function markerZIndex(signal: DestinationSignal) {
+  return 200 + signalRank(signal.tier) * 100 + Math.min(signal.nearbyPointCount, 99);
+}
+
 export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en" }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -144,27 +164,30 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
     visibleDestinations.forEach((destination) => {
       const signal = destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination);
-      const circleRadius = signal.tier === "high" ? 620 : signal.tier === "medium" ? 520 : signal.tier === "emerging" ? 430 : 320;
+      const drawDemandHalo = shouldDrawDemandHalo(signal, displayMode, Boolean(activePoint));
       const selectDestination = () => {
         setSelectedDestinationId(destination.id);
         map.panTo([destination.latitude, destination.longitude], { animate: true });
       };
 
-      L.circle([destination.latitude, destination.longitude], {
-        radius: circleRadius,
-        color: "rgba(15, 118, 110, 0.34)",
-        fillColor: "rgba(15, 118, 110, 0.11)",
-        fillOpacity: signal.tier === "low" ? 0.06 : 0.12,
-        weight: signal.tier === "low" ? 1 : 2,
-        interactive: true,
-      })
-        .on("click", selectDestination)
-        .bindTooltip(destination.name, { direction: "top", opacity: 0.92 })
-        .addTo(layer);
+      if (drawDemandHalo) {
+        L.circle([destination.latitude, destination.longitude], {
+          radius: demandHaloRadius(signal),
+          color: signal.nearbyPointCount > 0 ? "rgba(15, 118, 110, 0.34)" : "rgba(15, 118, 110, 0.2)",
+          fillColor: "rgba(15, 118, 110, 0.11)",
+          fillOpacity: signal.nearbyPointCount > 0 ? 0.12 : 0.05,
+          weight: signal.nearbyPointCount > 0 ? 2 : 1,
+          interactive: true,
+        })
+          .on("click", selectDestination)
+          .bindTooltip(destination.name, { direction: "top", opacity: 0.92 })
+          .addTo(layer);
+      }
 
       const marker = L.marker([destination.latitude, destination.longitude], {
         icon: destinationIcon(destination.category, signal, locale),
         title: destination.name,
+        zIndexOffset: markerZIndex(signal),
       }).on("click", selectDestination);
 
       if (mode !== "tourist") {
@@ -239,7 +262,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       } else if (displayMode === "route" && route.length > 0) {
         map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
       } else if (displayMode === "signals" && visibleDestinations.length > 1) {
-        const destinationBounds = L.latLngBounds(visibleDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
+        const signalBoundDestinations = visibleDestinations.filter((destination) => (destinationSignals.get(destination.id)?.nearbyPointCount ?? 0) > 0);
+        const boundsDestinations = signalBoundDestinations.length > 1 ? signalBoundDestinations : visibleDestinations;
+        const destinationBounds = L.latLngBounds(boundsDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
         map.fitBounds(destinationBounds, { padding: [42, 42], maxZoom: 8 });
       } else if (activePoint) {
         map.setView([activePoint.latitude, activePoint.longitude], 15);

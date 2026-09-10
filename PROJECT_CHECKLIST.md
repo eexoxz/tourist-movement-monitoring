@@ -302,6 +302,7 @@ Current alignment notes:
 - [x] Standardise tourist maps so active or selected trips show routes while overview maps show aggregate destination signals.
 - [x] Use aggregate destination demand mode on administrator overview maps so large demo datasets stay readable.
 - [x] Move map demand-signal calculation into a tested service and avoid per-destination filter/sort work during map rendering.
+- [x] Reduce aggregate map rendering noise by drawing demand halos only for places with movement signals and prioritising signal markers above low-activity places.
 - [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System
@@ -398,6 +399,7 @@ Current alignment notes:
 - [x] Reduce repeated analytics scans by reusing grouped movement points and one-pass trip movement evidence.
 - [x] Batch 1 optimisation: harden prepared demo dataset actions with processing states, local-only messaging and duplicate-action prevention.
 - [x] Batch 2 optimisation: index admin dashboard movement records by trip/user/analysis to reduce repeated scans on large datasets.
+- [x] Batch 3 optimisation: reduce aggregate map clutter and prioritise meaningful destination demand signals on large datasets.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.

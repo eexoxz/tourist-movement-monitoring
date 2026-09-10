@@ -117,6 +117,13 @@ describe("user interface quality guardrails", () => {
     expect(tripDiarySource).toContain('displayMode={selectedTripPoints.length ? "route" : "signals"}');
   });
 
+  it("keeps aggregate map rendering focused on useful demand signals", () => {
+    expect(mapSource).toContain("shouldDrawDemandHalo");
+    expect(mapSource).toContain("markerZIndex");
+    expect(mapSource).toContain("signalBoundDestinations");
+    expect(mapSource).toContain("signal.nearbyPointCount > 0");
+  });
+
   it("keeps large prepared demo dataset actions local-only and hard to spam", () => {
     expect(appSource).toContain('const [demoDatasetAction, setDemoDatasetAction]');
     expect(appSource).toContain("DEMO_DATASET_LOCAL_ONLY_STATUS");
