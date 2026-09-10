@@ -10,6 +10,7 @@ const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/Aut
 const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
+const listLimitFooterSource = readFileSync(resolve(process.cwd(), "src/components/ListLimitFooter.tsx"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
 const toastSource = readFileSync(resolve(process.cwd(), "src/components/ToastViewport.tsx"), "utf8");
 const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf8");
@@ -93,5 +94,11 @@ describe("user interface quality guardrails", () => {
     expect(viteConfigSource).toContain("tourism-data");
     expect(viteConfigSource).toContain("analysis-core");
     expect(viteConfigSource).toContain("normalizedId");
+  });
+
+  it("keeps reusable list limiting UI outside the main app shell", () => {
+    expect(appSource).toContain('from "./components/ListLimitFooter"');
+    expect(appSource).not.toContain("function ListLimitFooter");
+    expect(listLimitFooterSource).toContain("export function ListLimitFooter");
   });
 });

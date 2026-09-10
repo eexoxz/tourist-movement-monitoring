@@ -109,6 +109,7 @@ import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./compon
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
 import { AuthScreen, LanguageSelector, type AuthResult, type TouristRegistrationDraft } from "./components/AuthScreen";
 import { CompletedTripSummary, EmptyState, MetricGrid } from "./components/SummaryCards";
+import { ListLimitFooter } from "./components/ListLimitFooter";
 import { ToastViewport, type AppNotification, type NotificationTone, type NotifyFn } from "./components/ToastViewport";
 import { DestinationManager } from "./components/DestinationManager";
 import { FestivalCalendarPanel } from "./components/FestivalCalendarPanel";
@@ -1649,33 +1650,6 @@ function TouristWorkspace({
       onIncidentLocationNoteChange={setIncidentLocationNote}
       onSubmitIncidentReport={submitIncidentReport}
     />
-  );
-}
-
-function ListLimitFooter({
-  hiddenCount,
-  isExpanded,
-  itemLabel,
-  pluralLabel,
-  onToggle,
-}: {
-  hiddenCount: number;
-  isExpanded: boolean;
-  itemLabel: string;
-  pluralLabel: string;
-  onToggle: () => void;
-}) {
-  if (hiddenCount <= 0 && !isExpanded) {
-    return null;
-  }
-
-  return (
-    <div className="list-limit-footer">
-      <span>{isExpanded ? `Showing all ${pluralLabel}.` : `${hiddenCount} more ${hiddenCount === 1 ? itemLabel : pluralLabel} available.`}</span>
-      <button className="secondary-action compact-action" type="button" onClick={onToggle}>
-        {isExpanded ? "Show fewer" : "Show more"}
-      </button>
-    </div>
   );
 }
 

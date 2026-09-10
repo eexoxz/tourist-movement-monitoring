@@ -386,6 +386,7 @@ Current alignment notes:
 - [x] Begin final code cleanup by extracting shared summary and notification components out of App.tsx.
 - [x] Extract authentication and language selector UI out of App.tsx into a focused AuthScreen component.
 - [x] Extract Destination Management and admin analytics widgets into focused components before final QA.
+- [x] Extract reusable list-limit footer UI out of App.tsx during final cleanup.
 - [x] Expand high-visibility Administrator dashboard headings, metrics, filters and actions across all enabled languages.
 - [x] Optimise production chunks so translations, tourism data and analytics are split out of the main app bundle.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
