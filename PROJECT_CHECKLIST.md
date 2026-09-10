@@ -268,6 +268,7 @@ Current alignment notes:
 - [x] Add an administrator control to regenerate or reload the demonstration dataset on demand.
 - [x] Expand synthetic tourist movement coverage around each supported Malaysian destination/city so local dashboard examples do not depend on manual test accounts.
 - [x] Optimise the administrator overview map for larger demo datasets by showing destination demand signals instead of connecting every movement point as one route.
+- [x] Prevent repeated large demo dataset load/remove actions and keep the prepared dataset local-only to avoid Firestore lag.
 - [ ] Document in the report that seeded movement records are synthetic demonstration data, not real collected tourist data.
 
 ## Mobile And Usability
@@ -395,6 +396,7 @@ Current alignment notes:
 - [x] Optimise production chunks so translations, tourism data and analytics are split out of the main app bundle.
 - [x] Extract and test map demand-signal logic so large movement datasets are easier to optimise and maintain.
 - [x] Reduce repeated analytics scans by reusing grouped movement points and one-pass trip movement evidence.
+- [x] Batch 1 optimisation: harden prepared demo dataset actions with processing states, local-only messaging and duplicate-action prevention.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.

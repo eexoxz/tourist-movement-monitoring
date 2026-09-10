@@ -286,6 +286,15 @@ button:disabled {
   justify-content: flex-end;
 }
 
+.demo-sync-note {
+  flex-basis: 100%;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: right;
+}
+
 .page-header span {
   color: #4d6b5d;
   font-size: 0.82rem;

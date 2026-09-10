@@ -1693,6 +1693,7 @@ function AdminWorkspace({
   const [showAllMovementRecords, setShowAllMovementRecords] = useState(false);
   const [showAllSafetyCases, setShowAllSafetyCases] = useState(false);
   const [showAllAiResults, setShowAllAiResults] = useState(false);
+  const [demoDatasetAction, setDemoDatasetAction] = useState<"loading" | "removing" | null>(null);
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
   const movementRecords = useMemo(
@@ -1890,6 +1891,10 @@ function AdminWorkspace({
   };
 
   const seedDemoTourists = () => {
+    if (demoDatasetAction) {
+      return;
+    }
+
     if (demoDatasetLoaded) {
       notify({
         tone: "info",
@@ -1899,23 +1904,41 @@ function AdminWorkspace({
       return;
     }
 
-    const refreshed = refreshAllRecommendations(mergePreparedDemoDataset(data));
-    onDataChange(refreshed, null, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS });
-    notify({
-      tone: "success",
-      title: t("admin.demo.loadedTitle"),
-      message: t("admin.demo.loadedMessage"),
-    });
+    setDemoDatasetAction("loading");
+    window.setTimeout(() => {
+      try {
+        const refreshed = refreshAllRecommendations(mergePreparedDemoDataset(data));
+        onDataChange(refreshed, null, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS });
+        notify({
+          tone: "success",
+          title: t("admin.demo.loadedTitle"),
+          message: t("admin.demo.loadedMessage"),
+        });
+      } finally {
+        setDemoDatasetAction(null);
+      }
+    }, 0);
   };
 
   const clearDemoTourists = () => {
-    const cleaned = refreshAllRecommendations(removeGeneratedDemoDataset(data));
-    onDataChange(cleaned, null, { localOnlyStatus: "Generated demo dataset removed locally; Firestore sync skipped" });
-    notify({
-      tone: "info",
-      title: t("admin.demo.removedTitle"),
-      message: t("admin.demo.removedMessage"),
-    });
+    if (demoDatasetAction) {
+      return;
+    }
+
+    setDemoDatasetAction("removing");
+    window.setTimeout(() => {
+      try {
+        const cleaned = refreshAllRecommendations(removeGeneratedDemoDataset(data));
+        onDataChange(cleaned, null, { localOnlyStatus: "Generated demo dataset removed locally; Firestore sync skipped" });
+        notify({
+          tone: "info",
+          title: t("admin.demo.removedTitle"),
+          message: t("admin.demo.removedMessage"),
+        });
+      } finally {
+        setDemoDatasetAction(null);
+      }
+    }, 0);
   };
 
   const resetRecordFilters = () => {
@@ -2461,20 +2484,23 @@ function AdminWorkspace({
       eyebrow={t("admin.dashboard.eyebrow")}
       actions={
         <div className="page-action-row">
-          <button className="secondary-action" onClick={seedDemoTourists} disabled={demoDatasetLoaded}>
+          <button className="secondary-action" onClick={seedDemoTourists} disabled={Boolean(demoDatasetAction) || demoDatasetLoaded}>
             <UserRound size={18} />
-            {demoDatasetLoaded ? t("admin.demo.loadedButton") : t("admin.demo.loadButton")}
+            {demoDatasetAction === "loading" ? t("admin.demo.loadingButton") : demoDatasetLoaded ? t("admin.demo.loadedButton") : t("admin.demo.loadButton")}
           </button>
           {demoDatasetLoaded && (
-            <button className="secondary-action" onClick={clearDemoTourists}>
+            <button className="secondary-action" onClick={clearDemoTourists} disabled={Boolean(demoDatasetAction)}>
               <Trash2 size={18} />
-              {t("admin.demo.removeButton")}
+              {demoDatasetAction === "removing" ? t("admin.demo.removingButton") : t("admin.demo.removeButton")}
             </button>
           )}
-          <button className="secondary-action" onClick={recomputeAi}>
+          <button className="secondary-action" onClick={recomputeAi} disabled={Boolean(demoDatasetAction)}>
             <RotateCcw size={18} />
             {t("admin.dashboard.refreshAi")}
           </button>
+          <small className="demo-sync-note" aria-live="polite">
+            {t("admin.demo.localOnlyNote")}
+          </small>
         </div>
       }
     >

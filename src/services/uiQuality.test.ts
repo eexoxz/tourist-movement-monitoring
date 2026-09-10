@@ -116,4 +116,14 @@ describe("user interface quality guardrails", () => {
     expect(touristHomeSource).toContain('displayMode={activeTrip ? "route" : "signals"}');
     expect(tripDiarySource).toContain('displayMode={selectedTripPoints.length ? "route" : "signals"}');
   });
+
+  it("keeps large prepared demo dataset actions local-only and hard to spam", () => {
+    expect(appSource).toContain('const [demoDatasetAction, setDemoDatasetAction]');
+    expect(appSource).toContain("DEMO_DATASET_LOCAL_ONLY_STATUS");
+    expect(appSource).toContain("cacheLocalData(nextData)");
+    expect(appSource).toContain('disabled={Boolean(demoDatasetAction) || demoDatasetLoaded}');
+    expect(appSource).toContain('disabled={Boolean(demoDatasetAction)}');
+    expect(i18nSource).toContain('"admin.demo.localOnlyNote"');
+    expect(stylesSource).toContain(".demo-sync-note");
+  });
 });
