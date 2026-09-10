@@ -1,6 +1,5 @@
 import type { AnalysisResult, AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
 import { distanceKm, nearestDestination } from "./geo";
-import { summarizeTrip } from "./movement";
 
 export type MovementRecordView = {
   point: MovementPoint;
@@ -306,8 +305,63 @@ function tripMatchesDateRange(trip: TripSession, points: MovementPoint[], filter
   return tripDates.some((date) => isWithinDateRange(date, filters));
 }
 
+function buildDashboardIndexes(data: AppData) {
+  const pointsByTrip = new Map<string, MovementPoint[]>();
+
+  data.points.forEach((point) => {
+    const tripPoints = pointsByTrip.get(point.tripId) ?? [];
+    tripPoints.push(point);
+    pointsByTrip.set(point.tripId, tripPoints);
+  });
+
+  pointsByTrip.forEach((points) => {
+    points.sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+  });
+
+  return {
+    tripById: new Map(data.trips.map((trip) => [trip.id, trip])),
+    userById: new Map(data.users.map((user) => [user.id, user])),
+    analysisByTripId: new Map(data.analyses.map((analysis) => [analysis.tripId, analysis])),
+    pointsByTrip,
+  };
+}
+
+function summarizeTripPoints(trip: TripSession, points: MovementPoint[], data: AppData): { summary: TripSummary; destinationNames: string[] } {
+  const visitedDestinationIds = new Set<string>();
+  const destinationNames = new Set<string>();
+  const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
+
+  points.forEach((point) => {
+    const nearest = nearestDestination(point, data.destinations);
+    if (nearest && nearest.distance <= 1.2) {
+      visitedDestinationIds.add(nearest.destination.id);
+      destinationNames.add(nearest.destination.name);
+    }
+  });
+
+  const startedAt = points[0]?.recordedAt ?? trip.startedAt;
+  const endedAt = points.at(-1)?.recordedAt ?? trip.endedAt ?? startedAt;
+  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)) : 0;
+  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(points.reduce((total, point) => total + point.accuracyMeters, 0) / points.length);
+
+  return {
+    summary: {
+      tripId: trip.id,
+      pointCount: points.length,
+      distanceKm: Number(distance.toFixed(2)),
+      durationMinutes,
+      visitedDestinationCount: visitedDestinationIds.size,
+      averageAccuracyMeters,
+      firstRecordedAt: points[0]?.recordedAt,
+      lastRecordedAt: points.at(-1)?.recordedAt,
+    },
+    destinationNames: [...destinationNames],
+  };
+}
+
 export function getMovementRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementRecordView[] {
   const normalized = normalizeMovementFilters(filters);
+  const indexes = buildDashboardIndexes(data);
   const visibleTrips =
     normalized.touristId && normalized.touristId !== "all"
       ? data.trips.filter((trip) => trip.userId === normalized.touristId)
@@ -319,8 +373,8 @@ export function getMovementRecords(data: AppData, filters: MovementRecordFilters
     .filter((point) => !normalized.tripId || normalized.tripId === "all" || point.tripId === normalized.tripId)
     .filter((point) => isWithinDateRange(point.recordedAt, normalized))
     .map((point) => {
-      const trip = data.trips.find((candidate) => candidate.id === point.tripId) ?? null;
-      const tourist = data.users.find((candidate) => candidate.id === trip?.userId) ?? null;
+      const trip = indexes.tripById.get(point.tripId) ?? null;
+      const tourist = trip ? indexes.userById.get(trip.userId) ?? null : null;
       const nearest = nearestDestination(point, data.destinations);
 
       return {
@@ -342,30 +396,22 @@ export function getTripFilterOptions(data: AppData, touristId = "all") {
 
 export function getMovementTripRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementTripRecordView[] {
   const normalized = normalizeMovementFilters(filters);
+  const indexes = buildDashboardIndexes(data);
 
   return data.trips
     .filter((trip) => !normalized.touristId || normalized.touristId === "all" || trip.userId === normalized.touristId)
     .filter((trip) => !normalized.tripId || normalized.tripId === "all" || trip.id === normalized.tripId)
     .map((trip) => {
-      const points = data.points.filter((point) => point.tripId === trip.id).sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
-      const destinationNames = Array.from(
-        new Set(
-          points
-            .map((point) => {
-              const nearest = nearestDestination(point, data.destinations);
-              return nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
-            })
-            .filter(Boolean)
-        )
-      ) as string[];
+      const points = indexes.pointsByTrip.get(trip.id) ?? [];
+      const evidence = summarizeTripPoints(trip, points, data);
 
       return {
         trip,
-        tourist: data.users.find((user) => user.id === trip.userId) ?? null,
-        summary: summarizeTrip(data, trip.id),
+        tourist: indexes.userById.get(trip.userId) ?? null,
+        summary: evidence.summary,
         points,
-        destinationNames,
-        analysis: data.analyses.find((analysis) => analysis.tripId === trip.id) ?? null,
+        destinationNames: evidence.destinationNames,
+        analysis: indexes.analysisByTripId.get(trip.id) ?? null,
       };
     })
     .filter((record) => tripMatchesDateRange(record.trip, record.points, normalized))

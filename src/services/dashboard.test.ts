@@ -16,6 +16,7 @@ import {
   getTripFilterOptions,
   summarizeDashboard,
 } from "./dashboard";
+import { summarizeTrip } from "./movement";
 
 describe("dashboard service", () => {
   it("summarizes tourist, consent, trip, point, and destination totals", () => {
@@ -170,6 +171,13 @@ describe("dashboard service", () => {
     expect(records[0].summary.pointCount).toBe(4);
     expect(records[0].destinationNames.length).toBeGreaterThan(0);
     expect(records[0].analysis?.profile).toBeDefined();
+  });
+
+  it("keeps optimized movement trip summaries aligned with trip summary logic", () => {
+    const refreshed = refreshAllRecommendations(initialData);
+    const record = getMovementTripRecords(refreshed, "tourist-demo")[0];
+
+    expect(record.summary).toEqual(summarizeTrip(refreshed, record.trip.id));
   });
 
   it("filters administrator trip records by selected trip and date range", () => {
