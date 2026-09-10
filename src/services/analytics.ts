@@ -68,30 +68,24 @@ function emptyCounts(): Record<DestinationCategory, number> {
   };
 }
 
-function categoryCounts(points: MovementPoint[], data: AppData) {
+function getTripMovementEvidence(points: MovementPoint[], data: AppData) {
+  const preparedPoints = prepareMovementPoints(points);
   const counts = emptyCounts();
+  const destinationIds = new Set<string>();
 
-  prepareMovementPoints(points).forEach((point) => {
+  preparedPoints.forEach((point) => {
     const nearest = nearestDestination(point, data.destinations);
     if (nearest && nearest.distance <= 1.2) {
       counts[nearest.destination.category] += 1;
+      destinationIds.add(nearest.destination.id);
     }
   });
 
-  return counts;
-}
-
-function matchedDestinationIds(points: MovementPoint[], data: AppData) {
-  const ids = new Set<string>();
-
-  prepareMovementPoints(points).forEach((point) => {
-    const nearest = nearestDestination(point, data.destinations);
-    if (nearest && nearest.distance <= 1.2) {
-      ids.add(nearest.destination.id);
-    }
-  });
-
-  return ids;
+  return {
+    points: preparedPoints,
+    counts,
+    uniqueDestinationCount: destinationIds.size,
+  };
 }
 
 function prepareMovementPoints(points: MovementPoint[]) {
@@ -324,25 +318,26 @@ function averageVector(vectors: number[][], fallback: number[]) {
 }
 
 function createTripFeatures(data: AppData): TripFeature[] {
+  const pointsByTrip = movementPointsByTrip(data.points);
+
   return data.trips
     .filter((trip) => trip.status === "completed")
     .map((trip) => {
-      const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
-      if (points.length < 2) {
+      const evidence = getTripMovementEvidence(pointsByTrip.get(trip.id) ?? [], data);
+      if (evidence.points.length < 2) {
         return null;
       }
 
-      const counts = categoryCounts(points, data);
-      const kMeansInput = kMeansInputFromCounts(counts, matchedDestinationIds(points, data).size);
+      const kMeansInput = kMeansInputFromCounts(evidence.counts, evidence.uniqueDestinationCount);
       const vector = vectorFromKMeansInput(kMeansInput);
 
       return {
         trip,
-        counts,
+        counts: evidence.counts,
         vector,
         kMeansInput,
-        profile: inferProfile(counts),
-        pointCount: points.length,
+        profile: inferProfile(evidence.counts),
+        pointCount: evidence.points.length,
       };
     })
     .filter((feature): feature is TripFeature => Boolean(feature));
@@ -636,16 +631,15 @@ export function calculateMovementAlerts(data: AppData): MovementAlert[] {
 }
 
 export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | null {
-  const points = prepareMovementPoints(data.points.filter((point) => point.tripId === trip.id));
+  const evidence = getTripMovementEvidence(movementPointsByTrip(data.points).get(trip.id) ?? [], data);
 
-  if (points.length < 2) {
+  if (evidence.points.length < 2) {
     return null;
   }
 
-  const counts = categoryCounts(points, data);
-  const kMeansInput = kMeansInputFromCounts(counts, matchedDestinationIds(points, data).size);
+  const kMeansInput = kMeansInputFromCounts(evidence.counts, evidence.uniqueDestinationCount);
   const vector = vectorFromKMeansInput(kMeansInput);
-  const classification = classifyWithDecisionTree(counts);
+  const classification = classifyWithDecisionTree(evidence.counts);
 
   return {
     tripId: trip.id,
@@ -663,8 +657,8 @@ export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | 
     kMeansInput,
     kMeansCentroid: kMeansFeatureRecord(vector),
     clusterCentroid: legacyCentroidRecord(vector),
-    categoryCounts: counts,
-    dataPointCount: points.length,
+    categoryCounts: evidence.counts,
+    dataPointCount: evidence.points.length,
     method: "k-means",
     generatedAt: new Date().toISOString(),
   };
@@ -719,15 +713,36 @@ export function recommendForUser(
   const userTrips = data.trips.filter((trip) => trip.userId === userId);
   const completedTripIds = new Set(userTrips.filter((trip) => trip.status === "completed").map((trip) => trip.id));
   const allUserTripIds = new Set(userTrips.map((trip) => trip.id));
-  const completedPoints = data.points.filter((point) => completedTripIds.has(point.tripId));
-  const points = data.points.filter((point) => allUserTripIds.has(point.tripId));
+  const completedPoints: MovementPoint[] = [];
+  const points: MovementPoint[] = [];
+
+  data.points.forEach((point) => {
+    if (!allUserTripIds.has(point.tripId)) {
+      return;
+    }
+
+    points.push(point);
+
+    if (completedTripIds.has(point.tripId)) {
+      completedPoints.push(point);
+    }
+  });
+
   const visited = new Set(
     completedPoints
       .map((point) => nearestDestination(point, data.destinations))
       .filter((result) => result && result.distance <= 1.2)
       .map((result) => result.destination.id)
   );
-  const latestPoint = referencePoint ?? points.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
+  const latestPoint =
+    referencePoint ??
+    points.reduce<MovementPoint | undefined>((latest, point) => {
+      if (!latest || new Date(point.recordedAt).getTime() > new Date(latest.recordedAt).getTime()) {
+        return point;
+      }
+
+      return latest;
+    }, undefined);
   const profile = analysis?.profile ?? "mixed";
   const hasPersonalizedAnalysis = Boolean(analysis);
   const demandByDestination = new Map((destinationDemand ?? calculateDestinationDemand(data)).map((demand) => [demand.destinationId, demand]));
@@ -846,6 +861,7 @@ function emptyConfusionMatrix(): Record<TouristProfile, Record<TouristProfile, n
 export function evaluateAiOutput(data: AppData): AiEvaluation {
   const analyses = analyzeAllTrips(data);
   const matrix = emptyConfusionMatrix();
+  const pointsByTrip = movementPointsByTrip(data.points);
   let labelledRecordCount = 0;
   let correctClassificationCount = 0;
 
@@ -863,7 +879,7 @@ export function evaluateAiOutput(data: AppData): AiEvaluation {
   });
 
   const completedTrips = data.trips.filter((trip) => trip.status === "completed");
-  const insufficientTripCount = completedTrips.filter((trip) => data.points.filter((point) => point.tripId === trip.id).length < 2).length;
+  const insufficientTripCount = completedTrips.filter((trip) => (pointsByTrip.get(trip.id)?.length ?? 0) < 2).length;
   const averageSilhouetteScore =
     analyses.length === 0 ? 0 : Number((analyses.reduce((sum, analysis) => sum + analysis.silhouetteScore, 0) / analyses.length).toFixed(2));
 

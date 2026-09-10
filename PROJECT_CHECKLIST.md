@@ -394,6 +394,7 @@ Current alignment notes:
 - [x] Expand high-visibility Administrator dashboard headings, metrics, filters and actions across all enabled languages.
 - [x] Optimise production chunks so translations, tourism data and analytics are split out of the main app bundle.
 - [x] Extract and test map demand-signal logic so large movement datasets are easier to optimise and maintain.
+- [x] Reduce repeated analytics scans by reusing grouped movement points and one-pass trip movement evidence.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.
