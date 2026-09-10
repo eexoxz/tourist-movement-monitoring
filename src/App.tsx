@@ -87,24 +87,19 @@ import {
   createSampleTripForUser,
   deleteTrip,
   deleteTouristMovementData,
-  getActiveTrip,
-  getGrantedConsent,
   getLocalSampleDestinations,
-  getUserTrips,
-  getVisitedDestinationIds,
   grantLocationConsent,
   revokeLocationConsent,
   startTripSession,
   stopActiveTrip,
-  summarizeTrip,
-  summarizeUserTrips,
   updateTripLabel,
 } from "./services/movement";
 import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn } from "./services/checkIns";
 import { calculateGeofenceActivity, getActiveGeofenceWarnings } from "./services/geofencing";
 import { createIncidentReport, createSosAlert, getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "./services/safety";
 import { getTouristManagementRows } from "./services/touristManagement";
-import { formatTripTitle, getRecognizedDestinationNames, getTripDiaryInsight, getTripSuggestionStatus } from "./services/tripPresentation";
+import { getTouristWorkspaceData } from "./services/touristWorkspace";
+import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from "./services/tripPresentation";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
 import { AuthScreen, LanguageSelector, type AuthResult, type TouristRegistrationDraft } from "./components/AuthScreen";
@@ -834,17 +829,10 @@ function TouristWorkspace({
   watchId: React.MutableRefObject<number | null>;
   notify: NotifyFn;
 }) {
-  const userTrips = getUserTrips(data, user.id);
-  const activeTrip = getActiveTrip(data, user.id);
-  const currentConsent = getGrantedConsent(data, user.id);
-  const tripPoints = data.points.filter((point) => userTrips.some((trip) => trip.id === point.tripId));
-  const activePoints = activeTrip ? data.points.filter((point) => point.tripId === activeTrip.id) : [];
-  const latestAnalysis = data.analyses.filter((analysis) => analysis.userId === user.id).sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
-  const savedRecommendations = data.recommendations.filter((recommendation) => recommendation.userId === user.id);
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
   const [isLiveTracking, setIsLiveTracking] = useState(false);
   const [locationRetryAvailable, setLocationRetryAvailable] = useState(false);
-  const [selectedTripId, setSelectedTripId] = useState<string>(userTrips[0]?.id ?? "");
+  const [selectedTripId, setSelectedTripId] = useState<string>("");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>(() => loadLastBrowserLocation(user.id));
@@ -854,44 +842,45 @@ function TouristWorkspace({
   const [incidentLocationNote, setIncidentLocationNote] = useState("");
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
   const geofenceNoticeKey = useRef("");
-  const activeTripSummary = activeTrip ? summarizeTrip(data, activeTrip.id) : null;
-  const tripSummaries = useMemo(() => summarizeUserTrips(data, user.id), [data, user.id]);
-  const recentTrips = useMemo(() => [...userTrips].sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()), [userTrips]);
-  const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? recentTrips[0];
-  const selectedTripPoints = selectedTrip ? data.points.filter((point) => point.tripId === selectedTrip.id) : [];
-  const selectedTripSummary = selectedTrip ? summarizeTrip(data, selectedTrip.id) : null;
-  const selectedTripAnalysis = selectedTrip
-    ? data.analyses.find((analysis) => analysis.tripId === selectedTrip.id && analysis.userId === user.id) ?? null
-    : null;
-  const selectedTripDestinationNames = useMemo(() => {
-    return getRecognizedDestinationNames(selectedTripPoints, data.destinations);
-  }, [selectedTripPoints, data.destinations]);
-  const selectedTripRecommendations = savedRecommendations.slice(0, 3);
-  const latestCompletedTrip = recentTrips.find((trip) => trip.status === "completed") ?? null;
-  const latestCompletedTripPoints = latestCompletedTrip ? data.points.filter((point) => point.tripId === latestCompletedTrip.id) : [];
-  const latestCompletedTripSummary = latestCompletedTrip ? summarizeTrip(data, latestCompletedTrip.id) : null;
-  const latestCompletedTripAnalysis = latestCompletedTrip
-    ? data.analyses.find((analysis) => analysis.tripId === latestCompletedTrip.id && analysis.userId === user.id) ?? null
-    : null;
-  const latestCompletedTripDestinationNames = useMemo(() => {
-    return getRecognizedDestinationNames(latestCompletedTripPoints, data.destinations);
-  }, [latestCompletedTripPoints, data.destinations]);
+  const touristWorkspace = useMemo(() => getTouristWorkspaceData(data, user.id, selectedTripId), [data, selectedTripId, user.id]);
+  const {
+    userTrips,
+    activeTrip,
+    currentConsent,
+    tripPoints,
+    activePoints,
+    latestAnalysis,
+    recentTrips,
+    tripSummaries,
+    selectedTrip,
+    selectedTripPoints,
+    selectedTripSummary,
+    selectedTripAnalysis,
+    selectedTripDestinationNames,
+    selectedTripRecommendations,
+    latestCompletedTrip,
+    latestCompletedTripPoints,
+    latestCompletedTripSummary,
+    latestCompletedTripAnalysis,
+    latestCompletedTripDestinationNames,
+    visitedDestinationIds,
+    userSosAlerts,
+    userIncidentReports,
+    openSafetyCount,
+    recentCheckIns,
+  } = touristWorkspace;
+  const activeTripSummary = activeTrip ? tripSummaries.find((summary) => summary.tripId === activeTrip.id) ?? null : null;
   const recentTrip = recentTrips[0];
   const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
-  const visitedDestinationIds = useMemo(() => getVisitedDestinationIds(data, user.id), [data, user.id]);
   const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));
   const recommendations = useMemo(
     () => recommendForUser(user.id, data, latestAnalysis, destinationDemand, latestKnownPoint),
     [data, destinationDemand, latestAnalysis, latestKnownPoint, user.id]
   );
-  const userSosAlerts = data.sosAlerts.filter((alert) => alert.userId === user.id);
-  const userIncidentReports = data.incidentReports.filter((report) => report.userId === user.id);
-  const openSafetyCount = [...userSosAlerts, ...userIncidentReports].filter((record) => record.status !== "resolved").length;
   const activeCheckIn = getActiveCheckIn(data, user.id);
   const activeCheckInDestination = activeCheckIn ? data.destinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
-  const recentCheckIns = data.checkIns.filter((checkIn) => checkIn.userId === user.id).slice(0, 3);
   const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, data.destinations)?.destination : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(latestKnownPoint, data.geofences), [data.geofences, latestKnownPoint]);
   const displayName = getDisplayName(user);

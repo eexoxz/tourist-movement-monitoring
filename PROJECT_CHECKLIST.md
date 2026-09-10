@@ -401,6 +401,7 @@ Current alignment notes:
 - [x] Batch 2 optimisation: index admin dashboard movement records by trip/user/analysis to reduce repeated scans on large datasets.
 - [x] Batch 3 optimisation: reduce aggregate map clutter and prioritise meaningful destination demand signals on large datasets.
 - [x] Batch 4 optimisation: index administrator tourist-management rows so large demo datasets avoid repeated per-tourist collection scans.
+- [x] Batch 5 optimisation: move tourist page derived data into a tested selector so Home, Trips and Recommendations reuse one prepared snapshot.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.
