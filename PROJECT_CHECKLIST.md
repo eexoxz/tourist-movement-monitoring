@@ -267,6 +267,7 @@ Current alignment notes:
 - [x] Keep synthetic seed size large enough for dashboard/AI evidence but small enough for fast local testing and Firebase sync.
 - [x] Add an administrator control to regenerate or reload the demonstration dataset on demand.
 - [x] Expand synthetic tourist movement coverage around each supported Malaysian destination/city so local dashboard examples do not depend on manual test accounts.
+- [x] Optimise the administrator overview map for larger demo datasets by showing destination demand signals instead of connecting every movement point as one route.
 - [ ] Document in the report that seeded movement records are synthetic demonstration data, not real collected tourist data.
 
 ## Mobile And Usability
@@ -297,6 +298,7 @@ Current alignment notes:
 - [x] Keep fallback tourist recommendations nearest-first when local movement/location data is available.
 - [x] Add an active-trip local route simulator so movement recording can be demonstrated without physically travelling.
 - [x] Preserve the latest browser location and save the first trip point promptly so tourist recommendations stay local after reload/start.
+- [x] Use aggregate destination demand mode on administrator overview maps so large demo datasets stay readable.
 - [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System

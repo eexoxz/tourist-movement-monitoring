@@ -12,6 +12,7 @@ type MapViewProps = {
   destinations: Destination[];
   activePoint?: MovementPoint;
   mode?: "tourist" | "admin";
+  displayMode?: "route" | "signals";
   locale?: Locale;
 };
 
@@ -75,7 +76,8 @@ function destinationIcon(category: DestinationCategory, signal: DestinationSigna
   const meta = categoryMeta[category];
   const size = signal.tier === "high" ? 46 : signal.tier === "medium" ? 42 : signal.tier === "emerging" ? 38 : 34;
   const iconSize = Math.round(size * 0.44);
-  const badge = signal.nearbyPointCount > 0 ? `<b>${signal.nearbyPointCount}</b>` : "";
+  const badgeLabel = signal.nearbyPointCount > 999 ? "999+" : signal.nearbyPointCount.toString();
+  const badge = signal.nearbyPointCount > 0 ? `<b>${badgeLabel}</b>` : "";
 
   return L.divIcon({
     className: `destination-marker destination-marker-${category} destination-marker-${signal.tier}`,
@@ -96,7 +98,7 @@ function routeIcon(type: "start" | "end" | "current") {
   });
 }
 
-export function MapView({ points, destinations, activePoint, mode = "admin", locale = "en" }: MapViewProps) {
+export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en" }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const lastAutoFocusKeyRef = useRef("");
@@ -208,7 +210,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
       marker.addTo(layer);
     });
 
-    if (route.length > 0) {
+    if (displayMode === "route" && route.length > 0) {
       L.polyline(route, {
         color: "#ffffff",
         weight: 9,
@@ -255,7 +257,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
     }
 
     const latestRoutePoint = points.at(-1);
-    const autoFocusKey = activePoint
+    const autoFocusKey = displayMode === "signals"
+      ? `signals:${visibleDestinations.length}:${points.length}`
+      : activePoint
       ? `active:${activePoint.latitude}:${activePoint.longitude}:${activePoint.recordedAt}`
       : latestRoutePoint
         ? `route:${points.length}:${latestRoutePoint.latitude}:${latestRoutePoint.longitude}:${latestRoutePoint.recordedAt}`
@@ -266,8 +270,11 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
 
       if (activePoint && mode === "tourist") {
         map.setView([activePoint.latitude, activePoint.longitude], 15);
-      } else if (route.length > 0) {
+      } else if (displayMode === "route" && route.length > 0) {
         map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
+      } else if (displayMode === "signals" && visibleDestinations.length > 1) {
+        const destinationBounds = L.latLngBounds(visibleDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
+        map.fitBounds(destinationBounds, { padding: [42, 42], maxZoom: 8 });
       } else if (activePoint) {
         map.setView([activePoint.latitude, activePoint.longitude], 15);
       }
@@ -276,7 +283,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", loc
     return () => {
       layer.remove();
     };
-  }, [points, visibleDestinations, activePoint, destinationSignals, locale, mode]);
+  }, [points, visibleDestinations, activePoint, destinationSignals, locale, mode, displayMode]);
 
   const centerOnActivePoint = () => {
     if (!activePoint) {

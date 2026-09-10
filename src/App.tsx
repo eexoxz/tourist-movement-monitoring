@@ -2512,7 +2512,7 @@ function AdminWorkspace({
           />
           <section className="admin-overview-layout">
             <div className="admin-overview-map">
-              <MovementMap points={allDashboardPoints} destinations={data.destinations} locale={locale} />
+              <MovementMap points={allDashboardPoints} destinations={data.destinations} displayMode="signals" locale={locale} />
             </div>
             <aside className="admin-command-panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}

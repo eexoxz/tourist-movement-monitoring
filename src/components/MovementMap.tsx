@@ -9,10 +9,11 @@ type MovementMapProps = {
   destinations: Destination[];
   activePoint?: MovementPoint;
   mode?: "tourist" | "admin";
+  displayMode?: "route" | "signals";
   locale?: Locale;
 };
 
-export function MovementMap({ points, destinations, activePoint, mode = "admin", locale = "en" }: MovementMapProps) {
+export function MovementMap({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en" }: MovementMapProps) {
   return (
     <Suspense
       fallback={
@@ -22,7 +23,7 @@ export function MovementMap({ points, destinations, activePoint, mode = "admin",
         </div>
       }
     >
-      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} locale={locale} />
+      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} displayMode={displayMode} locale={locale} />
     </Suspense>
   );
 }
