@@ -13,6 +13,7 @@ const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), 
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
 const toastSource = readFileSync(resolve(process.cwd(), "src/components/ToastViewport.tsx"), "utf8");
 const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf8");
+const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
   it("keeps mobile tourist pages protected from horizontal scrolling", () => {
@@ -85,5 +86,12 @@ describe("user interface quality guardrails", () => {
     expect(combinedSource).not.toContain("payment");
     expect(combinedSource).not.toContain("review stars");
     expect(combinedSource).not.toContain("chatbot");
+  });
+
+  it("keeps large internal modules split out of the main production app chunk", () => {
+    expect(viteConfigSource).toContain("locale-copy");
+    expect(viteConfigSource).toContain("tourism-data");
+    expect(viteConfigSource).toContain("analysis-core");
+    expect(viteConfigSource).toContain("normalizedId");
   });
 });

@@ -7,32 +7,50 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("node_modules/firebase/firestore") || id.includes("node_modules/@firebase/firestore")) {
+          const normalizedId = id.replace(/\\/g, "/");
+
+          if (normalizedId.includes("node_modules/firebase/firestore") || normalizedId.includes("node_modules/@firebase/firestore")) {
             return "firebase-firestore";
           }
 
-          if (id.includes("node_modules/firebase/auth") || id.includes("node_modules/@firebase/auth")) {
+          if (normalizedId.includes("node_modules/firebase/auth") || normalizedId.includes("node_modules/@firebase/auth")) {
             return "firebase-auth";
           }
 
-          if (id.includes("node_modules/firebase/app") || id.includes("node_modules/@firebase/app")) {
+          if (normalizedId.includes("node_modules/firebase/app") || normalizedId.includes("node_modules/@firebase/app")) {
             return "firebase-app";
           }
 
-          if (id.includes("node_modules/firebase") || id.includes("node_modules/@firebase")) {
+          if (normalizedId.includes("node_modules/firebase") || normalizedId.includes("node_modules/@firebase")) {
             return "firebase-core";
           }
 
-          if (id.includes("node_modules/leaflet")) {
+          if (normalizedId.includes("node_modules/leaflet")) {
             return "map";
           }
 
-          if (id.includes("node_modules/lucide-react")) {
+          if (normalizedId.includes("node_modules/lucide-react")) {
             return "icons";
           }
 
-          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
+          if (normalizedId.includes("node_modules/react") || normalizedId.includes("node_modules/react-dom")) {
             return "react";
+          }
+
+          if (normalizedId.includes("/src/services/i18n.ts") || normalizedId.includes("/src/services/adminI18n.ts")) {
+            return "locale-copy";
+          }
+
+          if (normalizedId.includes("/src/data/")) {
+            return "tourism-data";
+          }
+
+          if (
+            normalizedId.includes("/src/services/analytics.ts") ||
+            normalizedId.includes("/src/services/dashboard.ts") ||
+            normalizedId.includes("/src/services/touristManagement.ts")
+          ) {
+            return "analysis-core";
           }
         },
       },
