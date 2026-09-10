@@ -462,6 +462,9 @@ const demandTierWeight: Record<DestinationDemand["tier"], number> = {
 };
 
 const localRecommendationRadiusKm = 90;
+const approachSignalRadiusKm = 8;
+const approachSignalMinimumGainKm = 0.08;
+const destinationGridCellDegrees = 0.15;
 
 type DemandAccumulator = {
   destinationId: string;
@@ -490,6 +493,45 @@ function createDemandAccumulators(destinations: Destination[]) {
   );
 }
 
+function destinationGridKey(latitude: number, longitude: number) {
+  return `${Math.floor(latitude / destinationGridCellDegrees)}:${Math.floor(longitude / destinationGridCellDegrees)}`;
+}
+
+function buildDestinationGrid(destinations: Destination[]) {
+  const grid = new Map<string, Destination[]>();
+
+  destinations.forEach((destination) => {
+    const key = destinationGridKey(destination.latitude, destination.longitude);
+    const current = grid.get(key);
+
+    if (current) {
+      current.push(destination);
+      return;
+    }
+
+    grid.set(key, [destination]);
+  });
+
+  return grid;
+}
+
+function getApproachCandidateDestinations(grid: Map<string, Destination[]>, previous: MovementPoint, current: MovementPoint) {
+  const paddingDegrees = approachSignalRadiusKm / 111;
+  const minLatCell = Math.floor((Math.min(previous.latitude, current.latitude) - paddingDegrees) / destinationGridCellDegrees);
+  const maxLatCell = Math.floor((Math.max(previous.latitude, current.latitude) + paddingDegrees) / destinationGridCellDegrees);
+  const minLngCell = Math.floor((Math.min(previous.longitude, current.longitude) - paddingDegrees) / destinationGridCellDegrees);
+  const maxLngCell = Math.floor((Math.max(previous.longitude, current.longitude) + paddingDegrees) / destinationGridCellDegrees);
+  const candidates = new Map<string, Destination>();
+
+  for (let latCell = minLatCell; latCell <= maxLatCell; latCell += 1) {
+    for (let lngCell = minLngCell; lngCell <= maxLngCell; lngCell += 1) {
+      grid.get(`${latCell}:${lngCell}`)?.forEach((destination) => candidates.set(destination.id, destination));
+    }
+  }
+
+  return [...candidates.values()];
+}
+
 function movementPointsByTrip(points: MovementPoint[]) {
   const grouped = new Map<string, MovementPoint[]>();
 
@@ -507,6 +549,7 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
   const rowsByDestination = createDemandAccumulators(data.destinations);
   const tripById = new Map(data.trips.map((trip) => [trip.id, trip]));
   const pointsByTrip = movementPointsByTrip(data.points);
+  const destinationGrid = buildDestinationGrid(data.destinations);
 
   data.points.forEach((point) => {
     const nearest = nearestDestination(point, data.destinations);
@@ -539,12 +582,12 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
     points.slice(1).forEach((point, index) => {
       const previous = points[index];
 
-      data.destinations.forEach((destination) => {
+      getApproachCandidateDestinations(destinationGrid, previous, point).forEach((destination) => {
         const previousDistance = distanceKm(previous, destination);
         const currentDistance = distanceKm(point, destination);
         const movedCloserBy = previousDistance - currentDistance;
 
-        if (previousDistance <= 8 && currentDistance <= 8 && movedCloserBy >= 0.08) {
+        if (previousDistance <= approachSignalRadiusKm && currentDistance <= approachSignalRadiusKm && movedCloserBy >= approachSignalMinimumGainKm) {
           const row = rowsByDestination.get(destination.id);
           if (row) {
             row.approachSignalCount += 1;

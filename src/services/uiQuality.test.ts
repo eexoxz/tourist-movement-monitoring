@@ -6,6 +6,7 @@ const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
 const accessSource = readFileSync(resolve(process.cwd(), "src/services/access.ts"), "utf8");
 const adminAnalyticsSource = readFileSync(resolve(process.cwd(), "src/components/AdminAnalyticsWidgets.tsx"), "utf8");
 const adminI18nSource = readFileSync(resolve(process.cwd(), "src/services/adminI18n.ts"), "utf8");
+const analyticsSource = readFileSync(resolve(process.cwd(), "src/services/analytics.ts"), "utf8");
 const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
 const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
@@ -122,6 +123,13 @@ describe("user interface quality guardrails", () => {
     expect(mapSource).toContain("markerZIndex");
     expect(mapSource).toContain("signalBoundDestinations");
     expect(mapSource).toContain("signal.nearbyPointCount > 0");
+  });
+
+  it("keeps destination demand approach checks spatially prefiltered", () => {
+    expect(analyticsSource).toContain("buildDestinationGrid");
+    expect(analyticsSource).toContain("getApproachCandidateDestinations");
+    expect(analyticsSource).toContain("destinationGridCellDegrees");
+    expect(analyticsSource).not.toContain("data.destinations.forEach((destination) => {\n        const previousDistance");
   });
 
   it("keeps large prepared demo dataset actions local-only and hard to spam", () => {
