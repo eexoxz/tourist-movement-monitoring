@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
+import { calculateDestinationSignals, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
 
 type MapViewProps = {
   points: MovementPoint[];
@@ -14,14 +15,6 @@ type MapViewProps = {
   mode?: "tourist" | "admin";
   displayMode?: "route" | "signals";
   locale?: Locale;
-};
-
-type DestinationSignal = {
-  nearbyPointCount: number;
-  uniqueTouristCount: number;
-  latestRecordedAt?: string;
-  distanceFromActiveKm?: number;
-  tier: "high" | "medium" | "emerging" | "low";
 };
 
 const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; labelKey: TranslationKey }> = {
@@ -42,30 +35,6 @@ function escapeHtml(value: string) {
 function categoryIconHtml(category: DestinationCategory, size = 16) {
   const Icon = categoryMeta[category].Icon;
   return renderToStaticMarkup(<Icon size={size} strokeWidth={2.7} aria-hidden="true" />);
-}
-
-function getDestinationSignal(destination: Destination, points: MovementPoint[], activePoint?: MovementPoint): DestinationSignal {
-  const nearbyPoints = points.filter((point) => distanceKm(point, destination) <= 1.2);
-  const uniqueTouristIds = new Set(nearbyPoints.map((point) => point.userId || point.tripId));
-  const latestPoint = [...nearbyPoints].sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
-  const nearbyPointCount = nearbyPoints.length;
-  const uniqueTouristCount = uniqueTouristIds.size;
-  const tier =
-    nearbyPointCount >= 12 || uniqueTouristCount >= 5
-      ? "high"
-      : nearbyPointCount >= 6 || uniqueTouristCount >= 3
-        ? "medium"
-        : nearbyPointCount >= 2 || uniqueTouristCount >= 1
-          ? "emerging"
-          : "low";
-
-  return {
-    nearbyPointCount,
-    uniqueTouristCount,
-    latestRecordedAt: latestPoint?.recordedAt,
-    distanceFromActiveKm: activePoint ? distanceKm(activePoint, destination) : undefined,
-    tier,
-  };
 }
 
 function tierLabelKey(tier: DestinationSignal["tier"]): TranslationKey {
@@ -116,10 +85,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
     return rankedDestinations.slice(0, limit);
   }, [activePoint, destinations, mode, points.length]);
-  const destinationSignals = useMemo(
-    () => new Map(visibleDestinations.map((destination) => [destination.id, getDestinationSignal(destination, points, activePoint)])),
-    [activePoint, points, visibleDestinations]
-  );
+  const destinationSignals = useMemo(() => calculateDestinationSignals(visibleDestinations, points, activePoint), [activePoint, points, visibleDestinations]);
   const selectedDestination = visibleDestinations.find((destination) => destination.id === selectedDestinationId) ?? null;
   const selectedSignal = selectedDestination ? destinationSignals.get(selectedDestination.id) : null;
   const t = (key: TranslationKey) => translate(locale, key);
@@ -177,7 +143,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     const route = points.map((point) => [point.latitude, point.longitude] as [number, number]);
 
     visibleDestinations.forEach((destination) => {
-      const signal = destinationSignals.get(destination.id) ?? getDestinationSignal(destination, points, activePoint);
+      const signal = destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination);
       const circleRadius = signal.tier === "high" ? 620 : signal.tier === "medium" ? 520 : signal.tier === "emerging" ? 430 : 320;
       const selectDestination = () => {
         setSelectedDestinationId(destination.id);
@@ -297,7 +263,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const topSignals = [...visibleDestinations]
     .map((destination) => ({
       destination,
-      signal: destinationSignals.get(destination.id) ?? getDestinationSignal(destination, points, activePoint),
+      signal: destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination),
     }))
     .filter((row) => row.signal.nearbyPointCount > 0)
     .sort((a, b) => b.signal.nearbyPointCount - a.signal.nearbyPointCount)

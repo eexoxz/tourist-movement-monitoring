@@ -300,6 +300,7 @@ Current alignment notes:
 - [x] Preserve the latest browser location and save the first trip point promptly so tourist recommendations stay local after reload/start.
 - [x] Standardise tourist maps so active or selected trips show routes while overview maps show aggregate destination signals.
 - [x] Use aggregate destination demand mode on administrator overview maps so large demo datasets stay readable.
+- [x] Move map demand-signal calculation into a tested service and avoid per-destination filter/sort work during map rendering.
 - [x] Keep full custom map rendering out of scope unless Leaflet becomes a blocker.
 
 ## Notification System
@@ -392,6 +393,7 @@ Current alignment notes:
 - [x] Extract reusable list-limit footer UI out of App.tsx during final cleanup.
 - [x] Expand high-visibility Administrator dashboard headings, metrics, filters and actions across all enabled languages.
 - [x] Optimise production chunks so translations, tourism data and analytics are split out of the main app bundle.
+- [x] Extract and test map demand-signal logic so large movement datasets are easier to optimise and maintain.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.
