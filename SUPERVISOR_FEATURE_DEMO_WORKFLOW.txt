@@ -1,0 +1,245 @@
+Supervisor Feature Demo Workflow
+================================
+
+This file explains how to show the extra features requested by the supervisor inside the Smart Tourist Movement Monitoring web app.
+
+
+Tourist Side
+------------
+
+Start from the tourist login/register flow.
+
+1. Tourist Registration and Profile
+   Where to show it:
+   - Register page
+   - Tourist Profile area
+
+   Demo workflow:
+   - Create or open a tourist account.
+   - Show tourist name, nationality, passport number, travel style, and emergency contact details.
+
+2. Privacy / Terms and Conditions Consent
+   Where to show it:
+   - Register page
+
+   Demo workflow:
+   - Open the registration form.
+   - Show the privacy/terms consent section before account creation.
+   - Explain that location tracking is consent-based.
+
+3. GPS Location Tracking
+   Where to show it:
+   - Tourist Home
+
+   Demo workflow:
+   - Click Allow Location.
+   - Click Start Trip.
+   - Show that the tourist location or recorded movement appears on the map.
+
+4. Check-In / Check-Out
+   Where to show it:
+   - Tourist Home
+   - Visit Tools section
+
+   Demo workflow:
+   - Open Visit Tools.
+   - Choose a destination.
+   - Check in.
+   - Show active check-in.
+   - Check out when done.
+
+5. SOS Emergency Support
+   Where to show it:
+   - Tourist Home
+   - Safety Support section
+
+   Demo workflow:
+   - Open Safety Support.
+   - Click the SOS / emergency support action.
+   - Show that an SOS case is created for administrator review.
+
+6. Incident Reporting
+   Where to show it:
+   - Tourist Home
+   - Safety Support section
+
+   Demo workflow:
+   - Open Safety Support.
+   - Submit an incident report such as lost item, accident, suspicious activity, medical, or other.
+   - Show that the incident is saved and can be reviewed by the administrator.
+
+7. Geofencing
+   Where to show it:
+   - Tourist Home
+
+   Demo workflow:
+   - Start a trip or add test movement near a monitored zone.
+   - The app compares the latest tourist location with saved geofence zones.
+   - If the tourist enters or approaches a zone, a warning appears.
+   - Explain that this uses saved geofence data and the tourist location; it does not use a new API.
+
+8. Tourist Map
+   Where to show it:
+   - Tourist Home
+   - Trips page
+
+   Demo workflow:
+   - Show the map with current location, destination markers, trip route, and selected place details.
+
+9. Attraction Information
+   Where to show it:
+   - Places page
+
+   Demo workflow:
+   - Open a place card or place detail panel.
+   - Show destination description, address/practical info, opening hours, fee note, visit tips, and demand/crowd information.
+
+10. Crowd Monitoring
+    Where to show it:
+    - Places page
+    - Tourist map
+
+    Demo workflow:
+    - Show destination demand/crowd level based on movement points.
+    - Explain that the system uses tourist movement data to identify places with higher activity.
+
+11. Event Calendar
+    Where to show it:
+    - Event Calendar tab
+
+    Demo workflow:
+    - Open the Event Calendar.
+    - Show upcoming Malaysian festivals, public holidays, state events, and linked destinations.
+
+12. Digital Tourist Pass
+    Where to show it:
+    - Tourist Profile area
+
+    Demo workflow:
+    - Open the profile/pass section.
+    - Show the QR-style digital tourist pass.
+
+13. Language System
+    Where to show it:
+    - Login page
+    - Tourist sidebar/navigation
+
+    Demo workflow:
+    - Change the language from the dropdown.
+    - Show that the interface text changes.
+
+
+Admin Side
+----------
+
+Login with an administrator account and open the administrator dashboard.
+
+1. Admin Dashboard
+   Where to show it:
+   - Admin Dashboard
+
+   Demo workflow:
+   - Show overview cards, charts, movement demand, tourist counts, and main monitoring sections.
+
+2. Real-Time / Tourist Movement Map
+   Where to show it:
+   - Admin Dashboard overview
+   - Movement Records tab
+
+   Demo workflow:
+   - Show the admin map with tourist movement and destination demand markers.
+
+3. Tourist Management
+   Where to show it:
+   - Tourists tab
+
+   Demo workflow:
+   - Show tourist list with nationality, passport number, consent status, trip count, and safety case count.
+
+4. Location Monitoring
+   Where to show it:
+   - Movement Records tab
+
+   Demo workflow:
+   - Select a trip record.
+   - Show the route map, movement details, recognised destinations, cluster, and tourist category.
+
+5. Emergency / SOS Monitoring
+   Where to show it:
+   - Safety tab
+
+   Demo workflow:
+   - Show SOS cases.
+   - Open a case.
+   - Update status or admin note.
+
+6. Crowd Monitoring
+   Where to show it:
+   - Admin overview
+
+   Demo workflow:
+   - Show high-demand destinations and movement alerts.
+   - Explain that these are based on recorded movement points and destination demand.
+
+7. Incident Management
+   Where to show it:
+   - Safety tab
+
+   Demo workflow:
+   - Open an incident case.
+   - Review details.
+   - Update the case status or admin response.
+
+8. Reports and Analytics
+   Where to show it:
+   - AI Results tab
+   - Admin overview
+
+   Demo workflow:
+   - Show K-Means clustering results.
+   - Show Decision Tree tourist category results.
+   - Show charts and analytics.
+   - Use CSV export if needed.
+
+9. Destination Management
+   Where to show it:
+   - Destinations page
+
+   Demo workflow:
+   - Add, edit, or delete a destination.
+   - Show destination name, category, address, opening hours, fee note, and visit tips.
+
+
+Geofencing Explanation For Supervisor
+-------------------------------------
+
+Geofencing means the app creates an invisible boundary around a monitored place or area.
+
+In this prototype:
+- The geofence zones are saved inside the app data.
+- The tourist's current/latest location is compared with those zones.
+- If the tourist enters or approaches a monitored zone, the app shows a warning.
+- The administrator can also review related geofence activity as part of monitoring.
+- This does not use an extra API.
+
+Simple explanation:
+
+"The system includes geofencing logic that compares tourist movement coordinates with predefined monitored zones. When a tourist enters or approaches a configured zone, the system can display a warning and include the activity in administrator monitoring."
+
+
+Quick Demo Order
+----------------
+
+1. Register or login as a tourist.
+2. Show privacy consent, passport number, nationality, and profile details.
+3. Go to Tourist Home.
+4. Allow location and start a trip.
+5. Add test movement if live movement is hard to demonstrate.
+6. Show map, crowd/demand signals, and geofence warning if available.
+7. Show check-in/check-out.
+8. Show SOS and incident reporting.
+9. Open Places and Event Calendar.
+10. Open Tourist Profile and digital pass.
+11. Login as administrator.
+12. Show dashboard overview.
+13. Show Tourists, Movement Records, Safety, AI Results, and Destinations.

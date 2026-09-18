@@ -41,11 +41,14 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Add tourist check-in/check-out for attractions.
 - [x] Decide whether check-in is manual only or QR-style simulation for the prototype.
 - [x] Add digital tourist pass with QR-style check-in confirmation for the prototype.
+- [ ] Upgrade QR-style check-in into a real scannable QR workflow, with camera scan support where the browser allows it and a manual fallback for laptops/demo use.
+- [ ] Upgrade in-app toast alerts into browser notification support for important tourist/admin events while keeping the existing toast system as the fallback.
 - [x] Add incident reporting for lost item, accident, suspicious activity and general help.
 - [x] Add administrator incident management section with status updates.
 - [x] Add tourist management view for administrators using existing user/profile records.
 - [x] Add geofencing warning logic around selected safe/restricted/dense areas without adding new APIs.
 - [x] Add basic attraction practical info such as opening hours, fee note and visit tips where data is locally available.
+- [ ] Add destination/place photos anywhere a location is shown or described so tourists and administrators can recognise places visually.
 - [ ] Document that weather, traffic and road-closure alerts are out of scope unless approved APIs are allowed.
 
 ## Malaysia Destination Scope
@@ -58,6 +61,8 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Label destination categories consistently so K-Means and Decision Tree evidence stays explainable.
 - [x] Add a balanced mix of Cultural, Nature and Urban destinations, with Food, Heritage and Coastal only where they help the report.
 - [x] Avoid making recommendations look like a generic “top 10 tourist attractions” list.
+- [ ] Add a local image/photo reference for each destination without relying on another external API.
+- [ ] Show destination photos in recommendations, place details, map detail panels, check-in/pass confirmation, event-linked places and administrator destination management.
 
 ## Seven Main Pages
 
@@ -316,6 +321,8 @@ Current alignment notes:
 - [x] Add retry buttons for recoverable Firebase and geolocation failures where useful.
 - [x] Test notification placement on mobile tourist pages and desktop administrator pages.
 - [x] Add focused language coverage for the main Administrator dashboard panels, actions and monitoring tabs.
+- [ ] Add browser notification permission flow for tourist safety, check-in/geofence and admin monitoring events.
+- [ ] Add fallback behavior so users still receive in-app toast alerts when browser notifications are denied or unsupported.
 
 ## Required Demonstration Flow
 
@@ -403,6 +410,7 @@ Current alignment notes:
 - [x] Batch 4 optimisation: index administrator tourist-management rows so large demo datasets avoid repeated per-tourist collection scans.
 - [x] Batch 5 optimisation: move tourist page derived data into a tested selector so Home, Trips and Recommendations reuse one prepared snapshot.
 - [x] Batch 6 optimisation: spatially prefilter destination approach-signal checks so demand analytics scale better with larger movement datasets.
+- [ ] Supervisor feature upgrade: implement true browser notifications, real QR scan/check-in flow and destination photo references before final QA.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.
