@@ -4,6 +4,7 @@ import { destinationCategories } from "../services/destinationManagement";
 import { distanceKm } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AnalysisResult, Destination, DestinationCategory, DestinationDemand, FestivalEvent, MovementPoint, Recommendation, TouristProfile, User } from "../types";
+import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
@@ -335,6 +336,7 @@ export function PlaceDiscovery({
               key={row.destination.id}
               onClick={() => onSelectDestination(row.destination.id)}
             >
+              <DestinationVisual destination={row.destination} compact />
               <div className="place-card-heading">
                 <div>
                   <span>{getCategoryLabel(row.destination.category, t)}</span>
@@ -373,6 +375,7 @@ export function PlaceDiscovery({
 
         {selectedRow && (
           <aside className="place-detail-card">
+            <DestinationVisual destination={selectedRow.destination} />
             <span>{getCategoryLabel(selectedRow.destination.category, t)}</span>
             <h2>{selectedRow.destination.name}</h2>
             <p>{selectedRow.destination.description}</p>

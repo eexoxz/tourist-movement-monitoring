@@ -45,12 +45,16 @@ describe("destination management service", () => {
       openingHours: "Daily, 9:00 AM to 5:00 PM",
       feeNote: "Ticket counter may apply for special galleries.",
       visitTips: "Visit earlier in the day\nPair with Merdeka Square",
+      imageUrl: "https://example.com/textile-museum.jpg",
+      imageAlt: "National Textile Museum exterior",
     });
 
     expect(result.error).toBeUndefined();
     expect(result.destination?.name).toBe("National Textile Museum");
     expect(result.destination?.openingHours).toBe("Daily, 9:00 AM to 5:00 PM");
     expect(result.destination?.visitTips).toEqual(["Visit earlier in the day", "Pair with Merdeka Square"]);
+    expect(result.destination?.imageUrl).toBe("https://example.com/textile-museum.jpg");
+    expect(result.destination?.imageAlt).toBe("National Textile Museum exterior");
     expect(result.destinations).toHaveLength(destinations.length + 1);
   });
 

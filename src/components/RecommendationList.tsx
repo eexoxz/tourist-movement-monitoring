@@ -1,5 +1,6 @@
 import type { Destination, DestinationCategory, DestinationDemand, Recommendation } from "../types";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
+import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 
 const categoryLabelKeys: Record<DestinationCategory, TranslationKey> = {
@@ -83,6 +84,7 @@ export function RecommendationList({
 
         return (
           <article className="recommendation-card" key={recommendation.id}>
+            <DestinationVisual destination={destination} compact />
             <div>
               <strong>{destination.name}</strong>
               <span>{destination.city}</span>

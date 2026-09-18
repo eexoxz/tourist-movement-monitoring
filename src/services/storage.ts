@@ -554,6 +554,8 @@ function normalizeDestination(destination: Destination): Destination {
     feeNote: destination.feeNote ?? fallback?.feeNote ?? "Fee information may vary; check the official counter or venue notice before entry.",
     visitTips: Array.isArray(destination.visitTips) ? destination.visitTips.filter(Boolean) : fallback?.visitTips ?? [],
     averageVisitMinutes: Number.isFinite(destination.averageVisitMinutes) ? destination.averageVisitMinutes : fallback?.averageVisitMinutes ?? 60,
+    imageUrl: destination.imageUrl ?? fallback?.imageUrl,
+    imageAlt: destination.imageAlt ?? fallback?.imageAlt,
   };
 }
 

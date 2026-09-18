@@ -15,6 +15,8 @@ type DestinationInput = {
   openingHours?: string;
   feeNote?: string;
   visitTips?: string[] | string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 type DestinationUpdateInput = DestinationInput & {
@@ -43,6 +45,8 @@ export function validateDestination(input: DestinationInput) {
   const description = input.description.trim();
   const openingHours = input.openingHours?.trim() ?? "";
   const feeNote = input.feeNote?.trim() ?? "";
+  const imageUrl = input.imageUrl?.trim() ?? "";
+  const imageAlt = input.imageAlt?.trim() ?? "";
   const visitTips = normalizeVisitTips(input.visitTips);
   const latitude = toNumber(input.latitude);
   const longitude = toNumber(input.longitude);
@@ -89,6 +93,8 @@ export function validateDestination(input: DestinationInput) {
       openingHours: openingHours || "Check locally before visiting, especially during public holidays.",
       feeNote: feeNote || "Fee information may vary; check the official counter or venue notice before entry.",
       visitTips,
+      imageUrl: imageUrl || undefined,
+      imageAlt: imageAlt || undefined,
     },
   };
 }

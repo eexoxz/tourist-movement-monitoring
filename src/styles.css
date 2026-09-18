@@ -744,6 +744,45 @@ button:disabled {
   text-transform: capitalize;
 }
 
+.destination-visual {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: 8px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.destination-visual img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.destination-visual figcaption {
+  position: absolute;
+  inset: auto 8px 8px 8px;
+  width: fit-content;
+  max-width: calc(100% - 16px);
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 0.74rem;
+  font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.destination-visual.compact img {
+  height: 82px;
+  aspect-ratio: auto;
+}
+
 .tourist-pass-card {
   position: relative;
   display: grid;
@@ -801,6 +840,10 @@ button:disabled {
 
 .tourist-pass-card.compact .tourist-pass-copy h2 {
   font-size: 1.05rem;
+}
+
+.tourist-pass-card.compact .destination-visual.compact img {
+  height: 64px;
 }
 
 .tourist-pass-copy p {
@@ -1147,6 +1190,10 @@ button:disabled {
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
 }
 
+.place-discovery-card .destination-visual.compact img {
+  height: 94px;
+}
+
 .place-card-heading {
   display: flex;
   justify-content: space-between;
@@ -1228,6 +1275,10 @@ button:disabled {
     linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 54%),
     #ffffff;
   box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
+}
+
+.place-detail-card .destination-visual img {
+  max-height: 190px;
 }
 
 .place-detail-card h2 {
@@ -1523,6 +1574,10 @@ button:disabled {
   border: 1px dashed #0f766e;
   border-radius: 8px;
   background: rgba(240, 253, 250, 0.84);
+}
+
+.qr-station-card .destination-visual.compact img {
+  height: 86px;
 }
 
 .qr-station-card span,
@@ -2285,6 +2340,10 @@ button:disabled {
   text-transform: uppercase;
 }
 
+.map-detail-panel .destination-visual.compact img {
+  height: 90px;
+}
+
 .map-detail-panel h2 {
   margin: 0;
   color: #102033;
@@ -2579,6 +2638,11 @@ button:disabled {
 
 .destination-admin-grid .empty-state {
   grid-column: 1 / -1;
+}
+
+.destination-card .destination-visual.compact img,
+.recommendation-card .destination-visual.compact img {
+  height: 88px;
 }
 
 .record-card,
@@ -3426,6 +3490,16 @@ button:disabled {
   background: #ccfbf1;
   font-size: 0.76rem;
   font-weight: 900;
+}
+
+.festival-destinations .destination-visual.compact {
+  flex: 0 0 28px;
+  width: 28px;
+  border-radius: 999px;
+}
+
+.festival-destinations .destination-visual.compact img {
+  height: 22px;
 }
 
 .festival-destinations {

@@ -11,6 +11,7 @@ import {
   getFestivalPlanningSummary,
   getFestivalsForState,
 } from "../services/festivals";
+import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 
 const compactCalendarPreviewLimit = 5;
@@ -96,7 +97,10 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
                   {matchedDestinations.length > 0 && (
                     <div className="festival-destinations">
                       {matchedDestinations.map((destination) => (
-                        <span key={destination.id}>{destination.name}</span>
+                        <span key={destination.id}>
+                          <DestinationVisual destination={destination} compact />
+                          {destination.name}
+                        </span>
                       ))}
                     </div>
                   )}

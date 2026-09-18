@@ -1,6 +1,7 @@
 import { BadgeCheck, QrCode, ShieldCheck } from "lucide-react";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { Destination, User } from "../types";
+import { DestinationVisual } from "./DestinationVisual";
 
 type TouristPassCardProps = {
   user: User;
@@ -90,6 +91,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
           {t("tourist.pass.eyebrow")}
         </span>
         <h2>{compact ? t("tourist.pass.compactTitle") : t("tourist.pass.title")}</h2>
+        {destination && <DestinationVisual destination={destination} compact />}
         <p>{destination ? `${t("tourist.pass.checkInDescription")} ${destination.name}.` : t("tourist.pass.description")}</p>
 
         <dl className="tourist-pass-details">

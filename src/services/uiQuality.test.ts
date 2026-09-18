@@ -10,6 +10,7 @@ const analyticsSource = readFileSync(resolve(process.cwd(), "src/services/analyt
 const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
 const browserNotificationsSource = readFileSync(resolve(process.cwd(), "src/services/browserNotifications.ts"), "utf8");
 const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
+const destinationVisualSource = readFileSync(resolve(process.cwd(), "src/components/DestinationVisual.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
 const listLimitFooterSource = readFileSync(resolve(process.cwd(), "src/components/ListLimitFooter.tsx"), "utf8");
@@ -74,6 +75,15 @@ describe("user interface quality guardrails", () => {
     expect(destinationManagerSource).toContain("Find destination");
     expect(destinationManagerSource).toContain("categoryFilter");
     expect(destinationManagerSource).toContain("filteredDestinations");
+  });
+
+  it("keeps destination visual references visible without adding a live image API", () => {
+    expect(destinationVisualSource).toContain("data:image/svg+xml");
+    expect(destinationVisualSource).toContain("destination.imageUrl");
+    expect(destinationManagerSource).toContain("Image URL");
+    expect(touristHomeSource).toContain("TouristPassCard");
+    expect(mapSource).toContain("DestinationVisual");
+    expect(qrCheckInPanelSource).toContain("DestinationVisual");
   });
 
   it("keeps supporting categories deliberate while primary AI categories stay clear", () => {

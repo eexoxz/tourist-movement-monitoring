@@ -7,6 +7,7 @@ import type { Destination, DestinationCategory, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { calculateDestinationSignals, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
+import { DestinationVisual } from "./DestinationVisual";
 
 type MapViewProps = {
   points: MovementPoint[];
@@ -326,6 +327,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
             >
               <X size={16} aria-hidden="true" />
             </button>
+            <DestinationVisual destination={selectedDestination} compact />
             <span>{categoryLabel(selectedDestination.category)} {t("map.destination")}</span>
             <h2>{selectedDestination.name}</h2>
             <p>{selectedDestination.description}</p>

@@ -61,8 +61,8 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Label destination categories consistently so K-Means and Decision Tree evidence stays explainable.
 - [x] Add a balanced mix of Cultural, Nature and Urban destinations, with Food, Heritage and Coastal only where they help the report.
 - [x] Avoid making recommendations look like a generic “top 10 tourist attractions” list.
-- [ ] Add a local image/photo reference for each destination without relying on another external API.
-- [ ] Show destination photos in recommendations, place details, map detail panels, check-in/pass confirmation, event-linked places and administrator destination management.
+- [x] Add a local image/photo reference for each destination without relying on another external API.
+- [x] Show destination photos in recommendations, place details, map detail panels, check-in/pass confirmation, event-linked places and administrator destination management.
 
 ## Seven Main Pages
 
@@ -413,7 +413,7 @@ Current alignment notes:
 - [ ] Supervisor feature upgrade: implement true browser notifications, real QR scan/check-in flow and destination photo references before final QA.
   - [x] Browser notification permission flow with toast fallback.
   - [x] QR/code based attraction check-in with camera support and manual fallback.
-  - [ ] Destination photo references.
+  - [x] Destination photo references.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.

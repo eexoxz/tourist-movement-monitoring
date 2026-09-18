@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { MapPinned, Pencil, RotateCcw, Save, Trash2, X } from "lucide-react";
 import type { Destination, DestinationCategory } from "../types";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "../services/destinationManagement";
+import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 import type { NotifyFn } from "./ToastViewport";
 
@@ -16,6 +17,8 @@ type DestinationFormState = {
   openingHours: string;
   feeNote: string;
   visitTips: string;
+  imageUrl: string;
+  imageAlt: string;
   description: string;
 };
 
@@ -31,6 +34,8 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
     openingHours: destination?.openingHours ?? "",
     feeNote: destination?.feeNote ?? "",
     visitTips: destination?.visitTips?.join("\n") ?? "",
+    imageUrl: destination?.imageUrl ?? "",
+    imageAlt: destination?.imageAlt ?? "",
     description: destination?.description ?? "",
   };
 }
@@ -192,6 +197,7 @@ export function DestinationManager({ destinations, onChange, notify }: { destina
         <section className="destination-admin-grid">
           {filteredDestinations.map((destination) => (
             <article className="destination-card editable" key={destination.id}>
+              <DestinationVisual destination={destination} compact />
               <div>
                 <strong>{destination.name}</strong>
                 <span>{destination.city}</span>
@@ -278,6 +284,14 @@ export function DestinationManager({ destinations, onChange, notify }: { destina
             <label>
               Fee note
               <input value={form.feeNote} onChange={(event) => setForm({ ...form, feeNote: event.target.value })} placeholder="Example: Entry is normally free; activities may vary" />
+            </label>
+            <label>
+              Image URL
+              <input value={form.imageUrl} onChange={(event) => setForm({ ...form, imageUrl: event.target.value })} placeholder="Optional licensed image URL" />
+            </label>
+            <label>
+              Image description
+              <input value={form.imageAlt} onChange={(event) => setForm({ ...form, imageAlt: event.target.value })} placeholder="Example: Front view of Batu Caves temple steps" />
             </label>
             <label>
               Visit tips

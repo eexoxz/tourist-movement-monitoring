@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createDestinationCheckInCode, parseDestinationCheckInCode } from "../services/qrCheckIn";
 import type { Destination } from "../types";
+import { DestinationVisual } from "./DestinationVisual";
 
 type BarcodeDetectorShape = {
   detect: (source: CanvasImageSource) => Promise<Array<{ rawValue?: string }>>;
@@ -142,6 +143,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       </label>
 
       <div className="qr-station-card">
+        {selectedDestination && <DestinationVisual destination={selectedDestination} compact />}
         <span>{t("tourist.checkin.stationCode")}</span>
         <strong>{selectedCode}</strong>
         <small>{t("tourist.checkin.stationCodeNote")}</small>
