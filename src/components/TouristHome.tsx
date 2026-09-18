@@ -4,12 +4,14 @@ import { formatDateTime } from "../services/geo";
 import { getCheckInDurationMinutes } from "../services/checkIns";
 import type { GeoFenceWarning } from "../services/geofencing";
 import type { IncidentPhotoAttachment } from "../services/incidentAttachments";
+import type { TourismAdvisory } from "../services/advisories";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
 import { MovementMap } from "./MovementMap";
 import { Page } from "./Page";
 import { QrCheckInPanel } from "./QrCheckInPanel";
 import { TouristPassCard } from "./TouristPassCard";
+import { TourismAdvisoryPanel } from "./TourismAdvisoryPanel";
 
 type IncidentOption = {
   value: IncidentType;
@@ -26,6 +28,7 @@ type TouristHomeProps = {
   activeJourneyPoint: MovementPoint | undefined;
   destinations: Destination[];
   geofenceWarnings: GeoFenceWarning[];
+  tourismAdvisories: TourismAdvisory[];
   isLiveTracking: boolean;
   locationRetryAvailable: boolean;
   trackingMessage: string | null;
@@ -99,6 +102,7 @@ export function TouristHome({
   activeJourneyPoint,
   destinations,
   geofenceWarnings,
+  tourismAdvisories,
   isLiveTracking,
   locationRetryAvailable,
   trackingMessage,
@@ -277,6 +281,8 @@ export function TouristHome({
             </div>
           </section>
         )}
+
+        <TourismAdvisoryPanel advisories={tourismAdvisories} />
 
         <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
           <article className="home-preview-card recommendation-preview">

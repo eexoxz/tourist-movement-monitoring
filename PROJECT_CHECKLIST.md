@@ -43,6 +43,7 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Add digital tourist pass with QR-style check-in confirmation for the prototype.
 - [x] Upgrade QR-style check-in into a real scannable QR workflow, with camera scan support where the browser allows it and a manual fallback for laptops/demo use.
 - [x] Upgrade in-app toast alerts into browser notification support for important tourist/admin events while keeping the existing toast system as the fallback.
+- [x] Add local tourism advisories for weather, traffic, road closures, safety and event reminders without relying on another live API.
 - [x] Add incident reporting for lost item, accident, suspicious activity and general help.
 - [x] Add optional incident photo evidence upload with mobile file picker, compressed preview and administrator review.
 - [x] Add administrator incident management section with status updates.
@@ -50,7 +51,7 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Add geofencing warning logic around selected safe/restricted/dense areas without adding new APIs.
 - [x] Add basic attraction practical info such as opening hours, fee note and visit tips where data is locally available.
 - [x] Add destination/place photos anywhere a location is shown or described so tourists and administrators can recognise places visually.
-- [ ] Document that weather, traffic and road-closure alerts are out of scope unless approved APIs are allowed.
+- [x] Keep weather, traffic and road-closure alerts as local/admin-maintained advisories unless approved APIs are allowed.
 
 ## Malaysia Destination Scope
 

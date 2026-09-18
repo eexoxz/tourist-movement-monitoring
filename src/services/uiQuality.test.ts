@@ -8,6 +8,7 @@ const adminAnalyticsSource = readFileSync(resolve(process.cwd(), "src/components
 const adminI18nSource = readFileSync(resolve(process.cwd(), "src/services/adminI18n.ts"), "utf8");
 const analyticsSource = readFileSync(resolve(process.cwd(), "src/services/analytics.ts"), "utf8");
 const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
+const advisoriesSource = readFileSync(resolve(process.cwd(), "src/services/advisories.ts"), "utf8");
 const browserNotificationsSource = readFileSync(resolve(process.cwd(), "src/services/browserNotifications.ts"), "utf8");
 const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
 const destinationVisualSource = readFileSync(resolve(process.cwd(), "src/components/DestinationVisual.tsx"), "utf8");
@@ -56,6 +57,13 @@ describe("user interface quality guardrails", () => {
     expect(appSource).toContain('t("notifications.enableAction")');
     expect(appSource).toContain("browser: true");
     expect(toastSource).toContain("toast-stack");
+  });
+
+  it("keeps tourist weather traffic and event alerts local without adding live APIs", () => {
+    expect(advisoriesSource).toContain("tourismAdvisoryTemplates");
+    expect(touristHomeSource).toContain("TourismAdvisoryPanel");
+    expect(appSource).toContain("getRelevantTourismAdvisories");
+    expect(stylesSource).toContain(".advisory-panel");
   });
 
   it("keeps QR based check-in available with a manual code fallback", () => {

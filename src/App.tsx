@@ -71,6 +71,7 @@ import { isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedD
 import { malaysiaFestivalEvents } from "./data/festivals";
 import { loadLocale, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
 import { getUpcomingFestivals } from "./services/festivals";
+import { getRelevantTourismAdvisories } from "./services/advisories";
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
@@ -928,6 +929,10 @@ function TouristWorkspace({
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));
+  const tourismAdvisories = useMemo(
+    () => getRelevantTourismAdvisories({ destinations: data.destinations, activePoint: latestKnownPoint }),
+    [data.destinations, latestKnownPoint]
+  );
   const recommendations = useMemo(
     () => recommendForUser(user.id, data, latestAnalysis, destinationDemand, latestKnownPoint),
     [data, destinationDemand, latestAnalysis, latestKnownPoint, user.id]
@@ -1691,6 +1696,7 @@ function TouristWorkspace({
       activeJourneyPoint={activeJourneyPoint}
       destinations={data.destinations}
       geofenceWarnings={geofenceWarnings}
+      tourismAdvisories={tourismAdvisories}
       isLiveTracking={isLiveTracking}
       locationRetryAvailable={locationRetryAvailable}
       trackingMessage={trackingMessage}

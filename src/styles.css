@@ -1702,6 +1702,78 @@ button:disabled {
     #ffffff;
 }
 
+.advisory-panel {
+  border-color: #bfdbfe;
+  background:
+    linear-gradient(135deg, rgba(219, 234, 254, 0.62), rgba(255, 253, 248, 0.96) 58%),
+    #ffffff;
+}
+
+.advisory-panel .section-heading span {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.advisory-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.advisory-card {
+  display: grid;
+  gap: 8px;
+  padding: 13px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.advisory-card.high {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.advisory-card.medium {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.advisory-card.low {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.advisory-card div {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: #0f766e;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.advisory-card strong {
+  color: #102033;
+  line-height: 1.25;
+}
+
+.advisory-card p,
+.advisory-card small,
+.advisory-card time {
+  margin: 0;
+  color: #596575;
+  line-height: 1.4;
+}
+
+.advisory-card small,
+.advisory-card time {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
 .geofence-warning-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -5112,6 +5184,7 @@ textarea {
   .qr-manual-row,
   .qr-camera-actions,
   .check-in-history,
+  .advisory-list,
   .geofence-warning-list,
   .safety-admin-heading,
   .safety-admin-meta,
