@@ -13,6 +13,7 @@ const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/compon
 const destinationVisualSource = readFileSync(resolve(process.cwd(), "src/components/DestinationVisual.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
+const incidentAttachmentsSource = readFileSync(resolve(process.cwd(), "src/services/incidentAttachments.ts"), "utf8");
 const listLimitFooterSource = readFileSync(resolve(process.cwd(), "src/components/ListLimitFooter.tsx"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
 const movementMapSource = readFileSync(resolve(process.cwd(), "src/components/MovementMap.tsx"), "utf8");
@@ -63,6 +64,14 @@ describe("user interface quality guardrails", () => {
     expect(qrCheckInPanelSource).toContain('t("tourist.checkin.useCode")');
     expect(touristHomeSource).toContain("QrCheckInPanel");
     expect(appSource).toContain("destinationIdOverride");
+  });
+
+  it("keeps incident reports able to carry photo evidence without a new upload API", () => {
+    expect(incidentAttachmentsSource).toContain("FileReader");
+    expect(incidentAttachmentsSource).toContain("canvas.toDataURL");
+    expect(appSource).toContain("prepareIncidentPhotoAttachment");
+    expect(touristHomeSource).toContain("incidentPhoto");
+    expect(appSource).toContain("photoDataUrl");
   });
 
   it("keeps the tourist map simpler than the administrator analysis map", () => {

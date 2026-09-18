@@ -102,6 +102,7 @@ import { getTouristManagementRows } from "./services/touristManagement";
 import { getTouristWorkspaceData } from "./services/touristWorkspace";
 import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from "./services/tripPresentation";
 import { getBrowserNotificationPermission, requestBrowserNotificationPermission, showBrowserNotification } from "./services/browserNotifications";
+import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "./services/incidentAttachments";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
 import { AuthScreen, LanguageSelector, type AuthResult, type TouristRegistrationDraft } from "./components/AuthScreen";
@@ -889,6 +890,9 @@ function TouristWorkspace({
   const [incidentType, setIncidentType] = useState<IncidentType>("lost-item");
   const [incidentDescription, setIncidentDescription] = useState("");
   const [incidentLocationNote, setIncidentLocationNote] = useState("");
+  const [incidentPhoto, setIncidentPhoto] = useState<IncidentPhotoAttachment | null>(null);
+  const [incidentPhotoMessage, setIncidentPhotoMessage] = useState<string | null>(null);
+  const [isPreparingIncidentPhoto, setIsPreparingIncidentPhoto] = useState(false);
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
   const geofenceNoticeKey = useRef("");
   const touristWorkspace = useMemo(() => getTouristWorkspaceData(data, user.id, selectedTripId), [data, selectedTripId, user.id]);
@@ -1332,6 +1336,35 @@ function TouristWorkspace({
     });
   };
 
+  const handleIncidentPhotoChange = async (file: File | null) => {
+    if (!file) {
+      setIncidentPhoto(null);
+      setIncidentPhotoMessage(null);
+      return;
+    }
+
+    setIsPreparingIncidentPhoto(true);
+    setIncidentPhotoMessage("Preparing photo evidence...");
+    const result = await prepareIncidentPhotoAttachment(file);
+    setIsPreparingIncidentPhoto(false);
+
+    if (result.error || !result.attachment) {
+      setIncidentPhoto(null);
+      setIncidentPhotoMessage(result.error ?? "Incident photo could not be prepared.");
+      notify({ tone: "error", title: "Photo not attached", message: result.error ?? "Try a smaller image or submit without a photo." });
+      return;
+    }
+
+    setIncidentPhoto(result.attachment);
+    setIncidentPhotoMessage(`${result.attachment.photoName} attached.`);
+    notify({ tone: "success", title: "Photo attached", message: "The incident photo will be submitted with the report." });
+  };
+
+  const removeIncidentPhoto = () => {
+    setIncidentPhoto(null);
+    setIncidentPhotoMessage(null);
+  };
+
   const submitIncidentReport = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const result = createIncidentReport(data, {
@@ -1340,6 +1373,11 @@ function TouristWorkspace({
       description: incidentDescription,
       locationNote: incidentLocationNote,
       location: latestKnownPoint,
+      photoDataUrl: incidentPhoto?.photoDataUrl,
+      photoName: incidentPhoto?.photoName,
+      photoType: incidentPhoto?.photoType,
+      photoSizeBytes: incidentPhoto?.photoSizeBytes,
+      photoCapturedAt: incidentPhoto?.photoCapturedAt,
     });
 
     if (result.error || !result.data) {
@@ -1350,6 +1388,8 @@ function TouristWorkspace({
     onDataChange(result.data, user);
     setIncidentDescription("");
     setIncidentLocationNote("");
+    setIncidentPhoto(null);
+    setIncidentPhotoMessage(null);
     notify({ tone: "success", title: "Incident report saved", message: "Tourism administrators can review this case from the dashboard.", browser: true });
   };
 
@@ -1665,6 +1705,9 @@ function TouristWorkspace({
       incidentType={incidentType}
       incidentDescription={incidentDescription}
       incidentLocationNote={incidentLocationNote}
+      incidentPhoto={incidentPhoto}
+      incidentPhotoMessage={incidentPhotoMessage}
+      isPreparingIncidentPhoto={isPreparingIncidentPhoto}
       incidentTypeOptions={incidentTypeOptions}
       userSosAlerts={userSosAlerts}
       userIncidentReports={userIncidentReports}
@@ -1689,6 +1732,8 @@ function TouristWorkspace({
       onIncidentTypeChange={setIncidentType}
       onIncidentDescriptionChange={setIncidentDescription}
       onIncidentLocationNoteChange={setIncidentLocationNote}
+      onIncidentPhotoChange={handleIncidentPhotoChange}
+      onRemoveIncidentPhoto={removeIncidentPhoto}
       onSubmitIncidentReport={submitIncidentReport}
     />
   );
@@ -1820,6 +1865,9 @@ function AdminWorkspace({
           detail: alert.message,
           locationNote: alert.latitude !== undefined && alert.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No recent location point was available.",
           adminNote: alert.adminNote,
+          photoDataUrl: undefined,
+          photoName: undefined,
+          photoCapturedAt: undefined,
           createdAt: alert.createdAt,
           updatedAt: alert.updatedAt,
         })),
@@ -1832,6 +1880,9 @@ function AdminWorkspace({
           detail: report.description,
           locationNote: report.locationNote || (report.latitude !== undefined && report.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No location note was provided."),
           adminNote: report.adminNote,
+          photoDataUrl: report.photoDataUrl,
+          photoName: report.photoName,
+          photoCapturedAt: report.photoCapturedAt,
           createdAt: report.createdAt,
           updatedAt: report.updatedAt,
         })),
@@ -2335,6 +2386,12 @@ function AdminWorkspace({
                   <dd>{formatDateTime(record.createdAt)}</dd>
                 </div>
               </dl>
+              {record.photoDataUrl && (
+                <figure className="safety-photo-evidence">
+                  <img src={record.photoDataUrl} alt={record.photoName ? `Incident evidence: ${record.photoName}` : "Incident evidence"} />
+                  <figcaption>{record.photoName ?? "Incident photo"}{record.photoCapturedAt ? ` · ${formatDateTime(record.photoCapturedAt)}` : ""}</figcaption>
+                </figure>
+              )}
               <div className="safety-admin-response">
                 <label>
                   {adminText("safety.responseLabel")}

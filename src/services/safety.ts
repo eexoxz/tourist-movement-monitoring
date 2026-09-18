@@ -33,6 +33,11 @@ export function createIncidentReport(
     description: string;
     locationNote?: string;
     location?: SafetyLocation;
+    photoDataUrl?: string;
+    photoName?: string;
+    photoType?: string;
+    photoSizeBytes?: number;
+    photoCapturedAt?: string;
   }
 ) {
   const description = input.description.trim();
@@ -52,6 +57,11 @@ export function createIncidentReport(
     longitude: input.location?.longitude,
     createdAt: now,
     updatedAt: now,
+    photoDataUrl: input.photoDataUrl,
+    photoName: input.photoName,
+    photoType: input.photoType,
+    photoSizeBytes: input.photoSizeBytes,
+    photoCapturedAt: input.photoCapturedAt,
   };
 
   return {

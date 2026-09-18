@@ -44,11 +44,12 @@ The supervisor review suggested the app needs more visible feature depth. Add on
 - [x] Upgrade QR-style check-in into a real scannable QR workflow, with camera scan support where the browser allows it and a manual fallback for laptops/demo use.
 - [x] Upgrade in-app toast alerts into browser notification support for important tourist/admin events while keeping the existing toast system as the fallback.
 - [x] Add incident reporting for lost item, accident, suspicious activity and general help.
+- [x] Add optional incident photo evidence upload with mobile file picker, compressed preview and administrator review.
 - [x] Add administrator incident management section with status updates.
 - [x] Add tourist management view for administrators using existing user/profile records.
 - [x] Add geofencing warning logic around selected safe/restricted/dense areas without adding new APIs.
 - [x] Add basic attraction practical info such as opening hours, fee note and visit tips where data is locally available.
-- [ ] Add destination/place photos anywhere a location is shown or described so tourists and administrators can recognise places visually.
+- [x] Add destination/place photos anywhere a location is shown or described so tourists and administrators can recognise places visually.
 - [ ] Document that weather, traffic and road-closure alerts are out of scope unless approved APIs are allowed.
 
 ## Malaysia Destination Scope
@@ -414,6 +415,7 @@ Current alignment notes:
   - [x] Browser notification permission flow with toast fallback.
   - [x] QR/code based attraction check-in with camera support and manual fallback.
   - [x] Destination photo references.
+  - [x] Incident photo evidence submission and administrator review.
 - [ ] Expand detailed Administrator copy coverage beyond English/Malay after the final admin wording is approved.
 - [ ] Final cleanup: split App.tsx into focused tourist, admin and shared UI components after feature freeze.
 - [ ] Final cleanup: split styles.css into feature sections or component styles after the interface stops changing.

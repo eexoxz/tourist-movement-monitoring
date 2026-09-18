@@ -180,6 +180,11 @@ export type IncidentReport = {
   createdAt: string;
   updatedAt: string;
   adminNote?: string;
+  photoDataUrl?: string;
+  photoName?: string;
+  photoType?: string;
+  photoSizeBytes?: number;
+  photoCapturedAt?: string;
 };
 
 export type AttractionCheckIn = {

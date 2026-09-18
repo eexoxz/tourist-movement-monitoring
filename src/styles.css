@@ -1514,6 +1514,44 @@ button:disabled {
   resize: vertical;
 }
 
+.incident-photo-field input {
+  padding: 12px;
+  border: 1px dashed #fca5a5;
+  border-radius: 8px;
+  background: #fff7f7;
+}
+
+.incident-photo-preview,
+.safety-photo-evidence {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  background: #fffafa;
+}
+
+.incident-photo-preview img,
+.safety-photo-evidence img {
+  width: 100%;
+  max-height: 240px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.incident-photo-preview figcaption,
+.safety-photo-evidence figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  color: #596575;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
 .safety-record-list {
   gap: 8px;
 }

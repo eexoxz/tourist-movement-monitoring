@@ -21,6 +21,22 @@ describe("safety service", () => {
     expect(invalid.error).toBe("Describe the incident in at least 10 characters.");
   });
 
+  it("stores incident photo evidence with the report", () => {
+    const result = createIncidentReport(initialData, {
+      userId: "tourist-demo",
+      type: "lost-item",
+      description: "My backpack was missing near the entrance counter.",
+      photoDataUrl: "data:image/jpeg;base64,abc123",
+      photoName: "backpack.jpg",
+      photoType: "image/jpeg",
+      photoSizeBytes: 1280,
+      photoCapturedAt: "2026-09-18T08:00:00.000Z",
+    });
+
+    expect(result.report?.photoName).toBe("backpack.jpg");
+    expect(result.data?.incidentReports[0].photoDataUrl).toContain("data:image/jpeg");
+  });
+
   it("updates safety record statuses", () => {
     const sosData = updateSosStatus(initialData, "sos-demo-open", "resolved", "Officer is calling the emergency contact.");
     const incidentData = updateIncidentStatus(initialData, "incident-demo-lost-bag", "reviewing", "Check with the attraction counter.");

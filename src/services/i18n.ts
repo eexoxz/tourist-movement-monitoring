@@ -234,6 +234,9 @@ export type TranslationKey =
   | "tourist.safety.locationPlaceholder"
   | "tourist.safety.whatHappened"
   | "tourist.safety.descriptionPlaceholder"
+  | "tourist.safety.photoEvidence"
+  | "tourist.safety.removePhoto"
+  | "tourist.safety.preparingPhoto"
   | "tourist.safety.submitIncident"
   | "tourist.safety.noRequests"
   | "tourist.safety.incidentLostItem"
@@ -665,6 +668,9 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.safety.locationPlaceholder": "Example: near entrance gate",
     "tourist.safety.whatHappened": "What happened?",
     "tourist.safety.descriptionPlaceholder": "Briefly describe the issue.",
+    "tourist.safety.photoEvidence": "Photo evidence",
+    "tourist.safety.removePhoto": "Remove photo",
+    "tourist.safety.preparingPhoto": "Preparing photo",
     "tourist.safety.submitIncident": "Submit incident report",
     "tourist.safety.noRequests": "No safety requests submitted yet.",
     "tourist.safety.incidentLostItem": "Lost item",

@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { formatDateTime } from "../services/geo";
 import { getCheckInDurationMinutes } from "../services/checkIns";
 import type { GeoFenceWarning } from "../services/geofencing";
+import type { IncidentPhotoAttachment } from "../services/incidentAttachments";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
 import { MovementMap } from "./MovementMap";
@@ -39,6 +40,9 @@ type TouristHomeProps = {
   incidentType: IncidentType;
   incidentDescription: string;
   incidentLocationNote: string;
+  incidentPhoto: IncidentPhotoAttachment | null;
+  incidentPhotoMessage: string | null;
+  isPreparingIncidentPhoto: boolean;
   incidentTypeOptions: IncidentOption[];
   userSosAlerts: SosAlert[];
   userIncidentReports: IncidentReport[];
@@ -63,6 +67,8 @@ type TouristHomeProps = {
   onIncidentTypeChange: (type: IncidentType) => void;
   onIncidentDescriptionChange: (value: string) => void;
   onIncidentLocationNoteChange: (value: string) => void;
+  onIncidentPhotoChange: (file: File | null) => void;
+  onRemoveIncidentPhoto: () => void;
   onSubmitIncidentReport: (event: FormEvent<HTMLFormElement>) => void;
 };
 
@@ -107,6 +113,9 @@ export function TouristHome({
   incidentType,
   incidentDescription,
   incidentLocationNote,
+  incidentPhoto,
+  incidentPhotoMessage,
+  isPreparingIncidentPhoto,
   incidentTypeOptions,
   userSosAlerts,
   userIncidentReports,
@@ -131,6 +140,8 @@ export function TouristHome({
   onIncidentTypeChange,
   onIncidentDescriptionChange,
   onIncidentLocationNoteChange,
+  onIncidentPhotoChange,
+  onRemoveIncidentPhoto,
   onSubmitIncidentReport,
 }: TouristHomeProps) {
   const t = (key: TranslationKey) => translate(locale, key);
@@ -412,9 +423,25 @@ export function TouristHome({
                 {t("tourist.safety.whatHappened")}
                 <textarea value={incidentDescription} onChange={(event) => onIncidentDescriptionChange(event.target.value)} placeholder={t("tourist.safety.descriptionPlaceholder")} required />
               </label>
-              <button className="secondary-action wide" type="submit">
+              <label className="incident-photo-field">
+                {t("tourist.safety.photoEvidence")}
+                <input type="file" accept="image/*" onChange={(event) => onIncidentPhotoChange(event.target.files?.[0] ?? null)} />
+              </label>
+              {incidentPhoto && (
+                <figure className="incident-photo-preview">
+                  <img src={incidentPhoto.photoDataUrl} alt={incidentPhoto.photoName} />
+                  <figcaption>
+                    <span>{incidentPhoto.photoName}</span>
+                    <button className="secondary-action compact-action" type="button" onClick={onRemoveIncidentPhoto}>
+                      {t("tourist.safety.removePhoto")}
+                    </button>
+                  </figcaption>
+                </figure>
+              )}
+              {incidentPhotoMessage && <p className="status-message">{incidentPhotoMessage}</p>}
+              <button className="secondary-action wide" type="submit" disabled={isPreparingIncidentPhoto}>
                 <Save size={18} />
-                {t("tourist.safety.submitIncident")}
+                {isPreparingIncidentPhoto ? t("tourist.safety.preparingPhoto") : t("tourist.safety.submitIncident")}
               </button>
             </form>
 

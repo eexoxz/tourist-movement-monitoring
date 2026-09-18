@@ -679,6 +679,11 @@ function normalizeIncidentReport(report: Partial<IncidentReport>): IncidentRepor
     createdAt,
     updatedAt: report.updatedAt ?? createdAt,
     adminNote: report.adminNote,
+    photoDataUrl: report.photoDataUrl,
+    photoName: report.photoName,
+    photoType: report.photoType,
+    photoSizeBytes: Number.isFinite(report.photoSizeBytes) ? report.photoSizeBytes : undefined,
+    photoCapturedAt: report.photoCapturedAt,
   };
 }
 
