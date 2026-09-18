@@ -308,7 +308,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       <div className="map-legend" aria-label={t("map.legendAria")}>
         {visibleCategories.map((category) => (
           <span key={category}>
-            <i className={`destination-marker destination-marker-${category}`}>
+            <i className={`legend-marker destination-marker-${category}`}>
               <span dangerouslySetInnerHTML={{ __html: categoryIconHtml(category, 13) }} />
             </i>
             {categoryLabel(category)}

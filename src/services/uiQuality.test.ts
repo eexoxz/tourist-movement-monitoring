@@ -88,6 +88,12 @@ describe("user interface quality guardrails", () => {
     expect(mapSource).toContain("rankedDestinations.slice");
   });
 
+  it("keeps map legend icons centered without inheriting Leaflet marker positioning", () => {
+    expect(mapSource).toContain("legend-marker");
+    expect(stylesSource).toContain(".legend-marker");
+    expect(stylesSource).toContain("place-items: center");
+  });
+
   it("keeps destination management searchable after CRUD stabilisation", () => {
     expect(destinationManagerSource).toContain("Find destination");
     expect(destinationManagerSource).toContain("categoryFilter");
