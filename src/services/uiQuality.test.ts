@@ -8,12 +8,14 @@ const adminAnalyticsSource = readFileSync(resolve(process.cwd(), "src/components
 const adminI18nSource = readFileSync(resolve(process.cwd(), "src/services/adminI18n.ts"), "utf8");
 const analyticsSource = readFileSync(resolve(process.cwd(), "src/services/analytics.ts"), "utf8");
 const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
+const browserNotificationsSource = readFileSync(resolve(process.cwd(), "src/services/browserNotifications.ts"), "utf8");
 const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
 const listLimitFooterSource = readFileSync(resolve(process.cwd(), "src/components/ListLimitFooter.tsx"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
 const movementMapSource = readFileSync(resolve(process.cwd(), "src/components/MovementMap.tsx"), "utf8");
+const qrCheckInPanelSource = readFileSync(resolve(process.cwd(), "src/components/QrCheckInPanel.tsx"), "utf8");
 const touristHomeSource = readFileSync(resolve(process.cwd(), "src/components/TouristHome.tsx"), "utf8");
 const toastSource = readFileSync(resolve(process.cwd(), "src/components/ToastViewport.tsx"), "utf8");
 const tripDiarySource = readFileSync(resolve(process.cwd(), "src/components/TripDiary.tsx"), "utf8");
@@ -43,6 +45,23 @@ describe("user interface quality guardrails", () => {
     expect(stylesSource).toContain("width: min(380px, calc(100vw - 28px))");
     expect(stylesSource).toContain("z-index: 50000");
     expect(stylesSource).toContain("left: 10px");
+  });
+
+  it("keeps browser notifications available with in-app toast fallback", () => {
+    expect(browserNotificationsSource).toContain("Notification.requestPermission");
+    expect(browserNotificationsSource).toContain("new Notification");
+    expect(appSource).toContain("showBrowserNotification(notification)");
+    expect(appSource).toContain('t("notifications.enableAction")');
+    expect(appSource).toContain("browser: true");
+    expect(toastSource).toContain("toast-stack");
+  });
+
+  it("keeps QR based check-in available with a manual code fallback", () => {
+    expect(qrCheckInPanelSource).toContain("BarcodeDetector");
+    expect(qrCheckInPanelSource).toContain("getUserMedia");
+    expect(qrCheckInPanelSource).toContain('t("tourist.checkin.useCode")');
+    expect(touristHomeSource).toContain("QrCheckInPanel");
+    expect(appSource).toContain("destinationIdOverride");
   });
 
   it("keeps the tourist map simpler than the administrator analysis map", () => {

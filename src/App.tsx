@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BarChart3,
+  BellRing,
   CalendarDays,
   Compass,
   Download,
@@ -100,6 +101,7 @@ import { createIncidentReport, createSosAlert, getOpenSafetyCount, updateInciden
 import { getTouristManagementRows } from "./services/touristManagement";
 import { getTouristWorkspaceData } from "./services/touristWorkspace";
 import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from "./services/tripPresentation";
+import { getBrowserNotificationPermission, requestBrowserNotificationPermission, showBrowserNotification } from "./services/browserNotifications";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
 import { AuthScreen, LanguageSelector, type AuthResult, type TouristRegistrationDraft } from "./components/AuthScreen";
@@ -299,12 +301,29 @@ function App() {
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [browserNotificationPermission, setBrowserNotificationPermission] = useState(() => getBrowserNotificationPermission());
   const watchId = useRef<number | null>(null);
   const lastSyncWarningAt = useRef(0);
   const t = (key: TranslationKey) => translate(locale, key);
 
   const notify: NotifyFn = (notification) => {
     setNotifications((current) => [...current.slice(-2), { ...notification, id: createId("notification") }]);
+    if (notification.browser) {
+      const delivered = showBrowserNotification(notification);
+      setBrowserNotificationPermission(getBrowserNotificationPermission());
+
+      if (!delivered && getBrowserNotificationPermission() === "default") {
+        setNotifications((current) => [
+          ...current.slice(-2),
+          {
+            id: createId("notification"),
+            tone: "info",
+            title: t("notifications.enableTitle"),
+            message: t("notifications.enableMessage"),
+          },
+        ]);
+      }
+    }
   };
 
   const dismissNotification = (id: string) => {
@@ -324,6 +343,23 @@ function App() {
   const changeLocale = (nextLocale: Locale) => {
     setLocale(nextLocale);
     saveLocale(nextLocale);
+  };
+
+  const enableBrowserNotifications = async () => {
+    const permission = await requestBrowserNotificationPermission();
+    setBrowserNotificationPermission(permission);
+
+    if (permission === "granted") {
+      notify({ tone: "success", title: t("notifications.enabledTitle"), message: t("notifications.enabledMessage"), browser: true });
+      return;
+    }
+
+    if (permission === "denied") {
+      notify({ tone: "warning", title: t("notifications.deniedTitle"), message: t("notifications.deniedMessage") });
+      return;
+    }
+
+    notify({ tone: "warning", title: t("notifications.unsupportedTitle"), message: t("notifications.unsupportedMessage") });
   };
 
   const goToAuthMode = (mode: AuthMode) => {
@@ -727,6 +763,15 @@ function App() {
           ["events", t("nav.events"), CalendarDays],
         ] as const);
   const primaryViews = getPrimaryViewsForRole(currentUser.role);
+  const browserNotificationLabel =
+    browserNotificationPermission === "granted"
+      ? t("notifications.enabledAction")
+      : browserNotificationPermission === "denied"
+      ? t("notifications.deniedAction")
+      : browserNotificationPermission === "unsupported"
+      ? t("notifications.unsupportedAction")
+      : t("notifications.enableAction");
+  const browserNotificationDisabled = browserNotificationPermission === "granted" || browserNotificationPermission === "denied" || browserNotificationPermission === "unsupported";
 
   return (
     <div className={currentUser.role === "tourist" ? "app-shell tourist-shell" : "app-shell admin-shell"}>
@@ -782,6 +827,10 @@ function App() {
         </div>
 
         <div className="sidebar-tools">
+          <button className="nav-item utility" onClick={enableBrowserNotifications} disabled={browserNotificationDisabled} title={browserNotificationLabel}>
+            <BellRing size={18} />
+            {browserNotificationLabel}
+          </button>
           <button className="nav-item utility" onClick={exportData} title="Export prototype data">
             <Download size={18} />
             {t("nav.exportData")}
@@ -917,7 +966,7 @@ function TouristWorkspace({
     if (warningKey !== geofenceNoticeKey.current) {
       const warning = geofenceWarnings[0];
       geofenceNoticeKey.current = warningKey;
-      notify({ tone: warning.tone, title: warning.geofence.name, message: warning.geofence.message });
+      notify({ tone: warning.tone, title: warning.geofence.name, message: warning.geofence.message, browser: true });
     }
   }, [geofenceWarnings, notify]);
 
@@ -1279,6 +1328,7 @@ function TouristWorkspace({
       tone: "warning",
       title: "SOS request recorded",
       message: latestKnownPoint ? "Your latest saved location was attached for administrator review." : "No saved location was available, but the request was recorded.",
+      browser: true,
     });
   };
 
@@ -1300,13 +1350,14 @@ function TouristWorkspace({
     onDataChange(result.data, user);
     setIncidentDescription("");
     setIncidentLocationNote("");
-    notify({ tone: "success", title: "Incident report saved", message: "Tourism administrators can review this case from the dashboard." });
+    notify({ tone: "success", title: "Incident report saved", message: "Tourism administrators can review this case from the dashboard.", browser: true });
   };
 
-  const startAttractionCheckIn = () => {
+  const startAttractionCheckIn = (destinationIdOverride?: string) => {
+    const destinationId = destinationIdOverride ?? checkInDestinationId;
     const result = createAttractionCheckIn(data, {
       userId: user.id,
-      destinationId: checkInDestinationId,
+      destinationId,
       tripId: activeTrip?.id,
       location: latestKnownPoint,
     });
@@ -1316,9 +1367,9 @@ function TouristWorkspace({
       return;
     }
 
-    const destination = data.destinations.find((candidate) => candidate.id === checkInDestinationId);
+    const destination = data.destinations.find((candidate) => candidate.id === destinationId);
     onDataChange(result.data, user);
-    notify({ tone: "success", title: "Checked in", message: destination ? `${destination.name} was added to your visit log.` : "Your attraction visit was added." });
+    notify({ tone: "success", title: "Checked in", message: destination ? `${destination.name} was added to your visit log.` : "Your attraction visit was added.", browser: true });
   };
 
   const finishAttractionCheckIn = () => {
@@ -1334,7 +1385,7 @@ function TouristWorkspace({
     }
 
     onDataChange(result.data, user);
-    notify({ tone: "success", title: "Checked out", message: "Your attraction visit duration was saved." });
+    notify({ tone: "success", title: "Checked out", message: "Your attraction visit duration was saved.", browser: true });
   };
 
   const skipProfileSetup = () => {

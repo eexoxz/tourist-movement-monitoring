@@ -26,6 +26,18 @@ export type TranslationKey =
   | "nav.logout"
   | "sync.retrying"
   | "sync.retry"
+  | "notifications.enableAction"
+  | "notifications.enabledAction"
+  | "notifications.deniedAction"
+  | "notifications.unsupportedAction"
+  | "notifications.enableTitle"
+  | "notifications.enableMessage"
+  | "notifications.enabledTitle"
+  | "notifications.enabledMessage"
+  | "notifications.deniedTitle"
+  | "notifications.deniedMessage"
+  | "notifications.unsupportedTitle"
+  | "notifications.unsupportedMessage"
   | "auth.title"
   | "auth.description"
   | "auth.mode"
@@ -258,6 +270,19 @@ export type TranslationKey =
   | "tourist.checkin.unknownAttraction"
   | "tourist.checkin.minVisit"
   | "tourist.checkin.currentlyCheckedIn"
+  | "tourist.checkin.qrHelp"
+  | "tourist.checkin.stationCode"
+  | "tourist.checkin.stationCodeNote"
+  | "tourist.checkin.scanOrEnterCode"
+  | "tourist.checkin.useCode"
+  | "tourist.checkin.scanQr"
+  | "tourist.checkin.stopScan"
+  | "tourist.checkin.cameraUnavailable"
+  | "tourist.checkin.cameraReady"
+  | "tourist.checkin.cameraDenied"
+  | "tourist.checkin.cameraPaused"
+  | "tourist.checkin.codeAccepted"
+  | "tourist.checkin.codeInvalid"
   | "tourist.completed.title"
   | "tourist.completed.started"
   | "tourist.completed.ended"
@@ -453,6 +478,18 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "nav.logout": "Logout",
     "sync.retrying": "Retrying",
     "sync.retry": "Retry sync",
+    "notifications.enableAction": "Enable alerts",
+    "notifications.enabledAction": "Alerts enabled",
+    "notifications.deniedAction": "Alerts blocked",
+    "notifications.unsupportedAction": "Alerts unavailable",
+    "notifications.enableTitle": "Enable browser alerts",
+    "notifications.enableMessage": "Use the Enable alerts button to allow browser notifications for safety, geofence and check-in updates.",
+    "notifications.enabledTitle": "Browser alerts enabled",
+    "notifications.enabledMessage": "Important tourist monitoring alerts can now appear as browser notifications while the app is open.",
+    "notifications.deniedTitle": "Browser alerts blocked",
+    "notifications.deniedMessage": "Your browser blocked notifications. You can still receive in-app alerts, or enable notifications in browser settings.",
+    "notifications.unsupportedTitle": "Browser alerts unavailable",
+    "notifications.unsupportedMessage": "This browser does not support notification permission here. In-app alerts will still be shown.",
     "auth.title": "Smart Tourist Movement Monitoring",
     "auth.description": "Consent-based trip tracking, route visualization, dashboard monitoring, and explainable destination recommendations for selected Malaysian tourist locations.",
     "auth.mode": "Authentication mode",
@@ -664,6 +701,19 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.checkin.unknownAttraction": "Unknown attraction",
     "tourist.checkin.minVisit": "min visit",
     "tourist.checkin.currentlyCheckedIn": "Currently checked in",
+    "tourist.checkin.qrHelp": "Scan an attraction QR code or use the station code shown for the selected place.",
+    "tourist.checkin.stationCode": "Station code",
+    "tourist.checkin.stationCodeNote": "Use this as the attraction QR payload for demo check-ins.",
+    "tourist.checkin.scanOrEnterCode": "Scan or enter code",
+    "tourist.checkin.useCode": "Use code",
+    "tourist.checkin.scanQr": "Scan QR",
+    "tourist.checkin.stopScan": "Stop scan",
+    "tourist.checkin.cameraUnavailable": "Camera QR scanning is not available in this browser. Use the station code instead.",
+    "tourist.checkin.cameraReady": "Camera is ready. Point it at an attraction QR code.",
+    "tourist.checkin.cameraDenied": "Camera access was not allowed. Use the station code instead.",
+    "tourist.checkin.cameraPaused": "Camera scan paused. Try the station code if the QR cannot be read.",
+    "tourist.checkin.codeAccepted": "check-in code accepted.",
+    "tourist.checkin.codeInvalid": "The attraction code could not be used.",
     "tourist.completed.title": "Completed Trip",
     "tourist.completed.started": "Started",
     "tourist.completed.ended": "Ended",

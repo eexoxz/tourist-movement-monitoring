@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
 import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn, getCheckInDurationMinutes } from "./checkIns";
+import { createDestinationCheckInCode, parseDestinationCheckInCode } from "./qrCheckIn";
 
 describe("attraction check-ins", () => {
   it("creates a manual check-in for a tourist attraction", () => {
@@ -51,5 +52,15 @@ describe("attraction check-ins", () => {
     expect(checkedOut.error).toBeUndefined();
     expect(checkedOut.checkIn?.status).toBe("checked-out");
     expect(getCheckInDurationMinutes(checkedOut.checkIn!)).toBeGreaterThanOrEqual(0);
+  });
+
+  it("validates QR station codes against known destinations", () => {
+    const destination = initialData.destinations[0];
+    const code = createDestinationCheckInCode(destination.id);
+    const result = parseDestinationCheckInCode(code, initialData.destinations);
+
+    expect(result.error).toBeUndefined();
+    expect(result.destination?.id).toBe(destination.id);
+    expect(parseDestinationCheckInCode(`${code.slice(0, -1)}X`, initialData.destinations).error).toBe("The attraction check-in code could not be verified.");
   });
 });

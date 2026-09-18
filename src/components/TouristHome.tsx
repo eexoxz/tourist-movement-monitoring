@@ -7,6 +7,7 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
 import { MovementMap } from "./MovementMap";
 import { Page } from "./Page";
+import { QrCheckInPanel } from "./QrCheckInPanel";
 import { TouristPassCard } from "./TouristPassCard";
 
 type IncidentOption = {
@@ -56,7 +57,7 @@ type TouristHomeProps = {
   onAddLocalTestRoute: () => void;
   onCreateSampleRoute: () => void;
   onCheckInDestinationChange: (destinationId: string) => void;
-  onStartAttractionCheckIn: () => void;
+  onStartAttractionCheckIn: (destinationId?: string) => void;
   onFinishAttractionCheckIn: () => void;
   onSendSosAlert: () => void;
   onIncidentTypeChange: (type: IncidentType) => void;
@@ -320,22 +321,13 @@ export function TouristHome({
             {!activeCheckIn && (
               <div className="check-in-stack">
                 <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
-                <div className="check-in-control">
-                  <label>
-                    {t("tourist.checkin.attraction")}
-                    <select value={checkInDestinationId} onChange={(event) => onCheckInDestinationChange(event.target.value)}>
-                      {destinations.map((destination) => (
-                        <option key={destination.id} value={destination.id}>
-                          {destination.name} · {destination.city}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button className="primary-action" type="button" onClick={onStartAttractionCheckIn}>
-                    <MapPinned size={18} />
-                    {t("tourist.checkin.confirmWithPass")}
-                  </button>
-                </div>
+                <QrCheckInPanel
+                  destinations={destinations}
+                  selectedDestination={selectedCheckInDestination}
+                  locale={locale}
+                  onDestinationChange={onCheckInDestinationChange}
+                  onConfirm={onStartAttractionCheckIn}
+                />
               </div>
             )}
 

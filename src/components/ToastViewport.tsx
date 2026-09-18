@@ -8,6 +8,7 @@ export type AppNotification = {
   tone: NotificationTone;
   title: string;
   message?: string;
+  browser?: boolean;
 };
 
 export type NotifyFn = (notification: Omit<AppNotification, "id">) => void;
