@@ -68,6 +68,11 @@ export type MovementRecordFilters = {
   toDate?: string;
 };
 
+export type MovementDashboardViews = {
+  records: MovementRecordView[];
+  tripRecords: MovementTripRecordView[];
+};
+
 export function getTourists(data: AppData) {
   return data.users.filter((user) => user.role === "tourist");
 }
@@ -328,6 +333,8 @@ function buildDashboardIndexes(data: AppData) {
   };
 }
 
+type DashboardIndexes = ReturnType<typeof buildDashboardIndexes>;
+
 function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex): { summary: TripSummary; destinationNames: string[] } {
   const visitedDestinationIds = new Set<string>();
   const destinationNames = new Set<string>();
@@ -361,19 +368,17 @@ function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destina
   };
 }
 
-export function getMovementRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementRecordView[] {
-  const normalized = normalizeMovementFilters(filters);
-  const indexes = buildDashboardIndexes(data);
+function getMovementRecordsWithIndexes(data: AppData, filters: MovementRecordFilters, indexes: DashboardIndexes): MovementRecordView[] {
   const visibleTrips =
-    normalized.touristId && normalized.touristId !== "all"
-      ? data.trips.filter((trip) => trip.userId === normalized.touristId)
+    filters.touristId && filters.touristId !== "all"
+      ? data.trips.filter((trip) => trip.userId === filters.touristId)
       : data.trips;
   const visibleTripIds = new Set(visibleTrips.map((trip) => trip.id));
 
   return data.points
     .filter((point) => visibleTripIds.has(point.tripId))
-    .filter((point) => !normalized.tripId || normalized.tripId === "all" || point.tripId === normalized.tripId)
-    .filter((point) => isWithinDateRange(point.recordedAt, normalized))
+    .filter((point) => !filters.tripId || filters.tripId === "all" || point.tripId === filters.tripId)
+    .filter((point) => isWithinDateRange(point.recordedAt, filters))
     .map((point) => {
       const trip = indexes.tripById.get(point.tripId) ?? null;
       const tourist = trip ? indexes.userById.get(trip.userId) ?? null : null;
@@ -390,19 +395,21 @@ export function getMovementRecords(data: AppData, filters: MovementRecordFilters
     .sort((a, b) => new Date(b.point.recordedAt).getTime() - new Date(a.point.recordedAt).getTime());
 }
 
+export function getMovementRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementRecordView[] {
+  const normalized = normalizeMovementFilters(filters);
+  return getMovementRecordsWithIndexes(data, normalized, buildDashboardIndexes(data));
+}
+
 export function getTripFilterOptions(data: AppData, touristId = "all") {
   return data.trips
     .filter((trip) => touristId === "all" || trip.userId === touristId)
     .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 }
 
-export function getMovementTripRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementTripRecordView[] {
-  const normalized = normalizeMovementFilters(filters);
-  const indexes = buildDashboardIndexes(data);
-
+function getMovementTripRecordsWithIndexes(data: AppData, filters: MovementRecordFilters, indexes: DashboardIndexes): MovementTripRecordView[] {
   return data.trips
-    .filter((trip) => !normalized.touristId || normalized.touristId === "all" || trip.userId === normalized.touristId)
-    .filter((trip) => !normalized.tripId || normalized.tripId === "all" || trip.id === normalized.tripId)
+    .filter((trip) => !filters.touristId || filters.touristId === "all" || trip.userId === filters.touristId)
+    .filter((trip) => !filters.tripId || filters.tripId === "all" || trip.id === filters.tripId)
     .map((trip) => {
       const points = indexes.pointsByTrip.get(trip.id) ?? [];
       const evidence = summarizeTripPoints(trip, points, indexes.destinationIndex);
@@ -416,8 +423,23 @@ export function getMovementTripRecords(data: AppData, filters: MovementRecordFil
         analysis: indexes.analysisByTripId.get(trip.id) ?? null,
       };
     })
-    .filter((record) => tripMatchesDateRange(record.trip, record.points, normalized))
+    .filter((record) => tripMatchesDateRange(record.trip, record.points, filters))
     .sort((a, b) => new Date(b.trip.startedAt).getTime() - new Date(a.trip.startedAt).getTime());
+}
+
+export function getMovementTripRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementTripRecordView[] {
+  const normalized = normalizeMovementFilters(filters);
+  return getMovementTripRecordsWithIndexes(data, normalized, buildDashboardIndexes(data));
+}
+
+export function getMovementDashboardViews(data: AppData, filters: MovementRecordFilters | string = {}): MovementDashboardViews {
+  const normalized = normalizeMovementFilters(filters);
+  const indexes = buildDashboardIndexes(data);
+
+  return {
+    records: getMovementRecordsWithIndexes(data, normalized, indexes),
+    tripRecords: getMovementTripRecordsWithIndexes(data, normalized, indexes),
+  };
 }
 
 function csvCell(value: string | number | null | undefined) {
@@ -440,15 +462,25 @@ export function buildMovementRecordsCsv(records: MovementRecordView[]) {
     "trip_duration_minutes",
     "trip_visited_destinations",
   ];
+  const recordsByTrip = records.reduce<Map<string, MovementRecordView[]>>((groups, record) => {
+    const tripId = record.trip?.id ?? record.point.tripId;
+    const tripRecords = groups.get(tripId);
+
+    if (tripRecords) {
+      tripRecords.push(record);
+      return groups;
+    }
+
+    groups.set(tripId, [record]);
+    return groups;
+  }, new Map());
   const summaries = new Map(
-    Array.from(new Set(records.map((record) => record.trip?.id ?? record.point.tripId))).map((tripId) => {
-      const tripRecords = records
-        .filter((record) => (record.trip?.id ?? record.point.tripId) === tripId)
-        .sort((a, b) => new Date(a.point.recordedAt).getTime() - new Date(b.point.recordedAt).getTime());
-      const distance = tripRecords.slice(1).reduce((total, record, index) => total + distanceKm(tripRecords[index].point, record.point), 0);
-      const startedAt = tripRecords[0]?.point.recordedAt ?? tripRecords[0]?.trip?.startedAt;
-      const endedAt = tripRecords.at(-1)?.point.recordedAt ?? tripRecords[0]?.trip?.endedAt ?? startedAt;
-      const visited = new Set(tripRecords.map((record) => record.nearestDestinationName).filter((name) => name !== "Unmapped destination"));
+    [...recordsByTrip.entries()].map(([tripId, tripRecords]) => {
+      const sortedTripRecords = [...tripRecords].sort((a, b) => new Date(a.point.recordedAt).getTime() - new Date(b.point.recordedAt).getTime());
+      const distance = sortedTripRecords.slice(1).reduce((total, record, index) => total + distanceKm(sortedTripRecords[index].point, record.point), 0);
+      const startedAt = sortedTripRecords[0]?.point.recordedAt ?? sortedTripRecords[0]?.trip?.startedAt;
+      const endedAt = sortedTripRecords.at(-1)?.point.recordedAt ?? sortedTripRecords[0]?.trip?.endedAt ?? startedAt;
+      const visited = new Set(sortedTripRecords.map((record) => record.nearestDestinationName).filter((name) => name !== "Unmapped destination"));
 
       return [
         tripId,

@@ -75,9 +75,8 @@ import { getRelevantTourismAdvisories } from "./services/advisories";
 import {
   buildMovementRecordsCsv,
   getDailyMovementTrend,
+  getMovementDashboardViews,
   getMovementDataStatus,
-  getMovementRecords,
-  getMovementTripRecords,
   getProfileDistribution,
   getTourists,
   getTripFilterOptions,
@@ -1787,9 +1786,9 @@ function AdminWorkspace({
   const [demoDatasetAction, setDemoDatasetAction] = useState<"loading" | "removing" | null>(null);
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
-  const movementRecords = useMemo(
+  const movementViews = useMemo(
     () =>
-      getMovementRecords(data, {
+      getMovementDashboardViews(data, {
         touristId: selectedTouristId,
         tripId: selectedTripId,
         fromDate,
@@ -1797,16 +1796,8 @@ function AdminWorkspace({
       }),
     [data, selectedTouristId, selectedTripId, fromDate, toDate]
   );
-  const movementTripRecords = useMemo(
-    () =>
-      getMovementTripRecords(data, {
-        touristId: selectedTouristId,
-        tripId: selectedTripId,
-        fromDate,
-        toDate,
-      }),
-    [data, selectedTouristId, selectedTripId, fromDate, toDate]
-  );
+  const movementRecords = movementViews.records;
+  const movementTripRecords = movementViews.tripRecords;
   const filteredPoints = movementRecords.map((record) => record.point);
   const allDashboardPoints = data.points;
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);

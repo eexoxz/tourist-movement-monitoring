@@ -1,5 +1,5 @@
 import type { AppData, AttractionCheckIn, MovementPoint, TouristProfile, TripSession, User } from "../types";
-import { nearestDestination } from "./geo";
+import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
 
 export type TouristManagementRow = {
   tourist: User;
@@ -28,7 +28,7 @@ function pushGroupedValue<T>(groups: Map<string, T[]>, key: string, value: T) {
 }
 
 function latestDate(dates: string[]) {
-  return dates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+  return dates.reduce<string | undefined>((latest, date) => (!latest || new Date(date).getTime() > new Date(latest).getTime() ? date : latest), undefined);
 }
 
 function addUserPoint(pointsByUser: Map<string, Map<string, MovementPoint>>, userId: string, point: MovementPoint) {
@@ -43,6 +43,7 @@ function addUserPoint(pointsByUser: Map<string, Map<string, MovementPoint>>, use
 }
 
 function buildTouristManagementIndexes(data: AppData) {
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
   const grantedConsentIds = new Set(data.consents.filter((consent) => consent.granted).map((consent) => consent.userId));
   const tripsByUser = new Map<string, TripSession[]>();
   const userIdByTripId = new Map<string, string>();
@@ -76,8 +77,7 @@ function buildTouristManagementIndexes(data: AppData) {
       return;
     }
 
-    const nearest = nearestDestination(point, data.destinations);
-    const destinationName = nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
+    const destinationName = destinationIndex.nearest(point, 1.2)?.destination.name ?? null;
 
     ownerIds.forEach((userId) => {
       addUserPoint(pointsByUser, userId, point);
@@ -152,13 +152,20 @@ export function getTouristManagementRows(data: AppData): TouristManagementRow[] 
         ...(indexes.safetyDatesByUser.get(tourist.id) ?? []),
       ].filter((date): date is string => Boolean(date));
       const destinationNames = Array.from(indexes.destinationNamesByUser.get(tourist.id) ?? []);
+      const tripStatusCounts = trips.reduce(
+        (counts, trip) => {
+          counts[trip.status] += 1;
+          return counts;
+        },
+        { active: 0, completed: 0 }
+      );
 
       return {
         tourist,
         consentGranted: indexes.grantedConsentIds.has(tourist.id),
         totalTrips: trips.length,
-        completedTrips: trips.filter((trip) => trip.status === "completed").length,
-        activeTrips: trips.filter((trip) => trip.status === "active").length,
+        completedTrips: tripStatusCounts.completed,
+        activeTrips: tripStatusCounts.active,
         movementPoints: points.length,
         checkIns: indexes.checkInsByUser.get(tourist.id)?.length ?? 0,
         openSafetyCases: indexes.openSafetyCasesByUser.get(tourist.id) ?? 0,

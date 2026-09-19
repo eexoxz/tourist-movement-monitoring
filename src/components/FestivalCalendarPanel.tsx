@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { allMalaysianStates } from "../data/festivals";
 import type { Destination, FestivalEvent, MalaysianState } from "../types";
@@ -30,9 +30,13 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
-  const filteredEvents = getFestivalsForState(events, stateFilter);
+  const filteredEvents = useMemo(() => getFestivalsForState(events, stateFilter), [events, stateFilter]);
   const visibleLimit = showFullCalendar ? filteredEvents.length : compact ? compactCalendarPreviewLimit : fullCalendarPreviewLimit;
-  const visibleEvents = filteredEvents.slice(0, visibleLimit);
+  const visibleEvents = useMemo(() => filteredEvents.slice(0, visibleLimit), [filteredEvents, visibleLimit]);
+  const visibleDestinationMatches = useMemo(
+    () => new Map(visibleEvents.map((event) => [event.id, getFestivalDestinationMatches(event, destinations).slice(0, 3)])),
+    [destinations, visibleEvents]
+  );
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
       </div>
       <div className="festival-list">
         {visibleEvents.map((event) => {
-          const matchedDestinations = getFestivalDestinationMatches(event, destinations).slice(0, 3);
+          const matchedDestinations = visibleDestinationMatches.get(event.id) ?? [];
           const statesExpanded = expandedEventIds.includes(event.id);
 
           return (

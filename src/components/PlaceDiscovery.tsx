@@ -258,6 +258,7 @@ export function PlaceDiscovery({
   const visibleRows = showAllPlaces ? rows : rows.slice(0, placePreviewLimit);
   const hiddenPlaceCount = rows.length - visibleRows.length;
   const personalized = Boolean(latestAnalysis);
+  const demandSignalCount = useMemo(() => demand.filter((row) => row.popularityScore > 0).length, [demand]);
 
   return (
     <section className="places-page">
@@ -273,7 +274,7 @@ export function PlaceDiscovery({
             {t("tourist.places.placesShown")}
           </span>
           <span>
-            <strong>{demand.filter((row) => row.popularityScore > 0).length}</strong>
+            <strong>{demandSignalCount}</strong>
             {t("tourist.places.withDemand")}
           </span>
           <span>
