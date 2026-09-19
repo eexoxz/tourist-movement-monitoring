@@ -194,6 +194,51 @@ function getProfileSkipKey(userId: string) {
   return `${PROFILE_SKIP_KEY_PREFIX}${userId}`;
 }
 
+function loadProfileSetupSkipped(userId: string) {
+  if (typeof localStorage === "undefined") {
+    return false;
+  }
+
+  try {
+    return localStorage.getItem(getProfileSkipKey(userId)) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function saveProfileSetupSkipped(userId: string, skipped: boolean) {
+  if (typeof localStorage === "undefined") {
+    return;
+  }
+
+  try {
+    if (skipped) {
+      localStorage.setItem(getProfileSkipKey(userId), "true");
+      return;
+    }
+
+    localStorage.removeItem(getProfileSkipKey(userId));
+  } catch {
+    // Profile setup can still continue in the current session if storage is unavailable.
+  }
+}
+
+function hasBrowserGeolocation() {
+  return typeof navigator !== "undefined" && Boolean(navigator.geolocation);
+}
+
+function clearBrowserLocationWatch(watchId: { current: number | null }) {
+  if (watchId.current === null) {
+    return;
+  }
+
+  if (hasBrowserGeolocation()) {
+    navigator.geolocation.clearWatch(watchId.current);
+  }
+
+  watchId.current = null;
+}
+
 function getLastBrowserLocationKey(userId: string) {
   return `${LAST_BROWSER_LOCATION_KEY_PREFIX}${userId}`;
 }
@@ -695,10 +740,7 @@ function App() {
   };
 
   const logout = async () => {
-    if (watchId.current !== null) {
-      navigator.geolocation.clearWatch(watchId.current);
-      watchId.current = null;
-    }
+    clearBrowserLocationWatch(watchId);
 
     await signOutConfiguredProvider().catch(() => undefined);
     clearSession();
@@ -707,10 +749,7 @@ function App() {
   };
 
   const resetPrototype = () => {
-    if (watchId.current !== null) {
-      navigator.geolocation.clearWatch(watchId.current);
-      watchId.current = null;
-    }
+    clearBrowserLocationWatch(watchId);
 
     const freshData = refreshAllRecommendations(resetData());
     saveData(freshData, currentUser);
@@ -893,7 +932,7 @@ function TouristWorkspace({
   const [incidentPhoto, setIncidentPhoto] = useState<IncidentPhotoAttachment | null>(null);
   const [incidentPhotoMessage, setIncidentPhotoMessage] = useState<string | null>(null);
   const [isPreparingIncidentPhoto, setIsPreparingIncidentPhoto] = useState(false);
-  const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true");
+  const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
   const geofenceNoticeKey = useRef("");
   const touristWorkspace = useMemo(() => getTouristWorkspaceData(data, user.id, selectedTripId), [data, selectedTripId, user.id]);
   const {
@@ -989,7 +1028,7 @@ function TouristWorkspace({
   }, [user.id]);
 
   useEffect(() => {
-    if (!currentConsent || activeTrip || !navigator.geolocation) {
+    if (!currentConsent || activeTrip || !hasBrowserGeolocation()) {
       return;
     }
 
@@ -1054,7 +1093,7 @@ function TouristWorkspace({
   const startLocationWatch = (tripId: string, message: string) => {
     setLocationRetryAvailable(false);
 
-    if (!navigator.geolocation) {
+    if (!hasBrowserGeolocation()) {
       showTrackingNotice("warning", "Browser location unavailable", "Browser geolocation is unavailable. Demo points can still be added manually.");
       setLocationRetryAvailable(true);
       setIsLiveTracking(false);
@@ -1100,10 +1139,7 @@ function TouristWorkspace({
       saveBrowserPosition,
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
-          if (watchId.current !== null) {
-            navigator.geolocation.clearWatch(watchId.current);
-            watchId.current = null;
-          }
+          clearBrowserLocationWatch(watchId);
           setIsLiveTracking(false);
 
           const stopped = stopActiveTrip(loadData(), user.id);
@@ -1152,10 +1188,7 @@ function TouristWorkspace({
       return;
     }
 
-    if (watchId.current !== null) {
-      navigator.geolocation.clearWatch(watchId.current);
-      watchId.current = null;
-    }
+    clearBrowserLocationWatch(watchId);
     setIsLiveTracking(false);
     setLocationRetryAvailable(false);
 
@@ -1249,10 +1282,7 @@ function TouristWorkspace({
   };
 
   const revokeConsent = () => {
-    if (watchId.current !== null) {
-      navigator.geolocation.clearWatch(watchId.current);
-      watchId.current = null;
-    }
+    clearBrowserLocationWatch(watchId);
     setIsLiveTracking(false);
     setLocationRetryAvailable(false);
 
@@ -1262,10 +1292,7 @@ function TouristWorkspace({
   };
 
   const deleteMyMovementData = () => {
-    if (watchId.current !== null) {
-      navigator.geolocation.clearWatch(watchId.current);
-      watchId.current = null;
-    }
+    clearBrowserLocationWatch(watchId);
     setIsLiveTracking(false);
 
     const nextData = deleteTouristMovementData(data, user.id);
@@ -1296,8 +1323,7 @@ function TouristWorkspace({
     }
 
     if (trip.status === "active" && watchId.current !== null) {
-      navigator.geolocation.clearWatch(watchId.current);
-      watchId.current = null;
+      clearBrowserLocationWatch(watchId);
       setIsLiveTracking(false);
       setLocationRetryAvailable(false);
     }
@@ -1319,7 +1345,7 @@ function TouristWorkspace({
       ...data,
       users: data.users.map((candidate) => (candidate.id === user.id ? nextUser : candidate)),
     };
-    localStorage.removeItem(getProfileSkipKey(user.id));
+    saveProfileSetupSkipped(user.id, false);
     setProfileSetupSkipped(false);
     onDataChange(refreshAllRecommendations(nextData), nextUser);
     notify({ tone: "success", title: "Profile saved", message: "Your travel preferences will be used for recommendations." });
@@ -1433,7 +1459,7 @@ function TouristWorkspace({
   };
 
   const skipProfileSetup = () => {
-    localStorage.setItem(getProfileSkipKey(user.id), "true");
+    saveProfileSetupSkipped(user.id, true);
     setProfileSetupSkipped(true);
     notify({ tone: "info", title: "Profile skipped", message: "You can complete your travel profile later from Home." });
   };

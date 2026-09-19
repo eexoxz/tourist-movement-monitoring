@@ -30,9 +30,17 @@ const routeJumpLimitKm = 120;
 const maxRenderedRoutePointMarkers = 80;
 
 function escapeHtml(value: string) {
-  const element = document.createElement("div");
-  element.textContent = value;
-  return element.innerHTML;
+  return value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;",
+    };
+
+    return entities[character];
+  });
 }
 
 function categoryIconHtml(category: DestinationCategory, size = 16) {
@@ -126,7 +134,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
     const limit = points.length > 0 || activePoint ? 12 : 8;
     const rankedDestinations = activePoint
-      ? [...destinations].sort((a, b) => distanceKm(activePoint, a) - distanceKm(activePoint, b))
+      ? destinations
+          .map((destination) => ({ destination, distance: distanceKm(activePoint, destination) }))
+          .sort((a, b) => a.distance - b.distance)
+          .map((row) => row.destination)
       : destinations;
 
     return rankedDestinations.slice(0, limit);
@@ -317,15 +328,19 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     mapRef.current?.setView([activePoint.latitude, activePoint.longitude], 16);
   };
 
-  const visibleCategories = Array.from(new Set(visibleDestinations.map((destination) => destination.category)));
-  const topSignals = [...visibleDestinations]
-    .map((destination) => ({
-      destination,
-      signal: destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination),
-    }))
-    .filter((row) => row.signal.nearbyPointCount > 0)
-    .sort((a, b) => b.signal.nearbyPointCount - a.signal.nearbyPointCount)
-    .slice(0, 3);
+  const visibleCategories = useMemo(() => Array.from(new Set(visibleDestinations.map((destination) => destination.category))), [visibleDestinations]);
+  const topSignals = useMemo(
+    () =>
+      visibleDestinations
+        .map((destination) => ({
+          destination,
+          signal: destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination),
+        }))
+        .filter((row) => row.signal.nearbyPointCount > 0)
+        .sort((a, b) => b.signal.nearbyPointCount - a.signal.nearbyPointCount)
+        .slice(0, 3),
+    [activePoint, destinationSignals, visibleDestinations]
+  );
 
   return (
     <div className={mode === "tourist" ? "map-frame tourist-map-mode" : "map-frame"}>

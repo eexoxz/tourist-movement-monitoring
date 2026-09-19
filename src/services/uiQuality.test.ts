@@ -163,12 +163,22 @@ describe("user interface quality guardrails", () => {
     expect(movementMapSource).toContain('displayMode?: "route" | "signals"');
     expect(mapSource).toContain('displayMode === "route" && route.length > 0');
     expect(mapSource).toContain('displayMode === "signals"');
+    expect(mapSource).toContain("splitRouteSegments");
+    expect(mapSource).toContain("maxRenderedRoutePointMarkers");
     expect(mapSource).toContain('"999+"');
     expect(appSource).toContain('displayMode="signals"');
     expect(appSource).toContain('displayMode={activePoints.length ? "route" : "signals"}');
     expect(appSource).toContain('displayMode={selectedRecord?.points.length ? "route" : "signals"}');
     expect(touristHomeSource).toContain('displayMode={activeTrip ? "route" : "signals"}');
     expect(tripDiarySource).toContain('displayMode={selectedTripPoints.length ? "route" : "signals"}');
+  });
+
+  it("keeps tourist location tracking guarded for mobile browser edge cases", () => {
+    expect(appSource).toContain("hasBrowserGeolocation");
+    expect(appSource).toContain("clearBrowserLocationWatch");
+    expect(appSource).toContain("loadProfileSetupSkipped");
+    expect(appSource).toContain("saveProfileSetupSkipped");
+    expect(appSource).not.toContain('useState(() => localStorage.getItem(getProfileSkipKey(user.id)) === "true")');
   });
 
   it("keeps aggregate map rendering focused on useful demand signals", () => {

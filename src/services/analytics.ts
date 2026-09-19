@@ -607,11 +607,12 @@ function movementAlertSeverity(row: DestinationDemand): MovementAlert["severity"
 
 export function calculateMovementAlerts(data: AppData): MovementAlert[] {
   const generatedAt = new Date().toISOString();
+  const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
 
   return calculateDestinationDemand(data)
     .filter((row) => row.popularityScore > 0 && (row.tier !== "low" || row.approachSignalCount > 0))
     .map((row) => {
-      const destination = data.destinations.find((candidate) => candidate.id === row.destinationId);
+      const destination = destinationById.get(row.destinationId);
       const severity = movementAlertSeverity(row);
       const visitorCount = Math.max(row.uniqueTouristCount, row.approachingTouristCount);
 
@@ -833,9 +834,7 @@ export function recommendForUser(
 
 export function refreshAnalysis(data: AppData, userId: string): AppData {
   const analyses = analyzeAllTrips(data);
-  const latestAnalysis = analyses
-    .filter((analysis) => analysis.userId === userId)
-    .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
+  const latestAnalysis = getLatestAnalysisByUser(analyses).get(userId);
   const recommendationData = { ...data, analyses };
   const destinationDemand = calculateDestinationDemand(recommendationData);
   const recommendations = recommendForUser(userId, recommendationData, latestAnalysis, destinationDemand);
@@ -852,14 +851,22 @@ export function refreshAllRecommendations(data: AppData): AppData {
   const users = data.users.filter((user) => user.role === "tourist");
   const withAnalyses = { ...data, analyses };
   const destinationDemand = calculateDestinationDemand(withAnalyses);
-  const recommendations = users.flatMap((user) => {
-    const latestAnalysis = analyses
-      .filter((analysis) => analysis.userId === user.id)
-      .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())[0];
-    return recommendForUser(user.id, withAnalyses, latestAnalysis, destinationDemand);
-  });
+  const latestAnalysisByUser = getLatestAnalysisByUser(analyses);
+  const recommendations = users.flatMap((user) => recommendForUser(user.id, withAnalyses, latestAnalysisByUser.get(user.id), destinationDemand));
 
   return { ...withAnalyses, recommendations };
+}
+
+function getLatestAnalysisByUser(analyses: AnalysisResult[]) {
+  return analyses.reduce<Map<string, AnalysisResult>>((latestByUser, analysis) => {
+    const current = latestByUser.get(analysis.userId);
+
+    if (!current || new Date(analysis.generatedAt).getTime() > new Date(current.generatedAt).getTime()) {
+      latestByUser.set(analysis.userId, analysis);
+    }
+
+    return latestByUser;
+  }, new Map());
 }
 
 function emptyConfusionMatrix(): Record<TouristProfile, Record<TouristProfile, number>> {
@@ -928,11 +935,12 @@ function travelPlanAudienceBonus(audience: Required<TravelPlanOptions>["audience
 export function createMovementBasedTravelPlan(data: AppData, options?: TravelPlanOptions): TravelPlan {
   const criteria = normalizeTravelPlanOptions(options);
   const demandRows = calculateDestinationDemand(data);
+  const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
   const selectedDestinationIds = new Set<string>();
   const selectedCategories = new Set<DestinationCategory>();
   const candidates = demandRows
     .map((row) => {
-      const destination = data.destinations.find((candidate) => candidate.id === row.destinationId);
+      const destination = destinationById.get(row.destinationId);
       return destination
         ? {
             row,
@@ -1007,8 +1015,9 @@ function csvCell(value: string | number | null | undefined) {
 
 export function buildTravelPlanCsv(plan: TravelPlan, data: AppData) {
   const header = ["order", "destination", "city", "category", "suggested_minutes", "reason"];
+  const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
   const rows = plan.stops.map((stop) => {
-    const destination = data.destinations.find((candidate) => candidate.id === stop.destinationId);
+    const destination = destinationById.get(stop.destinationId);
 
     return [
       stop.order,
@@ -1025,8 +1034,9 @@ export function buildTravelPlanCsv(plan: TravelPlan, data: AppData) {
 
 export function buildMovementAlertsCsv(alerts: MovementAlert[], data: AppData) {
   const header = ["destination", "city", "severity", "score", "message", "recommended_action", "generated_at"];
+  const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
   const rows = alerts.map((alert) => {
-    const destination = data.destinations.find((candidate) => candidate.id === alert.destinationId);
+    const destination = destinationById.get(alert.destinationId);
 
     return [
       destination?.name ?? "Unknown destination",
