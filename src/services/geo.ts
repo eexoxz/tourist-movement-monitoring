@@ -15,12 +15,10 @@ export function distanceKm(a: Pick<MovementPoint | Destination, "latitude" | "lo
 }
 
 export function nearestDestination(point: MovementPoint, destinations: Destination[]) {
-  return destinations
-    .map((destination) => ({
-      destination,
-      distance: distanceKm(point, destination),
-    }))
-    .sort((a, b) => a.distance - b.distance)[0];
+  return destinations.reduce<{ destination: Destination; distance: number } | undefined>((nearest, destination) => {
+    const distance = distanceKm(point, destination);
+    return !nearest || distance < nearest.distance ? { destination, distance } : nearest;
+  }, undefined);
 }
 
 export function formatDateTime(value: string) {

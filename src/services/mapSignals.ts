@@ -1,5 +1,6 @@
 import type { Destination, MovementPoint } from "../types";
 import { distanceKm } from "./geo";
+import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
 
 export type DestinationSignal = {
   nearbyPointCount: number;
@@ -17,7 +18,6 @@ type MutableDestinationSignal = {
 };
 
 const nearbyRadiusKm = 1.2;
-const kmPerLatitudeDegree = 111.32;
 
 export function emptyDestinationSignal(activePoint?: MovementPoint, destination?: Destination): DestinationSignal {
   return {
@@ -56,27 +56,10 @@ export function calculateDestinationSignals(destinations: Destination[], points:
     ])
   );
 
-  const indexedDestinations = destinations.map((destination) => {
-    const latitudeRadius = nearbyRadiusKm / kmPerLatitudeDegree;
-    const longitudeRadius = nearbyRadiusKm / (kmPerLatitudeDegree * Math.max(0.25, Math.cos((destination.latitude * Math.PI) / 180)));
-
-    return {
-      destination,
-      latitudeRadius,
-      longitudeRadius,
-    };
-  });
+  const destinationIndex = createDestinationSpatialIndex(destinations);
 
   points.forEach((point) => {
-    indexedDestinations.forEach(({ destination, latitudeRadius, longitudeRadius }) => {
-      if (Math.abs(point.latitude - destination.latitude) > latitudeRadius || Math.abs(point.longitude - destination.longitude) > longitudeRadius) {
-        return;
-      }
-
-      if (distanceKm(point, destination) > nearbyRadiusKm) {
-        return;
-      }
-
+    destinationIndex.nearby(point, nearbyRadiusKm).forEach(({ destination }) => {
       const signal = mutableSignals.get(destination.id);
       if (!signal) {
         return;

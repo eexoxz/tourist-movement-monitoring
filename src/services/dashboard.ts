@@ -1,5 +1,6 @@
 import type { AnalysisResult, AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
-import { distanceKm, nearestDestination } from "./geo";
+import { distanceKm } from "./geo";
+import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
 
 export type MovementRecordView = {
   point: MovementPoint;
@@ -322,18 +323,19 @@ function buildDashboardIndexes(data: AppData) {
     tripById: new Map(data.trips.map((trip) => [trip.id, trip])),
     userById: new Map(data.users.map((user) => [user.id, user])),
     analysisByTripId: new Map(data.analyses.map((analysis) => [analysis.tripId, analysis])),
+    destinationIndex: createDestinationSpatialIndex(data.destinations),
     pointsByTrip,
   };
 }
 
-function summarizeTripPoints(trip: TripSession, points: MovementPoint[], data: AppData): { summary: TripSummary; destinationNames: string[] } {
+function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex): { summary: TripSummary; destinationNames: string[] } {
   const visitedDestinationIds = new Set<string>();
   const destinationNames = new Set<string>();
   const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
 
   points.forEach((point) => {
-    const nearest = nearestDestination(point, data.destinations);
-    if (nearest && nearest.distance <= 1.2) {
+    const nearest = destinationIndex.nearest(point, 1.2);
+    if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
       destinationNames.add(nearest.destination.name);
     }
@@ -375,7 +377,7 @@ export function getMovementRecords(data: AppData, filters: MovementRecordFilters
     .map((point) => {
       const trip = indexes.tripById.get(point.tripId) ?? null;
       const tourist = trip ? indexes.userById.get(trip.userId) ?? null : null;
-      const nearest = nearestDestination(point, data.destinations);
+      const nearest = indexes.destinationIndex.nearest(point, 1.2);
 
       return {
         point,
@@ -403,7 +405,7 @@ export function getMovementTripRecords(data: AppData, filters: MovementRecordFil
     .filter((trip) => !normalized.tripId || normalized.tripId === "all" || trip.id === normalized.tripId)
     .map((trip) => {
       const points = indexes.pointsByTrip.get(trip.id) ?? [];
-      const evidence = summarizeTripPoints(trip, points, data);
+      const evidence = summarizeTripPoints(trip, points, indexes.destinationIndex);
 
       return {
         trip,

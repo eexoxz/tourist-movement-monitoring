@@ -939,7 +939,7 @@ function TouristWorkspace({
   );
   const activeCheckIn = getActiveCheckIn(data, user.id);
   const activeCheckInDestination = activeCheckIn ? data.destinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
-  const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, data.destinations)?.destination : null;
+  const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, data.destinations)?.destination ?? null : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(latestKnownPoint, data.geofences), [data.geofences, latestKnownPoint]);
   const displayName = getDisplayName(user);
   const t = (key: TranslationKey) => translate(locale, key);

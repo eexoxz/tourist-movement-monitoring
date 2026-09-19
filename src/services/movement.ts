@@ -1,6 +1,7 @@
 import type { AppData, Destination, LocationConsent, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
 import { createId } from "./storage";
-import { distanceKm, nearestDestination } from "./geo";
+import { distanceKm } from "./geo";
+import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
 
 type MovementInput = {
   tripId: string;
@@ -32,12 +33,13 @@ export function getGrantedConsent(data: AppData, userId: string) {
 export function getVisitedDestinationIds(data: AppData, userId: string, maxDistanceKm = 1.2) {
   const tripIds = new Set(getUserTrips(data, userId).map((trip) => trip.id));
   const visited = new Set<string>();
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
 
   data.points
     .filter((point) => tripIds.has(point.tripId))
     .forEach((point) => {
-      const nearest = nearestDestination(point, data.destinations);
-      if (nearest && nearest.distance <= maxDistanceKm) {
+      const nearest = destinationIndex.nearest(point, maxDistanceKm);
+      if (nearest) {
         visited.add(nearest.destination.id);
       }
     });
@@ -54,10 +56,11 @@ export function summarizeTrip(data: AppData, tripId: string): TripSummary {
   const trip = data.trips.find((candidate) => candidate.id === tripId);
   const visitedDestinationIds = new Set<string>();
   const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
 
   points.forEach((point) => {
-    const nearest = nearestDestination(point, data.destinations);
-    if (nearest && nearest.distance <= 1.2) {
+    const nearest = destinationIndex.nearest(point, 1.2);
+    if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
     }
   });
@@ -166,14 +169,16 @@ export function getLocalSampleDestinations(
     return fallbackRoute;
   }
 
-  const ranked = data.destinations
-    .map((destination) => ({
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
+  const ranked = destinationIndex
+    .nearby(referencePoint, 90)
+    .map(({ destination, distance }) => ({
       destination,
-      distance: distanceKm(referencePoint, destination),
+      distance,
       profileMatch: profileMatchesDestination(profile, destination.category),
     }))
     .sort((a, b) => a.distance - b.distance || Number(b.profileMatch) - Number(a.profileMatch));
-  const nearby = ranked.filter((row) => row.distance <= 90).slice(0, limit).map((row) => row.destination);
+  const nearby = ranked.slice(0, limit).map((row) => row.destination);
 
   return nearby.length >= 2 ? nearby : fallbackRoute;
 }
@@ -317,9 +322,13 @@ export function appendMovementPoint(data: AppData, input: MovementInput) {
     return { error: "Start a trip before saving a movement point." };
   }
 
-  const previousPoint = data.points
-    .filter((point) => point.tripId === trip.id)
-    .sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
+  const previousPoint = data.points.reduce<MovementPoint | undefined>((latest, point) => {
+    if (point.tripId !== trip.id) {
+      return latest;
+    }
+
+    return !latest || new Date(point.recordedAt).getTime() > new Date(latest.recordedAt).getTime() ? point : latest;
+  }, undefined);
   const candidate = {
     latitude: input.latitude,
     longitude: input.longitude,

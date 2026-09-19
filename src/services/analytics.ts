@@ -15,7 +15,8 @@ import type {
   TripSession,
 } from "../types";
 import { createId } from "./storage";
-import { distanceKm, nearestDestination } from "./geo";
+import { distanceKm } from "./geo";
+import { createDestinationSpatialIndex, type DestinationDistance } from "./destinationSpatialIndex";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 const kMeansFeatureNames: Array<keyof KMeansFeatureVector> = ["culturalProportion", "natureProportion", "urbanProportion", "uniqueDestinations"];
@@ -68,14 +69,14 @@ function emptyCounts(): Record<DestinationCategory, number> {
   };
 }
 
-function getTripMovementEvidence(points: MovementPoint[], data: AppData) {
+function getTripMovementEvidence(points: MovementPoint[], data: AppData, destinationIndex = createDestinationSpatialIndex(data.destinations)) {
   const preparedPoints = prepareMovementPoints(points);
   const counts = emptyCounts();
   const destinationIds = new Set<string>();
 
   preparedPoints.forEach((point) => {
-    const nearest = nearestDestination(point, data.destinations);
-    if (nearest && nearest.distance <= 1.2) {
+    const nearest = destinationIndex.nearest(point, 1.2);
+    if (nearest) {
       counts[nearest.destination.category] += 1;
       destinationIds.add(nearest.destination.id);
     }
@@ -319,11 +320,12 @@ function averageVector(vectors: number[][], fallback: number[]) {
 
 function createTripFeatures(data: AppData): TripFeature[] {
   const pointsByTrip = movementPointsByTrip(data.points);
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
 
   return data.trips
     .filter((trip) => trip.status === "completed")
     .map((trip) => {
-      const evidence = getTripMovementEvidence(pointsByTrip.get(trip.id) ?? [], data);
+      const evidence = getTripMovementEvidence(pointsByTrip.get(trip.id) ?? [], data, destinationIndex);
       if (evidence.points.length < 2) {
         return null;
       }
@@ -464,7 +466,6 @@ const demandTierWeight: Record<DestinationDemand["tier"], number> = {
 const localRecommendationRadiusKm = 90;
 const approachSignalRadiusKm = 8;
 const approachSignalMinimumGainKm = 0.08;
-const destinationGridCellDegrees = 0.15;
 
 type DemandAccumulator = {
   destinationId: string;
@@ -493,45 +494,6 @@ function createDemandAccumulators(destinations: Destination[]) {
   );
 }
 
-function destinationGridKey(latitude: number, longitude: number) {
-  return `${Math.floor(latitude / destinationGridCellDegrees)}:${Math.floor(longitude / destinationGridCellDegrees)}`;
-}
-
-function buildDestinationGrid(destinations: Destination[]) {
-  const grid = new Map<string, Destination[]>();
-
-  destinations.forEach((destination) => {
-    const key = destinationGridKey(destination.latitude, destination.longitude);
-    const current = grid.get(key);
-
-    if (current) {
-      current.push(destination);
-      return;
-    }
-
-    grid.set(key, [destination]);
-  });
-
-  return grid;
-}
-
-function getApproachCandidateDestinations(grid: Map<string, Destination[]>, previous: MovementPoint, current: MovementPoint) {
-  const paddingDegrees = approachSignalRadiusKm / 111;
-  const minLatCell = Math.floor((Math.min(previous.latitude, current.latitude) - paddingDegrees) / destinationGridCellDegrees);
-  const maxLatCell = Math.floor((Math.max(previous.latitude, current.latitude) + paddingDegrees) / destinationGridCellDegrees);
-  const minLngCell = Math.floor((Math.min(previous.longitude, current.longitude) - paddingDegrees) / destinationGridCellDegrees);
-  const maxLngCell = Math.floor((Math.max(previous.longitude, current.longitude) + paddingDegrees) / destinationGridCellDegrees);
-  const candidates = new Map<string, Destination>();
-
-  for (let latCell = minLatCell; latCell <= maxLatCell; latCell += 1) {
-    for (let lngCell = minLngCell; lngCell <= maxLngCell; lngCell += 1) {
-      grid.get(`${latCell}:${lngCell}`)?.forEach((destination) => candidates.set(destination.id, destination));
-    }
-  }
-
-  return [...candidates.values()];
-}
-
 function movementPointsByTrip(points: MovementPoint[]) {
   const grouped = new Map<string, MovementPoint[]>();
 
@@ -549,12 +511,12 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
   const rowsByDestination = createDemandAccumulators(data.destinations);
   const tripById = new Map(data.trips.map((trip) => [trip.id, trip]));
   const pointsByTrip = movementPointsByTrip(data.points);
-  const destinationGrid = buildDestinationGrid(data.destinations);
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
 
   data.points.forEach((point) => {
-    const nearest = nearestDestination(point, data.destinations);
+    const nearest = destinationIndex.nearest(point, 1.2);
 
-    if (!nearest || nearest.distance > 1.2) {
+    if (!nearest) {
       return;
     }
 
@@ -582,7 +544,7 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
     points.slice(1).forEach((point, index) => {
       const previous = points[index];
 
-      getApproachCandidateDestinations(destinationGrid, previous, point).forEach((destination) => {
+      destinationIndex.candidatesBetween(previous, point, approachSignalRadiusKm).forEach((destination) => {
         const previousDistance = distanceKm(previous, destination);
         const currentDistance = distanceKm(point, destination);
         const movedCloserBy = previousDistance - currentDistance;
@@ -758,6 +720,7 @@ export function recommendForUser(
   const allUserTripIds = new Set(userTrips.map((trip) => trip.id));
   const completedPoints: MovementPoint[] = [];
   const points: MovementPoint[] = [];
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
 
   data.points.forEach((point) => {
     if (!allUserTripIds.has(point.tripId)) {
@@ -773,8 +736,8 @@ export function recommendForUser(
 
   const visited = new Set(
     completedPoints
-      .map((point) => nearestDestination(point, data.destinations))
-      .filter((result) => result && result.distance <= 1.2)
+      .map((point) => destinationIndex.nearest(point, 1.2))
+      .filter((result): result is DestinationDistance => Boolean(result))
       .map((result) => result.destination.id)
   );
   const latestPoint =
@@ -790,12 +753,18 @@ export function recommendForUser(
   const hasPersonalizedAnalysis = Boolean(analysis);
   const demandByDestination = new Map((destinationDemand ?? calculateDestinationDemand(data)).map((demand) => [demand.destinationId, demand]));
   const availableDestinations = data.destinations.filter((destination) => !visited.has(destination.id));
+  const destinationDistances = new Map<string, number>();
   const rankedAvailableDestinations = latestPoint
-    ? [...availableDestinations].sort((a, b) => distanceKm(latestPoint, a) - distanceKm(latestPoint, b))
+    ? availableDestinations
+        .map((destination) => {
+          const distance = distanceKm(latestPoint, destination);
+          destinationDistances.set(destination.id, distance);
+          return { destination, distance };
+        })
+        .sort((a, b) => a.distance - b.distance)
+        .map((row) => row.destination)
     : availableDestinations;
-  const localDestinations = latestPoint
-    ? rankedAvailableDestinations.filter((destination) => distanceKm(latestPoint, destination) <= localRecommendationRadiusKm)
-    : [];
+  const localDestinations = rankedAvailableDestinations.filter((destination) => (destinationDistances.get(destination.id) ?? Number.POSITIVE_INFINITY) <= localRecommendationRadiusKm);
   const localDestinationIds = new Set(localDestinations.map((destination) => destination.id));
   const recommendationPool =
     localDestinations.length > 0
@@ -814,7 +783,7 @@ export function recommendForUser(
       const clusterFeature = categoryToKMeansFeature(destination.category);
       const clusterScore = analysis ? Math.round((analysis.kMeansCentroid[clusterFeature] / 100) * 24) : 0;
       const unvisitedScore = 20;
-      const distance = latestPoint ? distanceKm(latestPoint, destination) : undefined;
+      const distance = latestPoint ? destinationDistances.get(destination.id) : undefined;
       const distanceScore =
         distance === undefined
           ? 12

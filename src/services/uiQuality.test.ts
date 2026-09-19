@@ -13,6 +13,7 @@ const browserNotificationsSource = readFileSync(resolve(process.cwd(), "src/serv
 const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/components/DestinationManager.tsx"), "utf8");
 const destinationVisualSource = readFileSync(resolve(process.cwd(), "src/components/DestinationVisual.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
+const destinationSpatialIndexSource = readFileSync(resolve(process.cwd(), "src/services/destinationSpatialIndex.ts"), "utf8");
 const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
 const incidentAttachmentsSource = readFileSync(resolve(process.cwd(), "src/services/incidentAttachments.ts"), "utf8");
 const listLimitFooterSource = readFileSync(resolve(process.cwd(), "src/components/ListLimitFooter.tsx"), "utf8");
@@ -178,9 +179,9 @@ describe("user interface quality guardrails", () => {
   });
 
   it("keeps destination demand approach checks spatially prefiltered", () => {
-    expect(analyticsSource).toContain("buildDestinationGrid");
-    expect(analyticsSource).toContain("getApproachCandidateDestinations");
-    expect(analyticsSource).toContain("destinationGridCellDegrees");
+    expect(destinationSpatialIndexSource).toContain("createDestinationSpatialIndex");
+    expect(destinationSpatialIndexSource).toContain("candidatesBetween");
+    expect(analyticsSource).toContain("destinationIndex.candidatesBetween");
     expect(analyticsSource).not.toContain("data.destinations.forEach((destination) => {\n        const previousDistance");
   });
 

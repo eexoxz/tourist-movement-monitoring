@@ -1,5 +1,6 @@
-import type { AnalysisResult, AppData, AttractionCheckIn, Destination, MovementPoint, Recommendation, SosAlert, IncidentReport, TripSession, TripSummary } from "../types";
-import { distanceKm, nearestDestination } from "./geo";
+import type { AnalysisResult, AppData, AttractionCheckIn, MovementPoint, Recommendation, SosAlert, IncidentReport, TripSession, TripSummary } from "../types";
+import { distanceKm } from "./geo";
+import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
 import { getRecognizedDestinationNames } from "./tripPresentation";
 
 export type TouristWorkspaceData = {
@@ -30,13 +31,13 @@ export type TouristWorkspaceData = {
   recentCheckIns: AppData["checkIns"];
 };
 
-function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], destinations: Destination[]): TripSummary {
+function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex): TripSummary {
   const visitedDestinationIds = new Set<string>();
   const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
 
   points.forEach((point) => {
-    const nearest = nearestDestination(point, destinations);
-    if (nearest && nearest.distance <= 1.2) {
+    const nearest = destinationIndex.nearest(point, 1.2);
+    if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
     }
   });
@@ -63,6 +64,7 @@ function latestByDate<T>(items: T[], getDate: (item: T) => string) {
 }
 
 export function getTouristWorkspaceData(data: AppData, userId: string, selectedTripId: string): TouristWorkspaceData {
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
   const userTrips: TripSession[] = [];
   const pointsByTrip = new Map<string, MovementPoint[]>();
   const visitedDestinationIds = new Set<string>();
@@ -88,8 +90,8 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
 
     pointsByTrip.get(point.tripId)?.push(point);
 
-    const nearest = nearestDestination(point, data.destinations);
-    if (nearest && nearest.distance <= 1.2) {
+    const nearest = destinationIndex.nearest(point, 1.2);
+    if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
     }
   });
@@ -136,7 +138,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
   const recentTrips = [...userTrips].sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
   const activeTrip = userTrips.find((trip) => trip.status === "active") ?? null;
   const activePoints = activeTrip ? pointsByTrip.get(activeTrip.id) ?? [] : [];
-  const tripSummaries = userTrips.map((trip) => summarizeTripFromPoints(trip, pointsByTrip.get(trip.id) ?? [], data.destinations));
+  const tripSummaries = userTrips.map((trip) => summarizeTripFromPoints(trip, pointsByTrip.get(trip.id) ?? [], destinationIndex));
   const tripSummaryById = new Map(tripSummaries.map((summary) => [summary.tripId, summary]));
   const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? recentTrips[0];
   const selectedTripPoints = selectedTrip ? pointsByTrip.get(selectedTrip.id) ?? [] : [];
@@ -158,13 +160,13 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
     selectedTripPoints,
     selectedTripSummary: selectedTrip ? tripSummaryById.get(selectedTrip.id) ?? null : null,
     selectedTripAnalysis: selectedTrip ? analysesByTrip.get(selectedTrip.id) ?? null : null,
-    selectedTripDestinationNames: getRecognizedDestinationNames(selectedTripPoints, data.destinations),
+    selectedTripDestinationNames: getRecognizedDestinationNames(selectedTripPoints, data.destinations, destinationIndex),
     selectedTripRecommendations: savedRecommendations.slice(0, 3),
     latestCompletedTrip,
     latestCompletedTripPoints,
     latestCompletedTripSummary: latestCompletedTrip ? tripSummaryById.get(latestCompletedTrip.id) ?? null : null,
     latestCompletedTripAnalysis: latestCompletedTrip ? analysesByTrip.get(latestCompletedTrip.id) ?? null : null,
-    latestCompletedTripDestinationNames: getRecognizedDestinationNames(latestCompletedTripPoints, data.destinations),
+    latestCompletedTripDestinationNames: getRecognizedDestinationNames(latestCompletedTripPoints, data.destinations, destinationIndex),
     visitedDestinationIds,
     userSosAlerts,
     userIncidentReports,

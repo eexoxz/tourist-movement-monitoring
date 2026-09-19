@@ -26,6 +26,8 @@ const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; labelKey: Tr
   food: { Icon: Utensils, labelKey: "category.food" },
   coastal: { Icon: Waves, labelKey: "category.coastal" },
 };
+const routeJumpLimitKm = 120;
+const maxRenderedRoutePointMarkers = 80;
 
 function escapeHtml(value: string) {
   const element = document.createElement("div");
@@ -86,6 +88,29 @@ function shouldDrawDemandHalo(signal: DestinationSignal, displayMode: MapViewPro
 
 function markerZIndex(signal: DestinationSignal) {
   return 200 + signalRank(signal.tier) * 100 + Math.min(signal.nearbyPointCount, 99);
+}
+
+function splitRouteSegments(points: MovementPoint[]) {
+  return points.reduce<Array<Array<[number, number]>>>((segments, point, index) => {
+    const coordinate: [number, number] = [point.latitude, point.longitude];
+    const previous = points[index - 1];
+
+    if (!previous || distanceKm(previous, point) > routeJumpLimitKm) {
+      segments.push([coordinate]);
+      return segments;
+    }
+
+    segments[segments.length - 1].push(coordinate);
+    return segments;
+  }, []);
+}
+
+function shouldRenderPointMarker(index: number, totalPoints: number) {
+  if (index === 0 || index === totalPoints - 1) {
+    return true;
+  }
+
+  return index % Math.max(1, Math.ceil(totalPoints / maxRenderedRoutePointMarkers)) === 0;
 }
 
 export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en" }: MapViewProps) {
@@ -162,6 +187,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
     const layer = L.layerGroup().addTo(map);
     const route = points.map((point) => [point.latitude, point.longitude] as [number, number]);
+    const routeSegments = splitRouteSegments(points).filter((segment) => segment.length > 1);
 
     visibleDestinations.forEach((destination) => {
       const signal = destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination);
@@ -201,23 +227,29 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     });
 
     if (displayMode === "route" && route.length > 0) {
-      L.polyline(route, {
-        color: "#ffffff",
-        weight: 9,
-        opacity: 0.95,
-        lineCap: "round",
-        lineJoin: "round",
-      }).addTo(layer);
+      routeSegments.forEach((segment) => {
+        L.polyline(segment, {
+          color: "#ffffff",
+          weight: 9,
+          opacity: 0.95,
+          lineCap: "round",
+          lineJoin: "round",
+        }).addTo(layer);
 
-      L.polyline(route, {
-        color: "#0f766e",
-        weight: 5,
-        opacity: 0.88,
-        lineCap: "round",
-        lineJoin: "round",
-      }).addTo(layer);
+        L.polyline(segment, {
+          color: "#0f766e",
+          weight: 5,
+          opacity: 0.88,
+          lineCap: "round",
+          lineJoin: "round",
+        }).addTo(layer);
+      });
 
       points.forEach((point, index) => {
+        if (!shouldRenderPointMarker(index, points.length)) {
+          return;
+        }
+
         L.circleMarker([point.latitude, point.longitude], {
           radius: index === points.length - 1 ? 6 : 4,
           color: "#ffffff",

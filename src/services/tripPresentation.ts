@@ -1,12 +1,12 @@
 import type { AnalysisResult, Destination, MovementPoint, TripSession, TripSummary } from "../types";
 import type { TranslationKey } from "./i18n";
-import { nearestDestination } from "./geo";
+import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
 
-export function getRecognizedDestinationNames(points: MovementPoint[], destinations: Destination[]) {
+export function getRecognizedDestinationNames(points: MovementPoint[], destinations: Destination[], destinationIndex: DestinationSpatialIndex = createDestinationSpatialIndex(destinations)) {
   const names = points
     .map((point) => {
-      const nearest = nearestDestination(point, destinations);
-      return nearest && nearest.distance <= 1.2 ? nearest.destination.name : null;
+      const nearest = destinationIndex.nearest(point, 1.2);
+      return nearest ? nearest.destination.name : null;
     })
     .filter((name): name is string => Boolean(name));
 
