@@ -1027,27 +1027,6 @@ function TouristWorkspace({
     : null;
   const nextFestival = upcomingFestivals[0] ?? null;
 
-  useEffect(() => {
-    if (!pendingCheckInDestinationId) {
-      return;
-    }
-
-    const destination = localizedDestinations.find((candidate) => candidate.id === pendingCheckInDestinationId);
-    onPendingCheckInConsumed();
-
-    if (!destination) {
-      notify({ tone: "error", title: "Check-in link not recognised", message: "This QR code is not linked to a destination in the app." });
-      return;
-    }
-
-    setCheckInDestinationId(destination.id);
-    setShowCheckInPanel(true);
-    if (view !== "overview") {
-      onViewChange("overview");
-    }
-    notify({ tone: "success", title: "Check-in QR opened", message: `${destination.name} is ready for check-in.` });
-  }, [localizedDestinations, notify, onPendingCheckInConsumed, onViewChange, pendingCheckInDestinationId, view]);
-
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
     notify({ tone, title, message });
@@ -1532,6 +1511,38 @@ function TouristWorkspace({
     onDataChange(result.data, user);
     notify({ tone: "success", title: "Checked in", message: destination ? `${destination.name} was added to your visit log.` : "Your attraction visit was added.", browser: true });
   };
+
+  useEffect(() => {
+    if (!pendingCheckInDestinationId) {
+      return;
+    }
+
+    const destination = localizedDestinations.find((candidate) => candidate.id === pendingCheckInDestinationId);
+    onPendingCheckInConsumed();
+
+    if (!destination) {
+      notify({ tone: "error", title: "Check-in link not recognised", message: "This QR code is not linked to a destination in the app." });
+      return;
+    }
+
+    setCheckInDestinationId(destination.id);
+    setShowCheckInPanel(true);
+    if (view !== "overview") {
+      onViewChange("overview");
+    }
+
+    if (!activeCheckIn) {
+      startAttractionCheckIn(destination.id);
+    } else if (activeCheckIn.destinationId === destination.id) {
+      notify({ tone: "info", title: "Already checked in", message: `${destination.name} is already your active visit.` });
+    } else {
+      notify({ tone: "warning", title: "Check-out needed first", message: "You already have an active attraction visit. Check out before scanning another place." });
+    }
+
+    window.setTimeout(() => {
+      document.getElementById("tourist-check-in")?.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 80);
+  }, [activeCheckIn, localizedDestinations, notify, onPendingCheckInConsumed, onViewChange, pendingCheckInDestinationId, startAttractionCheckIn, view]);
 
   const finishAttractionCheckIn = () => {
     if (!activeCheckIn) {

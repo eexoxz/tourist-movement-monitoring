@@ -620,6 +620,15 @@ button:disabled {
   align-items: start;
 }
 
+.qr-check-in-priority,
+.qr-secondary-support {
+  grid-template-columns: 1fr;
+}
+
+.qr-active-check-in-panel {
+  scroll-margin-top: 18px;
+}
+
 .new-user-guide {
   display: grid;
   gap: 8px;
@@ -1607,6 +1616,11 @@ button:disabled {
 .check-in-stack {
   display: grid;
   gap: 12px;
+}
+
+.qr-active-check-in-panel .check-in-stack {
+  grid-template-columns: minmax(260px, 0.8fr) minmax(280px, 1fr);
+  align-items: start;
 }
 
 .check-in-control {
@@ -5293,6 +5307,7 @@ textarea {
 
   .safety-contact-strip,
   .check-in-control,
+  .qr-active-check-in-panel .check-in-stack,
   .qr-manual-row,
   .qr-camera-actions,
   .check-in-history,

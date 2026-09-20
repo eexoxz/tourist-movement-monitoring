@@ -1,5 +1,5 @@
 import { CalendarDays, Compass, MapPinned, Navigation, Play, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
-import type { FormEvent } from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 import { formatDateTime } from "../services/geo";
 import { getCheckInDurationMinutes } from "../services/checkIns";
 import type { GeoFenceWarning } from "../services/geofencing";
@@ -152,10 +152,65 @@ export function TouristHome({
 }: TouristHomeProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const selectedCheckInDestination = destinations.find((destination) => destination.id === checkInDestinationId) ?? destinations[0] ?? null;
+  const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
+
+  useEffect(() => {
+    if (!showCheckInPanel) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      checkInPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 120);
+  }, [showCheckInPanel, checkInDestinationId]);
 
   return (
     <Page title={displayName ? `${t("tourist.home.welcomeBack")}, ${displayName}` : t("tourist.home.planTitle")} eyebrow={t("common.tourist")}>
-      <section className="tourist-home-flow">
+      <section className={showCheckInPanel ? "tourist-home-flow qr-check-in-mode" : "tourist-home-flow"}>
+        {showCheckInPanel && (
+          <section className="home-support-grid qr-check-in-priority">
+            <details
+              className="tourist-section home-disclosure check-in-panel qr-active-check-in-panel"
+              id="tourist-check-in"
+              open
+              ref={checkInPanelRef}
+            >
+              <summary>
+                <span>{t("tourist.home.visitTools")}</span>
+                <strong>{activeCheckInDestination ? activeCheckInDestination.name : selectedCheckInDestination?.name ?? t("tourist.checkin.emptyTitle")}</strong>
+              </summary>
+              <div className="section-heading">
+                <div>
+                  <span>{t("tourist.checkin.eyebrow")}</span>
+                  <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
+                  <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
+                </div>
+                {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
+              </div>
+
+              {!activeCheckIn && (
+                <div className="check-in-stack">
+                  <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
+                  <QrCheckInPanel
+                    destinations={destinations}
+                    selectedDestination={selectedCheckInDestination}
+                    locale={locale}
+                    onDestinationChange={onCheckInDestinationChange}
+                    onConfirm={onStartAttractionCheckIn}
+                  />
+                </div>
+              )}
+
+              {activeCheckIn && (
+                <button className="secondary-action wide" type="button" onClick={onFinishAttractionCheckIn}>
+                  <Square size={18} />
+                  {t("tourist.checkin.checkOut")}
+                </button>
+              )}
+            </details>
+          </section>
+        )}
+
         <section className="home-primary-grid">
           <div className="home-today-panel">
             <div className="tracking-status-card home-status-card">
@@ -322,61 +377,63 @@ export function TouristHome({
           </article>
         </section>
 
-        <section className="home-support-grid">
-          <details className="tourist-section home-disclosure check-in-panel" open={Boolean(activeCheckIn) || showCheckInPanel}>
-            <summary>
-              <span>{t("tourist.home.visitTools")}</span>
-              <strong>{activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")}</strong>
-            </summary>
-            <div className="section-heading">
-              <div>
-                <span>{t("tourist.checkin.eyebrow")}</span>
-                <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
-                <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
+        <section className={showCheckInPanel ? "home-support-grid qr-secondary-support" : "home-support-grid"}>
+          {!showCheckInPanel && (
+            <details className="tourist-section home-disclosure check-in-panel" id="tourist-check-in" open={Boolean(activeCheckIn)} ref={checkInPanelRef}>
+              <summary>
+                <span>{t("tourist.home.visitTools")}</span>
+                <strong>{activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")}</strong>
+              </summary>
+              <div className="section-heading">
+                <div>
+                  <span>{t("tourist.checkin.eyebrow")}</span>
+                  <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
+                  <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
+                </div>
+                {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
               </div>
-              {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
-            </div>
 
-            {!activeCheckIn && (
-              <div className="check-in-stack">
-                <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
-                <QrCheckInPanel
-                  destinations={destinations}
-                  selectedDestination={selectedCheckInDestination}
-                  locale={locale}
-                  onDestinationChange={onCheckInDestinationChange}
-                  onConfirm={onStartAttractionCheckIn}
-                />
+              {!activeCheckIn && (
+                <div className="check-in-stack">
+                  <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
+                  <QrCheckInPanel
+                    destinations={destinations}
+                    selectedDestination={selectedCheckInDestination}
+                    locale={locale}
+                    onDestinationChange={onCheckInDestinationChange}
+                    onConfirm={onStartAttractionCheckIn}
+                  />
+                </div>
+              )}
+
+              {recommendedCheckIn && !activeCheckIn && (
+                <button className="secondary-action wide" type="button" onClick={() => onCheckInDestinationChange(recommendedCheckIn.id)}>
+                  {t("tourist.checkin.useNearest")}: {recommendedCheckIn.name}
+                </button>
+              )}
+
+              {activeCheckIn && (
+                <button className="secondary-action wide" type="button" onClick={onFinishAttractionCheckIn}>
+                  <Square size={18} />
+                  {t("tourist.checkin.checkOut")}
+                </button>
+              )}
+
+              <div className="check-in-history">
+                {recentCheckIns.map((checkIn) => {
+                  const destination = destinations.find((candidate) => candidate.id === checkIn.destinationId);
+
+                  return (
+                    <span key={checkIn.id}>
+                      <strong>{destination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
+                      {checkIn.status === "checked-out" ? `${getCheckInDurationMinutes(checkIn)} ${t("tourist.checkin.minVisit")}` : t("tourist.checkin.currentlyCheckedIn")}
+                    </span>
+                  );
+                })}
+                {recentCheckIns.length === 0 && <small>{t("tourist.checkin.emptyHistory")}</small>}
               </div>
-            )}
-
-            {recommendedCheckIn && !activeCheckIn && (
-              <button className="secondary-action wide" type="button" onClick={() => onCheckInDestinationChange(recommendedCheckIn.id)}>
-                {t("tourist.checkin.useNearest")}: {recommendedCheckIn.name}
-              </button>
-            )}
-
-            {activeCheckIn && (
-              <button className="secondary-action wide" type="button" onClick={onFinishAttractionCheckIn}>
-                <Square size={18} />
-                {t("tourist.checkin.checkOut")}
-              </button>
-            )}
-
-            <div className="check-in-history">
-              {recentCheckIns.map((checkIn) => {
-                const destination = destinations.find((candidate) => candidate.id === checkIn.destinationId);
-
-                return (
-                  <span key={checkIn.id}>
-                    <strong>{destination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
-                    {checkIn.status === "checked-out" ? `${getCheckInDurationMinutes(checkIn)} ${t("tourist.checkin.minVisit")}` : t("tourist.checkin.currentlyCheckedIn")}
-                  </span>
-                );
-              })}
-              {recentCheckIns.length === 0 && <small>{t("tourist.checkin.emptyHistory")}</small>}
-            </div>
-          </details>
+            </details>
+          )}
 
           <details className="tourist-section home-disclosure safety-panel" open={openSafetyCount > 0}>
             <summary>
