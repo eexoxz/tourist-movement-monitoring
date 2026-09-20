@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import type { Destination } from "../types";
 
 type DestinationVisualProps = {
@@ -22,11 +22,15 @@ function resizeCommonsImageUrl(src: string, width: number) {
   return src;
 }
 
-export function DestinationVisual({ destination, compact = false }: DestinationVisualProps) {
+function DestinationVisualComponent({ destination, compact = false }: DestinationVisualProps) {
   const src = destination.imageUrl?.trim();
-  const displaySrc = src ? resizeCommonsImageUrl(src, compact ? 360 : 760) : "";
+  const displaySrc = useMemo(() => (src ? resizeCommonsImageUrl(src, compact ? 360 : 760) : ""), [compact, src]);
   const [imageFailed, setImageFailed] = useState(() => Boolean(displaySrc && failedImageUrls.has(displaySrc)));
   const alt = destination.imageAlt?.trim() || `${destination.name} location photo`;
+
+  useEffect(() => {
+    setImageFailed(Boolean(displaySrc && failedImageUrls.has(displaySrc)));
+  }, [displaySrc]);
 
   if (!displaySrc || imageFailed) {
     return (
@@ -47,6 +51,7 @@ export function DestinationVisual({ destination, compact = false }: DestinationV
         loading="lazy"
         decoding="async"
         fetchPriority={compact ? "low" : "auto"}
+        sizes={compact ? "96px" : "(max-width: 760px) 100vw, 760px"}
         referrerPolicy="no-referrer"
         onError={() => {
           failedImageUrls.add(displaySrc);
@@ -57,3 +62,5 @@ export function DestinationVisual({ destination, compact = false }: DestinationV
     </figure>
   );
 }
+
+export const DestinationVisual = memo(DestinationVisualComponent);

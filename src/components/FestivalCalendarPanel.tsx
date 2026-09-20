@@ -8,8 +8,6 @@ import {
   formatFestivalDate,
   formatFestivalScope,
   formatFestivalStateSummaryLabel,
-  getFestivalDestinationMatches,
-  getFestivalPlanningSummary,
   getFestivalsForState,
 } from "../services/festivals";
 import { DestinationVisual } from "./DestinationVisual";
@@ -85,6 +83,22 @@ function categoryLabelKey(category: FestivalCategory | "all"): TranslationKey {
   return `tourist.events.category.${category}` as TranslationKey;
 }
 
+function getMatchedDestinations(event: FestivalEvent, destinationById: Map<string, Destination>) {
+  return event.destinationIds.flatMap((destinationId) => {
+    const destination = destinationById.get(destinationId);
+    return destination ? [destination] : [];
+  });
+}
+
+function getPlanningSummary(matchedDestinations: Destination[]) {
+  if (matchedDestinations.length === 0) {
+    return "No linked place has been added yet. Use current movement demand to find suitable nearby destinations for this state.";
+  }
+
+  const cityNames = Array.from(new Set(matchedDestinations.map((destination) => destination.city)));
+  return `These places may become busier around this event. Compare demand in ${cityNames.join(", ")} before planning a route.`;
+}
+
 export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", referencePoint, onOpenCalendar }: FestivalCalendarPanelProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
@@ -94,6 +108,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   const [nearMeOnly, setNearMeOnly] = useState(false);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
+  const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
   const localState = useMemo(() => nearestState(referencePoint, destinations), [destinations, referencePoint]);
   const effectiveStateFilter = nearMeOnly && localState ? localState : stateFilter;
   const filteredEvents = useMemo(
@@ -105,10 +120,20 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   );
   const visibleLimit = showFullCalendar ? filteredEvents.length : compact ? compactCalendarPreviewLimit : fullCalendarPreviewLimit;
   const visibleEvents = useMemo(() => filteredEvents.slice(0, visibleLimit), [filteredEvents, visibleLimit]);
-  const visibleDestinationMatches = useMemo(
-    () => new Map(visibleEvents.map((event) => [event.id, getFestivalDestinationMatches(event, destinations).slice(0, 3)])),
-    [destinations, visibleEvents]
-  );
+  const visibleEventDetails = useMemo(() => {
+    return new Map(
+      visibleEvents.map((event) => {
+        const matchedDestinations = getMatchedDestinations(event, destinationById);
+        return [
+          event.id,
+          {
+            matchedDestinations: matchedDestinations.slice(0, 3),
+            planningSummary: getPlanningSummary(matchedDestinations),
+          },
+        ];
+      })
+    );
+  }, [destinationById, visibleEvents]);
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
   const resultScope = effectiveStateFilter === "all" ? "Malaysia" : effectiveStateFilter;
 
@@ -169,7 +194,8 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
       </div>
       <div className="festival-list">
         {visibleEvents.map((event) => {
-          const matchedDestinations = visibleDestinationMatches.get(event.id) ?? [];
+          const eventDetails = visibleEventDetails.get(event.id);
+          const matchedDestinations = eventDetails?.matchedDestinations ?? [];
           const statesExpanded = expandedEventIds.includes(event.id);
 
           return (
@@ -196,7 +222,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
                   )}
                 </div>
                 <div className="festival-insight-row">
-                  <small className="festival-planning-note">{getFestivalPlanningSummary(event, destinations)}</small>
+                  <small className="festival-planning-note">{eventDetails?.planningSummary}</small>
                   {matchedDestinations.length > 0 && (
                     <div className="festival-destinations">
                       {matchedDestinations.map((destination) => (

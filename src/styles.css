@@ -3553,6 +3553,8 @@ button:disabled {
   border: 1px solid #dce7e2;
   border-radius: 8px;
   background: #ffffff;
+  content-visibility: auto;
+  contain-intrinsic-size: 260px;
 }
 
 .festival-date-rail {
