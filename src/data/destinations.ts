@@ -3,7 +3,7 @@ import type { Destination } from "../types";
 type PracticalDestinationInfo = Partial<Pick<Destination, "openingHours" | "feeNote" | "visitTips" | "imageUrl" | "imageAlt">>;
 
 function commonsImage(fileName: string) {
-  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=900`;
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=760`;
 }
 
 const practicalDestinationInfo: Record<string, PracticalDestinationInfo> = {
