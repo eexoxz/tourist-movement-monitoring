@@ -63,6 +63,8 @@ type TouristPreferenceDocument = {
   tripPace: NonNullable<User["tripPace"]>;
   travelGroup: NonNullable<User["travelGroup"]>;
   accessibilityPreference: NonNullable<User["accessibilityPreference"]>;
+  trackingSuggestionMode?: User["trackingSuggestionMode"];
+  trackingSuggestionRadiusKm?: number;
   profileCompletedAt?: string;
   updatedAt: string;
 };
@@ -490,6 +492,8 @@ function mergeUserDocuments(
       tripPace: preference.tripPace,
       travelGroup: preference.travelGroup,
       accessibilityPreference: preference.accessibilityPreference,
+      trackingSuggestionMode: preference.trackingSuggestionMode,
+      trackingSuggestionRadiusKm: preference.trackingSuggestionRadiusKm,
       profileCompletedAt: preference.profileCompletedAt,
     });
   }
@@ -514,6 +518,8 @@ function buildTouristPreferenceDocument(user: User): TouristPreferenceDocument {
     tripPace: user.tripPace ?? "balanced",
     travelGroup: user.travelGroup ?? "solo",
     accessibilityPreference: user.accessibilityPreference ?? "none",
+    trackingSuggestionMode: user.trackingSuggestionMode ?? "balanced",
+    trackingSuggestionRadiusKm: user.trackingSuggestionRadiusKm ?? 2,
     profileCompletedAt: user.profileCompletedAt,
     updatedAt: new Date().toISOString(),
   };

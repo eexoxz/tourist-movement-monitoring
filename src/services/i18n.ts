@@ -161,6 +161,10 @@ export type TranslationKey =
   | "profile.option.noPreference"
   | "profile.option.lowWalking"
   | "profile.option.wheelchair"
+  | "profile.option.trackingBalanced"
+  | "profile.option.trackingNearby"
+  | "profile.option.trackingPopular"
+  | "profile.option.trackingOff"
   | "tourist.profile.pageTitle"
   | "tourist.profile.setupPageTitle"
   | "tourist.profile.formTitle"
@@ -263,6 +267,10 @@ export type TranslationKey =
   | "tourist.profile.travelPace"
   | "tourist.profile.travellingWith"
   | "tourist.profile.walkingPreference"
+  | "tourist.profile.trackingSettings"
+  | "tourist.profile.trackingDescription"
+  | "tourist.profile.nearbySuggestions"
+  | "tourist.profile.suggestionDistance"
   | "tourist.profile.emergencyDescription"
   | "tourist.profile.contactName"
   | "tourist.profile.contactNamePlaceholder"
@@ -595,6 +603,10 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "profile.option.noPreference": "No special preference",
     "profile.option.lowWalking": "Prefer less walking",
     "profile.option.wheelchair": "Prefer wheelchair-friendly places",
+    "profile.option.trackingBalanced": "Balanced suggestions",
+    "profile.option.trackingNearby": "Closest places only",
+    "profile.option.trackingPopular": "Popular places first",
+    "profile.option.trackingOff": "Off",
     "tourist.profile.pageTitle": "Travel Profile",
     "tourist.profile.setupPageTitle": "Set Up Your Travel Profile",
     "tourist.profile.formTitle": "Travel Preferences",
@@ -697,6 +709,10 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.profile.travelPace": "Travel pace",
     "tourist.profile.travellingWith": "Travelling with",
     "tourist.profile.walkingPreference": "Walking preference",
+    "tourist.profile.trackingSettings": "Tracking suggestions",
+    "tourist.profile.trackingDescription": "Control whether the app points out nearby attractions while a trip is being recorded.",
+    "tourist.profile.nearbySuggestions": "Nearby place alerts",
+    "tourist.profile.suggestionDistance": "Alert distance",
     "tourist.profile.emergencyDescription": "Optional, but useful if the tourist submits an SOS or incident report.",
     "tourist.profile.contactName": "Contact name",
     "tourist.profile.contactNamePlaceholder": "Example: Nur Aisyah",

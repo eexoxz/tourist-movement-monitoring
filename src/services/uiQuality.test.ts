@@ -175,6 +175,7 @@ describe("user interface quality guardrails", () => {
 
   it("keeps tourist location tracking guarded for mobile browser edge cases", () => {
     expect(appSource).toContain("hasBrowserGeolocation");
+    expect(appSource).toContain("isSecureContext");
     expect(appSource).toContain("clearBrowserLocationWatch");
     expect(appSource).toContain("loadProfileSetupSkipped");
     expect(appSource).toContain("saveProfileSetupSkipped");

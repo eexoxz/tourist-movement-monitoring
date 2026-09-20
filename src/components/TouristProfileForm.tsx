@@ -31,6 +31,8 @@ export function TouristProfileForm({
   const [tripPace, setTripPace] = useState<User["tripPace"]>(user.tripPace ?? "balanced");
   const [travelGroup, setTravelGroup] = useState<User["travelGroup"]>(user.travelGroup ?? "solo");
   const [accessibilityPreference, setAccessibilityPreference] = useState<User["accessibilityPreference"]>(user.accessibilityPreference ?? "none");
+  const [trackingSuggestionMode, setTrackingSuggestionMode] = useState<User["trackingSuggestionMode"]>(user.trackingSuggestionMode ?? "balanced");
+  const [trackingSuggestionRadiusKm, setTrackingSuggestionRadiusKm] = useState(user.trackingSuggestionRadiusKm ?? 2);
   const [emergencyContactName, setEmergencyContactName] = useState(user.emergencyContactName ?? "");
   const [emergencyContactPhone, setEmergencyContactPhone] = useState(user.emergencyContactPhone ?? "");
   const [emergencyContactRelation, setEmergencyContactRelation] = useState(user.emergencyContactRelation ?? "");
@@ -51,6 +53,8 @@ export function TouristProfileForm({
       tripPace,
       travelGroup,
       accessibilityPreference,
+      trackingSuggestionMode,
+      trackingSuggestionRadiusKm,
       emergencyContactName: emergencyContactName.trim() || undefined,
       emergencyContactPhone: emergencyContactPhone.trim() || undefined,
       emergencyContactRelation: emergencyContactRelation.trim() || undefined,
@@ -113,6 +117,33 @@ export function TouristProfileForm({
               <option value="wheelchair-friendly">{t("profile.option.wheelchair")}</option>
             </select>
           </label>
+
+          <section className="profile-emergency-fields">
+            <div>
+              <span>{t("tourist.profile.trackingSettings")}</span>
+              <p>{t("tourist.profile.trackingDescription")}</p>
+            </div>
+            <div className="field-pair">
+              <label>
+                {t("tourist.profile.nearbySuggestions")}
+                <select value={trackingSuggestionMode} onChange={(event) => setTrackingSuggestionMode(event.target.value as User["trackingSuggestionMode"])}>
+                  <option value="balanced">{t("profile.option.trackingBalanced")}</option>
+                  <option value="nearby">{t("profile.option.trackingNearby")}</option>
+                  <option value="popular">{t("profile.option.trackingPopular")}</option>
+                  <option value="off">{t("profile.option.trackingOff")}</option>
+                </select>
+              </label>
+              <label>
+                {t("tourist.profile.suggestionDistance")}
+                <select value={trackingSuggestionRadiusKm} onChange={(event) => setTrackingSuggestionRadiusKm(Number(event.target.value))} disabled={trackingSuggestionMode === "off"}>
+                  <option value={1}>1 km</option>
+                  <option value={2}>2 km</option>
+                  <option value={3}>3 km</option>
+                  <option value={5}>5 km</option>
+                </select>
+              </label>
+            </div>
+          </section>
 
           <section className="profile-emergency-fields">
             <div>

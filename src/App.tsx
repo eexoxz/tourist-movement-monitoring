@@ -103,6 +103,7 @@ import { getTouristWorkspaceData } from "./services/touristWorkspace";
 import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from "./services/tripPresentation";
 import { getBrowserNotificationPermission, requestBrowserNotificationPermission, showBrowserNotification } from "./services/browserNotifications";
 import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "./services/incidentAttachments";
+import { getLiveNearbySuggestion } from "./services/liveSuggestions";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
 import { AuthScreen, LanguageSelector, type AuthResult, type TouristRegistrationDraft } from "./components/AuthScreen";
@@ -149,6 +150,12 @@ function analysisKey(analysis: AnalysisResult) {
 }
 
 function geolocationErrorMessage(error: GeolocationPositionError) {
+  const needsSecureContext = typeof window !== "undefined" && window.isSecureContext === false;
+
+  if (needsSecureContext) {
+    return "Phone browser GPS usually needs HTTPS. Use localhost for laptop testing, deploy to HTTPS, or add test movement for prototype checking.";
+  }
+
   if (error.code === error.PERMISSION_DENIED) {
     return "Location permission was denied. Tracking was stopped and no browser movement point was saved.";
   }
@@ -934,6 +941,7 @@ function TouristWorkspace({
   const [isPreparingIncidentPhoto, setIsPreparingIncidentPhoto] = useState(false);
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
   const geofenceNoticeKey = useRef("");
+  const liveSuggestionDestinationIds = useRef(new Set<string>());
   const touristWorkspace = useMemo(() => getTouristWorkspaceData(data, user.id, selectedTripId), [data, selectedTripId, user.id]);
   const {
     userTrips,
@@ -1002,6 +1010,39 @@ function TouristWorkspace({
     setTrackingMessage(message);
     notify({ tone, title, message });
   };
+
+  const showLiveNearbySuggestion = (point: MovementPoint) => {
+    const suggestion = getLiveNearbySuggestion({
+      point,
+      destinations: data.destinations,
+      demand: destinationDemand,
+      user,
+      excludeDestinationIds: liveSuggestionDestinationIds.current,
+    });
+
+    if (!suggestion) {
+      return;
+    }
+
+    liveSuggestionDestinationIds.current.add(suggestion.destination.id);
+    const reason =
+      suggestion.reason === "preference"
+        ? "It matches your travel style."
+        : suggestion.reason === "popular"
+          ? "Visitor movement is strong around it."
+          : "It is close to your current route.";
+
+    notify({
+      tone: "info",
+      title: `${suggestion.destination.name} is nearby`,
+      message: `${suggestion.distanceKm} km away. ${reason} Change this from Travel Profile settings.`,
+      browser: true,
+    });
+  };
+
+  useEffect(() => {
+    liveSuggestionDestinationIds.current.clear();
+  }, [activeTrip?.id, user.id]);
 
   useEffect(() => {
     const warningKey = geofenceWarnings.map((warning) => warning.geofence.id).join("|");
@@ -1087,7 +1128,7 @@ function TouristWorkspace({
     }
 
     onDataChange(result.data);
-    return true;
+    return result.point ?? true;
   };
 
   const startLocationWatch = (tripId: string, message: string) => {
@@ -1113,7 +1154,10 @@ function TouristWorkspace({
       setLocationRetryAvailable(false);
 
       if (saveInitialPoint) {
-        appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true });
+        const saved = appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true });
+        if (saved) {
+          showLiveNearbySuggestion(saved);
+        }
       }
     };
 
@@ -1122,6 +1166,7 @@ function TouristWorkspace({
       const saved = appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true });
       if (saved) {
         setTrackingMessage("Live movement point recorded.");
+        showLiveNearbySuggestion(saved);
       }
     };
 
@@ -1222,7 +1267,9 @@ function TouristWorkspace({
     }
 
     const point = simulatedPointNear(destination, currentPoints.length);
-    if (appendPoint(activeTrip.id, point.latitude, point.longitude, 32, "demo")) {
+    const saved = appendPoint(activeTrip.id, point.latitude, point.longitude, 32, "demo");
+    if (saved) {
+      showLiveNearbySuggestion(saved);
       showTrackingNotice("success", "Test movement added", `A test movement point was added near ${destination.name}.`);
     }
   };
@@ -1271,7 +1318,9 @@ function TouristWorkspace({
       return;
     }
 
-    if (appendPoint(activeTrip.id, Number(manualLocation.latitude), Number(manualLocation.longitude), Number(manualLocation.accuracyMeters), "demo")) {
+    const saved = appendPoint(activeTrip.id, Number(manualLocation.latitude), Number(manualLocation.longitude), Number(manualLocation.accuracyMeters), "demo");
+    if (saved) {
+      showLiveNearbySuggestion(saved);
       showTrackingNotice("success", "Manual point saved", "Manual movement point saved to the active trip.");
     }
   };

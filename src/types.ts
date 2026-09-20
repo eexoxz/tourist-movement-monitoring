@@ -53,6 +53,8 @@ export type User = {
   tripPace?: "relaxed" | "balanced" | "packed";
   travelGroup?: "solo" | "couple" | "family" | "friends";
   accessibilityPreference?: "none" | "low-walking" | "wheelchair-friendly";
+  trackingSuggestionMode?: "off" | "nearby" | "balanced" | "popular";
+  trackingSuggestionRadiusKm?: number;
   nationality?: string;
   passportNumber?: string;
   emergencyContactName?: string;
