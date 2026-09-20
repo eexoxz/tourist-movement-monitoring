@@ -130,7 +130,7 @@ const practicalDestinationInfo: Record<string, PracticalDestinationInfo> = {
     openingHours: "Temple complex hours may vary by section.",
     feeNote: "Main areas are often free; selected lifts or sections may charge.",
     visitTips: ["Expect slopes and stairs.", "Festival lighting periods may increase crowd movement."],
-    imageUrl: commonsImage("2008 07 29 Penang Kek Lok Si Temple (1).jpg"),
+    imageUrl: commonsImage("010851- Kek-Lok-Tempel, Penang, Malaysia.jpg"),
     imageAlt: "Kek Lok Si Temple in Penang",
   },
   "hin-bus-depot": {

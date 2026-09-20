@@ -52,6 +52,22 @@ function tierLabelKey(tier: DestinationSignal["tier"]): TranslationKey {
   return `map.tier.${tier}`;
 }
 
+function crowdLabelKey(signal: DestinationSignal): TranslationKey {
+  if (signal.tier === "high") {
+    return "map.crowd.busy";
+  }
+
+  if (signal.tier === "medium") {
+    return "map.crowd.steady";
+  }
+
+  if (signal.tier === "emerging") {
+    return "map.crowd.growing";
+  }
+
+  return "map.crowd.quiet";
+}
+
 function destinationIcon(category: DestinationCategory, signal: DestinationSignal, locale: Locale) {
   const meta = categoryMeta[category];
   const size = signal.tier === "high" ? 46 : signal.tier === "medium" ? 42 : signal.tier === "emerging" ? 38 : 34;
@@ -375,38 +391,52 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
               <X size={16} aria-hidden="true" />
             </button>
             <DestinationVisual destination={selectedDestination} compact />
-            <span>{categoryLabel(selectedDestination.category)} {t("map.destination")}</span>
-            <h2>{selectedDestination.name}</h2>
-            <p>{selectedDestination.description}</p>
-            <dl>
-              <div>
-                <dt>{t("tourist.places.area")}</dt>
-                <dd>{selectedDestination.city}</dd>
-              </div>
-              <div>
-                <dt>{t("map.demandSignal")}</dt>
-                <dd>{signalTierLabel(selectedSignal.tier)}</dd>
-              </div>
-              <div>
-                <dt>{t("map.nearbyPoints")}</dt>
-                <dd>{selectedSignal.nearbyPointCount}</dd>
-              </div>
-              <div>
-                <dt>{t("map.touristProfiles")}</dt>
-                <dd>{selectedSignal.uniqueTouristCount}</dd>
+            <div className="map-detail-heading">
+              <span>{categoryLabel(selectedDestination.category)} {t("map.destination")}</span>
+              <h2>{selectedDestination.name}</h2>
+              <p>{selectedDestination.description}</p>
+            </div>
+            <dl className="map-visitor-details">
+              <div className="wide">
+                <dt>{t("common.address")}</dt>
+                <dd>{selectedDestination.address ?? selectedDestination.city}</dd>
               </div>
               {selectedSignal.distanceFromActiveKm !== undefined && (
                 <div>
                   <dt>{t("map.fromCurrentPoint")}</dt>
-                  <dd>{selectedSignal.distanceFromActiveKm.toFixed(2)} km</dd>
+                  <dd>{selectedSignal.distanceFromActiveKm.toFixed(1)} km {t("map.away")}</dd>
                 </div>
               )}
               <div>
                 <dt>{t("map.suggestedVisit")}</dt>
                 <dd>{selectedDestination.averageVisitMinutes} {t("common.minutes")}</dd>
               </div>
+              <div>
+                <dt>{t("common.demand")}</dt>
+                <dd>{t(crowdLabelKey(selectedSignal))}</dd>
+              </div>
             </dl>
-            {selectedSignal.latestRecordedAt && <small>{t("map.latestRouteSignal")}: {formatDateTime(selectedSignal.latestRecordedAt)}</small>}
+            <section className="map-visit-notes">
+              <div>
+                <strong>{t("common.openingHours")}</strong>
+                <p>{selectedDestination.openingHours ?? t("common.checkLocally")}</p>
+              </div>
+              <div>
+                <strong>{t("common.feeNote")}</strong>
+                <p>{selectedDestination.feeNote ?? t("common.feeMayVary")}</p>
+              </div>
+              {selectedDestination.visitTips && selectedDestination.visitTips.length > 0 && (
+                <div>
+                  <strong>{t("map.goodToKnow")}</strong>
+                  <ul>
+                    {selectedDestination.visitTips.slice(0, 2).map((tip) => (
+                      <li key={tip}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
+            {selectedSignal.latestRecordedAt && <small>{t("map.visitorMovementUpdated")} {formatDateTime(selectedSignal.latestRecordedAt)}</small>}
           </>
         ) : topSignals.length > 0 ? (
           <>
