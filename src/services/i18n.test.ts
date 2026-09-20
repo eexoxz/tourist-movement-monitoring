@@ -89,6 +89,7 @@ const visibleTouristWorkflowKeys: TranslationKey[] = [
   "tourist.pass.travelStyle",
   "tourist.pass.qrLabel",
   "tourist.pass.qrNote",
+  "tourist.pass.localQrNote",
   "tourist.pass.verified",
   "tourist.pass.scanReady",
   "tourist.profile.personalSetup",

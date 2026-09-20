@@ -1,5 +1,5 @@
 import { BadgeCheck, ShieldCheck } from "lucide-react";
-import { createTouristCheckInUrl, createTouristPassUrl } from "../services/checkInDeepLink";
+import { createTouristCheckInUrl, createTouristPassUrl, isLocalOnlyQrOrigin } from "../services/checkInDeepLink";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createQrSvgDataUri } from "../services/qrCode";
 import type { Destination, User } from "../types";
@@ -58,6 +58,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
   const passId = createPassId(user);
   const qrPayload = createPassPayload(passId, destination);
   const qrSource = createQrSvgDataUri(qrPayload);
+  const localOnlyQr = isLocalOnlyQrOrigin();
   const passport = maskPassport(user.passportNumber) || t("tourist.profile.notSetYet");
   const nationality = user.nationality || t("tourist.profile.notSetYet");
 
@@ -101,7 +102,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
         <strong>{destination ? t("tourist.pass.scanReady") : t("tourist.pass.verified")}</strong>
         <small>
           <ShieldCheck size={14} />
-          {t("tourist.pass.qrNote")}
+          {localOnlyQr ? t("tourist.pass.localQrNote") : t("tourist.pass.qrNote")}
         </small>
       </div>
     </article>

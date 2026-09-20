@@ -2,7 +2,7 @@ import { getPathForView } from "./access";
 
 const CHECK_IN_PARAM = "checkin";
 const PASS_PARAM = "pass";
-const LOCAL_MOBILE_HOST = "192.168.50.176";
+const DEFAULT_LOCAL_ORIGIN = "http://localhost:4175";
 
 type LocationLike = Pick<Location, "hostname" | "origin" | "port" | "protocol">;
 
@@ -10,17 +10,35 @@ function isLoopbackHost(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
 }
 
+function configuredPublicOrigin() {
+  const configured = import.meta.env.VITE_PUBLIC_APP_URL?.trim();
+
+  if (!configured) {
+    return "";
+  }
+
+  try {
+    return new URL(configured).origin;
+  } catch {
+    return "";
+  }
+}
+
 export function getShareableAppOrigin(location: LocationLike | null = typeof window === "undefined" ? null : window.location) {
+  const publicOrigin = configuredPublicOrigin();
+  if (publicOrigin) {
+    return publicOrigin;
+  }
+
   if (!location) {
-    return `http://${LOCAL_MOBILE_HOST}:4175`;
+    return DEFAULT_LOCAL_ORIGIN;
   }
 
-  if (!isLoopbackHost(location.hostname)) {
-    return location.origin;
-  }
+  return location.origin;
+}
 
-  const port = location.port || "4175";
-  return `${location.protocol}//${LOCAL_MOBILE_HOST}:${port}`;
+export function isLocalOnlyQrOrigin(location: LocationLike | null = typeof window === "undefined" ? null : window.location) {
+  return !configuredPublicOrigin() && Boolean(location && isLoopbackHost(location.hostname));
 }
 
 export function createTouristCheckInUrl(destinationId: string, passId?: string) {
