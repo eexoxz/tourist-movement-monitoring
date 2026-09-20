@@ -1753,7 +1753,7 @@ function TouristWorkspace({
             </div>
             <p>{t("tourist.events.pageDescription")}</p>
           </section>
-          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} />
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} referencePoint={latestKnownPoint} />
         </section>
       </Page>
     );

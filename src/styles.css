@@ -3482,19 +3482,58 @@ button:disabled {
 .festival-filter {
   display: grid;
   gap: 6px;
-  min-width: 190px;
   color: #344155;
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.festival-filter select {
+.festival-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 10px;
+  width: min(100%, 880px);
+}
+
+.festival-filter select,
+.festival-filter input {
   min-height: 40px;
   padding: 8px 10px;
+  border: 1px solid #cfd8d3;
+  border-radius: 8px;
+  background: #fffefa;
+  color: #102033;
   font-size: 0.86rem;
   font-weight: 800;
   text-transform: none;
+}
+
+.festival-nearby-toggle {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bef3e7;
+  border-radius: 999px;
+  color: #064e3b;
+  background: #ecfdf5;
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.festival-nearby-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--teal);
+}
+
+.festival-nearby-toggle:has(input:disabled) {
+  color: #64748b;
+  border-color: #e2e8f0;
+  background: #f8fafc;
 }
 
 .festival-card {
@@ -5446,6 +5485,16 @@ textarea {
 
   .festival-filter {
     width: 100%;
+  }
+
+  .festival-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .festival-nearby-toggle {
+    width: 100%;
+    border-radius: 8px;
   }
 
   .festival-date-rail {
