@@ -162,7 +162,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
             </label>
             <label className="festival-nearby-toggle">
               <input type="checkbox" checked={nearMeOnly} onChange={(event) => setNearMeOnly(event.target.checked)} disabled={!localState} />
-              <span>{localState ? `${t("tourist.events.nearMe")} (${localState})` : t("tourist.events.nearMeUnavailable")}</span>
+              <span>{localState ? t("tourist.events.nearMe") : t("tourist.events.nearMeUnavailable")}</span>
             </label>
           </div>
         )}
