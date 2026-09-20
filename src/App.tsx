@@ -104,6 +104,7 @@ import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from ".
 import { getBrowserNotificationPermission, requestBrowserNotificationPermission, showBrowserNotification } from "./services/browserNotifications";
 import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "./services/incidentAttachments";
 import { getLiveNearbySuggestion } from "./services/liveSuggestions";
+import { localizeDestinations } from "./services/destinationLocale";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
 import { AuthScreen, LanguageSelector, type AuthResult, type TouristRegistrationDraft } from "./components/AuthScreen";
@@ -942,7 +943,9 @@ function TouristWorkspace({
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
   const geofenceNoticeKey = useRef("");
   const liveSuggestionDestinationIds = useRef(new Set<string>());
-  const touristWorkspace = useMemo(() => getTouristWorkspaceData(data, user.id, selectedTripId), [data, selectedTripId, user.id]);
+  const localizedDestinations = useMemo(() => localizeDestinations(data.destinations, locale), [data.destinations, locale]);
+  const localizedData = useMemo(() => ({ ...data, destinations: localizedDestinations }), [data, localizedDestinations]);
+  const touristWorkspace = useMemo(() => getTouristWorkspaceData(localizedData, user.id, selectedTripId), [localizedData, selectedTripId, user.id]);
   const {
     userTrips,
     activeTrip,
@@ -971,21 +974,21 @@ function TouristWorkspace({
   } = touristWorkspace;
   const activeTripSummary = activeTrip ? tripSummaries.find((summary) => summary.tripId === activeTrip.id) ?? null : null;
   const recentTrip = recentTrips[0];
-  const selectedDestination = data.destinations.find((destination) => destination.id === selectedDestinationId) ?? data.destinations[0];
+  const selectedDestination = localizedDestinations.find((destination) => destination.id === selectedDestinationId) ?? localizedDestinations[0];
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));
   const tourismAdvisories = useMemo(
-    () => getRelevantTourismAdvisories({ destinations: data.destinations, activePoint: latestKnownPoint }),
-    [data.destinations, latestKnownPoint]
+    () => getRelevantTourismAdvisories({ destinations: localizedDestinations, activePoint: latestKnownPoint }),
+    [localizedDestinations, latestKnownPoint]
   );
   const recommendations = useMemo(
-    () => recommendForUser(user.id, data, latestAnalysis, destinationDemand, latestKnownPoint),
-    [data, destinationDemand, latestAnalysis, latestKnownPoint, user.id]
+    () => recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, latestKnownPoint),
+    [destinationDemand, latestAnalysis, latestKnownPoint, localizedData, user.id]
   );
   const activeCheckIn = getActiveCheckIn(data, user.id);
-  const activeCheckInDestination = activeCheckIn ? data.destinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
-  const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, data.destinations)?.destination ?? null : null;
+  const activeCheckInDestination = activeCheckIn ? localizedDestinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
+  const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, localizedDestinations)?.destination ?? null : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(latestKnownPoint, data.geofences), [data.geofences, latestKnownPoint]);
   const displayName = getDisplayName(user);
   const t = (key: TranslationKey) => translate(locale, key);
@@ -999,10 +1002,10 @@ function TouristWorkspace({
   const activeJourneyPoints = activePoints.length ? activePoints : activeTrip ? [] : latestCompletedTripPoints;
   const activeJourneyPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : latestCompletedTripPoints.at(-1));
   const topRecommendationDestination = recommendations[0]
-    ? data.destinations.find((destination) => destination.id === recommendations[0].destinationId)
+    ? localizedDestinations.find((destination) => destination.id === recommendations[0].destinationId)
     : null;
   const topDemandDestination = destinationDemand[0]
-    ? data.destinations.find((destination) => destination.id === destinationDemand[0].destinationId)
+    ? localizedDestinations.find((destination) => destination.id === destinationDemand[0].destinationId)
     : null;
   const nextFestival = upcomingFestivals[0] ?? null;
 
@@ -1014,7 +1017,7 @@ function TouristWorkspace({
   const showLiveNearbySuggestion = (point: MovementPoint) => {
     const suggestion = getLiveNearbySuggestion({
       point,
-      destinations: data.destinations,
+      destinations: localizedDestinations,
       demand: destinationDemand,
       user,
       excludeDestinationIds: liveSuggestionDestinationIds.current,
@@ -1486,7 +1489,7 @@ function TouristWorkspace({
       return;
     }
 
-    const destination = data.destinations.find((candidate) => candidate.id === destinationId);
+    const destination = localizedDestinations.find((candidate) => candidate.id === destinationId);
     onDataChange(result.data, user);
     notify({ tone: "success", title: "Checked in", message: destination ? `${destination.name} was added to your visit log.` : "Your attraction visit was added.", browser: true });
   };
@@ -1665,7 +1668,7 @@ function TouristWorkspace({
 
           <MovementMap
             points={activePoints.length ? activePoints : tripPoints}
-            destinations={data.destinations}
+            destinations={localizedDestinations}
             activePoint={activePoints.at(-1) ?? latestKnownPoint}
             mode="tourist"
             displayMode={activePoints.length ? "route" : "signals"}
@@ -1696,7 +1699,7 @@ function TouristWorkspace({
           selectedTripDestinationNames={selectedTripDestinationNames}
           selectedTripRecommendations={selectedTripRecommendations}
           fallbackPoints={tripPoints}
-          destinations={data.destinations}
+          destinations={localizedDestinations}
           hasPersonalizedRecommendations={hasPersonalizedRecommendations}
           locale={locale}
           onSelectTrip={setSelectedTripId}
@@ -1721,7 +1724,7 @@ function TouristWorkspace({
         }
       >
         <PlaceDiscovery
-          destinations={data.destinations}
+          destinations={localizedDestinations}
           demand={destinationDemand}
           festivals={upcomingFestivals}
           recommendations={recommendations}
@@ -1753,7 +1756,7 @@ function TouristWorkspace({
             </div>
             <p>{t("tourist.events.pageDescription")}</p>
           </section>
-          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} referencePoint={latestKnownPoint} />
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={localizedDestinations} locale={locale} referencePoint={latestKnownPoint} />
         </section>
       </Page>
     );
@@ -1768,7 +1771,7 @@ function TouristWorkspace({
       currentConsent={currentConsent}
       activeJourneyPoints={activeJourneyPoints}
       activeJourneyPoint={activeJourneyPoint}
-      destinations={data.destinations}
+      destinations={localizedDestinations}
       geofenceWarnings={geofenceWarnings}
       tourismAdvisories={tourismAdvisories}
       isLiveTracking={isLiveTracking}

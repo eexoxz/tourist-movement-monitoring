@@ -5,7 +5,6 @@ import type { Destination, FestivalCategory, FestivalEvent, MalaysianState, Move
 import { distanceKm } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import {
-  formatFestivalDate,
   formatFestivalScope,
   formatFestivalStateSummaryLabel,
   getFestivalsForState,
@@ -81,6 +80,59 @@ function nearestState(point: MovementPoint | undefined, destinations: Destinatio
 
 function categoryLabelKey(category: FestivalCategory | "all"): TranslationKey {
   return `tourist.events.category.${category}` as TranslationKey;
+}
+
+function dateLocale(locale: Locale) {
+  const locales: Record<Locale, string> = {
+    en: "en-MY",
+    es: "es",
+    fr: "fr",
+    ja: "ja",
+    ko: "ko",
+    ms: "ms-MY",
+    pt: "pt",
+    ta: "ta-IN",
+    zh: "zh-CN",
+  };
+
+  return locales[locale];
+}
+
+function formatEventDate(event: FestivalEvent, locale: Locale) {
+  const formatter = new Intl.DateTimeFormat(dateLocale(locale), {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+  const start = formatter.format(new Date(`${event.date}T00:00:00`));
+  if (!event.endDate || event.endDate === event.date) {
+    return start;
+  }
+
+  return `${start} - ${formatter.format(new Date(`${event.endDate}T00:00:00`))}`;
+}
+
+function eventDescription(event: FestivalEvent, locale: Locale, t: (key: TranslationKey) => string) {
+  if (locale === "en") {
+    return event.description;
+  }
+
+  const category = t(categoryLabelKey(event.category));
+  const scope = event.scope === "national" ? t("tourist.events.allMalaysia") : event.states.join(", ");
+
+  const templates: Record<Locale, string> = {
+    en: event.description,
+    ms: `Acara ${category.toLowerCase()} ini boleh mempengaruhi pergerakan pelancong di ${scope}. Gunakan isyarat ini semasa merancang tarikh dan tempat lawatan.`,
+    zh: `这项${category}活动可能会影响 ${scope} 的游客流动。规划日期和地点时，可把它作为参考。`,
+    ja: `この${category}イベントは、${scope}周辺の観光客の動きに影響する可能性があります。日程や訪問先を決める参考にできます。`,
+    ko: `이 ${category} 이벤트는 ${scope} 지역의 관광객 이동에 영향을 줄 수 있습니다. 날짜와 방문지를 계획할 때 참고하세요.`,
+    pt: `Este evento de ${category.toLowerCase()} pode influenciar o movimento turístico em ${scope}. Use este sinal ao planear datas e locais de visita.`,
+    ta: `இந்த ${category} நிகழ்வு ${scope} பகுதியில் சுற்றுலா நகர்வை பாதிக்கலாம். பயண தேதி மற்றும் இடங்களை திட்டமிட இதை பயன்படுத்தலாம்.`,
+    es: `Este evento de ${category.toLowerCase()} puede influir en el movimiento turístico en ${scope}. Úsalo al planificar fechas y lugares de visita.`,
+    fr: `Cet événement ${category.toLowerCase()} peut influencer le mouvement touristique à ${scope}. Utilisez ce signal pour planifier les dates et les lieux de visite.`,
+  };
+
+  return templates[locale] ?? event.description;
 }
 
 function getMatchedDestinations(event: FestivalEvent, destinationById: Map<string, Destination>) {
@@ -202,15 +254,15 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
             <article className={`festival-card festival-card-${event.category}`} key={event.id}>
               <div className="festival-date-rail">
                 <CalendarDays size={17} />
-                <strong>{formatFestivalDate(event)}</strong>
-                <span>{event.category}</span>
+                <strong>{formatEventDate(event, locale)}</strong>
+                <span>{t(categoryLabelKey(event.category))}</span>
               </div>
               <div className="festival-card-main">
                 <div className="festival-card-heading">
                   <h3>{event.name}</h3>
                 </div>
                 {event.venue && <small className="festival-venue">{event.venue}</small>}
-                <p>{event.description}</p>
+                <p>{eventDescription(event, locale, t)}</p>
                 <div className="festival-state-details">
                   <button type="button" onClick={() => toggleEventStates(event.id)} aria-expanded={statesExpanded}>
                     {formatFestivalStateSummaryLabel(event)}

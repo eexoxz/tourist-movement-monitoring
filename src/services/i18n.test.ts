@@ -167,6 +167,7 @@ const visibleTouristWorkflowKeys: TranslationKey[] = [
   "tourist.trips.currentTripTitle",
   "tourist.trips.malaysiaTripTitle",
   "tourist.trips.tripSuffix",
+  "tourist.trips.routeConnector",
   "tourist.trips.keepRecording",
   "tourist.trips.ready",
   "tourist.trips.refresh",

@@ -19,7 +19,7 @@ export function formatTripTitle(trip: TripSession, destinationNames: string[], t
     return customLabel;
   }
 
-  const routeLabel = destinationNames.slice(0, 2).join(" to ");
+  const routeLabel = destinationNames.slice(0, 2).join(` ${t("tourist.trips.routeConnector")} `);
 
   if (routeLabel) {
     return `${routeLabel} ${t("tourist.trips.tripSuffix")}`;
