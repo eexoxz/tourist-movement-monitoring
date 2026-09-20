@@ -1,117 +1,165 @@
 import type { Destination } from "../types";
 
-type PracticalDestinationInfo = Pick<Destination, "openingHours" | "feeNote" | "visitTips">;
+type PracticalDestinationInfo = Partial<Pick<Destination, "openingHours" | "feeNote" | "visitTips" | "imageUrl" | "imageAlt">>;
+
+function commonsImage(fileName: string) {
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=900`;
+}
 
 const practicalDestinationInfo: Record<string, PracticalDestinationInfo> = {
   "merdeka-square": {
     openingHours: "Public square, usually accessible daily.",
     feeNote: "Outdoor square access is normally free.",
     visitTips: ["Best paired with nearby heritage buildings.", "Go earlier in the day for easier walking and photos."],
+    imageUrl: commonsImage("The Merdeka Square,KL Malaysia .jpg"),
+    imageAlt: "Merdeka Square in Kuala Lumpur",
   },
   "islamic-arts-museum": {
     openingHours: "Museum hours may vary; check official notices before visiting.",
     feeNote: "Museum ticket may apply.",
     visitTips: ["Allow enough time for galleries across multiple floors.", "Pair with Perdana Botanical Garden or nearby heritage stops."],
+    imageUrl: commonsImage("Islamic Arts Museum Malaysia.JPG"),
+    imageAlt: "Islamic Arts Museum Malaysia building",
   },
   "klcc-park": {
     openingHours: "Public park, usually accessible daily.",
     feeNote: "Park access is normally free.",
     visitTips: ["Expect more visitors near evening fountain hours.", "Use nearby public transport if traffic is heavy."],
+    imageUrl: commonsImage("KLCC Park Kuala Lumpur.jpg"),
+    imageAlt: "KLCC Park in Kuala Lumpur",
   },
   "batu-caves": {
     openingHours: "Temple area is usually open daily; check notices during religious events.",
     feeNote: "Main temple area is generally free; some cave attractions may charge separately.",
     visitTips: ["Wear comfortable shoes for the stairs.", "Plan extra time during Thaipusam or peak holiday periods."],
+    imageUrl: commonsImage("Gombak Selangor Batu-Caves-01.jpg"),
+    imageAlt: "Batu Caves Murugan statue and staircase",
   },
   "perdana-botanical-garden": {
     openingHours: "Park area is usually accessible daily.",
     feeNote: "Garden access is normally free; selected facilities may vary.",
     visitTips: ["Bring water for longer walks.", "Good quieter alternative when central landmarks are crowded."],
+    imageUrl: commonsImage("Perdana Botanical Gardens, Kuala Lumpur.jpg"),
+    imageAlt: "Perdana Botanical Gardens in Kuala Lumpur",
   },
   "central-market": {
     openingHours: "Retail and food hours vary by tenant.",
     feeNote: "Entry is normally free; purchases depend on shop or stall.",
     visitTips: ["Good indoor stop during hot or rainy periods.", "Pair with Chinatown and nearby heritage lanes."],
+    imageUrl: commonsImage("Central Market Kuala Lumpur.jpg"),
+    imageAlt: "Central Market Kuala Lumpur exterior",
   },
   "penang-hill": {
     openingHours: "Funicular and attraction hours vary; check before going.",
     feeNote: "Funicular ticket is usually required.",
     visitTips: ["Arrive early to reduce queue time.", "Weather can change quickly at higher elevation."],
+    imageUrl: commonsImage("Penang Hill (8345232894).jpg"),
+    imageAlt: "View at Penang Hill",
   },
   "george-town-heritage-zone": {
     openingHours: "Street area is public; museums, shops, and cafes vary.",
     feeNote: "Walking around is normally free; individual venues may charge.",
     visitTips: ["Use shaded walking routes where possible.", "Check in at specific stops to record visit duration."],
+    imageUrl: commonsImage("Heritage buildings in central George Town, Penang.jpg"),
+    imageAlt: "Heritage buildings in central George Town, Penang",
   },
   "jonker-street": {
     openingHours: "Street activity varies; evening and weekend periods are usually busier.",
     feeNote: "Street access is free; purchases depend on vendors.",
     visitTips: ["Keep belongings close during crowded evening hours.", "Try side streets if the main route is packed."],
+    imageUrl: commonsImage("Jonker Street@Malacca.JPG"),
+    imageAlt: "Jonker Street in Melaka",
   },
   "tanjung-aru": {
     openingHours: "Beachfront area is usually accessible daily.",
     feeNote: "Beach access is normally free.",
     visitTips: ["Arrive before sunset for easier parking and walking.", "Choose a clear meeting point if travelling with a group."],
+    imageUrl: commonsImage("Tanjung Aru Beach.jpg"),
+    imageAlt: "Tanjung Aru Beach in Kota Kinabalu",
   },
   "kwai-chai-hong": {
     openingHours: "Lane access and tenant hours may vary.",
     feeNote: "Lane access is normally free.",
     visitTips: ["Best for short photo and cafe stops.", "Pair with Central Market or Chinatown walking routes."],
+    imageUrl: commonsImage("Kwai Chai Hong, Kuala Lumpur in May 2020 04.jpg"),
+    imageAlt: "Kwai Chai Hong lane in Kuala Lumpur",
   },
   "kampung-baru-kl": {
     openingHours: "Food stall and restaurant hours vary by operator.",
     feeNote: "Area access is free; meals depend on vendor pricing.",
     visitTips: ["Evening food movement can be heavy.", "Use public transport or ride-hailing during peak dining hours."],
+    imageUrl: commonsImage("Kampung Baru, Kuala Lumpur 20230828 145020.jpg"),
+    imageAlt: "Kampung Baru in Kuala Lumpur",
   },
   "thean-hou-temple": {
     openingHours: "Temple hours may vary during ceremonies and festive periods.",
     feeNote: "Temple entry is generally free; donations may be available.",
     visitTips: ["Respect prayer areas and dress modestly.", "Lantern seasons can increase visitor movement."],
+    imageUrl: commonsImage("Thean Hou Temple, Kuala Lumpur, Malaysia.jpg"),
+    imageAlt: "Thean Hou Temple in Kuala Lumpur",
   },
   "taman-botani-putrajaya": {
     openingHours: "Park and facility hours may vary.",
     feeNote: "General park access is usually free; rentals or facilities may charge.",
     visitTips: ["Useful for relaxed nature routes.", "Bring sun protection for open walking paths."],
+    imageUrl: commonsImage("Putrajaya Botanical Garden in Malaysia 28.jpg"),
+    imageAlt: "Taman Botani Putrajaya garden area",
   },
   "sekinchan-paddy-gallery": {
     openingHours: "Gallery hours may vary by season and operator.",
     feeNote: "Small entry or activity fees may apply.",
     visitTips: ["Best combined with nearby food and paddy-field viewpoints.", "Check rice-season timing if scenery matters."],
+    imageUrl: commonsImage("Sekinchan paddy 1.jpg"),
+    imageAlt: "Paddy fields in Sekinchan",
   },
   "kellies-castle": {
     openingHours: "Attraction hours may vary; check local notices before visiting.",
     feeNote: "Entry ticket is usually required.",
     visitTips: ["Bring water as parts of the site are exposed.", "Good heritage stop when travelling around Batu Gajah or Ipoh."],
+    imageUrl: commonsImage("Kellie's Castle.jpg"),
+    imageAlt: "Kellie's Castle in Perak",
   },
   "concubine-lane": {
     openingHours: "Shop, cafe, and stall hours vary.",
     feeNote: "Street access is normally free.",
     visitTips: ["Best explored on foot with nearby Old Town stops.", "Crowds can form quickly on weekends."],
+    imageUrl: commonsImage("Concubine Lane.jpg"),
+    imageAlt: "Concubine Lane in Ipoh",
   },
   "kek-lok-si-temple": {
     openingHours: "Temple complex hours may vary by section.",
     feeNote: "Main areas are often free; selected lifts or sections may charge.",
     visitTips: ["Expect slopes and stairs.", "Festival lighting periods may increase crowd movement."],
+    imageUrl: commonsImage("2008 07 29 Penang Kek Lok Si Temple (1).jpg"),
+    imageAlt: "Kek Lok Si Temple in Penang",
   },
   "hin-bus-depot": {
     openingHours: "Market, gallery, and tenant hours vary by day.",
     feeNote: "Entry is usually free; purchases depend on tenants.",
     visitTips: ["Weekend markets can be livelier.", "Good creative stop near George Town food routes."],
+    imageUrl: commonsImage("Cmglee Penang Hin Bus Depot entrance.jpg"),
+    imageAlt: "Hin Bus Depot entrance in Penang",
   },
   "mari-mari-cultural-village": {
     openingHours: "Tour sessions and operating hours vary; booking checks are recommended.",
     feeNote: "Tour ticket is usually required.",
     visitTips: ["Arrive before the scheduled session.", "Allow enough time for performances and guided activities."],
+    imageUrl: commonsImage("Mari Mari Cultural Village sign and map.jpg"),
+    imageAlt: "Mari Mari Cultural Village sign and entrance area",
   },
   "sarawak-cultural-village": {
     openingHours: "Village hours and show schedules may vary.",
     feeNote: "Entry ticket is usually required.",
     visitTips: ["Check performance times before travelling out.", "Pair with Santubong or Damai-area stops if time allows."],
+    imageUrl: commonsImage("Sarawak Cultural Village, Kuching.jpg"),
+    imageAlt: "Sarawak Cultural Village in Kuching",
   },
   "semenggoh-nature-reserve": {
     openingHours: "Wildlife viewing sessions are time-sensitive and may vary.",
     feeNote: "Entry ticket is usually required.",
     visitTips: ["Arrive around feeding-session windows.", "Keep distance from wildlife and follow ranger guidance."],
+    imageUrl: commonsImage("Main entrance into Semenggoh Wildlife Centre.jpg"),
+    imageAlt: "Main entrance into Semenggoh Wildlife Centre",
   },
 };
 

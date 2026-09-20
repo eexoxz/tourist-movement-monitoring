@@ -101,9 +101,10 @@ describe("user interface quality guardrails", () => {
     expect(destinationManagerSource).toContain("filteredDestinations");
   });
 
-  it("keeps destination visual references visible without adding a live image API", () => {
-    expect(destinationVisualSource).toContain("data:image/svg+xml");
+  it("keeps destination visual references photo-based without adding a live image API", () => {
     expect(destinationVisualSource).toContain("destination.imageUrl");
+    expect(destinationVisualSource).toContain("Photo not added");
+    expect(destinationVisualSource).not.toContain("data:image/svg+xml");
     expect(destinationManagerSource).toContain("Image URL");
     expect(touristHomeSource).toContain("TouristPassCard");
     expect(mapSource).toContain("DestinationVisual");

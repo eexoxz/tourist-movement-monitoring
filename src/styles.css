@@ -762,6 +762,32 @@ button:disabled {
   object-fit: cover;
 }
 
+.destination-visual.empty {
+  display: grid;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  background: #f1f5f9;
+}
+
+.destination-photo-empty {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  color: #475569;
+  text-align: center;
+}
+
+.destination-photo-empty strong {
+  color: #102033;
+  font-size: 0.95rem;
+}
+
+.destination-photo-empty span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .destination-visual figcaption {
   position: absolute;
   inset: auto 8px 8px 8px;
@@ -780,6 +806,11 @@ button:disabled {
 
 .destination-visual.compact img {
   height: 82px;
+  aspect-ratio: auto;
+}
+
+.destination-visual.compact.empty {
+  min-height: 82px;
   aspect-ratio: auto;
 }
 
