@@ -1,4 +1,5 @@
 import { Pencil, Sparkles, Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { formatDateTime } from "../services/geo";
 import { formatTripTitle, getRecognizedDestinationNames } from "../services/tripPresentation";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -53,6 +54,22 @@ export function TripDiary({
   const completedTripCount = trips.filter((trip) => trip.status === "completed").length;
   const totalDistanceKm = Number(tripSummaries.reduce((sum, summary) => sum + summary.distanceKm, 0).toFixed(1));
   const totalRecognizedStops = tripSummaries.reduce((sum, summary) => sum + summary.visitedDestinationCount, 0);
+  const summaryByTripId = useMemo(() => new Map(tripSummaries.map((summary) => [summary.tripId, summary])), [tripSummaries]);
+  const pointsByTripId = useMemo(() => {
+    const grouped = new Map<string, MovementPoint[]>();
+
+    fallbackPoints.forEach((point) => {
+      const points = grouped.get(point.tripId) ?? [];
+      points.push(point);
+      grouped.set(point.tripId, points);
+    });
+
+    return grouped;
+  }, [fallbackPoints]);
+  const destinationNamesByTripId = useMemo(() => {
+    return new Map(recentTrips.map((trip) => [trip.id, getRecognizedDestinationNames(pointsByTripId.get(trip.id) ?? [], destinations)]));
+  }, [destinations, pointsByTripId, recentTrips]);
+  const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
 
   return (
     <section className="trip-diary-page">
@@ -155,7 +172,7 @@ export function TripDiary({
                 <strong>{hasPersonalizedRecommendations ? t("tourist.trips.personalizedNext") : t("tourist.trips.basicNext")}</strong>
                 {selectedTripRecommendations.length > 0 ? (
                   selectedTripRecommendations.map((recommendation) => {
-                    const destination = destinations.find((candidate) => candidate.id === recommendation.destinationId);
+                    const destination = destinationById.get(recommendation.destinationId);
 
                     return destination ? (
                       <button className="trip-recommendation-link" type="button" key={recommendation.id} onClick={onViewRecommendations}>
@@ -187,26 +204,26 @@ export function TripDiary({
           </div>
 
           {recentTrips.map((trip) => {
-            const summary = tripSummaries.find((row) => row.tripId === trip.id);
-            const points = fallbackPoints.filter((point) => point.tripId === trip.id);
-            const destinationNames = getRecognizedDestinationNames(points, destinations);
+            const summary = summaryByTripId.get(trip.id);
+            const destinationNames = destinationNamesByTripId.get(trip.id) ?? [];
+            const fallbackTitle = formatTripTitle(trip, destinationNames, t);
 
             return (
               <article className={selectedTrip?.id === trip.id ? "trip-timeline-card active" : "trip-timeline-card"} key={trip.id}>
                 <button className="trip-timeline-select" type="button" onClick={() => onSelectTrip(trip.id)}>
                   <span>{trip.status === "completed" ? t("tourist.trips.completedTrip") : t("tourist.trips.activeTrip")}</span>
-                  <strong>{formatTripTitle(trip, destinationNames, t)}</strong>
+                  <strong>{fallbackTitle}</strong>
                   <small>{trip.endedAt ? formatDateTime(trip.endedAt) : t("tourist.trips.stillActive")}</small>
                   <p>
                     {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
                   </p>
                 </button>
                 <div className="trip-card-actions">
-                  <button type="button" onClick={() => onRenameTrip(trip, formatTripTitle(trip, destinationNames, t))}>
+                  <button type="button" onClick={() => onRenameTrip(trip, fallbackTitle)}>
                     <Pencil size={15} />
                     {t("tourist.trips.renameTrip")}
                   </button>
-                  <button className="danger" type="button" onClick={() => onDeleteTrip(trip, formatTripTitle(trip, destinationNames, t))}>
+                  <button className="danger" type="button" onClick={() => onDeleteTrip(trip, fallbackTitle)}>
                     <Trash2 size={15} />
                     {t("tourist.trips.deleteTrip")}
                   </button>

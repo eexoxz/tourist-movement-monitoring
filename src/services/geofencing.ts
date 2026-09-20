@@ -14,6 +14,14 @@ export type GeoFenceActivity = {
   latestRecordedAt?: string;
 };
 
+type GeoFenceActivityAccumulator = {
+  geofence: GeoFence;
+  latestRecordedAt?: string;
+  latestRecordedTime: number;
+  pointCount: number;
+  touristIds: Set<string>;
+};
+
 const toneByType: Record<GeoFenceType, GeoFenceWarning["tone"]> = {
   restricted: "error",
   dense: "warning",
@@ -39,17 +47,38 @@ export function getActiveGeofenceWarnings(point: Pick<MovementPoint, "latitude" 
 }
 
 export function calculateGeofenceActivity(data: AppData): GeoFenceActivity[] {
-  return data.geofences
-    .map((geofence) => {
-      const points = data.points.filter((point) => distanceKm(point, geofence) * 1000 <= geofence.radiusMeters);
-      const latestRecordedAt = points.map((point) => point.recordedAt).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+  const activity = data.geofences.map<GeoFenceActivityAccumulator>((geofence) => ({
+    geofence,
+    latestRecordedTime: 0,
+    pointCount: 0,
+    touristIds: new Set<string>(),
+  }));
 
-      return {
-        geofence,
-        pointCount: points.length,
-        touristCount: new Set(points.map((point) => point.userId).filter(Boolean)).size,
-        latestRecordedAt,
-      };
-    })
+  data.points.forEach((point) => {
+    activity.forEach((row) => {
+      if (distanceKm(point, row.geofence) * 1000 > row.geofence.radiusMeters) {
+        return;
+      }
+
+      row.pointCount += 1;
+      if (point.userId) {
+        row.touristIds.add(point.userId);
+      }
+
+      const recordedTime = new Date(point.recordedAt).getTime();
+      if (recordedTime > row.latestRecordedTime) {
+        row.latestRecordedTime = recordedTime;
+        row.latestRecordedAt = point.recordedAt;
+      }
+    });
+  });
+
+  return activity
+    .map((row) => ({
+      geofence: row.geofence,
+      pointCount: row.pointCount,
+      touristCount: row.touristIds.size,
+      latestRecordedAt: row.latestRecordedAt,
+    }))
     .sort((a, b) => b.pointCount - a.pointCount || a.geofence.name.localeCompare(b.geofence.name));
 }

@@ -1888,7 +1888,7 @@ function AdminWorkspace({
 }) {
   const t = (key: TranslationKey) => translate(locale, key);
   const adminText = (key: AdminCopyKey, values?: Record<string, string | number>) => translateAdmin(locale, key, values);
-  const tourists = getTourists(data);
+  const tourists = useMemo(() => getTourists(data), [data]);
   const summary = useMemo(() => summarizeDashboard(data), [data]);
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
@@ -1927,11 +1927,11 @@ function AdminWorkspace({
   );
   const movementRecords = movementViews.records;
   const movementTripRecords = movementViews.tripRecords;
-  const filteredPoints = movementRecords.map((record) => record.point);
+  const filteredPoints = useMemo(() => movementRecords.map((record) => record.point), [movementRecords]);
   const allDashboardPoints = data.points;
   const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
-  const movementAlerts = useMemo(() => calculateMovementAlerts(data), [data]);
+  const movementAlerts = useMemo(() => calculateMovementAlerts(data, destinationDemand), [data, destinationDemand]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
@@ -1962,8 +1962,8 @@ function AdminWorkspace({
         maxStops: planMaxStops,
         minimumTier: planMinimumTier,
         diversifyCategories: planDiversifyCategories,
-      }),
-    [data, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
+      }, destinationDemand),
+    [data, destinationDemand, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
   );
   const cityOptions = useMemo(() => Array.from(new Set(data.destinations.map((destination) => destination.city))).sort(), [data.destinations]);
   const filteredTouristCount = new Set(movementTripRecords.map((record) => record.trip.userId)).size;
@@ -1975,10 +1975,24 @@ function AdminWorkspace({
     () => [...data.analyses].sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()),
     [data.analyses]
   );
+  const userById = useMemo(() => new Map(data.users.map((candidate) => [candidate.id, candidate])), [data.users]);
+  const tripById = useMemo(() => new Map(data.trips.map((candidate) => [candidate.id, candidate])), [data.trips]);
+  const destinationById = useMemo(() => new Map(data.destinations.map((candidate) => [candidate.id, candidate])), [data.destinations]);
+  const recommendationsByUser = useMemo(() => {
+    const grouped = new Map<string, typeof data.recommendations>();
+
+    data.recommendations.forEach((recommendation) => {
+      const rows = grouped.get(recommendation.userId) ?? [];
+      rows.push(recommendation);
+      grouped.set(recommendation.userId, rows);
+    });
+
+    return grouped;
+  }, [data.recommendations]);
   const selectedAnalysis = analysisRows.find((analysis) => analysisKey(analysis) === selectedAnalysisKey) ?? analysisRows[0] ?? null;
-  const selectedAnalysisUser = selectedAnalysis ? data.users.find((candidate) => candidate.id === selectedAnalysis.userId) ?? null : null;
-  const selectedAnalysisTrip = selectedAnalysis ? data.trips.find((candidate) => candidate.id === selectedAnalysis.tripId) ?? null : null;
-  const selectedAnalysisRecommendations = selectedAnalysis ? data.recommendations.filter((recommendation) => recommendation.userId === selectedAnalysis.userId).slice(0, 3) : [];
+  const selectedAnalysisUser = selectedAnalysis ? userById.get(selectedAnalysis.userId) ?? null : null;
+  const selectedAnalysisTrip = selectedAnalysis ? tripById.get(selectedAnalysis.tripId) ?? null : null;
+  const selectedAnalysisRecommendations = selectedAnalysis ? (recommendationsByUser.get(selectedAnalysis.userId) ?? []).slice(0, 3) : [];
   const safetyRecords = useMemo(
     () =>
       [
@@ -2029,29 +2043,35 @@ function AdminWorkspace({
   const visibleAnalysisRows = showAllAiResults ? analysisRows : analysisRows.slice(0, adminAiPreviewLimit);
   const hiddenAnalysisCount = analysisRows.length - visibleAnalysisRows.length;
   const selectedKValue = aiEvaluation.validClusteredRecordCount > 0 ? Math.min(3, aiEvaluation.validClusteredRecordCount) : 0;
-  const selectedClusterSize = selectedAnalysis ? analysisRows.filter((analysis) => analysis.cluster === selectedAnalysis.cluster).length : 0;
-  const clusterSummaries = useMemo(
-    () =>
-      Array.from(new Set(analysisRows.map((analysis) => analysis.cluster)))
-        .sort((a, b) => a - b)
-        .map((cluster) => {
-          const records = analysisRows.filter((analysis) => analysis.cluster === cluster);
-          const profileCounts = records.reduce<Record<string, number>>((totals, analysis) => {
-            totals[analysis.profile] = (totals[analysis.profile] ?? 0) + 1;
-            return totals;
-          }, {});
-          const dominantProfile = Object.entries(profileCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "mixed";
+  const clusterSummaries = useMemo(() => {
+    const clusters = new Map<number, { cluster: number; label: string; profileCounts: Record<string, number>; silhouetteTotal: number; size: number }>();
 
-          return {
-            cluster,
-            size: records.length,
-            label: records[0]?.clusterLabel ?? "Unlabelled cluster",
-            dominantProfile,
-            averageSilhouette: records.length ? Number((records.reduce((total, analysis) => total + analysis.silhouetteScore, 0) / records.length).toFixed(2)) : 0,
-          };
-        }),
-    [analysisRows]
-  );
+    analysisRows.forEach((analysis) => {
+      const cluster = clusters.get(analysis.cluster) ?? {
+        cluster: analysis.cluster,
+        label: analysis.clusterLabel ?? "Unlabelled cluster",
+        profileCounts: {},
+        silhouetteTotal: 0,
+        size: 0,
+      };
+
+      cluster.size += 1;
+      cluster.silhouetteTotal += analysis.silhouetteScore;
+      cluster.profileCounts[analysis.profile] = (cluster.profileCounts[analysis.profile] ?? 0) + 1;
+      clusters.set(analysis.cluster, cluster);
+    });
+
+    return [...clusters.values()]
+      .sort((a, b) => a.cluster - b.cluster)
+      .map((cluster) => ({
+        cluster: cluster.cluster,
+        size: cluster.size,
+        label: cluster.label,
+        dominantProfile: Object.entries(cluster.profileCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "mixed",
+        averageSilhouette: cluster.size ? Number((cluster.silhouetteTotal / cluster.size).toFixed(2)) : 0,
+      }));
+  }, [analysisRows]);
+  const selectedClusterSize = selectedAnalysis ? clusterSummaries.find((summary) => summary.cluster === selectedAnalysis.cluster)?.size ?? 0 : 0;
 
   useEffect(() => {
     if (selectedTripId !== "all" && !tripOptions.some((trip) => trip.id === selectedTripId)) {
@@ -2465,7 +2485,7 @@ function AdminWorkspace({
       />
       <section className="list-panel safety-admin-list">
         {visibleSafetyRecords.map((record) => {
-          const tourist = data.users.find((candidate) => candidate.id === record.userId);
+          const tourist = userById.get(record.userId);
           const caseKey = `${record.kind}:${record.id}`;
           const noteDraft = safetyAdminNotes[caseKey] ?? record.adminNote ?? "";
           const contactLine = tourist?.emergencyContactPhone
@@ -2585,7 +2605,7 @@ function AdminWorkspace({
 
         <section className="list-panel ai-analysis-list">
           {visibleAnalysisRows.map((analysis) => {
-            const user = data.users.find((candidate) => candidate.id === analysis.userId);
+            const user = userById.get(analysis.userId);
             const active = selectedAnalysis ? analysisKey(selectedAnalysis) === analysisKey(analysis) : false;
 
             return (
@@ -2678,7 +2698,7 @@ function AdminWorkspace({
               {selectedAnalysisRecommendations.length > 0 ? (
                 <div className="ai-recommendation-result">
                   {selectedAnalysisRecommendations.map((recommendation) => {
-                    const destination = data.destinations.find((candidate) => candidate.id === recommendation.destinationId);
+                    const destination = destinationById.get(recommendation.destinationId);
 
                     return destination ? (
                       <span key={recommendation.id}>

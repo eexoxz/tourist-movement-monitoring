@@ -589,8 +589,8 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
     .sort((a, b) => b.popularityScore - a.popularityScore);
 }
 
-export function getDestinationDemand(data: AppData, destinationId: string) {
-  return calculateDestinationDemand(data).find((row) => row.destinationId === destinationId) ?? null;
+export function getDestinationDemand(data: AppData, destinationId: string, destinationDemand = calculateDestinationDemand(data)) {
+  return destinationDemand.find((row) => row.destinationId === destinationId) ?? null;
 }
 
 function movementAlertSeverity(row: DestinationDemand): MovementAlert["severity"] {
@@ -605,11 +605,11 @@ function movementAlertSeverity(row: DestinationDemand): MovementAlert["severity"
   return "info";
 }
 
-export function calculateMovementAlerts(data: AppData): MovementAlert[] {
+export function calculateMovementAlerts(data: AppData, destinationDemand = calculateDestinationDemand(data)): MovementAlert[] {
   const generatedAt = new Date().toISOString();
   const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
 
-  return calculateDestinationDemand(data)
+  return destinationDemand
     .filter((row) => row.popularityScore > 0 && (row.tier !== "low" || row.approachSignalCount > 0))
     .map((row) => {
       const destination = destinationById.get(row.destinationId);
@@ -932,9 +932,9 @@ function travelPlanAudienceBonus(audience: Required<TravelPlanOptions>["audience
   return profileMatchesCategory(audience, destination.category) ? 30 : -8;
 }
 
-export function createMovementBasedTravelPlan(data: AppData, options?: TravelPlanOptions): TravelPlan {
+export function createMovementBasedTravelPlan(data: AppData, options?: TravelPlanOptions, destinationDemand = calculateDestinationDemand(data)): TravelPlan {
   const criteria = normalizeTravelPlanOptions(options);
-  const demandRows = calculateDestinationDemand(data);
+  const demandRows = destinationDemand;
   const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
   const selectedDestinationIds = new Set<string>();
   const selectedCategories = new Set<DestinationCategory>();

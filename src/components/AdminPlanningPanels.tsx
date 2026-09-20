@@ -1,4 +1,5 @@
 import { Download } from "lucide-react";
+import { useMemo } from "react";
 import type { Destination, DestinationDemand, MovementAlert, TravelPlan } from "../types";
 import { EmptyState } from "./SummaryCards";
 
@@ -13,13 +14,14 @@ export function MovementDemandList({
   destinations: Destination[];
   compact?: boolean;
 }) {
-  const visibleDemand = demand.filter((row) => row.popularityScore > 0);
+  const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
+  const visibleDemand = useMemo(() => demand.filter((row) => row.popularityScore > 0), [demand]);
 
   return (
     <section className={compact ? "movement-demand compact" : "movement-demand"}>
       <h2>{title}</h2>
       {visibleDemand.map((row, index) => {
-        const destination = destinations.find((candidate) => candidate.id === row.destinationId);
+        const destination = destinationById.get(row.destinationId);
         if (!destination) {
           return null;
         }
@@ -46,6 +48,8 @@ export function MovementDemandList({
 }
 
 export function MovementAlertList({ alerts, destinations, onExport }: { alerts: MovementAlert[]; destinations: Destination[]; onExport: () => void }) {
+  const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
+
   return (
     <section className="movement-alerts">
       <div className="section-heading">
@@ -56,7 +60,7 @@ export function MovementAlertList({ alerts, destinations, onExport }: { alerts: 
         </button>
       </div>
       {alerts.map((alert) => {
-        const destination = destinations.find((candidate) => candidate.id === alert.destinationId);
+        const destination = destinationById.get(alert.destinationId);
 
         return (
           <article className={`alert-card ${alert.severity}`} key={alert.id}>
@@ -75,6 +79,8 @@ export function MovementAlertList({ alerts, destinations, onExport }: { alerts: 
 }
 
 export function TravelPlanPanel({ plan, destinations }: { plan: TravelPlan; destinations: Destination[] }) {
+  const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
+
   return (
     <section className="travel-plan">
       <p>{plan.summary}</p>
@@ -85,7 +91,7 @@ export function TravelPlanPanel({ plan, destinations }: { plan: TravelPlan; dest
         <span>{plan.criteria.maxStops} stop limit</span>
       </div>
       {plan.stops.map((stop) => {
-        const destination = destinations.find((candidate) => candidate.id === stop.destinationId);
+        const destination = destinationById.get(stop.destinationId);
         if (!destination) {
           return null;
         }

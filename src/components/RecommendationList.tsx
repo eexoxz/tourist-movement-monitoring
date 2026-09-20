@@ -1,4 +1,5 @@
 import type { Destination, DestinationCategory, DestinationDemand, Recommendation } from "../types";
+import { useMemo } from "react";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
@@ -68,6 +69,8 @@ export function RecommendationList({
   onSelect,
 }: RecommendationListProps) {
   const t = (key: TranslationKey) => translate(locale, key);
+  const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
+  const demandByDestinationId = useMemo(() => new Map(demand.map((row) => [row.destinationId, row])), [demand]);
 
   if (recommendations.length === 0) {
     return <EmptyState text={personalized ? t("tourist.recommendations.emptyPersonalized") : t("tourist.recommendations.emptyBasic")} />;
@@ -76,11 +79,11 @@ export function RecommendationList({
   return (
     <section className={compact ? "recommendation-list compact" : "recommendation-list"}>
       {recommendations.map((recommendation) => {
-        const destination = destinations.find((candidate) => candidate.id === recommendation.destinationId);
+        const destination = destinationById.get(recommendation.destinationId);
         if (!destination) {
           return null;
         }
-        const demandRow = demand.find((row) => row.destinationId === destination.id);
+        const demandRow = demandByDestinationId.get(destination.id);
 
         return (
           <article className="recommendation-card" key={recommendation.id}>
