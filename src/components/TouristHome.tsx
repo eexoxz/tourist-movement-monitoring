@@ -36,6 +36,7 @@ type TouristHomeProps = {
   activeCheckIn: AttractionCheckIn | null;
   activeCheckInDestination: Destination | null;
   checkInDestinationId: string;
+  showCheckInPanel?: boolean;
   recentCheckIns: AttractionCheckIn[];
   recommendedCheckIn: Destination | null;
   openSafetyCount: number;
@@ -110,6 +111,7 @@ export function TouristHome({
   activeCheckIn,
   activeCheckInDestination,
   checkInDestinationId,
+  showCheckInPanel = false,
   recentCheckIns,
   recommendedCheckIn,
   openSafetyCount,
@@ -321,7 +323,7 @@ export function TouristHome({
         </section>
 
         <section className="home-support-grid">
-          <details className="tourist-section home-disclosure check-in-panel" open={Boolean(activeCheckIn)}>
+          <details className="tourist-section home-disclosure check-in-panel" open={Boolean(activeCheckIn) || showCheckInPanel}>
             <summary>
               <span>{t("tourist.home.visitTools")}</span>
               <strong>{activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")}</strong>

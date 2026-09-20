@@ -67,6 +67,7 @@ import {
 } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
 import { translateAdmin, type AdminCopyKey } from "./services/adminI18n";
+import { getTouristCheckInDestinationIdFromUrl } from "./services/checkInDeepLink";
 import { isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "./data/demoData";
 import { malaysiaFestivalEvents } from "./data/festivals";
 import { loadLocale, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
@@ -356,6 +357,7 @@ function App() {
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [browserNotificationPermission, setBrowserNotificationPermission] = useState(() => getBrowserNotificationPermission());
+  const [pendingCheckInDestinationId, setPendingCheckInDestinationId] = useState<string | null>(() => getTouristCheckInDestinationIdFromUrl());
   const watchId = useRef<number | null>(null);
   const lastSyncWarningAt = useRef(0);
   const t = (key: TranslationKey) => translate(locale, key);
@@ -899,7 +901,18 @@ function App() {
         {currentUser.role === "admin" ? (
           <AdminWorkspace data={data} view={safeView} locale={locale} onDataChange={commitData} notify={notify} />
         ) : (
-          <TouristWorkspace data={data} view={safeView} user={currentUser} locale={locale} onDataChange={commitData} onViewChange={goToView} watchId={watchId} notify={notify} />
+          <TouristWorkspace
+            data={data}
+            view={safeView}
+            user={currentUser}
+            locale={locale}
+            pendingCheckInDestinationId={pendingCheckInDestinationId}
+            onPendingCheckInConsumed={() => setPendingCheckInDestinationId(null)}
+            onDataChange={commitData}
+            onViewChange={goToView}
+            watchId={watchId}
+            notify={notify}
+          />
         )}
       </main>
       <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
@@ -912,6 +925,8 @@ function TouristWorkspace({
   view,
   user,
   locale,
+  pendingCheckInDestinationId,
+  onPendingCheckInConsumed,
   onDataChange,
   onViewChange,
   watchId,
@@ -921,6 +936,8 @@ function TouristWorkspace({
   view: AppView;
   user: User;
   locale: Locale;
+  pendingCheckInDestinationId: string | null;
+  onPendingCheckInConsumed: () => void;
   onDataChange: (data: AppData, actor?: User | null) => void;
   onViewChange: (view: AppView) => void;
   watchId: React.MutableRefObject<number | null>;
@@ -941,6 +958,7 @@ function TouristWorkspace({
   const [incidentPhotoMessage, setIncidentPhotoMessage] = useState<string | null>(null);
   const [isPreparingIncidentPhoto, setIsPreparingIncidentPhoto] = useState(false);
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
+  const [showCheckInPanel, setShowCheckInPanel] = useState(false);
   const geofenceNoticeKey = useRef("");
   const liveSuggestionDestinationIds = useRef(new Set<string>());
   const localizedDestinations = useMemo(() => localizeDestinations(data.destinations, locale), [data.destinations, locale]);
@@ -1008,6 +1026,27 @@ function TouristWorkspace({
     ? localizedDestinations.find((destination) => destination.id === destinationDemand[0].destinationId)
     : null;
   const nextFestival = upcomingFestivals[0] ?? null;
+
+  useEffect(() => {
+    if (!pendingCheckInDestinationId) {
+      return;
+    }
+
+    const destination = localizedDestinations.find((candidate) => candidate.id === pendingCheckInDestinationId);
+    onPendingCheckInConsumed();
+
+    if (!destination) {
+      notify({ tone: "error", title: "Check-in link not recognised", message: "This QR code is not linked to a destination in the app." });
+      return;
+    }
+
+    setCheckInDestinationId(destination.id);
+    setShowCheckInPanel(true);
+    if (view !== "overview") {
+      onViewChange("overview");
+    }
+    notify({ tone: "success", title: "Check-in QR opened", message: `${destination.name} is ready for check-in.` });
+  }, [localizedDestinations, notify, onPendingCheckInConsumed, onViewChange, pendingCheckInDestinationId, view]);
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -1781,6 +1820,7 @@ function TouristWorkspace({
       activeCheckIn={activeCheckIn}
       activeCheckInDestination={activeCheckInDestination}
       checkInDestinationId={checkInDestinationId}
+      showCheckInPanel={showCheckInPanel}
       recentCheckIns={recentCheckIns}
       recommendedCheckIn={recommendedCheckIn}
       openSafetyCount={openSafetyCount}

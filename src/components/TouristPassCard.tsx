@@ -1,4 +1,5 @@
 import { BadgeCheck, ShieldCheck } from "lucide-react";
+import { createTouristCheckInUrl, createTouristPassUrl } from "../services/checkInDeepLink";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createQrSvgDataUri } from "../services/qrCode";
 import type { Destination, User } from "../types";
@@ -28,7 +29,7 @@ function createPassId(user: User) {
 }
 
 function createPassPayload(passId: string, destination?: Destination | null) {
-  return destination ? `TMM-PASS|${passId}|VISIT|${destination.id}` : `TMM-PASS|${passId}|PROFILE`;
+  return destination ? createTouristCheckInUrl(destination.id, passId) : createTouristPassUrl(passId);
 }
 
 function maskPassport(passportNumber?: string) {
