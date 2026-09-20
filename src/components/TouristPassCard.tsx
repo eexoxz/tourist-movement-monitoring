@@ -1,5 +1,6 @@
-import { BadgeCheck, QrCode, ShieldCheck } from "lucide-react";
+import { BadgeCheck, ShieldCheck } from "lucide-react";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
+import { createQrSvgDataUri } from "../services/qrCode";
 import type { Destination, User } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 
@@ -21,38 +22,13 @@ function hashSeed(seed: string) {
   return hash >>> 0;
 }
 
-function buildQrCells(seed: string) {
-  const size = 13;
-  const cells: boolean[] = [];
-  let value = hashSeed(seed || "tourist-pass");
-
-  for (let row = 0; row < size; row += 1) {
-    for (let col = 0; col < size; col += 1) {
-      const inFinder =
-        (row < 4 && col < 4) ||
-        (row < 4 && col >= size - 4) ||
-        (row >= size - 4 && col < 4);
-
-      if (inFinder) {
-        const localRow = row < 4 ? row : row - (size - 4);
-        const localCol = col < 4 ? col : col - (size - 4);
-        cells.push(localRow === 0 || localRow === 3 || localCol === 0 || localCol === 3 || (localRow === 1 && localCol === 1));
-        continue;
-      }
-
-      value ^= value << 13;
-      value ^= value >>> 17;
-      value ^= value << 5;
-      cells.push((value & 3) !== 0);
-    }
-  }
-
-  return cells;
-}
-
 function createPassId(user: User) {
   const source = `${user.authUid ?? user.id}${user.email}${user.passportNumber ?? ""}`;
   return `MYP-${hashSeed(source).toString(36).toUpperCase().slice(0, 6).padEnd(6, "0")}`;
+}
+
+function createPassPayload(passId: string, destination?: Destination | null) {
+  return destination ? `TMM-PASS|${passId}|VISIT|${destination.id}` : `TMM-PASS|${passId}|PROFILE`;
 }
 
 function maskPassport(passportNumber?: string) {
@@ -79,7 +55,8 @@ function formatPreferences(user: User, t: (key: TranslationKey) => string) {
 export function TouristPassCard({ user, destination, locale = "en", compact = false }: TouristPassCardProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const passId = createPassId(user);
-  const cells = buildQrCells(`${passId}:${destination?.id ?? "profile"}`);
+  const qrPayload = createPassPayload(passId, destination);
+  const qrSource = createQrSvgDataUri(qrPayload);
   const passport = maskPassport(user.passportNumber) || t("tourist.profile.notSetYet");
   const nationality = user.nationality || t("tourist.profile.notSetYet");
 
@@ -118,10 +95,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
 
       <div className="tourist-pass-qr">
         <div className="qr-frame" aria-label={t("tourist.pass.qrLabel")}>
-          {cells.map((filled, index) => (
-            <span className={filled ? "filled" : ""} key={`${passId}-${index}`} />
-          ))}
-          <QrCode className="qr-frame-icon" size={20} aria-hidden="true" />
+          <img alt={t("tourist.pass.qrLabel")} src={qrSource} />
         </div>
         <strong>{destination ? t("tourist.pass.scanReady") : t("tourist.pass.verified")}</strong>
         <small>
