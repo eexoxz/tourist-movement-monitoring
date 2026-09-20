@@ -1623,6 +1623,74 @@ button:disabled {
   align-items: start;
 }
 
+.qr-check-in-confirmation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.32fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.qr-check-in-confirmation > button {
+  align-self: stretch;
+  min-height: 58px;
+}
+
+.qr-visit-card {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid rgba(20, 184, 166, 0.32);
+  border-radius: 8px;
+  background: rgba(240, 253, 250, 0.84);
+}
+
+.qr-visit-card > span {
+  font-family: var(--font-display);
+  color: #047857;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.qr-visit-card > strong {
+  color: #07142e;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 4vw, 1.8rem);
+  line-height: 1.12;
+}
+
+.qr-visit-card p {
+  margin: 0;
+  color: #52647d;
+  line-height: 1.5;
+}
+
+.qr-visit-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.qr-visit-meta span {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.qr-visit-meta strong {
+  color: #07142e;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.qr-visit-meta small {
+  color: #64748b;
+  font-weight: 800;
+}
+
 .check-in-control {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -5175,8 +5243,9 @@ textarea {
   }
 
   .tourist-shell .toast-stack {
-    top: 12px;
+    top: auto;
     right: 10px;
+    bottom: 88px;
     left: 10px;
     width: auto;
   }
@@ -5305,9 +5374,28 @@ textarea {
     text-align: left;
   }
 
+  .qr-active-check-in-panel.home-disclosure > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .qr-active-check-in-panel.home-disclosure > summary span {
+    grid-column: 1 / -1;
+  }
+
+  .qr-active-check-in-panel.home-disclosure > summary strong {
+    grid-column: 1;
+  }
+
+  .qr-active-check-in-panel.home-disclosure > summary::after {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
   .safety-contact-strip,
   .check-in-control,
   .qr-active-check-in-panel .check-in-stack,
+  .qr-check-in-confirmation,
+  .qr-visit-meta,
   .qr-manual-row,
   .qr-camera-actions,
   .check-in-history,

@@ -153,6 +153,11 @@ export function TouristHome({
   const t = (key: TranslationKey) => translate(locale, key);
   const selectedCheckInDestination = destinations.find((destination) => destination.id === checkInDestinationId) ?? destinations[0] ?? null;
   const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
+  const checkInTitle = activeCheckInDestination
+    ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}`
+    : selectedCheckInDestination
+      ? `${t("tourist.checkin.checkIn")}: ${selectedCheckInDestination.name}`
+      : t("tourist.checkin.emptyTitle");
 
   useEffect(() => {
     if (!showCheckInPanel) {
@@ -182,7 +187,7 @@ export function TouristHome({
               <div className="section-heading">
                 <div>
                   <span>{t("tourist.checkin.eyebrow")}</span>
-                  <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
+                  <h2>{checkInTitle}</h2>
                   <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
                 </div>
                 {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
@@ -202,16 +207,35 @@ export function TouristHome({
               )}
 
               {activeCheckIn && (
-                <button className="secondary-action wide" type="button" onClick={onFinishAttractionCheckIn}>
-                  <Square size={18} />
-                  {t("tourist.checkin.checkOut")}
-                </button>
+                <div className="qr-check-in-confirmation">
+                  <div className="qr-visit-card">
+                    <span>{t("tourist.checkin.currentlyCheckedIn")}</span>
+                    <strong>{activeCheckInDestination?.name ?? selectedCheckInDestination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
+                    <p>{t("tourist.checkin.activeDescription")}</p>
+                    <div className="qr-visit-meta">
+                      <span>
+                        <strong>{getCheckInDurationMinutes(activeCheckIn)}</strong>
+                        <small>{t("tourist.checkin.minVisit")}</small>
+                      </span>
+                      {activeCheckInDestination && (
+                        <span>
+                          <strong>{activeCheckInDestination.city}</strong>
+                          <small>{t("tourist.checkin.attraction")}</small>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button className="secondary-action wide" type="button" onClick={onFinishAttractionCheckIn}>
+                    <Square size={18} />
+                    {t("tourist.checkin.checkOut")}
+                  </button>
+                </div>
               )}
             </details>
           </section>
         )}
 
-        <section className="home-primary-grid">
+        {!showCheckInPanel && <section className="home-primary-grid">
           <div className="home-today-panel">
             <div className="tracking-status-card home-status-card">
               <span>{tripStateLabel}</span>
@@ -313,9 +337,9 @@ export function TouristHome({
               locale={locale}
             />
           </div>
-        </section>
+        </section>}
 
-        {geofenceWarnings.length > 0 && (
+        {!showCheckInPanel && geofenceWarnings.length > 0 && (
           <section className="tourist-section geofence-warning-panel">
             <div className="section-heading">
               <div>
@@ -339,9 +363,9 @@ export function TouristHome({
           </section>
         )}
 
-        <TourismAdvisoryPanel advisories={tourismAdvisories} />
+        {!showCheckInPanel && <TourismAdvisoryPanel advisories={tourismAdvisories} />}
 
-        <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
+        {!showCheckInPanel && <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
           <article className="home-preview-card recommendation-preview">
             <span>{recommendationHeading}</span>
             <h2>{topRecommendationDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
@@ -375,7 +399,7 @@ export function TouristHome({
               {t("tourist.home.openPlaces")}
             </button>
           </article>
-        </section>
+        </section>}
 
         <section className={showCheckInPanel ? "home-support-grid qr-secondary-support" : "home-support-grid"}>
           {!showCheckInPanel && (
