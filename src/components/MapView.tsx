@@ -182,10 +182,15 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     }
 
     try {
+      const prefersPageScroll =
+        typeof window !== "undefined" && window.matchMedia("(pointer: coarse) and (max-width: 760px)").matches;
+
       mapRef.current = L.map(containerRef.current, {
+        dragging: !prefersPageScroll,
         zoomControl: false,
         attributionControl: true,
         scrollWheelZoom: false,
+        touchZoom: !prefersPageScroll,
       }).setView([3.1478, 101.6937], 13);
 
       L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);

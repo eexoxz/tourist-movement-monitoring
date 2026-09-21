@@ -26,7 +26,7 @@ html,
   min-width: 0;
   min-height: 100%;
   overflow-x: hidden;
-  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -34,7 +34,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
-  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
 }
 
 button,
@@ -67,7 +68,7 @@ button:disabled {
   grid-template-columns: 292px minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100dvh;
-  overscroll-behavior: contain;
+  overscroll-behavior-x: contain;
   background:
     linear-gradient(125deg, rgba(15, 118, 110, 0.08), transparent 34%),
     linear-gradient(315deg, rgba(232, 93, 117, 0.1), transparent 28%),
@@ -984,6 +985,8 @@ button:disabled {
   display: grid;
   place-items: center;
   padding: 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background:
     linear-gradient(125deg, rgba(15, 118, 110, 0.12), transparent 36%),
     linear-gradient(315deg, rgba(232, 93, 117, 0.12), transparent 28%),
@@ -4576,7 +4579,9 @@ textarea {
   place-items: center;
   min-height: 100vh;
   min-height: 100dvh;
-  overscroll-behavior: contain;
+  overflow-y: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 24px;
   background:
     linear-gradient(135deg, rgba(15, 118, 110, 0.8), rgba(232, 93, 117, 0.28)),
@@ -5524,6 +5529,12 @@ textarea {
     min-height: 380px;
   }
 
+  .map-view.leaflet-container,
+  .map-view .leaflet-pane,
+  .map-view .leaflet-tile {
+    touch-action: pan-y;
+  }
+
   .home-today-panel {
     padding: 14px;
   }
@@ -5809,6 +5820,7 @@ textarea {
   .map-view {
     height: 58vh;
     min-height: 420px;
+    touch-action: pan-y;
   }
 
   .map-frame {
