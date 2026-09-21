@@ -1,3 +1,5 @@
+import type { TranslationKey } from "../services/i18n";
+
 export type EmergencyServiceKind = "police" | "hospital" | "fire";
 
 export type EmergencyService = {
@@ -13,7 +15,7 @@ export type EmergencyService = {
   note: string;
 };
 
-export const malaysiaEmergencyNumbers = [
+export const malaysiaEmergencyNumbers: Array<{ labelKey: TranslationKey; phone: string; descriptionKey: TranslationKey }> = [
   {
     labelKey: "tourist.safety.emergencyResponse",
     phone: "999",

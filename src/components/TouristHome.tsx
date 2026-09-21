@@ -516,10 +516,10 @@ export function TouristHome({
               </div>
               <div className="emergency-number-grid">
                 {malaysiaEmergencyNumbers.map((number) => (
-                  <a className="emergency-number-card" key={number.phone} href={`tel:${number.phone}`} aria-label={`${t("tourist.safety.call")} ${t(number.labelKey as TranslationKey)} ${number.phone}`}>
-                    <span>{t(number.labelKey as TranslationKey)}</span>
+                  <a className="emergency-number-card" key={number.phone} href={`tel:${number.phone}`} aria-label={`${t("tourist.safety.call")} ${t(number.labelKey)} ${number.phone}`}>
+                    <span>{t(number.labelKey)}</span>
                     <strong>{number.phone}</strong>
-                    <small>{t(number.descriptionKey as TranslationKey)}</small>
+                    <small>{t(number.descriptionKey)}</small>
                   </a>
                 ))}
               </div>

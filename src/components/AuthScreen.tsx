@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { CheckCircle2, Circle, Eye, EyeOff, KeyRound, MapPinned, RotateCcw, ShieldCheck } from "lucide-react";
 import { nationalityOptions } from "../data/nationalities";
 import { type AuthMode } from "../services/access";
@@ -123,7 +123,7 @@ export function AuthScreen({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firebaseMode = hasConfiguredAuth();
   const t = (key: TranslationKey) => translate(locale, key);
-  const passwordStrength = getPasswordStrength(password);
+  const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
   const passwordStrengthLabel =
     passwordStrength.level === "strong"
       ? t("auth.passwordStrengthStrong")
