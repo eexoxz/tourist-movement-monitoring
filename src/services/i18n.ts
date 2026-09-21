@@ -322,6 +322,7 @@ export type TranslationKey =
   | "publicCheckin.missingDestination"
   | "publicCheckin.missingPass"
   | "publicCheckin.missingUser"
+  | "publicCheckin.accountMismatch"
   | "publicCheckin.destinationErrorTitle"
   | "publicCheckin.passErrorTitle"
   | "publicCheckin.alreadyTitle"
@@ -817,6 +818,7 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "publicCheckin.missingDestination": "This QR code is missing an attraction reference.",
     "publicCheckin.missingPass": "This QR code is missing a digital pass reference.",
     "publicCheckin.missingUser": "This digital pass is not available in the current app data.",
+    "publicCheckin.accountMismatch": "Sign in with the tourist account that owns this digital pass before checking in.",
     "publicCheckin.destinationErrorTitle": "Destination not recognised",
     "publicCheckin.passErrorTitle": "Pass not recognised",
     "publicCheckin.alreadyTitle": "Already checked in",
@@ -4575,6 +4577,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "Kod QR ini tiada rujukan tarikan.",
     "publicCheckin.missingPass": "Kod QR ini tiada rujukan pas digital.",
     "publicCheckin.missingUser": "Pas digital ini tidak tersedia dalam data aplikasi semasa.",
+    "publicCheckin.accountMismatch": "Log masuk dengan akaun pelancong yang memiliki pas digital ini sebelum daftar masuk.",
     "publicCheckin.destinationErrorTitle": "Destinasi tidak dikenali",
     "publicCheckin.passErrorTitle": "Pas tidak dikenali",
     "publicCheckin.alreadyTitle": "Sudah daftar masuk",
@@ -4608,6 +4611,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "此二维码缺少景点引用。",
     "publicCheckin.missingPass": "此二维码缺少数字通行证引用。",
     "publicCheckin.missingUser": "当前应用数据中没有此数字通行证。",
+    "publicCheckin.accountMismatch": "请先使用拥有此数字通行证的游客账户登录，然后再签到。",
     "publicCheckin.destinationErrorTitle": "目的地未识别",
     "publicCheckin.passErrorTitle": "通行证未识别",
     "publicCheckin.alreadyTitle": "已签到",
@@ -4641,6 +4645,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "このQRコードには観光地参照がありません。",
     "publicCheckin.missingPass": "このQRコードにはデジタルパス参照がありません。",
     "publicCheckin.missingUser": "このデジタルパスは現在のアプリデータにありません。",
+    "publicCheckin.accountMismatch": "チェックインする前に、このデジタルパスを所有する観光客アカウントでサインインしてください。",
     "publicCheckin.destinationErrorTitle": "目的地を認識できません",
     "publicCheckin.passErrorTitle": "パスを認識できません",
     "publicCheckin.alreadyTitle": "チェックイン済み",
@@ -4674,6 +4679,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "이 QR 코드에는 관광지 참조가 없습니다.",
     "publicCheckin.missingPass": "이 QR 코드에는 디지털 패스 참조가 없습니다.",
     "publicCheckin.missingUser": "이 디지털 패스는 현재 앱 데이터에 없습니다.",
+    "publicCheckin.accountMismatch": "체크인하기 전에 이 디지털 패스를 소유한 관광객 계정으로 로그인하세요.",
     "publicCheckin.destinationErrorTitle": "목적지를 인식할 수 없음",
     "publicCheckin.passErrorTitle": "패스를 인식할 수 없음",
     "publicCheckin.alreadyTitle": "이미 체크인됨",
@@ -4707,6 +4713,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "Este QR code não tem referência da atração.",
     "publicCheckin.missingPass": "Este QR code não tem referência do passe digital.",
     "publicCheckin.missingUser": "Este passe digital não está disponível nos dados atuais da app.",
+    "publicCheckin.accountMismatch": "Inicie sessão com a conta turística que possui este passe digital antes de fazer check-in.",
     "publicCheckin.destinationErrorTitle": "Destino não reconhecido",
     "publicCheckin.passErrorTitle": "Passe não reconhecido",
     "publicCheckin.alreadyTitle": "Check-in já feito",
@@ -4740,6 +4747,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "இந்த QR குறியீட்டில் ஈர்ப்பு இட குறிப்பு இல்லை.",
     "publicCheckin.missingPass": "இந்த QR குறியீட்டில் டிஜிட்டல் பாஸ் குறிப்பு இல்லை.",
     "publicCheckin.missingUser": "இந்த டிஜிட்டல் பாஸ் தற்போதைய பயன்பாட்டு தரவில் இல்லை.",
+    "publicCheckin.accountMismatch": "செக்-இன் செய்வதற்கு முன் இந்த டிஜிட்டல் பாஸை கொண்டுள்ள சுற்றுலா கணக்கில் உள்நுழையவும்.",
     "publicCheckin.destinationErrorTitle": "இடம் அறியப்படவில்லை",
     "publicCheckin.passErrorTitle": "பாஸ் அறியப்படவில்லை",
     "publicCheckin.alreadyTitle": "ஏற்கனவே செக்-இன் செய்யப்பட்டது",
@@ -4773,6 +4781,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "Este código QR no tiene referencia de atracción.",
     "publicCheckin.missingPass": "Este código QR no tiene referencia de pase digital.",
     "publicCheckin.missingUser": "Este pase digital no está disponible en los datos actuales de la app.",
+    "publicCheckin.accountMismatch": "Inicia sesión con la cuenta turística propietaria de este pase digital antes de hacer check-in.",
     "publicCheckin.destinationErrorTitle": "Destino no reconocido",
     "publicCheckin.passErrorTitle": "Pase no reconocido",
     "publicCheckin.alreadyTitle": "Ya registrado",
@@ -4806,6 +4815,7 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
     "publicCheckin.missingDestination": "Ce QR code ne contient pas de référence d'attraction.",
     "publicCheckin.missingPass": "Ce QR code ne contient pas de référence de pass numérique.",
     "publicCheckin.missingUser": "Ce pass numérique n'est pas disponible dans les données actuelles de l'application.",
+    "publicCheckin.accountMismatch": "Connectez-vous avec le compte touriste propriétaire de ce pass numérique avant le check-in.",
     "publicCheckin.destinationErrorTitle": "Destination non reconnue",
     "publicCheckin.passErrorTitle": "Pass non reconnu",
     "publicCheckin.alreadyTitle": "Déjà enregistré",

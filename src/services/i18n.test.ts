@@ -141,6 +141,7 @@ const visibleTouristWorkflowKeys: TranslationKey[] = [
   "publicCheckin.missingDestination",
   "publicCheckin.missingPass",
   "publicCheckin.missingUser",
+  "publicCheckin.accountMismatch",
   "publicCheckin.destinationErrorTitle",
   "publicCheckin.passErrorTitle",
   "publicCheckin.alreadyTitle",

@@ -363,10 +363,17 @@ function App() {
   const lastSyncWarningAt = useRef(0);
   const t = (key: TranslationKey) => translate(locale, key);
   const publicCheckInRequest = getTouristCheckInRequestFromUrl();
+  const isPublicCheckInFlow = Boolean(publicCheckInRequest);
   const publicCheckInDestination = publicCheckInRequest?.destinationId ? data.destinations.find((destination) => destination.id === publicCheckInRequest.destinationId) ?? null : null;
-  const publicCheckInTourist = publicCheckInRequest?.passId
+  const publicCheckInPassOwner = publicCheckInRequest?.passId
     ? data.users.find((user) => user.role === "tourist" && createTouristPassId(user) === publicCheckInRequest.passId) ?? null
     : null;
+  const publicCheckInTourist =
+    currentUser?.role === "tourist" &&
+    publicCheckInPassOwner &&
+    (currentUser.id === publicCheckInPassOwner.id || (Boolean(currentUser.authUid) && currentUser.authUid === publicCheckInPassOwner.authUid))
+      ? currentUser
+      : null;
 
   const notify: NotifyFn = (notification) => {
     setNotifications((current) => [...current.slice(-2), { ...notification, id: createId("notification") }]);
@@ -426,6 +433,9 @@ function App() {
 
   const goToAuthMode = (mode: AuthMode) => {
     setAuthMode(mode);
+    if (isPublicCheckInFlow) {
+      return;
+    }
     pushBrowserPath(getPathForAuthMode(mode));
   };
 
@@ -702,7 +712,9 @@ function App() {
       saveSession(authUid);
       setSessionUserId(authUid);
       setView(defaultView);
-      replaceBrowserPath(getPathForView(user.role, defaultView));
+      if (!isPublicCheckInFlow) {
+        replaceBrowserPath(getPathForView(user.role, defaultView));
+      }
 
       void loadCloudData({ ...user, authUid })
         .then((cloudData) => {
@@ -730,7 +742,9 @@ function App() {
     saveSession(localUser.id);
     setSessionUserId(localUser.id);
     setView(getDefaultViewForRole(localUser.role));
-    replaceBrowserPath(getPathForView(localUser.role, getDefaultViewForRole(localUser.role)));
+    if (!isPublicCheckInFlow) {
+      replaceBrowserPath(getPathForView(localUser.role, getDefaultViewForRole(localUser.role)));
+    }
     return {};
   };
 
@@ -780,7 +794,9 @@ function App() {
     saveSession(user.id);
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));
-    replaceBrowserPath(getPathForView(user.role, getDefaultViewForRole(user.role)));
+    if (!isPublicCheckInFlow) {
+      replaceBrowserPath(getPathForView(user.role, getDefaultViewForRole(user.role)));
+    }
     return {};
   };
 
@@ -852,6 +868,25 @@ function App() {
     notify({ tone: "success", title: "Export started", message: "The current prototype data is downloading as a JSON file." });
   };
 
+  if (publicCheckInRequest && !currentUser) {
+    return (
+      <>
+        <AuthScreen
+          mode={authMode}
+          locale={locale}
+          onLocaleChange={changeLocale}
+          onModeChange={goToAuthMode}
+          onLogin={login}
+          onRegister={register}
+          onResendVerification={resendVerification}
+          onPasswordReset={sendPasswordReset}
+          notify={notify}
+        />
+        <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
+      </>
+    );
+  }
+
   if (publicCheckInRequest) {
     const missingReason = !publicCheckInRequest.destinationId
       ? t("publicCheckin.missingDestination")
@@ -859,8 +894,10 @@ function App() {
         ? t("publicCheckin.destinationNotLinked")
         : !publicCheckInRequest.passId
           ? t("publicCheckin.missingPass")
-          : !publicCheckInTourist
+          : !publicCheckInPassOwner
             ? t("publicCheckin.missingUser")
+            : !publicCheckInTourist
+              ? t("publicCheckin.accountMismatch")
             : undefined;
 
     return (
