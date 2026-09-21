@@ -66,6 +66,16 @@ export type TranslationKey =
   | "auth.alreadyHaveAccount"
   | "auth.showPassword"
   | "auth.hidePassword"
+  | "auth.passwordStrength"
+  | "auth.passwordStrengthEmpty"
+  | "auth.passwordStrengthWeak"
+  | "auth.passwordStrengthFair"
+  | "auth.passwordStrengthStrong"
+  | "auth.passwordRuleLength"
+  | "auth.passwordRuleUpper"
+  | "auth.passwordRuleLower"
+  | "auth.passwordRuleNumber"
+  | "auth.passwordRuleSymbol"
   | "admin.dashboard.title"
   | "admin.dashboard.eyebrow"
   | "admin.dashboard.tabsLabel"
@@ -241,6 +251,20 @@ export type TranslationKey =
   | "tourist.safety.editContact"
   | "tourist.safety.sos"
   | "tourist.safety.prototypeNote"
+  | "tourist.safety.emergencyHelp"
+  | "tourist.safety.callFirstThenReport"
+  | "tourist.safety.emergencyResponse"
+  | "tourist.safety.emergencyResponseDescription"
+  | "tourist.safety.mobileEmergencyBackup"
+  | "tourist.safety.mobileEmergencyBackupDescription"
+  | "tourist.safety.fireRescue"
+  | "tourist.safety.fireRescueDescription"
+  | "tourist.safety.nearestPreparedServices"
+  | "tourist.safety.basedOnLatestLocation"
+  | "tourist.safety.allowLocationToSort"
+  | "tourist.safety.call"
+  | "tourist.safety.kmAway"
+  | "tourist.safety.noSavedLocationForServices"
   | "tourist.safety.incidentType"
   | "tourist.safety.locationNote"
   | "tourist.safety.locationPlaceholder"
@@ -4830,6 +4854,243 @@ const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, s
   },
 };
 
+const featureTranslations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
+  en: {
+    "auth.passwordStrength": "Password strength",
+    "auth.passwordStrengthEmpty": "Not started",
+    "auth.passwordStrengthWeak": "Weak",
+    "auth.passwordStrengthFair": "Fair",
+    "auth.passwordStrengthStrong": "Strong",
+    "auth.passwordRuleLength": "8 to 20 characters",
+    "auth.passwordRuleUpper": "At least one uppercase letter",
+    "auth.passwordRuleLower": "At least one lowercase letter",
+    "auth.passwordRuleNumber": "At least one number",
+    "auth.passwordRuleSymbol": "At least one symbol",
+    "tourist.safety.emergencyHelp": "Emergency help",
+    "tourist.safety.callFirstThenReport": "Call first, then report in the app",
+    "tourist.safety.emergencyResponse": "Emergency response",
+    "tourist.safety.emergencyResponseDescription": "Police, ambulance, fire, civil defence and maritime emergency routing.",
+    "tourist.safety.mobileEmergencyBackup": "Mobile emergency backup",
+    "tourist.safety.mobileEmergencyBackupDescription": "Mobile emergency number if 999 cannot be reached from a handset.",
+    "tourist.safety.fireRescue": "Fire and rescue",
+    "tourist.safety.fireRescueDescription": "Fire-related emergency line commonly listed in Malaysia travel guidance.",
+    "tourist.safety.nearestPreparedServices": "Nearest prepared services",
+    "tourist.safety.basedOnLatestLocation": "Based on your latest saved location.",
+    "tourist.safety.allowLocationToSort": "Allow location or start a trip to sort nearby services.",
+    "tourist.safety.call": "Call",
+    "tourist.safety.kmAway": "km away",
+    "tourist.safety.noSavedLocationForServices": "No location has been saved yet, so the app cannot sort nearby prepared services.",
+  },
+  ms: {
+    "auth.passwordStrength": "Kekuatan kata laluan",
+    "auth.passwordStrengthEmpty": "Belum mula",
+    "auth.passwordStrengthWeak": "Lemah",
+    "auth.passwordStrengthFair": "Sederhana",
+    "auth.passwordStrengthStrong": "Kuat",
+    "auth.passwordRuleLength": "8 hingga 20 aksara",
+    "auth.passwordRuleUpper": "Sekurang-kurangnya satu huruf besar",
+    "auth.passwordRuleLower": "Sekurang-kurangnya satu huruf kecil",
+    "auth.passwordRuleNumber": "Sekurang-kurangnya satu nombor",
+    "auth.passwordRuleSymbol": "Sekurang-kurangnya satu simbol",
+    "tourist.safety.emergencyHelp": "Bantuan kecemasan",
+    "tourist.safety.callFirstThenReport": "Hubungi dahulu, kemudian laporkan dalam aplikasi",
+    "tourist.safety.emergencyResponse": "Talian kecemasan",
+    "tourist.safety.emergencyResponseDescription": "Laluan polis, ambulans, bomba, pertahanan awam dan maritim.",
+    "tourist.safety.mobileEmergencyBackup": "Sandaran kecemasan telefon bimbit",
+    "tourist.safety.mobileEmergencyBackupDescription": "Nombor kecemasan mudah alih jika 999 tidak dapat dihubungi.",
+    "tourist.safety.fireRescue": "Bomba dan penyelamat",
+    "tourist.safety.fireRescueDescription": "Talian kecemasan berkaitan kebakaran yang lazim disenaraikan dalam panduan perjalanan Malaysia.",
+    "tourist.safety.nearestPreparedServices": "Perkhidmatan tersedia terdekat",
+    "tourist.safety.basedOnLatestLocation": "Berdasarkan lokasi tersimpan terkini anda.",
+    "tourist.safety.allowLocationToSort": "Benarkan lokasi atau mulakan perjalanan untuk menyusun perkhidmatan berdekatan.",
+    "tourist.safety.call": "Hubungi",
+    "tourist.safety.kmAway": "km jauhnya",
+    "tourist.safety.noSavedLocationForServices": "Belum ada lokasi tersimpan, jadi aplikasi tidak dapat menyusun perkhidmatan berdekatan.",
+  },
+  zh: {
+    "auth.passwordStrength": "密码强度",
+    "auth.passwordStrengthEmpty": "尚未开始",
+    "auth.passwordStrengthWeak": "弱",
+    "auth.passwordStrengthFair": "一般",
+    "auth.passwordStrengthStrong": "强",
+    "auth.passwordRuleLength": "8 至 20 个字符",
+    "auth.passwordRuleUpper": "至少一个大写字母",
+    "auth.passwordRuleLower": "至少一个小写字母",
+    "auth.passwordRuleNumber": "至少一个数字",
+    "auth.passwordRuleSymbol": "至少一个符号",
+    "tourist.safety.emergencyHelp": "紧急帮助",
+    "tourist.safety.callFirstThenReport": "先拨打电话，再在应用内报告",
+    "tourist.safety.emergencyResponse": "紧急响应",
+    "tourist.safety.emergencyResponseDescription": "连接警方、救护车、消防、民防和海事紧急支援。",
+    "tourist.safety.mobileEmergencyBackup": "手机紧急备用号码",
+    "tourist.safety.mobileEmergencyBackupDescription": "如果手机无法拨通 999，可尝试此紧急号码。",
+    "tourist.safety.fireRescue": "消防与救援",
+    "tourist.safety.fireRescueDescription": "马来西亚旅游指南中常列出的火警相关紧急号码。",
+    "tourist.safety.nearestPreparedServices": "最近的预设服务",
+    "tourist.safety.basedOnLatestLocation": "根据你最近保存的位置。",
+    "tourist.safety.allowLocationToSort": "允许位置或开始行程后可排序附近服务。",
+    "tourist.safety.call": "拨打",
+    "tourist.safety.kmAway": "公里外",
+    "tourist.safety.noSavedLocationForServices": "尚未保存位置，因此应用无法排序附近的预设服务。",
+  },
+  ja: {
+    "auth.passwordStrength": "パスワード強度",
+    "auth.passwordStrengthEmpty": "未入力",
+    "auth.passwordStrengthWeak": "弱い",
+    "auth.passwordStrengthFair": "普通",
+    "auth.passwordStrengthStrong": "強い",
+    "auth.passwordRuleLength": "8〜20文字",
+    "auth.passwordRuleUpper": "大文字を1文字以上",
+    "auth.passwordRuleLower": "小文字を1文字以上",
+    "auth.passwordRuleNumber": "数字を1文字以上",
+    "auth.passwordRuleSymbol": "記号を1文字以上",
+    "tourist.safety.emergencyHelp": "緊急サポート",
+    "tourist.safety.callFirstThenReport": "先に電話し、その後アプリで報告",
+    "tourist.safety.emergencyResponse": "緊急対応",
+    "tourist.safety.emergencyResponseDescription": "警察、救急、消防、民間防衛、海上緊急対応につながります。",
+    "tourist.safety.mobileEmergencyBackup": "携帯電話の緊急予備番号",
+    "tourist.safety.mobileEmergencyBackupDescription": "携帯端末から999につながらない場合の緊急番号です。",
+    "tourist.safety.fireRescue": "消防・救助",
+    "tourist.safety.fireRescueDescription": "マレーシア旅行案内でよく記載される火災関連の緊急番号です。",
+    "tourist.safety.nearestPreparedServices": "近くの登録済みサービス",
+    "tourist.safety.basedOnLatestLocation": "最後に保存された位置に基づきます。",
+    "tourist.safety.allowLocationToSort": "位置情報を許可するか、旅行を開始すると近くのサービスを並べ替えます。",
+    "tourist.safety.call": "電話",
+    "tourist.safety.kmAway": "km先",
+    "tourist.safety.noSavedLocationForServices": "位置がまだ保存されていないため、近くの登録済みサービスを並べ替えられません。",
+  },
+  ko: {
+    "auth.passwordStrength": "비밀번호 강도",
+    "auth.passwordStrengthEmpty": "시작 안 됨",
+    "auth.passwordStrengthWeak": "약함",
+    "auth.passwordStrengthFair": "보통",
+    "auth.passwordStrengthStrong": "강함",
+    "auth.passwordRuleLength": "8~20자",
+    "auth.passwordRuleUpper": "대문자 1개 이상",
+    "auth.passwordRuleLower": "소문자 1개 이상",
+    "auth.passwordRuleNumber": "숫자 1개 이상",
+    "auth.passwordRuleSymbol": "기호 1개 이상",
+    "tourist.safety.emergencyHelp": "긴급 도움",
+    "tourist.safety.callFirstThenReport": "먼저 전화한 뒤 앱에 신고하세요",
+    "tourist.safety.emergencyResponse": "긴급 대응",
+    "tourist.safety.emergencyResponseDescription": "경찰, 구급차, 소방, 민방위 및 해상 긴급 대응 연결.",
+    "tourist.safety.mobileEmergencyBackup": "모바일 긴급 예비 번호",
+    "tourist.safety.mobileEmergencyBackupDescription": "휴대폰에서 999 연결이 어려울 때 사용하는 긴급 번호.",
+    "tourist.safety.fireRescue": "소방 및 구조",
+    "tourist.safety.fireRescueDescription": "말레이시아 여행 안내에 자주 표시되는 화재 관련 긴급 번호.",
+    "tourist.safety.nearestPreparedServices": "가까운 준비된 서비스",
+    "tourist.safety.basedOnLatestLocation": "최근 저장된 위치 기준.",
+    "tourist.safety.allowLocationToSort": "위치 허용 또는 여행 시작 후 가까운 서비스를 정렬합니다.",
+    "tourist.safety.call": "전화",
+    "tourist.safety.kmAway": "km 거리",
+    "tourist.safety.noSavedLocationForServices": "저장된 위치가 없어 가까운 준비된 서비스를 정렬할 수 없습니다.",
+  },
+  pt: {
+    "auth.passwordStrength": "Força da senha",
+    "auth.passwordStrengthEmpty": "Não iniciada",
+    "auth.passwordStrengthWeak": "Fraca",
+    "auth.passwordStrengthFair": "Média",
+    "auth.passwordStrengthStrong": "Forte",
+    "auth.passwordRuleLength": "8 a 20 caracteres",
+    "auth.passwordRuleUpper": "Pelo menos uma letra maiúscula",
+    "auth.passwordRuleLower": "Pelo menos uma letra minúscula",
+    "auth.passwordRuleNumber": "Pelo menos um número",
+    "auth.passwordRuleSymbol": "Pelo menos um símbolo",
+    "tourist.safety.emergencyHelp": "Ajuda de emergência",
+    "tourist.safety.callFirstThenReport": "Ligue primeiro, depois reporte no app",
+    "tourist.safety.emergencyResponse": "Resposta de emergência",
+    "tourist.safety.emergencyResponseDescription": "Encaminhamento para polícia, ambulância, bombeiros, defesa civil e emergência marítima.",
+    "tourist.safety.mobileEmergencyBackup": "Reserva de emergência móvel",
+    "tourist.safety.mobileEmergencyBackupDescription": "Número de emergência móvel se 999 não funcionar no telemóvel.",
+    "tourist.safety.fireRescue": "Bombeiros e resgate",
+    "tourist.safety.fireRescueDescription": "Linha de emergência de incêndio comum em guias de viagem da Malásia.",
+    "tourist.safety.nearestPreparedServices": "Serviços preparados mais próximos",
+    "tourist.safety.basedOnLatestLocation": "Com base na sua última localização guardada.",
+    "tourist.safety.allowLocationToSort": "Permita localização ou inicie uma viagem para ordenar serviços próximos.",
+    "tourist.safety.call": "Ligar",
+    "tourist.safety.kmAway": "km de distância",
+    "tourist.safety.noSavedLocationForServices": "Ainda não há localização guardada, por isso o app não consegue ordenar serviços próximos.",
+  },
+  ta: {
+    "auth.passwordStrength": "கடவுச்சொல் வலிமை",
+    "auth.passwordStrengthEmpty": "தொடங்கவில்லை",
+    "auth.passwordStrengthWeak": "பலவீனம்",
+    "auth.passwordStrengthFair": "சராசரி",
+    "auth.passwordStrengthStrong": "வலிமை",
+    "auth.passwordRuleLength": "8 முதல் 20 எழுத்துகள்",
+    "auth.passwordRuleUpper": "குறைந்தது ஒரு பெரிய எழுத்து",
+    "auth.passwordRuleLower": "குறைந்தது ஒரு சிறிய எழுத்து",
+    "auth.passwordRuleNumber": "குறைந்தது ஒரு எண்",
+    "auth.passwordRuleSymbol": "குறைந்தது ஒரு குறியீடு",
+    "tourist.safety.emergencyHelp": "அவசர உதவி",
+    "tourist.safety.callFirstThenReport": "முதலில் அழைக்கவும், பிறகு பயன்பாட்டில் தெரிவிக்கவும்",
+    "tourist.safety.emergencyResponse": "அவசர பதில்",
+    "tourist.safety.emergencyResponseDescription": "போலீஸ், ஆம்புலன்ஸ், தீயணைப்பு, குடிமை பாதுகாப்பு மற்றும் கடல்சார் அவசர வழிமுறை.",
+    "tourist.safety.mobileEmergencyBackup": "மொபைல் அவசர மாற்று எண்",
+    "tourist.safety.mobileEmergencyBackupDescription": "மொபைலில் 999 கிடைக்காவிட்டால் பயன்படுத்த வேண்டிய அவசர எண்.",
+    "tourist.safety.fireRescue": "தீயணைப்பு மற்றும் மீட்பு",
+    "tourist.safety.fireRescueDescription": "மலேசிய பயண வழிகாட்டிகளில் பொதுவாக வரும் தீ தொடர்பான அவசர எண்.",
+    "tourist.safety.nearestPreparedServices": "அருகிலுள்ள தயார் சேவைகள்",
+    "tourist.safety.basedOnLatestLocation": "உங்கள் சமீபத்திய சேமித்த இடத்தின் அடிப்படையில்.",
+    "tourist.safety.allowLocationToSort": "அருகிலுள்ள சேவைகளை வரிசைப்படுத்த இடத்தை அனுமதிக்கவும் அல்லது பயணத்தை தொடங்கவும்.",
+    "tourist.safety.call": "அழைக்க",
+    "tourist.safety.kmAway": "கி.மீ தூரம்",
+    "tourist.safety.noSavedLocationForServices": "இன்னும் இடம் சேமிக்கப்படவில்லை; அதனால் அருகிலுள்ள சேவைகளை பயன்பாடு வரிசைப்படுத்த முடியாது.",
+  },
+  es: {
+    "auth.passwordStrength": "Seguridad de la contraseña",
+    "auth.passwordStrengthEmpty": "Sin empezar",
+    "auth.passwordStrengthWeak": "Débil",
+    "auth.passwordStrengthFair": "Media",
+    "auth.passwordStrengthStrong": "Fuerte",
+    "auth.passwordRuleLength": "8 a 20 caracteres",
+    "auth.passwordRuleUpper": "Al menos una mayúscula",
+    "auth.passwordRuleLower": "Al menos una minúscula",
+    "auth.passwordRuleNumber": "Al menos un número",
+    "auth.passwordRuleSymbol": "Al menos un símbolo",
+    "tourist.safety.emergencyHelp": "Ayuda de emergencia",
+    "tourist.safety.callFirstThenReport": "Llama primero y luego informa en la app",
+    "tourist.safety.emergencyResponse": "Respuesta de emergencia",
+    "tourist.safety.emergencyResponseDescription": "Enlace con policía, ambulancia, bomberos, defensa civil y emergencia marítima.",
+    "tourist.safety.mobileEmergencyBackup": "Emergencia móvil alternativa",
+    "tourist.safety.mobileEmergencyBackupDescription": "Número móvil de emergencia si 999 no conecta desde el teléfono.",
+    "tourist.safety.fireRescue": "Bomberos y rescate",
+    "tourist.safety.fireRescueDescription": "Línea de emergencia por incendio común en guías de viaje de Malasia.",
+    "tourist.safety.nearestPreparedServices": "Servicios preparados más cercanos",
+    "tourist.safety.basedOnLatestLocation": "Según tu última ubicación guardada.",
+    "tourist.safety.allowLocationToSort": "Permite ubicación o inicia un viaje para ordenar servicios cercanos.",
+    "tourist.safety.call": "Llamar",
+    "tourist.safety.kmAway": "km de distancia",
+    "tourist.safety.noSavedLocationForServices": "Aún no hay una ubicación guardada, por eso la app no puede ordenar servicios cercanos.",
+  },
+  fr: {
+    "auth.passwordStrength": "Force du mot de passe",
+    "auth.passwordStrengthEmpty": "Pas commencé",
+    "auth.passwordStrengthWeak": "Faible",
+    "auth.passwordStrengthFair": "Moyen",
+    "auth.passwordStrengthStrong": "Fort",
+    "auth.passwordRuleLength": "8 à 20 caractères",
+    "auth.passwordRuleUpper": "Au moins une majuscule",
+    "auth.passwordRuleLower": "Au moins une minuscule",
+    "auth.passwordRuleNumber": "Au moins un chiffre",
+    "auth.passwordRuleSymbol": "Au moins un symbole",
+    "tourist.safety.emergencyHelp": "Aide d'urgence",
+    "tourist.safety.callFirstThenReport": "Appelez d'abord, puis signalez dans l'app",
+    "tourist.safety.emergencyResponse": "Réponse d'urgence",
+    "tourist.safety.emergencyResponseDescription": "Orientation vers police, ambulance, pompiers, défense civile et urgence maritime.",
+    "tourist.safety.mobileEmergencyBackup": "Secours mobile de rechange",
+    "tourist.safety.mobileEmergencyBackupDescription": "Numéro d'urgence mobile si 999 ne répond pas depuis un téléphone.",
+    "tourist.safety.fireRescue": "Pompiers et secours",
+    "tourist.safety.fireRescueDescription": "Ligne d'urgence incendie souvent indiquée dans les guides de voyage en Malaisie.",
+    "tourist.safety.nearestPreparedServices": "Services préparés les plus proches",
+    "tourist.safety.basedOnLatestLocation": "Basé sur votre dernière position enregistrée.",
+    "tourist.safety.allowLocationToSort": "Autorisez la localisation ou démarrez un trajet pour trier les services proches.",
+    "tourist.safety.call": "Appeler",
+    "tourist.safety.kmAway": "km",
+    "tourist.safety.noSavedLocationForServices": "Aucune position n'est encore enregistrée, donc l'app ne peut pas trier les services proches.",
+  },
+};
+
 export function isLocale(value: string): value is Locale {
   return localeOptions.some((option) => option.value === value);
 }
@@ -4849,7 +5110,8 @@ export function hasDirectTranslation(locale: Locale, key: TranslationKey) {
       touristTranslations[locale][key] ??
       touristCoverageTranslations[locale][key] ??
       adminTranslations[locale][key] ??
-      publicCheckInTranslations[locale][key]
+      publicCheckInTranslations[locale][key] ??
+      featureTranslations[locale][key]
   );
 }
 
@@ -4860,11 +5122,13 @@ export function translate(locale: Locale, key: TranslationKey) {
     touristCoverageTranslations[locale][key] ??
     adminTranslations[locale][key] ??
     publicCheckInTranslations[locale][key] ??
+    featureTranslations[locale][key] ??
     translations.en[key] ??
     touristTranslations.en[key] ??
     touristCoverageTranslations.en[key] ??
     adminTranslations.en[key] ??
     publicCheckInTranslations.en[key] ??
+    featureTranslations.en[key] ??
     key
   );
 }

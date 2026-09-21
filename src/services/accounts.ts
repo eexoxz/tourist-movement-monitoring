@@ -1,5 +1,6 @@
 import type { AppData, DestinationCategory, User } from "../types";
 import { nationalityOptions } from "../data/nationalities";
+import { passwordRequirementMessage } from "./passwordStrength";
 import { createId } from "./storage";
 
 type RegisterInput = {
@@ -73,8 +74,9 @@ export function validateTouristAccount(data: AppData, input: RegisterInput) {
     return { error: "Enter a valid email address." };
   }
 
-  if (password.length < 6) {
-    return { error: "Password must be at least 6 characters." };
+  const passwordError = passwordRequirementMessage(password);
+  if (passwordError) {
+    return { error: passwordError };
   }
 
   if (!isValidNationality(nationality)) {

@@ -105,6 +105,7 @@ import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from ".
 import { getBrowserNotificationPermission, requestBrowserNotificationPermission, showBrowserNotification } from "./services/browserNotifications";
 import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "./services/incidentAttachments";
 import { getLiveNearbySuggestion } from "./services/liveSuggestions";
+import { getNearbyEmergencyServices } from "./services/emergencyServices";
 import { localizeDestinations } from "./services/destinationLocale";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
@@ -1173,6 +1174,7 @@ function TouristWorkspace({
     ? localizedDestinations.find((destination) => destination.id === destinationDemand[0].destinationId)
     : null;
   const nextFestival = upcomingFestivals[0] ?? null;
+  const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(latestKnownPoint), [latestKnownPoint]);
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -1992,6 +1994,7 @@ function TouristWorkspace({
       incidentTypeOptions={incidentTypeOptions}
       userSosAlerts={userSosAlerts}
       userIncidentReports={userIncidentReports}
+      nearbyEmergencyServices={nearbyEmergencyServices}
       recommendationHeading={recommendationHeading}
       recommendationSupportText={recommendationSupportText}
       topRecommendationDestination={topRecommendationDestination}

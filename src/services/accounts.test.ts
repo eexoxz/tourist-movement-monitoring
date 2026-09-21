@@ -5,7 +5,7 @@ import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEm
 const validRegistration = {
   name: "New Tourist",
   email: "newtourist@example.com",
-  password: "secret1",
+  password: "Secret123!",
   nationality: "Malaysia",
   passportNumber: "A12345678",
   termsAccepted: true,
@@ -32,7 +32,7 @@ describe("accounts service", () => {
     expect(isValidEmail("newtourist@-example.com")).toBe(false);
     expect(validateTouristAccount(initialData, { ...validRegistration, name: "A" }).error).toContain("name");
     expect(validateTouristAccount(initialData, { ...validRegistration, email: "bad-email" }).error).toContain("valid email");
-    expect(validateTouristAccount(initialData, { ...validRegistration, password: "123" }).error).toContain("at least 6");
+    expect(validateTouristAccount(initialData, { ...validRegistration, password: "secret123" }).error).toContain("uppercase");
     expect(validateTouristAccount(initialData, { ...validRegistration, nationality: "" }).error).toContain("nationality");
     expect(validateTouristAccount(initialData, { ...validRegistration, nationality: "Neverland" }).error).toContain("nationality");
     expect(validateTouristAccount(initialData, { ...validRegistration, passportNumber: "A1" }).error).toContain("passport");
@@ -70,7 +70,7 @@ describe("accounts service", () => {
     const result = createTouristAccount(initialData, {
       name: "Cloud Tourist",
       email: "cloud@example.com",
-      password: "secret1",
+      password: "Secret123!",
       authUid: "firebase-user-1",
       nationality: "Indonesia",
       passportNumber: "B12345678",
@@ -86,7 +86,7 @@ describe("accounts service", () => {
     const result = createTouristAccount(initialData, {
       name: "Demo Tourist",
       email: "TOURIST@example.com",
-      password: "secret1",
+      password: "Secret123!",
       nationality: "Malaysia",
       passportNumber: "A12345678",
       termsAccepted: true,

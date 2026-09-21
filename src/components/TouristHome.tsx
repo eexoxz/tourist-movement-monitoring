@@ -1,7 +1,9 @@
-import { CalendarDays, Compass, MapPinned, Navigation, Play, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
+import { Building2, CalendarDays, Compass, Flame, Hospital, MapPinned, Navigation, PhoneCall, Play, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
 import { useEffect, useRef, type FormEvent } from "react";
+import { malaysiaEmergencyNumbers } from "../data/emergencyServices";
 import { formatDateTime } from "../services/geo";
 import { getCheckInDurationMinutes } from "../services/checkIns";
+import type { NearbyEmergencyService } from "../services/emergencyServices";
 import type { GeoFenceWarning } from "../services/geofencing";
 import type { IncidentPhotoAttachment } from "../services/incidentAttachments";
 import type { TourismAdvisory } from "../services/advisories";
@@ -50,6 +52,7 @@ type TouristHomeProps = {
   incidentTypeOptions: IncidentOption[];
   userSosAlerts: SosAlert[];
   userIncidentReports: IncidentReport[];
+  nearbyEmergencyServices: NearbyEmergencyService[];
   recommendationHeading: string;
   recommendationSupportText: string;
   topRecommendationDestination: Destination | null | undefined;
@@ -125,6 +128,7 @@ export function TouristHome({
   incidentTypeOptions,
   userSosAlerts,
   userIncidentReports,
+  nearbyEmergencyServices,
   recommendationHeading,
   recommendationSupportText,
   topRecommendationDestination,
@@ -158,6 +162,17 @@ export function TouristHome({
     : selectedCheckInDestination
       ? `${t("tourist.checkin.checkIn")}: ${selectedCheckInDestination.name}`
       : t("tourist.checkin.emptyTitle");
+  const getEmergencyIcon = (kind: NearbyEmergencyService["kind"]) => {
+    if (kind === "hospital") {
+      return <Hospital size={18} />;
+    }
+
+    if (kind === "fire") {
+      return <Flame size={18} />;
+    }
+
+    return <Building2 size={18} />;
+  };
 
   useEffect(() => {
     if (!showCheckInPanel) {
@@ -490,6 +505,45 @@ export function TouristHome({
               {t("tourist.safety.sos")}
             </button>
             <p className="safety-disclaimer">{t("tourist.safety.prototypeNote")}</p>
+
+            <section className="emergency-help-panel">
+              <div className="emergency-help-heading">
+                <div>
+                  <span>{t("tourist.safety.emergencyHelp")}</span>
+                  <strong>{t("tourist.safety.callFirstThenReport")}</strong>
+                </div>
+                <PhoneCall size={20} />
+              </div>
+              <div className="emergency-number-grid">
+                {malaysiaEmergencyNumbers.map((number) => (
+                  <a className="emergency-number-card" key={number.phone} href={`tel:${number.phone}`} aria-label={`${t("tourist.safety.call")} ${t(number.labelKey as TranslationKey)} ${number.phone}`}>
+                    <span>{t(number.labelKey as TranslationKey)}</span>
+                    <strong>{number.phone}</strong>
+                    <small>{t(number.descriptionKey as TranslationKey)}</small>
+                  </a>
+                ))}
+              </div>
+              <div className="nearby-service-list">
+                <div className="nearby-service-heading">
+                  <strong>{t("tourist.safety.nearestPreparedServices")}</strong>
+                  <span>{activeJourneyPoint ? t("tourist.safety.basedOnLatestLocation") : t("tourist.safety.allowLocationToSort")}</span>
+                </div>
+                {nearbyEmergencyServices.map((service) => (
+                  <article className={`nearby-service-card ${service.kind}`} key={service.id}>
+                    <span className="nearby-service-icon">{getEmergencyIcon(service.kind)}</span>
+                    <div>
+                      <strong>{service.name}</strong>
+                      <span>{service.address}</span>
+                      <small>{service.distanceKm} {t("tourist.safety.kmAway")} · {service.note}</small>
+                    </div>
+                    <a className="secondary-action compact-action" href={`tel:${service.phone}`}>
+                      {t("tourist.safety.call")} {service.phone}
+                    </a>
+                  </article>
+                ))}
+                {nearbyEmergencyServices.length === 0 && <small className="safety-disclaimer">{t("tourist.safety.noSavedLocationForServices")}</small>}
+              </div>
+            </section>
 
             <form className="incident-form" onSubmit={onSubmitIncidentReport}>
               <div className="field-pair">

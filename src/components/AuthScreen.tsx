@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { Eye, EyeOff, KeyRound, MapPinned, RotateCcw, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Circle, Eye, EyeOff, KeyRound, MapPinned, RotateCcw, ShieldCheck } from "lucide-react";
 import { nationalityOptions } from "../data/nationalities";
 import { type AuthMode } from "../services/access";
 import { isValidEmail } from "../services/accounts";
 import { hasConfiguredAuth } from "../services/auth";
 import { isLocale, localeOptions, translate, type Locale, type TranslationKey } from "../services/i18n";
+import { getPasswordStrength, passwordRequirementMessage } from "../services/passwordStrength";
 import type { UserRole } from "../types";
 import type { NotifyFn } from "./ToastViewport";
 
@@ -20,6 +21,14 @@ export type TouristRegistrationDraft = {
 };
 
 type RememberedLogin = { email: string; password: string };
+
+const passwordRuleKeys = {
+  length: "auth.passwordRuleLength",
+  upper: "auth.passwordRuleUpper",
+  lower: "auth.passwordRuleLower",
+  number: "auth.passwordRuleNumber",
+  symbol: "auth.passwordRuleSymbol",
+} satisfies Record<ReturnType<typeof getPasswordStrength>["rules"][number]["id"], TranslationKey>;
 
 const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
 const demoCredentialEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
@@ -114,6 +123,15 @@ export function AuthScreen({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firebaseMode = hasConfiguredAuth();
   const t = (key: TranslationKey) => translate(locale, key);
+  const passwordStrength = getPasswordStrength(password);
+  const passwordStrengthLabel =
+    passwordStrength.level === "strong"
+      ? t("auth.passwordStrengthStrong")
+      : passwordStrength.level === "fair"
+        ? t("auth.passwordStrengthFair")
+        : passwordStrength.level === "weak"
+          ? t("auth.passwordStrengthWeak")
+          : t("auth.passwordStrengthEmpty");
 
   const setDemoRole = (role: UserRole | "nature" | "culture" | "urban") => {
     setRoleHint(role);
@@ -146,17 +164,26 @@ export function AuthScreen({
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      setMessage(null);
-      notify({ tone: "error", title: "Password is too short", message: "Use at least 6 characters before continuing." });
-      return;
-    }
+    const passwordError = passwordRequirementMessage(password);
 
     if (mode === "register" && name.trim().length < 2) {
       setError("Enter a name with at least two characters.");
       setMessage(null);
       notify({ tone: "error", title: "Name is missing", message: "Enter at least two characters for the tourist profile name." });
+      return;
+    }
+
+    if (mode === "register" && passwordError) {
+      setError(passwordError);
+      setMessage(null);
+      notify({ tone: "error", title: "Password is not strong enough", message: passwordError });
+      return;
+    }
+
+    if (mode === "login" && password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      setMessage(null);
+      notify({ tone: "error", title: "Password is too short", message: "Use at least 6 characters before continuing." });
       return;
     }
 
@@ -339,12 +366,40 @@ export function AuthScreen({
           <label>
             {t("auth.password")}
             <span className="password-field">
-              <input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={6} />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
+                required
+                minLength={mode === "register" ? 8 : 6}
+                maxLength={mode === "register" ? 20 : undefined}
+              />
               <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}>
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </span>
           </label>
+
+          {mode === "register" && (
+            <section className={`password-strength-card ${passwordStrength.level}`} aria-live="polite">
+              <div className="password-strength-heading">
+                <span>{t("auth.passwordStrength")}</span>
+                <strong>{passwordStrengthLabel}</strong>
+              </div>
+              <div className="password-strength-meter" aria-hidden="true">
+                <i style={{ width: `${(passwordStrength.passedCount / passwordStrength.rules.length) * 100}%` }} />
+              </div>
+              <ul className="password-rule-list">
+                {passwordStrength.rules.map((rule) => (
+                  <li key={rule.id} className={rule.passed ? "passed" : ""}>
+                    {rule.passed ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+                    {t(passwordRuleKeys[rule.id])}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {mode === "register" && (
             <label>
@@ -356,7 +411,8 @@ export function AuthScreen({
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   autoComplete="new-password"
                   required
-                  minLength={6}
+                  minLength={8}
+                  maxLength={20}
                 />
                 <button type="button" onClick={() => setShowPassword((visible) => !visible)} title={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}>
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

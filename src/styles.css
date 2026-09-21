@@ -1683,6 +1683,125 @@ button:disabled {
   font-size: 0.88rem;
 }
 
+.emergency-help-panel {
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  background: #fff7ed;
+}
+
+.emergency-help-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.emergency-help-heading div,
+.nearby-service-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.emergency-help-heading span,
+.nearby-service-heading span {
+  color: #9a3412;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.emergency-help-heading strong,
+.nearby-service-heading strong {
+  color: #111827;
+}
+
+.emergency-number-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.emergency-number-card {
+  display: grid;
+  gap: 5px;
+  min-height: 112px;
+  padding: 12px;
+  border: 1px solid #fdba74;
+  border-radius: 8px;
+  color: #111827;
+  text-decoration: none;
+  background: #fffdfa;
+}
+
+.emergency-number-card span {
+  color: #9a3412;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.emergency-number-card strong {
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  line-height: 1;
+}
+
+.emergency-number-card small,
+.nearby-service-card small {
+  color: #596575;
+  line-height: 1.35;
+}
+
+.nearby-service-list {
+  display: grid;
+  gap: 9px;
+}
+
+.nearby-service-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.nearby-service-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 999px;
+  color: #ffffff;
+  background: #0f766e;
+}
+
+.nearby-service-card.hospital .nearby-service-icon {
+  background: #be123c;
+}
+
+.nearby-service-card.fire .nearby-service-icon {
+  background: #c2410c;
+}
+
+.nearby-service-card div {
+  display: grid;
+  gap: 3px;
+}
+
+.nearby-service-card strong {
+  color: #111827;
+}
+
+.nearby-service-card span {
+  color: #334155;
+  line-height: 1.35;
+}
+
 .incident-form textarea {
   min-height: 96px;
   resize: vertical;
@@ -5054,6 +5173,82 @@ textarea {
   background: #f8fafc;
 }
 
+.password-strength-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e4ded1;
+  border-radius: 8px;
+  background: #fffdfa;
+}
+
+.password-strength-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.password-strength-heading strong {
+  color: #9a3412;
+}
+
+.password-strength-card.fair .password-strength-heading strong {
+  color: #0f766e;
+}
+
+.password-strength-card.strong .password-strength-heading strong {
+  color: #047857;
+}
+
+.password-strength-meter {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #fee2e2;
+}
+
+.password-strength-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #ef4444;
+  transition: width 0.18s ease, background 0.18s ease;
+}
+
+.password-strength-card.fair .password-strength-meter i {
+  background: #f59e0b;
+}
+
+.password-strength-card.strong .password-strength-meter i {
+  background: #10b981;
+}
+
+.password-rule-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.password-rule-list li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.password-rule-list li.passed {
+  color: #047857;
+}
+
 .remember-login {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -5575,6 +5770,8 @@ textarea {
   }
 
   .safety-contact-strip,
+  .emergency-number-grid,
+  .nearby-service-card,
   .check-in-control,
   .qr-active-check-in-panel .check-in-stack,
   .qr-check-in-confirmation,
