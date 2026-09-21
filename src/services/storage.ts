@@ -102,6 +102,24 @@ export function cacheLocalData(data: AppData) {
   saveLocalData(data);
 }
 
+export async function saveCheckInRecord(checkIn: AttractionCheckIn, actor?: User | null) {
+  const services = getFirebaseServices();
+  if (!services || !services.auth.currentUser || !actor) {
+    return false;
+  }
+
+  const authUid = services.auth.currentUser.uid;
+  const actorMatchesAuth = actor.id === authUid || actor.authUid === authUid;
+  const actorCanWriteCheckIn = actor.role === "admin" || (actor.role === "tourist" && actor.id === checkIn.userId);
+  if (!actorMatchesAuth || !actorCanWriteCheckIn) {
+    return false;
+  }
+
+  const { doc, setDoc } = await import("firebase/firestore");
+  await setDoc(doc(services.db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>);
+  return true;
+}
+
 export function loadSession(): string | null {
   return localStorage.getItem(SESSION_KEY);
 }

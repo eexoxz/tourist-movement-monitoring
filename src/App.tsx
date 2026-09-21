@@ -41,7 +41,7 @@ import {
   getViewFromPath,
   type AuthMode,
 } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveData, saveSession } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
 import {
   buildMovementAlertsCsv,
@@ -624,7 +624,18 @@ function App() {
       };
     }
 
-    commitData(result.data, publicCheckInTourist);
+    setData(result.data);
+    cacheLocalData(result.data);
+    setSyncStatus("Check-in saved locally; cloud save pending");
+    void saveCheckInRecord(result.checkIn, publicCheckInTourist)
+      .then((synced) => {
+        setSyncStatus(synced ? "Check-in saved to Firestore" : "Check-in saved to local browser storage");
+      })
+      .catch(() => {
+        setSyncStatus("Check-in saved on this device; cloud retry pending");
+        notifySyncIssue("Cloud save needs retry", "The check-in was kept locally. Firestore did not accept the quick check-in save.");
+      });
+
     return {
       tone: "success",
       title: t("publicCheckin.successTitle"),
