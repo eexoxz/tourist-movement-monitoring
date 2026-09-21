@@ -302,6 +302,37 @@ export type TranslationKey =
   | "tourist.checkin.cameraPaused"
   | "tourist.checkin.codeAccepted"
   | "tourist.checkin.codeInvalid"
+  | "publicCheckin.title"
+  | "publicCheckin.destinationNotFound"
+  | "publicCheckin.destinationNotLinked"
+  | "publicCheckin.eyebrow"
+  | "publicCheckin.unavailableTitle"
+  | "publicCheckin.readyMessage"
+  | "publicCheckin.invalidMessage"
+  | "publicCheckin.passId"
+  | "publicCheckin.passStatus"
+  | "publicCheckin.verified"
+  | "publicCheckin.notRecognised"
+  | "publicCheckin.area"
+  | "publicCheckin.syncMode"
+  | "publicCheckin.missing"
+  | "publicCheckin.unknown"
+  | "publicCheckin.confirm"
+  | "publicCheckin.checkoutInApp"
+  | "publicCheckin.missingDestination"
+  | "publicCheckin.missingPass"
+  | "publicCheckin.missingUser"
+  | "publicCheckin.destinationErrorTitle"
+  | "publicCheckin.passErrorTitle"
+  | "publicCheckin.alreadyTitle"
+  | "publicCheckin.alreadyMessage"
+  | "publicCheckin.checkoutNeededTitle"
+  | "publicCheckin.checkoutNeededMessage"
+  | "publicCheckin.saveErrorTitle"
+  | "publicCheckin.saveErrorMessage"
+  | "publicCheckin.successTitle"
+  | "publicCheckin.successPrefix"
+  | "publicCheckin.successSuffix"
   | "tourist.completed.title"
   | "tourist.completed.started"
   | "tourist.completed.ended"
@@ -766,6 +797,37 @@ const translations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
     "tourist.checkin.cameraPaused": "Camera scan paused. Try the station code if the QR cannot be read.",
     "tourist.checkin.codeAccepted": "check-in code accepted.",
     "tourist.checkin.codeInvalid": "The attraction code could not be used.",
+    "publicCheckin.title": "Attraction check-in",
+    "publicCheckin.destinationNotFound": "Destination not found",
+    "publicCheckin.destinationNotLinked": "This QR code is not linked to a saved attraction.",
+    "publicCheckin.eyebrow": "Digital tourist pass check-in",
+    "publicCheckin.unavailableTitle": "Check-in unavailable",
+    "publicCheckin.readyMessage": "Confirm this visit to save it into the tourist movement monitoring record.",
+    "publicCheckin.invalidMessage": "This QR code cannot be used because the pass or destination could not be verified.",
+    "publicCheckin.passId": "Pass ID",
+    "publicCheckin.passStatus": "Pass status",
+    "publicCheckin.verified": "Verified",
+    "publicCheckin.notRecognised": "Not recognised",
+    "publicCheckin.area": "Area",
+    "publicCheckin.syncMode": "Sync mode",
+    "publicCheckin.missing": "Missing",
+    "publicCheckin.unknown": "Unknown",
+    "publicCheckin.confirm": "Confirm check-in",
+    "publicCheckin.checkoutInApp": "Check-out is done from the tourist app",
+    "publicCheckin.missingDestination": "This QR code is missing an attraction reference.",
+    "publicCheckin.missingPass": "This QR code is missing a digital pass reference.",
+    "publicCheckin.missingUser": "This digital pass is not available in the current app data.",
+    "publicCheckin.destinationErrorTitle": "Destination not recognised",
+    "publicCheckin.passErrorTitle": "Pass not recognised",
+    "publicCheckin.alreadyTitle": "Already checked in",
+    "publicCheckin.alreadyMessage": "This visit is already active in the tourist record.",
+    "publicCheckin.checkoutNeededTitle": "Check-out needed first",
+    "publicCheckin.checkoutNeededMessage": "This pass already has another active attraction visit. Check out from the tourist app before starting a new visit.",
+    "publicCheckin.saveErrorTitle": "Check-in not saved",
+    "publicCheckin.saveErrorMessage": "Try again in a moment.",
+    "publicCheckin.successTitle": "Checked in",
+    "publicCheckin.successPrefix": "The visit to",
+    "publicCheckin.successSuffix": "was saved into the tourist visit record.",
     "tourist.completed.title": "Completed Trip",
     "tourist.completed.started": "Started",
     "tourist.completed.ended": "Ended",
@@ -4490,6 +4552,274 @@ const adminTranslations: Record<Locale, Partial<Record<TranslationKey, string>>>
   },
 };
 
+const publicCheckInTranslations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
+  en: {},
+  ms: {
+    "publicCheckin.title": "Daftar masuk tarikan",
+    "publicCheckin.destinationNotFound": "Destinasi tidak ditemui",
+    "publicCheckin.destinationNotLinked": "Kod QR ini tidak dipautkan kepada tarikan yang disimpan.",
+    "publicCheckin.eyebrow": "Daftar masuk pas pelancong digital",
+    "publicCheckin.unavailableTitle": "Daftar masuk tidak tersedia",
+    "publicCheckin.readyMessage": "Sahkan lawatan ini untuk menyimpannya dalam rekod pemantauan pergerakan pelancong.",
+    "publicCheckin.invalidMessage": "Kod QR ini tidak boleh digunakan kerana pas atau destinasi tidak dapat disahkan.",
+    "publicCheckin.passId": "ID pas",
+    "publicCheckin.passStatus": "Status pas",
+    "publicCheckin.verified": "Disahkan",
+    "publicCheckin.notRecognised": "Tidak dikenali",
+    "publicCheckin.area": "Kawasan",
+    "publicCheckin.syncMode": "Mod penyegerakan",
+    "publicCheckin.missing": "Tiada",
+    "publicCheckin.unknown": "Tidak diketahui",
+    "publicCheckin.confirm": "Sahkan daftar masuk",
+    "publicCheckin.checkoutInApp": "Daftar keluar dibuat dalam aplikasi pelancong",
+    "publicCheckin.missingDestination": "Kod QR ini tiada rujukan tarikan.",
+    "publicCheckin.missingPass": "Kod QR ini tiada rujukan pas digital.",
+    "publicCheckin.missingUser": "Pas digital ini tidak tersedia dalam data aplikasi semasa.",
+    "publicCheckin.destinationErrorTitle": "Destinasi tidak dikenali",
+    "publicCheckin.passErrorTitle": "Pas tidak dikenali",
+    "publicCheckin.alreadyTitle": "Sudah daftar masuk",
+    "publicCheckin.alreadyMessage": "Lawatan ini sudah aktif dalam rekod pelancong.",
+    "publicCheckin.checkoutNeededTitle": "Perlu daftar keluar dahulu",
+    "publicCheckin.checkoutNeededMessage": "Pas ini sudah mempunyai lawatan tarikan aktif yang lain. Daftar keluar dari aplikasi pelancong sebelum memulakan lawatan baharu.",
+    "publicCheckin.saveErrorTitle": "Daftar masuk tidak disimpan",
+    "publicCheckin.saveErrorMessage": "Cuba lagi sebentar lagi.",
+    "publicCheckin.successTitle": "Daftar masuk berjaya",
+    "publicCheckin.successPrefix": "Lawatan ke",
+    "publicCheckin.successSuffix": "telah disimpan dalam rekod lawatan pelancong.",
+  },
+  zh: {
+    "publicCheckin.title": "景点签到",
+    "publicCheckin.destinationNotFound": "找不到目的地",
+    "publicCheckin.destinationNotLinked": "此二维码未连接到已保存的景点。",
+    "publicCheckin.eyebrow": "数字游客通行证签到",
+    "publicCheckin.unavailableTitle": "无法签到",
+    "publicCheckin.readyMessage": "确认本次到访，以保存到游客移动监测记录。",
+    "publicCheckin.invalidMessage": "无法使用此二维码，因为通行证或目的地无法验证。",
+    "publicCheckin.passId": "通行证 ID",
+    "publicCheckin.passStatus": "通行证状态",
+    "publicCheckin.verified": "已验证",
+    "publicCheckin.notRecognised": "未识别",
+    "publicCheckin.area": "地区",
+    "publicCheckin.syncMode": "同步模式",
+    "publicCheckin.missing": "缺失",
+    "publicCheckin.unknown": "未知",
+    "publicCheckin.confirm": "确认签到",
+    "publicCheckin.checkoutInApp": "请在游客应用内签出",
+    "publicCheckin.missingDestination": "此二维码缺少景点引用。",
+    "publicCheckin.missingPass": "此二维码缺少数字通行证引用。",
+    "publicCheckin.missingUser": "当前应用数据中没有此数字通行证。",
+    "publicCheckin.destinationErrorTitle": "目的地未识别",
+    "publicCheckin.passErrorTitle": "通行证未识别",
+    "publicCheckin.alreadyTitle": "已签到",
+    "publicCheckin.alreadyMessage": "本次到访已在游客记录中启用。",
+    "publicCheckin.checkoutNeededTitle": "请先签出",
+    "publicCheckin.checkoutNeededMessage": "此通行证已有另一个进行中的景点到访。请先在游客应用内签出，再开始新的到访。",
+    "publicCheckin.saveErrorTitle": "签到未保存",
+    "publicCheckin.saveErrorMessage": "请稍后再试。",
+    "publicCheckin.successTitle": "已签到",
+    "publicCheckin.successPrefix": "前往",
+    "publicCheckin.successSuffix": "的到访已保存到游客到访记录。",
+  },
+  ja: {
+    "publicCheckin.title": "観光地チェックイン",
+    "publicCheckin.destinationNotFound": "目的地が見つかりません",
+    "publicCheckin.destinationNotLinked": "このQRコードは保存済みの観光地にリンクされていません。",
+    "publicCheckin.eyebrow": "デジタル観光パスのチェックイン",
+    "publicCheckin.unavailableTitle": "チェックインできません",
+    "publicCheckin.readyMessage": "この訪問を確認して、観光客移動監視記録に保存します。",
+    "publicCheckin.invalidMessage": "パスまたは目的地を確認できないため、このQRコードは使用できません。",
+    "publicCheckin.passId": "パスID",
+    "publicCheckin.passStatus": "パス状態",
+    "publicCheckin.verified": "確認済み",
+    "publicCheckin.notRecognised": "認識されません",
+    "publicCheckin.area": "エリア",
+    "publicCheckin.syncMode": "同期モード",
+    "publicCheckin.missing": "不足",
+    "publicCheckin.unknown": "不明",
+    "publicCheckin.confirm": "チェックインを確認",
+    "publicCheckin.checkoutInApp": "チェックアウトは観光客アプリで行います",
+    "publicCheckin.missingDestination": "このQRコードには観光地参照がありません。",
+    "publicCheckin.missingPass": "このQRコードにはデジタルパス参照がありません。",
+    "publicCheckin.missingUser": "このデジタルパスは現在のアプリデータにありません。",
+    "publicCheckin.destinationErrorTitle": "目的地を認識できません",
+    "publicCheckin.passErrorTitle": "パスを認識できません",
+    "publicCheckin.alreadyTitle": "チェックイン済み",
+    "publicCheckin.alreadyMessage": "この訪問はすでに観光客記録で有効です。",
+    "publicCheckin.checkoutNeededTitle": "先にチェックアウトしてください",
+    "publicCheckin.checkoutNeededMessage": "このパスには別の有効な観光地訪問があります。新しい訪問を始める前に観光客アプリでチェックアウトしてください。",
+    "publicCheckin.saveErrorTitle": "チェックインは保存されませんでした",
+    "publicCheckin.saveErrorMessage": "少し待ってからもう一度お試しください。",
+    "publicCheckin.successTitle": "チェックインしました",
+    "publicCheckin.successPrefix": "訪問先",
+    "publicCheckin.successSuffix": "が観光客訪問記録に保存されました。",
+  },
+  ko: {
+    "publicCheckin.title": "관광지 체크인",
+    "publicCheckin.destinationNotFound": "목적지를 찾을 수 없음",
+    "publicCheckin.destinationNotLinked": "이 QR 코드는 저장된 관광지와 연결되어 있지 않습니다.",
+    "publicCheckin.eyebrow": "디지털 관광객 패스 체크인",
+    "publicCheckin.unavailableTitle": "체크인할 수 없음",
+    "publicCheckin.readyMessage": "이 방문을 확인하여 관광객 이동 모니터링 기록에 저장합니다.",
+    "publicCheckin.invalidMessage": "패스 또는 목적지를 확인할 수 없어 이 QR 코드를 사용할 수 없습니다.",
+    "publicCheckin.passId": "패스 ID",
+    "publicCheckin.passStatus": "패스 상태",
+    "publicCheckin.verified": "확인됨",
+    "publicCheckin.notRecognised": "인식되지 않음",
+    "publicCheckin.area": "지역",
+    "publicCheckin.syncMode": "동기화 모드",
+    "publicCheckin.missing": "없음",
+    "publicCheckin.unknown": "알 수 없음",
+    "publicCheckin.confirm": "체크인 확인",
+    "publicCheckin.checkoutInApp": "체크아웃은 관광객 앱에서 진행합니다",
+    "publicCheckin.missingDestination": "이 QR 코드에는 관광지 참조가 없습니다.",
+    "publicCheckin.missingPass": "이 QR 코드에는 디지털 패스 참조가 없습니다.",
+    "publicCheckin.missingUser": "이 디지털 패스는 현재 앱 데이터에 없습니다.",
+    "publicCheckin.destinationErrorTitle": "목적지를 인식할 수 없음",
+    "publicCheckin.passErrorTitle": "패스를 인식할 수 없음",
+    "publicCheckin.alreadyTitle": "이미 체크인됨",
+    "publicCheckin.alreadyMessage": "이 방문은 이미 관광객 기록에서 활성 상태입니다.",
+    "publicCheckin.checkoutNeededTitle": "먼저 체크아웃 필요",
+    "publicCheckin.checkoutNeededMessage": "이 패스에는 다른 활성 관광지 방문이 있습니다. 새 방문을 시작하기 전에 관광객 앱에서 체크아웃하세요.",
+    "publicCheckin.saveErrorTitle": "체크인이 저장되지 않음",
+    "publicCheckin.saveErrorMessage": "잠시 후 다시 시도하세요.",
+    "publicCheckin.successTitle": "체크인 완료",
+    "publicCheckin.successPrefix": "방문지",
+    "publicCheckin.successSuffix": "방문이 관광객 방문 기록에 저장되었습니다.",
+  },
+  pt: {
+    "publicCheckin.title": "Check-in da atração",
+    "publicCheckin.destinationNotFound": "Destino não encontrado",
+    "publicCheckin.destinationNotLinked": "Este QR code não está ligado a uma atração guardada.",
+    "publicCheckin.eyebrow": "Check-in com passe turístico digital",
+    "publicCheckin.unavailableTitle": "Check-in indisponível",
+    "publicCheckin.readyMessage": "Confirme esta visita para a guardar no registo de monitorização de movimento turístico.",
+    "publicCheckin.invalidMessage": "Este QR code não pode ser usado porque o passe ou o destino não pôde ser verificado.",
+    "publicCheckin.passId": "ID do passe",
+    "publicCheckin.passStatus": "Estado do passe",
+    "publicCheckin.verified": "Verificado",
+    "publicCheckin.notRecognised": "Não reconhecido",
+    "publicCheckin.area": "Área",
+    "publicCheckin.syncMode": "Modo de sincronização",
+    "publicCheckin.missing": "Em falta",
+    "publicCheckin.unknown": "Desconhecido",
+    "publicCheckin.confirm": "Confirmar check-in",
+    "publicCheckin.checkoutInApp": "O check-out é feito na app do turista",
+    "publicCheckin.missingDestination": "Este QR code não tem referência da atração.",
+    "publicCheckin.missingPass": "Este QR code não tem referência do passe digital.",
+    "publicCheckin.missingUser": "Este passe digital não está disponível nos dados atuais da app.",
+    "publicCheckin.destinationErrorTitle": "Destino não reconhecido",
+    "publicCheckin.passErrorTitle": "Passe não reconhecido",
+    "publicCheckin.alreadyTitle": "Check-in já feito",
+    "publicCheckin.alreadyMessage": "Esta visita já está ativa no registo do turista.",
+    "publicCheckin.checkoutNeededTitle": "Faça check-out primeiro",
+    "publicCheckin.checkoutNeededMessage": "Este passe já tem outra visita ativa. Faça check-out na app do turista antes de iniciar uma nova visita.",
+    "publicCheckin.saveErrorTitle": "Check-in não guardado",
+    "publicCheckin.saveErrorMessage": "Tente novamente dentro de instantes.",
+    "publicCheckin.successTitle": "Check-in feito",
+    "publicCheckin.successPrefix": "A visita a",
+    "publicCheckin.successSuffix": "foi guardada no registo de visitas do turista.",
+  },
+  ta: {
+    "publicCheckin.title": "ஈர்ப்பு இட செக்-இன்",
+    "publicCheckin.destinationNotFound": "இடம் கிடைக்கவில்லை",
+    "publicCheckin.destinationNotLinked": "இந்த QR குறியீடு சேமிக்கப்பட்ட ஈர்ப்பு இடத்துடன் இணைக்கப்படவில்லை.",
+    "publicCheckin.eyebrow": "டிஜிட்டல் சுற்றுலா பாஸ் செக்-இன்",
+    "publicCheckin.unavailableTitle": "செக்-இன் கிடைக்கவில்லை",
+    "publicCheckin.readyMessage": "இந்த வருகையை சுற்றுலாப் பயணி இயக்க கண்காணிப்பு பதிவில் சேமிக்க உறுதிப்படுத்தவும்.",
+    "publicCheckin.invalidMessage": "பாஸ் அல்லது இடத்தை சரிபார்க்க முடியாததால் இந்த QR குறியீட்டை பயன்படுத்த முடியாது.",
+    "publicCheckin.passId": "பாஸ் ID",
+    "publicCheckin.passStatus": "பாஸ் நிலை",
+    "publicCheckin.verified": "சரிபார்க்கப்பட்டது",
+    "publicCheckin.notRecognised": "அறியப்படவில்லை",
+    "publicCheckin.area": "பகுதி",
+    "publicCheckin.syncMode": "ஒத்திசைவு முறை",
+    "publicCheckin.missing": "இல்லை",
+    "publicCheckin.unknown": "தெரியவில்லை",
+    "publicCheckin.confirm": "செக்-இன் உறுதி செய்",
+    "publicCheckin.checkoutInApp": "செக்-அவுட் சுற்றுலா பயன்பாட்டில் செய்யப்படும்",
+    "publicCheckin.missingDestination": "இந்த QR குறியீட்டில் ஈர்ப்பு இட குறிப்பு இல்லை.",
+    "publicCheckin.missingPass": "இந்த QR குறியீட்டில் டிஜிட்டல் பாஸ் குறிப்பு இல்லை.",
+    "publicCheckin.missingUser": "இந்த டிஜிட்டல் பாஸ் தற்போதைய பயன்பாட்டு தரவில் இல்லை.",
+    "publicCheckin.destinationErrorTitle": "இடம் அறியப்படவில்லை",
+    "publicCheckin.passErrorTitle": "பாஸ் அறியப்படவில்லை",
+    "publicCheckin.alreadyTitle": "ஏற்கனவே செக்-இன் செய்யப்பட்டது",
+    "publicCheckin.alreadyMessage": "இந்த வருகை ஏற்கனவே சுற்றுலாப் பயணி பதிவில் செயலில் உள்ளது.",
+    "publicCheckin.checkoutNeededTitle": "முதலில் செக்-அவுட் செய்ய வேண்டும்",
+    "publicCheckin.checkoutNeededMessage": "இந்த பாஸில் மற்றொரு செயலில் உள்ள ஈர்ப்பு இட வருகை உள்ளது. புதிய வருகையை தொடங்கும் முன் சுற்றுலா பயன்பாட்டில் செக்-அவுட் செய்யவும்.",
+    "publicCheckin.saveErrorTitle": "செக்-இன் சேமிக்கப்படவில்லை",
+    "publicCheckin.saveErrorMessage": "சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+    "publicCheckin.successTitle": "செக்-இன் செய்யப்பட்டது",
+    "publicCheckin.successPrefix": "வருகை இடம்",
+    "publicCheckin.successSuffix": "சுற்றுலாப் பயணி வருகைப் பதிவில் சேமிக்கப்பட்டது.",
+  },
+  es: {
+    "publicCheckin.title": "Check-in de atracción",
+    "publicCheckin.destinationNotFound": "Destino no encontrado",
+    "publicCheckin.destinationNotLinked": "Este código QR no está vinculado a una atracción guardada.",
+    "publicCheckin.eyebrow": "Check-in con pase turístico digital",
+    "publicCheckin.unavailableTitle": "Check-in no disponible",
+    "publicCheckin.readyMessage": "Confirma esta visita para guardarla en el registro de monitoreo de movimiento turístico.",
+    "publicCheckin.invalidMessage": "Este código QR no se puede usar porque no se pudo verificar el pase o el destino.",
+    "publicCheckin.passId": "ID del pase",
+    "publicCheckin.passStatus": "Estado del pase",
+    "publicCheckin.verified": "Verificado",
+    "publicCheckin.notRecognised": "No reconocido",
+    "publicCheckin.area": "Área",
+    "publicCheckin.syncMode": "Modo de sincronización",
+    "publicCheckin.missing": "Falta",
+    "publicCheckin.unknown": "Desconocido",
+    "publicCheckin.confirm": "Confirmar check-in",
+    "publicCheckin.checkoutInApp": "El check-out se hace desde la app turística",
+    "publicCheckin.missingDestination": "Este código QR no tiene referencia de atracción.",
+    "publicCheckin.missingPass": "Este código QR no tiene referencia de pase digital.",
+    "publicCheckin.missingUser": "Este pase digital no está disponible en los datos actuales de la app.",
+    "publicCheckin.destinationErrorTitle": "Destino no reconocido",
+    "publicCheckin.passErrorTitle": "Pase no reconocido",
+    "publicCheckin.alreadyTitle": "Ya registrado",
+    "publicCheckin.alreadyMessage": "Esta visita ya está activa en el registro del turista.",
+    "publicCheckin.checkoutNeededTitle": "Primero haz check-out",
+    "publicCheckin.checkoutNeededMessage": "Este pase ya tiene otra visita activa. Haz check-out desde la app turística antes de iniciar una nueva visita.",
+    "publicCheckin.saveErrorTitle": "Check-in no guardado",
+    "publicCheckin.saveErrorMessage": "Inténtalo de nuevo en un momento.",
+    "publicCheckin.successTitle": "Check-in completado",
+    "publicCheckin.successPrefix": "La visita a",
+    "publicCheckin.successSuffix": "se guardó en el registro de visitas del turista.",
+  },
+  fr: {
+    "publicCheckin.title": "Check-in d'attraction",
+    "publicCheckin.destinationNotFound": "Destination introuvable",
+    "publicCheckin.destinationNotLinked": "Ce QR code n'est pas lié à une attraction enregistrée.",
+    "publicCheckin.eyebrow": "Check-in avec pass touristique numérique",
+    "publicCheckin.unavailableTitle": "Check-in indisponible",
+    "publicCheckin.readyMessage": "Confirmez cette visite pour l'enregistrer dans le dossier de suivi des mouvements touristiques.",
+    "publicCheckin.invalidMessage": "Ce QR code ne peut pas être utilisé car le pass ou la destination n'a pas pu être vérifié.",
+    "publicCheckin.passId": "ID du pass",
+    "publicCheckin.passStatus": "Statut du pass",
+    "publicCheckin.verified": "Vérifié",
+    "publicCheckin.notRecognised": "Non reconnu",
+    "publicCheckin.area": "Zone",
+    "publicCheckin.syncMode": "Mode de synchronisation",
+    "publicCheckin.missing": "Manquant",
+    "publicCheckin.unknown": "Inconnu",
+    "publicCheckin.confirm": "Confirmer le check-in",
+    "publicCheckin.checkoutInApp": "Le check-out se fait dans l'application touriste",
+    "publicCheckin.missingDestination": "Ce QR code ne contient pas de référence d'attraction.",
+    "publicCheckin.missingPass": "Ce QR code ne contient pas de référence de pass numérique.",
+    "publicCheckin.missingUser": "Ce pass numérique n'est pas disponible dans les données actuelles de l'application.",
+    "publicCheckin.destinationErrorTitle": "Destination non reconnue",
+    "publicCheckin.passErrorTitle": "Pass non reconnu",
+    "publicCheckin.alreadyTitle": "Déjà enregistré",
+    "publicCheckin.alreadyMessage": "Cette visite est déjà active dans le dossier du touriste.",
+    "publicCheckin.checkoutNeededTitle": "Check-out requis d'abord",
+    "publicCheckin.checkoutNeededMessage": "Ce pass a déjà une autre visite active. Faites le check-out dans l'application touriste avant de commencer une nouvelle visite.",
+    "publicCheckin.saveErrorTitle": "Check-in non enregistré",
+    "publicCheckin.saveErrorMessage": "Réessayez dans un instant.",
+    "publicCheckin.successTitle": "Check-in effectué",
+    "publicCheckin.successPrefix": "La visite à",
+    "publicCheckin.successSuffix": "a été enregistrée dans le dossier de visite du touriste.",
+  },
+};
+
 export function isLocale(value: string): value is Locale {
   return localeOptions.some((option) => option.value === value);
 }
@@ -4504,7 +4834,13 @@ export function saveLocale(locale: Locale) {
 }
 
 export function hasDirectTranslation(locale: Locale, key: TranslationKey) {
-  return Boolean(translations[locale][key] ?? touristTranslations[locale][key] ?? touristCoverageTranslations[locale][key] ?? adminTranslations[locale][key]);
+  return Boolean(
+    translations[locale][key] ??
+      touristTranslations[locale][key] ??
+      touristCoverageTranslations[locale][key] ??
+      adminTranslations[locale][key] ??
+      publicCheckInTranslations[locale][key]
+  );
 }
 
 export function translate(locale: Locale, key: TranslationKey) {
@@ -4513,10 +4849,12 @@ export function translate(locale: Locale, key: TranslationKey) {
     touristTranslations[locale][key] ??
     touristCoverageTranslations[locale][key] ??
     adminTranslations[locale][key] ??
+    publicCheckInTranslations[locale][key] ??
     translations.en[key] ??
     touristTranslations.en[key] ??
     touristCoverageTranslations.en[key] ??
     adminTranslations.en[key] ??
+    publicCheckInTranslations.en[key] ??
     key
   );
 }

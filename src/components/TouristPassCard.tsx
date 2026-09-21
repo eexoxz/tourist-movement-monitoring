@@ -1,5 +1,5 @@
 import { BadgeCheck, ShieldCheck } from "lucide-react";
-import { createTouristCheckInUrl, createTouristPassUrl, isLocalOnlyQrOrigin } from "../services/checkInDeepLink";
+import { createTouristCheckInUrl, createTouristPassId, createTouristPassUrl, isLocalOnlyQrOrigin } from "../services/checkInDeepLink";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createQrSvgDataUri } from "../services/qrCode";
 import type { Destination, User } from "../types";
@@ -11,22 +11,6 @@ type TouristPassCardProps = {
   locale?: Locale;
   compact?: boolean;
 };
-
-function hashSeed(seed: string) {
-  let hash = 2166136261;
-
-  for (let index = 0; index < seed.length; index += 1) {
-    hash ^= seed.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-
-  return hash >>> 0;
-}
-
-function createPassId(user: User) {
-  const source = `${user.authUid ?? user.id}${user.email}${user.passportNumber ?? ""}`;
-  return `MYP-${hashSeed(source).toString(36).toUpperCase().slice(0, 6).padEnd(6, "0")}`;
-}
 
 function createPassPayload(passId: string, destination?: Destination | null) {
   return destination ? createTouristCheckInUrl(destination.id, passId) : createTouristPassUrl(passId);
@@ -55,7 +39,7 @@ function formatPreferences(user: User, t: (key: TranslationKey) => string) {
 
 export function TouristPassCard({ user, destination, locale = "en", compact = false }: TouristPassCardProps) {
   const t = (key: TranslationKey) => translate(locale, key);
-  const passId = createPassId(user);
+  const passId = createTouristPassId(user);
   const qrPayload = createPassPayload(passId, destination);
   const qrSource = createQrSvgDataUri(qrPayload);
   const localOnlyQr = isLocalOnlyQrOrigin();

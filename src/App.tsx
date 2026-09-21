@@ -67,7 +67,7 @@ import {
 } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./services/accounts";
 import { translateAdmin, type AdminCopyKey } from "./services/adminI18n";
-import { getTouristCheckInDestinationIdFromUrl } from "./services/checkInDeepLink";
+import { createTouristPassId, getTouristCheckInDestinationIdFromUrl, getTouristCheckInRequestFromUrl, isTouristCheckInRoute } from "./services/checkInDeepLink";
 import { isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "./data/demoData";
 import { malaysiaFestivalEvents } from "./data/festivals";
 import { loadLocale, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
@@ -118,6 +118,7 @@ import { MovementMap } from "./components/MovementMap";
 import { MovementPulseHero } from "./components/MovementPulseHero";
 import { Page } from "./components/Page";
 import { PlaceDiscovery } from "./components/PlaceDiscovery";
+import { PublicCheckInPage, type PublicCheckInResult } from "./components/PublicCheckInPage";
 import { RecommendationList } from "./components/RecommendationList";
 import { TouristHome } from "./components/TouristHome";
 import { TouristPassCard } from "./components/TouristPassCard";
@@ -361,6 +362,11 @@ function App() {
   const watchId = useRef<number | null>(null);
   const lastSyncWarningAt = useRef(0);
   const t = (key: TranslationKey) => translate(locale, key);
+  const publicCheckInRequest = getTouristCheckInRequestFromUrl();
+  const publicCheckInDestination = publicCheckInRequest?.destinationId ? data.destinations.find((destination) => destination.id === publicCheckInRequest.destinationId) ?? null : null;
+  const publicCheckInTourist = publicCheckInRequest?.passId
+    ? data.users.find((user) => user.role === "tourist" && createTouristPassId(user) === publicCheckInRequest.passId) ?? null
+    : null;
 
   const notify: NotifyFn = (notification) => {
     setNotifications((current) => [...current.slice(-2), { ...notification, id: createId("notification") }]);
@@ -498,6 +504,10 @@ function App() {
     const handlePopState = () => {
       const pathname = getCurrentPathname();
 
+      if (isTouristCheckInRoute(pathname)) {
+        return;
+      }
+
       if (!currentUser) {
         setAuthMode(getAuthModeFromPath(pathname) ?? "login");
         return;
@@ -513,6 +523,10 @@ function App() {
 
   useEffect(() => {
     const pathname = getCurrentPathname();
+
+    if (isTouristCheckInRoute(pathname)) {
+      return;
+    }
 
     if (!currentUser) {
       const nextMode = getAuthModeFromPath(pathname) ?? authMode;
@@ -550,6 +564,63 @@ function App() {
         setSyncStatus("Saved on this device; cloud retry pending");
         notifySyncIssue("Cloud save needs retry", "Your change was kept locally. Firestore did not accept the latest sync.");
       });
+  };
+
+  const confirmPublicCheckIn = (): PublicCheckInResult => {
+    if (!publicCheckInRequest?.destinationId || !publicCheckInDestination) {
+      return {
+        tone: "error",
+        title: t("publicCheckin.destinationErrorTitle"),
+        message: t("publicCheckin.destinationNotLinked"),
+      };
+    }
+
+    if (!publicCheckInRequest.passId || !publicCheckInTourist) {
+      return {
+        tone: "error",
+        title: t("publicCheckin.passErrorTitle"),
+        message: t("publicCheckin.missingUser"),
+      };
+    }
+
+    const activeCheckIn = getActiveCheckIn(data, publicCheckInTourist.id);
+    if (activeCheckIn?.destinationId === publicCheckInDestination.id) {
+      return {
+        tone: "info",
+        title: t("publicCheckin.alreadyTitle"),
+        message: t("publicCheckin.alreadyMessage"),
+        checkIn: activeCheckIn,
+      };
+    }
+
+    if (activeCheckIn) {
+      return {
+        tone: "error",
+        title: t("publicCheckin.checkoutNeededTitle"),
+        message: t("publicCheckin.checkoutNeededMessage"),
+      };
+    }
+
+    const result = createAttractionCheckIn(data, {
+      userId: publicCheckInTourist.id,
+      destinationId: publicCheckInDestination.id,
+    });
+
+    if (result.error || !result.data || !result.checkIn) {
+      return {
+        tone: "error",
+        title: t("publicCheckin.saveErrorTitle"),
+        message: result.error ?? t("publicCheckin.saveErrorMessage"),
+      };
+    }
+
+    commitData(result.data, publicCheckInTourist);
+    return {
+      tone: "success",
+      title: t("publicCheckin.successTitle"),
+      message: `${t("publicCheckin.successPrefix")} ${publicCheckInDestination.name} ${t("publicCheckin.successSuffix")}`,
+      checkIn: result.checkIn,
+    };
   };
 
   const retryCloudSync = async () => {
@@ -780,6 +851,34 @@ function App() {
     URL.revokeObjectURL(url);
     notify({ tone: "success", title: "Export started", message: "The current prototype data is downloading as a JSON file." });
   };
+
+  if (publicCheckInRequest) {
+    const missingReason = !publicCheckInRequest.destinationId
+      ? t("publicCheckin.missingDestination")
+      : !publicCheckInDestination
+        ? t("publicCheckin.destinationNotLinked")
+        : !publicCheckInRequest.passId
+          ? t("publicCheckin.missingPass")
+          : !publicCheckInTourist
+            ? t("publicCheckin.missingUser")
+            : undefined;
+
+    return (
+      <>
+        <PublicCheckInPage
+          destination={publicCheckInDestination}
+          locale={locale}
+          missingReason={missingReason}
+          passId={publicCheckInRequest.passId}
+          passVerified={Boolean(publicCheckInTourist)}
+          syncStatus={syncStatus}
+          onConfirm={confirmPublicCheckIn}
+          onLocaleChange={changeLocale}
+        />
+        <ToastViewport notifications={notifications} onDismiss={dismissNotification} />
+      </>
+    );
+  }
 
   if (!currentUser) {
     return (

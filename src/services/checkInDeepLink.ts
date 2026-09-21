@@ -1,8 +1,10 @@
 import { getPathForView } from "./access";
+import type { User } from "../types";
 
 const CHECK_IN_PARAM = "checkin";
 const PASS_PARAM = "pass";
 const DEFAULT_LOCAL_ORIGIN = "http://localhost:4175";
+const CHECK_IN_PATH = "/check-in";
 
 type LocationLike = Pick<Location, "hostname" | "origin" | "port" | "protocol">;
 
@@ -41,8 +43,24 @@ export function isLocalOnlyQrOrigin(location: LocationLike | null = typeof windo
   return !configuredPublicOrigin() && Boolean(location && isLoopbackHost(location.hostname));
 }
 
+function hashSeed(seed: string) {
+  let hash = 2166136261;
+
+  for (let index = 0; index < seed.length; index += 1) {
+    hash ^= seed.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
+}
+
+export function createTouristPassId(user: User) {
+  const source = `${user.authUid ?? user.id}${user.email}${user.passportNumber ?? ""}`;
+  return `MYP-${hashSeed(source).toString(36).toUpperCase().slice(0, 6).padEnd(6, "0")}`;
+}
+
 export function createTouristCheckInUrl(destinationId: string, passId?: string) {
-  const url = new URL(getPathForView("tourist", "overview"), getShareableAppOrigin());
+  const url = new URL(CHECK_IN_PATH, getShareableAppOrigin());
   url.searchParams.set(CHECK_IN_PARAM, destinationId);
 
   if (passId) {
@@ -64,4 +82,20 @@ export function getTouristCheckInDestinationIdFromUrl() {
   }
 
   return new URLSearchParams(window.location.search).get(CHECK_IN_PARAM);
+}
+
+export function getTouristCheckInRequestFromUrl() {
+  if (typeof window === "undefined" || !isTouristCheckInRoute(window.location.pathname)) {
+    return null;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  return {
+    destinationId: params.get(CHECK_IN_PARAM),
+    passId: params.get(PASS_PARAM),
+  };
+}
+
+export function isTouristCheckInRoute(pathname: string) {
+  return (pathname.replace(/\/+$/, "") || "/") === CHECK_IN_PATH;
 }

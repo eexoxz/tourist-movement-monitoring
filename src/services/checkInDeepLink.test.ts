@@ -29,11 +29,11 @@ describe("tourist QR deep links", () => {
     ).toBe("http://192.168.50.176:4175");
   });
 
-  it("creates a home check-in URL for attraction QR passes", () => {
+  it("creates a dedicated check-in URL for attraction QR passes", () => {
     const url = new URL(createTouristCheckInUrl("batu-caves", "MYP-ABC123"));
 
     expect(url.origin).toBe("http://localhost:4175");
-    expect(url.pathname).toBe("/app/home");
+    expect(url.pathname).toBe("/check-in");
     expect(url.searchParams.get("checkin")).toBe("batu-caves");
     expect(url.searchParams.get("pass")).toBe("MYP-ABC123");
   });
@@ -44,7 +44,7 @@ describe("tourist QR deep links", () => {
     const url = new URL(createTouristCheckInUrl("batu-caves", "MYP-ABC123"));
 
     expect(url.origin).toBe("https://tourism.example.com");
-    expect(url.pathname).toBe("/app/home");
+    expect(url.pathname).toBe("/check-in");
   });
 
   it("creates a profile URL for profile-only tourist passes", () => {
