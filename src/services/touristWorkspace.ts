@@ -2,6 +2,7 @@ import type { AnalysisResult, AppData, AttractionCheckIn, MovementPoint, Recomme
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
 import { getRecognizedDestinationNames } from "./tripPresentation";
+import { compareTimeAsc, compareTimeDesc, minutesBetween, timeValue } from "./time";
 
 export type TouristWorkspaceData = {
   userTrips: TripSession[];
@@ -52,7 +53,7 @@ function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], des
 
   const startedAt = points[0]?.recordedAt ?? trip.startedAt;
   const endedAt = points.at(-1)?.recordedAt ?? trip.endedAt ?? startedAt;
-  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((timeValue(endedAt) - timeValue(startedAt)) / 60000)) : 0;
+  const durationMinutes = minutesBetween(startedAt, endedAt);
   const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(accuracyTotal / points.length);
 
   return {
@@ -65,10 +66,6 @@ function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], des
     firstRecordedAt: points[0]?.recordedAt,
     lastRecordedAt: points.at(-1)?.recordedAt,
   };
-}
-
-function timeValue(value: string | undefined) {
-  return value ? new Date(value).getTime() : 0;
 }
 
 function latestByDate<T>(items: T[], getDate: (item: T) => string) {
@@ -120,7 +117,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
   });
 
   pointsByTrip.forEach((points) => {
-    points.sort((a, b) => timeValue(a.recordedAt) - timeValue(b.recordedAt));
+    points.sort((a, b) => compareTimeAsc(a.recordedAt, b.recordedAt));
   });
 
   const userAnalyses: AnalysisResult[] = [];
@@ -160,10 +157,10 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
     }
   });
 
-  recentCheckIns.sort((a, b) => timeValue(b.checkedOutAt ?? b.checkedInAt) - timeValue(a.checkedOutAt ?? a.checkedInAt));
-  savedRecommendations.sort((a, b) => timeValue(b.generatedAt) - timeValue(a.generatedAt));
+  recentCheckIns.sort((a, b) => compareTimeDesc(a.checkedOutAt ?? a.checkedInAt, b.checkedOutAt ?? b.checkedInAt));
+  savedRecommendations.sort((a, b) => compareTimeDesc(a.generatedAt, b.generatedAt));
 
-  const recentTrips = [...userTrips].sort((a, b) => timeValue(b.startedAt) - timeValue(a.startedAt));
+  const recentTrips = [...userTrips].sort((a, b) => compareTimeDesc(a.startedAt, b.startedAt));
   const activeTrip = userTrips.find((trip) => trip.status === "active") ?? null;
   const activePoints = activeTrip ? pointsByTrip.get(activeTrip.id) ?? [] : [];
   const tripSummaries = userTrips.map((trip) => summarizeTripFromPoints(trip, pointsByTrip.get(trip.id) ?? [], destinationIndex));

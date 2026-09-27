@@ -2,6 +2,7 @@ import type { AppData, Destination, LocationConsent, MovementPoint, TouristProfi
 import { createId } from "./storage";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
+import { compareTimeAsc, minutesBetween, timeValue } from "./time";
 
 type MovementInput = {
   tripId: string;
@@ -48,17 +49,23 @@ export function getVisitedDestinationIds(data: AppData, userId: string, maxDista
 }
 
 function getTripPoints(data: AppData, tripId: string) {
-  return data.points.filter((point) => point.tripId === tripId).sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+  return data.points.filter((point) => point.tripId === tripId).sort((a, b) => compareTimeAsc(a.recordedAt, b.recordedAt));
 }
 
 export function summarizeTrip(data: AppData, tripId: string): TripSummary {
   const points = getTripPoints(data, tripId);
   const trip = data.trips.find((candidate) => candidate.id === tripId);
   const visitedDestinationIds = new Set<string>();
-  const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
+  let distance = 0;
+  let accuracyTotal = 0;
   const destinationIndex = createDestinationSpatialIndex(data.destinations);
 
-  points.forEach((point) => {
+  points.forEach((point, index) => {
+    accuracyTotal += point.accuracyMeters;
+    if (index > 0) {
+      distance += distanceKm(points[index - 1], point);
+    }
+
     const nearest = destinationIndex.nearest(point, 1.2);
     if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
@@ -67,8 +74,8 @@ export function summarizeTrip(data: AppData, tripId: string): TripSummary {
 
   const startedAt = points[0]?.recordedAt ?? trip?.startedAt;
   const endedAt = points.at(-1)?.recordedAt ?? trip?.endedAt ?? startedAt;
-  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)) : 0;
-  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(points.reduce((total, point) => total + point.accuracyMeters, 0) / points.length);
+  const durationMinutes = minutesBetween(startedAt, endedAt);
+  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(accuracyTotal / points.length);
 
   return {
     tripId,
@@ -255,7 +262,7 @@ export function addLocalTestRouteToActiveTrip(data: AppData, userId: string, ref
     return { error: "Not enough nearby destinations are available to simulate a local route." };
   }
 
-  const baseTime = Math.max(Date.now(), new Date(currentPoints.at(-1)?.recordedAt ?? activeTrip.startedAt).getTime());
+  const baseTime = Math.max(Date.now(), timeValue(currentPoints.at(-1)?.recordedAt ?? activeTrip.startedAt));
   const points: MovementPoint[] = routeDestinations.map((destination, index) => {
     const point = simulatedPointNearDestination(destination, currentPoints.length + index);
 
@@ -327,7 +334,7 @@ export function appendMovementPoint(data: AppData, input: MovementInput) {
       return latest;
     }
 
-    return !latest || new Date(point.recordedAt).getTime() > new Date(latest.recordedAt).getTime() ? point : latest;
+    return !latest || timeValue(point.recordedAt) > timeValue(latest.recordedAt) ? point : latest;
   }, undefined);
   const candidate = {
     latitude: input.latitude,
@@ -335,7 +342,7 @@ export function appendMovementPoint(data: AppData, input: MovementInput) {
   };
 
   if (previousPoint) {
-    const secondsApart = Math.abs(Date.now() - new Date(previousPoint.recordedAt).getTime()) / 1000;
+    const secondsApart = Math.abs(Date.now() - timeValue(previousPoint.recordedAt)) / 1000;
     if (distanceKm(previousPoint, candidate) < 0.04 && secondsApart < 60) {
       return { error: "Movement point is too close to the previous point and was not saved." };
     }

@@ -111,5 +111,8 @@ export function updateIncidentStatus(data: AppData, reportId: string, status: Sa
 }
 
 export function getOpenSafetyCount(data: AppData) {
-  return data.sosAlerts.filter((alert) => alert.status !== "resolved").length + data.incidentReports.filter((report) => report.status !== "resolved").length;
+  return (
+    data.sosAlerts.reduce((count, alert) => count + Number(alert.status !== "resolved"), 0) +
+    data.incidentReports.reduce((count, report) => count + Number(report.status !== "resolved"), 0)
+  );
 }

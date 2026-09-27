@@ -16,13 +16,24 @@ export function getDisplayName(user: User) {
 }
 
 export function inferExpectedProfileFromPreferences(preferences: DestinationCategory[]): NonNullable<User["expectedProfile"]> {
-  const culturalScore = preferences.filter((category) => category === "cultural" || category === "heritage").length;
-  const natureScore = preferences.filter((category) => category === "nature" || category === "coastal").length;
-  const urbanScore = preferences.filter((category) => category === "urban" || category === "food").length;
+  const scoresByProfile = preferences.reduce(
+    (scores, category) => {
+      if (category === "cultural" || category === "heritage") {
+        scores.cultural += 1;
+      } else if (category === "nature" || category === "coastal") {
+        scores.nature += 1;
+      } else {
+        scores.urban += 1;
+      }
+
+      return scores;
+    },
+    { cultural: 0, nature: 0, urban: 0 }
+  );
   const scores = [
-    ["cultural", culturalScore],
-    ["nature", natureScore],
-    ["urban", urbanScore],
+    ["cultural", scoresByProfile.cultural],
+    ["nature", scoresByProfile.nature],
+    ["urban", scoresByProfile.urban],
   ] as const;
   const ranked = [...scores].sort((a, b) => b[1] - a[1]);
 

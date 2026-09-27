@@ -1,5 +1,6 @@
 import type { AppData, AttractionCheckIn, MovementPoint, TouristProfile, TripSession, User } from "../types";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
+import { compareTimeDesc, timeValue } from "./time";
 
 export type TouristManagementRow = {
   tourist: User;
@@ -28,7 +29,7 @@ function pushGroupedValue<T>(groups: Map<string, T[]>, key: string, value: T) {
 }
 
 function latestDate(dates: string[]) {
-  return dates.reduce<string | undefined>((latest, date) => (!latest || new Date(date).getTime() > new Date(latest).getTime() ? date : latest), undefined);
+  return dates.reduce<string | undefined>((latest, date) => (!latest || timeValue(date) > timeValue(latest) ? date : latest), undefined);
 }
 
 function addUserPoint(pointsByUser: Map<string, Map<string, MovementPoint>>, userId: string, point: MovementPoint) {
@@ -93,7 +94,7 @@ function buildTouristManagementIndexes(data: AppData) {
   data.analyses.forEach((analysis) => {
     const current = latestAnalysisByUser.get(analysis.userId);
 
-    if (!current || new Date(analysis.generatedAt).getTime() > new Date(current.generatedAt).getTime()) {
+    if (!current || timeValue(analysis.generatedAt) > timeValue(current.generatedAt)) {
       latestAnalysisByUser.set(analysis.userId, { profile: analysis.profile, generatedAt: analysis.generatedAt });
     }
   });
@@ -175,5 +176,5 @@ export function getTouristManagementRows(data: AppData): TouristManagementRow[] 
         latestDestinationNames: destinationNames.slice(0, 4),
       };
     })
-    .sort((a, b) => new Date(b.latestActivityAt ?? b.tourist.createdAt).getTime() - new Date(a.latestActivityAt ?? a.tourist.createdAt).getTime());
+    .sort((a, b) => compareTimeDesc(a.latestActivityAt ?? a.tourist.createdAt, b.latestActivityAt ?? b.tourist.createdAt));
 }
