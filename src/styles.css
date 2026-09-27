@@ -5727,7 +5727,7 @@ textarea {
   .map-view.leaflet-container,
   .map-view .leaflet-pane,
   .map-view .leaflet-tile {
-    touch-action: pan-y;
+    touch-action: auto;
   }
 
   .home-today-panel {
@@ -6017,7 +6017,7 @@ textarea {
   .map-view {
     height: 58vh;
     min-height: 420px;
-    touch-action: pan-y;
+    touch-action: auto;
   }
 
   .map-frame {
