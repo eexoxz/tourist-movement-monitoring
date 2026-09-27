@@ -302,13 +302,20 @@ function isWithinDateRange(recordedAt: string, filters: MovementRecordFilters) {
   return (!filters.fromDate || dateKey >= filters.fromDate) && (!filters.toDate || dateKey <= filters.toDate);
 }
 
+function timeValue(value: string | undefined) {
+  return value ? new Date(value).getTime() : 0;
+}
+
 function tripMatchesDateRange(trip: TripSession, points: MovementPoint[], filters: MovementRecordFilters) {
   if (!filters.fromDate && !filters.toDate) {
     return true;
   }
 
-  const tripDates = [trip.startedAt, trip.endedAt, ...points.map((point) => point.recordedAt)].filter((date): date is string => Boolean(date));
-  return tripDates.some((date) => isWithinDateRange(date, filters));
+  if (isWithinDateRange(trip.startedAt, filters) || (trip.endedAt && isWithinDateRange(trip.endedAt, filters))) {
+    return true;
+  }
+
+  return points.some((point) => isWithinDateRange(point.recordedAt, filters));
 }
 
 function buildDashboardIndexes(data: AppData) {
@@ -321,7 +328,7 @@ function buildDashboardIndexes(data: AppData) {
   });
 
   pointsByTrip.forEach((points) => {
-    points.sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+    points.sort((a, b) => timeValue(a.recordedAt) - timeValue(b.recordedAt));
   });
 
   return {
@@ -338,20 +345,28 @@ type DashboardIndexes = ReturnType<typeof buildDashboardIndexes>;
 function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex): { summary: TripSummary; destinationNames: string[] } {
   const visitedDestinationIds = new Set<string>();
   const destinationNames = new Set<string>();
-  const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
+  let distance = 0;
+  let accuracyTotal = 0;
 
-  points.forEach((point) => {
+  for (let index = 0; index < points.length; index += 1) {
+    const point = points[index];
+    accuracyTotal += point.accuracyMeters;
+
+    if (index > 0) {
+      distance += distanceKm(points[index - 1], point);
+    }
+
     const nearest = destinationIndex.nearest(point, 1.2);
     if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
       destinationNames.add(nearest.destination.name);
     }
-  });
+  }
 
   const startedAt = points[0]?.recordedAt ?? trip.startedAt;
   const endedAt = points.at(-1)?.recordedAt ?? trip.endedAt ?? startedAt;
-  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)) : 0;
-  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(points.reduce((total, point) => total + point.accuracyMeters, 0) / points.length);
+  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((timeValue(endedAt) - timeValue(startedAt)) / 60000)) : 0;
+  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(accuracyTotal / points.length);
 
   return {
     summary: {
@@ -392,7 +407,7 @@ function getMovementRecordsWithIndexes(data: AppData, filters: MovementRecordFil
         nearestDestinationCategory: nearest?.destination.category ?? null,
       };
     })
-    .sort((a, b) => new Date(b.point.recordedAt).getTime() - new Date(a.point.recordedAt).getTime());
+    .sort((a, b) => timeValue(b.point.recordedAt) - timeValue(a.point.recordedAt));
 }
 
 export function getMovementRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementRecordView[] {
@@ -403,7 +418,7 @@ export function getMovementRecords(data: AppData, filters: MovementRecordFilters
 export function getTripFilterOptions(data: AppData, touristId = "all") {
   return data.trips
     .filter((trip) => touristId === "all" || trip.userId === touristId)
-    .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+    .sort((a, b) => timeValue(b.startedAt) - timeValue(a.startedAt));
 }
 
 function getMovementTripRecordsWithIndexes(data: AppData, filters: MovementRecordFilters, indexes: DashboardIndexes): MovementTripRecordView[] {
@@ -424,7 +439,7 @@ function getMovementTripRecordsWithIndexes(data: AppData, filters: MovementRecor
       };
     })
     .filter((record) => tripMatchesDateRange(record.trip, record.points, filters))
-    .sort((a, b) => new Date(b.trip.startedAt).getTime() - new Date(a.trip.startedAt).getTime());
+    .sort((a, b) => timeValue(b.trip.startedAt) - timeValue(a.trip.startedAt));
 }
 
 export function getMovementTripRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementTripRecordView[] {

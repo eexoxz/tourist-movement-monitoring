@@ -33,19 +33,27 @@ export type TouristWorkspaceData = {
 
 function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex): TripSummary {
   const visitedDestinationIds = new Set<string>();
-  const distance = points.slice(1).reduce((total, point, index) => total + distanceKm(points[index], point), 0);
+  let distance = 0;
+  let accuracyTotal = 0;
 
-  points.forEach((point) => {
+  for (let index = 0; index < points.length; index += 1) {
+    const point = points[index];
+    accuracyTotal += point.accuracyMeters;
+
+    if (index > 0) {
+      distance += distanceKm(points[index - 1], point);
+    }
+
     const nearest = destinationIndex.nearest(point, 1.2);
     if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
     }
-  });
+  }
 
   const startedAt = points[0]?.recordedAt ?? trip.startedAt;
   const endedAt = points.at(-1)?.recordedAt ?? trip.endedAt ?? startedAt;
-  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)) : 0;
-  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(points.reduce((total, point) => total + point.accuracyMeters, 0) / points.length);
+  const durationMinutes = startedAt && endedAt ? Math.max(0, Math.round((timeValue(endedAt) - timeValue(startedAt)) / 60000)) : 0;
+  const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(accuracyTotal / points.length);
 
   return {
     tripId: trip.id,
@@ -59,8 +67,23 @@ function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], des
   };
 }
 
+function timeValue(value: string | undefined) {
+  return value ? new Date(value).getTime() : 0;
+}
+
 function latestByDate<T>(items: T[], getDate: (item: T) => string) {
-  return items.reduce<T | undefined>((latest, item) => (!latest || new Date(getDate(item)).getTime() > new Date(getDate(latest)).getTime() ? item : latest), undefined);
+  let latest: T | undefined;
+  let latestTime = Number.NEGATIVE_INFINITY;
+
+  items.forEach((item) => {
+    const itemTime = timeValue(getDate(item));
+    if (!latest || itemTime > latestTime) {
+      latest = item;
+      latestTime = itemTime;
+    }
+  });
+
+  return latest;
 }
 
 export function getTouristWorkspaceData(data: AppData, userId: string, selectedTripId: string): TouristWorkspaceData {
@@ -97,13 +120,18 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
   });
 
   pointsByTrip.forEach((points) => {
-    points.sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+    points.sort((a, b) => timeValue(a.recordedAt) - timeValue(b.recordedAt));
   });
 
-  const userAnalyses = data.analyses.filter((analysis) => analysis.userId === userId);
-  userAnalyses.forEach((analysis) => {
+  const userAnalyses: AnalysisResult[] = [];
+  data.analyses.forEach((analysis) => {
+    if (analysis.userId !== userId) {
+      return;
+    }
+
+    userAnalyses.push(analysis);
     const current = analysesByTrip.get(analysis.tripId);
-    if (!current || new Date(analysis.generatedAt).getTime() > new Date(current.generatedAt).getTime()) {
+    if (!current || timeValue(analysis.generatedAt) > timeValue(current.generatedAt)) {
       analysesByTrip.set(analysis.tripId, analysis);
     }
   });
@@ -132,10 +160,10 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
     }
   });
 
-  recentCheckIns.sort((a, b) => new Date(b.checkedOutAt ?? b.checkedInAt).getTime() - new Date(a.checkedOutAt ?? a.checkedInAt).getTime());
-  savedRecommendations.sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime());
+  recentCheckIns.sort((a, b) => timeValue(b.checkedOutAt ?? b.checkedInAt) - timeValue(a.checkedOutAt ?? a.checkedInAt));
+  savedRecommendations.sort((a, b) => timeValue(b.generatedAt) - timeValue(a.generatedAt));
 
-  const recentTrips = [...userTrips].sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+  const recentTrips = [...userTrips].sort((a, b) => timeValue(b.startedAt) - timeValue(a.startedAt));
   const activeTrip = userTrips.find((trip) => trip.status === "active") ?? null;
   const activePoints = activeTrip ? pointsByTrip.get(activeTrip.id) ?? [] : [];
   const tripSummaries = userTrips.map((trip) => summarizeTripFromPoints(trip, pointsByTrip.get(trip.id) ?? [], destinationIndex));
@@ -150,7 +178,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
     userTrips,
     activeTrip,
     currentConsent: data.consents.find((consent) => consent.userId === userId && consent.granted) ?? null,
-    tripPoints: Array.from(pointsByTrip.values()).flat(),
+    tripPoints: userTrips.flatMap((trip) => pointsByTrip.get(trip.id) ?? []),
     activePoints,
     latestAnalysis,
     savedRecommendations,
@@ -170,7 +198,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
     visitedDestinationIds,
     userSosAlerts,
     userIncidentReports,
-    openSafetyCount: [...userSosAlerts, ...userIncidentReports].filter((record) => record.status !== "resolved").length,
+    openSafetyCount: userSosAlerts.reduce((count, record) => count + Number(record.status !== "resolved"), 0) + userIncidentReports.reduce((count, record) => count + Number(record.status !== "resolved"), 0),
     recentCheckIns: recentCheckIns.slice(0, 3),
   };
 }

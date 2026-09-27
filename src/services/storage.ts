@@ -372,16 +372,24 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
   };
 
   if (currentActor?.role === "tourist") {
-    const ownTripIds = new Set(data.trips.filter((trip) => trip.userId === currentActor.id).map((trip) => trip.id));
+    const ownConsents = data.consents.filter((row) => row.userId === currentActor.id);
+    const ownTrips = data.trips.filter((row) => row.userId === currentActor.id);
+    const ownTripIds = new Set(ownTrips.map((trip) => trip.id));
+    const ownPoints = data.points.filter((row) => row.userId === currentActor.id || ownTripIds.has(row.tripId));
+    const ownAnalyses = data.analyses.filter((row) => row.userId === currentActor.id);
+    const ownRecommendations = data.recommendations.filter((row) => row.userId === currentActor.id);
+    const ownSosAlerts = data.sosAlerts.filter((row) => row.userId === currentActor.id);
+    const ownIncidentReports = data.incidentReports.filter((row) => row.userId === currentActor.id);
+    const ownCheckIns = data.checkIns.filter((row) => row.userId === currentActor.id);
     const existingTrips = await getDocs(query(collection(db, FIRESTORE_COLLECTIONS.tripSessions), where("userId", "==", currentActor.id)));
-    const nextConsentIds = new Set(data.consents.filter((consent) => consent.userId === currentActor.id).map((consent) => consent.id));
-    const nextTripIds = new Set(data.trips.filter((trip) => trip.userId === currentActor.id).map((trip) => trip.id));
-    const nextPointIds = new Set(data.points.filter((point) => point.userId === currentActor.id || ownTripIds.has(point.tripId)).map((point) => point.id));
-    const nextAnalysisIds = new Set(data.analyses.filter((analysis) => analysis.userId === currentActor.id).map((analysis) => analysis.tripId));
-    const nextRecommendationIds = new Set(data.recommendations.filter((recommendation) => recommendation.userId === currentActor.id).map((recommendation) => recommendation.id));
-    const nextSosAlertIds = new Set(data.sosAlerts.filter((alert) => alert.userId === currentActor.id).map((alert) => alert.id));
-    const nextIncidentReportIds = new Set(data.incidentReports.filter((report) => report.userId === currentActor.id).map((report) => report.id));
-    const nextCheckInIds = new Set(data.checkIns.filter((checkIn) => checkIn.userId === currentActor.id).map((checkIn) => checkIn.id));
+    const nextConsentIds = new Set(ownConsents.map((consent) => consent.id));
+    const nextTripIds = new Set(ownTrips.map((trip) => trip.id));
+    const nextPointIds = new Set(ownPoints.map((point) => point.id));
+    const nextAnalysisIds = new Set(ownAnalyses.map((analysis) => analysis.tripId));
+    const nextRecommendationIds = new Set(ownRecommendations.map((recommendation) => recommendation.id));
+    const nextSosAlertIds = new Set(ownSosAlerts.map((alert) => alert.id));
+    const nextIncidentReportIds = new Set(ownIncidentReports.map((report) => report.id));
+    const nextCheckInIds = new Set(ownCheckIns.map((checkIn) => checkIn.id));
 
     await queueWrite((currentBatch) =>
       currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>)
@@ -396,32 +404,32 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
       )
     );
 
-    for (const consent of data.consents.filter((row) => row.userId === currentActor.id)) {
+    for (const consent of ownConsents) {
       await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.locationConsents, consent.id), cleanFirestoreData(consent) as Record<string, unknown>));
     }
-    for (const trip of data.trips.filter((row) => row.userId === currentActor.id)) {
+    for (const trip of ownTrips) {
       await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.tripSessions, trip.id), cleanFirestoreData(trip) as Record<string, unknown>));
     }
-    for (const point of data.points.filter((row) => row.userId === currentActor.id || ownTripIds.has(row.tripId))) {
+    for (const point of ownPoints) {
       await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.movementRecords, point.id), cleanFirestoreData(point) as Record<string, unknown>));
     }
-    for (const analysis of data.analyses.filter((row) => row.userId === currentActor.id)) {
+    for (const analysis of ownAnalyses) {
       await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.aiAnalyses, analysis.tripId), cleanFirestoreData(analysis) as Record<string, unknown>));
     }
-    for (const recommendation of data.recommendations.filter((row) => row.userId === currentActor.id)) {
+    for (const recommendation of ownRecommendations) {
       await queueWrite((currentBatch) =>
         currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>)
       );
     }
-    for (const alert of data.sosAlerts.filter((row) => row.userId === currentActor.id)) {
+    for (const alert of ownSosAlerts) {
       await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.sosAlerts, alert.id), cleanFirestoreData(alert) as Record<string, unknown>));
     }
-    for (const report of data.incidentReports.filter((row) => row.userId === currentActor.id)) {
+    for (const report of ownIncidentReports) {
       await queueWrite((currentBatch) =>
         currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.incidentReports, report.id), cleanFirestoreData(report) as Record<string, unknown>)
       );
     }
-    for (const checkIn of data.checkIns.filter((row) => row.userId === currentActor.id)) {
+    for (const checkIn of ownCheckIns) {
       await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
     }
 
@@ -439,9 +447,10 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.incidentReports, nextIncidentReportIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.checkIns, nextCheckInIds);
   } else {
+    const touristUsers = data.users.filter((user) => user.role === "tourist");
     await syncCollection(FIRESTORE_COLLECTIONS.users, data.users.map(publicUser), (user) => user.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.touristProfiles, data.users.filter((user) => user.role === "tourist").map(buildTouristProfileDocument), (user) => user.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.touristPreferences, data.users.filter((user) => user.role === "tourist").map(buildTouristPreferenceDocument), (preference) => preference.id);
+    await syncCollection(FIRESTORE_COLLECTIONS.touristProfiles, touristUsers.map(buildTouristProfileDocument), (user) => user.id);
+    await syncCollection(FIRESTORE_COLLECTIONS.touristPreferences, touristUsers.map(buildTouristPreferenceDocument), (preference) => preference.id);
     await syncCollection(FIRESTORE_COLLECTIONS.locationConsents, data.consents, (consent) => consent.id);
     await syncCollection(FIRESTORE_COLLECTIONS.tripSessions, data.trips, (trip) => trip.id);
     await syncCollection(FIRESTORE_COLLECTIONS.movementRecords, data.points, (point) => point.id);
