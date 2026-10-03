@@ -2009,6 +2009,12 @@ button:disabled {
 .police-help-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .sos-confirmation { display: grid; gap: 10px; padding: 12px 0; }
 .sos-confirmation p { margin: 0; }
+.sos-request-list { display: grid; gap: 12px; padding: 16px 0; }
+.sos-request-list h3 { margin: 0; }
+.sos-request-actions { min-width: 0; }
+.sos-request-actions button { white-space: normal; overflow-wrap: anywhere; }
+.sos-closed-history summary { cursor: pointer; font-weight: 700; }
+.sos-closed-history .safety-record-list { margin-top: 12px; }
 
 .nearby-service-card {
   display: grid;

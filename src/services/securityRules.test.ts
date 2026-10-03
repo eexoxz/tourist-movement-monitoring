@@ -5,6 +5,15 @@ import { resolve } from "node:path";
 const firestoreRules = readFileSync(resolve(process.cwd(), "firestore.rules"), "utf8");
 
 describe("Firestore security rules coverage", () => {
+  it("keeps SOS closure terminal and protects ownership, response and closure history", () => {
+    const sosRules = firestoreRules.split("match /sos_alerts/{alertId}")[1].split("match /incident_reports/{reportId}")[0];
+    expect(sosRules).toContain("request.resource.data.userId == resource.data.userId");
+    expect(sosRules).toContain('resource.data.status != "resolved"');
+    expect(sosRules).toContain('request.resource.data.status == "resolved"');
+    for (const field of ["closureReason", "closedBy", "resolvedAt", "adminNote"]) {
+      expect(sosRules).toContain(`request.resource.data.get("${field}", null) == resource.data.get("${field}", null)`);
+    }
+  });
   it("keeps tourist movement records scoped to the authenticated owner", () => {
     expect(firestoreRules).toContain("function ownsExistingRecord()");
     expect(firestoreRules).toContain("function ownsRequestedRecord()");

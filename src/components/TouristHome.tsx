@@ -9,7 +9,7 @@ import type { GeoFenceWarning } from "../services/geofencing";
 import type { IncidentPhotoAttachment } from "../services/incidentAttachments";
 import type { TourismAdvisory } from "../services/advisories";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
-import type { AppView, AttractionCheckIn, Destination, DestinationDemand, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
+import type { AppView, AttractionCheckIn, Destination, DestinationDemand, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, SosClosureReason, TripSession, User } from "../types";
 import { MovementMap } from "./MovementMap";
 import { Page } from "./Page";
 import { QrCheckInPanel } from "./QrCheckInPanel";
@@ -17,6 +17,8 @@ import { TouristPassCard } from "./TouristPassCard";
 import { TourismAdvisoryPanel } from "./TourismAdvisoryPanel";
 import { PoliceHelpPanel } from "./PoliceHelpPanel";
 import { emergencyHelpText } from "../services/emergencyHelpCopy";
+import { sosText } from "../services/sosCopy";
+import { TouristSosRequests } from "./TouristSosRequests";
 
 type IncidentOption = {
   value: IncidentType;
@@ -81,6 +83,7 @@ type TouristHomeProps = {
   onStartAttractionCheckIn: (destinationId?: string) => void;
   onFinishAttractionCheckIn: () => void;
   onSendSosAlert: () => void;
+  onCloseSosAlert: (id: string, reason: SosClosureReason) => void;
   onIncidentTypeChange: (type: IncidentType) => void;
   onIncidentDescriptionChange: (value: string) => void;
   onIncidentLocationNoteChange: (value: string) => void;
@@ -164,6 +167,7 @@ export function TouristHome({
   onStartAttractionCheckIn,
   onFinishAttractionCheckIn,
   onSendSosAlert,
+  onCloseSosAlert,
   onIncidentTypeChange,
   onIncidentDescriptionChange,
   onIncidentLocationNoteChange,
@@ -524,7 +528,7 @@ export function TouristHome({
               </button>
             </div>
 
-            <button className="primary-action danger wide" type="button" onClick={() => setIsConfirmingSos(true)} disabled={isConfirmingSos}>
+            <button className="primary-action danger wide" type="button" onClick={() => setIsConfirmingSos(true)} disabled={isConfirmingSos || userSosAlerts.some((alert) => alert.status !== "resolved")}>
               <ShieldCheck size={18} />
               {t("tourist.safety.sos")}
             </button>
@@ -535,9 +539,11 @@ export function TouristHome({
                 <button className="secondary-action" type="button" onClick={() => setIsConfirmingSos(false)}>{emergencyHelpText(locale, "cancel")}</button>
               </div>
             </div>}
+            {userSosAlerts.some((alert) => alert.status !== "resolved") && <p className="safety-disclaimer">{sosText(locale, "activeExists")}</p>}
             <p className="safety-disclaimer">{t("tourist.safety.prototypeNote")}</p>
-            {userSosAlerts[0] && userSosAlerts[0].status !== "resolved" && <PoliceHelpPanel
-              alert={userSosAlerts[0]} fallbackPoint={safetyReferencePoint} fallbackIsArea={isSafetyAreaReference} locale={locale}
+            <TouristSosRequests alerts={userSosAlerts} locale={locale} onClose={onCloseSosAlert} />
+            {userSosAlerts.find((alert) => alert.status !== "resolved") && <PoliceHelpPanel
+              alert={userSosAlerts.find((alert) => alert.status !== "resolved")!} fallbackPoint={safetyReferencePoint} fallbackIsArea={isSafetyAreaReference} locale={locale}
             />}
 
             <section className="emergency-help-panel">
@@ -623,12 +629,6 @@ export function TouristHome({
             </form>
 
             <div className="safety-record-list">
-              {userSosAlerts.slice(0, 2).map((alert) => (
-                <article className="safety-record-item" key={alert.id}>
-                  <strong>SOS · {getSafetyStatusLabel(alert.status, t)}</strong>
-                  <span>{alert.adminNote || `${t("common.waiting")} · ${formatDateTime(alert.createdAt)}`}</span>
-                </article>
-              ))}
               {userIncidentReports.slice(0, 2).map((report) => (
                 <article className="safety-record-item" key={report.id}>
                   <strong>{getIncidentTypeLabel(report.type, incidentTypeOptions, t)} · {getSafetyStatusLabel(report.status, t)}</strong>

@@ -62,7 +62,7 @@ describe("user interface quality guardrails", () => {
     expect(appSource).toContain("discoveryGpsPoint ? nearestDestination(discoveryGpsPoint");
     expect(appSource).not.toContain("recommendedCheckIn = latestKnownPoint");
     expect(appSource).toContain("getNearbyEmergencyServices(discoveryGpsPoint)");
-    expect(appSource).toContain("createSosAlert(data, user.id, discoveryGpsPoint)");
+    expect(appSource).toContain("createSosAlert(loadData(), user.id, discoveryGpsPoint)");
     expect(appSource).not.toContain("location: latestKnownPoint");
   });
   it("keeps mobile tourist pages protected from horizontal scrolling", () => {

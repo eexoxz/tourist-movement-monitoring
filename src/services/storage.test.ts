@@ -3,6 +3,13 @@ import { initialData } from "../data/demoData";
 import { cacheLocalData, clearSession, createId, FIRESTORE_COLLECTIONS, loadData, loadSession, normalizeAppData, saveSession } from "./storage";
 
 describe("storage service", () => {
+  it("preserves SOS closure metadata on reload and normalizes unknown closure reasons", () => {
+    const closed = { ...initialData.sosAlerts[0], status: "resolved" as const, closureReason: "cancelled" as const, closedBy: "test-user", resolvedAt: "2026-10-03T10:00:00Z" };
+    const restored = normalizeAppData({ ...initialData, sosAlerts: [closed] });
+    expect(restored.sosAlerts[0]).toMatchObject(closed);
+    const invalid = normalizeAppData({ ...initialData, sosAlerts: [{ ...closed, closureReason: "unknown" } as never] });
+    expect(invalid.sosAlerts[0].closureReason).toBeUndefined();
+  });
   it("reuses unchanged local data without rewriting it and detects another tab's changes", () => {
     const key = "tourist-movement-monitoring:data";
     const storage = new Map<string, string>();

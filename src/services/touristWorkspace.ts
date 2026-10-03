@@ -156,6 +156,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
   });
 
   recentCheckIns.sort((a, b) => compareTimeDesc(a.checkedOutAt ?? a.checkedInAt, b.checkedOutAt ?? b.checkedInAt));
+  userSosAlerts.sort((a, b) => compareTimeDesc(a.createdAt, b.createdAt));
   savedRecommendations.sort((a, b) => compareTimeDesc(a.generatedAt, b.generatedAt));
 
   const recentTrips = [...userTrips].sort((a, b) => compareTimeDesc(a.startedAt, b.startedAt));

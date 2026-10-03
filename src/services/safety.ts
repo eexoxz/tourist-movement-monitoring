@@ -1,9 +1,11 @@
-import type { AppData, IncidentReport, IncidentType, MovementPoint, SafetyStatus, SosAlert } from "../types";
+import type { AppData, IncidentReport, IncidentType, MovementPoint, SafetyStatus, SosAlert, SosClosureReason } from "../types";
 import { createId } from "./storage";
 
 export type SafetyLocation = Pick<MovementPoint, "latitude" | "longitude"> | null | undefined;
 
 export function createSosAlert(data: AppData, userId: string, location?: SafetyLocation) {
+  const existing = data.sosAlerts.find((alert) => alert.userId === userId && alert.status !== "resolved");
+  if (existing) return { alert: existing, data, alreadyOpen: true };
   const now = new Date().toISOString();
   const alert: SosAlert = {
     id: createId("sos"),
@@ -18,6 +20,7 @@ export function createSosAlert(data: AppData, userId: string, location?: SafetyL
 
   return {
     alert,
+    alreadyOpen: false,
     data: {
       ...data,
       sosAlerts: [alert, ...data.sosAlerts],
@@ -73,7 +76,7 @@ export function createIncidentReport(
   };
 }
 
-export function updateSosStatus(data: AppData, alertId: string, status: SafetyStatus, adminNote?: string) {
+export function updateSosStatus(data: AppData, alertId: string, status: SafetyStatus, adminNote?: string, closureReason?: SosClosureReason, closedBy?: string) {
   const now = new Date().toISOString();
   const cleanAdminNote = adminNote?.trim() || undefined;
   return {
@@ -82,14 +85,39 @@ export function updateSosStatus(data: AppData, alertId: string, status: SafetySt
       alert.id === alertId
         ? {
             ...alert,
-            status,
+            status: alert.status === "resolved" ? "resolved" : status,
             updatedAt: now,
-            resolvedAt: status === "resolved" ? now : alert.resolvedAt,
+            resolvedAt: alert.resolvedAt ?? (status === "resolved" ? now : undefined),
+            closureReason: alert.status === "resolved" ? alert.closureReason : status === "resolved" ? closureReason ?? "help-received" : undefined,
+            closedBy: alert.status === "resolved" ? alert.closedBy : status === "resolved" ? closedBy : undefined,
             adminNote: cleanAdminNote,
           }
         : alert
     ),
   };
+}
+
+export function closeOwnSosAlert(data: AppData, userId: string, alertId: string, reason: SosClosureReason): AppData {
+  const alert = data.sosAlerts.find((candidate) => candidate.id === alertId && candidate.userId === userId);
+  if (!alert || alert.status === "resolved") return data;
+  return updateSosStatus(data, alertId, "resolved", alert.adminNote, reason, userId);
+}
+
+// A closed case is terminal: delayed writes from another device must not reopen it.
+export function preferredSosAlert(incoming: SosAlert, existing: SosAlert): SosAlert {
+  if (existing.status === "resolved" && incoming.status !== "resolved") return existing;
+  if (incoming.status === "resolved" && existing.status !== "resolved") return incoming;
+  return Date.parse(incoming.updatedAt) > Date.parse(existing.updatedAt) ? incoming : existing;
+}
+
+export function mergeSosAlerts(local: SosAlert[], remote: SosAlert[]): SosAlert[] {
+  const records = new Map(local.map((alert) => [alert.id, alert]));
+  for (const alert of remote) {
+    const previous = records.get(alert.id);
+    const sameVersion = previous && alert.status === previous.status && Date.parse(alert.updatedAt) === Date.parse(previous.updatedAt);
+    records.set(alert.id, previous && !sameVersion ? preferredSosAlert(alert, previous) : alert);
+  }
+  return [...records.values()].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 }
 
 export function updateIncidentStatus(data: AppData, reportId: string, status: SafetyStatus, adminNote?: string) {

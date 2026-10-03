@@ -155,7 +155,15 @@ service cloud.firestore {
       allow create: if canCreateOwnedRecord()
         && request.resource.data.status in ["open", "reviewing", "resolved"];
       allow update: if canUpdateOwnedRecord()
-        && request.resource.data.status in ["open", "reviewing", "resolved"];
+        && request.resource.data.status in ["open", "reviewing", "resolved"]
+        && request.resource.data.userId == resource.data.userId
+        && (isAdmin() || request.resource.data.get("adminNote", null) == resource.data.get("adminNote", null))
+        && (resource.data.status != "resolved" || (
+          request.resource.data.status == "resolved"
+          && request.resource.data.get("closureReason", null) == resource.data.get("closureReason", null)
+          && request.resource.data.get("closedBy", null) == resource.data.get("closedBy", null)
+          && request.resource.data.get("resolvedAt", null) == resource.data.get("resolvedAt", null)
+        ));
       allow delete: if isAdmin() || ownsExistingRecord();
     }
 

@@ -25,6 +25,8 @@ import type {
   IncidentType,
   MovementPoint,
   SafetyStatus,
+  SosAlert,
+  SosClosureReason,
   TouristProfile,
   TravelPlanOptions,
   TripSession,
@@ -41,7 +43,7 @@ import {
   getViewFromPath,
   type AuthMode,
 } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, loadSharedDestinations, resetData, saveCheckInRecord, saveData, saveSession } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, loadSharedDestinations, resetData, saveCheckInRecord, saveData, saveSession, saveSosAlertRecord, subscribeSosAlerts } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
 import {
   buildMovementAlertsCsv,
@@ -98,7 +100,9 @@ import {
 } from "./services/movement";
 import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn } from "./services/checkIns";
 import { calculateGeofenceActivity, getActiveGeofenceWarnings } from "./services/geofencing";
-import { createIncidentReport, createSosAlert, getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "./services/safety";
+import { closeOwnSosAlert, createIncidentReport, createSosAlert, getOpenSafetyCount, mergeSosAlerts, updateIncidentStatus, updateSosStatus } from "./services/safety";
+import { sosText } from "./services/sosCopy";
+import { SosRequestActions } from "./components/SosRequestActions";
 import { getTouristManagementRows } from "./services/touristManagement";
 import { getTouristWorkspaceData } from "./services/touristWorkspace";
 import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from "./services/tripPresentation";
@@ -142,6 +146,7 @@ type PlanTier = NonNullable<TravelPlanOptions["minimumTier"]>;
 type AdminDashboardTab = "overview" | "tourists" | "records" | "safety" | "ai";
 type CommitDataOptions = {
   localOnlyStatus?: string;
+  sosAlert?: SosAlert;
 };
 const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
 const LAST_BROWSER_LOCATION_KEY_PREFIX = "tourist-movement-monitoring:last-location:";
@@ -577,7 +582,11 @@ function App() {
       return;
     }
 
-    void saveData(nextData, actor)
+    if (options.sosAlert) {
+      cacheLocalData(nextData);
+      setSyncStatus(sosText(locale, "syncPending"));
+    }
+    void (options.sosAlert ? saveSosAlertRecord(options.sosAlert, actor) : saveData(nextData, actor))
       .then((synced) => {
         setSyncStatus(synced ? "Saved to Firestore collections" : "Saved to local browser storage");
       })
@@ -586,6 +595,25 @@ function App() {
         notifySyncIssue("Cloud save needs retry", "Your change was kept locally. Firestore did not accept the latest sync.");
       });
   };
+
+  useEffect(() => {
+    if (!currentUser) return;
+    let stopped = false;
+    let unsubscribe: (() => void) | undefined;
+    void subscribeSosAlerts(currentUser, (alerts) => {
+      if (stopped) return;
+      setData((current) => {
+        const next = { ...current, sosAlerts: mergeSosAlerts(current.sosAlerts, alerts) };
+        cacheLocalData(next);
+        return next;
+      });
+    }, () => {
+      if (!stopped) notifySyncIssue(sosText(locale, "syncUnavailable"), sosText(locale, "syncDetail"));
+    }).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(() => {
+      if (!stopped) notifySyncIssue(sosText(locale, "syncUnavailable"), sosText(locale, "syncDetail"));
+    });
+    return () => { stopped = true; unsubscribe?.(); };
+  }, [currentUser?.id, currentUser?.role, locale]);
 
   const confirmPublicCheckIn = (): PublicCheckInResult => {
     if (!publicCheckInRequest?.destinationId || !publicCheckInDestination) {
@@ -1063,7 +1091,7 @@ function App() {
           <button className="secondary-action icon-action" type="button" title={t("nav.logout")} aria-label={t("nav.logout")} onClick={logout}><LogOut size={18} /></button>
         </div>}
         {currentUser.role === "admin" ? (
-          <AdminWorkspace data={data} view={safeView} locale={locale} onDataChange={commitData} notify={notify} />
+          <AdminWorkspace data={data} actor={currentUser} view={safeView} locale={locale} onDataChange={commitData} notify={notify} />
         ) : (
           <TouristWorkspace
             data={data}
@@ -1104,7 +1132,7 @@ function TouristWorkspace({
   locale: Locale;
   pendingCheckInDestinationId: string | null;
   onPendingCheckInConsumed: () => void;
-  onDataChange: (data: AppData, actor?: User | null) => void;
+  onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void;
   onViewChange: (view: AppView) => void;
   watchId: React.MutableRefObject<number | null>;
   notify: NotifyFn;
@@ -1679,8 +1707,12 @@ function TouristWorkspace({
   };
 
   const sendSosAlert = () => {
-    const result = createSosAlert(data, user.id, discoveryGpsPoint);
-    onDataChange(result.data, user);
+    const result = createSosAlert(loadData(), user.id, discoveryGpsPoint);
+    if (result.alreadyOpen) {
+      notify({ tone: "info", title: emergencyHelpText(locale, "recorded"), message: sosText(locale, "activeExists") });
+      return;
+    }
+    onDataChange(result.data, user, { sosAlert: result.alert });
     notify({
       tone: "warning",
       title: emergencyHelpText(locale, "recorded"),
@@ -1711,6 +1743,14 @@ function TouristWorkspace({
     setIncidentPhoto(result.attachment);
     setIncidentPhotoMessage(`${result.attachment.photoName} attached.`);
     notify({ tone: "success", title: "Photo attached", message: "The incident photo will be submitted with the report." });
+  };
+
+  const closeSosAlert = (id: string, reason: SosClosureReason) => {
+    const current = loadData();
+    const next = closeOwnSosAlert(current, user.id, id, reason);
+    if (next === current) return;
+    onDataChange(next, user, { sosAlert: next.sosAlerts.find((alert) => alert.id === id)! });
+    notify({ tone: "info", title: sosText(locale, "saved"), message: sosText(locale, "savedDetail") });
   };
 
   const removeIncidentPhoto = () => {
@@ -2132,6 +2172,7 @@ function TouristWorkspace({
       onStartAttractionCheckIn={startAttractionCheckIn}
       onFinishAttractionCheckIn={finishAttractionCheckIn}
       onSendSosAlert={sendSosAlert}
+      onCloseSosAlert={closeSosAlert}
       onIncidentTypeChange={setIncidentType}
       onIncidentDescriptionChange={setIncidentDescription}
       onIncidentLocationNoteChange={setIncidentLocationNote}
@@ -2164,12 +2205,14 @@ function TouristWorkspace({
 
 function AdminWorkspace({
   data,
+  actor,
   view,
   locale,
   onDataChange,
   notify,
 }: {
   data: AppData;
+  actor: User;
   view: AppView;
   locale: Locale;
   onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void;
@@ -2294,6 +2337,7 @@ function AdminWorkspace({
           detail: alert.message,
           locationNote: alert.latitude !== undefined && alert.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No recent location point was available.",
           adminNote: alert.adminNote,
+          closureReason: alert.closureReason,
           photoDataUrl: undefined,
           photoName: undefined,
           photoCapturedAt: undefined,
@@ -2309,13 +2353,14 @@ function AdminWorkspace({
           detail: report.description,
           locationNote: report.locationNote || (report.latitude !== undefined && report.longitude !== undefined ? "Approximate location was saved from the latest trip point." : "No location note was provided."),
           adminNote: report.adminNote,
+          closureReason: undefined,
           photoDataUrl: report.photoDataUrl,
           photoName: report.photoName,
           photoCapturedAt: report.photoCapturedAt,
           createdAt: report.createdAt,
           updatedAt: report.updatedAt,
         })),
-      ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+      ].sort((a, b) => Number(a.status === "resolved") - Number(b.status === "resolved") || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [data.incidentReports, data.sosAlerts]
   );
   const openSosCount = data.sosAlerts.filter((alert) => alert.status !== "resolved").length;
@@ -2504,13 +2549,14 @@ function AdminWorkspace({
     URL.revokeObjectURL(url);
   };
 
-  const updateSafetyCase = (kind: "sos" | "incident", recordId: string, status: SafetyStatus, adminNote?: string) => {
-    const nextData = kind === "sos" ? updateSosStatus(data, recordId, status, adminNote) : updateIncidentStatus(data, recordId, status, adminNote);
-    onDataChange(nextData);
+  const updateSafetyCase = (kind: "sos" | "incident", recordId: string, status: SafetyStatus, adminNote?: string, closureReason?: SosClosureReason) => {
+    const current = loadData();
+    const nextData = kind === "sos" ? updateSosStatus(current, recordId, status, adminNote, closureReason, actor.id) : updateIncidentStatus(current, recordId, status, adminNote);
+    onDataChange(nextData, actor, kind === "sos" ? { sosAlert: nextData.sosAlerts.find((alert) => alert.id === recordId) } : undefined);
     notify({
       tone: "success",
-      title: "Safety case updated",
-      message: adminNote?.trim() ? "The case status and admin response were saved." : status === "resolved" ? "The case is marked as resolved." : "The case status was saved.",
+      title: kind === "sos" && status === "resolved" ? sosText(locale, "saved") : "Safety case updated",
+      message: kind === "sos" && status === "resolved" ? sosText(locale, "savedDetail") : adminNote?.trim() ? "The case status and admin response were saved." : status === "resolved" ? "The case is marked as resolved." : "The case status was saved.",
     });
   };
 
@@ -2787,19 +2833,22 @@ function AdminWorkspace({
             : adminText("common.notProvided");
 
           return (
-            <article className={record.kind === "sos" ? "safety-admin-card urgent" : "safety-admin-card"} key={`${record.kind}-${record.id}`}>
+            <article className={record.kind === "sos" && record.status !== "resolved" ? "safety-admin-card urgent" : "safety-admin-card"} key={`${record.kind}-${record.id}`}>
               <div className="safety-admin-heading">
                 <div>
                   <span>{record.kind === "sos" ? adminText("safety.sos") : adminText("safety.incident")}</span>
                   <h3>{record.title}</h3>
                   <p>{record.detail}</p>
                 </div>
-                <select className="safety-status-select" value={record.status} onChange={(event) => updateSafetyCase(record.kind, record.id, event.target.value as SafetyStatus, noteDraft)} aria-label={adminText("safety.status")}>
+                <select className="safety-status-select" value={record.status} disabled={record.kind === "sos" && record.status === "resolved"} onChange={(event) => updateSafetyCase(record.kind, record.id, event.target.value as SafetyStatus, noteDraft)} aria-label={adminText("safety.status")}>
                   <option value="open">{adminText("safety.open")}</option>
                   <option value="reviewing">{adminText("safety.reviewing")}</option>
-                  <option value="resolved">{adminText("safety.resolved")}</option>
+                  {(record.kind !== "sos" || record.status === "resolved") && <option value="resolved">{adminText("safety.resolved")}</option>}
                 </select>
               </div>
+              {record.kind === "sos" && (record.status === "resolved"
+                ? <p className="safety-disclaimer">{sosText(locale, record.closureReason === "cancelled" ? "cancelled" : "resolved")}</p>
+                : <SosRequestActions locale={locale} onClose={(reason) => updateSafetyCase("sos", record.id, "resolved", noteDraft, reason)} />)}
               <dl className="safety-admin-meta">
                 <div>
                   <dt>{t("common.tourist")}</dt>

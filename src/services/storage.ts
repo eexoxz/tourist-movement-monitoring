@@ -18,6 +18,7 @@ import type {
   User,
 } from "../types";
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
+import { preferredSosAlert } from "./safety";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
@@ -143,6 +144,43 @@ export async function saveCheckInRecord(checkIn: AttractionCheckIn, actor?: User
   const { doc, setDoc } = await import("firebase/firestore");
   await setDoc(doc(services.db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>);
   return true;
+}
+
+export async function saveSosAlertRecord(alert: SosAlert, actor?: User | null) {
+  const services = getFirebaseServices();
+  if (!services?.auth.currentUser || !actor) return false;
+  const uid = services.auth.currentUser.uid;
+  if ((actor.id !== uid && actor.authUid !== uid) || (actor.role !== "admin" && actor.id !== alert.userId)) return false;
+  const { doc, runTransaction } = await import("firebase/firestore");
+  const reference = doc(services.db, FIRESTORE_COLLECTIONS.sosAlerts, alert.id);
+  await runTransaction(services.db, async (transaction) => {
+    const snapshot = await transaction.get(reference);
+    const existing = snapshot.exists() ? normalizeSosAlert({ ...snapshot.data(), id: snapshot.id }) : null;
+    if (existing && existing.userId !== alert.userId) throw new Error("SOS ownership cannot change");
+    const next = existing ? preferredSosAlert(alert, existing) : alert;
+    if (next !== existing) {
+      const saved = {
+        ...next,
+        ...(existing?.status === "resolved" ? { closureReason: existing.closureReason, closedBy: existing.closedBy, resolvedAt: existing.resolvedAt } : {}),
+        ...(existing && actor.role === "tourist" ? { adminNote: existing.adminNote } : {}),
+      };
+      transaction.set(reference, cleanFirestoreData(saved) as Record<string, unknown>);
+    }
+  });
+  return true;
+}
+
+export async function subscribeSosAlerts(actor: User, onChange: (alerts: SosAlert[]) => void, onError: () => void) {
+  const services = getFirebaseServices();
+  if (!services?.auth.currentUser) return () => {};
+  const uid = services.auth.currentUser.uid;
+  if (actor.id !== uid && actor.authUid !== uid) return () => {};
+  const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+  const source = collection(services.db, FIRESTORE_COLLECTIONS.sosAlerts);
+  const scoped = actor.role === "admin" ? source : query(source, where("userId", "==", actor.id));
+  return onSnapshot(scoped, (snapshot) => {
+    onChange(snapshot.docs.map((record) => normalizeSosAlert({ ...record.data(), id: record.id })));
+  }, onError);
 }
 
 export function loadSession(): string | null {
@@ -396,6 +434,17 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     }
   };
 
+  const syncSosRecords = async (rows: SosAlert[]) => {
+    const source = collection(db, FIRESTORE_COLLECTIONS.sosAlerts);
+    const snapshot = await getDocs(currentActor.role === "admin" ? source : query(source, where("userId", "==", currentActor.id)));
+    const existing = new Map(snapshot.docs.map((record) => [record.id, normalizeSosAlert({ ...record.data(), id: record.id })]));
+    for (const alert of rows) {
+      const remote = existing.get(alert.id);
+      if (remote && preferredSosAlert(alert, remote) === remote) continue;
+      await saveSosAlertRecord(alert, currentActor);
+    }
+  };
+
   if (currentActor?.role === "tourist") {
     const ownConsents = data.consents.filter((row) => row.userId === currentActor.id);
     const ownTrips = data.trips.filter((row) => row.userId === currentActor.id);
@@ -412,7 +461,6 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     const nextPointIds = new Set(ownPoints.map((point) => point.id));
     const nextAnalysisIds = new Set(ownAnalyses.map((analysis) => analysis.tripId));
     const nextRecommendationIds = new Set(ownRecommendations.map((recommendation) => recommendation.id));
-    const nextSosAlertIds = new Set(ownSosAlerts.map((alert) => alert.id));
     const nextIncidentReportIds = new Set(ownIncidentReports.map((report) => report.id));
     const nextCheckInIds = new Set(ownCheckIns.map((checkIn) => checkIn.id));
 
@@ -446,9 +494,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
         currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>)
       );
     }
-    for (const alert of ownSosAlerts) {
-      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.sosAlerts, alert.id), cleanFirestoreData(alert) as Record<string, unknown>));
-    }
+    await syncSosRecords(ownSosAlerts);
     for (const report of ownIncidentReports) {
       await queueWrite((currentBatch) =>
         currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.incidentReports, report.id), cleanFirestoreData(report) as Record<string, unknown>)
@@ -468,7 +514,6 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.movementRecords, nextPointIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.aiAnalyses, nextAnalysisIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds);
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.sosAlerts, nextSosAlertIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.incidentReports, nextIncidentReportIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.checkIns, nextCheckInIds);
   } else {
@@ -483,7 +528,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await syncCollection(FIRESTORE_COLLECTIONS.destinations, data.destinations, (destination) => destination.id);
     await syncCollection(FIRESTORE_COLLECTIONS.aiAnalyses, data.analyses, (analysis) => analysis.tripId);
     await syncCollection(FIRESTORE_COLLECTIONS.recommendations, data.recommendations, (recommendation) => recommendation.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.sosAlerts, data.sosAlerts, (alert) => alert.id);
+    await syncSosRecords(data.sosAlerts);
     await syncCollection(FIRESTORE_COLLECTIONS.incidentReports, data.incidentReports, (report) => report.id);
     await syncCollection(FIRESTORE_COLLECTIONS.checkIns, data.checkIns, (checkIn) => checkIn.id);
     await syncCollection(FIRESTORE_COLLECTIONS.geofences, data.geofences, (geofence) => geofence.id);
@@ -727,6 +772,8 @@ function normalizeSosAlert(alert: Partial<SosAlert>): SosAlert {
     createdAt,
     updatedAt: alert.updatedAt ?? createdAt,
     resolvedAt: alert.resolvedAt,
+    closureReason: alert.closureReason === "cancelled" || alert.closureReason === "help-received" ? alert.closureReason : undefined,
+    closedBy: alert.closedBy,
     adminNote: alert.adminNote,
   };
 }

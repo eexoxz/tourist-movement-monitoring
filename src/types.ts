@@ -169,6 +169,7 @@ export type LocationConsent = {
 };
 
 export type SafetyStatus = "open" | "reviewing" | "resolved";
+export type SosClosureReason = "cancelled" | "help-received";
 
 export type SosAlert = {
   id: string;
@@ -180,6 +181,8 @@ export type SosAlert = {
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
+  closureReason?: SosClosureReason;
+  closedBy?: string;
   adminNote?: string;
 };
 
