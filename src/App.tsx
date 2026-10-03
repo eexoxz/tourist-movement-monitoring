@@ -1055,6 +1055,12 @@ function App() {
       </aside>
 
       <main className="content">
+        {currentUser.role === "tourist" && <div className="mobile-account-tools">
+          <LanguageSelector locale={locale} onLocaleChange={changeLocale} />
+          <button className="secondary-action icon-action" type="button" title={t("nav.profile")} aria-label={t("nav.profile")} onClick={() => goToView("profile")}><UserRound size={18} /></button>
+          <button className="secondary-action icon-action" type="button" title={browserNotificationLabel} aria-label={browserNotificationLabel} disabled={browserNotificationDisabled} onClick={enableBrowserNotifications}><BellRing size={18} /></button>
+          <button className="secondary-action icon-action" type="button" title={t("nav.logout")} aria-label={t("nav.logout")} onClick={logout}><LogOut size={18} /></button>
+        </div>}
         {currentUser.role === "admin" ? (
           <AdminWorkspace data={data} view={safeView} locale={locale} onDataChange={commitData} notify={notify} />
         ) : (
@@ -1179,7 +1185,8 @@ function TouristWorkspace({
   );
   const activeCheckIn = getActiveCheckIn(data, user.id);
   const activeCheckInDestination = activeCheckIn ? localizedDestinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
-  const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, localizedDestinations)?.destination ?? null : null;
+  const nearestCheckIn = discoveryGpsPoint ? nearestDestination(discoveryGpsPoint, localizedDestinations) : null;
+  const recommendedCheckIn = nearestCheckIn && nearestCheckIn.distance <= 1.2 ? nearestCheckIn.destination : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(discoveryGpsPoint, data.geofences), [data.geofences, discoveryGpsPoint]);
   const displayName = getDisplayName(user);
   const trackingFeedback = trackingQualityIssue ? activityText(locale, trackingQualityIssue) : trackingMessage;
@@ -1201,7 +1208,7 @@ function TouristWorkspace({
     ? localizedDestinations.find((destination) => destination.id === destinationDemand.find((row) => row.popularityScore > 0 && localDestinationIds.has(row.destinationId))?.destinationId)
     : null;
   const nextFestival = getLocalEventAnnouncement(upcomingFestivals, discoveryReference);
-  const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(latestKnownPoint), [latestKnownPoint]);
+  const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(discoveryGpsPoint), [discoveryGpsPoint]);
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -1675,12 +1682,12 @@ function TouristWorkspace({
       return;
     }
 
-    const result = createSosAlert(data, user.id, latestKnownPoint);
+    const result = createSosAlert(data, user.id, discoveryGpsPoint);
     onDataChange(result.data, user);
     notify({
       tone: "warning",
       title: "SOS request recorded",
-      message: latestKnownPoint ? "Your latest saved location was attached for administrator review." : "No saved location was available, but the request was recorded.",
+      message: discoveryGpsPoint ? "Your latest saved location was attached for administrator review." : "No saved location was available, but the request was recorded.",
       browser: true,
     });
   };
@@ -1721,7 +1728,7 @@ function TouristWorkspace({
       type: incidentType,
       description: incidentDescription,
       locationNote: incidentLocationNote,
-      location: latestKnownPoint,
+      location: discoveryGpsPoint,
       photoDataUrl: incidentPhoto?.photoDataUrl,
       photoName: incidentPhoto?.photoName,
       photoType: incidentPhoto?.photoType,
@@ -1748,7 +1755,7 @@ function TouristWorkspace({
       userId: user.id,
       destinationId,
       tripId: activeTrip?.id,
-      location: latestKnownPoint,
+      location: discoveryGpsPoint,
     });
 
     if (result.error || !result.data) {

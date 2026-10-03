@@ -21,6 +21,7 @@ import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
+let localDataCache: { storage: Storage; raw: string; data: AppData } | undefined;
 const LEGACY_DATA_COLLECTION = "prototype";
 const LEGACY_DATA_DOCUMENT = "appData";
 
@@ -83,9 +84,11 @@ type DestinationCategoryDocument = {
 
 export function loadData(): AppData {
   const raw = localStorage.getItem(DATA_KEY);
+  if (localDataCache?.storage === localStorage && localDataCache.raw === raw) return localDataCache.data;
   if (!raw) {
-    saveLocalData(initialData);
-    return normalizeAppData(initialData);
+    const data = normalizeAppData(initialData);
+    saveLocalData(data);
+    return data;
   }
 
   try {
@@ -93,13 +96,14 @@ export function loadData(): AppData {
     saveLocalData(data);
     return data;
   } catch {
-    saveLocalData(initialData);
-    return normalizeAppData(initialData);
+    const data = normalizeAppData(initialData);
+    saveLocalData(data);
+    return data;
   }
 }
 
 export function saveData(data: AppData, actor?: User | null) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+  saveLocalData(data);
   return saveCloudData(data, actor);
 }
 
@@ -603,7 +607,9 @@ function buildDestinationCategoryRows(destinations: Destination[]): DestinationC
 }
 
 function saveLocalData(data: AppData) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+  const raw = JSON.stringify(data);
+  localStorage.setItem(DATA_KEY, raw);
+  localDataCache = { storage: localStorage, raw, data };
 }
 
 function asArray<T>(value: unknown): T[] {

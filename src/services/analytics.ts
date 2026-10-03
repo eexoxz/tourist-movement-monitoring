@@ -19,6 +19,7 @@ import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
 import { filterQualityMovementPoints, isContinuousMovementSegment } from "./movementQuality";
 import { getRecordedStopIds } from "./stopEvidence";
+import { silhouetteScores } from "./clusterMetrics";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 const kMeansFeatureNames: Array<keyof KMeansFeatureVector> = ["culturalProportion", "natureProportion", "urbanProportion", "uniqueDestinations"];
@@ -368,48 +369,19 @@ function runKMeans(features: TripFeature[]) {
     );
   }
 
+  const silhouettes = silhouetteScores(features.map((feature) => feature.vector), assignments, k);
   return new Map(
     features.map((feature, index) => [
       feature.trip.id,
       {
         cluster: assignments[index],
-        silhouetteScore: silhouetteForFeature(features, assignments, index, k),
+        silhouetteScore: silhouettes[index],
         centroid: centroids[assignments[index]],
         distanceToCentroid: Number(euclidean(feature.vector, centroids[assignments[index]]).toFixed(3)),
         label: clusterLabel(centroids[assignments[index]]),
       },
     ])
   );
-}
-
-function silhouetteForFeature(features: TripFeature[], assignments: number[], featureIndex: number, k: number) {
-  if (k <= 1 || features.length <= 1) {
-    return 0;
-  }
-
-  const feature = features[featureIndex];
-  const ownCluster = assignments[featureIndex];
-  const ownDistances = features
-    .map((candidate, index) => ({ candidate, index }))
-    .filter(({ index }) => index !== featureIndex && assignments[index] === ownCluster)
-    .map(({ candidate }) => euclidean(feature.vector, candidate.vector));
-
-  const a = ownDistances.length ? ownDistances.reduce((sum, value) => sum + value, 0) / ownDistances.length : 0;
-  const otherAverages = Array.from({ length: k }, (_, clusterIndex) => clusterIndex)
-    .filter((clusterIndex) => clusterIndex !== ownCluster)
-    .map((clusterIndex) => {
-      const distances = features
-        .filter((_, index) => assignments[index] === clusterIndex)
-        .map((candidate) => euclidean(feature.vector, candidate.vector));
-      return distances.length ? distances.reduce((sum, value) => sum + value, 0) / distances.length : Number.POSITIVE_INFINITY;
-    });
-  const b = Math.min(...otherAverages);
-
-  if (!Number.isFinite(b) || Math.max(a, b) === 0) {
-    return 0;
-  }
-
-  return Number(((b - a) / Math.max(a, b)).toFixed(2));
 }
 
 function profileMatchesCategory(profile: TouristProfile, category: DestinationCategory) {
@@ -512,8 +484,20 @@ function movementPointsByTrip(points: MovementPoint[]) {
   return grouped;
 }
 
+type DemandCacheEntry = {
+  trips: AppData["trips"];
+  points: AppData["points"];
+  destinations: AppData["destinations"];
+  computedAt: number;
+  results: DestinationDemand[];
+};
+const demandCache = new Map<boolean, DemandCacheEntry>();
+
 export function calculateDestinationDemand(data: AppData, options: { includeDemo?: boolean; now?: number } = {}): DestinationDemand[] {
   const now = options.now ?? Date.now();
+  const includeDemo = options.includeDemo !== false;
+  const cached = demandCache.get(includeDemo);
+  if (options.now === undefined && cached && cached.trips === data.trips && cached.points === data.points && cached.destinations === data.destinations && now >= cached.computedAt && now - cached.computedAt < 5000) return cached.results;
   const since = now - 7 * 24 * 60 * 60 * 1000;
   const rowsByDestination = createDemandAccumulators(data.destinations);
   const tripById = new Map(data.trips.map((trip) => [trip.id, trip]));
@@ -582,7 +566,7 @@ export function calculateDestinationDemand(data: AppData, options: { includeDemo
   }));
   const maxScore = Math.max(1, ...rows.map((row) => row.rawScore));
 
-  return rows
+  const results = rows
     .map((row) => {
       const popularityScore = Math.round((row.rawScore / maxScore) * 100);
 
@@ -598,6 +582,8 @@ export function calculateDestinationDemand(data: AppData, options: { includeDemo
       };
     })
     .sort((a, b) => b.popularityScore - a.popularityScore);
+  if (options.now === undefined) demandCache.set(includeDemo, { trips: data.trips, points: data.points, destinations: data.destinations, computedAt: now, results });
+  return results;
 }
 
 export function getDestinationDemand(data: AppData, destinationId: string, destinationDemand = calculateDestinationDemand(data)) {
@@ -681,12 +667,16 @@ export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | 
   };
 }
 
+let analysisCache: { trips: AppData["trips"]; points: AppData["points"]; destinations: AppData["destinations"]; expiresAt: number; results: AnalysisResult[] } | undefined;
+
 export function analyzeAllTrips(data: AppData): AnalysisResult[] {
+  const now = Date.now();
+  if (analysisCache && analysisCache.trips === data.trips && analysisCache.points === data.points && analysisCache.destinations === data.destinations && now < analysisCache.expiresAt) return analysisCache.results;
   const features = createTripFeatures(data);
   const clusters = runKMeans(features);
   const generatedAt = new Date().toISOString();
 
-  return features.map((feature) => {
+  const results = features.map((feature) => {
     const cluster = clusters.get(feature.trip.id) ?? {
       cluster: 0,
       silhouetteScore: 0,
@@ -714,10 +704,12 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
       clusterCentroid: legacyCentroidRecord(cluster.centroid),
       categoryCounts: feature.counts,
       dataPointCount: feature.pointCount,
-      method: "k-means",
+      method: "k-means" as const,
       generatedAt,
     };
   });
+  analysisCache = { trips: data.trips, points: data.points, destinations: data.destinations, expiresAt: now + 60000, results };
+  return results;
 }
 
 export function recommendForUser(

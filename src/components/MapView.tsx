@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Building2, Landmark, Trees, Utensils, Waves, X, type LucideIcon } from "lucide-react";
+import { Building2, Landmark, LocateFixed, Trees, Utensils, Waves, X, type LucideIcon } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, DestinationDemand, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
@@ -374,8 +374,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? t("map.loading") : t("map.error")}</div>}
       {mode === "tourist" && <div className="map-mode-label">{t("map.touristMap")}</div>}
       {activePoint && (
-        <button className="map-current-button" type="button" onClick={centerOnActivePoint}>
-          {isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}
+        <button className="map-current-button" type="button" onClick={centerOnActivePoint} title={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")} aria-label={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}>
+          <LocateFixed size={18} aria-hidden="true" />
+          <span>{isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}</span>
         </button>
       )}
       <div className="map-legend" aria-label={t("map.legendAria")}>

@@ -1,8 +1,30 @@
 import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
-import { clearSession, createId, FIRESTORE_COLLECTIONS, loadData, loadSession, normalizeAppData, saveSession } from "./storage";
+import { cacheLocalData, clearSession, createId, FIRESTORE_COLLECTIONS, loadData, loadSession, normalizeAppData, saveSession } from "./storage";
 
 describe("storage service", () => {
+  it("reuses unchanged local data without rewriting it and detects another tab's changes", () => {
+    const key = "tourist-movement-monitoring:data";
+    const storage = new Map<string, string>();
+    const write = vi.fn((name: string, value: string) => storage.set(name, value));
+    vi.stubGlobal("localStorage", { getItem: (name: string) => storage.get(name) ?? null, setItem: write });
+    try {
+      const first = loadData();
+      expect(loadData()).toBe(first);
+      expect(write).toHaveBeenCalledTimes(1);
+      const changed = { ...first, users: first.users.map((user, index) => index === 0 ? { ...user, name: "Updated locally" } : user) };
+      cacheLocalData(changed);
+      expect(loadData()).toBe(changed);
+      expect(write).toHaveBeenCalledTimes(2);
+      storage.set(key, JSON.stringify({ ...changed, points: [] }));
+      expect(loadData().points).toEqual([]);
+      expect(loadData()).not.toBe(changed);
+      storage.delete(key);
+      expect(loadData().points.length).toBeGreaterThan(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
   it("uses DPP-aligned Firestore collection names for new writes", () => {
     expect(Object.values(FIRESTORE_COLLECTIONS)).toEqual(
       expect.arrayContaining([

@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
 import type { AppData, MovementPoint, TripSession } from "../types";
 import {
+  analyzeAllTrips,
   calculateDestinationDemand,
   calculateMovementAlerts,
   buildMovementAlertsCsv,
@@ -18,6 +19,51 @@ function countAnalyzableCompletedTrips(data: AppData) {
 }
 
 describe("analytics service", () => {
+  it("reuses demand only for unchanged data, the same source mode and a short time window", () => {
+    const data = { ...initialData, trips: [...initialData.trips], points: [...initialData.points], destinations: [...initialData.destinations] };
+    const now = Date.now();
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now);
+    try {
+      const results = calculateDestinationDemand(data);
+      expect(calculateDestinationDemand({ ...data, users: [...data.users] })).toBe(results);
+      expect(calculateDestinationDemand(data, { includeDemo: false })).not.toBe(results);
+      expect(calculateDestinationDemand(data)).toBe(results);
+      expect(calculateDestinationDemand(data, { now })).toEqual(results);
+      expect(calculateDestinationDemand(data, { now })).not.toBe(results);
+      for (const changed of [{ ...data, points: [] }, { ...data, trips: [] }, { ...data, destinations: [] }]) {
+        const previous = calculateDestinationDemand(data);
+        expect(calculateDestinationDemand(changed)).not.toBe(previous);
+      }
+      const latest = calculateDestinationDemand(data);
+      clock.mockReturnValue(now + 5001);
+      expect(calculateDestinationDemand(data)).not.toBe(latest);
+      const later = calculateDestinationDemand(data);
+      clock.mockReturnValue(now);
+      expect(calculateDestinationDemand(data)).not.toBe(later);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it("reuses unchanged analysis but invalidates every movement input and its time window", () => {
+    const tripIds = new Set(initialData.trips.slice(0, 3).map((trip) => trip.id));
+    const data = { ...initialData, trips: initialData.trips.slice(0, 3), points: initialData.points.filter((point) => tripIds.has(point.tripId)) };
+    const now = Date.now();
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now);
+    try {
+      const results = analyzeAllTrips(data);
+      expect(analyzeAllTrips({ ...data, users: [...data.users] })).toBe(results);
+      for (const changed of [{ ...data, points: [...data.points] }, { ...data, trips: [...data.trips] }, { ...data, destinations: [...data.destinations] }]) {
+        const previous = analyzeAllTrips(data);
+        expect(analyzeAllTrips(changed)).not.toBe(previous);
+      }
+      const latest = analyzeAllTrips(data);
+      clock.mockReturnValue(now + 60001);
+      expect(analyzeAllTrips(data)).not.toBe(latest);
+    } finally {
+      clock.mockRestore();
+    }
+  });
   it("assigns valid completed trips to K-Means clusters and Decision Tree profiles", () => {
     const data = refreshAllRecommendations(initialData);
 

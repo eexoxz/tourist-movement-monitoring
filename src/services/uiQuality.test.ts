@@ -27,6 +27,28 @@ const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("contains Leaflet stacking so maps cannot intercept mobile navigation or modals", () => {
+    expect(stylesSource).toMatch(/\.map-frame\s*\{[^}]*isolation:\s*isolate/);
+    expect(stylesSource).toContain(".map-detail-panel:not(.visible)");
+  });
+
+  it("keeps mobile account actions and calendar date filters accessible", () => {
+    expect(appSource).toContain('className="mobile-account-tools"');
+    expect(stylesSource).toContain(".tourist-shell .mobile-account-tools .language-selector");
+    expect(stylesSource).toContain(".festival-calendar:not(.compact) > .section-heading");
+    expect(mapSource).toContain("LocateFixed");
+    expect(stylesSource).toMatch(/\.admin-shell \.sidebar\s*\{[^}]*position:\s*static/);
+  });
+
+  it("stacks named Home preview areas on mobile and avoids historical nearest check-ins", () => {
+    expect(stylesSource).toContain('grid-template-areas: "recommend" "event" "demand"');
+    expect(appSource).toContain("nearestCheckIn.distance <= 1.2");
+    expect(appSource).toContain("discoveryGpsPoint ? nearestDestination(discoveryGpsPoint");
+    expect(appSource).not.toContain("recommendedCheckIn = latestKnownPoint");
+    expect(appSource).toContain("getNearbyEmergencyServices(discoveryGpsPoint)");
+    expect(appSource).toContain("createSosAlert(data, user.id, discoveryGpsPoint)");
+    expect(appSource).not.toContain("location: latestKnownPoint");
+  });
   it("keeps mobile tourist pages protected from horizontal scrolling", () => {
     expect(stylesSource).toContain("overflow-x: hidden");
     expect(stylesSource).toContain("@media (max-width: 760px)");

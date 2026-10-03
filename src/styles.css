@@ -565,8 +565,8 @@ button:disabled {
 }
 
 .home-status-card {
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: 1fr;
+  align-content: start;
   padding: 20px;
   box-shadow: none;
 }
@@ -2560,6 +2560,8 @@ button:disabled {
 
 .map-frame {
   position: relative;
+  isolation: isolate;
+  z-index: 0;
   min-width: 0;
   min-height: 580px;
 }
@@ -2869,6 +2871,9 @@ button:disabled {
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
   font-size: 0.82rem;
   font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .map-legend {
@@ -4028,9 +4033,22 @@ button:disabled {
 
 .festival-filter-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   width: min(100%, 880px);
+}
+
+.festival-calendar:not(.compact) > .section-heading {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+.festival-filter,
+.festival-filter input,
+.festival-filter select {
+  min-width: 0;
+  width: 100%;
 }
 
 .festival-filter select,
@@ -5602,6 +5620,18 @@ textarea {
   padding: 0 12px;
 }
 
+.admin-filter-toolbar .toolbar-input:not([type="date"]) {
+  flex: 1 1 260px;
+  max-width: none;
+  min-width: 0;
+}
+
+.admin-filter-toolbar .toolbar-select {
+  flex: 1 1 220px;
+  width: auto;
+  min-width: 0;
+}
+
 .analysis-card small {
   display: block;
   margin-top: 6px;
@@ -5679,11 +5709,64 @@ textarea {
   padding: 0;
 }
 
+.mobile-account-tools {
+  display: none;
+}
+
 .edit-form {
   margin-top: 4px;
 }
 
+@media (max-width: 1280px) {
+  .home-today-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .home-status-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .home-trip-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.76fr);
+  }
+}
+
 @media (max-width: 1040px) {
+  .mobile-account-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(3, 44px);
+    align-items: end;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .tourist-shell .mobile-account-tools .language-selector {
+    display: grid;
+  }
+
+  .mobile-account-tools .language-selector select,
+  .mobile-account-tools .icon-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+  }
+
+  .tourist-shell .sidebar .language-selector {
+    display: none;
+  }
+
+  .tourist-shell .sidebar-tools {
+    display: none;
+  }
+
+  .home-support-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-shell .logout {
+    display: flex;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
   }
@@ -5692,6 +5775,16 @@ textarea {
     position: sticky;
     top: 0;
     z-index: 10;
+  }
+
+  .admin-shell .sidebar {
+    position: static;
+    gap: 10px;
+  }
+
+  .admin-shell .nav-list,
+  .admin-shell .sidebar-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .nav-list {
@@ -5803,7 +5896,7 @@ textarea {
     position: fixed;
     inset: auto 0 0;
     z-index: 30;
-    padding: 8px 10px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
     border-top: 1px solid rgba(20, 83, 45, 0.16);
     border-right: 0;
     box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.1);
@@ -5923,6 +6016,15 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .home-preview-grid {
+    grid-template-areas: "recommend" "event" "demand";
+  }
+
+  .recommendation-preview {
+    min-height: 0;
+    padding: 18px;
+  }
+
   .home-map-panel .map-view {
     min-height: 380px;
   }
@@ -5934,11 +6036,44 @@ textarea {
   }
 
   .home-today-panel {
-    padding: 14px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .home-trip-controls {
-    padding: 16px;
+    padding: 12px;
+  }
+
+  .home-status-card {
+    padding: 12px;
+  }
+
+  .home-status-card h2 {
+    font-size: 1.12rem;
+  }
+
+  .home-status-card p,
+  .home-trip-controls .consent-box p {
+    font-size: 0.84rem;
+  }
+
+  .tourist-shell .discovery-location-control {
+    gap: 8px;
+    padding-block: 8px;
+  }
+
+  .tourist-shell .activity-basis-row {
+    margin-bottom: 0;
+  }
+
+  .home-trip-controls .consent-box {
+    padding: 10px;
+  }
+
+  .home-trip-controls .mobile-action-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .home-quick-actions button {
@@ -6096,6 +6231,18 @@ textarea {
     bottom: auto;
     left: auto;
     max-width: calc(100% - 28px);
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .map-current-button span {
+    display: none;
+  }
+
+  .map-detail-panel:not(.visible) {
+    display: none;
   }
 
   .map-detail-panel {
@@ -6203,7 +6350,11 @@ textarea {
     align-items: start;
   }
 
-  .page-header h1,
+  .page-header h1 {
+    font-size: 1.6rem;
+    overflow-wrap: anywhere;
+  }
+
   .auth-copy h1 {
     font-size: 2rem;
   }
@@ -6225,5 +6376,11 @@ textarea {
 
   .map-frame {
     min-height: 420px;
+  }
+}
+
+@media (max-width: 360px) {
+  .festival-filter-grid {
+    grid-template-columns: 1fr;
   }
 }

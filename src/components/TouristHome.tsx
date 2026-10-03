@@ -543,7 +543,7 @@ export function TouristHome({
               <div className="nearby-service-list">
                 <div className="nearby-service-heading">
                   <strong>{t("tourist.safety.nearestPreparedServices")}</strong>
-                  <span>{activeJourneyPoint ? t("tourist.safety.basedOnLatestLocation") : t("tourist.safety.allowLocationToSort")}</span>
+                  <span>{nearbyEmergencyServices.length ? t("tourist.safety.basedOnLatestLocation") : t("tourist.safety.allowLocationToSort")}</span>
                 </div>
                 {nearbyEmergencyServices.map((service) => (
                   <article className={`nearby-service-card ${service.kind}`} key={service.id}>
