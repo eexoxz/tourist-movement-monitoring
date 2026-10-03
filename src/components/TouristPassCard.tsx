@@ -54,7 +54,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
           {t("tourist.pass.eyebrow")}
         </span>
         <h2>{compact ? t("tourist.pass.compactTitle") : t("tourist.pass.title")}</h2>
-        {destination && <DestinationVisual destination={destination} compact />}
+        {destination && <DestinationVisual destination={destination} compact locale={locale} />}
         <p>{destination ? `${t("tourist.pass.checkInDescription")} ${destination.name}.` : t("tourist.pass.description")}</p>
 
         <dl className="tourist-pass-details">

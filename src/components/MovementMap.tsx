@@ -1,6 +1,7 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import type { Destination, DestinationDemand, MovementPoint } from "../types";
 import { translate, type Locale } from "../services/i18n";
+import { localizeDestinations } from "../services/destinationLocale";
 
 const MapView = lazy(() => import("./MapView").then((module) => ({ default: module.MapView })));
 
@@ -16,6 +17,7 @@ type MovementMapProps = {
 };
 
 export function MovementMap({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand }: MovementMapProps) {
+  const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
   return (
     <Suspense
       fallback={
@@ -25,7 +27,7 @@ export function MovementMap({ points, destinations, activePoint, mode = "admin",
         </div>
       }
     >
-      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} displayMode={displayMode} locale={locale} isBrowsingArea={isBrowsingArea} activityDemand={activityDemand} />
+      <MapView points={points} destinations={localizedDestinations} activePoint={activePoint} mode={mode} displayMode={displayMode} locale={locale} isBrowsingArea={isBrowsingArea} activityDemand={activityDemand} />
     </Suspense>
   );
 }

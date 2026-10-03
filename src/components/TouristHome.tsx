@@ -15,6 +15,7 @@ import { Page } from "./Page";
 import { QrCheckInPanel } from "./QrCheckInPanel";
 import { TouristPassCard } from "./TouristPassCard";
 import { TourismAdvisoryPanel } from "./TourismAdvisoryPanel";
+import { uiText } from "../services/uiText";
 import { PoliceHelpPanel } from "./PoliceHelpPanel";
 import { emergencyHelpText } from "../services/emergencyHelpCopy";
 import { sosText } from "../services/sosCopy";
@@ -227,7 +228,7 @@ export function TouristHome({
                   <h2>{checkInTitle}</h2>
                   <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
                 </div>
-                {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
+                {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} {t("common.minutes")}</strong>}
               </div>
 
               {!activeCheckIn && (
@@ -346,7 +347,7 @@ export function TouristHome({
                 {t("tourist.home.addSampleRoute")}
               </button>
 
-              {trackingMessage && <p className="status-message">{trackingMessage}</p>}
+              {trackingMessage && <p className="status-message">{uiText(locale, trackingMessage)}</p>}
 
               {locationRetryAvailable && activeTrip && (
                 <button className="secondary-action wide" type="button" onClick={onResumeLiveTracking}>
@@ -395,18 +396,18 @@ export function TouristHome({
               {geofenceWarnings.map((warning) => (
                 <article className={`geofence-warning-card ${warning.geofence.type}`} key={warning.geofence.id}>
                   <div>
-                    <strong>{warning.geofence.name}</strong>
-                    <span>{warning.distanceMeters} m away</span>
+                    <strong>{uiText(locale, warning.geofence.name)}</strong>
+                    <span>{uiText(locale, "{count} m away", { count: warning.distanceMeters })}</span>
                   </div>
-                  <p>{warning.geofence.message}</p>
-                  <small>{warning.geofence.recommendedAction}</small>
+                  <p>{uiText(locale, warning.geofence.message)}</p>
+                  <small>{uiText(locale, warning.geofence.recommendedAction)}</small>
                 </article>
               ))}
             </div>
           </section>
         )}
 
-        {!showCheckInPanel && <TourismAdvisoryPanel advisories={tourismAdvisories} />}
+        {!showCheckInPanel && <TourismAdvisoryPanel advisories={tourismAdvisories} locale={locale} />}
 
         {!showCheckInPanel && <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
           <article className="home-preview-card recommendation-preview">
@@ -457,7 +458,7 @@ export function TouristHome({
                   <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
                   <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
                 </div>
-                {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} min</strong>}
+                {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} {t("common.minutes")}</strong>}
               </div>
 
               {!activeCheckIn && (
@@ -488,7 +489,7 @@ export function TouristHome({
 
               <div className="check-in-history">
                 {recentCheckIns.map((checkIn) => {
-                  const destination = destinations.find((candidate) => candidate.id === checkIn.destinationId);
+                  const destination = checkInDestinations.find((candidate) => candidate.id === checkIn.destinationId);
 
                   return (
                     <span key={checkIn.id}>
@@ -574,7 +575,7 @@ export function TouristHome({
                     <div>
                       <strong>{service.name}</strong>
                       <span>{service.address}</span>
-                      <small>{service.distanceKm} {t("tourist.safety.kmAway")} · {service.note}</small>
+                      <small>{service.distanceKm} {t("tourist.safety.kmAway")} · {uiText(locale, { police: "Police contact in the prepared directory.", hospital: "Hospital in the prepared directory.", fire: "Fire and rescue contact in the prepared directory." }[service.kind])}</small>
                     </div>
                     <a className="secondary-action compact-action" href={`tel:${service.phone}`}>
                       {t("tourist.safety.call")} {service.phone}
@@ -632,7 +633,7 @@ export function TouristHome({
               {userIncidentReports.slice(0, 2).map((report) => (
                 <article className="safety-record-item" key={report.id}>
                   <strong>{getIncidentTypeLabel(report.type, incidentTypeOptions, t)} · {getSafetyStatusLabel(report.status, t)}</strong>
-                  <span>{report.adminNote || `${t("common.waiting")} · ${formatDateTime(report.createdAt)}`}</span>
+                  <span>{report.adminNote || `${t("common.waiting")} · ${formatDateTime(report.createdAt, locale)}`}</span>
                 </article>
               ))}
               {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}

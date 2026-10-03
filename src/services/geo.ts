@@ -21,8 +21,8 @@ export function nearestDestination(point: MovementPoint, destinations: Destinati
   }, undefined);
 }
 
-export function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
+export function formatDateTime(value: string, locale?: string) {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     hour: "2-digit",

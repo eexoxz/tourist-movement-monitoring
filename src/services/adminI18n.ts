@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { coverageText } from "./coverageTranslations";
 
 export type AdminCopyKey =
   | "notify.aiTitle"
@@ -1177,8 +1178,26 @@ const adminCopy: Record<Locale, AdminCopyTable> = {
   },
 };
 
+export const adminTranslationKeys = Object.keys(adminCopy.en) as AdminCopyKey[];
+const englishKeys = new Map(adminTranslationKeys.map((key) => [adminCopy.en[key], key]));
+const normalizedEnglishKeys = new Map(adminTranslationKeys.map((key) => [adminCopy.en[key]?.toLowerCase(), key]));
+
+export function translateAdminEnglish(locale: Locale, source: string) {
+  const key = englishKeys.get(source) ?? normalizedEnglishKeys.get(source.toLowerCase());
+  return key ? translateAdmin(locale, key) : undefined;
+}
+
+export function englishAdminSource(locale: Locale, text: string) {
+  const key = adminTranslationKeys.find((key) => translateAdmin(locale, key) === text);
+  return key ? adminCopy.en[key] : undefined;
+}
+
+export function hasDirectAdminTranslation(locale: Locale, key: AdminCopyKey) {
+  return Boolean(adminCopy[locale][key] ?? coverageText(locale, adminCopy.en[key] ?? key));
+}
+
 export function translateAdmin(locale: Locale, key: AdminCopyKey, values: Record<string, string | number> = {}) {
-  const template = adminCopy[locale][key] ?? adminCopy.en[key] ?? key;
+  const template = adminCopy[locale][key] ?? coverageText(locale, adminCopy.en[key] ?? key) ?? adminCopy.en[key] ?? key;
 
   return Object.entries(values).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), template);
 }

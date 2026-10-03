@@ -1,3 +1,5 @@
+import { coverageText } from "./coverageTranslations";
+
 export type Locale = "en" | "ms" | "zh" | "ja" | "ko" | "pt" | "ta" | "es" | "fr";
 
 export type TranslationKey =
@@ -5104,6 +5106,25 @@ export function saveLocale(locale: Locale) {
   localStorage.setItem(STORAGE_KEY, locale);
 }
 
+export const translationKeys = Object.keys({ ...translations.en, ...touristTranslations.en, ...touristCoverageTranslations.en, ...adminTranslations.en, ...publicCheckInTranslations.en, ...featureTranslations.en }) as TranslationKey[];
+
+function englishText(key: TranslationKey) {
+  return translations.en[key] ?? touristTranslations.en[key] ?? touristCoverageTranslations.en[key] ?? adminTranslations.en[key] ?? publicCheckInTranslations.en[key] ?? featureTranslations.en[key] ?? key;
+}
+
+const englishKeys = new Map(translationKeys.map((key) => [englishText(key), key]));
+const normalizedEnglishKeys = new Map(translationKeys.map((key) => [englishText(key).toLowerCase().replace(/[.,]$/, ""), key]));
+
+export function translateEnglish(locale: Locale, source: string) {
+  const key = englishKeys.get(source) ?? normalizedEnglishKeys.get(source.toLowerCase().replace(/[.,]$/, ""));
+  return key ? translate(locale, key) : undefined;
+}
+
+export function englishTranslationSource(locale: Locale, text: string) {
+  const key = translationKeys.find((key) => translate(locale, key) === text);
+  return key ? englishText(key) : undefined;
+}
+
 export function hasDirectTranslation(locale: Locale, key: TranslationKey) {
   return Boolean(
     translations[locale][key] ??
@@ -5111,7 +5132,8 @@ export function hasDirectTranslation(locale: Locale, key: TranslationKey) {
       touristCoverageTranslations[locale][key] ??
       adminTranslations[locale][key] ??
       publicCheckInTranslations[locale][key] ??
-      featureTranslations[locale][key]
+      featureTranslations[locale][key] ??
+      coverageText(locale, englishText(key))
   );
 }
 
@@ -5123,12 +5145,7 @@ export function translate(locale: Locale, key: TranslationKey) {
     adminTranslations[locale][key] ??
     publicCheckInTranslations[locale][key] ??
     featureTranslations[locale][key] ??
-    translations.en[key] ??
-    touristTranslations.en[key] ??
-    touristCoverageTranslations.en[key] ??
-    adminTranslations.en[key] ??
-    publicCheckInTranslations.en[key] ??
-    featureTranslations.en[key] ??
-    key
+    coverageText(locale, englishText(key)) ??
+    englishText(key)
   );
 }

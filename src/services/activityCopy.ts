@@ -92,3 +92,13 @@ const copy: Record<Locale, Record<ActivityCopyKey, string>> = {
 export function activityText(locale: Locale, key: ActivityCopyKey) {
   return copy[locale][key];
 }
+
+export function englishActivitySource(locale: Locale, text: string) {
+  const key = (Object.keys(en) as ActivityCopyKey[]).find((key) => copy[locale][key] === text);
+  return key ? en[key] : undefined;
+}
+
+export function translatedActivitySource(locale: Locale, source: string) {
+  const key = (Object.keys(en) as ActivityCopyKey[]).find((key) => en[key] === source);
+  return key ? copy[locale][key] : undefined;
+}

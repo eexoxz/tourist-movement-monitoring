@@ -11,6 +11,7 @@ import { DestinationVisual } from "./DestinationVisual";
 import { discoveryText } from "../services/discoveryCopy";
 import { activityText } from "../services/activityCopy";
 import { isContinuousMovementSegment } from "../services/movementQuality";
+import { uiText } from "../services/uiText";
 
 type MapViewProps = {
   points: MovementPoint[];
@@ -215,6 +216,15 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   }, []);
 
   useEffect(() => {
+    const controls = containerRef.current;
+    for (const [selector, source] of [[".leaflet-control-zoom-in", "Zoom in"], [".leaflet-control-zoom-out", "Zoom out"]]) {
+      const control = controls?.querySelector(selector);
+      control?.setAttribute("title", uiText(locale, source));
+      control?.setAttribute("aria-label", uiText(locale, source));
+    }
+  }, [locale]);
+
+  useEffect(() => {
     const map = mapRef.current;
     if (!map) {
       return;
@@ -295,14 +305,14 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           weight: 2,
         })
           .bindPopup(
-            `<section class="map-popup"><strong>${escapeHtml(t("map.movementPoint"))} ${index + 1}</strong><span>${formatDateTime(point.recordedAt)}</span><dl><div><dt>${escapeHtml(t("map.accuracy"))}</dt><dd>${point.accuracyMeters}m</dd></div><div><dt>${escapeHtml(t("map.source"))}</dt><dd>${escapeHtml(point.source)}</dd></div></dl></section>`
+            `<section class="map-popup"><strong>${escapeHtml(t("map.movementPoint"))} ${index + 1}</strong><span>${formatDateTime(point.recordedAt, locale)}</span><dl><div><dt>${escapeHtml(t("map.accuracy"))}</dt><dd>${point.accuracyMeters}m</dd></div><div><dt>${escapeHtml(t("map.source"))}</dt><dd>${escapeHtml(point.source)}</dd></div></dl></section>`
           )
           .addTo(layer);
       });
 
-      L.marker(route[0], { icon: routeIcon("start"), title: t("map.tripStart") }).bindPopup(`<strong>${escapeHtml(t("map.tripStart"))}</strong><br>${formatDateTime(points[0].recordedAt)}`).addTo(layer);
+      L.marker(route[0], { icon: routeIcon("start"), title: t("map.tripStart") }).bindPopup(`<strong>${escapeHtml(t("map.tripStart"))}</strong><br>${formatDateTime(points[0].recordedAt, locale)}`).addTo(layer);
       L.marker(route[route.length - 1], { icon: routeIcon("end"), title: t("map.tripEnd") })
-        .bindPopup(`<strong>${escapeHtml(t("map.tripEnd"))}</strong><br>${formatDateTime(points.at(-1)!.recordedAt)}`)
+        .bindPopup(`<strong>${escapeHtml(t("map.tripEnd"))}</strong><br>${formatDateTime(points.at(-1)!.recordedAt, locale)}`)
         .addTo(layer);
     }
 
@@ -311,7 +321,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         icon: routeIcon("current"),
         title: isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"),
       })
-        .bindPopup(`<strong>${escapeHtml(isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"))}</strong>${isBrowsingArea ? "" : `<br>${formatDateTime(activePoint.recordedAt)}`}`)
+        .bindPopup(`<strong>${escapeHtml(isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"))}</strong>${isBrowsingArea ? "" : `<br>${formatDateTime(activePoint.recordedAt, locale)}`}`)
         .addTo(layer);
     }
 
@@ -405,7 +415,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
             >
               <X size={16} aria-hidden="true" />
             </button>
-            <DestinationVisual destination={selectedDestination} compact />
+            <DestinationVisual destination={selectedDestination} compact locale={locale} />
             <div className="map-detail-heading">
               <span>{categoryLabel(selectedDestination.category)} {t("map.destination")}</span>
               <h2>{selectedDestination.name}</h2>
@@ -451,7 +461,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
                 </div>
               )}
             </section>
-            {selectedSignal.latestRecordedAt && <small>{t("map.visitorMovementUpdated")} {formatDateTime(selectedSignal.latestRecordedAt)}</small>}
+            {selectedSignal.latestRecordedAt && <small>{t("map.visitorMovementUpdated")} {formatDateTime(selectedSignal.latestRecordedAt, locale)}</small>}
           </>
         ) : previewDestination && previewSignal ? (
           <>

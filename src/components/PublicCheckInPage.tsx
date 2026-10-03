@@ -5,11 +5,14 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AttractionCheckIn, Destination } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 import { LanguageSelector } from "./AuthScreen";
+import { uiText } from "../services/uiText";
 
 export type PublicCheckInResult = {
   tone: "success" | "info" | "error";
   title: string;
   message: string;
+  titleKey?: TranslationKey;
+  messageKey?: TranslationKey;
   checkIn?: AttractionCheckIn;
 };
 
@@ -48,7 +51,7 @@ export function PublicCheckInPage({ destination, locale, missingReason, passId, 
         </header>
 
         {destination ? (
-          <DestinationVisual destination={destination} />
+          <DestinationVisual destination={destination} locale={locale} />
         ) : (
           <div className="public-check-in-empty">
             <strong>{t("publicCheckin.destinationNotFound")}</strong>
@@ -84,7 +87,7 @@ export function PublicCheckInPage({ destination, locale, missingReason, passId, 
           </div>
           <div>
             <dt>{t("publicCheckin.syncMode")}</dt>
-            <dd>{syncStatus}</dd>
+            <dd>{uiText(locale, syncStatus)}</dd>
           </div>
         </dl>
 
@@ -92,9 +95,11 @@ export function PublicCheckInPage({ destination, locale, missingReason, passId, 
           <section className={`public-check-in-result ${result.tone}`} aria-live="polite">
             <CheckCircle2 size={20} />
             <div>
-              <strong>{result.title}</strong>
-              <p>{result.message}</p>
-              {result.checkIn && <small>{formatDateTime(result.checkIn.checkedInAt)}</small>}
+              <strong>{result.titleKey ? t(result.titleKey) : uiText(locale, result.title)}</strong>
+              <p>{result.tone === "success" && result.checkIn
+                ? `${t("publicCheckin.successPrefix")} ${destination?.name ?? ""} ${t("publicCheckin.successSuffix")}`
+                : result.messageKey ? t(result.messageKey) : uiText(locale, result.message)}</p>
+              {result.checkIn && <small>{formatDateTime(result.checkIn.checkedInAt, locale)}</small>}
             </div>
           </section>
         )}

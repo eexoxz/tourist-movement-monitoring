@@ -1,3 +1,4 @@
+import { uiText } from "../services/uiText";
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { allMalaysianStates } from "../data/festivals";
@@ -209,7 +210,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
         <div>
           <h2>{t("tourist.events.calendarTitle")}</h2>
           <p>
-            {filteredEvents.length} {t("tourist.events.upcomingSignals")} for {resultScope} {t("tourist.events.withinFilters")}.
+            {filteredEvents.length} {t("tourist.events.upcomingSignals")}{" "}{uiText(locale, "for")}{" "}{resultScope} {t("tourist.events.withinFilters")}.
           </p>
         </div>
         {!compact && (
@@ -271,21 +272,21 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
                 <p>{eventDescription(event, locale, t)}</p>
                 <div className="festival-state-details">
                   <button type="button" onClick={() => toggleEventStates(event.id)} aria-expanded={statesExpanded}>
-                    {formatFestivalStateSummaryLabel(event)}
+                    {uiText(locale, formatFestivalStateSummaryLabel(event))}
                   </button>
                   {statesExpanded && (
                     <div>
-                      <span>{formatFestivalScope(event)}</span>
+                      <span>{uiText(locale, formatFestivalScope(event))}</span>
                     </div>
                   )}
                 </div>
                 <div className="festival-insight-row">
-                  <small className="festival-planning-note">{eventDetails?.planningSummary}</small>
+                  <small className="festival-planning-note">{eventDetails?.planningSummary && uiText(locale, eventDetails.planningSummary)}</small>
                   {matchedDestinations.length > 0 && (
                     <div className="festival-destinations">
                       {matchedDestinations.map((destination) => (
                         <span key={destination.id}>
-                          <DestinationVisual destination={destination} compact />
+                          <DestinationVisual destination={destination} compact locale={locale} />
                           {destination.name}
                         </span>
                       ))}

@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
+import { recommendationReason } from "../services/planningText";
 
 const categoryLabelKeys: Record<DestinationCategory, TranslationKey> = {
   cultural: "category.cultural",
@@ -87,7 +88,7 @@ export function RecommendationList({
 
         return (
           <article className="recommendation-card" key={recommendation.id}>
-            <DestinationVisual destination={destination} compact />
+            <DestinationVisual destination={destination} compact locale={locale} />
             <div>
               <strong>{destination.name}</strong>
               <span>{destination.city}</span>
@@ -97,7 +98,7 @@ export function RecommendationList({
               <span>{getRecommendationCategoryLabel(destination.category, t)}</span>
               <span>{formatDemandActivity(demandRow?.tier, t)}</span>
             </div>
-            <p>{recommendation.reason}</p>
+            <p>{recommendationReason(locale, recommendation.reason)}</p>
             <div className="recommendation-card-footer">
               <small>{formatRecommendationMatch(recommendation.score, t)}</small>
               {onSelect && (

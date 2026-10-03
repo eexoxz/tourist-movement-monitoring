@@ -8,6 +8,7 @@ import { isLocale, localeOptions, translate, type Locale, type TranslationKey } 
 import { getPasswordStrength, passwordRequirementMessage } from "../services/passwordStrength";
 import type { UserRole } from "../types";
 import type { NotifyFn } from "./ToastViewport";
+import { uiText } from "../services/uiText";
 
 export type AuthResult = { error?: string; message?: string };
 
@@ -332,19 +333,19 @@ export function AuthScreen({
           {mode === "login" && !firebaseMode && (
             <div className="segmented-control role-switch profile-switch" aria-label={t("auth.demoRole")}>
               <button type="button" className={roleHint === "tourist" ? "active" : ""} onClick={() => setDemoRole("tourist")}>
-                Mixed
+                {uiText(locale, "Mixed")}
               </button>
               <button type="button" className={roleHint === "nature" ? "active" : ""} onClick={() => setDemoRole("nature")}>
-                Nature
+                {t("category.nature")}
               </button>
               <button type="button" className={roleHint === "culture" ? "active" : ""} onClick={() => setDemoRole("culture")}>
-                Culture
+                {t("category.cultural")}
               </button>
               <button type="button" className={roleHint === "urban" ? "active" : ""} onClick={() => setDemoRole("urban")}>
-                Urban
+                {t("category.urban")}
               </button>
               <button type="button" className={roleHint === "admin" ? "active" : ""} onClick={() => setDemoRole("admin")}>
-                Admin
+                {t("nav.adminRole")}
               </button>
             </div>
           )}
@@ -436,7 +437,7 @@ export function AuthScreen({
               </label>
               <label>
                 {t("auth.passportNumber")}
-                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" placeholder="Example: A12345678" required />
+                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" placeholder="A12345678" required />
                 <small className="field-hint">{t("auth.passportHint")}</small>
               </label>
             </div>
@@ -467,8 +468,8 @@ export function AuthScreen({
             {t("auth.rememberLogin")}
           </label>
 
-          {error && <p className="form-error">{error}</p>}
-          {message && <p className="form-success">{message}</p>}
+          {error && <p className="form-error">{uiText(locale, error)}</p>}
+          {message && <p className="form-success">{uiText(locale, message)}</p>}
 
           <button className="primary-action" type="submit" disabled={isSubmitting}>
             <ShieldCheck size={18} />

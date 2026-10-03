@@ -17,7 +17,7 @@ describe("admin dashboard translations", () => {
     expect(translateAdmin("fr", "tourists.title")).toBe("Gestion des Touristes");
   });
 
-  it("keeps English fallback for detailed copy that still needs wording review", () => {
-    expect(translateAdmin("pt", "records.readOnly")).toBe("Administrators can review movement records, but individual coordinates are read-only.");
+  it("translates detailed admin copy instead of silently falling back to English", () => {
+    expect(translateAdmin("pt", "records.readOnly")).toBe("Os administradores podem consultar movimentos, mas as coordenadas individuais são apenas de leitura.");
   });
 });

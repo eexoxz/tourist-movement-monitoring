@@ -81,3 +81,13 @@ const copy: Record<Locale, Record<SosCopyKey, string>> = {
 };
 
 export function sosText(locale: Locale, key: SosCopyKey) { return copy[locale][key]; }
+
+export function englishSosSource(locale: Locale, text: string) {
+  const key = (Object.keys(en) as SosCopyKey[]).find((key) => copy[locale][key] === text);
+  return key ? en[key] : undefined;
+}
+
+export function translatedSosSource(locale: Locale, source: string) {
+  const key = (Object.keys(en) as SosCopyKey[]).find((key) => en[key] === source);
+  return key ? copy[locale][key] : undefined;
+}

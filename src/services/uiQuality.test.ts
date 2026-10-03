@@ -92,7 +92,8 @@ describe("user interface quality guardrails", () => {
   it("keeps browser notifications available with in-app toast fallback", () => {
     expect(browserNotificationsSource).toContain("Notification.requestPermission");
     expect(browserNotificationsSource).toContain("new Notification");
-    expect(appSource).toContain("showBrowserNotification(notification)");
+    expect(appSource).toContain("showBrowserNotification({ ...notification");
+    expect(appSource).toContain("title: uiText(locale, notification.title)");
     expect(appSource).toContain('t("notifications.enableAction")');
     expect(appSource).toContain("browser: true");
     expect(toastSource).toContain("toast-stack");

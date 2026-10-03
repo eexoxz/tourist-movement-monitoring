@@ -41,21 +41,21 @@ export function CompletedTripSummary({
       <div className="section-heading">
         <div>
           <span>{t("tourist.completed.title")}</span>
-          <h2>{formatDateTime(trip.startedAt)}</h2>
+          <h2>{formatDateTime(trip.startedAt, locale)}</h2>
         </div>
       </div>
       <div className="completed-trip-grid">
         <div>
           <small>{t("tourist.completed.started")}</small>
-          <strong>{formatDateTime(trip.startedAt)}</strong>
+          <strong>{formatDateTime(trip.startedAt, locale)}</strong>
         </div>
         <div>
           <small>{t("tourist.completed.ended")}</small>
-          <strong>{trip.endedAt ? formatDateTime(trip.endedAt) : t("common.justNow")}</strong>
+          <strong>{trip.endedAt ? formatDateTime(trip.endedAt, locale) : t("common.justNow")}</strong>
         </div>
         <div>
           <small>{t("tourist.completed.duration")}</small>
-          <strong>{summary.durationMinutes} min</strong>
+          <strong>{summary.durationMinutes} {t("common.minutes")}</strong>
         </div>
         <div>
           <small>{t("tourist.completed.movementPoints")}</small>

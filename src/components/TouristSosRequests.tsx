@@ -11,7 +11,7 @@ export function TouristSosRequests({ alerts, locale, onClose }: { alerts: SosAle
   const closed = alerts.filter((alert) => alert.status === "resolved");
   const record = (alert: SosAlert) => <article className="safety-record-item" key={alert.id}>
     <strong>SOS · {alert.status === "resolved" ? sosText(locale, alert.closureReason === "cancelled" ? "cancelled" : "resolved") : translate(locale, alert.status === "reviewing" ? "common.waiting" : "common.active")}</strong>
-    <span>{formatDateTime(alert.createdAt)}</span>
+    <span>{formatDateTime(alert.createdAt, locale)}</span>
     {alert.adminNote && <span>{alert.adminNote}</span>}
     {alert.status !== "resolved" && <SosRequestActions locale={locale} onClose={(reason) => onClose(alert.id, reason)} />}
   </article>;

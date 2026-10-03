@@ -1,6 +1,7 @@
 import { Pencil, Sparkles, Trash2 } from "lucide-react";
 import { useMemo } from "react";
 import { formatDateTime } from "../services/geo";
+import { uiText } from "../services/uiText";
 import { formatTripTitle, getRecognizedDestinationNames } from "../services/tripPresentation";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { Destination, DestinationDemand, MovementPoint, Recommendation, TripSession, TripSummary } from "../types";
@@ -81,7 +82,7 @@ export function TripDiary({
           <h2>{t("tourist.trips.heroTitle")}</h2>
           <p>{t("tourist.trips.heroDescription")}</p>
         </div>
-        <div className="trip-diary-stats" aria-label="Trip diary totals">
+        <div className="trip-diary-stats" aria-label={uiText(locale, "Trip diary totals")}>
           <span>
             <strong>{completedTripCount}</strong>
             {t("common.completed")}
@@ -116,7 +117,7 @@ export function TripDiary({
                 <div>
                   <span>{t("tourist.trips.selectedRoute")}</span>
                   <h2>{selectedTripTitle}</h2>
-                  <p>{formatDateTime(selectedTrip.startedAt)}</p>
+                  <p>{formatDateTime(selectedTrip.startedAt, locale)}</p>
                 </div>
                 <div className="trip-story-actions">
                   <strong className="trip-status-badge">{selectedTrip.status === "completed" ? t("common.completed") : t("common.active")}</strong>
@@ -152,7 +153,7 @@ export function TripDiary({
 
               <p className="trip-insight">{selectedTripInsight}</p>
 
-              <div className="trip-stop-strip" aria-label="Recognised trip stops">
+              <div className="trip-stop-strip" aria-label={uiText(locale, "Recognised trip stops")}>
                 {selectedTripDestinationNames.length > 0 ? (
                   selectedTripDestinationNames.map((name) => <span key={name}>{name}</span>)
                 ) : (
@@ -216,9 +217,9 @@ export function TripDiary({
                 <button className="trip-timeline-select" type="button" onClick={() => onSelectTrip(trip.id)}>
                   <span>{trip.status === "completed" ? t("tourist.trips.completedTrip") : t("tourist.trips.activeTrip")}</span>
                   <strong>{fallbackTitle}</strong>
-                  <small>{trip.endedAt ? formatDateTime(trip.endedAt) : t("tourist.trips.stillActive")}</small>
+                  <small>{trip.endedAt ? formatDateTime(trip.endedAt, locale) : t("tourist.trips.stillActive")}</small>
                   <p>
-                    {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} min, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
+                    {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} {t("common.minutes")}, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
                   </p>
                 </button>
                 <div className="trip-card-actions">

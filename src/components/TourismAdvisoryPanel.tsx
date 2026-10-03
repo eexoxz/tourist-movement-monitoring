@@ -2,9 +2,12 @@ import { BellRing, CloudRain, Cone, ShieldAlert, TrafficCone, CalendarDays } fro
 import { formatDateTime } from "../services/geo";
 import type { TourismAdvisory } from "../services/advisories";
 import type { TourismAdvisoryType } from "../data/tourismAdvisories";
+import type { Locale } from "../services/i18n";
+import { uiText } from "../services/uiText";
 
 type TourismAdvisoryPanelProps = {
   advisories: TourismAdvisory[];
+  locale: Locale;
 };
 
 const advisoryIcons: Record<TourismAdvisoryType, typeof CloudRain> = {
@@ -15,21 +18,22 @@ const advisoryIcons: Record<TourismAdvisoryType, typeof CloudRain> = {
   event: CalendarDays,
 };
 
-export function TourismAdvisoryPanel({ advisories }: TourismAdvisoryPanelProps) {
+export function TourismAdvisoryPanel({ advisories, locale }: TourismAdvisoryPanelProps) {
+  const text = (source: string) => uiText(locale, source);
   if (advisories.length === 0) {
     return null;
   }
 
   return (
-    <section className="tourist-section advisory-panel" aria-label="Local tourism advisories">
+    <section className="tourist-section advisory-panel" aria-label={text("Local tourism advisories")}>
       <div className="section-heading">
         <div>
           <span>
             <BellRing size={16} />
-            Local tourism advisories
+            {text("Local tourism advisories")}
           </span>
-          <h2>Plan around current alerts</h2>
-          <p>These locally maintained advisories help tourists adjust routes without adding a live weather or traffic API.</p>
+          <h2>{text("Plan around current alerts")}</h2>
+          <p>{text("These locally maintained advisories help tourists adjust routes without adding a live weather or traffic API.")}</p>
         </div>
       </div>
       <div className="advisory-list">
@@ -40,12 +44,12 @@ export function TourismAdvisoryPanel({ advisories }: TourismAdvisoryPanelProps) 
             <article className={`advisory-card ${advisory.severity}`} key={advisory.id}>
               <div>
                 <Icon size={20} />
-                <span>{advisory.type.replace("-", " ")}</span>
+                <span>{text({ weather: "Weather", traffic: "Traffic", "road-closure": "Road closure", safety: "Safety", event: "Event" }[advisory.type])}</span>
               </div>
-              <strong>{advisory.title}</strong>
-              <p>{advisory.message}</p>
-              <small>{advisory.action}</small>
-              <time>{advisory.city} · Until {formatDateTime(advisory.endsAt)}</time>
+              <strong>{text(advisory.title)}</strong>
+              <p>{text(advisory.message)}</p>
+              <small>{text(advisory.action)}</small>
+              <time>{advisory.city} · {text("Until")} {formatDateTime(advisory.endsAt, locale)}</time>
             </article>
           );
         })}

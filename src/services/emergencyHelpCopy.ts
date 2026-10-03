@@ -115,3 +115,13 @@ const copy: Record<Locale, Record<EmergencyHelpCopyKey, string>> = {
 export function emergencyHelpText(locale: Locale, key: EmergencyHelpCopyKey) {
   return copy[locale][key];
 }
+
+export function englishEmergencySource(locale: Locale, text: string) {
+  const key = (Object.keys(english) as EmergencyHelpCopyKey[]).find((key) => copy[locale][key] === text);
+  return key ? english[key] : undefined;
+}
+
+export function translatedEmergencySource(locale: Locale, source: string) {
+  const key = (Object.keys(english) as EmergencyHelpCopyKey[]).find((key) => english[key] === source);
+  return key ? copy[locale][key] : undefined;
+}

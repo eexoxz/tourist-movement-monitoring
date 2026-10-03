@@ -6,6 +6,7 @@ import { distanceKm } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AnalysisResult, Destination, DestinationCategory, DestinationDemand, FestivalEvent, MovementPoint, Recommendation, TouristProfile, User } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
+import { uiText } from "../services/uiText";
 import { EmptyState } from "./SummaryCards";
 
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
@@ -299,7 +300,7 @@ export function PlaceDiscovery({
         </section>
       )}
 
-      <section className="places-controls" aria-label="Place discovery filters">
+      <section className="places-controls" aria-label={uiText(locale, "Place discovery filters")}>
         <label>
           {t("tourist.places.searchLabel")}
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("tourist.places.searchPlaceholder")} />
@@ -328,7 +329,7 @@ export function PlaceDiscovery({
         </label>
       </section>
 
-      <div className="places-mode-row" aria-label="Place discovery mode">
+      <div className="places-mode-row" aria-label={uiText(locale, "Place discovery mode")}>
         {placeDiscoveryModes.map((option) => (
           <button key={option.value} className={mode === option.value ? "active" : ""} type="button" onClick={() => setMode(option.value)}>
             {t(option.labelKey)}
@@ -345,7 +346,7 @@ export function PlaceDiscovery({
               key={row.destination.id}
               onClick={() => onSelectDestination(row.destination.id)}
             >
-              <DestinationVisual destination={row.destination} compact />
+              <DestinationVisual destination={row.destination} compact locale={locale} />
               <div className="place-card-heading">
                 <div>
                   <span>{getCategoryLabel(row.destination.category, t)}</span>
@@ -384,7 +385,7 @@ export function PlaceDiscovery({
 
         {selectedRow && (
           <aside className="place-detail-card">
-            <DestinationVisual destination={selectedRow.destination} />
+            <DestinationVisual destination={selectedRow.destination} locale={locale} />
             <span>{getCategoryLabel(selectedRow.destination.category, t)}</span>
             <h2>{selectedRow.destination.name}</h2>
             <p>{selectedRow.destination.description}</p>

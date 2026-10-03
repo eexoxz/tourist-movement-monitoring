@@ -1,9 +1,12 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import type { Destination } from "../types";
+import type { Locale } from "../services/i18n";
+import { uiText } from "../services/uiText";
 
 type DestinationVisualProps = {
   destination: Destination;
   compact?: boolean;
+  locale: Locale;
 };
 
 const failedImageUrls = new Set<string>();
@@ -22,11 +25,11 @@ function resizeCommonsImageUrl(src: string, width: number) {
   return src;
 }
 
-function DestinationVisualComponent({ destination, compact = false }: DestinationVisualProps) {
+function DestinationVisualComponent({ destination, compact = false, locale }: DestinationVisualProps) {
   const src = destination.imageUrl?.trim();
   const displaySrc = useMemo(() => (src ? resizeCommonsImageUrl(src, compact ? 360 : 760) : ""), [compact, src]);
   const [imageFailed, setImageFailed] = useState(() => Boolean(displaySrc && failedImageUrls.has(displaySrc)));
-  const alt = destination.imageAlt?.trim() || `${destination.name} location photo`;
+  const alt = destination.imageAlt?.trim() || `${destination.name} · ${uiText(locale, "Location photo")}`;
 
   useEffect(() => {
     setImageFailed(Boolean(displaySrc && failedImageUrls.has(displaySrc)));
@@ -37,7 +40,7 @@ function DestinationVisualComponent({ destination, compact = false }: Destinatio
       <figure className={compact ? "destination-visual compact empty" : "destination-visual empty"}>
         <div className="destination-photo-empty">
           <strong>{destination.name}</strong>
-          <span>Photo not added</span>
+          <span>{uiText(locale, "Photo not added")}</span>
         </div>
       </figure>
     );

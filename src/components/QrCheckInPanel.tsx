@@ -4,6 +4,7 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createDestinationCheckInCode, parseDestinationCheckInCode } from "../services/qrCheckIn";
 import type { Destination } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
+import { uiText } from "../services/uiText";
 
 type BarcodeDetectorShape = {
   detect: (source: CanvasImageSource) => Promise<Array<{ rawValue?: string }>>;
@@ -30,7 +31,7 @@ function getBarcodeDetector() {
 export function QrCheckInPanel({ destinations, selectedDestination, locale = "en", onDestinationChange, onConfirm }: QrCheckInPanelProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [manualCode, setManualCode] = useState("");
-  const [message, setMessage] = useState(t("tourist.checkin.qrHelp"));
+  const [message, setMessage] = useState(() => translate("en", "tourist.checkin.qrHelp"));
   const [isScanning, setIsScanning] = useState(false);
   const detectorRef = useRef<BarcodeDetectorShape | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -49,14 +50,14 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       const result = parseDestinationCheckInCode(rawCode, destinations);
 
       if (result.error || !result.destination) {
-        setMessage(result.error ?? t("tourist.checkin.codeInvalid"));
+        setMessage(result.error ?? translate("en", "tourist.checkin.codeInvalid"));
         return;
       }
 
       onDestinationChange(result.destination.id);
       onConfirm(result.destination.id);
       setManualCode("");
-      setMessage(`${result.destination.name}: ${t("tourist.checkin.codeAccepted")}`);
+      setMessage(`${result.destination.name}: ${translate("en", "tourist.checkin.codeAccepted")}`);
       stopCamera();
     },
     [destinations, onConfirm, onDestinationChange, stopCamera]
@@ -66,7 +67,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
     const BarcodeDetector = getBarcodeDetector();
 
     if (!BarcodeDetector || !navigator.mediaDevices?.getUserMedia) {
-      setMessage(t("tourist.checkin.cameraUnavailable"));
+      setMessage(translate("en", "tourist.checkin.cameraUnavailable"));
       return;
     }
 
@@ -81,9 +82,9 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       }
 
       setIsScanning(true);
-      setMessage(t("tourist.checkin.cameraReady"));
+      setMessage(translate("en", "tourist.checkin.cameraReady"));
     } catch {
-      setMessage(t("tourist.checkin.cameraDenied"));
+      setMessage(translate("en", "tourist.checkin.cameraDenied"));
       stopCamera();
     }
   };
@@ -110,7 +111,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
             return;
           }
         } catch {
-          setMessage(t("tourist.checkin.cameraPaused"));
+          setMessage(translate("en", "tourist.checkin.cameraPaused"));
         }
       }
 
@@ -143,7 +144,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       </label>
 
       <div className="qr-station-card">
-        {selectedDestination && <DestinationVisual destination={selectedDestination} compact />}
+        {selectedDestination && <DestinationVisual destination={selectedDestination} compact locale={locale} />}
         <span>{t("tourist.checkin.stationCode")}</span>
         <strong>{selectedCode}</strong>
         <small>{t("tourist.checkin.stationCodeNote")}</small>
@@ -176,7 +177,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       </div>
 
       <video className={isScanning ? "qr-camera-preview active" : "qr-camera-preview"} ref={videoRef} muted playsInline />
-      <p className="qr-checkin-message">{message}</p>
+      <p className="qr-checkin-message">{uiText(locale, message)}</p>
     </div>
   );
 }
