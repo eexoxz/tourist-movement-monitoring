@@ -48,9 +48,10 @@ export function getLiveNearbySuggestion({
   }
 
   const demandByDestination = new Map(demand.map((row) => [row.destinationId, row]));
+  const hidden = new Set(user.hiddenDestinationIds ?? []);
   const candidates = createDestinationSpatialIndex(destinations)
     .nearby(point, trackingRadius(user))
-    .filter(({ destination }) => !excludeDestinationIds.has(destination.id));
+    .filter(({ destination }) => !excludeDestinationIds.has(destination.id) && !hidden.has(destination.id));
 
   if (candidates.length === 0) {
     return null;

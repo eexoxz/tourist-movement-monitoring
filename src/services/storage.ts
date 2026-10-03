@@ -65,6 +65,10 @@ type TouristPreferenceDocument = {
   accessibilityPreference: NonNullable<User["accessibilityPreference"]>;
   trackingSuggestionMode?: User["trackingSuggestionMode"];
   trackingSuggestionRadiusKm?: number;
+  discoveryLocationMode?: User["discoveryLocationMode"];
+  discoveryAreaId?: string;
+  hiddenDestinationIds?: string[];
+  eventAnnouncementsEnabled?: boolean;
   profileCompletedAt?: string;
   updatedAt: string;
 };
@@ -521,6 +525,10 @@ function mergeUserDocuments(
       accessibilityPreference: preference.accessibilityPreference,
       trackingSuggestionMode: preference.trackingSuggestionMode,
       trackingSuggestionRadiusKm: preference.trackingSuggestionRadiusKm,
+      discoveryLocationMode: preference.discoveryLocationMode ?? currentUser.discoveryLocationMode,
+      discoveryAreaId: preference.discoveryAreaId ?? currentUser.discoveryAreaId,
+      hiddenDestinationIds: preference.hiddenDestinationIds ?? currentUser.hiddenDestinationIds,
+      eventAnnouncementsEnabled: preference.eventAnnouncementsEnabled ?? currentUser.eventAnnouncementsEnabled,
       profileCompletedAt: preference.profileCompletedAt,
     });
   }
@@ -547,6 +555,10 @@ function buildTouristPreferenceDocument(user: User): TouristPreferenceDocument {
     accessibilityPreference: user.accessibilityPreference ?? "none",
     trackingSuggestionMode: user.trackingSuggestionMode ?? "balanced",
     trackingSuggestionRadiusKm: user.trackingSuggestionRadiusKm ?? 2,
+    discoveryLocationMode: user.discoveryLocationMode ?? "current",
+    discoveryAreaId: user.discoveryAreaId,
+    hiddenDestinationIds: user.hiddenDestinationIds ?? [],
+    eventAnnouncementsEnabled: user.eventAnnouncementsEnabled ?? true,
     profileCompletedAt: user.profileCompletedAt,
     updatedAt: new Date().toISOString(),
   };

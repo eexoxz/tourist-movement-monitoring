@@ -2,6 +2,7 @@ import { Save } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { getCategoryLabel, getDisplayName, inferExpectedProfileFromPreferences, profilePreferenceOptions } from "../services/profile";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
+import { discoveryText } from "../services/discoveryCopy";
 import type { DestinationCategory, User } from "../types";
 
 type TouristProfileFormProps = {
@@ -33,6 +34,8 @@ export function TouristProfileForm({
   const [accessibilityPreference, setAccessibilityPreference] = useState<User["accessibilityPreference"]>(user.accessibilityPreference ?? "none");
   const [trackingSuggestionMode, setTrackingSuggestionMode] = useState<User["trackingSuggestionMode"]>(user.trackingSuggestionMode ?? "balanced");
   const [trackingSuggestionRadiusKm, setTrackingSuggestionRadiusKm] = useState(user.trackingSuggestionRadiusKm ?? 2);
+  const [eventAnnouncementsEnabled, setEventAnnouncementsEnabled] = useState(user.eventAnnouncementsEnabled ?? true);
+  const [hiddenDestinationIds, setHiddenDestinationIds] = useState(user.hiddenDestinationIds ?? []);
   const [emergencyContactName, setEmergencyContactName] = useState(user.emergencyContactName ?? "");
   const [emergencyContactPhone, setEmergencyContactPhone] = useState(user.emergencyContactPhone ?? "");
   const [emergencyContactRelation, setEmergencyContactRelation] = useState(user.emergencyContactRelation ?? "");
@@ -55,6 +58,8 @@ export function TouristProfileForm({
       accessibilityPreference,
       trackingSuggestionMode,
       trackingSuggestionRadiusKm,
+      eventAnnouncementsEnabled,
+      hiddenDestinationIds,
       emergencyContactName: emergencyContactName.trim() || undefined,
       emergencyContactPhone: emergencyContactPhone.trim() || undefined,
       emergencyContactRelation: emergencyContactRelation.trim() || undefined,
@@ -143,6 +148,14 @@ export function TouristProfileForm({
                 </select>
               </label>
             </div>
+            <label className="discovery-checkbox">
+              <input type="checkbox" checked={eventAnnouncementsEnabled} onChange={(event) => setEventAnnouncementsEnabled(event.target.checked)} />
+              {discoveryText(locale, "announcements")}
+            </label>
+            {hiddenDestinationIds.length > 0 && <div className="discovery-restore">
+              <span>{discoveryText(locale, "hidden")}: {hiddenDestinationIds.length}</span>
+              <button className="secondary-action compact-action" type="button" onClick={() => setHiddenDestinationIds([])}>{discoveryText(locale, "restore")}</button>
+            </div>}
           </section>
 
           <section className="profile-emergency-fields">

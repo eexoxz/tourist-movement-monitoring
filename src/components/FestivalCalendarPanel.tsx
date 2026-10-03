@@ -11,6 +11,7 @@ import {
 } from "../services/festivals";
 import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
+import { discoveryText } from "../services/discoveryCopy";
 
 const compactCalendarPreviewLimit = 5;
 const fullCalendarPreviewLimit = 6;
@@ -22,6 +23,7 @@ type FestivalCalendarPanelProps = {
   compact?: boolean;
   locale?: Locale;
   referencePoint?: MovementPoint;
+  referenceState?: MalaysianState;
   onOpenCalendar?: () => void;
 };
 
@@ -151,17 +153,17 @@ function getPlanningSummary(matchedDestinations: Destination[]) {
   return `These places may become busier around this event. Compare demand in ${cityNames.join(", ")} before planning a route.`;
 }
 
-export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", referencePoint, onOpenCalendar }: FestivalCalendarPanelProps) {
+export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", referencePoint, referenceState, onOpenCalendar }: FestivalCalendarPanelProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const [startDate, setStartDate] = useState(dateInputValue(new Date()));
   const [endDate, setEndDate] = useState(getDefaultEndDate);
   const [categoryFilter, setCategoryFilter] = useState<FestivalCategory | "all">("all");
-  const [nearMeOnly, setNearMeOnly] = useState(false);
+  const [nearMeOnly, setNearMeOnly] = useState(Boolean(referenceState));
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
   const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
-  const localState = useMemo(() => nearestState(referencePoint, destinations), [destinations, referencePoint]);
+  const localState = useMemo(() => referenceState ?? nearestState(referencePoint, destinations), [destinations, referencePoint, referenceState]);
   const effectiveStateFilter = nearMeOnly && localState ? localState : stateFilter;
   const filteredEvents = useMemo(
     () =>
@@ -188,6 +190,10 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   }, [destinationById, visibleEvents]);
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
   const resultScope = effectiveStateFilter === "all" ? "Malaysia" : effectiveStateFilter;
+
+  useEffect(() => {
+    if (referenceState) setNearMeOnly(true);
+  }, [referenceState]);
 
   useEffect(() => {
     setShowFullCalendar(false);
@@ -218,7 +224,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
             </label>
             <label className="festival-filter">
               {t("tourist.events.state")}
-              <select value={stateFilter} onChange={(event) => setStateFilter(event.target.value as MalaysianState | "all")} disabled={nearMeOnly && Boolean(localState)}>
+              <select value={effectiveStateFilter} onChange={(event) => setStateFilter(event.target.value as MalaysianState | "all")} disabled={nearMeOnly && Boolean(localState)}>
                 <option value="all">{t("tourist.events.allMalaysia")}</option>
                 {allMalaysianStates.map((state) => (
                   <option key={state} value={state}>
@@ -239,7 +245,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
             </label>
             <label className="festival-nearby-toggle">
               <input type="checkbox" checked={nearMeOnly} onChange={(event) => setNearMeOnly(event.target.checked)} disabled={!localState} />
-              <span>{localState ? t("tourist.events.nearMe") : t("tourist.events.nearMeUnavailable")}</span>
+              <span>{referenceState ? discoveryText(locale, "eventsInArea") : localState ? t("tourist.events.nearMe") : t("tourist.events.nearMeUnavailable")}</span>
             </label>
           </div>
         )}

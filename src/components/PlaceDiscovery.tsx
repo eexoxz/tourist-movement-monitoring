@@ -1,4 +1,5 @@
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ThumbsDown } from "lucide-react";
+import { discoveryText } from "../services/discoveryCopy";
 import { useEffect, useMemo, useState } from "react";
 import { destinationCategories } from "../services/destinationManagement";
 import { distanceKm } from "../services/geo";
@@ -41,6 +42,8 @@ type PlaceDiscoveryProps = {
   locale?: Locale;
   onSelectDestination: (id: string) => void;
   onOpenEvents: () => void;
+  onHideDestination?: (id: string) => void;
+  isBrowsingArea?: boolean;
 };
 
 function getCategoryLabel(category: DestinationCategory, t: (key: TranslationKey) => string) {
@@ -111,7 +114,7 @@ function getPlaceDiscoveryInsight({
   t: (key: TranslationKey) => string;
 }) {
   if (recommendation) {
-    return recommendation.reason || t("tourist.places.insightRecommendationFallback");
+    return preferenceMatch ? t("tourist.places.insightPreference") : demandRow && demandRow.tier !== "low" ? t("tourist.places.insightDemand") : t("tourist.places.insightRecommendationFallback");
   }
 
   if (festivalBoosted && demandRow && demandRow.popularityScore > 0) {
@@ -150,6 +153,8 @@ export function PlaceDiscovery({
   locale = "en",
   onSelectDestination,
   onOpenEvents,
+  onHideDestination,
+  isBrowsingArea = false,
 }: PlaceDiscoveryProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [search, setSearch] = useState("");
@@ -258,13 +263,16 @@ export function PlaceDiscovery({
   const visibleRows = showAllPlaces ? rows : rows.slice(0, placePreviewLimit);
   const hiddenPlaceCount = rows.length - visibleRows.length;
   const personalized = Boolean(latestAnalysis);
-  const demandSignalCount = useMemo(() => demand.filter((row) => row.popularityScore > 0).length, [demand]);
+  const demandSignalCount = useMemo(() => {
+    const localIds = new Set(destinations.map((destination) => destination.id));
+    return demand.filter((row) => row.popularityScore > 0 && localIds.has(row.destinationId)).length;
+  }, [demand, destinations]);
 
   return (
     <section className="places-page">
       <section className="places-hero">
         <div>
-          <span>{latestAnalysis ? `${latestAnalysis.profile} ${t("tourist.places.profileTraveller")}` : t("tourist.places.discoveryMode")}</span>
+          <span>{t("tourist.places.discoveryMode")}</span>
           <h2>{t("tourist.places.heroTitle")}</h2>
           <p>{t("tourist.places.heroDescription")}</p>
         </div>
@@ -371,7 +379,7 @@ export function PlaceDiscovery({
               </button>
             </div>
           )}
-          {rows.length === 0 && <EmptyState text={t("tourist.places.noMatches")} />}
+          {rows.length === 0 && <EmptyState text={destinations.length === 0 ? discoveryText(locale, referencePoint ? "noLocal" : "locationNeeded") : t("tourist.places.noMatches")} />}
         </div>
 
         {selectedRow && (
@@ -398,7 +406,7 @@ export function PlaceDiscovery({
                 <dd>{selectedRow.festivalBoosted ? t("tourist.places.linkedUpcoming") : t("tourist.places.noCurrentEvent")}</dd>
               </div>
               <div>
-                <dt>{t("common.distance")}</dt>
+                <dt>{isBrowsingArea ? discoveryText(locale, "fromArea") : t("common.distance")}</dt>
                 <dd>{formatDistanceLabel(selectedRow.distance, t)}</dd>
               </div>
               <div>
@@ -425,6 +433,9 @@ export function PlaceDiscovery({
               </section>
             )}
             <div className="place-detail-actions">
+              {onHideDestination && <button className="secondary-action" type="button" onClick={() => onHideDestination(selectedRow.destination.id)}>
+                <ThumbsDown size={18} />{discoveryText(locale, "hide")}
+              </button>}
               <button className="secondary-action" type="button" onClick={onOpenEvents}>
                 <CalendarDays size={18} />
                 {t("common.checkEvents")}

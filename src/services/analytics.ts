@@ -714,7 +714,8 @@ export function recommendForUser(
   data: AppData,
   analysis?: AnalysisResult,
   destinationDemand?: DestinationDemand[],
-  referencePoint?: Pick<MovementPoint, "latitude" | "longitude" | "recordedAt">
+  referencePoint?: Pick<MovementPoint, "latitude" | "longitude" | "recordedAt">,
+  options: { localOnly?: boolean; radiusKm?: number; ignoreHistoryLocation?: boolean } = {}
 ): Recommendation[] {
   const userTrips = data.trips.filter((trip) => trip.userId === userId);
   const completedTripIds = new Set(userTrips.filter((trip) => trip.status === "completed").map((trip) => trip.id));
@@ -741,19 +742,20 @@ export function recommendForUser(
       .filter((result): result is DestinationDistance => Boolean(result))
       .map((result) => result.destination.id)
   );
-  const latestPoint =
-    referencePoint ??
-    points.reduce<MovementPoint | undefined>((latest, point) => {
-      if (!latest || new Date(point.recordedAt).getTime() > new Date(latest.recordedAt).getTime()) {
-        return point;
-      }
-
-      return latest;
-    }, undefined);
+  const historyLocation = options.ignoreHistoryLocation
+    ? undefined
+    : points.reduce<MovementPoint | undefined>((latest, point) => {
+        return !latest || new Date(point.recordedAt).getTime() > new Date(latest.recordedAt).getTime() ? point : latest;
+      }, undefined);
+  const latestPoint = referencePoint ?? historyLocation;
+  if (options.localOnly && !latestPoint) {
+    return [];
+  }
   const profile = analysis?.profile ?? "mixed";
   const hasPersonalizedAnalysis = Boolean(analysis);
   const demandByDestination = new Map((destinationDemand ?? calculateDestinationDemand(data)).map((demand) => [demand.destinationId, demand]));
-  const availableDestinations = data.destinations.filter((destination) => !visited.has(destination.id));
+  const hidden = new Set(data.users.find((user) => user.id === userId)?.hiddenDestinationIds ?? []);
+  const availableDestinations = data.destinations.filter((destination) => !visited.has(destination.id) && !hidden.has(destination.id));
   const destinationDistances = new Map<string, number>();
   const rankedAvailableDestinations = latestPoint
     ? availableDestinations
@@ -765,10 +767,11 @@ export function recommendForUser(
         .sort((a, b) => a.distance - b.distance)
         .map((row) => row.destination)
     : availableDestinations;
-  const localDestinations = rankedAvailableDestinations.filter((destination) => (destinationDistances.get(destination.id) ?? Number.POSITIVE_INFINITY) <= localRecommendationRadiusKm);
+  const localDestinations = rankedAvailableDestinations.filter((destination) => (destinationDistances.get(destination.id) ?? Number.POSITIVE_INFINITY) <= (options.radiusKm ?? localRecommendationRadiusKm));
   const localDestinationIds = new Set(localDestinations.map((destination) => destination.id));
-  const recommendationPool =
-    localDestinations.length > 0
+  const recommendationPool = options.localOnly
+    ? localDestinations
+    : localDestinations.length > 0
       ? [
           ...localDestinations,
           ...rankedAvailableDestinations

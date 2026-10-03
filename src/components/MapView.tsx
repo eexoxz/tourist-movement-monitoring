@@ -8,6 +8,7 @@ import { distanceKm, formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { calculateDestinationSignals, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
 import { DestinationVisual } from "./DestinationVisual";
+import { discoveryText } from "../services/discoveryCopy";
 
 type MapViewProps = {
   points: MovementPoint[];
@@ -16,6 +17,7 @@ type MapViewProps = {
   mode?: "tourist" | "admin";
   displayMode?: "route" | "signals";
   locale?: Locale;
+  isBrowsingArea?: boolean;
 };
 
 const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; labelKey: TranslationKey }> = {
@@ -137,7 +139,7 @@ function shouldRenderPointMarker(index: number, totalPoints: number) {
   return index % Math.max(1, Math.ceil(totalPoints / maxRenderedRoutePointMarkers)) === 0;
 }
 
-export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en" }: MapViewProps) {
+export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const lastAutoFocusKeyRef = useRef("");
@@ -304,17 +306,17 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     if (activePoint) {
       L.marker([activePoint.latitude, activePoint.longitude], {
         icon: routeIcon("current"),
-        title: t("map.currentLocation"),
+        title: isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"),
       })
-        .bindPopup(`<strong>${escapeHtml(t("map.currentLocation"))}</strong><br>${formatDateTime(activePoint.recordedAt)}`)
+        .bindPopup(`<strong>${escapeHtml(isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"))}</strong>${isBrowsingArea ? "" : `<br>${formatDateTime(activePoint.recordedAt)}`}`)
         .addTo(layer);
     }
 
     const latestRoutePoint = points.at(-1);
-    const autoFocusKey = displayMode === "signals"
-      ? `signals:${visibleDestinations.length}:${points.length}`
-      : activePoint
+    const autoFocusKey = activePoint && mode === "tourist"
       ? `active:${activePoint.latitude}:${activePoint.longitude}:${activePoint.recordedAt}`
+      : displayMode === "signals"
+        ? `signals:${visibleDestinations.length}:${points.length}`
       : latestRoutePoint
         ? `route:${points.length}:${latestRoutePoint.latitude}:${latestRoutePoint.longitude}:${latestRoutePoint.recordedAt}`
         : "";
@@ -339,7 +341,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     return () => {
       layer.remove();
     };
-  }, [points, visibleDestinations, activePoint, destinationSignals, locale, mode, displayMode]);
+  }, [points, visibleDestinations, activePoint, destinationSignals, locale, mode, displayMode, isBrowsingArea]);
 
   const centerOnActivePoint = () => {
     if (!activePoint) {
@@ -370,7 +372,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       {mode === "tourist" && <div className="map-mode-label">{t("map.touristMap")}</div>}
       {activePoint && (
         <button className="map-current-button" type="button" onClick={centerOnActivePoint}>
-          {t("map.centerCurrentLocation")}
+          {isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}
         </button>
       )}
       <div className="map-legend" aria-label={t("map.legendAria")}>
@@ -408,7 +410,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
               </div>
               {selectedSignal.distanceFromActiveKm !== undefined && (
                 <div>
-                  <dt>{t("map.fromCurrentPoint")}</dt>
+                  <dt>{isBrowsingArea ? discoveryText(locale, "fromArea") : t("map.fromCurrentPoint")}</dt>
                   <dd>{selectedSignal.distanceFromActiveKm.toFixed(1)} km {t("map.away")}</dd>
                 </div>
               )}

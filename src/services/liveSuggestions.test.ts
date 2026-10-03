@@ -16,6 +16,13 @@ const tourist: User = {
 };
 
 describe("live nearby suggestions", () => {
+  it("honours hidden places and the chosen alert radius", () => {
+    const destination = initialData.destinations.find((place) => place.id === "kek-lok-si-temple")!;
+    const input = { point: destination, destinations: [destination], demand: [], user: { ...tourist, hiddenDestinationIds: [destination.id] } };
+    expect(getLiveNearbySuggestion(input)).toBeNull();
+    expect(getLiveNearbySuggestion({ ...input, point: { latitude: destination.latitude + 0.02, longitude: destination.longitude }, user: { ...tourist, trackingSuggestionRadiusKm: 1 } })).toBeNull();
+    expect(getLiveNearbySuggestion({ ...input, point: { latitude: destination.latitude + 0.02, longitude: destination.longitude }, user: { ...tourist, trackingSuggestionRadiusKm: 3 } })?.destination.id).toBe(destination.id);
+  });
   it("suggests a nearby destination instead of a far away popular one", () => {
     const kekLokSi = initialData.destinations.find((destination) => destination.name === "Kek Lok Si Temple");
     const klcc = initialData.destinations.find((destination) => destination.name === "KLCC Park");

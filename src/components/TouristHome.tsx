@@ -1,5 +1,6 @@
 import { Building2, CalendarDays, Compass, Flame, Hospital, MapPinned, Navigation, PhoneCall, Play, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
-import { useEffect, useRef, type FormEvent } from "react";
+import { useEffect, useRef, type FormEvent, type ReactNode } from "react";
+import { discoveryText } from "../services/discoveryCopy";
 import { malaysiaEmergencyNumbers } from "../data/emergencyServices";
 import { formatDateTime } from "../services/geo";
 import { getCheckInDurationMinutes } from "../services/checkIns";
@@ -29,6 +30,9 @@ type TouristHomeProps = {
   activeJourneyPoints: MovementPoint[];
   activeJourneyPoint: MovementPoint | undefined;
   destinations: Destination[];
+  checkInDestinations?: Destination[];
+  discoveryControl?: ReactNode;
+  isBrowsingArea?: boolean;
   geofenceWarnings: GeoFenceWarning[];
   tourismAdvisories: TourismAdvisory[];
   isLiveTracking: boolean;
@@ -105,6 +109,9 @@ export function TouristHome({
   activeJourneyPoints,
   activeJourneyPoint,
   destinations,
+  checkInDestinations = destinations,
+  discoveryControl,
+  isBrowsingArea = false,
   geofenceWarnings,
   tourismAdvisories,
   isLiveTracking,
@@ -155,7 +162,7 @@ export function TouristHome({
   onSubmitIncidentReport,
 }: TouristHomeProps) {
   const t = (key: TranslationKey) => translate(locale, key);
-  const selectedCheckInDestination = destinations.find((destination) => destination.id === checkInDestinationId) ?? destinations[0] ?? null;
+  const selectedCheckInDestination = checkInDestinations.find((destination) => destination.id === checkInDestinationId) ?? checkInDestinations[0] ?? null;
   const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
   const checkInTitle = activeCheckInDestination
     ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}`
@@ -212,7 +219,7 @@ export function TouristHome({
                 <div className="check-in-stack">
                   <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
                   <QrCheckInPanel
-                    destinations={destinations}
+                    destinations={checkInDestinations}
                     selectedDestination={selectedCheckInDestination}
                     locale={locale}
                     onDestinationChange={onCheckInDestinationChange}
@@ -250,6 +257,9 @@ export function TouristHome({
           </section>
         )}
 
+        {!showCheckInPanel && discoveryControl}
+        {!showCheckInPanel && !activeJourneyPoint && <p className="discovery-empty-note">{discoveryText(locale, "locationNeeded")}</p>}
+        {!showCheckInPanel && activeJourneyPoint && destinations.length === 0 && <p className="discovery-empty-note">{discoveryText(locale, "noLocal")}</p>}
         {!showCheckInPanel && <section className="home-primary-grid">
           <div className="home-today-panel">
             <div className="tracking-status-card home-status-card">
@@ -350,6 +360,7 @@ export function TouristHome({
               mode="tourist"
               displayMode={activeTrip ? "route" : "signals"}
               locale={locale}
+              isBrowsingArea={isBrowsingArea}
             />
           </div>
         </section>}
@@ -436,7 +447,7 @@ export function TouristHome({
                 <div className="check-in-stack">
                   <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
                   <QrCheckInPanel
-                    destinations={destinations}
+                    destinations={checkInDestinations}
                     selectedDestination={selectedCheckInDestination}
                     locale={locale}
                     onDestinationChange={onCheckInDestinationChange}

@@ -55,6 +55,10 @@ export type User = {
   accessibilityPreference?: "none" | "low-walking" | "wheelchair-friendly";
   trackingSuggestionMode?: "off" | "nearby" | "balanced" | "popular";
   trackingSuggestionRadiusKm?: number;
+  discoveryLocationMode?: "current" | "area";
+  discoveryAreaId?: string;
+  hiddenDestinationIds?: string[];
+  eventAnnouncementsEnabled?: boolean;
   nationality?: string;
   passportNumber?: string;
   emergencyContactName?: string;
