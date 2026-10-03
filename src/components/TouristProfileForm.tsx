@@ -3,6 +3,8 @@ import { useState, type FormEvent } from "react";
 import { getCategoryLabel, getDisplayName, inferExpectedProfileFromPreferences, profilePreferenceOptions } from "../services/profile";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { discoveryText } from "../services/discoveryCopy";
+import { activityText } from "../services/activityCopy";
+import { usesSampleActivity } from "../services/activitySummary";
 import type { DestinationCategory, User } from "../types";
 
 type TouristProfileFormProps = {
@@ -35,6 +37,7 @@ export function TouristProfileForm({
   const [trackingSuggestionMode, setTrackingSuggestionMode] = useState<User["trackingSuggestionMode"]>(user.trackingSuggestionMode ?? "balanced");
   const [trackingSuggestionRadiusKm, setTrackingSuggestionRadiusKm] = useState(user.trackingSuggestionRadiusKm ?? 2);
   const [eventAnnouncementsEnabled, setEventAnnouncementsEnabled] = useState(user.eventAnnouncementsEnabled ?? true);
+  const [sampleActivityEnabled, setSampleActivityEnabled] = useState(usesSampleActivity(user));
   const [hiddenDestinationIds, setHiddenDestinationIds] = useState(user.hiddenDestinationIds ?? []);
   const [emergencyContactName, setEmergencyContactName] = useState(user.emergencyContactName ?? "");
   const [emergencyContactPhone, setEmergencyContactPhone] = useState(user.emergencyContactPhone ?? "");
@@ -59,6 +62,7 @@ export function TouristProfileForm({
       trackingSuggestionMode,
       trackingSuggestionRadiusKm,
       eventAnnouncementsEnabled,
+      sampleActivityEnabled,
       hiddenDestinationIds,
       emergencyContactName: emergencyContactName.trim() || undefined,
       emergencyContactPhone: emergencyContactPhone.trim() || undefined,
@@ -151,6 +155,10 @@ export function TouristProfileForm({
             <label className="discovery-checkbox">
               <input type="checkbox" checked={eventAnnouncementsEnabled} onChange={(event) => setEventAnnouncementsEnabled(event.target.checked)} />
               {discoveryText(locale, "announcements")}
+            </label>
+            <label className="discovery-checkbox">
+              <input type="checkbox" checked={sampleActivityEnabled} onChange={(event) => setSampleActivityEnabled(event.target.checked)} />
+              {activityText(locale, "previewSample")}
             </label>
             {hiddenDestinationIds.length > 0 && <div className="discovery-restore">
               <span>{discoveryText(locale, "hidden")}: {hiddenDestinationIds.length}</span>

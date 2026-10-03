@@ -3,6 +3,8 @@ import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
 import { getRecognizedDestinationNames } from "./tripPresentation";
 import { compareTimeAsc, compareTimeDesc, minutesBetween, timeValue } from "./time";
+import { filterQualityMovementPoints, isContinuousMovementSegment } from "./movementQuality";
+import { getRecordedStopIds } from "./stopEvidence";
 
 export type TouristWorkspaceData = {
   userTrips: TripSession[];
@@ -32,8 +34,9 @@ export type TouristWorkspaceData = {
   recentCheckIns: AppData["checkIns"];
 };
 
-function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex): TripSummary {
-  const visitedDestinationIds = new Set<string>();
+function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex, checkIns: AttractionCheckIn[]): TripSummary {
+  const visitedDestinationIds = getRecordedStopIds(points, destinationIndex);
+  checkIns.filter((checkIn) => checkIn.tripId === trip.id && checkIn.userId === trip.userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
   let distance = 0;
   let accuracyTotal = 0;
 
@@ -41,14 +44,10 @@ function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], des
     const point = points[index];
     accuracyTotal += point.accuracyMeters;
 
-    if (index > 0) {
+    if (index > 0 && isContinuousMovementSegment(points[index - 1], point)) {
       distance += distanceKm(points[index - 1], point);
     }
 
-    const nearest = destinationIndex.nearest(point, 1.2);
-    if (nearest) {
-      visitedDestinationIds.add(nearest.destination.id);
-    }
   }
 
   const startedAt = points[0]?.recordedAt ?? trip.startedAt;
@@ -103,17 +102,16 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
 
   const userTripIds = new Set(userTrips.map((trip) => trip.id));
 
-  data.points.forEach((point) => {
+  const qualityPoints = filterQualityMovementPoints(data.points.filter((point) => userTripIds.has(point.tripId)));
+  getRecordedStopIds(qualityPoints, destinationIndex).forEach((id) => visitedDestinationIds.add(id));
+  data.checkIns.filter((checkIn) => checkIn.userId === userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
+  qualityPoints.forEach((point) => {
     if (!userTripIds.has(point.tripId)) {
       return;
     }
 
     pointsByTrip.get(point.tripId)?.push(point);
 
-    const nearest = destinationIndex.nearest(point, 1.2);
-    if (nearest) {
-      visitedDestinationIds.add(nearest.destination.id);
-    }
   });
 
   pointsByTrip.forEach((points) => {
@@ -163,7 +161,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
   const recentTrips = [...userTrips].sort((a, b) => compareTimeDesc(a.startedAt, b.startedAt));
   const activeTrip = userTrips.find((trip) => trip.status === "active") ?? null;
   const activePoints = activeTrip ? pointsByTrip.get(activeTrip.id) ?? [] : [];
-  const tripSummaries = userTrips.map((trip) => summarizeTripFromPoints(trip, pointsByTrip.get(trip.id) ?? [], destinationIndex));
+  const tripSummaries = userTrips.map((trip) => summarizeTripFromPoints(trip, pointsByTrip.get(trip.id) ?? [], destinationIndex, data.checkIns));
   const tripSummaryById = new Map(tripSummaries.map((summary) => [summary.tripId, summary]));
   const selectedTrip = userTrips.find((trip) => trip.id === selectedTripId) ?? recentTrips[0];
   const selectedTripPoints = selectedTrip ? pointsByTrip.get(selectedTrip.id) ?? [] : [];

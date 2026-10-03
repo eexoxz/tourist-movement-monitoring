@@ -16,7 +16,9 @@ import type {
 } from "../types";
 import { createId } from "./storage";
 import { distanceKm } from "./geo";
-import { createDestinationSpatialIndex, type DestinationDistance } from "./destinationSpatialIndex";
+import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
+import { filterQualityMovementPoints, isContinuousMovementSegment } from "./movementQuality";
+import { getRecordedStopIds } from "./stopEvidence";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 const kMeansFeatureNames: Array<keyof KMeansFeatureVector> = ["culturalProportion", "natureProportion", "urbanProportion", "uniqueDestinations"];
@@ -90,9 +92,7 @@ function getTripMovementEvidence(points: MovementPoint[], data: AppData, destina
 }
 
 function prepareMovementPoints(points: MovementPoint[]) {
-  const sortedPoints = [...points]
-    .filter((point) => Math.abs(point.latitude) <= 90 && Math.abs(point.longitude) <= 180)
-    .sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+  const sortedPoints = filterQualityMovementPoints(points);
 
   return sortedPoints.filter((point, index) => {
     if (index === 0) {
@@ -475,6 +475,9 @@ type DemandAccumulator = {
   approachSignalCount: number;
   approachingTouristIds: Set<string>;
   rawScore: number;
+  movementDays: Set<string>;
+  recentDays: Set<string>;
+  approachDays: Set<string>;
 };
 
 function createDemandAccumulators(destinations: Destination[]) {
@@ -489,6 +492,9 @@ function createDemandAccumulators(destinations: Destination[]) {
         approachSignalCount: 0,
         approachingTouristIds: new Set<string>(),
         rawScore: 0,
+        movementDays: new Set<string>(),
+        recentDays: new Set<string>(),
+        approachDays: new Set<string>(),
       },
     ])
   );
@@ -506,14 +512,16 @@ function movementPointsByTrip(points: MovementPoint[]) {
   return grouped;
 }
 
-export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
-  const since = Date.now() - 7 * 24 * 60 * 60 * 1000;
+export function calculateDestinationDemand(data: AppData, options: { includeDemo?: boolean; now?: number } = {}): DestinationDemand[] {
+  const now = options.now ?? Date.now();
+  const since = now - 7 * 24 * 60 * 60 * 1000;
   const rowsByDestination = createDemandAccumulators(data.destinations);
   const tripById = new Map(data.trips.map((trip) => [trip.id, trip]));
-  const pointsByTrip = movementPointsByTrip(data.points);
+  const validPoints = filterQualityMovementPoints(data.points.filter((point) => options.includeDemo !== false || point.source === "browser"), now);
+  const pointsByTrip = movementPointsByTrip(validPoints);
   const destinationIndex = createDestinationSpatialIndex(data.destinations);
 
-  data.points.forEach((point) => {
+  validPoints.forEach((point) => {
     const nearest = destinationIndex.nearest(point, 1.2);
 
     if (!nearest) {
@@ -523,18 +531,19 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
     const row = rowsByDestination.get(nearest.destination.id);
     const trip = tripById.get(point.tripId);
 
-    if (!row) {
+    if (!row || !trip || (point.userId && point.userId !== trip.userId)) {
       return;
     }
 
     row.movementPointCount += 1;
 
-    if (trip) {
-      row.touristIds.add(trip.userId);
-    }
+    row.touristIds.add(trip.userId);
+    const visitorDay = `${trip.userId}|${new Date(point.recordedAt).toISOString().slice(0, 10)}`;
+    row.movementDays.add(visitorDay);
 
-    if (new Date(point.recordedAt).getTime() >= since) {
+    if (new Date(point.recordedAt).getTime() >= since && new Date(point.recordedAt).getTime() <= now) {
       row.recentPointCount += 1;
+      row.recentDays.add(visitorDay);
     }
   });
 
@@ -543,6 +552,7 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
 
     points.slice(1).forEach((point, index) => {
       const previous = points[index];
+      if (!isContinuousMovementSegment(previous, point) || (point.userId && point.userId !== trip.userId) || (previous.userId && previous.userId !== trip.userId)) return;
 
       destinationIndex.candidatesBetween(previous, point, approachSignalRadiusKm).forEach((destination) => {
         const previousDistance = distanceKm(previous, destination);
@@ -554,6 +564,7 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
           if (row) {
             row.approachSignalCount += 1;
             row.approachingTouristIds.add(trip.userId);
+            row.approachDays.add(`${trip.userId}|${new Date(point.recordedAt).toISOString().slice(0, 10)}`);
           }
         }
       });
@@ -563,10 +574,10 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
   const rows = [...rowsByDestination.values()].map((row) => ({
     ...row,
     rawScore:
-      row.movementPointCount * 8 +
+      row.movementDays.size * 8 +
       row.touristIds.size * 18 +
-      row.recentPointCount * 10 +
-      row.approachSignalCount * 12 +
+      row.recentDays.size * 10 +
+      row.approachDays.size * 12 +
       row.approachingTouristIds.size * 20,
   }));
   const maxScore = Math.max(1, ...rows.map((row) => row.rawScore));
@@ -583,7 +594,7 @@ export function calculateDestinationDemand(data: AppData): DestinationDemand[] {
         approachSignalCount: row.approachSignalCount,
         approachingTouristCount: row.approachingTouristIds.size,
         popularityScore,
-        tier: demandTier(popularityScore),
+        tier: row.touristIds.size >= 3 ? demandTier(popularityScore) : "low" as const,
       };
     })
     .sort((a, b) => b.popularityScore - a.popularityScore);
@@ -736,12 +747,8 @@ export function recommendForUser(
     }
   });
 
-  const visited = new Set(
-    completedPoints
-      .map((point) => destinationIndex.nearest(point, 1.2))
-      .filter((result): result is DestinationDistance => Boolean(result))
-      .map((result) => result.destination.id)
-  );
+  const visited = getRecordedStopIds(completedPoints, destinationIndex);
+  data.checkIns.filter((checkIn) => checkIn.userId === userId).forEach((checkIn) => visited.add(checkIn.destinationId));
   const historyLocation = options.ignoreHistoryLocation
     ? undefined
     : points.reduce<MovementPoint | undefined>((latest, point) => {

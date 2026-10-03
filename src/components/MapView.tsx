@@ -3,12 +3,14 @@ import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Building2, Landmark, Trees, Utensils, Waves, X, type LucideIcon } from "lucide-react";
 import "leaflet/dist/leaflet.css";
-import type { Destination, DestinationCategory, MovementPoint } from "../types";
+import type { Destination, DestinationCategory, DestinationDemand, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { calculateDestinationSignals, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
 import { DestinationVisual } from "./DestinationVisual";
 import { discoveryText } from "../services/discoveryCopy";
+import { activityText } from "../services/activityCopy";
+import { isContinuousMovementSegment } from "../services/movementQuality";
 
 type MapViewProps = {
   points: MovementPoint[];
@@ -18,6 +20,7 @@ type MapViewProps = {
   displayMode?: "route" | "signals";
   locale?: Locale;
   isBrowsingArea?: boolean;
+  activityDemand?: DestinationDemand[];
 };
 
 const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; labelKey: TranslationKey }> = {
@@ -70,12 +73,12 @@ function crowdLabelKey(signal: DestinationSignal): TranslationKey {
   return "map.crowd.quiet";
 }
 
-function destinationIcon(category: DestinationCategory, signal: DestinationSignal, locale: Locale) {
+function destinationIcon(category: DestinationCategory, signal: DestinationSignal, locale: Locale, showCounts = true) {
   const meta = categoryMeta[category];
   const size = signal.tier === "high" ? 46 : signal.tier === "medium" ? 42 : signal.tier === "emerging" ? 38 : 34;
   const iconSize = Math.round(size * 0.44);
   const badgeLabel = signal.nearbyPointCount > 999 ? "999+" : signal.nearbyPointCount.toString();
-  const badge = signal.nearbyPointCount > 0 ? `<b>${badgeLabel}</b>` : "";
+  const badge = showCounts && signal.nearbyPointCount > 0 ? `<b>${badgeLabel}</b>` : "";
 
   return L.divIcon({
     className: `destination-marker destination-marker-${category} destination-marker-${signal.tier}`,
@@ -121,7 +124,7 @@ function splitRouteSegments(points: MovementPoint[]) {
     const coordinate: [number, number] = [point.latitude, point.longitude];
     const previous = points[index - 1];
 
-    if (!previous || distanceKm(previous, point) > routeJumpLimitKm) {
+    if (!previous || !isContinuousMovementSegment(previous, point) || distanceKm(previous, point) > routeJumpLimitKm) {
       segments.push([coordinate]);
       return segments;
     }
@@ -139,7 +142,7 @@ function shouldRenderPointMarker(index: number, totalPoints: number) {
   return index % Math.max(1, Math.ceil(totalPoints / maxRenderedRoutePointMarkers)) === 0;
 }
 
-export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false }: MapViewProps) {
+export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const lastAutoFocusKeyRef = useRef("");
@@ -160,7 +163,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
     return rankedDestinations.slice(0, limit);
   }, [activePoint, destinations, mode, points.length]);
-  const destinationSignals = useMemo(() => calculateDestinationSignals(visibleDestinations, points, activePoint), [activePoint, points, visibleDestinations]);
+  const destinationSignals = useMemo(() => calculateDestinationSignals(visibleDestinations, points, activePoint, activityDemand), [activePoint, points, visibleDestinations, activityDemand]);
   const selectedDestination = visibleDestinations.find((destination) => destination.id === selectedDestinationId) ?? null;
   const selectedSignal = selectedDestination ? destinationSignals.get(selectedDestination.id) : null;
   const t = (key: TranslationKey) => translate(locale, key);
@@ -246,7 +249,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       }
 
       const marker = L.marker([destination.latitude, destination.longitude], {
-        icon: destinationIcon(destination.category, signal, locale),
+        icon: destinationIcon(destination.category, signal, locale, mode !== "tourist"),
         title: destination.name,
         zIndexOffset: markerZIndex(signal),
       }).on("click", selectDestination);
@@ -359,8 +362,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           destination,
           signal: destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination),
         }))
-        .filter((row) => row.signal.nearbyPointCount > 0)
-        .sort((a, b) => b.signal.nearbyPointCount - a.signal.nearbyPointCount)
+        .filter((row) => row.signal.nearbyPointCount > 0 || (row.signal.activityScore ?? 0) > 0)
+        .sort((a, b) => (b.signal.activityScore ?? 0) - (a.signal.activityScore ?? 0) || b.signal.nearbyPointCount - a.signal.nearbyPointCount)
         .slice(0, 3),
     [activePoint, destinationSignals, visibleDestinations]
   );
@@ -420,7 +423,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
               </div>
               <div>
                 <dt>{t("common.demand")}</dt>
-                <dd>{t(crowdLabelKey(selectedSignal))}</dd>
+                <dd>{mode === "tourist" && selectedSignal.activityScore === 0 ? activityText(locale, "noEvidence") : t(crowdLabelKey(selectedSignal))}</dd>
               </div>
             </dl>
             <section className="map-visit-notes">
@@ -447,10 +450,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           </>
         ) : topSignals.length > 0 ? (
           <>
-            <span>{mode === "tourist" ? t("map.nearbyMovement") : t("map.topMapSignals")}</span>
+            <span>{mode === "tourist" ? discoveryText(locale, "nearby") : t("map.topMapSignals")}</span>
             <h2>{topSignals[0].destination.name}</h2>
             <p>
-              {topSignals[0].signal.nearbyPointCount} {t("common.points")} {t("map.nearbyMovementDescription")}
+              {mode === "tourist" ? topSignals[0].destination.description : `${topSignals[0].signal.nearbyPointCount} ${t("common.points")} ${t("map.nearbyMovementDescription")}`}
             </p>
           </>
         ) : (

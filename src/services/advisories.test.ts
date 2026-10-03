@@ -23,5 +23,17 @@ describe("tourism advisories", () => {
 
     expect(advisories[0].city).toBe("Penang");
     expect(advisories.some((advisory) => advisory.type === "weather")).toBe(true);
+    expect(advisories.every((advisory) => advisory.city === "Penang" || advisory.city === "Malaysia")).toBe(true);
+  });
+
+  it("does not assume a distant city's notices apply to an unlisted area", () => {
+    const now = new Date("2026-09-18T08:00:00.000Z");
+    const advisories = getRelevantTourismAdvisories({
+      destinations: initialData.destinations,
+      activePoint: { id: "point", tripId: "trip", userId: "tourist-demo", latitude: 1.4927, longitude: 103.7414, accuracyMeters: 20, recordedAt: now.toISOString(), source: "demo" },
+      now,
+    });
+    expect(advisories.every((advisory) => advisory.city === "Malaysia")).toBe(true);
+    expect(getRelevantTourismAdvisories({ destinations: initialData.destinations, now }).every((advisory) => advisory.city === "Malaysia")).toBe(true);
   });
 });

@@ -7,7 +7,7 @@ export const discoveryRadiusKm = 25;
 
 export function getLatestDiscoveryPoint(...points: (MovementPoint | undefined)[]) {
   return points.reduce<MovementPoint | undefined>((latest, point) => {
-    if (!point || !Number.isFinite(Date.parse(point.recordedAt))) return latest;
+    if (!point || !Number.isFinite(Date.parse(point.recordedAt)) || Date.parse(point.recordedAt) > Date.now() + 60000) return latest;
     return !latest || Date.parse(point.recordedAt) > Date.parse(latest.recordedAt) ? point : latest;
   }, undefined);
 }

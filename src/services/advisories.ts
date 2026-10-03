@@ -1,6 +1,7 @@
 import { tourismAdvisoryTemplates, type TourismAdvisoryTemplate } from "../data/tourismAdvisories";
 import type { Destination, MovementPoint } from "../types";
 import { nearestDestination } from "./geo";
+import { discoveryRadiusKm } from "./discovery";
 
 export type TourismAdvisory = Omit<TourismAdvisoryTemplate, "startsInDays" | "lastsDays"> & {
   startsAt: string;
@@ -40,13 +41,14 @@ export function getRelevantTourismAdvisories(input: {
   limit?: number;
 }) {
   const now = input.now ?? new Date();
-  const nearest = input.activePoint ? nearestDestination(input.activePoint, input.destinations)?.destination : null;
-  const referenceCity = nearest?.city;
-  const referenceCategory = nearest?.category;
+  const nearest = input.activePoint ? nearestDestination(input.activePoint, input.destinations) : null;
+  const referenceDestination = nearest && nearest.distance <= discoveryRadiusKm ? nearest.destination : null;
+  const referenceCity = referenceDestination?.city;
+  const referenceCategory = referenceDestination?.category;
   const activeAdvisories = buildTourismAdvisories(now).filter((advisory) => {
     const startsAt = new Date(advisory.startsAt);
     const endsAt = new Date(advisory.endsAt);
-    return startsAt.getTime() <= now.getTime() && endsAt.getTime() >= now.getTime();
+    return (advisory.city === "Malaysia" || advisory.city === referenceCity) && startsAt.getTime() <= now.getTime() && endsAt.getTime() >= now.getTime();
   });
 
   return activeAdvisories

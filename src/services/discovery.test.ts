@@ -17,6 +17,7 @@ describe("privacy-aware local discovery", () => {
     expect(getDiscoveryReference(user, getLatestDiscoveryPoint(routePoint, gpsPoint))).toBe(gpsPoint);
     expect(getLatestDiscoveryPoint(gpsPoint, routePoint)).toBe(gpsPoint);
     expect(getLatestDiscoveryPoint(undefined, { ...routePoint, recordedAt: "invalid" })).toBeUndefined();
+    expect(getLatestDiscoveryPoint(gpsPoint, { ...routePoint, recordedAt: new Date(Date.now() + 10 * 60000).toISOString() })).toBe(gpsPoint);
   });
 
   it("uses the chosen district without creating or altering movement records", () => {

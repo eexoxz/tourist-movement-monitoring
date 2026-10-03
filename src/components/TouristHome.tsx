@@ -9,7 +9,7 @@ import type { GeoFenceWarning } from "../services/geofencing";
 import type { IncidentPhotoAttachment } from "../services/incidentAttachments";
 import type { TourismAdvisory } from "../services/advisories";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
-import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
+import type { AppView, AttractionCheckIn, Destination, DestinationDemand, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, TripSession, User } from "../types";
 import { MovementMap } from "./MovementMap";
 import { Page } from "./Page";
 import { QrCheckInPanel } from "./QrCheckInPanel";
@@ -32,6 +32,8 @@ type TouristHomeProps = {
   destinations: Destination[];
   checkInDestinations?: Destination[];
   discoveryControl?: ReactNode;
+  activityBasis?: ReactNode;
+  activityDemand?: DestinationDemand[];
   isBrowsingArea?: boolean;
   geofenceWarnings: GeoFenceWarning[];
   tourismAdvisories: TourismAdvisory[];
@@ -111,6 +113,8 @@ export function TouristHome({
   destinations,
   checkInDestinations = destinations,
   discoveryControl,
+  activityBasis,
+  activityDemand,
   isBrowsingArea = false,
   geofenceWarnings,
   tourismAdvisories,
@@ -258,6 +262,7 @@ export function TouristHome({
         )}
 
         {!showCheckInPanel && discoveryControl}
+        {!showCheckInPanel && activityBasis}
         {!showCheckInPanel && !activeJourneyPoint && <p className="discovery-empty-note">{discoveryText(locale, "locationNeeded")}</p>}
         {!showCheckInPanel && activeJourneyPoint && destinations.length === 0 && <p className="discovery-empty-note">{discoveryText(locale, "noLocal")}</p>}
         {!showCheckInPanel && <section className="home-primary-grid">
@@ -361,6 +366,7 @@ export function TouristHome({
               displayMode={activeTrip ? "route" : "signals"}
               locale={locale}
               isBrowsingArea={isBrowsingArea}
+              activityDemand={activityDemand}
             />
           </div>
         </section>}

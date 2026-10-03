@@ -41,7 +41,7 @@ import {
   getViewFromPath,
   type AuthMode,
 } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, saveSession } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, loadSharedDestinations, resetData, saveCheckInRecord, saveData, saveSession } from "./services/storage";
 import { formatDateTime, nearestDestination } from "./services/geo";
 import {
   buildMovementAlertsCsv,
@@ -109,6 +109,11 @@ import { discoveryRadiusKm, getDiscoveryDestinations, getDiscoveryReference, get
 import { discoveryAreas } from "./data/discoveryAreas";
 import { DiscoveryLocationControl } from "./components/DiscoveryLocationControl";
 import { DiscoveryPrompt } from "./components/DiscoveryPrompt";
+import { ActivityBasis } from "./components/ActivityBasis";
+import { ActivitySummaryPublisher } from "./components/ActivitySummaryPublisher";
+import { activityText } from "./services/activityCopy";
+import { buildDestinationActivitySummaries, getTouristDestinationDemand } from "./services/activitySummary";
+import { getMovementQualityIssue, type MovementQualityIssue } from "./services/movementQuality";
 import { getNearbyEmergencyServices } from "./services/emergencyServices";
 import { localizeDestinations } from "./services/destinationLocale";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
@@ -1099,8 +1104,10 @@ function TouristWorkspace({
   hasNotifications: boolean;
 }) {
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
+  const [trackingQualityIssue, setTrackingQualityIssue] = useState<MovementQualityIssue | null>(null);
   const [isLiveTracking, setIsLiveTracking] = useState(false);
   const [locationRetryAvailable, setLocationRetryAvailable] = useState(false);
+  const [refreshingActivities, setRefreshingActivities] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>("");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
@@ -1117,8 +1124,9 @@ function TouristWorkspace({
   const geofenceNoticeKey = useRef("");
   const liveSuggestionDestinationIds = useRef(new Set<string>());
   const lastSuggestionAt = useRef(0);
+  const browserPositionHandler = useRef<((position: GeolocationPosition) => void) | null>(null);
   const [liveSuggestion, setLiveSuggestion] = useState<LiveNearbySuggestion | null>(null);
-  const [dismissedEventIds, setDismissedEventIds] = useState<string[]>([]);
+  const [eventAnnouncementsDismissed, setEventAnnouncementsDismissed] = useState(false);
   const localizedDestinations = useMemo(() => localizeDestinations(data.destinations, locale), [data.destinations, locale]);
   const localizedData = useMemo(() => ({ ...data, destinations: localizedDestinations }), [data, localizedDestinations]);
   const touristWorkspace = useMemo(() => getTouristWorkspaceData(localizedData, user.id, selectedTripId), [localizedData, selectedTripId, user.id]);
@@ -1151,14 +1159,15 @@ function TouristWorkspace({
   const activeTripSummary = activeTrip ? tripSummaries.find((summary) => summary.tripId === activeTrip.id) ?? null : null;
   const recentTrip = recentTrips[0];
   const selectedDestination = localizedDestinations.find((destination) => destination.id === selectedDestinationId) ?? localizedDestinations[0];
-  const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
+  const destinationDemand = useMemo(() => getTouristDestinationDemand(data, user), [data, user]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents), []);
   const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));
-  const discoveryGpsPoint = currentConsent ? getLatestDiscoveryPoint(activePoints.at(-1), lastBrowserLocation) : undefined;
+  const latestGpsPoint = currentConsent ? getLatestDiscoveryPoint(activePoints.at(-1), lastBrowserLocation) : undefined;
+  const discoveryGpsPoint = getDiscoveryReference({ ...user, discoveryLocationMode: "current" }, latestGpsPoint);
   const discoveryReference = useMemo(() => getDiscoveryReference(user, discoveryGpsPoint), [user, discoveryGpsPoint]);
   const discoveryDestinations = useMemo(() => discoveryReference ? getDiscoveryDestinations(localizedDestinations, user, discoveryReference) : [], [localizedDestinations, user, discoveryReference]);
-  const eventAnnouncement = user.eventAnnouncementsEnabled !== false
-    ? getLocalEventAnnouncement(upcomingFestivals.filter((event) => !dismissedEventIds.includes(event.id)), discoveryReference)
+  const eventAnnouncement = user.eventAnnouncementsEnabled !== false && !eventAnnouncementsDismissed
+    ? getLocalEventAnnouncement(upcomingFestivals, discoveryReference)
     : null;
   const tourismAdvisories = useMemo(
     () => getRelevantTourismAdvisories({ destinations: localizedDestinations, activePoint: discoveryReference }),
@@ -1173,6 +1182,7 @@ function TouristWorkspace({
   const recommendedCheckIn = latestKnownPoint ? nearestDestination(latestKnownPoint, localizedDestinations)?.destination ?? null : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(discoveryGpsPoint, data.geofences), [data.geofences, discoveryGpsPoint]);
   const displayName = getDisplayName(user);
+  const trackingFeedback = trackingQualityIssue ? activityText(locale, trackingQualityIssue) : trackingMessage;
   const t = (key: TranslationKey) => translate(locale, key);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
   const hasPersonalizedRecommendations = Boolean(latestAnalysis);
@@ -1188,7 +1198,7 @@ function TouristWorkspace({
     : null;
   const localDestinationIds = new Set(discoveryDestinations.map((destination) => destination.id));
   const topDemandDestination = discoveryReference
-    ? localizedDestinations.find((destination) => destination.id === destinationDemand.find((row) => localDestinationIds.has(row.destinationId))?.destinationId)
+    ? localizedDestinations.find((destination) => destination.id === destinationDemand.find((row) => row.popularityScore > 0 && localDestinationIds.has(row.destinationId))?.destinationId)
     : null;
   const nextFestival = getLocalEventAnnouncement(upcomingFestivals, discoveryReference);
   const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(latestKnownPoint), [latestKnownPoint]);
@@ -1241,6 +1251,20 @@ function TouristWorkspace({
   const saveDiscoveryPreferences = (preferences: Partial<User>) => {
     const current = loadData();
     onDataChange({ ...current, users: current.users.map((candidate) => candidate.id === user.id ? { ...candidate, ...preferences } : candidate) });
+  };
+
+  const refreshActivities = async () => {
+    if (refreshingActivities) return;
+    setRefreshingActivities(true);
+    try {
+      const destinations = await loadSharedDestinations();
+      if (!destinations?.length) throw new Error("No shared destinations available");
+      onDataChange({ ...loadData(), destinations });
+    } catch {
+      notify({ tone: "warning", title: activityText(locale, "title"), message: activityText(locale, "refreshFailed") });
+    } finally {
+      setRefreshingActivities(false);
+    }
   };
 
   const changeDiscoveryLocation = (mode: "current" | "area", areaId?: string) => {
@@ -1298,6 +1322,12 @@ function TouristWorkspace({
         }
 
         const browserPoint = movementPointFromBrowserPosition(position, `browser-preview-${user.id}`, user.id);
+        const issue = getMovementQualityIssue(browserPoint, undefined, Date.now(), true);
+        if (issue) {
+          setTrackingQualityIssue(issue);
+          return;
+        }
+        setTrackingQualityIssue(null);
         setLastBrowserLocation(browserPoint);
         saveLastBrowserLocation(user.id, browserPoint);
       },
@@ -1325,7 +1355,7 @@ function TouristWorkspace({
     longitude: number,
     accuracyMeters: number,
     source: "browser" | "demo",
-    options: { quietDuplicate?: boolean } = {}
+    options: { quietDuplicate?: boolean; recordedAt?: string } = {}
   ) => {
     const result = appendMovementPoint(loadData(), {
       tripId,
@@ -1333,9 +1363,14 @@ function TouristWorkspace({
       longitude,
       accuracyMeters,
       source,
+      recordedAt: options.recordedAt,
     });
 
     if (result.error || !result.data) {
+      if (result.qualityIssue) {
+        setTrackingQualityIssue(result.qualityIssue);
+        return false;
+      }
       if (options.quietDuplicate && result.error?.includes("too close")) {
         return false;
       }
@@ -1365,23 +1400,34 @@ function TouristWorkspace({
     }
 
     const rememberBrowserPosition = (position: GeolocationPosition, saveInitialPoint = false) => {
+      const current = loadData();
+      if (!current.trips.some((trip) => trip.id === tripId && trip.userId === user.id && trip.status === "active") || !current.consents.some((consent) => consent.userId === user.id && consent.granted)) return false;
       const browserPoint = movementPointFromBrowserPosition(position, tripId, user.id);
+      const previous = loadLastBrowserLocation(user.id);
+      const issue = getMovementQualityIssue(browserPoint, previous?.tripId === tripId ? previous : undefined, Date.now(), true);
+      if (issue) {
+        setTrackingQualityIssue(issue);
+        return false;
+      }
+      setTrackingQualityIssue(null);
       setLastBrowserLocation(browserPoint);
       saveLastBrowserLocation(user.id, browserPoint);
       setLocationRetryAvailable(false);
 
       if (saveInitialPoint) {
-        appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true });
+        appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true, recordedAt: browserPoint.recordedAt });
       }
+      return true;
     };
 
     const saveBrowserPosition = (position: GeolocationPosition) => {
-      rememberBrowserPosition(position);
-      const saved = appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true });
+      if (!rememberBrowserPosition(position)) return;
+      const saved = appendPoint(tripId, position.coords.latitude, position.coords.longitude, position.coords.accuracy, "browser", { quietDuplicate: true, recordedAt: new Date(position.timestamp || Date.now()).toISOString() });
       if (saved) {
         setTrackingMessage("Live movement point recorded.");
       }
     };
+    browserPositionHandler.current = saveBrowserPosition;
 
     navigator.geolocation.getCurrentPosition(
       (position) => rememberBrowserPosition(position, true),
@@ -1420,6 +1466,19 @@ function TouristWorkspace({
     showTrackingNotice("success", "Trip tracking active", message);
     return true;
   };
+
+  useEffect(() => {
+    if (!activeTrip || !currentConsent || !isLiveTracking) return;
+    let cancelled = false;
+    // Some watches are quiet while stationary; periodic foreground readings provide dwell evidence.
+    const timer = window.setInterval(() => {
+      if (document.visibilityState !== "visible" || watchId.current === null) return;
+      navigator.geolocation.getCurrentPosition((position) => {
+        if (!cancelled && watchId.current !== null) browserPositionHandler.current?.(position);
+      }, () => undefined, { enableHighAccuracy: true, maximumAge: 10000, timeout: 12000 });
+    }, 60000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [activeTrip?.id, currentConsent?.id, isLiveTracking, watchId]);
 
   const startTrip = () => {
     const result = startTripSession(data, user.id);
@@ -1863,7 +1922,7 @@ function TouristWorkspace({
               </button>
             </form>
 
-            {trackingMessage && <p className="status-message">{trackingMessage}</p>}
+            {trackingFeedback && <p className="status-message">{trackingFeedback}</p>}
 
             {locationRetryAvailable && activeTrip && (
               <button className="secondary-action wide" type="button" onClick={resumeLiveTracking}>
@@ -1913,6 +1972,7 @@ function TouristWorkspace({
             mode="tourist"
             displayMode={activePoints.length ? "route" : "signals"}
             locale={locale}
+            activityDemand={destinationDemand}
           />
         </div>
       </Page>
@@ -1940,6 +2000,7 @@ function TouristWorkspace({
           selectedTripRecommendations={selectedTripRecommendations}
           fallbackPoints={tripPoints}
           destinations={localizedDestinations}
+          activityDemand={destinationDemand}
           hasPersonalizedRecommendations={hasPersonalizedRecommendations}
           locale={locale}
           onSelectTrip={setSelectedTripId}
@@ -1964,6 +2025,7 @@ function TouristWorkspace({
         }
       >
         <DiscoveryLocationControl user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
+        <ActivityBasis destinations={discoveryDestinations} user={user} locale={locale} onRefresh={user.authUid ? refreshActivities : undefined} refreshing={refreshingActivities} />
         <PlaceDiscovery
           destinations={discoveryDestinations}
           demand={destinationDemand}
@@ -2019,12 +2081,14 @@ function TouristWorkspace({
       destinations={showCheckInPanel ? localizedDestinations : discoveryDestinations}
       checkInDestinations={localizedDestinations}
       discoveryControl={<DiscoveryLocationControl user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />}
+      activityBasis={<ActivityBasis destinations={discoveryDestinations} user={user} locale={locale} onRefresh={user.authUid ? refreshActivities : undefined} refreshing={refreshingActivities} />}
+      activityDemand={destinationDemand}
       isBrowsingArea={!activeTrip && user.discoveryLocationMode === "area"}
       geofenceWarnings={geofenceWarnings}
       tourismAdvisories={tourismAdvisories}
       isLiveTracking={isLiveTracking}
       locationRetryAvailable={locationRetryAvailable}
-      trackingMessage={trackingMessage}
+      trackingMessage={trackingFeedback}
       userTrips={userTrips}
       activeCheckIn={activeCheckIn}
       activeCheckInDestination={activeCheckInDestination}
@@ -2075,12 +2139,12 @@ function TouristWorkspace({
       locale={locale}
       onClose={() => {
         if (liveSuggestion) setLiveSuggestion(null);
-        else if (eventAnnouncement) setDismissedEventIds((current) => [...current, eventAnnouncement.id]);
+        else if (eventAnnouncement) setEventAnnouncementsDismissed(true);
       }}
       onView={() => {
         if (liveSuggestion) openSuggestedPlace();
         else {
-          if (eventAnnouncement) setDismissedEventIds((current) => [...current, eventAnnouncement.id]);
+          if (eventAnnouncement) setEventAnnouncementsDismissed(true);
           onViewChange("events");
           window.scrollTo({ top: 0, behavior: "smooth" });
         }
@@ -2680,6 +2744,11 @@ function AdminWorkspace({
   if (view === "destinations") {
     return (
       <Page title="Destination Management" eyebrow="Administrator workspace">
+        <ActivitySummaryPublisher destinations={data.destinations} locale={locale} onPublish={(source) => {
+          const destinations = buildDestinationActivitySummaries(data, Date.now(), source);
+          onDataChange({ ...data, destinations });
+          notify({ tone: "info", title: activityText(locale, "title"), message: activityText(locale, destinations.some((destination) => ((source === "browser" ? destination.activitySummary : destination.demoActivitySummary)?.popularityScore ?? 0) > 0) ? "saved" : "noEvidence") });
+        }} />
         <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} />
       </Page>
     );

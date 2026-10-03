@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Destination, MovementPoint } from "../types";
+import type { Destination, DestinationDemand, MovementPoint } from "../types";
 import { calculateDestinationSignals } from "./mapSignals";
 
 const destination: Destination = {
@@ -38,6 +38,11 @@ function point(id: string, latitude: number, longitude: number, userId: string, 
 }
 
 describe("map signal service", () => {
+  it("shows a shared activity band without inventing visitor or GPS counts", () => {
+    const demand: DestinationDemand = { destinationId: destination.id, popularityScore: 80, tier: "high", movementPointCount: 0, uniqueTouristCount: 0, recentPointCount: 0, approachSignalCount: 0, approachingTouristCount: 0 };
+    expect(calculateDestinationSignals([destination], [], undefined, [demand]).get(destination.id)).toMatchObject({ tier: "high", activityScore: 80, nearbyPointCount: 0, uniqueTouristCount: 0 });
+    expect(calculateDestinationSignals([destination], [], undefined, [{ ...demand, tier: "low", popularityScore: 0 }]).get(destination.id)?.tier).toBe("low");
+  });
   it("counts nearby movement points without treating faraway points as demand", () => {
     const signals = calculateDestinationSignals(
       [destination, farDestination],

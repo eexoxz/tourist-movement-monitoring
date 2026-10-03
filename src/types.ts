@@ -59,6 +59,7 @@ export type User = {
   discoveryAreaId?: string;
   hiddenDestinationIds?: string[];
   eventAnnouncementsEnabled?: boolean;
+  sampleActivityEnabled?: boolean;
   nationality?: string;
   passportNumber?: string;
   emergencyContactName?: string;
@@ -85,6 +86,16 @@ export type Destination = {
   visitTips?: string[];
   imageUrl?: string;
   imageAlt?: string;
+  activitySummary?: DestinationActivitySummary;
+  demoActivitySummary?: DestinationActivitySummary;
+};
+
+export type DestinationActivitySummary = {
+  version: 1;
+  updatedAt: string;
+  windowDays: 7;
+  popularityScore: number;
+  tier: "high" | "medium" | "emerging" | "low";
 };
 
 export type GeoFenceType = "safe" | "restricted" | "dense";

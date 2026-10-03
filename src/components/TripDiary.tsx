@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { formatDateTime } from "../services/geo";
 import { formatTripTitle, getRecognizedDestinationNames } from "../services/tripPresentation";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
-import type { Destination, MovementPoint, Recommendation, TripSession, TripSummary } from "../types";
+import type { Destination, DestinationDemand, MovementPoint, Recommendation, TripSession, TripSummary } from "../types";
 import { MovementMap } from "./MovementMap";
 import { EmptyState } from "./SummaryCards";
 
@@ -21,6 +21,7 @@ type TripDiaryProps = {
   selectedTripRecommendations: Recommendation[];
   fallbackPoints: MovementPoint[];
   destinations: Destination[];
+  activityDemand?: DestinationDemand[];
   hasPersonalizedRecommendations: boolean;
   locale?: Locale;
   onSelectTrip: (tripId: string) => void;
@@ -43,6 +44,7 @@ export function TripDiary({
   selectedTripRecommendations,
   fallbackPoints,
   destinations,
+  activityDemand,
   hasPersonalizedRecommendations,
   locale = "en",
   onSelectTrip,
@@ -104,6 +106,7 @@ export function TripDiary({
               mode="tourist"
               displayMode={selectedTripPoints.length ? "route" : "signals"}
               locale={locale}
+              activityDemand={activityDemand}
             />
           </div>
 

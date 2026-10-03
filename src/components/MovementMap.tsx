@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import type { Destination, MovementPoint } from "../types";
+import type { Destination, DestinationDemand, MovementPoint } from "../types";
 import { translate, type Locale } from "../services/i18n";
 
 const MapView = lazy(() => import("./MapView").then((module) => ({ default: module.MapView })));
@@ -12,9 +12,10 @@ type MovementMapProps = {
   displayMode?: "route" | "signals";
   locale?: Locale;
   isBrowsingArea?: boolean;
+  activityDemand?: DestinationDemand[];
 };
 
-export function MovementMap({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false }: MovementMapProps) {
+export function MovementMap({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand }: MovementMapProps) {
   return (
     <Suspense
       fallback={
@@ -24,7 +25,7 @@ export function MovementMap({ points, destinations, activePoint, mode = "admin",
         </div>
       }
     >
-      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} displayMode={displayMode} locale={locale} isBrowsingArea={isBrowsingArea} />
+      <MapView points={points} destinations={destinations} activePoint={activePoint} mode={mode} displayMode={displayMode} locale={locale} isBrowsingArea={isBrowsingArea} activityDemand={activityDemand} />
     </Suspense>
   );
 }

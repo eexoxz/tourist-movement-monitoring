@@ -69,6 +69,7 @@ type TouristPreferenceDocument = {
   discoveryAreaId?: string;
   hiddenDestinationIds?: string[];
   eventAnnouncementsEnabled?: boolean;
+  sampleActivityEnabled?: boolean;
   profileCompletedAt?: string;
   updatedAt: string;
 };
@@ -104,6 +105,22 @@ export function saveData(data: AppData, actor?: User | null) {
 
 export function cacheLocalData(data: AppData) {
   saveLocalData(data);
+}
+
+export async function loadSharedDestinations(): Promise<Destination[] | null> {
+  const services = getFirebaseServices();
+  if (!services?.auth.currentUser) return null;
+  const { collection, getDocsFromServer } = await import("firebase/firestore");
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const snapshot = await Promise.race([
+      getDocsFromServer(collection(services.db, FIRESTORE_COLLECTIONS.destinations)),
+      new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error("Place refresh timed out")), 10000); }),
+    ]);
+    return snapshot.docs.map((document) => normalizeDestination({ ...document.data(), id: document.id } as Destination));
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function saveCheckInRecord(checkIn: AttractionCheckIn, actor?: User | null) {
@@ -529,6 +546,7 @@ function mergeUserDocuments(
       discoveryAreaId: preference.discoveryAreaId ?? currentUser.discoveryAreaId,
       hiddenDestinationIds: preference.hiddenDestinationIds ?? currentUser.hiddenDestinationIds,
       eventAnnouncementsEnabled: preference.eventAnnouncementsEnabled ?? currentUser.eventAnnouncementsEnabled,
+      sampleActivityEnabled: preference.sampleActivityEnabled ?? currentUser.sampleActivityEnabled,
       profileCompletedAt: preference.profileCompletedAt,
     });
   }
@@ -559,6 +577,7 @@ function buildTouristPreferenceDocument(user: User): TouristPreferenceDocument {
     discoveryAreaId: user.discoveryAreaId,
     hiddenDestinationIds: user.hiddenDestinationIds ?? [],
     eventAnnouncementsEnabled: user.eventAnnouncementsEnabled ?? true,
+    sampleActivityEnabled: user.sampleActivityEnabled ?? !user.authUid,
     profileCompletedAt: user.profileCompletedAt,
     updatedAt: new Date().toISOString(),
   };

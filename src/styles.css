@@ -368,6 +368,67 @@ button:disabled {
   color: #526777;
 }
 
+.activity-basis {
+  margin: 4px 0 14px;
+  color: #435966;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.activity-basis-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.activity-basis-row p {
+  margin: 0;
+}
+
+.activity-basis-row button {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+}
+
+.shared-activity-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 0 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #d8e2e6;
+}
+
+.shared-activity-toolbar h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.shared-activity-toolbar p,
+.shared-activity-toolbar time {
+  color: #435966;
+  font-size: 13px;
+}
+
+.shared-activity-toolbar button {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.shared-activity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
 .discovery-prompt {
   position: fixed;
   z-index: 49990;

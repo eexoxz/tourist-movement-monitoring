@@ -1,6 +1,7 @@
-import type { Destination, MovementPoint } from "../types";
+import type { Destination, DestinationDemand, MovementPoint } from "../types";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
+import { filterQualityMovementPoints } from "./movementQuality";
 
 export type DestinationSignal = {
   nearbyPointCount: number;
@@ -8,6 +9,7 @@ export type DestinationSignal = {
   latestRecordedAt?: string;
   distanceFromActiveKm?: number;
   tier: "high" | "medium" | "emerging" | "low";
+  activityScore?: number;
 };
 
 type MutableDestinationSignal = {
@@ -44,7 +46,8 @@ function getTier(nearbyPointCount: number, uniqueTouristCount: number): Destinat
   return "low";
 }
 
-export function calculateDestinationSignals(destinations: Destination[], points: MovementPoint[], activePoint?: MovementPoint) {
+export function calculateDestinationSignals(destinations: Destination[], points: MovementPoint[], activePoint?: MovementPoint, activityDemand?: DestinationDemand[]) {
+  const demandById = new Map(activityDemand?.map((row) => [row.destinationId, row]) ?? []);
   const mutableSignals = new Map<string, MutableDestinationSignal>(
     destinations.map((destination) => [
       destination.id,
@@ -58,7 +61,7 @@ export function calculateDestinationSignals(destinations: Destination[], points:
 
   const destinationIndex = createDestinationSpatialIndex(destinations);
 
-  points.forEach((point) => {
+  filterQualityMovementPoints(points).forEach((point) => {
     destinationIndex.nearby(point, nearbyRadiusKm).forEach(({ destination }) => {
       const signal = mutableSignals.get(destination.id);
       if (!signal) {
@@ -89,7 +92,8 @@ export function calculateDestinationSignals(destinations: Destination[], points:
           uniqueTouristCount,
           latestRecordedAt: signal?.latestRecordedAt,
           distanceFromActiveKm: activePoint ? distanceKm(activePoint, destination) : undefined,
-          tier: getTier(nearbyPointCount, uniqueTouristCount),
+          tier: demandById.get(destination.id)?.tier ?? getTier(nearbyPointCount, uniqueTouristCount),
+          activityScore: demandById.get(destination.id)?.popularityScore,
         },
       ];
     })
