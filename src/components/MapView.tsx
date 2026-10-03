@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Building2, Landmark, LocateFixed, Trees, Utensils, Waves, X, type LucideIcon } from "lucide-react";
+import { Building2, Landmark, LocateFixed, MapPinned, Trees, Utensils, Waves, X, type LucideIcon } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, DestinationDemand, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
@@ -148,6 +148,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const lastAutoFocusKeyRef = useRef("");
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
+  const [expandedDestinationId, setExpandedDestinationId] = useState<string | null>(null);
+  const [dismissedPreviewId, setDismissedPreviewId] = useState<string | null>(null);
   const visibleDestinations = useMemo(() => {
     if (mode !== "tourist") {
       return destinations;
@@ -171,13 +173,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const signalTierLabel = (tier: DestinationSignal["tier"]) => t(tierLabelKey(tier));
 
   useEffect(() => {
-    if (visibleDestinations.length === 1) {
-      setSelectedDestinationId(visibleDestinations[0].id);
-      return;
-    }
-
     if (selectedDestinationId && !visibleDestinations.some((destination) => destination.id === selectedDestinationId)) {
       setSelectedDestinationId(null);
+      setExpandedDestinationId(null);
     }
   }, [selectedDestinationId, visibleDestinations]);
 
@@ -231,6 +229,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       const drawDemandHalo = shouldDrawDemandHalo(signal, displayMode, Boolean(activePoint));
       const selectDestination = () => {
         setSelectedDestinationId(destination.id);
+        setExpandedDestinationId(null);
+        setDismissedPreviewId(null);
         map.panTo([destination.latitude, destination.longitude], { animate: true });
       };
 
@@ -367,6 +367,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         .slice(0, 3),
     [activePoint, destinationSignals, visibleDestinations]
   );
+  const previewDestination = selectedDestination ?? topSignals[0]?.destination;
+  const previewSignal = selectedSignal ?? topSignals[0]?.signal;
+  const detailsExpanded = Boolean(selectedDestination && expandedDestinationId === selectedDestination.id);
+  const previewDismissed = !selectedDestination && previewDestination?.id === dismissedPreviewId;
 
   return (
     <div className={mode === "tourist" ? "map-frame tourist-map-mode" : "map-frame"}>
@@ -389,13 +393,13 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           </span>
         ))}
       </div>
-      <section className={selectedDestination ? "map-detail-panel visible" : "map-detail-panel"} aria-live="polite">
-        {selectedDestination && selectedSignal ? (
+      {!previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
+        {detailsExpanded && selectedDestination && selectedSignal ? (
           <>
             <button
               className="map-detail-close"
               type="button"
-              onClick={() => setSelectedDestinationId(null)}
+              onClick={() => setExpandedDestinationId(null)}
               title={t("map.closePlaceDetails")}
               aria-label={t("map.closePlaceDetails")}
             >
@@ -449,13 +453,27 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
             </section>
             {selectedSignal.latestRecordedAt && <small>{t("map.visitorMovementUpdated")} {formatDateTime(selectedSignal.latestRecordedAt)}</small>}
           </>
-        ) : topSignals.length > 0 ? (
+        ) : previewDestination && previewSignal ? (
           <>
+            <button className="map-detail-close" type="button" onClick={() => {
+              setDismissedPreviewId(previewDestination.id);
+              setSelectedDestinationId(null);
+              setExpandedDestinationId(null);
+            }} title={discoveryText(locale, "dismiss")} aria-label={discoveryText(locale, "dismiss")}>
+              <X size={16} aria-hidden="true" />
+            </button>
             <span>{mode === "tourist" ? discoveryText(locale, "nearby") : t("map.topMapSignals")}</span>
-            <h2>{topSignals[0].destination.name}</h2>
-            <p>
-              {mode === "tourist" ? topSignals[0].destination.description : `${topSignals[0].signal.nearbyPointCount} ${t("common.points")} ${t("map.nearbyMovementDescription")}`}
+            <h2>{previewDestination.name}</h2>
+            <p className="map-preview-description">
+              {mode === "tourist" ? previewDestination.description : `${previewSignal.nearbyPointCount} ${t("common.points")} ${t("map.nearbyMovementDescription")}`}
             </p>
+            <div className="map-preview-actions">
+              {previewSignal.distanceFromActiveKm !== undefined && <small>{new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(previewSignal.distanceFromActiveKm)} km {t("map.away")}</small>}
+              <button className="secondary-action compact-action" type="button" onClick={() => {
+                setSelectedDestinationId(previewDestination.id);
+                setExpandedDestinationId(previewDestination.id);
+              }}><MapPinned size={17} aria-hidden="true" />{discoveryText(locale, "view")}</button>
+            </div>
           </>
         ) : (
           <>
@@ -464,7 +482,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
             <p>{t("map.catalogueOnlyDescription")}</p>
           </>
         )}
-      </section>
+      </section>}
     </div>
   );
 }

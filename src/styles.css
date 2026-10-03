@@ -3026,6 +3026,30 @@ button:disabled {
   gap: 7px;
 }
 
+.map-place-preview {
+  gap: 8px;
+}
+
+.map-place-preview > span,
+.map-place-preview > h2 {
+  padding-right: 30px;
+}
+
+.map-place-preview .map-preview-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.map-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .map-detail-heading > span {
   padding-right: 36px;
   color: #4d6b5d;
@@ -3105,6 +3129,7 @@ button:disabled {
 
 .map-detail-close {
   position: absolute;
+  z-index: 1;
   top: 10px;
   right: 10px;
   display: grid;

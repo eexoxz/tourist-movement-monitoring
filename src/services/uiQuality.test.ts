@@ -27,6 +27,22 @@ const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("requires an explicit details action instead of automatically expanding a single map place", () => {
+    expect(mapSource).not.toContain("setSelectedDestinationId(visibleDestinations[0].id)");
+    expect(mapSource).toContain("detailsExpanded && selectedDestination && selectedSignal");
+    expect(mapSource).toContain("setExpandedDestinationId(previewDestination.id)");
+    expect(mapSource).toMatch(/const selectDestination = \(\) => \{[^}]*setExpandedDestinationId\(null\)/);
+    expect(stylesSource).toMatch(/\.map-place-preview \.map-preview-description\s*\{[^}]*-webkit-line-clamp:\s*2/);
+  });
+
+  it("lets tourists collapse full details or dismiss the compact map suggestion", () => {
+    expect(mapSource).toContain("onClick={() => setExpandedDestinationId(null)}");
+    expect(mapSource).toContain("setDismissedPreviewId(previewDestination.id)");
+    expect(mapSource).toContain("!previewDismissed && <section");
+    expect(mapSource).toContain('discoveryText(locale, "view")');
+    expect(stylesSource).toMatch(/\.map-detail-close\s*\{[^}]*z-index:\s*1/);
+  });
+
   it("contains Leaflet stacking so maps cannot intercept mobile navigation or modals", () => {
     expect(stylesSource).toMatch(/\.map-frame\s*\{[^}]*isolation:\s*isolate/);
     expect(stylesSource).toContain(".map-detail-panel:not(.visible)");
