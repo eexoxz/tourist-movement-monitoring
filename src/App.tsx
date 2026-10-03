@@ -115,6 +115,7 @@ import { activityText } from "./services/activityCopy";
 import { buildDestinationActivitySummaries, getTouristDestinationDemand } from "./services/activitySummary";
 import { getMovementQualityIssue, type MovementQualityIssue } from "./services/movementQuality";
 import { getNearbyEmergencyServices } from "./services/emergencyServices";
+import { emergencyHelpText } from "./services/emergencyHelpCopy";
 import { localizeDestinations } from "./services/destinationLocale";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "./components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./components/AdminAnalyticsWidgets";
@@ -1678,16 +1679,12 @@ function TouristWorkspace({
   };
 
   const sendSosAlert = () => {
-    if (!window.confirm("Record an SOS assistance request for tourism administrators? For real danger, call local emergency services too.")) {
-      return;
-    }
-
     const result = createSosAlert(data, user.id, discoveryGpsPoint);
     onDataChange(result.data, user);
     notify({
       tone: "warning",
-      title: "SOS request recorded",
-      message: discoveryGpsPoint ? "Your latest saved location was attached for administrator review." : "No saved location was available, but the request was recorded.",
+      title: emergencyHelpText(locale, "recorded"),
+      message: emergencyHelpText(locale, discoveryGpsPoint ? "withLocation" : "withoutLocation"),
       browser: true,
     });
   };
@@ -2115,6 +2112,8 @@ function TouristWorkspace({
       userSosAlerts={userSosAlerts}
       userIncidentReports={userIncidentReports}
       nearbyEmergencyServices={nearbyEmergencyServices}
+      safetyReferencePoint={discoveryGpsPoint ?? discoveryReference}
+      isSafetyAreaReference={!discoveryGpsPoint && user.discoveryLocationMode === "area"}
       recommendationHeading={recommendationHeading}
       recommendationSupportText={recommendationSupportText}
       topRecommendationDestination={topRecommendationDestination}

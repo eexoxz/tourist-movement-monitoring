@@ -1962,6 +1962,54 @@ button:disabled {
   gap: 9px;
 }
 
+.police-help {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 16px 0;
+  padding: 16px 0;
+  border-top: 2px solid #0f766e;
+  border-bottom: 1px solid #d9e5e4;
+  overflow-wrap: anywhere;
+}
+
+.police-help h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.police-help h3 svg { flex-shrink: 0; }
+.police-help p { margin: 0; }
+.police-help address { font-style: normal; }
+.police-help-name { font-size: 1.1rem; }
+
+.police-help-map {
+  height: 240px;
+  width: 100%;
+  min-width: 0;
+  isolation: isolate;
+  z-index: 0;
+  border-radius: 6px;
+  touch-action: pan-y;
+}
+
+.police-help-marker {
+  display: grid;
+  place-items: center;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #0f766e;
+  font-weight: 800;
+}
+
+.police-help-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.sos-confirmation { display: grid; gap: 10px; padding: 12px 0; }
+.sos-confirmation p { margin: 0; }
+
 .nearby-service-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

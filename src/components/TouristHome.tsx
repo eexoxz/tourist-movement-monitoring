@@ -1,5 +1,5 @@
 import { Building2, CalendarDays, Compass, Flame, Hospital, MapPinned, Navigation, PhoneCall, Play, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
-import { useEffect, useRef, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { discoveryText } from "../services/discoveryCopy";
 import { malaysiaEmergencyNumbers } from "../data/emergencyServices";
 import { formatDateTime } from "../services/geo";
@@ -15,6 +15,8 @@ import { Page } from "./Page";
 import { QrCheckInPanel } from "./QrCheckInPanel";
 import { TouristPassCard } from "./TouristPassCard";
 import { TourismAdvisoryPanel } from "./TourismAdvisoryPanel";
+import { PoliceHelpPanel } from "./PoliceHelpPanel";
+import { emergencyHelpText } from "../services/emergencyHelpCopy";
 
 type IncidentOption = {
   value: IncidentType;
@@ -59,6 +61,8 @@ type TouristHomeProps = {
   userSosAlerts: SosAlert[];
   userIncidentReports: IncidentReport[];
   nearbyEmergencyServices: NearbyEmergencyService[];
+  safetyReferencePoint?: MovementPoint;
+  isSafetyAreaReference?: boolean;
   recommendationHeading: string;
   recommendationSupportText: string;
   topRecommendationDestination: Destination | null | undefined;
@@ -140,6 +144,8 @@ export function TouristHome({
   userSosAlerts,
   userIncidentReports,
   nearbyEmergencyServices,
+  safetyReferencePoint,
+  isSafetyAreaReference = false,
   recommendationHeading,
   recommendationSupportText,
   topRecommendationDestination,
@@ -168,6 +174,7 @@ export function TouristHome({
   const t = (key: TranslationKey) => translate(locale, key);
   const selectedCheckInDestination = checkInDestinations.find((destination) => destination.id === checkInDestinationId) ?? checkInDestinations[0] ?? null;
   const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
+  const [isConfirmingSos, setIsConfirmingSos] = useState(false);
   const checkInTitle = activeCheckInDestination
     ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}`
     : selectedCheckInDestination
@@ -517,11 +524,21 @@ export function TouristHome({
               </button>
             </div>
 
-            <button className="primary-action danger wide" type="button" onClick={onSendSosAlert}>
+            <button className="primary-action danger wide" type="button" onClick={() => setIsConfirmingSos(true)} disabled={isConfirmingSos}>
               <ShieldCheck size={18} />
               {t("tourist.safety.sos")}
             </button>
+            {isConfirmingSos && <div className="sos-confirmation" role="group" aria-label={emergencyHelpText(locale, "confirm")}>
+              <p>{emergencyHelpText(locale, "confirm")}</p>
+              <div className="police-help-actions">
+                <button className="primary-action danger" type="button" onClick={() => { setIsConfirmingSos(false); onSendSosAlert(); }}>{emergencyHelpText(locale, "confirmAction")}</button>
+                <button className="secondary-action" type="button" onClick={() => setIsConfirmingSos(false)}>{emergencyHelpText(locale, "cancel")}</button>
+              </div>
+            </div>}
             <p className="safety-disclaimer">{t("tourist.safety.prototypeNote")}</p>
+            {userSosAlerts[0] && userSosAlerts[0].status !== "resolved" && <PoliceHelpPanel
+              alert={userSosAlerts[0]} fallbackPoint={safetyReferencePoint} fallbackIsArea={isSafetyAreaReference} locale={locale}
+            />}
 
             <section className="emergency-help-panel">
               <div className="emergency-help-heading">

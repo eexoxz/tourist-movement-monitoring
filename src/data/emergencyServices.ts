@@ -13,6 +13,9 @@ export type EmergencyService = {
   phone: string;
   address: string;
   note: string;
+  sourceUrl?: string;
+  mapSourceUrl?: string;
+  verifiedAt?: string;
 };
 
 export const malaysiaEmergencyNumbers: Array<{ labelKey: TranslationKey; phone: string; descriptionKey: TranslationKey }> = [
@@ -34,6 +37,21 @@ export const malaysiaEmergencyNumbers: Array<{ labelKey: TranslationKey; phone: 
 ];
 
 export const emergencyServices: EmergencyService[] = [
+  {
+    id: "police-penang-air-itam",
+    kind: "police",
+    name: "Balai Polis Ayer Itam",
+    state: "Penang",
+    city: "Air Itam",
+    latitude: 5.4027364,
+    longitude: 100.278253,
+    phone: "048268522",
+    address: "Jalan Paya Terubong, 11500 Air Itam, Pulau Pinang",
+    note: "Police station listed in the PDRM Timur Laut directory.",
+    sourceUrl: "https://www.rmp.gov.my/direktori/direktori-pdrm/pulau-pinang/timur-laut",
+    mapSourceUrl: "https://www.openstreetmap.org/way/276694692",
+    verifiedAt: "2026-10-03",
+  },
   {
     id: "police-penang-timur-laut",
     kind: "police",
