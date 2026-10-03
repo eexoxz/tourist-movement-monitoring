@@ -125,7 +125,7 @@ function samplePointTime(startedAt: Date, index: number) {
   return new Date(startedAt.getTime() + index * 18 * 60 * 1000).toISOString();
 }
 
-function simulatedPointNearDestination(destination: Destination, step: number) {
+export function simulatedPointNear(destination: Destination, step: number) {
   const latitudeOffset = ((step % 5) - 2) * 0.00022;
   const longitudeOffset = (((step * 2) % 5) - 2) * 0.00022;
 
@@ -251,7 +251,7 @@ export function addLocalTestRouteToActiveTrip(data: AppData, userId: string, ref
 
   const baseTime = Math.max(Date.now(), timeValue(currentPoints.at(-1)?.recordedAt ?? activeTrip.startedAt));
   const points: MovementPoint[] = routeDestinations.map((destination, index) => {
-    const point = simulatedPointNearDestination(destination, currentPoints.length + index);
+    const point = simulatedPointNear(destination, currentPoints.length + index);
 
     return {
       id: createId("point"),

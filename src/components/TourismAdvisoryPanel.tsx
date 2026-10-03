@@ -4,6 +4,7 @@ import type { TourismAdvisory } from "../services/advisories";
 import type { TourismAdvisoryType } from "../data/tourismAdvisories";
 import type { Locale } from "../services/i18n";
 import { uiText } from "../services/uiText";
+import { localizeCity } from "../services/destinationLocale";
 
 type TourismAdvisoryPanelProps = {
   advisories: TourismAdvisory[];
@@ -49,7 +50,7 @@ export function TourismAdvisoryPanel({ advisories, locale }: TourismAdvisoryPane
               <strong>{text(advisory.title)}</strong>
               <p>{text(advisory.message)}</p>
               <small>{text(advisory.action)}</small>
-              <time>{advisory.city} · {text("Until")} {formatDateTime(advisory.endsAt, locale)}</time>
+              <time>{localizeCity(advisory.city, locale)} · {text("Until")} {formatDateTime(advisory.endsAt, locale)}</time>
             </article>
           );
         })}

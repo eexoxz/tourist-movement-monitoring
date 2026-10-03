@@ -1,0 +1,677 @@
+
+
+.mobile-account-tools {
+  display: none;
+}
+
+.edit-form {
+  margin-top: 4px;
+}
+
+@media (max-width: 1280px) {
+  .home-today-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .home-status-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .home-trip-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.76fr);
+  }
+}
+
+@media (max-width: 1040px) {
+  .mobile-account-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(3, 44px);
+    align-items: end;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .tourist-shell .mobile-account-tools .language-selector {
+    display: grid;
+  }
+
+  .mobile-account-tools .language-selector select,
+  .mobile-account-tools .icon-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+  }
+
+  .tourist-shell .sidebar .language-selector {
+    display: none;
+  }
+
+  .tourist-shell .sidebar-tools {
+    display: none;
+  }
+
+  .home-support-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-shell .logout {
+    display: flex;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .admin-shell .sidebar {
+    position: static;
+    gap: 10px;
+  }
+
+  .admin-shell .nav-list,
+  .admin-shell .sidebar-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .tourist-shell .nav-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .account-strip,
+  .logout {
+    display: none;
+  }
+
+  .two-column,
+  .admin-overview-layout,
+  .auth-panel,
+  .movement-hero,
+  .profile-page-grid,
+  .profile-setup-card,
+  .destination-admin-grid,
+  .tourist-management-layout,
+  .ai-results-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tourist-management-detail {
+    position: static;
+  }
+
+  .ai-detail-panel {
+    position: static;
+  }
+
+  .profile-setup-copy {
+    min-height: 260px;
+  }
+
+  .profile-actions {
+    grid-column: auto;
+    justify-content: flex-start;
+  }
+
+  .home-today-panel,
+  .home-trip-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .home-map-panel .map-view {
+    min-height: 440px;
+  }
+
+  .admin-overview-map .map-view {
+    min-height: 460px;
+  }
+
+}
+
+@media (max-width: 760px) {
+  .content,
+  .sidebar,
+  .auth-copy,
+  .auth-form {
+    padding: 18px;
+  }
+
+  .nav-list,
+  .metric-grid,
+  .trip-summary > div,
+  .trip-diary-hero,
+  .trip-diary-layout,
+  .trip-story-metrics,
+  .trip-guidance-panel,
+  .recommendation-list,
+  .analysis-grid,
+  .admin-tabs,
+  .destination-filter-toolbar,
+  .auth-secondary-actions,
+  .profile-summary-grid,
+  .action-row,
+  .field-pair,
+  .alert-card,
+  .destination-signal,
+  .plan-builder,
+  .profile-switch,
+  .page-header {
+    grid-template-columns: 1fr;
+  }
+
+  .tourist-shell {
+    font-size: 16px;
+    padding-bottom: 78px;
+  }
+
+  .tourist-shell .content {
+    padding: 18px 14px 96px;
+  }
+
+  .tourist-shell .toast-stack {
+    top: auto;
+    right: 10px;
+    bottom: 88px;
+    left: 10px;
+    width: auto;
+  }
+
+  .tourist-shell .sidebar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 30;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(20, 83, 45, 0.16);
+    border-right: 0;
+    box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.1);
+  }
+
+  .tourist-shell .brand,
+  .tourist-shell .language-selector,
+  .tourist-shell .account-strip,
+  .tourist-shell .status-pill,
+  .tourist-shell .sidebar-tools,
+  .tourist-shell .logout {
+    display: none;
+  }
+
+  .tourist-shell .nav-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+  }
+
+  .tourist-shell .nav-item {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-height: 58px;
+    padding: 6px 4px;
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .destination-management-panel > .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-setup {
+    min-height: 0;
+  }
+
+  .tourist-pass-card,
+  .tourist-pass-card.compact {
+    grid-template-columns: 1fr;
+  }
+
+  .tourist-pass-qr {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .tourist-pass-details {
+    grid-template-columns: 1fr;
+  }
+
+  .public-check-in-shell {
+    align-items: start;
+    padding: 12px;
+  }
+
+  .public-check-in-card {
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .public-check-in-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .public-check-in-header .language-selector {
+    grid-column: 1 / -1;
+  }
+
+  .public-check-in-details {
+    grid-template-columns: 1fr;
+  }
+
+  .public-check-in-card .destination-visual img {
+    max-height: 220px;
+  }
+
+  .profile-setup-card,
+  .profile-setup-copy {
+    padding: 18px;
+  }
+
+  .profile-setup-copy {
+    min-height: 220px;
+  }
+
+  .profile-setup-copy h2 {
+    font-size: 1.9rem;
+  }
+
+  .preference-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tracking-status-card,
+  .home-primary-grid,
+  .home-today-panel,
+  .home-trip-controls,
+  .home-support-grid,
+  .festival-card,
+  .mobile-action-row,
+  .home-quick-actions,
+  .home-preview-grid,
+  .completed-trip-grid,
+  .completed-trip-actions,
+  .trip-preview-stats,
+  .recommendation-profile-card,
+  .places-hero,
+  .places-controls,
+  .places-discovery-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-preview-grid {
+    grid-template-areas: "recommend" "event" "demand";
+  }
+
+  .recommendation-preview {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .home-map-panel .map-view {
+    min-height: 380px;
+  }
+
+  .map-view.leaflet-container,
+  .map-view .leaflet-pane,
+  .map-view .leaflet-tile {
+    touch-action: auto;
+  }
+
+  .home-today-panel {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .home-trip-controls {
+    padding: 12px;
+  }
+
+  .home-status-card {
+    padding: 12px;
+  }
+
+  .home-status-card h2 {
+    font-size: 1.12rem;
+  }
+
+  .home-status-card p,
+  .home-trip-controls .consent-box p {
+    font-size: 0.84rem;
+  }
+
+  .tourist-shell .discovery-location-control {
+    gap: 8px;
+    padding-block: 8px;
+  }
+
+  .tourist-shell .activity-basis-row {
+    margin-bottom: 0;
+  }
+
+  .home-trip-controls .consent-box {
+    padding: 10px;
+  }
+
+  .home-trip-controls .mobile-action-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-quick-actions button {
+    grid-template-columns: 1fr;
+    min-height: 96px;
+  }
+
+  .home-disclosure > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .home-disclosure > summary strong {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .qr-active-check-in-panel.home-disclosure > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .qr-active-check-in-panel.home-disclosure > summary span {
+    grid-column: 1 / -1;
+  }
+
+  .qr-active-check-in-panel.home-disclosure > summary strong {
+    grid-column: 1;
+  }
+
+  .qr-active-check-in-panel.home-disclosure > summary::after {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .safety-contact-strip,
+  .emergency-number-grid,
+  .nearby-service-card,
+  .check-in-control,
+  .qr-active-check-in-panel .check-in-stack,
+  .qr-check-in-confirmation,
+  .qr-visit-meta,
+  .qr-manual-row,
+  .qr-camera-actions,
+  .check-in-history,
+  .advisory-list,
+  .geofence-warning-list,
+  .safety-admin-heading,
+  .safety-admin-meta,
+  .safety-admin-response {
+    grid-template-columns: 1fr;
+  }
+
+  .places-hero {
+    padding: 18px;
+  }
+
+  .places-hero h2 {
+    font-size: 1.72rem;
+  }
+
+  .places-hero-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .places-hero-stats span {
+    padding: 8px 6px;
+    font-size: 0.72rem;
+  }
+
+  .places-hero-stats strong {
+    font-size: 1.1rem;
+  }
+
+  .places-mode-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 3px;
+  }
+
+  .places-mode-row button {
+    flex: 0 0 auto;
+  }
+
+  .places-results-footer {
+    align-items: stretch;
+  }
+
+  .admin-overview-map .map-view {
+    min-height: 380px;
+  }
+
+  .admin-overview-section > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .admin-overview-section > summary strong {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .festival-calendar:not(.compact) .festival-list {
+    grid-template-columns: 1fr;
+  }
+
+  .place-detail-card {
+    position: static;
+  }
+
+  .trip-diary-hero,
+  .trip-story-panel,
+  .trip-timeline-panel {
+    padding: 14px;
+  }
+
+  .trip-story-actions {
+    justify-content: flex-start;
+  }
+
+  .trip-diary-hero h2 {
+    font-size: 1.72rem;
+  }
+
+  .trip-diary-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .trip-diary-stats span,
+  .trip-story-metrics span {
+    padding: 9px 7px;
+    font-size: 0.72rem;
+  }
+
+  .trip-diary-stats strong {
+    font-size: 1.15rem;
+  }
+
+  .trip-timeline-panel {
+    position: static;
+  }
+
+  .trip-map-panel .map-view {
+    min-height: 360px;
+  }
+
+  .trip-timeline-panel {
+    gap: 10px;
+  }
+
+  .trip-timeline-card {
+    padding: 12px;
+  }
+
+  .map-current-button {
+    top: 14px;
+    right: 14px;
+    bottom: auto;
+    left: auto;
+    max-width: calc(100% - 28px);
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .map-current-button span {
+    display: none;
+  }
+
+  .map-detail-panel:not(.visible) {
+    display: none;
+  }
+
+  .map-detail-panel {
+    top: auto;
+    right: 10px;
+    bottom: 78px;
+    left: 10px;
+    width: auto;
+    max-height: min(56vh, 430px);
+    padding: 12px;
+  }
+
+  .map-detail-panel .destination-visual.compact img,
+  .map-detail-panel .destination-visual.compact.empty {
+    height: 140px;
+  }
+
+  .map-detail-panel h2 {
+    font-size: 1.05rem;
+  }
+
+  .map-detail-panel p {
+    font-size: 0.84rem;
+  }
+
+  .map-visitor-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .map-legend {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    max-width: none;
+    justify-content: center;
+  }
+
+  .tourist-map-mode .map-legend {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .record-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recommendation-card-footer,
+  .festival-card > div:not(.festival-destinations),
+  .destination-modal dl div,
+  .admin-tab-heading,
+  .tourist-management-card > div,
+  .tourist-detail-actions,
+  .destination-management-panel > .section-heading,
+  .modal-actions {
+    display: grid;
+    justify-items: start;
+  }
+
+  .festival-filter {
+    width: 100%;
+  }
+
+  .festival-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .festival-nearby-toggle {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .festival-date-rail {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .admin-filter-toolbar .toolbar-select,
+  .admin-filter-toolbar .toolbar-input,
+  .admin-filter-toolbar .secondary-action,
+  .destination-filter-toolbar .secondary-action {
+    width: 100%;
+    max-width: none;
+  }
+
+  .record-detail-panel,
+  .trip-detail-panel,
+  .ai-detail-panel {
+    padding: 14px;
+  }
+
+  .modal-overlay {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .modal-card {
+    max-height: 90vh;
+  }
+
+  .page-header {
+    display: grid;
+    align-items: start;
+  }
+
+  .page-header h1 {
+    font-size: 1.6rem;
+    overflow-wrap: anywhere;
+  }
+
+  .auth-copy h1 {
+    font-size: 2rem;
+  }
+
+  .movement-hero {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .movement-hero-copy h2 {
+    font-size: 2rem;
+  }
+
+  .map-view {
+    height: 58vh;
+    min-height: 420px;
+    touch-action: auto;
+  }
+
+  .map-frame {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 360px) {
+  .festival-filter-grid {
+    grid-template-columns: 1fr;
+  }
+}

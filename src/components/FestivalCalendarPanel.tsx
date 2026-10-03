@@ -1,5 +1,7 @@
 import { uiText } from "../services/uiText";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useCalendarDay } from "../services/useCalendarDay";
+import { localizeDestinations } from "../services/destinationLocale";
 import { CalendarDays } from "lucide-react";
 import { allMalaysianStates } from "../data/festivals";
 import type { Destination, FestivalCategory, FestivalEvent, MalaysianState, MovementPoint } from "../types";
@@ -35,9 +37,9 @@ function dateInputValue(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function getDefaultEndDate() {
-  const date = new Date();
-  date.setFullYear(date.getFullYear() + 1);
+function getDefaultEndDate(day?: string) {
+  const date = day ? new Date(`${day}T00:00:00`) : new Date();
+  date.setDate(date.getDate() + 365);
   return dateInputValue(date);
 }
 
@@ -121,7 +123,7 @@ function eventDescription(event: FestivalEvent, locale: Locale, t: (key: Transla
   }
 
   const category = t(categoryLabelKey(event.category));
-  const scope = event.scope === "national" ? t("tourist.events.allMalaysia") : event.states.join(", ");
+  const scope = event.scope === "national" ? t("tourist.events.allMalaysia") : uiText(locale, formatFestivalStateSummaryLabel(event));
 
   const templates: Record<Locale, string> = {
     en: event.description,
@@ -156,6 +158,8 @@ function getPlanningSummary(matchedDestinations: Destination[]) {
 
 export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", referencePoint, referenceState, onOpenCalendar }: FestivalCalendarPanelProps) {
   const t = (key: TranslationKey) => translate(locale, key);
+  const today = useCalendarDay();
+  const previousDefaults = useRef({ start: today, end: getDefaultEndDate(today) });
   const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const [startDate, setStartDate] = useState(dateInputValue(new Date()));
   const [endDate, setEndDate] = useState(getDefaultEndDate);
@@ -163,7 +167,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   const [nearMeOnly, setNearMeOnly] = useState(Boolean(referenceState));
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
-  const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
+  const destinationById = useMemo(() => new Map(localizeDestinations(destinations, locale).map((destination) => [destination.id, destination])), [destinations, locale]);
   const localState = useMemo(() => referenceState ?? nearestState(referencePoint, destinations), [destinations, referencePoint, referenceState]);
   const effectiveStateFilter = nearMeOnly && localState ? localState : stateFilter;
   const filteredEvents = useMemo(
@@ -191,6 +195,14 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   }, [destinationById, visibleEvents]);
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
   const resultScope = effectiveStateFilter === "all" ? "Malaysia" : effectiveStateFilter;
+
+  useEffect(() => {
+    const nextEnd = getDefaultEndDate(today);
+    const previous = previousDefaults.current;
+    setStartDate((current) => current === previous.start ? today : current);
+    setEndDate((current) => current === previous.end ? nextEnd : current);
+    previousDefaults.current = { start: today, end: nextEnd };
+  }, [today]);
 
   useEffect(() => {
     if (referenceState) setNearMeOnly(true);

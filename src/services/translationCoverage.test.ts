@@ -12,7 +12,7 @@ import { sosText } from "./sosCopy";
 import { formatFestivalScope, formatFestivalStateSummaryLabel, getFestivalPlanningSummary } from "./festivals";
 import { malaysiaFestivalEvents } from "../data/festivals";
 
-const sourceFiles = [path.resolve("src/App.tsx"), ...fs.readdirSync("src/components").filter((name) => name.endsWith(".tsx")).map((name) => path.resolve("src/components", name)), path.resolve("src/services/planningText.ts")];
+const sourceFiles = [path.resolve("src/App.tsx"), ...["src/components", "src/workspaces"].flatMap((directory) => fs.readdirSync(directory).filter((name) => name.endsWith(".tsx")).map((name) => path.resolve(directory, name))), path.resolve("src/services/planningText.ts")];
 const uiSources = new Set<string>();
 const missingLocaleProps: string[] = [];
 const translatedComponents = new Set(["DestinationVisual", "DestinationManager", "ToastViewport", "TourismAdvisoryPanel", "CategoryBars", "ConfusionMatrix", "KMeansFeatureBars", "MovementPulseHero", "MovementAlertList", "MovementDemandList", "TravelPlanPanel", "ListLimitFooter", "FestivalCalendarPanel", "RecommendationList"]);
@@ -29,6 +29,9 @@ for (const file of sourceFiles) {
     if (ts.isCallExpression(node)) {
       const name = node.expression.getText(source);
       if (name === "uiText" && node.arguments[1]) collect(node.arguments[1]);
+      if (name === "window.confirm" && node.arguments[0] && ts.isStringLiteral(node.arguments[0])) {
+        missingLocaleProps.push(`${path.basename(file)}: untranslated confirmation`);
+      }
       if (name === "text" && /DestinationManager|TourismAdvisoryPanel/.test(file) && node.arguments[0]) collect(node.arguments[0]);
       if (["setSyncStatus", "setTrackingMessage", "setError", "setMessage"].includes(name) && node.arguments[0]) collect(node.arguments[0]);
       if (name === "showTrackingNotice") { if (node.arguments[1]) collect(node.arguments[1]); if (node.arguments[2]) collect(node.arguments[2]); }

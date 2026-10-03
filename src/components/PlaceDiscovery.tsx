@@ -7,6 +7,7 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AnalysisResult, Destination, DestinationCategory, DestinationDemand, FestivalEvent, MovementPoint, Recommendation, TouristProfile, User } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 import { uiText } from "../services/uiText";
+import { localizeCity, localizeDestinations } from "../services/destinationLocale";
 import { EmptyState } from "./SummaryCards";
 
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
@@ -164,6 +165,8 @@ export function PlaceDiscovery({
   const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
   const cityOptions = useMemo(() => Array.from(new Set(destinations.map((destination) => destination.city))).sort(), [destinations]);
+  const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
+  const cityByDestinationId = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination.city])), [destinations]);
   const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
   const recommendationByDestinationId = useMemo(() => new Map(recommendations.map((recommendation) => [recommendation.destinationId, recommendation])), [recommendations]);
   const demandByDestinationId = useMemo(() => new Map(demand.map((row) => [row.destinationId, row])), [demand]);
@@ -174,7 +177,7 @@ export function PlaceDiscovery({
   }, [categoryFilter, cityFilter, mode, normalizedSearch]);
 
   const rows = useMemo(() => {
-    return destinations
+    return localizedDestinations
       .map((destination) => {
         const recommendation = recommendationByDestinationId.get(destination.id);
         const demandRow = demandByDestinationId.get(destination.id);
@@ -204,7 +207,7 @@ export function PlaceDiscovery({
           return false;
         }
 
-        if (cityFilter !== "all" && row.destination.city !== cityFilter) {
+        if (cityFilter !== "all" && cityByDestinationId.get(row.destination.id) !== cityFilter) {
           return false;
         }
 
@@ -247,7 +250,8 @@ export function PlaceDiscovery({
     categoryFilter,
     cityFilter,
     demandByDestinationId,
-    destinations,
+    localizedDestinations,
+    cityByDestinationId,
     festivalDestinationIds,
     latestAnalysis?.profile,
     locale,
@@ -322,7 +326,7 @@ export function PlaceDiscovery({
             <option value="all">{t("tourist.places.allMalaysia")}</option>
             {cityOptions.map((city) => (
               <option key={city} value={city}>
-                {city}
+                {localizeCity(city, locale)}
               </option>
             ))}
           </select>

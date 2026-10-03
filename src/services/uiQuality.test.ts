@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
+const readSource = (file: string) => readFileSync(resolve(process.cwd(), file), "utf8");
+const appSource = ["src/App.tsx", "src/workspaces/TouristWorkspace.tsx", "src/workspaces/AdminWorkspace.tsx", "src/services/browserLocation.ts", "src/services/workspaceSupport.ts"].map(readSource).join("\n");
 const accessSource = readFileSync(resolve(process.cwd(), "src/services/access.ts"), "utf8");
 const adminAnalyticsSource = readFileSync(resolve(process.cwd(), "src/components/AdminAnalyticsWidgets.tsx"), "utf8");
-const adminI18nSource = readFileSync(resolve(process.cwd(), "src/services/adminI18n.ts"), "utf8");
+const adminI18nSource = readSource("src/services/adminI18n.ts") + readSource("src/locales/en.ts");
 const analyticsSource = readFileSync(resolve(process.cwd(), "src/services/analytics.ts"), "utf8");
 const authScreenSource = readFileSync(resolve(process.cwd(), "src/components/AuthScreen.tsx"), "utf8");
 const advisoriesSource = readFileSync(resolve(process.cwd(), "src/services/advisories.ts"), "utf8");
@@ -14,7 +15,7 @@ const destinationManagerSource = readFileSync(resolve(process.cwd(), "src/compon
 const destinationVisualSource = readFileSync(resolve(process.cwd(), "src/components/DestinationVisual.tsx"), "utf8");
 const destinationManagementSource = readFileSync(resolve(process.cwd(), "src/services/destinationManagement.ts"), "utf8");
 const destinationSpatialIndexSource = readFileSync(resolve(process.cwd(), "src/services/destinationSpatialIndex.ts"), "utf8");
-const i18nSource = readFileSync(resolve(process.cwd(), "src/services/i18n.ts"), "utf8");
+const i18nSource = readSource("src/services/i18n.ts") + readSource("src/locales/en.ts");
 const incidentAttachmentsSource = readFileSync(resolve(process.cwd(), "src/services/incidentAttachments.ts"), "utf8");
 const listLimitFooterSource = readFileSync(resolve(process.cwd(), "src/components/ListLimitFooter.tsx"), "utf8");
 const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.tsx"), "utf8");
@@ -23,10 +24,28 @@ const qrCheckInPanelSource = readFileSync(resolve(process.cwd(), "src/components
 const touristHomeSource = readFileSync(resolve(process.cwd(), "src/components/TouristHome.tsx"), "utf8");
 const toastSource = readFileSync(resolve(process.cwd(), "src/components/ToastViewport.tsx"), "utf8");
 const tripDiarySource = readFileSync(resolve(process.cwd(), "src/components/TripDiary.tsx"), "utf8");
-const stylesSource = readFileSync(resolve(process.cwd(), "src/styles.css"), "utf8");
+const styleImports = [...readSource("src/styles.css").matchAll(/@import "\.\/(.+?)";/g)];
+const stylesSource = styleImports.map(([, file]) => readSource(`src/${file}`)).join("\n");
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("keeps location matching independent of the selected display language", () => {
+    const touristSource = readSource("src/workspaces/TouristWorkspace.tsx");
+    expect(touristSource).toContain("getRelevantTourismAdvisories({ destinations: data.destinations");
+    expect(touristSource).toMatch(/FestivalCalendarPanel[^>]+destinations=\{data.destinations\}/);
+    expect(readSource("src/components/FestivalCalendarPanel.tsx")).toContain("localizeDestinations(destinations, locale)");
+    expect(readSource("src/components/PlaceDiscovery.tsx")).toContain("cityByDestinationId.get(row.destination.id) !== cityFilter");
+    expect(readSource("src/components/PlaceDiscovery.tsx")).toContain("{localizeCity(city, locale)}");
+  });
+
+  it("keeps the rolling calendar current after midnight or returning to the app", () => {
+    const clockSource = readSource("src/services/useCalendarDay.ts");
+    expect(clockSource).toContain('document.addEventListener("visibilitychange", refresh)');
+    expect(clockSource).toContain('window.addEventListener("focus", refresh)');
+    expect(readSource("src/workspaces/TouristWorkspace.tsx")).toContain("[calendarDay]");
+    expect(readSource("src/workspaces/AdminWorkspace.tsx")).toContain("[calendarDay]");
+    expect(readSource("src/components/FestivalCalendarPanel.tsx")).toContain("current === previous.start ? today : current");
+  });
   it("requires an explicit details action instead of automatically expanding a single map place", () => {
     expect(mapSource).not.toContain("setSelectedDestinationId(visibleDestinations[0].id)");
     expect(mapSource).toContain("detailsExpanded && selectedDestination && selectedSignal");
@@ -194,7 +213,7 @@ describe("user interface quality guardrails", () => {
   });
 
   it("keeps reusable list limiting UI outside the main app shell", () => {
-    expect(appSource).toContain('from "./components/ListLimitFooter"');
+    expect(appSource).toMatch(/from "\.\.\/components\/ListLimitFooter"/);
     expect(appSource).not.toContain("function ListLimitFooter");
     expect(listLimitFooterSource).toContain("export function ListLimitFooter");
   });

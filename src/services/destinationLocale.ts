@@ -218,8 +218,8 @@ const practicalCopy: Record<Locale, Pick<DestinationCopy, "openingHours" | "feeN
   },
 };
 
-function localCity(destination: Destination, locale: Locale) {
-  return cityNames[locale]?.[destination.city] ?? destination.city;
+export function localizeCity(city: string, locale: Locale) {
+  return cityNames[locale]?.[city] ?? city;
 }
 
 function interpolate(template: string, values: Record<string, string>) {
@@ -231,7 +231,7 @@ export function localizeDestination(destination: Destination, locale: Locale): D
     return destination;
   }
 
-  const city = localCity(destination, locale);
+  const city = localizeCity(destination.city, locale);
   const copy = practicalCopy[locale] ?? practicalCopy.en;
   const descriptionTemplate = categoryDescriptions[locale]?.[destination.category] ?? categoryDescriptions.en[destination.category];
 
