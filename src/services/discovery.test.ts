@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
-import { discoveryAreas } from "../data/discoveryAreas";
+import { discoveryAreas, discoveryStates, getDiscoveryAreasForState } from "../data/discoveryAreas";
 import { discoveryRadiusKm, getDiscoveryDestinations, getDiscoveryReference, getLatestDiscoveryPoint, getLocalEventAnnouncement } from "./discovery";
 import { discoveryText, type DiscoveryCopyKey } from "./discoveryCopy";
 import { localeOptions } from "./i18n";
@@ -10,6 +10,19 @@ import type { FestivalEvent, User } from "../types";
 const user: User = { ...initialData.users[0], id: "discovery-test", hiddenDestinationIds: [] };
 
 describe("privacy-aware local discovery", () => {
+  it("groups every existing area by state without mixing states or duplicating options", () => {
+    expect(discoveryStates).toHaveLength(14);
+    expect(getDiscoveryAreasForState("")).toEqual([]);
+    expect(getDiscoveryAreasForState("Penang").map((area) => area.id)).toContain("jelutong");
+    expect(getDiscoveryAreasForState("Penang").map((area) => area.id)).toContain("batu-kawan");
+    expect(getDiscoveryAreasForState("Kedah").map((area) => area.id)).toContain("alor-setar");
+    const grouped = discoveryStates.flatMap(getDiscoveryAreasForState);
+    expect(grouped).toHaveLength(discoveryAreas.length);
+    expect(new Set(grouped.map((area) => area.id)).size).toBe(discoveryAreas.length);
+    for (const state of discoveryStates) {
+      expect(getDiscoveryAreasForState(state).every((area) => area.state === state)).toBe(true);
+    }
+  });
   it("uses fresh stationary GPS readings instead of the last saved route point", () => {
     const routePoint = { ...initialData.points[0], recordedAt: new Date(Date.now() - 6 * 60 * 1000).toISOString() };
     const gpsPoint = { ...routePoint, recordedAt: new Date().toISOString() };
@@ -67,6 +80,7 @@ describe("privacy-aware local discovery", () => {
     expect(new Set(discoveryAreas.map((area) => area.state)).size).toBe(14);
     const keys: DiscoveryCopyKey[] = ["location", "current", "area", "choose", "privacy", "fromArea", "centreArea", "nearby", "popular", "preference", "view", "hide", "dismiss", "settings", "announcements", "event", "viewEvent", "hidden", "restore", "noLocal", "distance", "locationNeeded"];
     for (const { value: locale } of localeOptions) {
+      expect(discoveryText(locale, "chooseState").length).toBeGreaterThan(0);
       for (const key of keys) expect(discoveryText(locale, key).length).toBeGreaterThan(0);
     }
   });

@@ -39,3 +39,9 @@ export const discoveryAreas: DiscoveryArea[] = [
   { id: "putrajaya", name: "Putrajaya", state: "Federal Territories", latitude: 2.93, longitude: 101.69 },
   { id: "labuan", name: "Labuan", state: "Federal Territories", latitude: 5.28, longitude: 115.24 },
 ];
+
+export const discoveryStates = [...new Set(discoveryAreas.map((area) => area.state))];
+
+export function getDiscoveryAreasForState(state: MalaysianState | "") {
+  return discoveryAreas.filter((area) => area.state === state);
+}

@@ -5,6 +5,7 @@ const english = {
   current: "My current location",
   area: "Choose an area",
   choose: "Select an area",
+  chooseState: "Select a state",
   privacy: "Browse without sharing GPS. This choice does not record a trip or a visit.",
   fromArea: "From the selected area centre",
   centreArea: "Centre on selected area",
@@ -30,6 +31,7 @@ export type DiscoveryCopyKey = keyof typeof english;
 const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
   en: english,
   ms: {
+    chooseState: "Pilih negeri",
     eventsInArea: "Acara di kawasan pilihan",
     location: "Terokai sekitar", current: "Lokasi semasa saya", area: "Pilih kawasan", choose: "Pilih kawasan",
     privacy: "Terokai tanpa berkongsi GPS. Pilihan ini tidak merekodkan perjalanan atau lawatan.",
@@ -41,6 +43,7 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
     distance: "km dari sini", locationNeeded: "Benarkan lokasi atau pilih kawasan untuk melihat cadangan setempat.",
   },
   zh: {
+    chooseState: "选择州",
     eventsInArea: "所选地区的活动",
     location: "探索周边", current: "我的当前位置", area: "选择地区", choose: "选择地区",
     privacy: "无需共享 GPS 即可浏览。此选择不会记录行程或到访。", fromArea: "距所选地区中心", centreArea: "回到所选地区",
@@ -50,6 +53,7 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
     noLocal: "此地区暂无地点。请尝试其他附近地区。", distance: "公里外", locationNeeded: "允许定位或选择地区以查看当地推荐。",
   },
   ja: {
+    chooseState: "州を選択",
     eventsInArea: "選択したエリアのイベント",
     location: "周辺を探す", current: "現在地", area: "エリアを選ぶ", choose: "エリアを選択",
     privacy: "GPSを共有せずに閲覧できます。この選択では旅行や訪問は記録されません。", fromArea: "選択したエリアの中心から", centreArea: "選択したエリアに戻る",
@@ -59,6 +63,7 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
     noLocal: "このエリアにはまだスポットがありません。近くの別のエリアをお試しください。", distance: "km先", locationNeeded: "位置情報を許可するか、エリアを選んで周辺のおすすめをご覧ください。",
   },
   ko: {
+    chooseState: "주 선택",
     eventsInArea: "선택한 지역의 행사",
     location: "주변 둘러보기", current: "내 현재 위치", area: "지역 선택", choose: "지역 선택",
     privacy: "GPS를 공유하지 않고 둘러볼 수 있습니다. 이 선택은 여행이나 방문을 기록하지 않습니다.", fromArea: "선택한 지역 중심에서", centreArea: "선택한 지역으로 돌아가기",
@@ -68,6 +73,7 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
     noLocal: "이 지역에는 아직 장소가 없습니다. 다른 가까운 지역을 선택해 주세요.", distance: "km 거리", locationNeeded: "위치를 허용하거나 지역을 선택하여 주변 추천을 확인하세요.",
   },
   pt: {
+    chooseState: "Selecionar um estado",
     eventsInArea: "Eventos na área selecionada",
     location: "Explorar nas proximidades", current: "Minha localização atual", area: "Escolher uma área", choose: "Selecionar uma área",
     privacy: "Explore sem compartilhar o GPS. Esta escolha não registra viagens nem visitas.", fromArea: "Do centro da área selecionada", centreArea: "Centrar na área selecionada",
@@ -77,6 +83,7 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
     noLocal: "Ainda não há lugares nesta área. Tente outra área próxima.", distance: "km de distância", locationNeeded: "Permita a localização ou escolha uma área para ver sugestões locais.",
   },
   ta: {
+    chooseState: "மாநிலத்தைத் தேர்ந்தெடுக்கவும்",
     eventsInArea: "தேர்ந்தெடுத்த பகுதியில் நிகழ்வுகள்",
     location: "அருகில் ஆராயுங்கள்", current: "எனது தற்போதைய இடம்", area: "ஒரு பகுதியைத் தேர்ந்தெடுக்கவும்", choose: "பகுதியைத் தேர்ந்தெடுக்கவும்",
     privacy: "GPS பகிராமல் பார்க்கலாம். இந்தத் தேர்வு பயணத்தையோ வருகையையோ பதிவு செய்யாது.", fromArea: "தேர்ந்தெடுத்த பகுதியின் மையத்திலிருந்து", centreArea: "தேர்ந்தெடுத்த பகுதிக்குத் திரும்பவும்",
@@ -86,6 +93,7 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
     noLocal: "இந்தப் பகுதியில் இன்னும் இடங்கள் இல்லை. அருகிலுள்ள வேறு பகுதியை முயற்சிக்கவும்.", distance: "கி.மீ தொலைவில்", locationNeeded: "உள்ளூர் பரிந்துரைகளைப் பார்க்க இருப்பிடத்தை அனுமதிக்கவும் அல்லது பகுதியைத் தேர்ந்தெடுக்கவும்.",
   },
   es: {
+    chooseState: "Seleccionar un estado",
     eventsInArea: "Eventos en la zona elegida",
     location: "Explorar alrededor de", current: "Mi ubicación actual", area: "Elegir una zona", choose: "Seleccionar una zona",
     privacy: "Explora sin compartir el GPS. Esta elección no registra viajes ni visitas.", fromArea: "Desde el centro de la zona elegida", centreArea: "Centrar en la zona elegida",
@@ -95,6 +103,7 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
     noLocal: "Todavía no hay lugares en esta zona. Prueba otra zona cercana.", distance: "km de distancia", locationNeeded: "Permite la ubicación o elige una zona para ver sugerencias locales.",
   },
   fr: {
+    chooseState: "Sélectionner un État",
     eventsInArea: "Événements dans la zone choisie",
     location: "Explorer autour de", current: "Ma position actuelle", area: "Choisir une zone", choose: "Sélectionner une zone",
     privacy: "Explorez sans partager votre GPS. Ce choix n'enregistre ni trajet ni visite.", fromArea: "Depuis le centre de la zone choisie", centreArea: "Recentrer sur la zone choisie",
