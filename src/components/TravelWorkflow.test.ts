@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
 import { HomeDiscovery } from "./HomeDiscovery";
 import { TripExperience } from "./TripExperience";
+import { TripDiary } from "./TripDiary";
 
 vi.mock("./MovementMap", () => ({
   MovementMap: (props: { points: unknown[]; displayMode: string }) => createElement("div", { "data-route-points": props.points.length, "data-map-mode": props.displayMode }),
@@ -23,6 +24,21 @@ const tripProps: ComponentProps<typeof TripExperience> = {
 };
 
 describe("tourist travel workflow boundaries", () => {
+  it("shows recorded-stop counts consistently instead of counting every nearby place", () => {
+    const trip = initialData.trips[0];
+    const place = initialData.destinations[0];
+    const summary = { tripId: trip.id, pointCount: 1, distanceKm: 0, durationMinutes: 0, visitedDestinationCount: 0, averageAccuracyMeters: 20 };
+    const props: ComponentProps<typeof TripDiary> = {
+      trips: [trip], recentTrips: [trip], tripSummaries: [summary], selectedTrip: trip, selectedTripPoints: [], selectedTripSummary: summary,
+      selectedTripTitle: "Nearby but not visited", selectedTripInsight: "", selectedTripSuggestionStatus: "Waiting", selectedTripDestinationNames: [], selectedTripRecommendations: [],
+      fallbackPoints: [{ id: "nearby-only", tripId: trip.id, latitude: place.latitude, longitude: place.longitude, accuracyMeters: 20, recordedAt: new Date().toISOString(), source: "browser" }],
+      destinations: initialData.destinations, hasPersonalizedRecommendations: false, locale: "en",
+      onSelectTrip: noop, onViewRecommendations: noop, onOpenPlace: noop, onRenameTrip: noop, onDeleteTrip: noop,
+    };
+    const text = renderToStaticMarkup(createElement(TripDiary, props)).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    expect(text).toContain("0 Recognised stops");
+    expect(text).not.toContain("1 Recognised stops");
+  });
   it("keeps Home focused on discovery with an explicit Trips gateway", () => {
     const html = renderToStaticMarkup(createElement(HomeDiscovery, homeProps));
     expect(html).toContain("Go to Trips");

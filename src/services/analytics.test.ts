@@ -251,6 +251,15 @@ describe("analytics service", () => {
     expect(recommendedDestinations.every((destination) => destination?.city === "Penang")).toBe(true);
   });
 
+  it("keeps saved-route suggestions local even when account history points elsewhere", () => {
+    const data = refreshAllRecommendations(initialData);
+    const recommendations = recommendForUser("tourist-demo", data, undefined, undefined, {
+      latitude: 5.4141, longitude: 100.3288, recordedAt: "2026-01-01T00:00:00Z",
+    }, { localOnly: true, radiusKm: 25, ignoreHistoryLocation: true });
+    expect(recommendations.length).toBeGreaterThan(0);
+    expect(recommendations.every((recommendation) => data.destinations.find((place) => place.id === recommendation.destinationId)?.city === "Penang")).toBe(true);
+  });
+
   it("keeps fallback recommendations nearest-first when only one local destination is available", () => {
     const penangPoint = {
       latitude: 5.4141,

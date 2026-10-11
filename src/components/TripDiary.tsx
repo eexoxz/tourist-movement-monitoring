@@ -30,6 +30,7 @@ type TripDiaryProps = {
   locale?: Locale;
   onSelectTrip: (tripId: string) => void;
   onViewRecommendations: () => void;
+  onOpenPlace: (destinationId: string) => void;
   onRenameTrip: (trip: TripSession, fallbackTitle: string) => void;
   onDeleteTrip: (trip: TripSession, fallbackTitle: string) => void;
 };
@@ -53,6 +54,7 @@ export function TripDiary({
   locale = "en",
   onSelectTrip,
   onViewRecommendations,
+  onOpenPlace,
   onRenameTrip,
   onDeleteTrip,
 }: TripDiaryProps) {
@@ -187,7 +189,7 @@ export function TripDiary({
                     const destination = destinationById.get(recommendation.destinationId);
 
                     return destination ? (
-                      <button className="trip-recommendation-link" type="button" key={recommendation.id} onClick={onViewRecommendations}>
+                      <button className="trip-recommendation-link" type="button" key={recommendation.id} onClick={() => onOpenPlace(destination.id)}>
                         <span>
                           {destination.name} <small>{destination.city}</small>
                         </span>
@@ -195,7 +197,7 @@ export function TripDiary({
                     ) : null;
                   })
                 ) : (
-                  <p>{t("tourist.trips.needTripForRecommendations")}</p>
+                  <p>{travelText(locale, "noNextPlaces")}</p>
                 )}
               </div>
             </section>
@@ -227,7 +229,7 @@ export function TripDiary({
                   <strong>{fallbackTitle}</strong>
                   <small>{trip.endedAt ? formatDateTime(trip.endedAt, locale) : t("tourist.trips.stillActive")}</small>
                   <p>
-                    {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} {t("common.minutes")}, {destinationNames.length || 0} {t("tourist.completed.recognisedStops")}
+                    {summary?.distanceKm ?? 0} km, {summary?.durationMinutes ?? 0} {t("common.minutes")}, {summary?.visitedDestinationCount ?? 0} {t("tourist.completed.recognisedStops")}
                   </p>
                 </button>
                 <div className="trip-card-actions">

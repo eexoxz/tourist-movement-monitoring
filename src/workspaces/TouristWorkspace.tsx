@@ -14,7 +14,7 @@ import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn } fro
 import { getActiveGeofenceWarnings } from "../services/geofencing";
 import { closeOwnSosAlert, createIncidentReport, createSosAlert } from "../services/safety";
 import { sosText } from "../services/sosCopy";
-import { getTouristWorkspaceData } from "../services/touristWorkspace";
+import { createTouristWorkspaceSelector } from "../services/touristWorkspace";
 import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from "../services/tripPresentation";
 import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "../services/incidentAttachments";
 import { getLiveNearbySuggestion, type LiveNearbySuggestion } from "../services/liveSuggestions";
@@ -101,7 +101,8 @@ export function TouristWorkspace({
   const [eventAnnouncementsDismissed, setEventAnnouncementsDismissed] = useState(false);
   const localizedDestinations = useMemo(() => localizeDestinations(data.destinations, locale), [data.destinations, locale]);
   const localizedData = useMemo(() => ({ ...data, destinations: localizedDestinations }), [data, localizedDestinations]);
-  const touristWorkspace = useMemo(() => getTouristWorkspaceData(localizedData, user.id, selectedTripId), [localizedData, selectedTripId, user.id]);
+  const selectWorkspace = useMemo(createTouristWorkspaceSelector, []);
+  const touristWorkspace = useMemo(() => selectWorkspace(localizedData, user.id, selectedTripId), [localizedData, selectedTripId, user.id, selectWorkspace]);
   const {
     userTrips,
     activeTrip,
@@ -116,7 +117,6 @@ export function TouristWorkspace({
     selectedTripSummary,
     selectedTripAnalysis,
     selectedTripDestinationNames,
-    selectedTripRecommendations,
     visitedDestinationIds,
     userSosAlerts,
     userIncidentReports,
@@ -141,18 +141,26 @@ export function TouristWorkspace({
     [data.destinations, discoveryReference, calendarDay]
   );
   const recommendations = useMemo(
-    () => discoveryReference ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
-    [destinationDemand, latestAnalysis, discoveryReference, localizedData, user.id]
+    () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking") ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
+    [destinationDemand, latestAnalysis, discoveryReference, localizedData, user.id, view]
   );
   const activeSamplePoint = activeTrip && activePoints.at(-1)?.source === "demo" ? activePoints.at(-1) : undefined;
   const tripReference = activeSamplePoint ?? discoveryGpsPoint;
   const tripBrowsingReference = tripReference ?? (!activeTrip ? discoveryReference : undefined);
-  const tripDestinations = useMemo(() => tripBrowsingReference ? localizeDestinations(getDiscoveryDestinations(data.destinations, user, tripBrowsingReference), locale) : [], [data.destinations, locale, tripBrowsingReference, user]);
-  const tripRecommendations = useMemo(() => tripBrowsingReference ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, tripBrowsingReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [], [destinationDemand, latestAnalysis, localizedData, tripBrowsingReference, user.id]);
+  const tripDestinations = useMemo(() => view === "tracking" && tripBrowsingReference ? getDiscoveryDestinations(localizedDestinations, user, tripBrowsingReference) : [], [localizedDestinations, tripBrowsingReference, user, view]);
+  const tripRecommendations = useMemo(() => {
+    if (view !== "tracking" || !tripBrowsingReference) return [];
+    if (tripBrowsingReference === discoveryReference) return recommendations;
+    return recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, tripBrowsingReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true });
+  }, [destinationDemand, discoveryReference, latestAnalysis, localizedData, recommendations, tripBrowsingReference, user.id, view]);
   const nearbyTripPlaces = tripRecommendations.flatMap((recommendation) => {
     const destination = tripDestinations.find((candidate) => candidate.id === recommendation.destinationId);
     return destination ? [destination] : [];
   });
+  const selectedRoutePoint = selectedTripPoints.at(-1);
+  const selectedRouteRecommendations = useMemo(() => view === "history" && selectedRoutePoint
+    ? recommendForUser(user.id, localizedData, selectedTripAnalysis ?? undefined, destinationDemand, selectedRoutePoint, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true })
+    : [], [destinationDemand, localizedData, selectedRoutePoint, selectedTripAnalysis, user.id, view]);
   const activeCheckIn = getActiveCheckIn(data, user.id);
   const activeCheckInDestination = activeCheckIn ? localizedDestinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
   const nearestCheckIn = discoveryGpsPoint ? nearestDestination(discoveryGpsPoint, localizedDestinations) : null;
@@ -162,12 +170,13 @@ export function TouristWorkspace({
   const trackingFeedback = trackingQualityIssue ? activityText(locale, trackingQualityIssue) : trackingMessage;
   const t = (key: TranslationKey) => translate(locale, key);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
-  const hasPersonalizedRecommendations = Boolean(latestAnalysis);
   const topRecommendationDestination = recommendations[0]
     ? localizedDestinations.find((destination) => destination.id === recommendations[0].destinationId)
     : null;
   const nextFestival = getLocalEventAnnouncement(upcomingFestivals, discoveryReference);
   const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(discoveryGpsPoint), [discoveryGpsPoint]);
+
+  useEffect(() => () => clearBrowserLocationWatch(watchId), [user.id, watchId]);
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -788,14 +797,15 @@ export function TouristWorkspace({
     notify({ tone: "info", title: "Profile skipped", message: "You can complete your travel profile later from Home." });
   };
 
+  const browseAreaNear = (location: Pick<MovementPoint, "latitude" | "longitude">) => {
+    const area = discoveryAreas.reduce((nearest, candidate) => distanceKm(location, candidate) < distanceKm(location, nearest) ? candidate : nearest);
+    changeDiscoveryLocation("area", area.id);
+  };
   const openPlace = (destinationId: string) => {
     const destination = data.destinations.find((candidate) => candidate.id === destinationId);
     if (destination && !canonicalDiscoveryDestinations.some((candidate) => candidate.id === destinationId)) {
       if (view === "tracking" && tripReference?.source === "browser") changeDiscoveryLocation("current");
-      else {
-        const area = discoveryAreas.reduce((nearest, candidate) => distanceKm(destination, candidate) < distanceKm(destination, nearest) ? candidate : nearest);
-        changeDiscoveryLocation("area", area.id);
-      }
+      else browseAreaNear(destination);
     }
     setSelectedDestinationId(destinationId);
     onViewChange("recommendations");
@@ -884,14 +894,15 @@ export function TouristWorkspace({
           selectedTripInsight={selectedTripInsight}
           selectedTripSuggestionStatus={selectedTripSuggestionStatus}
           selectedTripDestinationNames={selectedTripDestinationNames}
-          selectedTripRecommendations={selectedTripRecommendations}
+          selectedTripRecommendations={selectedRouteRecommendations}
           fallbackPoints={tripPoints}
           destinations={localizedDestinations}
           activityDemand={destinationDemand}
-          hasPersonalizedRecommendations={hasPersonalizedRecommendations}
+          hasPersonalizedRecommendations={Boolean(selectedTripAnalysis)}
           locale={locale}
           onSelectTrip={setSelectedTripId}
-          onViewRecommendations={() => onViewChange("recommendations")}
+          onViewRecommendations={() => { if (selectedRoutePoint) browseAreaNear(selectedRoutePoint); onViewChange("recommendations"); }}
+          onOpenPlace={openPlace}
           onRenameTrip={renameTrip}
           onDeleteTrip={deleteSelectedTrip}
         />

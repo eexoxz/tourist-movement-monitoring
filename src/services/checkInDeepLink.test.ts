@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createTouristCheckInUrl, createTouristPassUrl, getShareableAppOrigin, isLocalOnlyQrOrigin } from "./checkInDeepLink";
+import { createTouristCheckInUrl, createTouristPassUrl, getShareableAppOrigin, getTouristCheckInRequestFromUrl, isLocalOnlyQrOrigin } from "./checkInDeepLink";
 
 describe("tourist QR deep links", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
   });
 
   it("marks localhost QR links as local-only during development", () => {
@@ -52,5 +53,22 @@ describe("tourist QR deep links", () => {
 
     expect(url.pathname).toBe("/app/profile");
     expect(url.searchParams.get("pass")).toBe("MYP-ABC123");
+  });
+
+  it("reads fresh destination and pass context when browser history changes", () => {
+    const browser = { location: new URL("https://tourism.example.com/check-in/?checkin=kek-lok-si-temple&pass=MYP-DEMO") };
+    vi.stubGlobal("window", browser);
+    expect(getTouristCheckInRequestFromUrl()).toEqual({ destinationId: "kek-lok-si-temple", passId: "MYP-DEMO" });
+    browser.location = new URL("https://tourism.example.com/check-in?checkin=penang-hill&pass=MYP-OTHER");
+    expect(getTouristCheckInRequestFromUrl()).toEqual({ destinationId: "penang-hill", passId: "MYP-OTHER" });
+    browser.location = new URL("https://tourism.example.com/app/trips/manage");
+    expect(getTouristCheckInRequestFromUrl()).toBeNull();
+  });
+
+  it("does not treat a partial or missing QR as an authenticated pass", () => {
+    vi.stubGlobal("window", { location: new URL("https://tourism.example.com/check-in?checkin=penang-hill") });
+    expect(getTouristCheckInRequestFromUrl()).toEqual({ destinationId: "penang-hill", passId: null });
+    vi.stubGlobal("window", { location: new URL("https://tourism.example.com/check-in") });
+    expect(getTouristCheckInRequestFromUrl()).toEqual({ destinationId: null, passId: null });
   });
 });

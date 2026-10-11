@@ -37,14 +37,11 @@ function App() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [browserNotificationPermission, setBrowserNotificationPermission] = useState(() => getBrowserNotificationPermission());
   const [pendingCheckInDestinationId, setPendingCheckInDestinationId] = useState<string | null>(() => getTouristCheckInDestinationIdFromUrl());
+  const [publicCheckInRequest, setPublicCheckInRequest] = useState(getTouristCheckInRequestFromUrl);
   const watchId = useRef<number | null>(null);
   const selectLocale = useRef(createLocaleSelection());
   const lastSyncWarningAt = useRef(0);
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
   const t = (key: TranslationKey) => translate(locale, key);
-  const publicCheckInRequest = getTouristCheckInRequestFromUrl();
   const isPublicCheckInFlow = Boolean(publicCheckInRequest);
   const publicCheckInDestination = publicCheckInRequest?.destinationId ? data.destinations.find((destination) => destination.id === publicCheckInRequest.destinationId) ?? null : null;
   const publicCheckInPassOwner = publicCheckInRequest?.passId
@@ -198,23 +195,29 @@ function App() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [safeView]);
+  }, [safeView, isPublicCheckInFlow, publicCheckInRequest?.destinationId, publicCheckInRequest?.passId]);
 
   useEffect(() => {
     const handlePopState = () => {
       const pathname = getCurrentPathname();
+      setPublicCheckInRequest(getTouristCheckInRequestFromUrl());
+      setPendingCheckInDestinationId(isTouristCheckInRoute(pathname) ? null : getTouristCheckInDestinationIdFromUrl());
 
       if (isTouristCheckInRoute(pathname)) {
         return;
       }
 
       if (!currentUser) {
-        setAuthMode(getAuthModeFromPath(pathname) ?? "login");
+        const nextMode = getAuthModeFromPath(pathname) ?? "login";
+        setAuthMode(nextMode);
+        replaceBrowserPath(getPathForAuthMode(nextMode));
         return;
       }
 
       const pathView = getViewFromPath(pathname) ?? getDefaultViewForRole(currentUser.role);
-      setView(coerceViewForRole(currentUser.role, pathView));
+      const nextView = coerceViewForRole(currentUser.role, pathView);
+      setView(nextView);
+      replaceBrowserPath(getPathForView(currentUser.role, nextView));
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -577,6 +580,7 @@ function App() {
     await signOutConfiguredProvider().catch(() => undefined);
     clearSession();
     setSessionUserId(null);
+    setPublicCheckInRequest(null);
     replaceBrowserPath(getPathForAuthMode("login"));
   };
 
@@ -587,6 +591,7 @@ function App() {
     saveData(freshData, currentUser);
     setData(freshData);
     setSessionUserId(null);
+    setPublicCheckInRequest(null);
     setView("overview");
     replaceBrowserPath(getPathForAuthMode("login"));
     notify({ tone: "info", title: "Demo data reset", message: "The prototype data has been restored to its prepared sample state." });
@@ -638,6 +643,7 @@ function App() {
     return (
       <>
         <PublicCheckInPage
+          key={`${publicCheckInRequest.destinationId}:${publicCheckInRequest.passId}`}
           destination={publicCheckInDestination}
           locale={locale}
           missingReason={missingReason}

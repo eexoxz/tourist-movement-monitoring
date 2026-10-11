@@ -190,6 +190,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         typeof window !== "undefined" && window.matchMedia("(pointer: coarse) and (max-width: 760px)").matches;
 
       mapRef.current = L.map(containerRef.current, {
+        // Zoom transition timers can outlive a map removed by page navigation.
+        zoomAnimation: false,
         dragging: !prefersPageScroll,
         zoomControl: false,
         attributionControl: true,
@@ -210,6 +212,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     }
 
     return () => {
+      mapRef.current?.stop();
       mapRef.current?.remove();
       mapRef.current = null;
     };

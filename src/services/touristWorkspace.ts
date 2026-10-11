@@ -198,3 +198,46 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
     recentCheckIns: recentCheckIns.slice(0, 3),
   };
 }
+
+// Keep route selection cheap without retaining earlier datasets or other users' data.
+export function createTouristWorkspaceSelector() {
+  let lastData: AppData | undefined;
+  let lastUserId = "";
+  let workspace: TouristWorkspaceData;
+  let destinationIndex: DestinationSpatialIndex;
+  let pointsByTrip: Map<string, MovementPoint[]>;
+  let namesByTrip: Map<string, string[]>;
+
+  return (data: AppData, userId: string, selectedTripId: string): TouristWorkspaceData => {
+    if (data !== lastData || userId !== lastUserId) {
+      workspace = getTouristWorkspaceData(data, userId, "");
+      destinationIndex = createDestinationSpatialIndex(data.destinations);
+      pointsByTrip = new Map();
+      namesByTrip = new Map();
+      workspace.tripPoints.forEach((point) => {
+        const points = pointsByTrip.get(point.tripId) ?? [];
+        points.push(point);
+        pointsByTrip.set(point.tripId, points);
+      });
+      lastData = data;
+      lastUserId = userId;
+    }
+
+    const selectedTrip = workspace.userTrips.find((trip) => trip.id === selectedTripId) ?? workspace.recentTrips[0];
+    if (selectedTrip?.id === workspace.selectedTrip?.id) return workspace;
+    const selectedTripPoints = selectedTrip ? pointsByTrip.get(selectedTrip.id) ?? [] : [];
+    const selectedTripDestinationNames = selectedTrip
+      ? namesByTrip.get(selectedTrip.id) ?? getRecognizedDestinationNames(selectedTripPoints, data.destinations, destinationIndex)
+      : [];
+    if (selectedTrip) namesByTrip.set(selectedTrip.id, selectedTripDestinationNames);
+    workspace = {
+      ...workspace,
+      selectedTrip,
+      selectedTripPoints,
+      selectedTripSummary: workspace.tripSummaries.find((summary) => summary.tripId === selectedTrip?.id) ?? null,
+      selectedTripAnalysis: latestByDate(data.analyses.filter((analysis) => analysis.userId === userId && analysis.tripId === selectedTrip?.id), (analysis) => analysis.generatedAt) ?? null,
+      selectedTripDestinationNames,
+    };
+    return workspace;
+  };
+}

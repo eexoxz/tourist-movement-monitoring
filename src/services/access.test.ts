@@ -38,6 +38,8 @@ describe("access service", () => {
     expect(getAuthModeFromPath("/")).toBe("login");
     expect(getAuthModeFromPath("/login")).toBe("login");
     expect(getAuthModeFromPath("/register")).toBe("register");
+    expect(getAuthModeFromPath("/register/")).toBe("register");
+    expect(getAuthModeFromPath("/login/")).toBe("login");
     expect(getAuthModeFromPath("/app/home")).toBeNull();
   });
 
@@ -75,5 +77,17 @@ describe("access service", () => {
     expect(canAccessView("tourist", "history")).toBe(true);
     expect(getPrimaryViewsForRole("tourist")).not.toContain("history");
     expect(getPathForView("admin", "history")).toBe("/admin/dashboard");
+  });
+
+  it("round-trips every allowed route without crossing role boundaries", () => {
+    for (const role of ["tourist", "admin"] as const) {
+      for (const view of getAllowedViewsForRole(role)) {
+        const path = getPathForView(role, view);
+        expect(getViewFromPath(path)).toBe(view);
+        expect(getViewFromPath(`${path}/`)).toBe(view);
+      }
+    }
+    expect(getViewFromPath("/app/trips/manage-extra")).toBeNull();
+    expect(getViewFromPath("/app/trips/unknown")).toBeNull();
   });
 });

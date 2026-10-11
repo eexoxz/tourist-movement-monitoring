@@ -100,6 +100,13 @@ describe("user interface quality guardrails", () => {
     expect(stylesSource).toContain(".map-detail-panel:not(.visible)");
   });
 
+  it("cleans up recording and map motion when a workspace is removed", () => {
+    expect(readSource("src/workspaces/TouristWorkspace.tsx")).toContain("useEffect(() => () => clearBrowserLocationWatch(watchId), [user.id, watchId])");
+    expect(mapSource).toContain("zoomAnimation: false");
+    expect(mapSource).toContain("mapRef.current?.stop()");
+    expect(readSource("src/components/EmergencyServiceMap.tsx")).toContain("observer.disconnect(); map.stop(); map.remove()");
+  });
+
   it("keeps mobile account actions and calendar date filters accessible", () => {
     expect(appSource).toContain('className="mobile-account-tools"');
     expect(stylesSource).toContain(".tourist-shell .mobile-account-tools .language-selector");

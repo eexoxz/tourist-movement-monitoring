@@ -50,11 +50,12 @@ export function getPathForAuthMode(mode: AuthMode) {
 }
 
 export function getAuthModeFromPath(pathname: string): AuthMode | null {
-  if (pathname === authModePaths.register) {
+  const route = pathname.replace(/\/+$/, "") || "/";
+  if (route === authModePaths.register) {
     return "register";
   }
 
-  if (pathname === "/" || pathname === authModePaths.login) {
+  if (route === "/" || route === authModePaths.login) {
     return "login";
   }
 

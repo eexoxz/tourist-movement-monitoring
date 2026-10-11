@@ -9,7 +9,7 @@ export default function EmergencyServiceMap({ service }: { service: EmergencySer
   const elementRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!elementRef.current) return;
-    const map = L.map(elementRef.current, { scrollWheelZoom: false, dragging: !L.Browser.mobile, tapHold: false })
+    const map = L.map(elementRef.current, { zoomAnimation: false, scrollWheelZoom: false, dragging: !L.Browser.mobile, tapHold: false })
       .setView([service.latitude, service.longitude], 16);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -21,7 +21,7 @@ export default function EmergencyServiceMap({ service }: { service: EmergencySer
     }).addTo(map);
     const observer = new ResizeObserver(() => map.invalidateSize());
     observer.observe(elementRef.current);
-    return () => { observer.disconnect(); map.remove(); };
+    return () => { observer.disconnect(); map.stop(); map.remove(); };
   }, [service.id, service.name, service.latitude, service.longitude]);
   return <div className="police-help-map" ref={elementRef} role="region" aria-label={service.name} />;
 }
