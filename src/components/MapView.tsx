@@ -488,8 +488,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         ) : (
           <>
             <span>{t("map.interactiveMap")}</span>
-            <h2>{t("map.tapPlaceMarker")}</h2>
-            <p>{t("map.catalogueOnlyDescription")}</p>
+            <h2>{mode === "tourist" ? t("tourist.home.quickPlaces") : t("map.tapPlaceMarker")}</h2>
+            <p>{mode === "tourist" ? t("common.checkLocally") : t("map.catalogueOnlyDescription")}</p>
           </>
         )}
       </section>}

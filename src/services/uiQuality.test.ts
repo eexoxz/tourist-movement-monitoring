@@ -22,6 +22,8 @@ const mapSource = readFileSync(resolve(process.cwd(), "src/components/MapView.ts
 const movementMapSource = readFileSync(resolve(process.cwd(), "src/components/MovementMap.tsx"), "utf8");
 const qrCheckInPanelSource = readFileSync(resolve(process.cwd(), "src/components/QrCheckInPanel.tsx"), "utf8");
 const touristHomeSource = readFileSync(resolve(process.cwd(), "src/components/TouristHome.tsx"), "utf8");
+const homeDiscoverySource = readSource("src/components/HomeDiscovery.tsx");
+const tripExperienceSource = readSource("src/components/TripExperience.tsx");
 const toastSource = readFileSync(resolve(process.cwd(), "src/components/ToastViewport.tsx"), "utf8");
 const tripDiarySource = readFileSync(resolve(process.cwd(), "src/components/TripDiary.tsx"), "utf8");
 const styleImports = [...readSource("src/styles.css").matchAll(/@import "\.\/(.+?)";/g)];
@@ -30,17 +32,24 @@ const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), 
 
 describe("user interface quality guardrails", () => {
   it("gives Home features recognisable layouts without losing their existing actions", () => {
-    expect(touristHomeSource).toContain("<DestinationVisual destination={topRecommendationDestination}");
-    expect(touristHomeSource).toContain('className="home-event-date" dateTime={nextFestival.date}');
-    expect(touristHomeSource).toContain("new Intl.DateTimeFormat(locale");
-    expect(touristHomeSource).toContain('className="home-place-preview"');
-    expect(touristHomeSource).toContain('onViewChange("events")');
-    expect(touristHomeSource).toContain('onViewChange("recommendations")');
-    expect(touristHomeSource).toContain('onViewChange("history")');
-    expect(stylesSource).toContain(".recommendation-preview > .destination-visual");
-    expect(stylesSource).toContain(".home-event-date strong");
+    expect(homeDiscoverySource).toContain("<DestinationVisual destination={featured}");
+    expect(homeDiscoverySource).toContain("<time dateTime={nextFestival.date}>");
+    expect(homeDiscoverySource).toContain("new Intl.DateTimeFormat(locale");
+    expect(homeDiscoverySource).toContain('className="home-place-gallery"');
+    expect(homeDiscoverySource).toContain('onViewChange("events")');
+    expect(homeDiscoverySource).toContain('onViewChange("recommendations")');
+    expect(homeDiscoverySource).toContain('onViewChange("tracking")');
+    expect(stylesSource).toContain(".home-billboard > .destination-visual");
+    expect(stylesSource).toContain(".home-event-invitation");
     expect(stylesSource).toMatch(/\.tourist-home-flow\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-    expect(stylesSource).toMatch(/\.home-feature-label\s*\{[^}]*overflow-wrap:\s*anywhere/);
+    expect(stylesSource).toMatch(/\.travel-place-copy\s*\{[^}]*overflow-wrap:\s*anywhere/);
+    expect(touristHomeSource).not.toContain("onStartTrip");
+    expect(touristHomeSource).not.toContain("<MovementMap");
+    expect(tripExperienceSource).toContain('onClick={onStart}');
+    expect(tripExperienceSource).toContain('onClick={onManage}');
+    expect(tripExperienceSource).toContain('points={activeTrip ? points : []}');
+    expect(tripDiarySource).toContain("points={selectedTripPoints}");
+    expect(tripDiarySource).toContain("destinations={routeDestinations}");
   });
 
   it("keeps check-in and safety disclosures native, named and visually distinct", () => {
@@ -99,8 +108,8 @@ describe("user interface quality guardrails", () => {
     expect(stylesSource).toMatch(/\.admin-shell \.sidebar\s*\{[^}]*position:\s*static/);
   });
 
-  it("stacks named Home preview areas on mobile and avoids historical nearest check-ins", () => {
-    expect(stylesSource).toContain('grid-template-areas: "recommend" "event" "demand"');
+  it("keeps local Home discovery and avoids historical nearest check-ins", () => {
+    expect(homeDiscoverySource).toContain('text(isLocal ? "nearby" : "places")');
     expect(appSource).toContain("nearestCheckIn.distance <= 1.2");
     expect(appSource).toContain("discoveryGpsPoint ? nearestDestination(discoveryGpsPoint");
     expect(appSource).not.toContain("recommendedCheckIn = latestKnownPoint");
@@ -118,7 +127,7 @@ describe("user interface quality guardrails", () => {
   });
 
   it("keeps recoverable failures connected to visible retry and toast patterns", () => {
-    expect(appSource).toContain("Try location again");
+    expect(tripExperienceSource).toContain("tourist.home.tryLocationAgain");
     expect(i18nSource).toContain('"sync.retry": "Retry sync"');
     expect(toastSource).toContain("toast-stack");
   });
@@ -250,9 +259,9 @@ describe("user interface quality guardrails", () => {
     expect(mapSource).toContain("maxRenderedRoutePointMarkers");
     expect(mapSource).toContain('"999+"');
     expect(appSource).toContain('displayMode="signals"');
-    expect(appSource).toContain('displayMode={activePoints.length ? "route" : "signals"}');
+    expect(tripExperienceSource).toContain('displayMode={activeTrip ? "route" : "signals"}');
     expect(appSource).toContain('displayMode={selectedRecord?.points.length ? "route" : "signals"}');
-    expect(touristHomeSource).toContain('displayMode={activeTrip ? "route" : "signals"}');
+    expect(touristHomeSource).not.toContain("<MovementMap");
     expect(tripDiarySource).toContain('displayMode={selectedTripPoints.length ? "route" : "signals"}');
   });
 

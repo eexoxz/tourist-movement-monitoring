@@ -3,13 +3,13 @@ import type { AppView, UserRole } from "../types";
 export type AuthMode = "login" | "register";
 
 const touristViews: AppView[] = ["overview", "tracking", "history", "recommendations", "events", "profile"];
-const touristPrimaryViews: AppView[] = ["overview", "history", "recommendations", "events"];
+const touristPrimaryViews: AppView[] = ["overview", "tracking", "recommendations", "events"];
 const adminViews: AppView[] = ["dashboard", "destinations"];
 
 const touristViewPaths: Partial<Record<AppView, string>> = {
   overview: "/app/home",
-  tracking: "/app/tracking",
-  history: "/app/trips",
+  tracking: "/app/trips",
+  history: "/app/trips/manage",
   recommendations: "/app/recommendations",
   events: "/app/events",
   profile: "/app/profile",
@@ -69,6 +69,7 @@ export function getPathForView(role: UserRole, view: AppView) {
 
 export function getViewFromPath(pathname: string): AppView | null {
   const route = pathname.replace(/\/+$/, "") || "/";
+  if (route === "/app/tracking") return "tracking";
   const allPaths = { ...touristViewPaths, ...adminViewPaths };
   const match = Object.entries(allPaths).find(([, path]) => path === route);
   return (match?.[0] as AppView | undefined) ?? null;

@@ -1,6 +1,5 @@
-import { Building2, CalendarDays, ChevronDown, Compass, Flame, Hospital, MapPinned, Navigation, PhoneCall, Play, QrCode, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
+import { Building2, ChevronDown, Flame, Hospital, PhoneCall, QrCode, Save, ShieldCheck, Square, UserRound } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { discoveryText } from "../services/discoveryCopy";
 import { malaysiaEmergencyNumbers } from "../data/emergencyServices";
 import { formatDateTime } from "../services/geo";
 import { getCheckInDurationMinutes } from "../services/checkIns";
@@ -9,8 +8,7 @@ import type { GeoFenceWarning } from "../services/geofencing";
 import type { IncidentPhotoAttachment } from "../services/incidentAttachments";
 import type { TourismAdvisory } from "../services/advisories";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
-import type { AppView, AttractionCheckIn, Destination, DestinationDemand, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, SosClosureReason, TripSession, User } from "../types";
-import { MovementMap } from "./MovementMap";
+import type { AppView, AttractionCheckIn, Destination, FestivalEvent, IncidentReport, IncidentType, LocationConsent, MovementPoint, SafetyStatus, SosAlert, SosClosureReason, TripSession, User } from "../types";
 import { Page } from "./Page";
 import { QrCheckInPanel } from "./QrCheckInPanel";
 import { TouristPassCard } from "./TouristPassCard";
@@ -20,7 +18,7 @@ import { PoliceHelpPanel } from "./PoliceHelpPanel";
 import { emergencyHelpText } from "../services/emergencyHelpCopy";
 import { sosText } from "../services/sosCopy";
 import { TouristSosRequests } from "./TouristSosRequests";
-import { DestinationVisual } from "./DestinationVisual";
+import { HomeDiscovery } from "./HomeDiscovery";
 
 type IncidentOption = {
   value: IncidentType;
@@ -29,28 +27,20 @@ type IncidentOption = {
 
 type TouristHomeProps = {
   displayName: string;
-  tripStateLabel: string;
   activeTrip: TripSession | null | undefined;
-  recentTrip: TripSession | undefined;
   currentConsent: LocationConsent | null | undefined;
-  activeJourneyPoints: MovementPoint[];
-  activeJourneyPoint: MovementPoint | undefined;
   destinations: Destination[];
   checkInDestinations?: Destination[];
   discoveryControl?: ReactNode;
-  activityBasis?: ReactNode;
-  activityDemand?: DestinationDemand[];
-  isBrowsingArea?: boolean;
+  hasLocalReference: boolean;
   geofenceWarnings: GeoFenceWarning[];
   tourismAdvisories: TourismAdvisory[];
-  isLiveTracking: boolean;
-  locationRetryAvailable: boolean;
-  trackingMessage: string | null;
-  userTrips: TripSession[];
   activeCheckIn: AttractionCheckIn | null;
   activeCheckInDestination: Destination | null;
   checkInDestinationId: string;
   showCheckInPanel?: boolean;
+  openSafetyPanel?: boolean;
+  onSafetyPanelOpened?: () => void;
   recentCheckIns: AttractionCheckIn[];
   recommendedCheckIn: Destination | null;
   openSafetyCount: number;
@@ -67,20 +57,12 @@ type TouristHomeProps = {
   nearbyEmergencyServices: NearbyEmergencyService[];
   safetyReferencePoint?: MovementPoint;
   isSafetyAreaReference?: boolean;
-  recommendationHeading: string;
-  recommendationSupportText: string;
   topRecommendationDestination: Destination | null | undefined;
   nextFestival: FestivalEvent | null;
-  topDemandDestination: Destination | null | undefined;
   locale?: Locale;
   onViewChange: (view: AppView) => void;
   onGrantConsent: () => void;
-  onStartTrip: () => void;
-  onStopTrip: () => void;
-  onResumeLiveTracking: () => void;
-  onAddDemoPoint: () => void;
-  onAddLocalTestRoute: () => void;
-  onCreateSampleRoute: () => void;
+  onOpenPlace: (id: string) => void;
   onCheckInDestinationChange: (destinationId: string) => void;
   onStartAttractionCheckIn: (destinationId?: string) => void;
   onFinishAttractionCheckIn: () => void;
@@ -124,28 +106,20 @@ function HomeToolSummary({ icon, label, status }: { icon: ReactNode; label: stri
 
 export function TouristHome({
   displayName,
-  tripStateLabel,
   activeTrip,
-  recentTrip,
   currentConsent,
-  activeJourneyPoints,
-  activeJourneyPoint,
   destinations,
   checkInDestinations = destinations,
   discoveryControl,
-  activityBasis,
-  activityDemand,
-  isBrowsingArea = false,
+  hasLocalReference,
   geofenceWarnings,
   tourismAdvisories,
-  isLiveTracking,
-  locationRetryAvailable,
-  trackingMessage,
-  userTrips,
   activeCheckIn,
   activeCheckInDestination,
   checkInDestinationId,
   showCheckInPanel = false,
+  openSafetyPanel = false,
+  onSafetyPanelOpened,
   recentCheckIns,
   recommendedCheckIn,
   openSafetyCount,
@@ -162,20 +136,12 @@ export function TouristHome({
   nearbyEmergencyServices,
   safetyReferencePoint,
   isSafetyAreaReference = false,
-  recommendationHeading,
-  recommendationSupportText,
   topRecommendationDestination,
   nextFestival,
-  topDemandDestination,
   locale = "en",
   onViewChange,
   onGrantConsent,
-  onStartTrip,
-  onStopTrip,
-  onResumeLiveTracking,
-  onAddDemoPoint,
-  onAddLocalTestRoute,
-  onCreateSampleRoute,
+  onOpenPlace,
   onCheckInDestinationChange,
   onStartAttractionCheckIn,
   onFinishAttractionCheckIn,
@@ -191,14 +157,13 @@ export function TouristHome({
   const t = (key: TranslationKey) => translate(locale, key);
   const selectedCheckInDestination = checkInDestinations.find((destination) => destination.id === checkInDestinationId) ?? checkInDestinations[0] ?? null;
   const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
+  const safetyPanelRef = useRef<HTMLDetailsElement | null>(null);
   const [isConfirmingSos, setIsConfirmingSos] = useState(false);
   const checkInTitle = activeCheckInDestination
     ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}`
     : selectedCheckInDestination
       ? `${t("tourist.checkin.checkIn")}: ${selectedCheckInDestination.name}`
       : t("tourist.checkin.emptyTitle");
-  const festivalDateParts = nextFestival ? new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" })
-    .formatToParts(new Date(`${nextFestival.date}T00:00:00`)) : [];
   const getEmergencyIcon = (kind: NearbyEmergencyService["kind"]) => {
     if (kind === "hospital") {
       return <Hospital size={18} />;
@@ -220,6 +185,13 @@ export function TouristHome({
       checkInPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
     }, 120);
   }, [showCheckInPanel, checkInDestinationId]);
+
+  useEffect(() => {
+    if (!openSafetyPanel || !safetyPanelRef.current) return;
+    safetyPanelRef.current.open = true;
+    safetyPanelRef.current.scrollIntoView({ block: "start", behavior: "smooth" });
+    onSafetyPanelOpened?.();
+  }, [openSafetyPanel, onSafetyPanelOpened]);
 
   return (
     <Page title={displayName ? `${t("tourist.home.welcomeBack")}, ${displayName}` : t("tourist.home.planTitle")} eyebrow={t("common.tourist")}>
@@ -285,114 +257,13 @@ export function TouristHome({
         )}
 
         {!showCheckInPanel && discoveryControl}
-        {!showCheckInPanel && activityBasis}
-        {!showCheckInPanel && !activeJourneyPoint && <p className="discovery-empty-note">{discoveryText(locale, "locationNeeded")}</p>}
-        {!showCheckInPanel && activeJourneyPoint && destinations.length === 0 && <p className="discovery-empty-note">{discoveryText(locale, "noLocal")}</p>}
-        {!showCheckInPanel && <section className="home-primary-grid">
-          <div className="home-today-panel">
-            <div className="tracking-status-card home-status-card">
-              <span>{tripStateLabel}</span>
-              <div>
-                <h2>{activeTrip ? t("tourist.home.activeTripTitle") : recentTrip ? t("tourist.home.readyNextTripTitle") : t("tourist.home.firstTripTitle")}</h2>
-                <p>
-                  {activeTrip
-                    ? t("tourist.home.activeTripDescription")
-                    : recentTrip
-                      ? t("tourist.home.readyNextTripDescription")
-                      : t("tourist.home.firstTripDescription")}
-                </p>
-              </div>
-            </div>
+        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
+          if (safetyPanelRef.current) {
+            safetyPanelRef.current.open = true;
+            safetyPanelRef.current.scrollIntoView({ block: "start", behavior: "smooth" });
+          }
+        }} />}
 
-            <section className="mobile-trip-controls home-trip-controls">
-              <div className="consent-box">
-                <ShieldCheck size={22} />
-                <div>
-                  <strong>{currentConsent ? t("tourist.home.locationAllowed") : t("tourist.home.allowLocation")}</strong>
-                  <p>{currentConsent ? t("tourist.home.locationAllowedText") : t("tourist.home.locationNeededText")}</p>
-                </div>
-              </div>
-
-              {!currentConsent && (
-                <button className="primary-action wide" onClick={onGrantConsent}>
-                  <ShieldCheck size={18} />
-                  {t("tourist.home.allowLocation")}
-                </button>
-              )}
-
-              {currentConsent && (
-                <div className="mobile-action-row">
-                  <button className="primary-action" onClick={onStartTrip} disabled={Boolean(activeTrip)}>
-                    <Play size={18} />
-                    {t("tourist.home.startTrip")}
-                  </button>
-                  <button className="secondary-action" onClick={onStopTrip} disabled={!activeTrip}>
-                    <Square size={18} />
-                    {t("tourist.home.stopTrip")}
-                  </button>
-                </div>
-              )}
-
-              {activeTrip && !isLiveTracking && (
-                <button className="secondary-action wide" onClick={onResumeLiveTracking}>
-                  <Navigation size={18} />
-                  {t("tourist.home.resumeTracking")}
-                </button>
-              )}
-
-              {activeTrip && (
-                <button className="secondary-action wide" onClick={onAddDemoPoint}>
-                  {t("tourist.home.addDemoPoint")}
-                </button>
-              )}
-
-              {activeTrip && (
-                <button className="secondary-action wide" onClick={onAddLocalTestRoute}>
-                  <Navigation size={18} />
-                  {t("tourist.home.simulateLocalRoute")}
-                </button>
-              )}
-
-              <button className="secondary-action wide" onClick={onCreateSampleRoute} disabled={Boolean(activeTrip)}>
-                <Compass size={18} />
-                {t("tourist.home.addSampleRoute")}
-              </button>
-
-              {trackingMessage && <p className="status-message">{uiText(locale, trackingMessage)}</p>}
-
-              {locationRetryAvailable && activeTrip && (
-                <button className="secondary-action wide" type="button" onClick={onResumeLiveTracking}>
-                  <RotateCcw size={18} />
-                  {t("tourist.home.tryLocationAgain")}
-                </button>
-              )}
-
-              {userTrips.length === 0 && (
-                <section className="new-user-guide">
-                  <strong>{t("tourist.home.howItWorks")}</strong>
-                  <ol>
-                    <li>{t("tourist.home.stepAllowLocation")}</li>
-                    <li>{t("tourist.home.stepStartTrip")}</li>
-                    <li>{t("tourist.home.stepStopTrip")}</li>
-                  </ol>
-                </section>
-              )}
-            </section>
-          </div>
-
-          <div className="home-map-panel">
-            <MovementMap
-              points={activeJourneyPoints}
-              destinations={destinations}
-              activePoint={activeJourneyPoint}
-              mode="tourist"
-              displayMode={activeTrip ? "route" : "signals"}
-              locale={locale}
-              isBrowsingArea={isBrowsingArea}
-              activityDemand={activityDemand}
-            />
-          </div>
-        </section>}
 
         {!showCheckInPanel && geofenceWarnings.length > 0 && (
           <section className="tourist-section geofence-warning-panel">
@@ -420,57 +291,7 @@ export function TouristHome({
 
         {!showCheckInPanel && <TourismAdvisoryPanel advisories={tourismAdvisories} locale={locale} />}
 
-        {!showCheckInPanel && <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
-          <article className="home-preview-card recommendation-preview">
-            {topRecommendationDestination && <DestinationVisual destination={topRecommendationDestination} locale={locale} />}
-            <div className="home-recommendation-copy">
-              <span className="home-feature-label"><Sparkles size={17} aria-hidden="true" />{recommendationHeading}</span>
-              <h2>{topRecommendationDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
-              {topRecommendationDestination && <small className="home-place-location"><MapPinned size={15} aria-hidden="true" />{topRecommendationDestination.city}</small>}
-              <p>{recommendationSupportText}</p>
-              <div className="home-preview-actions">
-                <button className="primary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
-                  <Sparkles size={16} />
-                  {t("common.viewAll")}
-                </button>
-                <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("history")}>
-                  <MapPinned size={16} />
-                  {t("common.viewTrips")}
-                </button>
-              </div>
-            </div>
-          </article>
-          <article className="home-preview-card event-preview">
-            {nextFestival ? <time className="home-event-date" dateTime={nextFestival.date}>
-              <span>{festivalDateParts.find((part) => part.type === "month")?.value}</span>
-              <strong>{festivalDateParts.find((part) => part.type === "day")?.value}</strong>
-              <span>{festivalDateParts.find((part) => part.type === "year")?.value}</span>
-            </time> : <div className="home-event-date" aria-hidden="true"><CalendarDays size={30} /></div>}
-            <div className="home-event-copy">
-              <span className="home-feature-label">{t("tourist.home.eventsPreview")}</span>
-              <h2>{nextFestival?.name ?? t("tourist.home.quickEvents")}</h2>
-              <p>{t("tourist.home.eventsPreviewText")}</p>
-              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("events")}>
-                <CalendarDays size={16} />
-                {t("common.checkEvents")}
-              </button>
-            </div>
-          </article>
-          <article className="home-preview-card demand-preview">
-            <div className="home-places-heading"><Compass size={22} aria-hidden="true" /><span className="home-feature-label">{t("tourist.home.placesPreview")}</span></div>
-            <div className="home-place-preview">
-              {topDemandDestination && <DestinationVisual destination={topDemandDestination} locale={locale} compact />}
-              <div>
-                <h2>{topDemandDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
-                {topDemandDestination && <small className="home-place-location"><MapPinned size={15} aria-hidden="true" />{topDemandDestination.city}</small>}
-                <p>{t("tourist.home.placesPreviewText")}</p>
-              </div>
-            </div>
-            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
-              <Compass size={16} />{t("tourist.home.openPlaces")}
-            </button>
-          </article>
-        </section>}
+
 
         <section className={showCheckInPanel ? "home-support-grid qr-secondary-support" : "home-support-grid"}>
           {!showCheckInPanel && (
@@ -527,7 +348,7 @@ export function TouristHome({
             </details>
           )}
 
-          <details className="tourist-section home-disclosure safety-panel" open={openSafetyCount > 0}>
+          <details className="tourist-section home-disclosure safety-panel" id="tourist-safety" ref={safetyPanelRef} open={openSafetyCount > 0}>
             <HomeToolSummary icon={<ShieldCheck size={24} />} label={t("tourist.safety.eyebrow")} status={`${openSafetyCount} ${t("tourist.safety.open")}`} />
             <div className="section-heading">
               <div>

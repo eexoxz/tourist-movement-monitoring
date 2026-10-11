@@ -5,6 +5,7 @@ import type { TourismAdvisoryType } from "../data/tourismAdvisories";
 import type { Locale } from "../services/i18n";
 import { uiText } from "../services/uiText";
 import { localizeCity } from "../services/destinationLocale";
+import { travelText } from "../services/travelExperienceCopy";
 
 type TourismAdvisoryPanelProps = {
   advisories: TourismAdvisory[];
@@ -34,7 +35,7 @@ export function TourismAdvisoryPanel({ advisories, locale }: TourismAdvisoryPane
             {text("Local tourism advisories")}
           </span>
           <h2>{text("Plan around current alerts")}</h2>
-          <p>{text("These locally maintained advisories help tourists adjust routes without adding a live weather or traffic API.")}</p>
+          <p>{travelText(locale, "advisoryNote")}</p>
         </div>
       </div>
       <div className="advisory-list">

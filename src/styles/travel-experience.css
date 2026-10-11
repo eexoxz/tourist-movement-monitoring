@@ -1,0 +1,524 @@
+.home-discovery,
+.trip-experience {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  min-width: 0;
+}
+
+.home-area-picker {
+  min-width: 0;
+  border-block: 1px solid #d7e6e3;
+}
+
+.home-area-picker > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding-block: 10px;
+  color: #0f766e;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.home-area-picker > summary::-webkit-details-marker {
+  display: none;
+}
+
+.home-area-picker > summary > strong {
+  flex: 1;
+  min-width: 0;
+  color: #172033;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.home-area-picker > summary > span,
+.tourist-home-flow .section-heading > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.home-area-picker > summary > svg {
+  flex-shrink: 0;
+}
+
+.home-area-picker[open] > summary > svg:last-child {
+  transform: rotate(180deg);
+}
+
+.home-billboard {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  background: #e6efec;
+}
+
+.home-billboard > .destination-visual {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  aspect-ratio: auto;
+}
+
+.home-billboard > .destination-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-billboard figcaption {
+  display: none;
+}
+
+.home-billboard-copy {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 22px;
+  color: #ffffff;
+  background: rgba(8, 28, 25, 0.82);
+}
+
+.home-billboard-copy h2 {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 750;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.home-billboard-copy > span {
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.home-billboard-copy .primary-action {
+  color: #064e3b;
+  background: #ffffff;
+}
+
+.home-journey-invitation,
+.home-event-invitation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding-block: 18px;
+  border-block: 1px solid #d7e6e3;
+}
+
+.home-journey-icon {
+  color: #0f766e;
+}
+
+.home-journey-invitation h2,
+.home-event-invitation h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.home-journey-invitation p,
+.home-event-invitation p {
+  margin: 4px 0 0;
+  color: #596575;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.home-event-invitation {
+  color: #912649;
+  border-color: #ead4dd;
+}
+
+.home-event-invitation > div {
+  display: grid;
+  gap: 5px;
+}
+
+.home-event-invitation span,
+.home-event-invitation time {
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.home-discovery-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-discovery-shortcuts button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 64px;
+  padding: 14px;
+  border: 1px solid #cfe5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f766e;
+  text-align: left;
+  font-weight: 650;
+}
+
+.home-discovery-shortcuts button > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.home-discovery-shortcuts svg {
+  flex-shrink: 0;
+}
+
+.home-discovery-shortcuts .home-event-shortcut {
+  color: #912649;
+  border-color: #ead4dd;
+}
+
+.home-discovery-shortcuts .home-safety-shortcut,
+.trip-safety-action {
+  color: #a32639;
+  border-color: #f0c4cd;
+}
+
+.home-location-invitation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #596575;
+}
+
+.home-location-invitation p {
+  flex: 1 1 200px;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.travel-place-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.trip-experience .travel-place-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.travel-place-tile {
+  display: grid;
+  align-content: start;
+  padding: 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dce5e2;
+  border-radius: 8px;
+  color: #172033;
+  background: #ffffff;
+  text-align: left;
+}
+
+.travel-place-tile:hover,
+.home-discovery-shortcuts button:hover {
+  border-color: #0f766e;
+}
+
+.travel-place-tile .destination-visual.compact {
+  width: 100%;
+  height: 144px;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.travel-place-tile .destination-visual.compact img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.travel-place-copy {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 14px;
+  overflow-wrap: anywhere;
+}
+
+.travel-place-copy > small {
+  color: #0f766e;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.travel-place-copy > strong {
+  font-size: 1.04rem;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.travel-place-copy > span {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  color: #596575;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.trip-recorder {
+  display: grid;
+  gap: 16px;
+  padding-block: 8px 20px;
+  border-bottom: 1px solid #d7e6e3;
+}
+
+.trip-recorder-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.trip-recorder-heading h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1.4;
+}
+
+.trip-recorder-heading p {
+  margin: 5px 0 0;
+  color: #596575;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.trip-live-indicator {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  height: 48px;
+  color: #0f766e;
+  background: #e6fbf4;
+  border-radius: 8px;
+}
+
+.trip-live-indicator.active {
+  color: #ffffff;
+  background: #0f766e;
+}
+
+.trip-recorder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.trip-current-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: #596575;
+  font-size: 0.9rem;
+}
+
+.trip-current-summary strong {
+  color: #172033;
+}
+
+.trip-sample-notice {
+  color: #8a4b14;
+  line-height: 1.5;
+}
+
+.trip-action-dialog {
+  width: min(440px, 100%);
+}
+
+.trip-action-dialog input {
+  width: 100%;
+  min-width: 0;
+}
+
+.trip-live-map .map-view {
+  height: 52vh;
+  min-height: 380px;
+  max-height: 580px;
+}
+
+.trip-experience .section-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.trip-manage-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: #0f766e;
+  text-align: left;
+  font-weight: 650;
+}
+
+.trip-management-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 12px;
+}
+
+.trip-management-tools details {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dce5e2;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.trip-management-tools summary {
+  padding-block: 4px;
+  color: #0f766e;
+  font-weight: 650;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.trip-management-tools details p {
+  color: #596575;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.trip-management-tools details > button {
+  margin: 8px 8px 0 0;
+}
+
+.trip-area-guidance {
+  display: grid;
+  gap: 12px;
+}
+
+.trip-area-guidance aside {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border-left: 3px solid #0f766e;
+  background: #edf8f3;
+}
+
+.trip-area-guidance svg {
+  flex-shrink: 0;
+}
+
+.trip-area-guidance p {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.home-discovery button,
+.trip-experience button,
+.trip-management-tools button {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .tourist-home-flow .section-heading {
+    flex-wrap: wrap;
+  }
+
+  .home-billboard {
+    height: 290px;
+  }
+
+  .home-billboard-copy {
+    padding: 16px;
+  }
+
+  .home-billboard-copy h2 {
+    font-size: 1.45rem;
+  }
+
+  .home-journey-invitation,
+  .home-event-invitation {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .home-journey-invitation > button,
+  .home-event-invitation > button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .home-discovery-shortcuts {
+    gap: 8px;
+  }
+
+  .home-discovery-shortcuts button {
+    flex-direction: column;
+    align-items: start;
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+
+  .home-discovery-shortcuts button > svg:last-child {
+    display: none;
+  }
+
+  .travel-place-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .home-place-gallery .travel-place-tile:nth-child(n + 3) {
+    display: none;
+  }
+
+  .travel-place-tile .destination-visual.compact {
+    height: 108px;
+  }
+
+  .travel-place-copy {
+    padding: 10px;
+  }
+
+  .travel-place-copy > strong {
+    font-size: 0.94rem;
+  }
+
+  .trip-recorder-heading h2 {
+    font-size: 1.2rem;
+  }
+
+  .trip-live-map .map-view {
+    height: 48vh;
+    min-height: 340px;
+  }
+}

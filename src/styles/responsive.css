@@ -8,20 +8,6 @@
   margin-top: 4px;
 }
 
-@media (max-width: 1280px) {
-  .home-today-panel {
-    grid-template-columns: 1fr;
-  }
-
-  .home-status-card {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .home-trip-controls {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.76fr);
-  }
-}
-
 @media (max-width: 1040px) {
   .mobile-account-tools {
     display: grid;
@@ -118,15 +104,6 @@
   .profile-actions {
     grid-column: auto;
     justify-content: flex-start;
-  }
-
-  .home-today-panel,
-  .home-trip-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .home-map-panel .map-view {
-    min-height: 440px;
   }
 
   .admin-overview-map .map-view {
@@ -285,14 +262,9 @@
   }
 
   .tracking-status-card,
-  .home-primary-grid,
-  .home-today-panel,
-  .home-trip-controls,
   .home-support-grid,
   .festival-card,
   .mobile-action-row,
-  .home-quick-actions,
-  .home-preview-grid,
   .completed-trip-grid,
   .completed-trip-actions,
   .trip-preview-stats,
@@ -303,64 +275,10 @@
     grid-template-columns: 1fr;
   }
 
-  .home-quick-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .home-preview-grid {
-    grid-template-areas: "recommend" "event" "demand";
-  }
-
-  .recommendation-preview {
-    min-height: 0;
-    padding: 0;
-  }
-
-  .home-preview-card:not(.recommendation-preview),
-  .home-recommendation-copy {
-    padding: 16px;
-  }
-
-  .event-preview {
-    gap: 12px;
-  }
-
-  .recommendation-preview > .destination-visual {
-    height: 168px;
-  }
-
-  .home-map-panel .map-view {
-    min-height: 380px;
-  }
-
   .map-view.leaflet-container,
   .map-view .leaflet-pane,
   .map-view .leaflet-tile {
     touch-action: auto;
-  }
-
-  .home-today-panel {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .home-trip-controls {
-    padding: 12px;
-  }
-
-  .home-status-card {
-    padding: 12px;
-  }
-
-  .home-status-card h2 {
-    font-size: 1.12rem;
-  }
-
-  .home-status-card p,
-  .home-trip-controls .consent-box p {
-    font-size: 0.84rem;
   }
 
   .tourist-shell .discovery-location-control {
@@ -370,19 +288,6 @@
 
   .tourist-shell .activity-basis-row {
     margin-bottom: 0;
-  }
-
-  .home-trip-controls .consent-box {
-    padding: 10px;
-  }
-
-  .home-trip-controls .mobile-action-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .home-quick-actions button {
-    grid-template-columns: 1fr;
-    min-height: 96px;
   }
 
   .home-disclosure > summary {

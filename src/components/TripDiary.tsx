@@ -4,6 +4,9 @@ import { formatDateTime } from "../services/geo";
 import { uiText } from "../services/uiText";
 import { formatTripTitle, getRecognizedDestinationNames } from "../services/tripPresentation";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
+import { travelText } from "../services/travelExperienceCopy";
+import { createDestinationSpatialIndex } from "../services/destinationSpatialIndex";
+import { discoveryRadiusKm } from "../services/discovery";
 import type { Destination, DestinationDemand, MovementPoint, Recommendation, TripSession, TripSummary } from "../types";
 import { MovementMap } from "./MovementMap";
 import { EmptyState } from "./SummaryCards";
@@ -73,14 +76,19 @@ export function TripDiary({
     return new Map(recentTrips.map((trip) => [trip.id, getRecognizedDestinationNames(pointsByTripId.get(trip.id) ?? [], destinations)]));
   }, [destinations, pointsByTripId, recentTrips]);
   const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
+  const routeDestinations = useMemo(() => {
+    const index = createDestinationSpatialIndex(destinations);
+    const ids = new Set(selectedTripPoints.flatMap((point) => index.nearby(point, discoveryRadiusKm).map(({ destination }) => destination.id)));
+    return destinations.filter((destination) => ids.has(destination.id));
+  }, [destinations, selectedTripPoints]);
 
   return (
     <section className="trip-diary-page">
       <section className="trip-diary-hero">
         <div>
           <span>{t("tourist.trips.routeHistory")}</span>
-          <h2>{t("tourist.trips.heroTitle")}</h2>
-          <p>{t("tourist.trips.heroDescription")}</p>
+          <h2>{t("tourist.trips.savedTrips")}</h2>
+          <p>{travelText(locale, "historyNote")}</p>
         </div>
         <div className="trip-diary-stats" aria-label={uiText(locale, "Trip diary totals")}>
           <span>
@@ -102,8 +110,8 @@ export function TripDiary({
         <div className="trip-diary-main">
           <div className="trip-map-panel">
             <MovementMap
-              points={selectedTripPoints.length ? selectedTripPoints : fallbackPoints}
-              destinations={destinations}
+              points={selectedTripPoints}
+              destinations={routeDestinations}
               mode="tourist"
               displayMode={selectedTripPoints.length ? "route" : "signals"}
               locale={locale}

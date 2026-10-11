@@ -52,6 +52,8 @@
 
 .trip-diary-stats span {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  overflow-wrap: anywhere;
   gap: 4px;
   min-width: 0;
   padding: 12px;

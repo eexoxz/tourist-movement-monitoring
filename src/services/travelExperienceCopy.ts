@@ -1,0 +1,110 @@
+import type { Locale } from "./i18n";
+
+const en = {
+  featured: "Discover Malaysia",
+  explore: "Explore this place",
+  nearby: "Around you",
+  places: "Discover places",
+  journeyTitle: "Make today a journey",
+  journeyDescription: "Keep your route and discover places along the way.",
+  openTrips: "Go to Trips",
+  continueTrip: "Continue your trip",
+  tripTitle: "Your journey",
+  idleTitle: "Where will today take you?",
+  idleDescription: "Record your route and discover places nearby.",
+  activeTitle: "You're on your way",
+  activeDescription: "Keep this page open to save your journey.",
+  manage: "Manage trips",
+  back: "Back to your journey",
+  alongRoute: "Places along your way",
+  noNearby: "Choose an area or allow location to discover nearby places.",
+  privacy: "Location and privacy",
+  sampleTools: "Sample routes and test controls",
+  sampleNote: "Sample routes are simulated, not GPS recordings.",
+  locationNote: "Your location is used only with your permission.",
+  advisoryNote: "Check local notices before you head out.",
+  historyNote: "Revisit your routes, stops and places to try next.",
+  tripName: "Trip name",
+};
+
+export type TravelExperienceKey = keyof typeof en;
+const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
+  en,
+  ms: {
+    tripName: "Nama perjalanan",
+    historyNote: "Lihat semula laluan, persinggahan dan tempat untuk lawatan seterusnya.",
+    advisoryNote: "Semak makluman setempat sebelum bertolak.",
+    featured: "Terokai Malaysia", explore: "Terokai tempat ini", nearby: "Di sekitar anda", places: "Temui tempat menarik",
+    journeyTitle: "Mulakan perjalanan hari ini", journeyDescription: "Simpan laluan anda dan temui tempat menarik sepanjang perjalanan.", openTrips: "Buka Perjalanan", continueTrip: "Teruskan perjalanan anda",
+    tripTitle: "Perjalanan anda", idleTitle: "Ke mana anda mahu pergi hari ini?", idleDescription: "Rekod laluan anda dan temui tempat berdekatan.", activeTitle: "Anda sedang dalam perjalanan", activeDescription: "Biarkan halaman ini terbuka untuk menyimpan perjalanan anda.",
+    manage: "Urus perjalanan", back: "Kembali ke perjalanan anda", alongRoute: "Tempat sepanjang perjalanan", noNearby: "Pilih kawasan atau benarkan lokasi untuk menemui tempat berdekatan.", privacy: "Lokasi dan privasi", sampleTools: "Laluan contoh dan kawalan ujian", sampleNote: "Laluan contoh ialah simulasi, bukan rekod GPS.", locationNote: "Lokasi anda hanya digunakan dengan kebenaran anda.",
+  },
+  zh: {
+    tripName: "行程名称",
+    historyNote: "回顾您的路线、停留地点和下次想去的地方。",
+    advisoryNote: "出发前查看当地提醒。",
+    featured: "探索马来西亚", explore: "探索这个地点", nearby: "您周边的地点", places: "发现好去处",
+    journeyTitle: "开启今天的旅程", journeyDescription: "记录路线，发现沿途的好去处。", openTrips: "打开行程", continueTrip: "继续您的旅程",
+    tripTitle: "您的旅程", idleTitle: "今天想去哪里？", idleDescription: "记录路线，发现附近的地点。", activeTitle: "您已在旅途中", activeDescription: "请保持此页面打开，以保存您的行程。",
+    manage: "管理行程", back: "返回您的旅程", alongRoute: "沿途的好去处", noNearby: "选择地区或允许定位，以探索附近的地点。", privacy: "位置与隐私", sampleTools: "示例路线与测试控制", sampleNote: "示例路线为模拟数据，并非 GPS 记录。", locationNote: "仅在您允许的情况下使用您的位置。",
+  },
+  ja: {
+    tripName: "旅行名",
+    historyNote: "これまでのルートや立ち寄り先、次に行きたいスポットを振り返りましょう。",
+    advisoryNote: "出発前に地域のお知らせを確認しましょう。",
+    featured: "マレーシアを探索", explore: "このスポットを見る", nearby: "近くのスポット", places: "スポットを探す",
+    journeyTitle: "今日の旅を始めましょう", journeyDescription: "ルートを記録し、道中のスポットを見つけましょう。", openTrips: "旅行を開く", continueTrip: "旅を続ける",
+    tripTitle: "あなたの旅", idleTitle: "今日はどこへ行きますか？", idleDescription: "ルートを記録し、近くのスポットを探しましょう。", activeTitle: "旅行を記録中です", activeDescription: "旅を保存するため、このページを開いたままにしてください。",
+    manage: "旅行を管理", back: "旅行に戻る", alongRoute: "道中のスポット", noNearby: "エリアを選ぶか位置情報を許可して、近くのスポットを探しましょう。", privacy: "位置情報とプライバシー", sampleTools: "サンプルルートとテスト操作", sampleNote: "サンプルルートはシミュレーションであり、GPSの記録ではありません。", locationNote: "位置情報は許可を得た場合にのみ使用します。",
+  },
+  ko: {
+    tripName: "여행 이름",
+    historyNote: "이전 경로와 방문한 장소, 다음에 가볼 곳을 살펴보세요.",
+    advisoryNote: "출발 전에 지역 안내를 확인하세요.",
+    featured: "말레이시아 둘러보기", explore: "이 장소 살펴보기", nearby: "내 주변", places: "장소 둘러보기",
+    journeyTitle: "오늘의 여행을 시작하세요", journeyDescription: "경로를 기록하고 이동 중에 들를 곳을 찾아보세요.", openTrips: "여행 열기", continueTrip: "여행 계속하기",
+    tripTitle: "내 여행", idleTitle: "오늘은 어디로 갈까요?", idleDescription: "경로를 기록하고 주변 장소를 찾아보세요.", activeTitle: "여행을 기록하고 있어요", activeDescription: "여행을 저장하려면 이 페이지를 열어 두세요.",
+    manage: "여행 관리", back: "여행으로 돌아가기", alongRoute: "이동 경로 주변 장소", noNearby: "지역을 선택하거나 위치를 허용하여 주변 장소를 찾아보세요.", privacy: "위치 및 개인정보", sampleTools: "샘플 경로 및 테스트 도구", sampleNote: "샘플 경로는 시뮬레이션이며 GPS 기록이 아닙니다.", locationNote: "위치는 허용한 경우에만 사용됩니다.",
+  },
+  pt: {
+    tripName: "Nome da viagem",
+    historyNote: "Reveja os seus percursos, paragens e locais a visitar a seguir.",
+    advisoryNote: "Consulte os avisos locais antes de sair.",
+    featured: "Descubra a Malásia", explore: "Explorar este local", nearby: "Perto de si", places: "Descobrir locais",
+    journeyTitle: "Comece a viagem de hoje", journeyDescription: "Guarde o seu percurso e descubra locais pelo caminho.", openTrips: "Abrir viagens", continueTrip: "Continuar a sua viagem",
+    tripTitle: "A sua viagem", idleTitle: "Onde quer ir hoje?", idleDescription: "Registe o seu percurso e descubra locais próximos.", activeTitle: "A sua viagem está a ser registada", activeDescription: "Mantenha esta página aberta para guardar a sua viagem.",
+    manage: "Gerir viagens", back: "Voltar à sua viagem", alongRoute: "Locais pelo caminho", noNearby: "Escolha uma zona ou permita a localização para descobrir locais próximos.", privacy: "Localização e privacidade", sampleTools: "Percursos de exemplo e controlos de teste", sampleNote: "Os percursos de exemplo são simulados, não são registos GPS.", locationNote: "A sua localização só é utilizada com a sua autorização.",
+  },
+  ta: {
+    tripName: "பயணத்தின் பெயர்",
+    historyNote: "உங்கள் பாதைகள், நிறுத்தங்கள் மற்றும் அடுத்து செல்லக்கூடிய இடங்களை மீண்டும் பாருங்கள்.",
+    advisoryNote: "புறப்படுவதற்கு முன் உள்ளூர் அறிவிப்புகளைப் பாருங்கள்.",
+    featured: "மலேசியாவை ஆராயுங்கள்", explore: "இந்த இடத்தைப் பாருங்கள்", nearby: "உங்களுக்கு அருகில்", places: "இடங்களைக் கண்டறியுங்கள்",
+    journeyTitle: "இன்றைய பயணத்தைத் தொடங்குங்கள்", journeyDescription: "உங்கள் பாதையைப் பதிவு செய்து வழியில் உள்ள இடங்களைக் கண்டறியுங்கள்.", openTrips: "பயணங்களைத் திற", continueTrip: "உங்கள் பயணத்தைத் தொடருங்கள்",
+    tripTitle: "உங்கள் பயணம்", idleTitle: "இன்று எங்கு செல்ல விரும்புகிறீர்கள்?", idleDescription: "உங்கள் பாதையைப் பதிவு செய்து அருகிலுள்ள இடங்களைக் கண்டறியுங்கள்.", activeTitle: "உங்கள் பயணம் பதிவாகிறது", activeDescription: "பயணத்தைச் சேமிக்க இந்தப் பக்கத்தைத் திறந்தே வைத்திருங்கள்.",
+    manage: "பயணங்களை நிர்வகி", back: "உங்கள் பயணத்திற்குத் திரும்பு", alongRoute: "பயண வழியில் உள்ள இடங்கள்", noNearby: "அருகிலுள்ள இடங்களைக் கண்டறிய பகுதியைத் தேர்ந்தெடுக்கவும் அல்லது இருப்பிடத்தை அனுமதிக்கவும்.", privacy: "இருப்பிடம் மற்றும் தனியுரிமை", sampleTools: "மாதிரிப் பாதைகள் மற்றும் சோதனைக் கருவிகள்", sampleNote: "மாதிரிப் பாதைகள் உருவகப்படுத்தப்பட்டவை; அவை GPS பதிவுகள் அல்ல.", locationNote: "உங்கள் அனுமதியுடன் மட்டுமே இருப்பிடம் பயன்படுத்தப்படுகிறது.",
+  },
+  es: {
+    tripName: "Nombre del viaje",
+    historyNote: "Revisa tus rutas, paradas y lugares para tu próxima visita.",
+    advisoryNote: "Consulta los avisos locales antes de salir.",
+    featured: "Descubre Malasia", explore: "Explorar este lugar", nearby: "A tu alrededor", places: "Descubrir lugares",
+    journeyTitle: "Empieza el viaje de hoy", journeyDescription: "Guarda tu ruta y descubre lugares por el camino.", openTrips: "Abrir viajes", continueTrip: "Continuar tu viaje",
+    tripTitle: "Tu viaje", idleTitle: "¿Adónde quieres ir hoy?", idleDescription: "Registra tu ruta y descubre lugares cercanos.", activeTitle: "Tu viaje se está registrando", activeDescription: "Mantén esta página abierta para guardar tu viaje.",
+    manage: "Gestionar viajes", back: "Volver a tu viaje", alongRoute: "Lugares por el camino", noNearby: "Elige una zona o permite la ubicación para descubrir lugares cercanos.", privacy: "Ubicación y privacidad", sampleTools: "Rutas de ejemplo y controles de prueba", sampleNote: "Las rutas de ejemplo son simulaciones, no registros GPS.", locationNote: "Tu ubicación solo se utiliza con tu permiso.",
+  },
+  fr: {
+    tripName: "Nom du voyage",
+    historyNote: "Retrouvez vos parcours, vos étapes et les lieux à découvrir ensuite.",
+    advisoryNote: "Consultez les avis locaux avant de partir.",
+    featured: "Découvrez la Malaisie", explore: "Découvrir ce lieu", nearby: "Autour de vous", places: "Découvrir des lieux",
+    journeyTitle: "Commencez le voyage du jour", journeyDescription: "Enregistrez votre parcours et découvrez des lieux en chemin.", openTrips: "Ouvrir les voyages", continueTrip: "Continuer votre voyage",
+    tripTitle: "Votre voyage", idleTitle: "Où voulez-vous aller aujourd'hui ?", idleDescription: "Enregistrez votre parcours et découvrez les lieux à proximité.", activeTitle: "Votre voyage est en cours d'enregistrement", activeDescription: "Gardez cette page ouverte pour enregistrer votre voyage.",
+    manage: "Gérer les voyages", back: "Retour à votre voyage", alongRoute: "Des lieux en chemin", noNearby: "Choisissez une zone ou autorisez la localisation pour découvrir les lieux à proximité.", privacy: "Localisation et confidentialité", sampleTools: "Parcours d'exemple et outils de test", sampleNote: "Les parcours d'exemple sont simulés, ce ne sont pas des relevés GPS.", locationNote: "Votre localisation n'est utilisée qu'avec votre autorisation.",
+  },
+};
+
+export const travelExperienceKeys = Object.keys(en) as TravelExperienceKey[];
+export function travelText(locale: Locale, key: TravelExperienceKey) {
+  return copy[locale][key];
+}

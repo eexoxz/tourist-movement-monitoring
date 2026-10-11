@@ -132,6 +132,10 @@ function App() {
     }
 
     const nextSafeView = coerceViewForRole(activeUser.role, nextView);
+    if (nextSafeView === safeView) {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      return;
+    }
     setView(nextSafeView);
     pushBrowserPath(getPathForView(activeUser.role, nextSafeView));
   };
@@ -675,7 +679,7 @@ function App() {
         ] as const)
       : ([
           ["overview", t("nav.home"), Compass],
-          ["history", t("nav.trips"), MapPinned],
+          ["tracking", t("nav.trips"), MapPinned],
           ["recommendations", t("nav.places"), Sparkles],
           ["events", t("nav.events"), CalendarDays],
         ] as const);
@@ -707,7 +711,7 @@ function App() {
 
         <nav className="nav-list" aria-label={uiText(locale, "Primary navigation")}>
           {roleViews.filter(([key]) => primaryViews.includes(key)).map(([key, label, Icon]) => (
-            <button key={key} className={safeView === key ? "nav-item active" : "nav-item"} onClick={() => goToView(key)}>
+            <button key={key} className={safeView === key || (key === "tracking" && safeView === "history") ? "nav-item active" : "nav-item"} onClick={() => goToView(key)}>
               <Icon size={18} />
               {label}
             </button>

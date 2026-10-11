@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
-import { Compass, Navigation, RotateCcw, Play, Save, ShieldCheck, Square, Trash2 } from "lucide-react";
+import { ChevronDown, Compass, MapPin, Navigation, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
 import type { AppData, AppView, IncidentType, MovementPoint, SosClosureReason, TripSession, User } from "../types";
 import { loadData, loadSharedDestinations } from "../services/storage";
-import { nearestDestination } from "../services/geo";
+import { distanceKm, nearestDestination } from "../services/geo";
 import { recommendForUser, refreshAllRecommendations, refreshAnalysis } from "../services/analytics";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -20,6 +20,7 @@ import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "..
 import { getLiveNearbySuggestion, type LiveNearbySuggestion } from "../services/liveSuggestions";
 import { discoveryRadiusKm, getDiscoveryDestinations, getDiscoveryReference, getLatestDiscoveryPoint, getLocalEventAnnouncement } from "../services/discovery";
 import { discoveryAreas } from "../data/discoveryAreas";
+import { discoveryText } from "../services/discoveryCopy";
 import { DiscoveryLocationControl } from "../components/DiscoveryLocationControl";
 import { DiscoveryPrompt } from "../components/DiscoveryPrompt";
 import { ActivityBasis } from "../components/ActivityBasis";
@@ -29,18 +30,18 @@ import { getMovementQualityIssue, type MovementQualityIssue } from "../services/
 import { getNearbyEmergencyServices } from "../services/emergencyServices";
 import { emergencyHelpText } from "../services/emergencyHelpCopy";
 import { localizeDestinations } from "../services/destinationLocale";
-import { CompletedTripSummary, MetricGrid } from "../components/SummaryCards";
 import { type NotificationTone, type NotifyFn } from "../components/ToastViewport";
 import { uiText } from "../services/uiText";
-import { profileLabel } from "../services/planningText";
 import { FestivalCalendarPanel } from "../components/FestivalCalendarPanel";
-import { MovementMap } from "../components/MovementMap";
 import { Page } from "../components/Page";
 import { PlaceDiscovery } from "../components/PlaceDiscovery";
 import { TouristHome } from "../components/TouristHome";
 import { TouristPassCard } from "../components/TouristPassCard";
 import { TouristProfileForm } from "../components/TouristProfileForm";
 import { TripDiary } from "../components/TripDiary";
+import { TripExperience } from "../components/TripExperience";
+import { TripActionDialog } from "../components/TripActionDialog";
+import { travelText } from "../services/travelExperienceCopy";
 import { getDisplayName } from "../services/profile";
 import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWatch, loadLastBrowserLocation, saveLastBrowserLocation, movementPointFromBrowserPosition } from "../services/browserLocation";
 import { type CommitDataOptions, incidentTypeOptions, loadProfileSetupSkipped, saveProfileSetupSkipped } from "../services/workspaceSupport";
@@ -88,6 +89,10 @@ export function TouristWorkspace({
   const [isPreparingIncidentPhoto, setIsPreparingIncidentPhoto] = useState(false);
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
   const [showCheckInPanel, setShowCheckInPanel] = useState(false);
+  const [openSafetyPanel, setOpenSafetyPanel] = useState(false);
+  const [tripDialog, setTripDialog] = useState<{ kind: "rename"; trip: TripSession } | { kind: "stop" } | null>(null);
+  const [tripLabelDraft, setTripLabelDraft] = useState("");
+  const homeAreaPickerRef = useRef<HTMLDetailsElement | null>(null);
   const geofenceNoticeKey = useRef("");
   const liveSuggestionDestinationIds = useRef(new Set<string>());
   const lastSuggestionAt = useRef(0);
@@ -112,11 +117,6 @@ export function TouristWorkspace({
     selectedTripAnalysis,
     selectedTripDestinationNames,
     selectedTripRecommendations,
-    latestCompletedTrip,
-    latestCompletedTripPoints,
-    latestCompletedTripSummary,
-    latestCompletedTripAnalysis,
-    latestCompletedTripDestinationNames,
     visitedDestinationIds,
     userSosAlerts,
     userIncidentReports,
@@ -124,8 +124,6 @@ export function TouristWorkspace({
     recentCheckIns,
   } = touristWorkspace;
   const activeTripSummary = activeTrip ? tripSummaries.find((summary) => summary.tripId === activeTrip.id) ?? null : null;
-  const recentTrip = recentTrips[0];
-  const selectedDestination = localizedDestinations.find((destination) => destination.id === selectedDestinationId) ?? localizedDestinations[0];
   const destinationDemand = useMemo(() => getTouristDestinationDemand(data, user), [data, user]);
   const calendarDay = useCalendarDay();
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
@@ -146,29 +144,27 @@ export function TouristWorkspace({
     () => discoveryReference ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
     [destinationDemand, latestAnalysis, discoveryReference, localizedData, user.id]
   );
+  const activeSamplePoint = activeTrip && activePoints.at(-1)?.source === "demo" ? activePoints.at(-1) : undefined;
+  const tripReference = activeSamplePoint ?? discoveryGpsPoint;
+  const tripBrowsingReference = tripReference ?? (!activeTrip ? discoveryReference : undefined);
+  const tripDestinations = useMemo(() => tripBrowsingReference ? localizeDestinations(getDiscoveryDestinations(data.destinations, user, tripBrowsingReference), locale) : [], [data.destinations, locale, tripBrowsingReference, user]);
+  const tripRecommendations = useMemo(() => tripBrowsingReference ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, tripBrowsingReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [], [destinationDemand, latestAnalysis, localizedData, tripBrowsingReference, user.id]);
+  const nearbyTripPlaces = tripRecommendations.flatMap((recommendation) => {
+    const destination = tripDestinations.find((candidate) => candidate.id === recommendation.destinationId);
+    return destination ? [destination] : [];
+  });
   const activeCheckIn = getActiveCheckIn(data, user.id);
   const activeCheckInDestination = activeCheckIn ? localizedDestinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
   const nearestCheckIn = discoveryGpsPoint ? nearestDestination(discoveryGpsPoint, localizedDestinations) : null;
   const recommendedCheckIn = nearestCheckIn && nearestCheckIn.distance <= 1.2 ? nearestCheckIn.destination : null;
-  const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(discoveryGpsPoint, data.geofences), [data.geofences, discoveryGpsPoint]);
+  const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(tripReference, data.geofences), [data.geofences, tripReference]);
   const displayName = getDisplayName(user);
   const trackingFeedback = trackingQualityIssue ? activityText(locale, trackingQualityIssue) : trackingMessage;
   const t = (key: TranslationKey) => translate(locale, key);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
   const hasPersonalizedRecommendations = Boolean(latestAnalysis);
-  const tripStateLabel = activeTrip ? t("common.active") : latestCompletedTrip ? t("common.completed") : t("common.notStarted");
-  const recommendationHeading = hasPersonalizedRecommendations ? t("tourist.home.recommendationsPersonalized") : t("tourist.home.recommendationsBasic");
-  const recommendationSupportText = hasPersonalizedRecommendations
-    ? t("tourist.home.recommendationsPersonalizedText")
-    : t("tourist.home.recommendationsBasicText");
-  const activeJourneyPoints = activePoints.length ? activePoints : activeTrip ? [] : latestCompletedTripPoints;
-  const activeJourneyPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : latestCompletedTripPoints.at(-1));
   const topRecommendationDestination = recommendations[0]
     ? localizedDestinations.find((destination) => destination.id === recommendations[0].destinationId)
-    : null;
-  const localDestinationIds = new Set(discoveryDestinations.map((destination) => destination.id));
-  const topDemandDestination = discoveryReference
-    ? localizedDestinations.find((destination) => destination.id === destinationDemand.find((row) => row.popularityScore > 0 && localDestinationIds.has(row.destinationId))?.destinationId)
     : null;
   const nextFestival = getLocalEventAnnouncement(upcomingFestivals, discoveryReference);
   const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(discoveryGpsPoint), [discoveryGpsPoint]);
@@ -471,10 +467,6 @@ export function TouristWorkspace({
   };
 
   const stopTrip = () => {
-    if (!window.confirm(uiText(locale, "Stop recording this trip?"))) {
-      return;
-    }
-
     clearBrowserLocationWatch(watchId);
     setIsLiveTracking(false);
     setLocationRetryAvailable(false);
@@ -591,10 +583,12 @@ export function TouristWorkspace({
   };
 
   const renameTrip = (trip: TripSession, fallbackTitle: string) => {
-    const nextLabel = window.prompt("Rename this trip. Leave it blank to use the automatic route name.", trip.label ?? fallbackTitle);
-    if (nextLabel === null) {
-      return;
-    }
+    setTripLabelDraft(trip.label ?? fallbackTitle);
+    setTripDialog({ kind: "rename", trip });
+  };
+
+  const saveTripName = (trip: TripSession) => {
+    const nextLabel = tripLabelDraft;
 
     const result = updateTripLabel(data, user.id, trip.id, nextLabel);
     if (result.error || !result.data) {
@@ -603,6 +597,7 @@ export function TouristWorkspace({
     }
 
     onDataChange(refreshAllRecommendations(result.data));
+    setTripDialog(null);
     notify({ tone: "success", title: "Trip name saved", message: nextLabel.trim() ? "This trip now uses your custom name." : "This trip now uses its automatic route name." });
   };
 
@@ -793,6 +788,36 @@ export function TouristWorkspace({
     notify({ tone: "info", title: "Profile skipped", message: "You can complete your travel profile later from Home." });
   };
 
+  const openPlace = (destinationId: string) => {
+    const destination = data.destinations.find((candidate) => candidate.id === destinationId);
+    if (destination && !canonicalDiscoveryDestinations.some((candidate) => candidate.id === destinationId)) {
+      if (view === "tracking" && tripReference?.source === "browser") changeDiscoveryLocation("current");
+      else {
+        const area = discoveryAreas.reduce((nearest, candidate) => distanceKm(destination, candidate) < distanceKm(destination, nearest) ? candidate : nearest);
+        changeDiscoveryLocation("area", area.id);
+      }
+    }
+    setSelectedDestinationId(destinationId);
+    onViewChange("recommendations");
+  };
+  const openSafety = () => {
+    setOpenSafetyPanel(true);
+    onViewChange("overview");
+  };
+  const discoveryPrompt = !showCheckInPanel && !hasNotifications ? <DiscoveryPrompt
+    suggestion={liveSuggestion}
+    event={view === "tracking" || liveSuggestion ? null : eventAnnouncement}
+    locale={locale}
+    onClose={() => { if (liveSuggestion) setLiveSuggestion(null); else setEventAnnouncementsDismissed(true); }}
+    onView={() => { if (liveSuggestion) openSuggestedPlace(); else { setEventAnnouncementsDismissed(true); onViewChange("events"); } }}
+    onHide={() => { if (liveSuggestion) hideDestination(liveSuggestion.destination.id); }}
+    onSettings={() => { setLiveSuggestion(null); onViewChange("profile"); }}
+  /> : null;
+  const tripActionDialog = tripDialog ? <TripActionDialog kind={tripDialog.kind} label={tripLabelDraft} locale={locale} onLabelChange={setTripLabelDraft} onCancel={() => setTripDialog(null)} onConfirm={() => {
+    if (tripDialog.kind === "rename") saveTripName(tripDialog.trip);
+    else { setTripDialog(null); stopTrip(); }
+  }} /> : null;
+
   if (view === "profile") {
     return (
       <Page title={t("tourist.profile.pageTitle")} eyebrow={t("common.tourist")}>
@@ -829,108 +854,9 @@ export function TouristWorkspace({
   }
 
   if (view === "tracking") {
-    return (
-      <Page title={uiText(locale, "Track My Trip")} eyebrow={t("common.tourist")}>
-        <div className="two-column">
-          <section className="panel">
-            <h2>{uiText(locale, "Current Trip")}</h2>
-            <div className="consent-box">
-              <ShieldCheck size={22} />
-              <div>
-                <strong>{currentConsent ? "Location is allowed" : "Allow location first"}</strong>
-                <p>{currentConsent ? "You can start a trip whenever you are ready." : "The app needs permission before it can record a route for recommendations."}</p>
-              </div>
-            </div>
-
-            {!currentConsent && (
-              <button className="primary-action" onClick={grantConsent}>
-                <ShieldCheck size={18} />{" "}{uiText(locale, "Allow location")}{" "}</button>
-            )}
-            {currentConsent && (
-              <button className="secondary-action wide" onClick={revokeConsent}>
-                <ShieldCheck size={18} />{" "}{uiText(locale, "Revoke consent")}{" "}</button>
-            )}
-
-            <div className="action-row">
-              <button className="primary-action" onClick={startTrip} disabled={!currentConsent || Boolean(activeTrip)}>
-                <Play size={18} />{" "}{uiText(locale, "Start trip")}{" "}</button>
-              <button className="secondary-action" onClick={resumeLiveTracking} disabled={!activeTrip || isLiveTracking}>
-                <Navigation size={18} />{" "}{uiText(locale, "Resume")}{" "}</button>
-              <button className="secondary-action" onClick={stopTrip} disabled={!activeTrip}>
-                <Square size={18} />{" "}{uiText(locale, "Finish trip")}{" "}</button>
-            </div>
-
-            <button className="secondary-action wide" onClick={addDemoPoint} disabled={!activeTrip}>
-              {t("tourist.home.addDemoPoint")}
-            </button>
-
-            <button className="secondary-action wide" onClick={createSampleRoute} disabled={Boolean(activeTrip)}>
-              <Compass size={18} />{" "}{uiText(locale, "Add sample Malaysia route")}{" "}</button>
-
-            <form className="mini-form" onSubmit={addManualPoint}>
-              <div className="field-pair">
-                <label>{" "}{uiText(locale, "Latitude")}{" "}<input value={manualLocation.latitude} onChange={(event) => setManualLocation({ ...manualLocation, latitude: event.target.value })} required />
-                </label>
-                <label>{" "}{uiText(locale, "Longitude")}{" "}<input value={manualLocation.longitude} onChange={(event) => setManualLocation({ ...manualLocation, longitude: event.target.value })} required />
-                </label>
-              </div>
-              <label>{" "}{uiText(locale, "Accuracy meters")}{" "}<input value={manualLocation.accuracyMeters} onChange={(event) => setManualLocation({ ...manualLocation, accuracyMeters: event.target.value })} required />
-              </label>
-              <button className="secondary-action wide" type="submit" disabled={!activeTrip}>
-                <Save size={18} />{" "}{uiText(locale, "Save manual point")}{" "}</button>
-            </form>
-
-            {trackingFeedback && <p className="status-message">{uiText(locale, trackingFeedback)}</p>}
-
-            {locationRetryAvailable && activeTrip && (
-              <button className="secondary-action wide" type="button" onClick={resumeLiveTracking}>
-                <RotateCcw size={18} />{" "}{uiText(locale, "Try location again")}{" "}</button>
-            )}
-
-            {latestCompletedTrip && latestCompletedTripSummary && (
-              <CompletedTripSummary
-                trip={latestCompletedTrip}
-                summary={latestCompletedTripSummary}
-                destinationNames={latestCompletedTripDestinationNames}
-                analysis={latestCompletedTripAnalysis}
-                locale={locale}
-                onViewHistory={() => {
-                  setSelectedTripId(latestCompletedTrip.id);
-                  onViewChange("history");
-                }}
-                onViewRecommendations={() => onViewChange("recommendations")}
-              />
-            )}
-
-            <section className="privacy-actions">
-              <strong>{uiText(locale, "Privacy")}</strong>
-              <p>{uiText(locale, "Your route can be deleted from your tourist account at any time.")}</p>
-              <button className="secondary-action wide danger" onClick={deleteMyMovementData} disabled={userTrips.length === 0}>
-                <Trash2 size={18} />{" "}{uiText(locale, "Delete my route history")}{" "}</button>
-            </section>
-
-            <MetricGrid
-              items={[
-                [uiText(locale, "Points saved"), activePoints.length.toString()],
-                [t("common.distance"), `${activeTripSummary?.distanceKm ?? 0} km`],
-                [uiText(locale, "Trip status"), tripStateLabel],
-                [uiText(locale, "Profile"), latestAnalysis ? profileLabel(locale, latestAnalysis.profile) : t("common.waiting")],
-              ]}
-            />
-          </section>
-
-          <MovementMap
-            points={activePoints.length ? activePoints : tripPoints}
-            destinations={localizedDestinations}
-            activePoint={activePoints.at(-1) ?? latestKnownPoint}
-            mode="tourist"
-            displayMode={activePoints.length ? "route" : "signals"}
-            locale={locale}
-            activityDemand={destinationDemand}
-          />
-        </div>
-      </Page>
-    );
+    return <><Page title={travelText(locale, "tripTitle")} eyebrow={t("common.tourist")}>
+      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} onAllowLocation={grantConsent} onStart={startTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onOpenPlace={openPlace} onSafety={openSafety} />
+    </Page>{discoveryPrompt}{tripActionDialog}</>;
   }
 
   if (view === "history") {
@@ -939,7 +865,14 @@ export function TouristWorkspace({
     const selectedTripSuggestionStatus = selectedTripSummary ? getTripSuggestionStatus(selectedTripSummary, selectedTripAnalysis, t) : t("common.waiting");
 
     return (
-      <Page title={t("tourist.trips.pageTitle")} eyebrow={t("common.tourist")}>
+      <Page title={travelText(locale, "manage")} eyebrow={t("nav.trips")} actions={<button className="secondary-action" type="button" onClick={() => onViewChange("tracking")}><Navigation size={18} />{travelText(locale, "back")}</button>}>
+        <section className="trip-management-tools">
+          <button className="secondary-action" type="button" onClick={() => onViewChange("profile")}><Compass size={18} />{t("tourist.profile.formTitle")}</button>
+          <details><summary>{travelText(locale, "privacy")}</summary><p>{travelText(locale, "locationNote")}</p><button className="secondary-action" type="button" onClick={currentConsent ? revokeConsent : grantConsent}><ShieldCheck size={18} />{uiText(locale, currentConsent ? "Revoke consent" : "Allow location")}</button><button className="secondary-action danger" type="button" onClick={deleteMyMovementData} disabled={userTrips.length === 0}><Trash2 size={18} />{uiText(locale, "Delete my route history")}</button></details>
+          <details><summary>{travelText(locale, "sampleTools")}</summary><p>{travelText(locale, "sampleNote")}</p><div className="action-row"><button className="secondary-action" type="button" onClick={createSampleRoute} disabled={Boolean(activeTrip)}><Compass size={18} />{t("tourist.home.addSampleRoute")}</button><button className="secondary-action" type="button" onClick={addDemoPoint} disabled={!activeTrip}>{t("tourist.home.addDemoPoint")}</button><button className="secondary-action" type="button" onClick={addLocalTestRoute} disabled={!activeTrip}><Navigation size={18} />{t("tourist.home.simulateLocalRoute")}</button></div>
+            <form className="mini-form" onSubmit={addManualPoint}><div className="field-pair"><label>{uiText(locale, "Latitude")}<input value={manualLocation.latitude} onChange={(event) => setManualLocation({ ...manualLocation, latitude: event.target.value })} required /></label><label>{uiText(locale, "Longitude")}<input value={manualLocation.longitude} onChange={(event) => setManualLocation({ ...manualLocation, longitude: event.target.value })} required /></label></div><label>{uiText(locale, "Accuracy meters")}<input value={manualLocation.accuracyMeters} onChange={(event) => setManualLocation({ ...manualLocation, accuracyMeters: event.target.value })} required /></label><button className="secondary-action" type="submit" disabled={!activeTrip}><Save size={18} />{uiText(locale, "Save manual point")}</button></form>
+          </details>
+        </section>
         <TripDiary
           trips={userTrips}
           recentTrips={recentTrips}
@@ -962,6 +895,7 @@ export function TouristWorkspace({
           onRenameTrip={renameTrip}
           onDeleteTrip={deleteSelectedTrip}
         />
+        {tripActionDialog}
       </Page>
     );
   }
@@ -1026,28 +960,23 @@ export function TouristWorkspace({
     <>
     <TouristHome
       displayName={displayName}
-      tripStateLabel={tripStateLabel}
       activeTrip={activeTrip}
-      recentTrip={recentTrip}
       currentConsent={currentConsent}
-      activeJourneyPoints={activeJourneyPoints}
-      activeJourneyPoint={activeTrip ? activeJourneyPoint : discoveryReference}
-      destinations={showCheckInPanel ? localizedDestinations : discoveryDestinations}
+      destinations={discoveryReference ? discoveryDestinations : localizedDestinations}
       checkInDestinations={localizedDestinations}
-      discoveryControl={<DiscoveryLocationControl user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />}
-      activityBasis={<ActivityBasis destinations={discoveryDestinations} user={user} locale={locale} onRefresh={user.authUid ? refreshActivities : undefined} refreshing={refreshingActivities} />}
-      activityDemand={destinationDemand}
-      isBrowsingArea={!activeTrip && user.discoveryLocationMode === "area"}
+      discoveryControl={<details className="home-area-picker" ref={homeAreaPickerRef}><summary><MapPin size={20} aria-hidden="true" /><span>{discoveryText(locale, "location")}</span><strong>{user.discoveryLocationMode === "area" ? discoveryAreas.find((area) => area.id === user.discoveryAreaId)?.name ?? discoveryText(locale, "choose") : discoveryText(locale, "current")}</strong><ChevronDown size={18} aria-hidden="true" /></summary><DiscoveryLocationControl user={user} locale={locale} onChange={(mode, areaId) => {
+        changeDiscoveryLocation(mode, areaId);
+        if ((mode === "current" || areaId) && homeAreaPickerRef.current) homeAreaPickerRef.current.open = false;
+      }} onSettings={() => onViewChange("profile")} /></details>}
+      hasLocalReference={Boolean(discoveryReference)}
       geofenceWarnings={geofenceWarnings}
       tourismAdvisories={tourismAdvisories}
-      isLiveTracking={isLiveTracking}
-      locationRetryAvailable={locationRetryAvailable}
-      trackingMessage={trackingFeedback}
-      userTrips={userTrips}
       activeCheckIn={activeCheckIn}
       activeCheckInDestination={activeCheckInDestination}
       checkInDestinationId={checkInDestinationId}
       showCheckInPanel={showCheckInPanel}
+      openSafetyPanel={openSafetyPanel}
+      onSafetyPanelOpened={() => setOpenSafetyPanel(false)}
       recentCheckIns={recentCheckIns}
       recommendedCheckIn={recommendedCheckIn}
       openSafetyCount={openSafetyCount}
@@ -1064,20 +993,12 @@ export function TouristWorkspace({
       nearbyEmergencyServices={nearbyEmergencyServices}
       safetyReferencePoint={discoveryGpsPoint ?? discoveryReference}
       isSafetyAreaReference={!discoveryGpsPoint && user.discoveryLocationMode === "area"}
-      recommendationHeading={recommendationHeading}
-      recommendationSupportText={recommendationSupportText}
-      topRecommendationDestination={topRecommendationDestination}
+      topRecommendationDestination={topRecommendationDestination ?? (discoveryReference ? discoveryDestinations[0] : localizedDestinations[0])}
       nextFestival={nextFestival}
-      topDemandDestination={topDemandDestination}
       locale={locale}
       onViewChange={onViewChange}
       onGrantConsent={grantConsent}
-      onStartTrip={startTrip}
-      onStopTrip={stopTrip}
-      onResumeLiveTracking={resumeLiveTracking}
-      onAddDemoPoint={addDemoPoint}
-      onAddLocalTestRoute={addLocalTestRoute}
-      onCreateSampleRoute={createSampleRoute}
+      onOpenPlace={openPlace}
       onCheckInDestinationChange={setCheckInDestinationId}
       onStartAttractionCheckIn={startAttractionCheckIn}
       onFinishAttractionCheckIn={finishAttractionCheckIn}
@@ -1090,25 +1011,7 @@ export function TouristWorkspace({
       onRemoveIncidentPhoto={removeIncidentPhoto}
       onSubmitIncidentReport={submitIncidentReport}
     />
-    {!showCheckInPanel && !hasNotifications && <DiscoveryPrompt
-      suggestion={liveSuggestion}
-      event={liveSuggestion ? null : eventAnnouncement}
-      locale={locale}
-      onClose={() => {
-        if (liveSuggestion) setLiveSuggestion(null);
-        else if (eventAnnouncement) setEventAnnouncementsDismissed(true);
-      }}
-      onView={() => {
-        if (liveSuggestion) openSuggestedPlace();
-        else {
-          if (eventAnnouncement) setEventAnnouncementsDismissed(true);
-          onViewChange("events");
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-      }}
-      onHide={() => { if (liveSuggestion) hideDestination(liveSuggestion.destination.id); }}
-      onSettings={() => { setLiveSuggestion(null); onViewChange("profile"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-    />}
+    {discoveryPrompt}
     </>
   );
 }
