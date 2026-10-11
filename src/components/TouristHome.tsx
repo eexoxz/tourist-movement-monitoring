@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, Compass, Flame, Hospital, MapPinned, Navigation, PhoneCall, Play, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
+import { Building2, CalendarDays, ChevronDown, Compass, Flame, Hospital, MapPinned, Navigation, PhoneCall, Play, QrCode, RotateCcw, Save, ShieldCheck, Sparkles, Square, UserRound } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { discoveryText } from "../services/discoveryCopy";
 import { malaysiaEmergencyNumbers } from "../data/emergencyServices";
@@ -20,6 +20,7 @@ import { PoliceHelpPanel } from "./PoliceHelpPanel";
 import { emergencyHelpText } from "../services/emergencyHelpCopy";
 import { sosText } from "../services/sosCopy";
 import { TouristSosRequests } from "./TouristSosRequests";
+import { DestinationVisual } from "./DestinationVisual";
 
 type IncidentOption = {
   value: IncidentType;
@@ -110,6 +111,17 @@ function getSafetyStatusLabel(status: SafetyStatus, t: (key: TranslationKey) => 
   return t("common.active");
 }
 
+function HomeToolSummary({ icon, label, status }: { icon: ReactNode; label: string; status: string }) {
+  return <summary className="home-tool-summary">
+    <span className="home-tool-icon" aria-hidden="true">{icon}</span>
+    <span className="home-tool-text">
+      <span className="home-tool-label">{label}</span>
+      <strong>{status}</strong>
+    </span>
+    <ChevronDown className="home-tool-toggle" size={20} aria-hidden="true" />
+  </summary>;
+}
+
 export function TouristHome({
   displayName,
   tripStateLabel,
@@ -185,6 +197,8 @@ export function TouristHome({
     : selectedCheckInDestination
       ? `${t("tourist.checkin.checkIn")}: ${selectedCheckInDestination.name}`
       : t("tourist.checkin.emptyTitle");
+  const festivalDateParts = nextFestival ? new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" })
+    .formatToParts(new Date(`${nextFestival.date}T00:00:00`)) : [];
   const getEmergencyIcon = (kind: NearbyEmergencyService["kind"]) => {
     if (kind === "hospital") {
       return <Hospital size={18} />;
@@ -218,10 +232,7 @@ export function TouristHome({
               open
               ref={checkInPanelRef}
             >
-              <summary>
-                <span>{t("tourist.home.visitTools")}</span>
-                <strong>{activeCheckInDestination ? activeCheckInDestination.name : selectedCheckInDestination?.name ?? t("tourist.checkin.emptyTitle")}</strong>
-              </summary>
+              <HomeToolSummary icon={<QrCode size={24} />} label={t("tourist.home.visitTools")} status={activeCheckInDestination ? activeCheckInDestination.name : selectedCheckInDestination?.name ?? t("tourist.checkin.emptyTitle")} />
               <div className="section-heading">
                 <div>
                   <span>{t("tourist.checkin.eyebrow")}</span>
@@ -411,36 +422,52 @@ export function TouristHome({
 
         {!showCheckInPanel && <section className="home-preview-grid" aria-label={t("tourist.home.nextUp")}>
           <article className="home-preview-card recommendation-preview">
-            <span>{recommendationHeading}</span>
-            <h2>{topRecommendationDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
-            <p>{recommendationSupportText}</p>
-            <div className="home-preview-actions">
-              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
-                <Sparkles size={16} />
-                {t("common.viewAll")}
-              </button>
-              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("history")}>
-                <MapPinned size={16} />
-                {t("common.viewTrips")}
-              </button>
+            {topRecommendationDestination && <DestinationVisual destination={topRecommendationDestination} locale={locale} />}
+            <div className="home-recommendation-copy">
+              <span className="home-feature-label"><Sparkles size={17} aria-hidden="true" />{recommendationHeading}</span>
+              <h2>{topRecommendationDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
+              {topRecommendationDestination && <small className="home-place-location"><MapPinned size={15} aria-hidden="true" />{topRecommendationDestination.city}</small>}
+              <p>{recommendationSupportText}</p>
+              <div className="home-preview-actions">
+                <button className="primary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
+                  <Sparkles size={16} />
+                  {t("common.viewAll")}
+                </button>
+                <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("history")}>
+                  <MapPinned size={16} />
+                  {t("common.viewTrips")}
+                </button>
+              </div>
             </div>
           </article>
           <article className="home-preview-card event-preview">
-            <span>{t("tourist.home.eventsPreview")}</span>
-            <h2>{nextFestival?.name ?? t("tourist.home.quickEvents")}</h2>
-            <p>{t("tourist.home.eventsPreviewText")}</p>
-            <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("events")}>
-              <CalendarDays size={16} />
-              {t("common.checkEvents")}
-            </button>
+            {nextFestival ? <time className="home-event-date" dateTime={nextFestival.date}>
+              <span>{festivalDateParts.find((part) => part.type === "month")?.value}</span>
+              <strong>{festivalDateParts.find((part) => part.type === "day")?.value}</strong>
+              <span>{festivalDateParts.find((part) => part.type === "year")?.value}</span>
+            </time> : <div className="home-event-date" aria-hidden="true"><CalendarDays size={30} /></div>}
+            <div className="home-event-copy">
+              <span className="home-feature-label">{t("tourist.home.eventsPreview")}</span>
+              <h2>{nextFestival?.name ?? t("tourist.home.quickEvents")}</h2>
+              <p>{t("tourist.home.eventsPreviewText")}</p>
+              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("events")}>
+                <CalendarDays size={16} />
+                {t("common.checkEvents")}
+              </button>
+            </div>
           </article>
           <article className="home-preview-card demand-preview">
-            <span>{t("tourist.home.placesPreview")}</span>
-            <h2>{topDemandDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
-            <p>{t("tourist.home.placesPreviewText")}</p>
+            <div className="home-places-heading"><Compass size={22} aria-hidden="true" /><span className="home-feature-label">{t("tourist.home.placesPreview")}</span></div>
+            <div className="home-place-preview">
+              {topDemandDestination && <DestinationVisual destination={topDemandDestination} locale={locale} compact />}
+              <div>
+                <h2>{topDemandDestination?.name ?? t("tourist.home.quickPlaces")}</h2>
+                {topDemandDestination && <small className="home-place-location"><MapPinned size={15} aria-hidden="true" />{topDemandDestination.city}</small>}
+                <p>{t("tourist.home.placesPreviewText")}</p>
+              </div>
+            </div>
             <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("recommendations")}>
-              <MapPinned size={16} />
-              {t("tourist.home.openPlaces")}
+              <Compass size={16} />{t("tourist.home.openPlaces")}
             </button>
           </article>
         </section>}
@@ -448,10 +475,7 @@ export function TouristHome({
         <section className={showCheckInPanel ? "home-support-grid qr-secondary-support" : "home-support-grid"}>
           {!showCheckInPanel && (
             <details className="tourist-section home-disclosure check-in-panel" id="tourist-check-in" open={Boolean(activeCheckIn)} ref={checkInPanelRef}>
-              <summary>
-                <span>{t("tourist.home.visitTools")}</span>
-                <strong>{activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")}</strong>
-              </summary>
+              <HomeToolSummary icon={<QrCode size={24} />} label={t("tourist.home.visitTools")} status={activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")} />
               <div className="section-heading">
                 <div>
                   <span>{t("tourist.checkin.eyebrow")}</span>
@@ -504,10 +528,7 @@ export function TouristHome({
           )}
 
           <details className="tourist-section home-disclosure safety-panel" open={openSafetyCount > 0}>
-            <summary>
-              <span>{t("tourist.safety.eyebrow")}</span>
-              <strong>{openSafetyCount} {t("tourist.safety.open")}</strong>
-            </summary>
+            <HomeToolSummary icon={<ShieldCheck size={24} />} label={t("tourist.safety.eyebrow")} status={`${openSafetyCount} ${t("tourist.safety.open")}`} />
             <div className="section-heading">
               <div>
                 <span>{t("tourist.safety.eyebrow")}</span>

@@ -29,6 +29,30 @@ const stylesSource = styleImports.map(([, file]) => readSource(`src/${file}`)).j
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("gives Home features recognisable layouts without losing their existing actions", () => {
+    expect(touristHomeSource).toContain("<DestinationVisual destination={topRecommendationDestination}");
+    expect(touristHomeSource).toContain('className="home-event-date" dateTime={nextFestival.date}');
+    expect(touristHomeSource).toContain("new Intl.DateTimeFormat(locale");
+    expect(touristHomeSource).toContain('className="home-place-preview"');
+    expect(touristHomeSource).toContain('onViewChange("events")');
+    expect(touristHomeSource).toContain('onViewChange("recommendations")');
+    expect(touristHomeSource).toContain('onViewChange("history")');
+    expect(stylesSource).toContain(".recommendation-preview > .destination-visual");
+    expect(stylesSource).toContain(".home-event-date strong");
+    expect(stylesSource).toMatch(/\.tourist-home-flow\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
+    expect(stylesSource).toMatch(/\.home-feature-label\s*\{[^}]*overflow-wrap:\s*anywhere/);
+  });
+
+  it("keeps check-in and safety disclosures native, named and visually distinct", () => {
+    expect(touristHomeSource).toContain('<summary className="home-tool-summary">');
+    expect(touristHomeSource).toContain("icon={<QrCode size={24} />}");
+    expect(touristHomeSource).toContain("icon={<ShieldCheck size={24} />}");
+    expect(touristHomeSource).toContain('label={t("tourist.home.visitTools")}');
+    expect(touristHomeSource).toContain('label={t("tourist.safety.eyebrow")}');
+    expect(stylesSource).toContain(".safety-panel .home-tool-icon");
+    expect(stylesSource).toContain(".home-disclosure[open] > summary .home-tool-toggle");
+  });
+
   it("keeps location matching independent of the selected display language", () => {
     const touristSource = readSource("src/workspaces/TouristWorkspace.tsx");
     expect(touristSource).toContain("getRelevantTourismAdvisories({ destinations: data.destinations");

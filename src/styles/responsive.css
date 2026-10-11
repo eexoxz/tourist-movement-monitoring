@@ -313,7 +313,20 @@
 
   .recommendation-preview {
     min-height: 0;
-    padding: 18px;
+    padding: 0;
+  }
+
+  .home-preview-card:not(.recommendation-preview),
+  .home-recommendation-copy {
+    padding: 16px;
+  }
+
+  .event-preview {
+    gap: 12px;
+  }
+
+  .recommendation-preview > .destination-visual {
+    height: 168px;
   }
 
   .home-map-panel .map-view {
@@ -373,29 +386,17 @@
   }
 
   .home-disclosure > summary {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
   }
 
   .home-disclosure > summary strong {
-    grid-column: 1 / -1;
-    text-align: left;
+    font-size: 0.94rem;
   }
 
-  .qr-active-check-in-panel.home-disclosure > summary {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .qr-active-check-in-panel.home-disclosure > summary span {
-    grid-column: 1 / -1;
-  }
-
-  .qr-active-check-in-panel.home-disclosure > summary strong {
-    grid-column: 1;
-  }
-
-  .qr-active-check-in-panel.home-disclosure > summary::after {
-    grid-column: 2;
-    grid-row: 2;
+  .home-tool-icon {
+    width: 40px;
+    height: 40px;
   }
 
   .safety-contact-strip,
