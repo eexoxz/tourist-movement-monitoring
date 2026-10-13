@@ -62,6 +62,8 @@ type TouristHomeProps = {
   isSafetyAreaReference?: boolean;
   topRecommendationDestination: Destination | null | undefined;
   nextFestival: FestivalEvent | null;
+  spotlightEvents?: FestivalEvent[];
+  onOpenSpotlightEvent?: (id: string) => void;
   locale?: Locale;
   onViewChange: (view: AppView) => void;
   onGrantConsent: () => void;
@@ -144,6 +146,8 @@ export function TouristHome({
   isSafetyAreaReference = false,
   topRecommendationDestination,
   nextFestival,
+  spotlightEvents,
+  onOpenSpotlightEvent,
   locale = "en",
   onViewChange,
   onGrantConsent,
@@ -268,7 +272,7 @@ export function TouristHome({
         )}
 
         {!showCheckInPanel && discoveryControl}
-        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
+        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} onOpenSpotlightEvent={onOpenSpotlightEvent} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
           if (safetyPanelRef.current) {
             safetyPanelRef.current.open = true;
             safetyPanelRef.current.scrollIntoView({ block: "start", behavior: "smooth" });

@@ -93,6 +93,7 @@ export function TouristWorkspace({
   const [showCheckInPanel, setShowCheckInPanel] = useState(false);
   const [openSafetyPanel, setOpenSafetyPanel] = useState(false);
   const [toolPanelOpen, setToolPanelOpen] = useState(false);
+  const [spotlightEventId, setSpotlightEventId] = useState<string>();
   const [tripDialog, setTripDialog] = useState<{ kind: "rename"; trip: TripSession } | { kind: "stop" } | null>(null);
   const [tripLabelDraft, setTripLabelDraft] = useState("");
   const homeAreaPickerRef = useRef<HTMLDetailsElement | null>(null);
@@ -181,6 +182,7 @@ export function TouristWorkspace({
 
   useEffect(() => () => clearBrowserLocationWatch(watchId), [user.id, watchId]);
   useEffect(() => { if (view !== "overview") setToolPanelOpen(false); }, [view]);
+  useEffect(() => { if (view !== "events") setSpotlightEventId(undefined); }, [view]);
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -974,7 +976,7 @@ export function TouristWorkspace({
             <p>{t("tourist.events.pageDescription")}</p>
           </section>
           <DiscoveryLocationControl user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
-          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} referencePoint={discoveryReference} referenceState={user.discoveryLocationMode === "area" ? discoveryAreas.find((area) => area.id === user.discoveryAreaId)?.state : undefined} />
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} initialEventId={spotlightEventId} referencePoint={discoveryReference} referenceState={user.discoveryLocationMode === "area" ? discoveryAreas.find((area) => area.id === user.discoveryAreaId)?.state : undefined} />
         </section>
       </Page>
     );
@@ -1019,6 +1021,8 @@ export function TouristWorkspace({
       isSafetyAreaReference={!discoveryGpsPoint && user.discoveryLocationMode === "area"}
       topRecommendationDestination={topRecommendationDestination ?? (discoveryReference ? discoveryDestinations[0] : localizedDestinations[0])}
       nextFestival={nextFestival}
+      spotlightEvents={upcomingFestivals}
+      onOpenSpotlightEvent={(id) => { setSpotlightEventId(id); onViewChange("events"); }}
       locale={locale}
       onViewChange={onViewChange}
       onGrantConsent={grantConsent}

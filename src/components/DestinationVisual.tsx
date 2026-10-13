@@ -7,6 +7,7 @@ type DestinationVisualProps = {
   destination: Destination;
   compact?: boolean;
   locale: Locale;
+  priority?: boolean;
 };
 
 const failedImageUrls = new Set<string>();
@@ -25,7 +26,7 @@ function resizeCommonsImageUrl(src: string, width: number) {
   return src;
 }
 
-function DestinationVisualComponent({ destination, compact = false, locale }: DestinationVisualProps) {
+function DestinationVisualComponent({ destination, compact = false, locale, priority = false }: DestinationVisualProps) {
   const src = destination.imageUrl?.trim();
   const displaySrc = useMemo(() => (src ? resizeCommonsImageUrl(src, compact ? 360 : 760) : ""), [compact, src]);
   const [imageFailed, setImageFailed] = useState(() => Boolean(displaySrc && failedImageUrls.has(displaySrc)));
@@ -51,9 +52,9 @@ function DestinationVisualComponent({ destination, compact = false, locale }: De
       <img
         src={displaySrc}
         alt={alt}
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
         decoding="async"
-        fetchPriority={compact ? "low" : "auto"}
+        fetchPriority={priority ? "high" : compact ? "low" : "auto"}
         sizes={compact ? "96px" : "(max-width: 760px) 100vw, 760px"}
         referrerPolicy="no-referrer"
         onError={() => {

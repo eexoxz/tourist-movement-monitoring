@@ -7,6 +7,9 @@ import { TripExperience } from "./TripExperience";
 import { TripDiary } from "./TripDiary";
 import { DestinationManager } from "./DestinationManager";
 import { UnlistedCheckInForm } from "./UnlistedCheckInForm";
+import { HomeSpotlight } from "./HomeSpotlight";
+import { FestivalCalendarPanel } from "./FestivalCalendarPanel";
+import { calendarDay } from "../services/useCalendarDay";
 
 vi.mock("./MovementMap", () => ({
   MovementMap: (props: { points: unknown[]; displayMode: string }) => createElement("div", { "data-route-points": props.points.length, "data-map-mode": props.displayMode }),
@@ -26,6 +29,34 @@ const tripProps: ComponentProps<typeof TripExperience> = {
 };
 
 describe("tourist travel workflow boundaries", () => {
+  it("keeps nationwide banner picks separate from nearby suggestions", () => {
+    const html = renderToStaticMarkup(createElement(HomeDiscovery, { ...homeProps, destinations: [initialData.destinations[0]], spotlightDestinations: initialData.destinations }));
+    expect(html).toContain("Kampung Baru");
+    expect(html).toContain("Hin Bus Depot");
+    expect(html).toContain("Penang Hill");
+    expect(html).toContain('aria-current="true"');
+    expect(html).toContain("Next spotlight");
+    expect(html.match(/class="home-spotlight-slide"/g)).toHaveLength(3);
+    expect(html).toContain('loading="eager"');
+    expect(html).toContain('inert=""');
+  });
+  it("does not show broken carousel controls for an empty or single-place catalogue", () => {
+    const props = { locale: "en" as const, onOpenPlace: noop, onOpenEvents: noop };
+    expect(renderToStaticMarkup(createElement(HomeSpotlight, { ...props, destinations: [] }))).toBe("");
+    const single = renderToStaticMarkup(createElement(HomeSpotlight, { ...props, destinations: initialData.destinations.slice(0, 1) }));
+    expect(single).not.toContain("Next spotlight");
+    expect(single).not.toContain("home-spotlight-controls");
+  });
+  it("opens a spotlight event outside the selected area without expanding the entire calendar", () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const events = Array.from({ length: 8 }, (_, index) => ({ id: `focus-${index}`, name: `Festival ${index}`, date: calendarDay(date), scope: "state" as const, states: ["Selangor" as const], category: "cultural" as const, description: "Calendar fixture", destinationIds: [] }));
+    const html = renderToStaticMarkup(createElement(FestivalCalendarPanel, { events, destinations: initialData.destinations, locale: "en", referenceState: "Penang", initialEventId: "focus-7" }));
+    expect(html).toContain("Festival 7");
+    expect(html.indexOf("Festival 7")).toBeLessThan(html.indexOf("Festival 0"));
+    expect(html).not.toContain("Festival 6");
+    expect(html).toContain("Show full 12-month calendar");
+  });
   it("keeps the admin catalogue compact and removes decorative visit badges", () => {
     const html = renderToStaticMarkup(createElement(DestinationManager, { destinations: initialData.destinations, locale: "en", notify: noop, onChange: noop }));
     expect(html.match(/class="destination-card editable"/g)).toHaveLength(6);

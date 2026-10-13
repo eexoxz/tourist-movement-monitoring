@@ -4,11 +4,13 @@ import { travelText } from "../services/travelExperienceCopy";
 import { uiText } from "../services/uiText";
 import type { AppView, Destination, FestivalEvent } from "../types";
 import { DestinationTeaser } from "./DestinationTeaser";
-import { DestinationVisual } from "./DestinationVisual";
+import { HomeSpotlight } from "./HomeSpotlight";
 
-export function HomeDiscovery({ featured, destinations, nextFestival, activeTrip, isLocal, needsLocationConsent, locale, onOpenPlace, onViewChange, onAllowLocation, onSafety }: {
+export function HomeDiscovery({ featured, destinations, spotlightDestinations = destinations, spotlightEvents, nextFestival, activeTrip, isLocal, needsLocationConsent, locale, onOpenPlace, onViewChange, onOpenSpotlightEvent, onAllowLocation, onSafety }: {
   featured?: Destination | null;
   destinations: Destination[];
+  spotlightDestinations?: Destination[];
+  spotlightEvents?: FestivalEvent[];
   nextFestival: FestivalEvent | null;
   activeTrip: boolean;
   isLocal: boolean;
@@ -16,6 +18,7 @@ export function HomeDiscovery({ featured, destinations, nextFestival, activeTrip
   locale: Locale;
   onOpenPlace: (id: string) => void;
   onViewChange: (view: AppView) => void;
+  onOpenSpotlightEvent?: (id: string) => void;
   onAllowLocation: () => void;
   onSafety: () => void;
 }) {
@@ -24,13 +27,7 @@ export function HomeDiscovery({ featured, destinations, nextFestival, activeTrip
   const places = destinations.filter((place) => place.id !== featured?.id).slice(0, 3);
 
   return <div className="home-discovery">
-    {featured && <section className="home-billboard">
-      <DestinationVisual destination={featured} locale={locale} />
-      <div className="home-billboard-copy">
-        <div><span>{text("featured")} · {featured.city}</span><h2>{featured.name}</h2></div>
-        <button className="secondary-action icon-action" type="button" title={text("explore")} aria-label={`${text("explore")}: ${featured.name}`} onClick={() => onOpenPlace(featured.id)}><ArrowRight size={22} /></button>
-      </div>
-    </section>}
+    <HomeSpotlight destinations={spotlightDestinations} events={spotlightEvents} locale={locale} onOpenPlace={onOpenPlace} onOpenEvents={onOpenSpotlightEvent ?? (() => onViewChange("events"))} />
 
     <section className="home-journey-invitation">
       <Compass className="home-journey-icon" size={28} aria-hidden="true" />

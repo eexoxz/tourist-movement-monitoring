@@ -28,6 +28,7 @@ type FestivalCalendarPanelProps = {
   referencePoint?: MovementPoint;
   referenceState?: MalaysianState;
   onOpenCalendar?: () => void;
+  initialEventId?: string;
 };
 
 function dateInputValue(date: Date) {
@@ -156,7 +157,7 @@ function getPlanningSummary(matchedDestinations: Destination[]) {
   return `These places may become busier around this event. Compare demand in ${cityNames.join(", ")} before planning a route.`;
 }
 
-export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", referencePoint, referenceState, onOpenCalendar }: FestivalCalendarPanelProps) {
+export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", referencePoint, referenceState, onOpenCalendar, initialEventId }: FestivalCalendarPanelProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const today = useCalendarDay();
   const previousDefaults = useRef({ start: today, end: getDefaultEndDate(today) });
@@ -164,9 +165,9 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   const [startDate, setStartDate] = useState(dateInputValue(new Date()));
   const [endDate, setEndDate] = useState(getDefaultEndDate);
   const [categoryFilter, setCategoryFilter] = useState<FestivalCategory | "all">("all");
-  const [nearMeOnly, setNearMeOnly] = useState(Boolean(referenceState));
+  const [nearMeOnly, setNearMeOnly] = useState(Boolean(referenceState) && !initialEventId);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
-  const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
+  const [expandedEventIds, setExpandedEventIds] = useState<string[]>(initialEventId ? [initialEventId] : []);
   const destinationById = useMemo(() => new Map(localizeDestinations(destinations, locale).map((destination) => [destination.id, destination])), [destinations, locale]);
   const localState = useMemo(() => referenceState ?? nearestState(referencePoint, destinations), [destinations, referencePoint, referenceState]);
   const effectiveStateFilter = nearMeOnly && localState ? localState : stateFilter;
@@ -174,8 +175,9 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
     () =>
       getFestivalsForState(events, effectiveStateFilter)
         .filter((event) => festivalOverlapsRange(event, startDate, endDate))
-        .filter((event) => categoryFilter === "all" || event.category === categoryFilter),
-    [categoryFilter, effectiveStateFilter, endDate, events, startDate]
+        .filter((event) => categoryFilter === "all" || event.category === categoryFilter)
+        .sort((a, b) => Number(b.id === initialEventId) - Number(a.id === initialEventId)),
+    [categoryFilter, effectiveStateFilter, endDate, events, startDate, initialEventId]
   );
   const visibleLimit = showFullCalendar ? filteredEvents.length : compact ? compactCalendarPreviewLimit : fullCalendarPreviewLimit;
   const visibleEvents = useMemo(() => filteredEvents.slice(0, visibleLimit), [filteredEvents, visibleLimit]);
@@ -205,8 +207,8 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   }, [today]);
 
   useEffect(() => {
-    if (referenceState) setNearMeOnly(true);
-  }, [referenceState]);
+    if (referenceState && !initialEventId) setNearMeOnly(true);
+  }, [referenceState, initialEventId]);
 
   useEffect(() => {
     setShowFullCalendar(false);

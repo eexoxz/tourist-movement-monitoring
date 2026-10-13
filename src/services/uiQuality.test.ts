@@ -32,14 +32,15 @@ const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), 
 
 describe("user interface quality guardrails", () => {
   it("gives Home features recognisable layouts without losing their existing actions", () => {
-    expect(homeDiscoverySource).toContain("<DestinationVisual destination={featured}");
+    expect(homeDiscoverySource).toContain("<HomeSpotlight destinations={spotlightDestinations}");
+    expect(readSource("src/components/HomeSpotlight.tsx")).toContain("<DestinationVisual destination={slide.destination}");
     expect(homeDiscoverySource).toContain("<time dateTime={nextFestival.date}>");
     expect(homeDiscoverySource).toContain("new Intl.DateTimeFormat(locale");
     expect(homeDiscoverySource).toContain('className="home-place-gallery"');
     expect(homeDiscoverySource).toContain('onViewChange("events")');
     expect(homeDiscoverySource).toContain('onViewChange("recommendations")');
     expect(homeDiscoverySource).toContain('onViewChange("tracking")');
-    expect(stylesSource).toContain(".home-billboard > .destination-visual");
+    expect(stylesSource).toContain(".home-spotlight-slide > .destination-visual");
     expect(stylesSource).toContain(".home-event-invitation");
     expect(stylesSource).toMatch(/\.tourist-home-flow\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
     expect(stylesSource).toMatch(/\.travel-place-copy\s*\{[^}]*overflow-wrap:\s*anywhere/);
