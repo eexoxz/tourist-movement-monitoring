@@ -8,38 +8,37 @@ import { travelText } from "../services/travelExperienceCopy";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { uiText } from "../services/uiText";
 import { DestinationVisual } from "./DestinationVisual";
+import { animateSpotlightMove } from "../services/spotlightAnimation";
 
 export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, onOpenEvents }: { destinations: Destination[]; events?: FestivalEvent[]; locale: Locale; onOpenPlace: (id: string) => void; onOpenEvents: (id: string) => void }) {
   const today = useCalendarDay();
   const slides = useMemo(() => buildHomeSpotlights(destinations, events, today), [destinations, events, today]);
   const signature = slides.map((slide) => slide.id).join("|");
   const track = useRef<HTMLDivElement>(null);
+  const cancelTransition = useRef<() => void>(() => undefined);
   const [current, setCurrent] = useState(0);
   const [interacting, setInteracting] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(true);
   const text = (key: Parameters<typeof spotlightText>[1]) => spotlightText(locale, key);
   const index = Math.min(current, Math.max(0, slides.length - 1));
   const currentIndex = useRef(index);
   currentIndex.current = index;
-  // Reduced motion removes the sliding animation, not the timed slide changes.
   const canPlay = slides.length > 1;
   const rotating = canPlay && !interacting && !hidden;
 
   const goTo = (next: number) => {
     if (!track.current || !slides.length) return;
     const wrapped = (next + slides.length) % slides.length;
-    track.current.scrollTo({ left: wrapped * track.current.clientWidth, behavior: reducedMotion ? "instant" : "smooth" });
+    cancelTransition.current();
+    cancelTransition.current = animateSpotlightMove(track.current, wrapped, next >= index ? 1 : -1);
     setCurrent(wrapped);
   };
 
   useEffect(() => {
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const refresh = () => { setReducedMotion(motion.matches); setHidden(document.hidden); };
+    const refresh = () => setHidden(document.hidden);
     refresh();
-    motion.addEventListener("change", refresh);
     document.addEventListener("visibilitychange", refresh);
-    return () => { motion.removeEventListener("change", refresh); document.removeEventListener("visibilitychange", refresh); };
+    return () => { cancelTransition.current(); document.removeEventListener("visibilitychange", refresh); };
   }, []);
 
   useEffect(() => {
@@ -52,6 +51,7 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
   }, []);
 
   useEffect(() => {
+    cancelTransition.current();
     setCurrent(0);
     track.current?.scrollTo({ left: 0, behavior: "instant" });
   }, [signature]);
@@ -65,7 +65,10 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
   useEffect(() => {
     const element = track.current;
     if (!element) return;
-    const resize = new ResizeObserver(() => element.scrollTo({ left: currentIndex.current * element.clientWidth, behavior: "instant" }));
+    const resize = new ResizeObserver(() => {
+      cancelTransition.current();
+      element.scrollTo({ left: currentIndex.current * element.clientWidth, behavior: "instant" });
+    });
     resize.observe(element);
     return () => resize.disconnect();
   }, [signature]);
@@ -75,7 +78,7 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); goTo(index + (event.key === "ArrowLeft" ? -1 : 1)); }
   }}>
     <div className="home-billboard">
-      <div className="home-spotlight-track" ref={track} onPointerDown={() => setInteracting(true)} onScroll={(event) => {
+      <div className="home-spotlight-track" ref={track} onPointerDown={() => { cancelTransition.current(); setInteracting(true); }} onScroll={(event) => {
         if (event.currentTarget.clientWidth) setCurrent(Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth));
       }} aria-live={rotating ? "off" : "polite"}>
         {slides.map((slide, slideIndex) => <div className="home-spotlight-slide" key={slide.id} inert={slideIndex !== index} aria-label={`${text("slide")} ${slideIndex + 1} / ${slides.length}`}>

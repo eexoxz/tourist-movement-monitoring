@@ -36,7 +36,8 @@ describe("user interface quality guardrails", () => {
     expect(source).toContain("goTo(index + 1), 8000");
     expect(source).toContain('window.addEventListener("pointerup", finishGesture)');
     expect(source).toContain('window.addEventListener("pointercancel", finishGesture)');
-    expect(source).toContain("reducedMotion ? \"instant\" : \"smooth\"");
+    expect(source).toContain("animateSpotlightMove(track.current");
+    expect(readSource("src/services/spotlightAnimation.ts")).toContain("duration: 550");
     expect(source).not.toContain("setPaused");
     expect(source).not.toContain("setHovered");
     expect(source).not.toContain("home-spotlight-play");
