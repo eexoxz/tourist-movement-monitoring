@@ -217,6 +217,27 @@ export type AttractionCheckIn = {
   checkedOutAt?: string;
   latitude?: number;
   longitude?: number;
+  submittedPlace?: {
+    name: string;
+    address: string;
+    city: string;
+    state: MalaysianState;
+    category: DestinationCategory;
+    note: string;
+    accuracyMeters?: number;
+  };
+  reviewStatus?: "pending" | "linked" | "dismissed";
+  reviewedBy?: string;
+  reviewedAt?: string;
+};
+
+export type PlaceReview = {
+  checkInIds: string[];
+  destinationId: string;
+  status: "linked" | "dismissed";
+  reviewedBy: string;
+  reviewedAt: string;
+  destination?: Destination;
 };
 
 export type AnalysisResult = {

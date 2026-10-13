@@ -42,6 +42,8 @@ import { TripDiary } from "../components/TripDiary";
 import { TripExperience } from "../components/TripExperience";
 import { TripActionDialog } from "../components/TripActionDialog";
 import { travelText } from "../services/travelExperienceCopy";
+import { createUnlistedCheckIn, type UnlistedPlaceDraft } from "../services/unlistedPlaces";
+import { placeText } from "../services/placeSubmissionCopy";
 import { getDisplayName } from "../services/profile";
 import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWatch, loadLastBrowserLocation, saveLastBrowserLocation, movementPointFromBrowserPosition } from "../services/browserLocation";
 import { type CommitDataOptions, incidentTypeOptions, loadProfileSetupSkipped, saveProfileSetupSkipped } from "../services/workspaceSupport";
@@ -90,6 +92,7 @@ export function TouristWorkspace({
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
   const [showCheckInPanel, setShowCheckInPanel] = useState(false);
   const [openSafetyPanel, setOpenSafetyPanel] = useState(false);
+  const [toolPanelOpen, setToolPanelOpen] = useState(false);
   const [tripDialog, setTripDialog] = useState<{ kind: "rename"; trip: TripSession } | { kind: "stop" } | null>(null);
   const [tripLabelDraft, setTripLabelDraft] = useState("");
   const homeAreaPickerRef = useRef<HTMLDetailsElement | null>(null);
@@ -177,6 +180,7 @@ export function TouristWorkspace({
   const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(discoveryGpsPoint), [discoveryGpsPoint]);
 
   useEffect(() => () => clearBrowserLocationWatch(watchId), [user.id, watchId]);
+  useEffect(() => { if (view !== "overview") setToolPanelOpen(false); }, [view]);
 
   const showTrackingNotice = (tone: NotificationTone, title: string, message: string) => {
     setTrackingMessage(message);
@@ -739,8 +743,17 @@ export function TouristWorkspace({
     }
 
     const destination = localizedDestinations.find((candidate) => candidate.id === destinationId);
-    onDataChange(result.data, user);
+    onDataChange(result.data, user, { checkIn: result.checkIn });
     notify({ tone: "success", title: "Checked in", message: destination ? `${destination.name} was added to your visit log.` : "Your attraction visit was added.", browser: true });
+  };
+
+  const startUnlistedCheckIn = (draft: UnlistedPlaceDraft, attachGps: boolean): string | null => {
+    if (attachGps && (!discoveryGpsPoint || discoveryGpsPoint.source !== "browser")) return placeText(locale, "location");
+    const result = createUnlistedCheckIn(loadData(), user.id, draft, attachGps ? discoveryGpsPoint : undefined);
+    if (result.error || !result.data) return placeText(locale, result.error ?? "invalid");
+    onDataChange(result.data, user, { checkIn: result.checkIn });
+    notify({ tone: "success", title: t("tourist.checkin.checkIn"), message: placeText(locale, "saved") });
+    return null;
   };
 
   useEffect(() => {
@@ -787,7 +800,7 @@ export function TouristWorkspace({
       return;
     }
 
-    onDataChange(result.data, user);
+    onDataChange(result.data, user, { checkIn: result.checkIn });
     notify({ tone: "success", title: "Checked out", message: "Your attraction visit duration was saved.", browser: true });
   };
 
@@ -814,7 +827,7 @@ export function TouristWorkspace({
     setOpenSafetyPanel(true);
     onViewChange("overview");
   };
-  const discoveryPrompt = !showCheckInPanel && !hasNotifications ? <DiscoveryPrompt
+  const discoveryPrompt = !showCheckInPanel && !toolPanelOpen && !hasNotifications ? <DiscoveryPrompt
     suggestion={liveSuggestion}
     event={view === "tracking" || liveSuggestion ? null : eventAnnouncement}
     locale={locale}
@@ -1013,6 +1026,9 @@ export function TouristWorkspace({
       onCheckInDestinationChange={setCheckInDestinationId}
       onStartAttractionCheckIn={startAttractionCheckIn}
       onFinishAttractionCheckIn={finishAttractionCheckIn}
+      onUnlistedCheckIn={startUnlistedCheckIn}
+      hasCheckInGps={Boolean(discoveryGpsPoint?.source === "browser" && discoveryGpsPoint.accuracyMeters <= 200)}
+      onToolPanelOpenChange={setToolPanelOpen}
       onSendSosAlert={sendSosAlert}
       onCloseSosAlert={closeSosAlert}
       onIncidentTypeChange={setIncidentType}

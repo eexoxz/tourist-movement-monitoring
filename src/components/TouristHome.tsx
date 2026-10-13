@@ -19,6 +19,9 @@ import { emergencyHelpText } from "../services/emergencyHelpCopy";
 import { sosText } from "../services/sosCopy";
 import { TouristSosRequests } from "./TouristSosRequests";
 import { HomeDiscovery } from "./HomeDiscovery";
+import { UnlistedCheckInForm } from "./UnlistedCheckInForm";
+import { placeText } from "../services/placeSubmissionCopy";
+import type { UnlistedPlaceDraft } from "../services/unlistedPlaces";
 
 type IncidentOption = {
   value: IncidentType;
@@ -66,6 +69,9 @@ type TouristHomeProps = {
   onCheckInDestinationChange: (destinationId: string) => void;
   onStartAttractionCheckIn: (destinationId?: string) => void;
   onFinishAttractionCheckIn: () => void;
+  onUnlistedCheckIn: (draft: UnlistedPlaceDraft, attachGps: boolean) => string | null;
+  hasCheckInGps: boolean;
+  onToolPanelOpenChange?: (open: boolean) => void;
   onSendSosAlert: () => void;
   onCloseSosAlert: (id: string, reason: SosClosureReason) => void;
   onIncidentTypeChange: (type: IncidentType) => void;
@@ -145,6 +151,9 @@ export function TouristHome({
   onCheckInDestinationChange,
   onStartAttractionCheckIn,
   onFinishAttractionCheckIn,
+  onUnlistedCheckIn,
+  hasCheckInGps,
+  onToolPanelOpenChange,
   onSendSosAlert,
   onCloseSosAlert,
   onIncidentTypeChange,
@@ -158,9 +167,21 @@ export function TouristHome({
   const selectedCheckInDestination = checkInDestinations.find((destination) => destination.id === checkInDestinationId) ?? checkInDestinations[0] ?? null;
   const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
   const safetyPanelRef = useRef<HTMLDetailsElement | null>(null);
+  const reportToolVisibility = () => onToolPanelOpenChange?.(Boolean(checkInPanelRef.current?.open || safetyPanelRef.current?.open));
   const [isConfirmingSos, setIsConfirmingSos] = useState(false);
-  const checkInTitle = activeCheckInDestination
-    ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}`
+  const [checkInMode, setCheckInMode] = useState<"known" | "unlisted">("known");
+  const activePlaceName = activeCheckInDestination?.name ?? activeCheckIn?.submittedPlace?.name;
+  const checkInEntry = !activeCheckIn && <>
+    <div className="check-in-mode-switch" role="group" aria-label={t("tourist.checkin.checkIn")}>
+      {(["known", "unlisted"] as const).map((mode) => <button key={mode} type="button" aria-pressed={checkInMode === mode} onClick={() => setCheckInMode(mode)}>{placeText(locale, mode)}</button>)}
+    </div>
+    {checkInMode === "unlisted" ? <UnlistedCheckInForm locale={locale} hasGps={hasCheckInGps} onSubmit={onUnlistedCheckIn} /> : <div className="check-in-stack">
+      <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
+      <QrCheckInPanel destinations={checkInDestinations} selectedDestination={selectedCheckInDestination} locale={locale} onDestinationChange={onCheckInDestinationChange} onConfirm={onStartAttractionCheckIn} />
+    </div>}
+  </>;
+  const checkInTitle = activePlaceName
+    ? `${t("tourist.checkin.activeTitlePrefix")} ${activePlaceName}`
     : selectedCheckInDestination
       ? `${t("tourist.checkin.checkIn")}: ${selectedCheckInDestination.name}`
       : t("tourist.checkin.emptyTitle");
@@ -203,8 +224,9 @@ export function TouristHome({
               id="tourist-check-in"
               open
               ref={checkInPanelRef}
+              onToggle={reportToolVisibility}
             >
-              <HomeToolSummary icon={<QrCode size={24} />} label={t("tourist.home.visitTools")} status={activeCheckInDestination ? activeCheckInDestination.name : selectedCheckInDestination?.name ?? t("tourist.checkin.emptyTitle")} />
+              <HomeToolSummary icon={<QrCode size={24} />} label={t("tourist.home.visitTools")} status={activePlaceName ?? selectedCheckInDestination?.name ?? t("tourist.checkin.emptyTitle")} />
               <div className="section-heading">
                 <div>
                   <span>{t("tourist.checkin.eyebrow")}</span>
@@ -214,24 +236,13 @@ export function TouristHome({
                 {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} {t("common.minutes")}</strong>}
               </div>
 
-              {!activeCheckIn && (
-                <div className="check-in-stack">
-                  <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
-                  <QrCheckInPanel
-                    destinations={checkInDestinations}
-                    selectedDestination={selectedCheckInDestination}
-                    locale={locale}
-                    onDestinationChange={onCheckInDestinationChange}
-                    onConfirm={onStartAttractionCheckIn}
-                  />
-                </div>
-              )}
+              {checkInEntry}
 
               {activeCheckIn && (
                 <div className="qr-check-in-confirmation">
                   <div className="qr-visit-card">
                     <span>{t("tourist.checkin.currentlyCheckedIn")}</span>
-                    <strong>{activeCheckInDestination?.name ?? selectedCheckInDestination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
+                    <strong>{activePlaceName ?? selectedCheckInDestination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
                     <p>{t("tourist.checkin.activeDescription")}</p>
                     <div className="qr-visit-meta">
                       <span>
@@ -295,31 +306,20 @@ export function TouristHome({
 
         <section className={showCheckInPanel ? "home-support-grid qr-secondary-support" : "home-support-grid"}>
           {!showCheckInPanel && (
-            <details className="tourist-section home-disclosure check-in-panel" id="tourist-check-in" open={Boolean(activeCheckIn)} ref={checkInPanelRef}>
-              <HomeToolSummary icon={<QrCode size={24} />} label={t("tourist.home.visitTools")} status={activeCheckInDestination ? activeCheckInDestination.name : t("tourist.checkin.emptyTitle")} />
+            <details className="tourist-section home-disclosure check-in-panel" id="tourist-check-in" open={Boolean(activeCheckIn)} ref={checkInPanelRef} onToggle={reportToolVisibility}>
+              <HomeToolSummary icon={<QrCode size={24} />} label={t("tourist.home.visitTools")} status={activePlaceName ?? t("tourist.checkin.emptyTitle")} />
               <div className="section-heading">
                 <div>
                   <span>{t("tourist.checkin.eyebrow")}</span>
-                  <h2>{activeCheckInDestination ? `${t("tourist.checkin.activeTitlePrefix")} ${activeCheckInDestination.name}` : t("tourist.checkin.emptyTitle")}</h2>
+                  <h2>{activePlaceName ? `${t("tourist.checkin.activeTitlePrefix")} ${activePlaceName}` : t("tourist.checkin.emptyTitle")}</h2>
                   <p>{activeCheckIn ? t("tourist.checkin.activeDescription") : t("tourist.checkin.emptyDescription")}</p>
                 </div>
                 {activeCheckIn && <strong>{getCheckInDurationMinutes(activeCheckIn)} {t("common.minutes")}</strong>}
               </div>
 
-              {!activeCheckIn && (
-                <div className="check-in-stack">
-                  <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
-                  <QrCheckInPanel
-                    destinations={checkInDestinations}
-                    selectedDestination={selectedCheckInDestination}
-                    locale={locale}
-                    onDestinationChange={onCheckInDestinationChange}
-                    onConfirm={onStartAttractionCheckIn}
-                  />
-                </div>
-              )}
+              {checkInEntry}
 
-              {recommendedCheckIn && !activeCheckIn && (
+              {recommendedCheckIn && !activeCheckIn && checkInMode === "known" && (
                 <button className="secondary-action wide" type="button" onClick={() => onCheckInDestinationChange(recommendedCheckIn.id)}>
                   {t("tourist.checkin.useNearest")}: {recommendedCheckIn.name}
                 </button>
@@ -338,8 +338,9 @@ export function TouristHome({
 
                   return (
                     <span key={checkIn.id}>
-                      <strong>{destination?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
+                      <strong>{destination?.name ?? checkIn.submittedPlace?.name ?? t("tourist.checkin.unknownAttraction")}</strong>
                       {checkIn.status === "checked-out" ? `${getCheckInDurationMinutes(checkIn)} ${t("tourist.checkin.minVisit")}` : t("tourist.checkin.currentlyCheckedIn")}
+                      {checkIn.submittedPlace && <small>{placeText(locale, checkIn.reviewStatus === "linked" ? "approved" : checkIn.reviewStatus === "dismissed" ? "dismissed" : "pending")}</small>}
                     </span>
                   );
                 })}
@@ -348,7 +349,7 @@ export function TouristHome({
             </details>
           )}
 
-          <details className="tourist-section home-disclosure safety-panel" id="tourist-safety" ref={safetyPanelRef} open={openSafetyCount > 0}>
+          <details className="tourist-section home-disclosure safety-panel" id="tourist-safety" ref={safetyPanelRef} open={openSafetyCount > 0} onToggle={reportToolVisibility}>
             <HomeToolSummary icon={<ShieldCheck size={24} />} label={t("tourist.safety.eyebrow")} status={`${openSafetyCount} ${t("tourist.safety.open")}`} />
             <div className="section-heading">
               <div>

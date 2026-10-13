@@ -36,7 +36,7 @@ export type TouristWorkspaceData = {
 
 function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex, checkIns: AttractionCheckIn[]): TripSummary {
   const visitedDestinationIds = getRecordedStopIds(points, destinationIndex);
-  checkIns.filter((checkIn) => checkIn.tripId === trip.id && checkIn.userId === trip.userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
+  checkIns.filter((checkIn) => checkIn.destinationId && checkIn.tripId === trip.id && checkIn.userId === trip.userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
   let distance = 0;
   let accuracyTotal = 0;
 
@@ -104,7 +104,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
 
   const qualityPoints = filterQualityMovementPoints(data.points.filter((point) => userTripIds.has(point.tripId)));
   getRecordedStopIds(qualityPoints, destinationIndex).forEach((id) => visitedDestinationIds.add(id));
-  data.checkIns.filter((checkIn) => checkIn.userId === userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
+  data.checkIns.filter((checkIn) => checkIn.destinationId && checkIn.userId === userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
   qualityPoints.forEach((point) => {
     if (!userTripIds.has(point.tripId)) {
       return;

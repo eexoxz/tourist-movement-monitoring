@@ -1,4 +1,4 @@
-import type { AnalysisResult, AppData, IncidentType, SosAlert, TravelPlanOptions, User } from "../types";
+import type { AnalysisResult, AppData, AttractionCheckIn, IncidentType, PlaceReview, SosAlert, TravelPlanOptions, User } from "../types";
 import type { TranslationKey } from "./i18n";
 
 export type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
@@ -10,6 +10,8 @@ export type AdminDashboardTab = "overview" | "tourists" | "records" | "safety" |
 export type CommitDataOptions = {
   localOnlyStatus?: string;
   sosAlert?: SosAlert;
+  checkIn?: AttractionCheckIn;
+  placeReview?: PlaceReview;
 };
 
 export const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";

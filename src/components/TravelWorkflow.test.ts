@@ -5,6 +5,8 @@ import { initialData } from "../data/demoData";
 import { HomeDiscovery } from "./HomeDiscovery";
 import { TripExperience } from "./TripExperience";
 import { TripDiary } from "./TripDiary";
+import { DestinationManager } from "./DestinationManager";
+import { UnlistedCheckInForm } from "./UnlistedCheckInForm";
 
 vi.mock("./MovementMap", () => ({
   MovementMap: (props: { points: unknown[]; displayMode: string }) => createElement("div", { "data-route-points": props.points.length, "data-map-mode": props.displayMode }),
@@ -24,6 +26,22 @@ const tripProps: ComponentProps<typeof TripExperience> = {
 };
 
 describe("tourist travel workflow boundaries", () => {
+  it("keeps the admin catalogue compact and removes decorative visit badges", () => {
+    const html = renderToStaticMarkup(createElement(DestinationManager, { destinations: initialData.destinations, locale: "en", notify: noop, onChange: noop }));
+    expect(html.match(/class="destination-card editable"/g)).toHaveLength(6);
+    expect(html).toContain("Show more");
+    expect(html).not.toContain("visit info");
+    expect(html).not.toContain("min visit");
+    expect(html).toContain("destination-admin-address");
+  });
+  it("makes unlisted check-ins address-based without consent or guessed coordinates", () => {
+    const html = renderToStaticMarkup(createElement(UnlistedCheckInForm, { locale: "en", hasGps: false, onSubmit: () => null }));
+    expect(html).toContain("Address only");
+    expect(html).toContain("Select a state");
+    expect(html).not.toContain("Latitude");
+    expect(html).not.toContain("Longitude");
+    expect(html).toContain('type="checkbox" disabled=""');
+  });
   it("shows recorded-stop counts consistently instead of counting every nearby place", () => {
     const trip = initialData.trips[0];
     const place = initialData.destinations[0];

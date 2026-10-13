@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { Download, RotateCcw, Trash2, UserRound } from "lucide-react";
-import type { AppData, AppView, SafetyStatus, SosClosureReason, TouristProfile, User } from "../types";
-import { loadData } from "../services/storage";
+import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, TouristProfile, User } from "../types";
+import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
 import { buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
 import { translateAdmin, type AdminCopyKey } from "../services/adminI18n";
@@ -25,6 +25,8 @@ import { EmptyState, MetricGrid } from "../components/SummaryCards";
 import { ListLimitFooter } from "../components/ListLimitFooter";
 import { type NotifyFn } from "../components/ToastViewport";
 import { DestinationManager } from "../components/DestinationManager";
+import { reviewUnlistedCheckIns } from "../services/unlistedPlaces";
+import { placeText } from "../services/placeSubmissionCopy";
 import { uiText } from "../services/uiText";
 import { clusterText, decisionStepText, profileLabel } from "../services/planningText";
 import { FestivalCalendarPanel } from "../components/FestivalCalendarPanel";
@@ -47,7 +49,7 @@ export function AdminWorkspace({
   actor: User;
   view: AppView;
   locale: Locale;
-  onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void;
+  onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void | Promise<boolean>;
   notify: NotifyFn;
 }) {
   const t = (key: TranslationKey) => translate(locale, key);
@@ -77,6 +79,7 @@ export function AdminWorkspace({
   const [showAllSafetyCases, setShowAllSafetyCases] = useState(false);
   const [showAllAiResults, setShowAllAiResults] = useState(false);
   const [demoDatasetAction, setDemoDatasetAction] = useState<"loading" | "removing" | null>(null);
+  const [refreshingReports, setRefreshingReports] = useState(false);
 
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
   const movementViews = useMemo(
@@ -634,7 +637,33 @@ export function AdminWorkspace({
           onDataChange({ ...data, destinations });
           notify({ tone: "info", title: activityText(locale, "title"), message: activityText(locale, destinations.some((destination) => ((source === "browser" ? destination.activitySummary : destination.demoActivitySummary)?.popularityScore ?? 0) > 0) ? "saved" : "noEvidence") });
         }} />
-        <DestinationManager destinations={data.destinations} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} locale={locale} />
+        <DestinationManager destinations={data.destinations} checkIns={data.checkIns} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} locale={locale}
+          refreshingReports={refreshingReports}
+          onRefreshReports={actor.authUid ? async () => {
+            if (refreshingReports) return;
+            setRefreshingReports(true);
+            try {
+              const reports = await loadPlaceReviewRecords(actor);
+              if (!reports) throw new Error("Review queue unavailable");
+              const current = loadData();
+              const records = new Map(current.checkIns.filter((record) => !record.submittedPlace || record.reviewStatus === "linked" || record.reviewStatus === "dismissed").map((record) => [record.id, record]));
+              reports.forEach((record) => records.set(record.id, record));
+              onDataChange({ ...current, checkIns: [...records.values()] }, actor, { localOnlyStatus: "Loaded from Firebase Firestore" });
+            } catch { notify({ tone: "warning", title: placeText(locale, "queue"), message: placeText(locale, "missing") }); }
+            finally { setRefreshingReports(false); }
+          } : undefined}
+          onReview={async (ids, destinationId) => {
+            const result = reviewUnlistedCheckIns(data, actor, ids, destinationId);
+            if (result.error || !result.data) { notify({ tone: "error", title: placeText(locale, "queue"), message: placeText(locale, result.error ?? "missing") }); return; }
+            const synced = await onDataChange(result.data, actor, { placeReview: result.review });
+            if (synced !== false) notify({ tone: "success", title: placeText(locale, "reviewed") });
+          }}
+          onCreateReviewedPlace={async (destination: Destination, ids) => {
+            const result = reviewUnlistedCheckIns(data, actor, ids, destination.id, destination);
+            if (result.error || !result.data) return placeText(locale, result.error ?? "missing");
+            const synced = await onDataChange(result.data, actor, { placeReview: result.review });
+            return synced === false ? placeText(locale, "saveFailed") : null;
+          }} />
       </Page>
     );
   }

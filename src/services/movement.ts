@@ -39,7 +39,7 @@ export function getVisitedDestinationIds(data: AppData, userId: string) {
   const tripIds = new Set(getUserTrips(data, userId).map((trip) => trip.id));
   const destinationIndex = createDestinationSpatialIndex(data.destinations);
   const visited = getRecordedStopIds(data.points.filter((point) => tripIds.has(point.tripId)), destinationIndex);
-  data.checkIns.filter((checkIn) => checkIn.userId === userId).forEach((checkIn) => visited.add(checkIn.destinationId));
+  data.checkIns.filter((checkIn) => checkIn.destinationId && checkIn.userId === userId).forEach((checkIn) => visited.add(checkIn.destinationId));
 
   return visited;
 }
@@ -55,7 +55,7 @@ export function summarizeTrip(data: AppData, tripId: string): TripSummary {
   let accuracyTotal = 0;
   const destinationIndex = createDestinationSpatialIndex(data.destinations);
   const visitedDestinationIds = getRecordedStopIds(points, destinationIndex);
-  data.checkIns.filter((checkIn) => checkIn.tripId === tripId && checkIn.userId === trip?.userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
+  data.checkIns.filter((checkIn) => checkIn.destinationId && checkIn.tripId === tripId && checkIn.userId === trip?.userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
 
   points.forEach((point, index) => {
     accuracyTotal += point.accuracyMeters;

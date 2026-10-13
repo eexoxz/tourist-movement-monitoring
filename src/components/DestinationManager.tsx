@@ -1,13 +1,16 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { MapPinned, Pencil, RotateCcw, Save, Trash2, X } from "lucide-react";
-import type { Destination, DestinationCategory } from "../types";
+import { MapPin, MapPinned, Pencil, RotateCcw, Save, Tag, Trash2, X } from "lucide-react";
+import type { AttractionCheckIn, Destination, DestinationCategory } from "../types";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "../services/destinationManagement";
 import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 import type { NotifyFn } from "./ToastViewport";
 import { translate, type Locale } from "../services/i18n";
 import { uiText } from "../services/uiText";
-import { localizeDestination } from "../services/destinationLocale";
+import { localizeCity, localizeDestination } from "../services/destinationLocale";
+import { UnlistedPlaceReview } from "./UnlistedPlaceReview";
+import type { PlaceSubmissionGroup } from "../services/unlistedPlaces";
+import { placeText } from "../services/placeSubmissionCopy";
 
 type DestinationFormState = {
   name: string;
@@ -43,7 +46,7 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
   };
 }
 
-export function DestinationManager({ destinations, onChange, notify, locale }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; notify: NotifyFn; locale: Locale }) {
+export function DestinationManager({ destinations, onChange, notify, locale, checkIns = [], onReview, onCreateReviewedPlace, onRefreshReports, refreshingReports }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; notify: NotifyFn; locale: Locale; checkIns?: AttractionCheckIn[]; onReview?: (ids: string[], destinationId: string) => void | Promise<void>; onCreateReviewedPlace?: (destination: Destination, ids: string[]) => string | null | Promise<string | null>; onRefreshReports?: () => void; refreshingReports?: boolean }) {
   const text = (source: string, values?: Record<string, string | number>) => uiText(locale, source, values);
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -53,6 +56,8 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
   const [message, setMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
+  const [candidate, setCandidate] = useState<PlaceSubmissionGroup | null>(null);
+  const [showAllDestinations, setShowAllDestinations] = useState(false);
 
   const filteredDestinations = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -73,6 +78,7 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
   };
 
   const openAddModal = () => {
+    setCandidate(null);
     setForm(createDestinationForm());
     setEditingId(null);
     setModalMode("add");
@@ -80,6 +86,7 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
   };
 
   const startEdit = (destination: Destination) => {
+    setCandidate(null);
     setEditingId(destination.id);
     setForm(createDestinationForm(destination));
     setModalMode("edit");
@@ -92,11 +99,12 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
     }
 
     setModalMode(null);
+    setCandidate(null);
     setEditingId(null);
     setForm(createDestinationForm());
   };
 
-  const saveDestination = (event: FormEvent<HTMLFormElement>) => {
+  const saveDestination = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const action = modalMode;
@@ -121,10 +129,14 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
       return;
     }
 
-    onChange(result.destinations);
+    if (candidate && result.destination) {
+      const error = onCreateReviewedPlace ? await onCreateReviewedPlace(result.destination, candidate.reports.slice(0, 100).map((report) => report.id)) : placeText(locale, "admin");
+      if (error) { setMessage(error); setSavingAction(null); return; }
+    } else onChange(result.destinations);
     setMessage(action === "add" ? "Destination saved." : "Destination updated.");
     setSavingAction(null);
     setModalMode(null);
+    setCandidate(null);
     setEditingId(null);
     setForm(createDestinationForm());
     notify({
@@ -162,6 +174,10 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
 
   return (
     <>
+      {onReview && <UnlistedPlaceReview checkIns={checkIns} destinations={destinations} locale={locale} onReview={onReview} onRefresh={onRefreshReports} refreshing={refreshingReports} onCreate={(group) => {
+        setCandidate(group); setEditingId(null); setModalMode("add"); setMessage(null);
+        setForm({ ...createDestinationForm(), name: group.place.name, city: group.place.city, address: group.place.address, category: group.place.category, latitude: group.latitude === undefined ? "" : String(group.latitude), longitude: group.longitude === undefined ? "" : String(group.longitude) });
+      }} />}
       <section className="destination-management-panel">
         <div className="section-heading">
           <div>
@@ -199,20 +215,18 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
         </div>
 
         <section className="destination-admin-grid">
-          {filteredDestinations.map((destination) => (
+          {(showAllDestinations ? filteredDestinations : filteredDestinations.slice(0, 6)).map((destination) => (
             <article className="destination-card editable" key={destination.id}>
               <DestinationVisual destination={destination} compact locale={locale} />
-              <div>
+              <div className="destination-admin-title">
                 <strong>{destination.name}</strong>
-                <span>{destination.city}</span>
+                <span>{localizeCity(destination.city, locale)}</span>
               </div>
-              <p>{localizeDestination(destination, locale).description}</p>
-              <div className="tag-row">
-                <small>{translate(locale, `category.${destination.category}`)}</small>
-                <small>{text("{count} min visit", { count: destination.averageVisitMinutes })}</small>
-                {destination.openingHours && <small>{text("visit info")}</small>}
-              </div>
-              <div className="card-actions">
+              <p className="destination-admin-description">{localizeDestination(destination, locale).description}</p>
+              {destination.address && <p className="destination-admin-address"><MapPin size={16} aria-hidden="true" /><span>{destination.address}</span></p>}
+              <div className="destination-admin-footer">
+                <span className={`destination-admin-category category-${destination.category}`}><Tag size={15} aria-hidden="true" />{translate(locale, `category.${destination.category}`)}</span>
+                <div className="card-actions">
                 <button className="secondary-action icon-action" onClick={() => startEdit(destination)} type="button" title={text("Edit destination")}>
                   <Pencil size={16} />
                 </button>
@@ -225,11 +239,13 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
                 >
                   <Trash2 size={16} />
                 </button>
+                </div>
               </div>
             </article>
           ))}
           {filteredDestinations.length === 0 && <EmptyState text={text("No destination records match the current search and category filter.")} />}
         </section>
+        {filteredDestinations.length > 6 && <div className="list-limit-footer"><span>{showAllDestinations ? filteredDestinations.length : 6} / {filteredDestinations.length}</span><button className="secondary-action compact-action" type="button" onClick={() => setShowAllDestinations(!showAllDestinations)}>{text(showAllDestinations ? "Show fewer" : "Show more")}</button></div>}
       </section>
 
       {modalMode && (
@@ -244,6 +260,9 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
                 <X size={18} />
               </button>
             </div>
+
+            {candidate && <p className="status-message">{placeText(locale, "publishNote")}</p>}
+            {message && <p className="status-message" role="alert">{text(message)}</p>}
 
             <label>
               {text("Name")}
@@ -305,7 +324,7 @@ export function DestinationManager({ destinations, onChange, notify, locale }: {
               {text("Description")}
               <textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} required />
             </label>
-            <button className="primary-action" type="submit">
+            <button className="primary-action" type="submit" disabled={Boolean(savingAction)}>
               <Save size={18} />
               {text(savingAction ? "Saving" : modalMode === "add" ? "Save destination" : "Save changes")}
             </button>

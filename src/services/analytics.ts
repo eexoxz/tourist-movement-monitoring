@@ -740,7 +740,7 @@ export function recommendForUser(
   });
 
   const visited = getRecordedStopIds(completedPoints, destinationIndex);
-  data.checkIns.filter((checkIn) => checkIn.userId === userId).forEach((checkIn) => visited.add(checkIn.destinationId));
+  data.checkIns.filter((checkIn) => checkIn.destinationId && checkIn.userId === userId).forEach((checkIn) => visited.add(checkIn.destinationId));
   const historyLocation = options.ignoreHistoryLocation
     ? undefined
     : points.reduce<MovementPoint | undefined>((latest, point) => {

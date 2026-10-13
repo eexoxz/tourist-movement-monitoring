@@ -5,6 +5,19 @@ import { resolve } from "node:path";
 const firestoreRules = readFileSync(resolve(process.cwd(), "firestore.rules"), "utf8");
 
 describe("Firestore security rules coverage", () => {
+  it("does not delete remote visits missing from an older local snapshot", () => {
+    const storage = readFileSync(resolve(process.cwd(), "src/services/storage.ts"), "utf8");
+    expect(storage).not.toContain("deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.checkIns");
+    expect(storage).not.toContain("syncCollection(FIRESTORE_COLLECTIONS.checkIns");
+  });
+  it("keeps unlisted-place approval admin-only and tourist checkout narrow", () => {
+    const checkInRules = firestoreRules.split("match /attraction_checkins/{checkInId}")[1].split("match /geofences/{geofenceId}")[0];
+    expect(checkInRules).toContain('hasOnly(["status", "checkedOutAt"])');
+    expect(checkInRules).toContain('reviewStatus == "pending"');
+    expect(checkInRules).toContain('destinationId == ""');
+    expect(checkInRules).toContain('resource.data.status != "checked-out"');
+    expect(checkInRules).toContain('hasAny(["reviewedBy", "reviewedAt"])');
+  });
   it("keeps SOS closure terminal and protects ownership, response and closure history", () => {
     const sosRules = firestoreRules.split("match /sos_alerts/{alertId}")[1].split("match /incident_reports/{reportId}")[0];
     expect(sosRules).toContain("request.resource.data.userId == resource.data.userId");

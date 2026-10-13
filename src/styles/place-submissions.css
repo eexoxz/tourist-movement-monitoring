@@ -1,0 +1,75 @@
+.check-in-mode-switch {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #dce5e2;
+  margin-block: 16px;
+}
+.check-in-mode-switch button {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #596575;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.check-in-mode-switch button[aria-pressed="true"] { color: #0f766e; border-color: #0f766e; }
+.unlisted-check-in-form { display: grid; gap: 14px; min-width: 0; }
+.unlisted-check-in-form label { min-width: 0; overflow-wrap: anywhere; }
+.unlisted-check-in-form .unlisted-gps-choice { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+.unlisted-gps-choice input { width: 18px; height: 18px; flex-shrink: 0; }
+.unlisted-gps-choice svg { flex-shrink: 0; }
+.destination-card.editable { gap: 12px; align-content: start; }
+.destination-card.editable .destination-visual.compact { position: relative; aspect-ratio: 16 / 9; height: auto; min-height: 0; }
+.destination-card.editable .destination-visual.compact img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.destination-card .destination-admin-title { display: grid; gap: 4px; }
+.destination-admin-title strong { font-size: 1.1rem; line-height: 1.4; }
+.destination-admin-title span { color: #596575; font-size: 0.83rem; }
+.destination-card .destination-admin-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 0.9rem; line-height: 1.55; }
+.destination-card .destination-admin-address { display: flex; align-items: start; gap: 7px; color: #596575; font-size: 0.8rem; line-height: 1.5; }
+.destination-admin-address svg { flex-shrink: 0; margin-top: 2px; }
+.destination-admin-address span { min-width: 0; overflow-wrap: anywhere; }
+.destination-admin-footer { border-top: 1px solid #e2e8e5; padding-top: 12px; }
+.destination-admin-category { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; color: #596575; }
+.destination-admin-category svg { flex-shrink: 0; }
+.place-review-queue { margin-bottom: 28px; min-width: 0; }
+.place-review-queue > summary { display: flex; gap: 10px; align-items: center; min-height: 54px; padding: 10px 0; border-block: 1px solid #dce5e2; color: #0f766e; font-weight: 600; cursor: pointer; }
+.place-review-queue > summary > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.place-review-queue > summary > svg { flex-shrink: 0; }
+.place-review-queue > p { color: #596575; line-height: 1.5; font-size: 0.9rem; }
+.place-review-queue h2 { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; }
+.place-review-queue h2 svg { flex-shrink: 0; }
+.place-review-list { display: grid; gap: 12px; margin-block: 16px; }
+.place-review-item { padding: 16px; border: 1px solid #dce5e2; border-radius: 8px; background: #fff; min-width: 0; overflow-wrap: anywhere; }
+.place-review-heading { display: flex; justify-content: space-between; align-items: start; gap: 14px; }
+.place-review-heading > div { min-width: 0; }
+.place-review-heading h3 { margin: 5px 0; font-size: 1.05rem; }
+.place-review-heading p { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 0.85rem; color: #596575; }
+.place-review-heading > div > span { font-size: 0.78rem; color: #0f766e; }
+.place-review-counts { display: grid; gap: 6px; font-size: 0.8rem; }
+.place-review-counts span { display: flex; align-items: center; gap: 6px; }
+.place-review-item details { margin-top: 12px; }
+.place-review-item summary { min-height: 32px; color: #0f766e; cursor: pointer; font-weight: 600; }
+.place-review-item details > p { font-size: 0.86rem; color: #596575; }
+.place-review-item ul { list-style: none; padding: 0; margin: 12px 0; max-height: 320px; overflow: auto; }
+.place-review-item li { display: grid; gap: 6px; padding: 12px 0; border-bottom: 1px solid #e2e8e5; font-size: 0.88rem; }
+.place-review-item li p { margin: 0; }
+.place-review-item .place-report-choice { display: flex; align-items: start; gap: 8px; cursor: pointer; }
+.place-report-choice input { width: 20px; height: 20px; flex-shrink: 0; margin: 0; }
+.place-report-choice strong { min-width: 0; }
+.place-review-item time, .place-review-item small { font-size: 0.78rem; color: #596575; }
+.place-review-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-block: 14px; }
+.place-review-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+.place-review-link label { min-width: 0; }
+.place-review-link select { width: 100%; min-width: 0; }
+.place-review-queue button { max-width: 100%; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .place-review-heading { flex-direction: column; }
+  .place-review-link { grid-template-columns: minmax(0, 1fr); }
+  .place-review-queue .section-heading { flex-wrap: wrap; }
+  .place-review-queue h2 { min-width: 0; overflow-wrap: anywhere; }
+  .destination-admin-footer { flex-wrap: wrap; gap: 10px; }
+}

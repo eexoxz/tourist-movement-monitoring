@@ -51,7 +51,7 @@
 
 .home-billboard {
   position: relative;
-  height: 320px;
+  height: 360px;
   overflow: hidden;
   background: #e6efec;
 }
@@ -81,28 +81,32 @@
 .home-billboard-copy {
   position: absolute;
   inset: auto 0 0;
-  display: grid;
-  justify-items: start;
-  gap: 10px;
-  padding: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 18px;
   color: #ffffff;
-  background: rgba(8, 28, 25, 0.82);
+  background: rgba(8, 28, 25, 0.72);
 }
+
+.home-billboard-copy > div { min-width: 0; }
+.home-billboard-copy > button { flex-shrink: 0; }
 
 .home-billboard-copy h2 {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: 1.5rem;
   font-weight: 750;
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
-.home-billboard-copy > span {
+.home-billboard-copy span {
   font-size: 0.84rem;
   line-height: 1.5;
 }
 
-.home-billboard-copy .primary-action {
+.home-billboard-copy .icon-action {
   color: #064e3b;
   background: #ffffff;
 }
@@ -454,15 +458,15 @@
   }
 
   .home-billboard {
-    height: 290px;
+    height: 320px;
   }
 
   .home-billboard-copy {
-    padding: 16px;
+    padding: 12px;
   }
 
   .home-billboard-copy h2 {
-    font-size: 1.45rem;
+    font-size: 1.2rem;
   }
 
   .home-journey-invitation,

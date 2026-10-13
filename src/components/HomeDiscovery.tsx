@@ -27,9 +27,8 @@ export function HomeDiscovery({ featured, destinations, nextFestival, activeTrip
     {featured && <section className="home-billboard">
       <DestinationVisual destination={featured} locale={locale} />
       <div className="home-billboard-copy">
-        <span>{text("featured")} · {featured.city}</span>
-        <h2>{featured.name}</h2>
-        <button className="primary-action" type="button" onClick={() => onOpenPlace(featured.id)}>{text("explore")}<ArrowRight size={18} /></button>
+        <div><span>{text("featured")} · {featured.city}</span><h2>{featured.name}</h2></div>
+        <button className="secondary-action icon-action" type="button" title={text("explore")} aria-label={`${text("explore")}: ${featured.name}`} onClick={() => onOpenPlace(featured.id)}><ArrowRight size={22} /></button>
       </div>
     </section>}
 

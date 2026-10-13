@@ -12,6 +12,7 @@ import type {
   LocationConsent,
   MalaysianState,
   MovementPoint,
+  PlaceReview,
   Recommendation,
   SosAlert,
   TripSession,
@@ -19,6 +20,7 @@ import type {
 } from "../types";
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 import { preferredSosAlert } from "./safety";
+import { preserveReviewedCheckIn } from "./unlistedPlaces";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
@@ -141,9 +143,47 @@ export async function saveCheckInRecord(checkIn: AttractionCheckIn, actor?: User
     return false;
   }
 
-  const { doc, setDoc } = await import("firebase/firestore");
-  await setDoc(doc(services.db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>);
+  const { doc, runTransaction } = await import("firebase/firestore");
+  const reference = doc(services.db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id);
+  await runTransaction(services.db, async (transaction) => {
+    const snapshot = await transaction.get(reference);
+    const existing = snapshot.exists() ? normalizeCheckIn({ ...snapshot.data(), id: snapshot.id }) : undefined;
+    const next = preserveReviewedCheckIn(checkIn, existing);
+    if (!existing) transaction.set(reference, cleanFirestoreData(next) as Record<string, unknown>);
+    else if (existing.status === "checked-in" && next.status === "checked-out") transaction.update(reference, { status: "checked-out", checkedOutAt: next.checkedOutAt ?? new Date().toISOString() });
+  });
   return true;
+}
+
+export async function savePlaceReview(review: PlaceReview, actor?: User | null) {
+  const services = getFirebaseServices();
+  const uid = services?.auth.currentUser?.uid;
+  if (!services || !uid || !actor || actor.role !== "admin" || (actor.id !== uid && actor.authUid !== uid) || review.reviewedBy !== actor.id || !review.checkInIds.length || review.checkInIds.length > 100 || (review.destination && review.destination.id !== review.destinationId) || (review.status === "linked" && !review.destinationId) || (review.status === "dismissed" && Boolean(review.destinationId || review.destination))) return false;
+  const { doc, runTransaction } = await import("firebase/firestore");
+  await runTransaction(services.db, async (transaction) => {
+    const references = review.checkInIds.map((id) => doc(services.db, FIRESTORE_COLLECTIONS.checkIns, id));
+    const snapshots = await Promise.all(references.map((reference) => transaction.get(reference)));
+    const alreadyCommitted = snapshots.every((snapshot) => snapshot.exists() && snapshot.data().reviewStatus === review.status && snapshot.data().destinationId === review.destinationId && snapshot.data().reviewedBy === review.reviewedBy && snapshot.data().reviewedAt === review.reviewedAt);
+    if (alreadyCommitted) return;
+    if (snapshots.some((snapshot) => !snapshot.exists() || !snapshot.data().submittedPlace || ![undefined, "pending"].includes(snapshot.data().reviewStatus))) throw new Error("Place reports changed; refresh before reviewing");
+    if (review.destinationId) {
+      const place = await transaction.get(doc(services.db, FIRESTORE_COLLECTIONS.destinations, review.destinationId));
+      if (!review.destination && !place.exists()) throw new Error("Catalogue place no longer exists");
+      if (review.destination && place.exists()) throw new Error("Catalogue place already exists");
+    }
+    if (review.destination) transaction.set(doc(services.db, FIRESTORE_COLLECTIONS.destinations, review.destination.id), cleanFirestoreData(review.destination) as Record<string, unknown>);
+    references.forEach((reference) => transaction.update(reference, { destinationId: review.destinationId, reviewStatus: review.status, reviewedBy: actor.id, reviewedAt: review.reviewedAt }));
+  });
+  return true;
+}
+
+export async function loadPlaceReviewRecords(actor: User) {
+  const services = getFirebaseServices();
+  const uid = services?.auth.currentUser?.uid;
+  if (!services || !uid || actor.role !== "admin" || (actor.id !== uid && actor.authUid !== uid)) return null;
+  const { collection, getDocsFromServer, query, where } = await import("firebase/firestore");
+  const snapshot = await getDocsFromServer(query(collection(services.db, FIRESTORE_COLLECTIONS.checkIns), where("reviewStatus", "==", "pending")));
+  return snapshot.docs.map((record) => normalizeCheckIn({ ...record.data(), id: record.id }));
 }
 
 export async function saveSosAlertRecord(alert: SosAlert, actor?: User | null) {
@@ -462,7 +502,6 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     const nextAnalysisIds = new Set(ownAnalyses.map((analysis) => analysis.tripId));
     const nextRecommendationIds = new Set(ownRecommendations.map((recommendation) => recommendation.id));
     const nextIncidentReportIds = new Set(ownIncidentReports.map((report) => report.id));
-    const nextCheckInIds = new Set(ownCheckIns.map((checkIn) => checkIn.id));
 
     await queueWrite((currentBatch) =>
       currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>)
@@ -500,8 +539,12 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
         currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.incidentReports, report.id), cleanFirestoreData(report) as Record<string, unknown>)
       );
     }
+    const remoteCheckIns = await getDocs(query(collection(db, FIRESTORE_COLLECTIONS.checkIns), where("userId", "==", currentActor.id)));
+    const remoteById = new Map(remoteCheckIns.docs.map((record) => [record.id, normalizeCheckIn({ ...record.data(), id: record.id })]));
     for (const checkIn of ownCheckIns) {
-      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
+      const existing = remoteById.get(checkIn.id);
+      if (!existing) await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
+      else if (existing.status === "checked-in" && checkIn.status === "checked-out") await queueWrite((currentBatch) => currentBatch.update(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), { status: "checked-out", checkedOutAt: checkIn.checkedOutAt ?? new Date().toISOString() }));
     }
 
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.locationConsents, nextConsentIds);
@@ -515,7 +558,6 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.aiAnalyses, nextAnalysisIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds);
     await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.incidentReports, nextIncidentReportIds);
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.checkIns, nextCheckInIds);
   } else {
     const touristUsers = data.users.filter((user) => user.role === "tourist");
     await syncCollection(FIRESTORE_COLLECTIONS.users, data.users.map(publicUser), (user) => user.id);
@@ -530,7 +572,13 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await syncCollection(FIRESTORE_COLLECTIONS.recommendations, data.recommendations, (recommendation) => recommendation.id);
     await syncSosRecords(data.sosAlerts);
     await syncCollection(FIRESTORE_COLLECTIONS.incidentReports, data.incidentReports, (report) => report.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.checkIns, data.checkIns, (checkIn) => checkIn.id);
+    const remoteCheckIns = await getDocs(collection(db, FIRESTORE_COLLECTIONS.checkIns));
+    const remoteById = new Map(remoteCheckIns.docs.map((record) => [record.id, normalizeCheckIn({ ...record.data(), id: record.id })]));
+    for (const checkIn of data.checkIns) {
+      const existing = remoteById.get(checkIn.id);
+      if (!existing) await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
+      else if (existing.status === "checked-in" && checkIn.status === "checked-out") await queueWrite((currentBatch) => currentBatch.update(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), { status: "checked-out", checkedOutAt: checkIn.checkedOutAt ?? new Date().toISOString() }));
+    }
     await syncCollection(FIRESTORE_COLLECTIONS.geofences, data.geofences, (geofence) => geofence.id);
   }
 
@@ -807,6 +855,15 @@ function normalizeIncidentReport(report: Partial<IncidentReport>): IncidentRepor
 function normalizeCheckIn(checkIn: Partial<AttractionCheckIn>): AttractionCheckIn {
   const checkedInAt = checkIn.checkedInAt ?? new Date().toISOString();
   const status = checkIn.status === "checked-out" ? "checked-out" : "checked-in";
+  const submitted = checkIn.submittedPlace;
+  const submittedPlace = submitted && typeof submitted.name === "string" && typeof submitted.address === "string" ? {
+    name: submitted.name.slice(0, 100), address: submitted.address.slice(0, 300),
+    city: typeof submitted.city === "string" ? submitted.city.slice(0, 80) : "",
+    state: normalizeMalaysianState(submitted.state),
+    category: (["cultural", "nature", "urban", "heritage", "food", "coastal"] as const).includes(submitted.category) ? submitted.category : "cultural" as const,
+    note: typeof submitted.note === "string" ? submitted.note.slice(0, 500) : "",
+    accuracyMeters: Number.isFinite(submitted.accuracyMeters) ? submitted.accuracyMeters : undefined,
+  } : undefined;
 
   return {
     id: checkIn.id ?? createId("checkin"),
@@ -818,6 +875,10 @@ function normalizeCheckIn(checkIn: Partial<AttractionCheckIn>): AttractionCheckI
     checkedOutAt: status === "checked-out" ? (checkIn.checkedOutAt ?? checkedInAt) : undefined,
     latitude: Number.isFinite(checkIn.latitude) ? checkIn.latitude : undefined,
     longitude: Number.isFinite(checkIn.longitude) ? checkIn.longitude : undefined,
+    submittedPlace,
+    reviewStatus: submittedPlace ? (["linked", "dismissed"] as const).includes(checkIn.reviewStatus as "linked" | "dismissed") ? checkIn.reviewStatus : "pending" : undefined,
+    reviewedBy: checkIn.reviewedBy,
+    reviewedAt: checkIn.reviewedAt,
   };
 }
 

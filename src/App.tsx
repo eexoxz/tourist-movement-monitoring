@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { BarChart3, BellRing, CalendarDays, Compass, Download, LogOut, MapPinned, RotateCcw, Sparkles, UserRound } from "lucide-react";
 import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, saveSession, saveSosAlertRecord, subscribeSosAlerts } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, savePlaceReview, saveSession, saveSosAlertRecord, subscribeSosAlerts } from "./services/storage";
 import { refreshAllRecommendations } from "./services/analytics";
 import { authProviderName, getConfiguredAuthState, getConfiguredUserRecord, hasConfiguredAuth, registerWithConfiguredProvider, sendPasswordResetToConfiguredProvider, sendVerificationEmail, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
@@ -23,6 +23,8 @@ import { friendlyAuthError } from "./services/authError";
 import { type CommitDataOptions, mergeUserRecord } from "./services/workspaceSupport";
 import { TouristWorkspace } from "./workspaces/TouristWorkspace";
 import { AdminWorkspace } from "./workspaces/AdminWorkspace";
+import { applyPlaceReview } from "./services/unlistedPlaces";
+import { placeText } from "./services/placeSubmissionCopy";
 
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
@@ -251,6 +253,24 @@ function App() {
   }, [authMode, currentUser, safeView]);
 
   const commitData = (nextData: AppData, actor: User | null = currentUser, options: CommitDataOptions = {}) => {
+    if (options.placeReview && hasConfiguredAuth()) {
+      const review = options.placeReview;
+      setSyncStatus(t("sync.retrying"));
+      return savePlaceReview(review, actor).then((synced) => {
+        if (!synced) throw new Error("Place review was not accepted");
+        setData((current) => {
+          const next = refreshAllRecommendations(applyPlaceReview(current, review));
+          cacheLocalData(next);
+          return next;
+        });
+        setSyncStatus("Saved to Firestore collections");
+        return true;
+      }).catch(() => {
+        setSyncStatus("Saved on this device; cloud retry pending");
+        notify({ tone: "warning", title: placeText(locale, "queue"), message: placeText(locale, "saveFailed") });
+        return false;
+      });
+    }
     setData(nextData);
 
     if (options.localOnlyStatus) {
@@ -259,11 +279,11 @@ function App() {
       return;
     }
 
-    if (options.sosAlert) {
+    if (options.sosAlert || options.checkIn || options.placeReview) {
       cacheLocalData(nextData);
-      setSyncStatus(sosText(locale, "syncPending"));
+      if (options.sosAlert) setSyncStatus(sosText(locale, "syncPending"));
     }
-    void (options.sosAlert ? saveSosAlertRecord(options.sosAlert, actor) : saveData(nextData, actor))
+    void (options.sosAlert ? saveSosAlertRecord(options.sosAlert, actor) : options.checkIn ? saveCheckInRecord(options.checkIn, actor) : options.placeReview ? savePlaceReview(options.placeReview, actor) : saveData(nextData, actor))
       .then((synced) => {
         setSyncStatus(synced ? "Saved to Firestore collections" : "Saved to local browser storage");
       })
