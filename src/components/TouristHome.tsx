@@ -71,8 +71,9 @@ type TouristHomeProps = {
   onCheckInDestinationChange: (destinationId: string) => void;
   onStartAttractionCheckIn: (destinationId?: string) => void;
   onFinishAttractionCheckIn: () => void;
-  onUnlistedCheckIn: (draft: UnlistedPlaceDraft, attachGps: boolean) => string | null;
-  hasCheckInGps: boolean;
+  checkingOut?: boolean;
+  onUnlistedCheckIn: (draft: UnlistedPlaceDraft, point?: MovementPoint) => string | null | Promise<string | null>;
+  onLocateUnlistedPlace: () => Promise<{ point?: MovementPoint; error?: string }>;
   onToolPanelOpenChange?: (open: boolean) => void;
   onSendSosAlert: () => void;
   onCloseSosAlert: (id: string, reason: SosClosureReason) => void;
@@ -155,8 +156,9 @@ export function TouristHome({
   onCheckInDestinationChange,
   onStartAttractionCheckIn,
   onFinishAttractionCheckIn,
+  checkingOut = false,
   onUnlistedCheckIn,
-  hasCheckInGps,
+  onLocateUnlistedPlace,
   onToolPanelOpenChange,
   onSendSosAlert,
   onCloseSosAlert,
@@ -179,7 +181,7 @@ export function TouristHome({
     <div className="check-in-mode-switch" role="group" aria-label={t("tourist.checkin.checkIn")}>
       {(["known", "unlisted"] as const).map((mode) => <button key={mode} type="button" aria-pressed={checkInMode === mode} onClick={() => setCheckInMode(mode)}>{placeText(locale, mode)}</button>)}
     </div>
-    {checkInMode === "unlisted" ? <UnlistedCheckInForm locale={locale} hasGps={hasCheckInGps} onSubmit={onUnlistedCheckIn} /> : <div className="check-in-stack">
+    {checkInMode === "unlisted" ? <UnlistedCheckInForm locale={locale} onLocate={onLocateUnlistedPlace} onSubmit={onUnlistedCheckIn} /> : <div className="check-in-stack">
       <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
       <QrCheckInPanel destinations={checkInDestinations} selectedDestination={selectedCheckInDestination} locale={locale} onDestinationChange={onCheckInDestinationChange} onConfirm={onStartAttractionCheckIn} />
     </div>}
@@ -261,7 +263,7 @@ export function TouristHome({
                       )}
                     </div>
                   </div>
-                  <button className="secondary-action wide" type="button" onClick={onFinishAttractionCheckIn}>
+                  <button className="secondary-action wide" type="button" disabled={checkingOut} onClick={onFinishAttractionCheckIn}>
                     <Square size={18} />
                     {t("tourist.checkin.checkOut")}
                   </button>
@@ -330,7 +332,7 @@ export function TouristHome({
               )}
 
               {activeCheckIn && (
-                <button className="secondary-action wide" type="button" onClick={onFinishAttractionCheckIn}>
+                <button className="secondary-action wide" type="button" disabled={checkingOut} onClick={onFinishAttractionCheckIn}>
                   <Square size={18} />
                   {t("tourist.checkin.checkOut")}
                 </button>

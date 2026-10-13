@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
 import { checkOutFromAttraction, createAttractionCheckIn } from "./checkIns";
-import { applyPlaceReview, createUnlistedCheckIn, groupUnlistedCheckIns, preserveReviewedCheckIn, reviewUnlistedCheckIns, selectPlaceReports, type UnlistedPlaceDraft } from "./unlistedPlaces";
+import { applyPlaceReview, createUnlistedCheckIn, groupUnlistedCheckIns, mergePlaceReviewRecords, sampleUnlistedCheckIns, preserveReviewedCheckIn, reviewUnlistedCheckIns, selectPlaceReports, type UnlistedPlaceDraft } from "./unlistedPlaces";
 import { getTouristWorkspaceData } from "./touristWorkspace";
 import { normalizeAppData } from "./storage";
 import { placeSubmissionKeys, placeText } from "./placeSubmissionCopy";
 import { localeOptions } from "./i18n";
+import { unlistedLocationKeys, unlistedLocationText } from "./unlistedLocationCopy";
 import type { AppData, AttractionCheckIn, MovementPoint } from "../types";
 
 const data: AppData = { ...initialData, checkIns: [] };
@@ -51,7 +52,41 @@ describe("unlisted place visits", () => {
     expect(groups[0].touristCount).toBe(2);
     expect(groups[0].reports).toHaveLength(3);
     expect(groupUnlistedCheckIns([...reports, report("d", "three", { latitude: 5.44, longitude: 100.329 })])).toHaveLength(2);
-    expect(groupUnlistedCheckIns([...reports, report("e", "three", { submittedPlace: { ...draft, name: "Different business" }, latitude: 5.414, longitude: 100.329 })])).toHaveLength(2);
+    expect(groupUnlistedCheckIns([...reports, report("e", "three", { submittedPlace: { ...draft, name: "Different business" }, latitude: 5.414, longitude: 100.329 })])).toHaveLength(1);
+  });
+  it("accepts a GPS-only location without inventing a street address or state", () => {
+    const gpsDraft = { ...draft, address: "", city: "", state: undefined };
+    const result = createUnlistedCheckIn(consentData, "tourist-demo", gpsDraft, { ...point, recordedAt: new Date().toISOString() });
+    expect(result.checkIn?.submittedPlace).toMatchObject({ address: "", city: "" });
+    expect(result.checkIn?.submittedPlace?.state).toBeUndefined();
+    expect(normalizeAppData(result.data!).checkIns[0].submittedPlace?.state).toBeUndefined();
+    expect(createUnlistedCheckIn(consentData, "tourist-demo", gpsDraft).error).toBe("invalid");
+  });
+  it("does not merge far-away GPS reports just because the address is the same", () => {
+    expect(groupUnlistedCheckIns([report("a", "one", point), report("b", "two", { latitude: 5.44, longitude: point.longitude })])).toHaveLength(2);
+  });
+  it("keeps samples separate, removable and ineligible for catalogue approval", () => {
+    const samples = sampleUnlistedCheckIns();
+    expect(new Set(samples.map((record) => record.id)).size).toBe(3);
+    expect(sampleUnlistedCheckIns().map((record) => record.id)).toEqual(samples.map((record) => record.id));
+    const real = report("real", "tourist-demo", { latitude: samples[0].latitude, longitude: samples[0].longitude, submittedPlace: samples[0].submittedPlace });
+    const groups = groupUnlistedCheckIns([real, ...samples]);
+    expect(groups).toHaveLength(2);
+    expect(groups[0].isDemo).toBeUndefined();
+    expect(groups[1].touristCount).toBe(2);
+    const admin = data.users.find((user) => user.role === "admin")!;
+    expect(reviewUnlistedCheckIns({ ...data, checkIns: samples }, admin, [samples[0].id], data.destinations[0].id).error).toBe("missing");
+    expect(groupUnlistedCheckIns([real, ...samples].filter((record) => !record.isDemo))).toHaveLength(1);
+  });
+  it("merges server pending reports without losing reviewed history or local samples", () => {
+    const linked = report("linked", "one", { reviewStatus: "linked", destinationId: "approved" });
+    const sample = sampleUnlistedCheckIns()[0];
+    const pending = report("pending", "two");
+    const current = [linked, sample, pending];
+    expect(mergePlaceReviewRecords(current, [pending])).toBe(current);
+    const reviewed = { ...pending, reviewStatus: "dismissed" as const };
+    expect(mergePlaceReviewRecords(current, [], [reviewed])).toEqual([linked, sample, reviewed]);
+    expect(mergePlaceReviewRecords(current, [])).toEqual([linked, sample]);
   });
   it("does not treat approximate addresses as GPS or merge different address-only reports", () => {
     const groups = groupUnlistedCheckIns([report("a", "one"), report("b", "two"), report("c", "three", { submittedPlace: { ...draft, address: "A different full street address" } })]);
@@ -116,6 +151,10 @@ describe("unlisted place language coverage", () => {
     for (const key of placeSubmissionKeys) {
       expect(placeText(locale, key).trim()).not.toBe("");
       if (locale !== "en") expect(placeText(locale, key)).not.toBe(placeText("en", key));
+    }
+    for (const key of unlistedLocationKeys) {
+      expect(unlistedLocationText(locale, key).trim()).not.toBe("");
+      if (locale !== "en") expect(unlistedLocationText(locale, key)).not.toBe(unlistedLocationText("en", key));
     }
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
-import { Download, RotateCcw, Trash2, UserRound } from "lucide-react";
+import { Download, MapPin, RotateCcw, Trash2, UserRound } from "lucide-react";
 import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, TouristProfile, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
@@ -25,7 +25,8 @@ import { EmptyState, MetricGrid } from "../components/SummaryCards";
 import { ListLimitFooter } from "../components/ListLimitFooter";
 import { type NotifyFn } from "../components/ToastViewport";
 import { DestinationManager } from "../components/DestinationManager";
-import { reviewUnlistedCheckIns } from "../services/unlistedPlaces";
+import { reviewUnlistedCheckIns, mergePlaceReviewRecords, sampleUnlistedCheckIns, groupUnlistedCheckIns } from "../services/unlistedPlaces";
+import { unlistedLocationText } from "../services/unlistedLocationCopy";
 import { placeText } from "../services/placeSubmissionCopy";
 import { uiText } from "../services/uiText";
 import { clusterText, decisionStepText, profileLabel } from "../services/planningText";
@@ -43,6 +44,9 @@ export function AdminWorkspace({
   view,
   locale,
   onDataChange,
+  onViewChange,
+  placeQueueState,
+  onRetryPlaceQueue,
   notify,
 }: {
   data: AppData;
@@ -50,11 +54,15 @@ export function AdminWorkspace({
   view: AppView;
   locale: Locale;
   onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void | Promise<boolean>;
+  onViewChange?: (view: AppView) => void;
+  placeQueueState?: "loading" | "live" | "offline";
+  onRetryPlaceQueue?: () => void;
   notify: NotifyFn;
 }) {
   const t = (key: TranslationKey) => translate(locale, key);
   const adminText = (key: AdminCopyKey, values?: Record<string, string | number>) => translateAdmin(locale, key, values);
   const tourists = useMemo(() => getTourists(data), [data]);
+  const pendingPlaceCount = useMemo(() => groupUnlistedCheckIns(data.checkIns.filter((record) => !record.isDemo)).length, [data.checkIns]);
   const summary = useMemo(() => summarizeDashboard(data), [data]);
   const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
@@ -638,18 +646,24 @@ export function AdminWorkspace({
           notify({ tone: "info", title: activityText(locale, "title"), message: activityText(locale, destinations.some((destination) => ((source === "browser" ? destination.activitySummary : destination.demoActivitySummary)?.popularityScore ?? 0) > 0) ? "saved" : "noEvidence") });
         }} />
         <DestinationManager destinations={data.destinations} checkIns={data.checkIns} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} locale={locale}
+          placeQueueState={placeQueueState}
+          onToggleSamples={() => {
+            const current = loadData();
+            const existing = current.checkIns.filter((record) => !record.isDemo);
+            const checkIns = current.checkIns.some((record) => record.isDemo) ? existing : [...existing, ...sampleUnlistedCheckIns()];
+            onDataChange({ ...current, checkIns }, actor, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS });
+          }}
           refreshingReports={refreshingReports}
-          onRefreshReports={actor.authUid ? async () => {
+          onRefreshReports={placeQueueState ? async () => {
             if (refreshingReports) return;
+            if (placeQueueState === "offline") onRetryPlaceQueue?.();
             setRefreshingReports(true);
             try {
               const reports = await loadPlaceReviewRecords(actor);
               if (!reports) throw new Error("Review queue unavailable");
               const current = loadData();
-              const records = new Map(current.checkIns.filter((record) => !record.submittedPlace || record.reviewStatus === "linked" || record.reviewStatus === "dismissed").map((record) => [record.id, record]));
-              reports.forEach((record) => records.set(record.id, record));
-              onDataChange({ ...current, checkIns: [...records.values()] }, actor, { localOnlyStatus: "Loaded from Firebase Firestore" });
-            } catch { notify({ tone: "warning", title: placeText(locale, "queue"), message: placeText(locale, "missing") }); }
+              onDataChange({ ...current, checkIns: mergePlaceReviewRecords(current.checkIns, reports) }, actor, { localOnlyStatus: "Loaded from Firebase Firestore" });
+            } catch { notify({ tone: "warning", title: placeText(locale, "queue"), message: unlistedLocationText(locale, "queueOffline") }); }
             finally { setRefreshingReports(false); }
           } : undefined}
           onReview={async (ids, destinationId) => {
@@ -952,6 +966,10 @@ export function AdminWorkspace({
         </div>
       }
     >
+      {pendingPlaceCount > 0 && onViewChange && <button className="secondary-action place-review-shortcut" type="button" onClick={() => onViewChange("destinations")}>
+        <MapPin size={20} />{placeText(locale, "queue")}<strong>{pendingPlaceCount}</strong>
+      </button>}
+      {placeQueueState === "offline" && <p role="alert">{unlistedLocationText(locale, "queueOffline")}</p>}
       <div className="segmented-control admin-tabs" aria-label={t("admin.dashboard.tabsLabel")}>
         <button className={adminTab === "overview" ? "active" : ""} type="button" onClick={() => setAdminTab("overview")}>
           {t("admin.tabs.overview")}

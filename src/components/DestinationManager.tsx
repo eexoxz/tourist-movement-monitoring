@@ -46,7 +46,7 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
   };
 }
 
-export function DestinationManager({ destinations, onChange, notify, locale, checkIns = [], onReview, onCreateReviewedPlace, onRefreshReports, refreshingReports }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; notify: NotifyFn; locale: Locale; checkIns?: AttractionCheckIn[]; onReview?: (ids: string[], destinationId: string) => void | Promise<void>; onCreateReviewedPlace?: (destination: Destination, ids: string[]) => string | null | Promise<string | null>; onRefreshReports?: () => void; refreshingReports?: boolean }) {
+export function DestinationManager({ destinations, onChange, notify, locale, checkIns = [], onReview, onCreateReviewedPlace, onRefreshReports, refreshingReports, onToggleSamples, placeQueueState }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; notify: NotifyFn; locale: Locale; checkIns?: AttractionCheckIn[]; onReview?: (ids: string[], destinationId: string) => void | Promise<void>; onCreateReviewedPlace?: (destination: Destination, ids: string[]) => string | null | Promise<string | null>; onRefreshReports?: () => void; refreshingReports?: boolean; onToggleSamples?: () => void; placeQueueState?: "loading" | "live" | "offline" }) {
   const text = (source: string, values?: Record<string, string | number>) => uiText(locale, source, values);
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -174,7 +174,7 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
 
   return (
     <>
-      {onReview && <UnlistedPlaceReview checkIns={checkIns} destinations={destinations} locale={locale} onReview={onReview} onRefresh={onRefreshReports} refreshing={refreshingReports} onCreate={(group) => {
+      {onReview && <UnlistedPlaceReview checkIns={checkIns} destinations={destinations} locale={locale} onReview={onReview} onRefresh={onRefreshReports} refreshing={refreshingReports} onToggleSamples={onToggleSamples} placeQueueState={placeQueueState} onCreate={(group) => {
         setCandidate(group); setEditingId(null); setModalMode("add"); setMessage(null);
         setForm({ ...createDestinationForm(), name: group.place.name, city: group.place.city, address: group.place.address, category: group.place.category, latitude: group.latitude === undefined ? "" : String(group.latitude), longitude: group.longitude === undefined ? "" : String(group.longitude) });
       }} />}

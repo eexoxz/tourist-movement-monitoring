@@ -132,7 +132,7 @@ export async function loadSharedDestinations(): Promise<Destination[] | null> {
 
 export async function saveCheckInRecord(checkIn: AttractionCheckIn, actor?: User | null) {
   const services = getFirebaseServices();
-  if (!services || !services.auth.currentUser || !actor) {
+  if (!services || !services.auth.currentUser || !actor || checkIn.isDemo) {
     return false;
   }
 
@@ -184,6 +184,19 @@ export async function loadPlaceReviewRecords(actor: User) {
   const { collection, getDocsFromServer, query, where } = await import("firebase/firestore");
   const snapshot = await getDocsFromServer(query(collection(services.db, FIRESTORE_COLLECTIONS.checkIns), where("reviewStatus", "==", "pending")));
   return snapshot.docs.map((record) => normalizeCheckIn({ ...record.data(), id: record.id }));
+}
+
+export async function subscribePlaceReviewRecords(actor: User, onChange: (pending: AttractionCheckIn[], reviewed: AttractionCheckIn[]) => void, onError: () => void) {
+  const services = getFirebaseServices();
+  const uid = services?.auth.currentUser?.uid;
+  if (!services || !uid || actor.role !== "admin" || (actor.id !== uid && actor.authUid !== uid)) return () => {};
+  const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+  return onSnapshot(query(collection(services.db, FIRESTORE_COLLECTIONS.checkIns), where("reviewStatus", "==", "pending")), { includeMetadataChanges: true }, (snapshot) => {
+    if (snapshot.metadata.fromCache) return;
+    const pending = snapshot.docs.map((record) => normalizeCheckIn({ ...record.data(), id: record.id }));
+    const reviewed = snapshot.docChanges().filter((change) => change.type === "removed").map((change) => normalizeCheckIn({ ...change.doc.data(), id: change.doc.id })).filter((record) => record.reviewStatus === "linked" || record.reviewStatus === "dismissed");
+    onChange(pending, reviewed);
+  }, onError);
 }
 
 export async function saveSosAlertRecord(alert: SosAlert, actor?: User | null) {
@@ -494,7 +507,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     const ownRecommendations = data.recommendations.filter((row) => row.userId === currentActor.id);
     const ownSosAlerts = data.sosAlerts.filter((row) => row.userId === currentActor.id);
     const ownIncidentReports = data.incidentReports.filter((row) => row.userId === currentActor.id);
-    const ownCheckIns = data.checkIns.filter((row) => row.userId === currentActor.id);
+    const ownCheckIns = data.checkIns.filter((row) => row.userId === currentActor.id && !row.isDemo);
     const existingTrips = await getDocs(query(collection(db, FIRESTORE_COLLECTIONS.tripSessions), where("userId", "==", currentActor.id)));
     const nextConsentIds = new Set(ownConsents.map((consent) => consent.id));
     const nextTripIds = new Set(ownTrips.map((trip) => trip.id));
@@ -574,7 +587,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
     await syncCollection(FIRESTORE_COLLECTIONS.incidentReports, data.incidentReports, (report) => report.id);
     const remoteCheckIns = await getDocs(collection(db, FIRESTORE_COLLECTIONS.checkIns));
     const remoteById = new Map(remoteCheckIns.docs.map((record) => [record.id, normalizeCheckIn({ ...record.data(), id: record.id })]));
-    for (const checkIn of data.checkIns) {
+    for (const checkIn of data.checkIns.filter((record) => !record.isDemo)) {
       const existing = remoteById.get(checkIn.id);
       if (!existing) await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
       else if (existing.status === "checked-in" && checkIn.status === "checked-out") await queueWrite((currentBatch) => currentBatch.update(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), { status: "checked-out", checkedOutAt: checkIn.checkedOutAt ?? new Date().toISOString() }));
@@ -859,7 +872,7 @@ function normalizeCheckIn(checkIn: Partial<AttractionCheckIn>): AttractionCheckI
   const submittedPlace = submitted && typeof submitted.name === "string" && typeof submitted.address === "string" ? {
     name: submitted.name.slice(0, 100), address: submitted.address.slice(0, 300),
     city: typeof submitted.city === "string" ? submitted.city.slice(0, 80) : "",
-    state: normalizeMalaysianState(submitted.state),
+    state: submitted.state ? normalizeMalaysianState(submitted.state) : undefined,
     category: (["cultural", "nature", "urban", "heritage", "food", "coastal"] as const).includes(submitted.category) ? submitted.category : "cultural" as const,
     note: typeof submitted.note === "string" ? submitted.note.slice(0, 500) : "",
     accuracyMeters: Number.isFinite(submitted.accuracyMeters) ? submitted.accuracyMeters : undefined,
@@ -879,6 +892,7 @@ function normalizeCheckIn(checkIn: Partial<AttractionCheckIn>): AttractionCheckI
     reviewStatus: submittedPlace ? (["linked", "dismissed"] as const).includes(checkIn.reviewStatus as "linked" | "dismissed") ? checkIn.reviewStatus : "pending" : undefined,
     reviewedBy: checkIn.reviewedBy,
     reviewedAt: checkIn.reviewedAt,
+    isDemo: checkIn.isDemo === true ? true : undefined,
   };
 }
 

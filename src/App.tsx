@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { BarChart3, BellRing, CalendarDays, Compass, Download, LogOut, MapPinned, RotateCcw, Sparkles, UserRound } from "lucide-react";
 import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, savePlaceReview, saveSession, saveSosAlertRecord, subscribeSosAlerts } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, savePlaceReview, saveSession, saveSosAlertRecord, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
 import { refreshAllRecommendations } from "./services/analytics";
 import { authProviderName, getConfiguredAuthState, getConfiguredUserRecord, hasConfiguredAuth, registerWithConfiguredProvider, sendPasswordResetToConfiguredProvider, sendVerificationEmail, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
@@ -23,11 +23,14 @@ import { friendlyAuthError } from "./services/authError";
 import { type CommitDataOptions, mergeUserRecord } from "./services/workspaceSupport";
 import { TouristWorkspace } from "./workspaces/TouristWorkspace";
 import { AdminWorkspace } from "./workspaces/AdminWorkspace";
-import { applyPlaceReview } from "./services/unlistedPlaces";
+import { applyPlaceReview, mergePlaceReviewRecords } from "./services/unlistedPlaces";
+import { unlistedLocationText } from "./services/unlistedLocationCopy";
 import { placeText } from "./services/placeSubmissionCopy";
 
 function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
+  const [placeQueueState, setPlaceQueueState] = useState<"loading" | "live" | "offline">();
+  const [placeQueueRevision, setPlaceQueueRevision] = useState(0);
   const [sessionUserId, setSessionUserId] = useState<string | null>(() => loadSession());
   const currentUser = data.users.find((user) => user.id === sessionUserId || user.authUid === sessionUserId) ?? null;
   const [view, setView] = useState<AppView>(() => getViewFromPath(getCurrentPathname()) ?? "overview");
@@ -253,13 +256,31 @@ function App() {
   }, [authMode, currentUser, safeView]);
 
   const commitData = (nextData: AppData, actor: User | null = currentUser, options: CommitDataOptions = {}) => {
+    if (options.checkIn?.submittedPlace && hasConfiguredAuth()) {
+      const checkIn = options.checkIn;
+      setSyncStatus(t("sync.retrying"));
+      return saveCheckInRecord(checkIn, actor).then((synced) => {
+        if (!synced) throw new Error("Check-in was not accepted");
+        setData((current) => {
+          const next = { ...current, checkIns: current.checkIns.some((record) => record.id === checkIn.id) ? current.checkIns.map((record) => record.id === checkIn.id ? { ...record, status: checkIn.status, checkedOutAt: checkIn.checkedOutAt } : record) : [checkIn, ...current.checkIns] };
+          cacheLocalData(next);
+          return next;
+        });
+        setSyncStatus("Saved to Firestore collections");
+        return true;
+      }).catch(() => {
+        setSyncStatus(unlistedLocationText(locale, "saveFailed"));
+        return false;
+      });
+    }
     if (options.placeReview && hasConfiguredAuth()) {
       const review = options.placeReview;
       setSyncStatus(t("sync.retrying"));
       return savePlaceReview(review, actor).then((synced) => {
         if (!synced) throw new Error("Place review was not accepted");
         setData((current) => {
-          const next = refreshAllRecommendations(applyPlaceReview(current, review));
+          const missing = nextData.checkIns.filter((record) => review.checkInIds.includes(record.id) && !current.checkIns.some((saved) => saved.id === record.id));
+          const next = refreshAllRecommendations(applyPlaceReview({ ...current, checkIns: [...current.checkIns, ...missing] }, review));
           cacheLocalData(next);
           return next;
         });
@@ -292,6 +313,26 @@ function App() {
         notifySyncIssue("Cloud save needs retry", "Your change was kept locally. Firestore did not accept the latest sync.");
       });
   };
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== "admin" || !hasConfiguredAuth()) { setPlaceQueueState(undefined); return; }
+    let stopped = false;
+    let unsubscribe: (() => void) | undefined;
+    setPlaceQueueState("loading");
+    const fail = () => { if (!stopped) setPlaceQueueState("offline"); };
+    void subscribePlaceReviewRecords(currentUser, (pending, reviewed) => {
+      if (stopped) return;
+      setPlaceQueueState("live");
+      setData((current) => {
+        const checkIns = mergePlaceReviewRecords(current.checkIns, pending, reviewed);
+        if (checkIns === current.checkIns) return current;
+        const next = { ...current, checkIns };
+        cacheLocalData(next);
+        return next;
+      });
+    }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
+    return () => { stopped = true; unsubscribe?.(); };
+  }, [currentUser?.id, currentUser?.role, placeQueueRevision]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -802,7 +843,7 @@ function App() {
           <button className="secondary-action icon-action" type="button" title={t("nav.logout")} aria-label={t("nav.logout")} onClick={logout}><LogOut size={18} /></button>
         </div>}
         {currentUser.role === "admin" ? (
-          <AdminWorkspace data={data} actor={currentUser} view={safeView} locale={locale} onDataChange={commitData} notify={notify} />
+          <AdminWorkspace data={data} actor={currentUser} view={safeView} locale={locale} onDataChange={commitData} onViewChange={goToView} placeQueueState={placeQueueState} onRetryPlaceQueue={() => setPlaceQueueRevision((current) => current + 1)} notify={notify} />
         ) : (
           <TouristWorkspace
             data={data}

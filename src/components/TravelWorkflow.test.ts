@@ -7,6 +7,8 @@ import { TripExperience } from "./TripExperience";
 import { TripDiary } from "./TripDiary";
 import { DestinationManager } from "./DestinationManager";
 import { UnlistedCheckInForm } from "./UnlistedCheckInForm";
+import { UnlistedPlaceReview } from "./UnlistedPlaceReview";
+import { sampleUnlistedCheckIns } from "../services/unlistedPlaces";
 import { HomeSpotlight } from "./HomeSpotlight";
 import { FestivalCalendarPanel } from "./FestivalCalendarPanel";
 import { calendarDay } from "../services/useCalendarDay";
@@ -68,12 +70,30 @@ describe("tourist travel workflow boundaries", () => {
     expect(html).toContain("destination-admin-address");
   });
   it("makes unlisted check-ins address-based without consent or guessed coordinates", () => {
-    const html = renderToStaticMarkup(createElement(UnlistedCheckInForm, { locale: "en", hasGps: false, onSubmit: () => null }));
-    expect(html).toContain("Address only");
+    const html = renderToStaticMarkup(createElement(UnlistedCheckInForm, { locale: "en", initialMode: "manual", onLocate: async () => ({}), onSubmit: () => null }));
+    expect(html).toContain("Address");
     expect(html).toContain("Select a state");
     expect(html).not.toContain("Latitude");
     expect(html).not.toContain("Longitude");
-    expect(html).toContain('type="checkbox" disabled=""');
+    expect(html).toContain('minLength="8"');
+  });
+  it("offers GPS first without requiring a street address or guessing the state", () => {
+    const html = renderToStaticMarkup(createElement(UnlistedCheckInForm, { locale: "en", onLocate: async () => ({}), onSubmit: () => null }));
+    expect(html).toContain("Use my current location");
+    expect(html).toContain("Address details (optional)");
+    expect(html).not.toContain('minLength="8"');
+    expect(html).not.toContain("Latitude");
+  });
+  it("does not report an empty review queue when Firebase cannot connect", () => {
+    const html = renderToStaticMarkup(createElement(UnlistedPlaceReview, { checkIns: [], destinations: [], locale: "en", placeQueueState: "offline", onCreate: noop, onReview: noop }));
+    expect(html).toContain("The review queue could not connect");
+    expect(html).not.toContain("No unlisted places are awaiting review");
+  });
+  it("labels removable samples and defers their maps until reports are expanded", () => {
+    const html = renderToStaticMarkup(createElement(UnlistedPlaceReview, { checkIns: sampleUnlistedCheckIns(), destinations: [], locale: "en", onCreate: noop, onReview: noop, onToggleSamples: noop }));
+    expect(html).toContain("Remove sample check-ins");
+    expect(html).toContain("not real visitor activity");
+    expect(html).not.toContain('class="check-in-location-map"');
   });
   it("shows recorded-stop counts consistently instead of counting every nearby place", () => {
     const trip = initialData.trips[0];

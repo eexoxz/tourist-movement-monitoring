@@ -221,7 +221,7 @@ export type AttractionCheckIn = {
     name: string;
     address: string;
     city: string;
-    state: MalaysianState;
+    state?: MalaysianState;
     category: DestinationCategory;
     note: string;
     accuracyMeters?: number;
@@ -229,6 +229,7 @@ export type AttractionCheckIn = {
   reviewStatus?: "pending" | "linked" | "dismissed";
   reviewedBy?: string;
   reviewedAt?: string;
+  isDemo?: boolean;
 };
 
 export type PlaceReview = {

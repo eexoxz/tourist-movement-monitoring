@@ -43,6 +43,7 @@ import { TripExperience } from "../components/TripExperience";
 import { TripActionDialog } from "../components/TripActionDialog";
 import { travelText } from "../services/travelExperienceCopy";
 import { createUnlistedCheckIn, type UnlistedPlaceDraft } from "../services/unlistedPlaces";
+import { unlistedLocationText } from "../services/unlistedLocationCopy";
 import { placeText } from "../services/placeSubmissionCopy";
 import { getDisplayName } from "../services/profile";
 import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWatch, loadLastBrowserLocation, saveLastBrowserLocation, movementPointFromBrowserPosition } from "../services/browserLocation";
@@ -67,7 +68,7 @@ export function TouristWorkspace({
   locale: Locale;
   pendingCheckInDestinationId: string | null;
   onPendingCheckInConsumed: () => void;
-  onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void;
+  onDataChange: (data: AppData, actor?: User | null, options?: CommitDataOptions) => void | Promise<boolean>;
   onViewChange: (view: AppView) => void;
   watchId: React.MutableRefObject<number | null>;
   notify: NotifyFn;
@@ -91,6 +92,7 @@ export function TouristWorkspace({
   const [isPreparingIncidentPhoto, setIsPreparingIncidentPhoto] = useState(false);
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
   const [showCheckInPanel, setShowCheckInPanel] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
   const [openSafetyPanel, setOpenSafetyPanel] = useState(false);
   const [toolPanelOpen, setToolPanelOpen] = useState(false);
   const [spotlightEventId, setSpotlightEventId] = useState<string>();
@@ -749,11 +751,25 @@ export function TouristWorkspace({
     notify({ tone: "success", title: "Checked in", message: destination ? `${destination.name} was added to your visit log.` : "Your attraction visit was added.", browser: true });
   };
 
-  const startUnlistedCheckIn = (draft: UnlistedPlaceDraft, attachGps: boolean): string | null => {
-    if (attachGps && (!discoveryGpsPoint || discoveryGpsPoint.source !== "browser")) return placeText(locale, "location");
-    const result = createUnlistedCheckIn(loadData(), user.id, draft, attachGps ? discoveryGpsPoint : undefined);
+  const locateUnlistedPlace = (): Promise<{ point?: MovementPoint; error?: string }> => {
+    if (!hasBrowserGeolocation()) return Promise.resolve({ error: placeText(locale, "location") });
+    const current = loadData();
+    if (!current.consents.some((consent) => consent.userId === user.id && consent.granted)) onDataChange(grantLocationConsent(current, user.id), user);
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const point = movementPointFromBrowserPosition(position, activeTrip?.id ?? "unlisted-checkin", user.id);
+        if (getMovementQualityIssue(point, undefined, Date.now(), true) || !Number.isFinite(point.latitude) || !Number.isFinite(point.longitude) || Math.abs(point.latitude) > 90 || Math.abs(point.longitude) > 180) { resolve({ error: placeText(locale, "location") }); return; }
+        setLastBrowserLocation(point); saveLastBrowserLocation(user.id, point);
+        resolve({ point });
+      }, (error) => resolve({ error: uiText(locale, geolocationErrorMessage(error)) }), { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 });
+    });
+  };
+
+  const startUnlistedCheckIn = async (draft: UnlistedPlaceDraft, point?: MovementPoint): Promise<string | null> => {
+    const result = createUnlistedCheckIn(loadData(), user.id, draft, point);
     if (result.error || !result.data) return placeText(locale, result.error ?? "invalid");
-    onDataChange(result.data, user, { checkIn: result.checkIn });
+    const synced = await onDataChange(result.data, user, { checkIn: result.checkIn });
+    if (synced === false) return unlistedLocationText(locale, "saveFailed");
     notify({ tone: "success", title: t("tourist.checkin.checkIn"), message: placeText(locale, "saved") });
     return null;
   };
@@ -790,7 +806,8 @@ export function TouristWorkspace({
     }, 80);
   }, [activeCheckIn, localizedDestinations, notify, onPendingCheckInConsumed, onViewChange, pendingCheckInDestinationId, startAttractionCheckIn, view]);
 
-  const finishAttractionCheckIn = () => {
+  const finishAttractionCheckIn = async () => {
+    if (checkingOut) return;
     if (!activeCheckIn) {
       notify({ tone: "error", title: "No active check-in", message: "There is no attraction visit to check out from." });
       return;
@@ -802,8 +819,14 @@ export function TouristWorkspace({
       return;
     }
 
-    onDataChange(result.data, user, { checkIn: result.checkIn });
-    notify({ tone: "success", title: "Checked out", message: "Your attraction visit duration was saved.", browser: true });
+    setCheckingOut(true);
+    try {
+      const synced = await onDataChange(result.data, user, { checkIn: result.checkIn });
+      if (synced === false) throw new Error("Checkout not accepted");
+      notify({ tone: "success", title: "Checked out", message: "Your attraction visit duration was saved.", browser: true });
+    } catch {
+      notify({ tone: "error", title: t("tourist.checkin.checkOut"), message: t("publicCheckin.saveErrorMessage") });
+    } finally { setCheckingOut(false); }
   };
 
   const skipProfileSetup = () => {
@@ -1030,8 +1053,9 @@ export function TouristWorkspace({
       onCheckInDestinationChange={setCheckInDestinationId}
       onStartAttractionCheckIn={startAttractionCheckIn}
       onFinishAttractionCheckIn={finishAttractionCheckIn}
+      checkingOut={checkingOut}
       onUnlistedCheckIn={startUnlistedCheckIn}
-      hasCheckInGps={Boolean(discoveryGpsPoint?.source === "browser" && discoveryGpsPoint.accuracyMeters <= 200)}
+      onLocateUnlistedPlace={locateUnlistedPlace}
       onToolPanelOpenChange={setToolPanelOpen}
       onSendSosAlert={sendSosAlert}
       onCloseSosAlert={closeSosAlert}
