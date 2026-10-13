@@ -23,7 +23,8 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
   const index = Math.min(current, Math.max(0, slides.length - 1));
   const currentIndex = useRef(index);
   currentIndex.current = index;
-  const canPlay = slides.length > 1 && !reducedMotion;
+  // Reduced motion removes the sliding animation, not the timed slide changes.
+  const canPlay = slides.length > 1;
   const rotating = canPlay && !paused && !hovered && !hidden;
 
   const goTo = (next: number, manual = true) => {
