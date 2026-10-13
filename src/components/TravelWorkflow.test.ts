@@ -36,7 +36,8 @@ describe("tourist travel workflow boundaries", () => {
     expect(html).toContain("Penang Hill");
     expect(html).toContain('aria-current="true"');
     expect(html).toContain("Next spotlight");
-    expect(html).toContain("Pause slideshow");
+    expect(html).not.toContain("Pause slideshow");
+    expect(html).not.toContain("Play slideshow");
     expect(html.match(/class="home-spotlight-slide"/g)).toHaveLength(3);
     expect(html).toContain('loading="eager"');
     expect(html).toContain('inert=""');

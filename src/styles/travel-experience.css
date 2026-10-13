@@ -88,7 +88,7 @@ body:has(.home-spotlight) { touch-action: auto; }
 .home-spotlight-arrow.next { right: 12px; }
 .home-spotlight-controls { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; }
 .home-spotlight-dots { display: flex; align-items: center; }
-.home-spotlight-dots button, .home-spotlight-play { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: #0f766e; }
+.home-spotlight-dots button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: #0f766e; }
 .home-spotlight-dots button > span { width: 8px; height: 8px; border-radius: 50%; background: #8c9b98; }
 .home-spotlight-dots button[aria-current="true"] > span { width: 20px; border-radius: 4px; background: #0f766e; }
 .home-spotlight-counter { font-size: 0.78rem; color: #596575; font-variant-numeric: tabular-nums; min-width: 34px; }

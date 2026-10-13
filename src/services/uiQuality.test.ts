@@ -31,6 +31,16 @@ const stylesSource = styleImports.map(([, file]) => readSource(`src/${file}`)).j
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("keeps banner autoplay automatic after clicks and hover without a play button", () => {
+    const source = readSource("src/components/HomeSpotlight.tsx");
+    expect(source).toContain("goTo(index + 1), 8000");
+    expect(source).toContain('window.addEventListener("pointerup", finishGesture)');
+    expect(source).toContain('window.addEventListener("pointercancel", finishGesture)');
+    expect(source).toContain("reducedMotion ? \"instant\" : \"smooth\"");
+    expect(source).not.toContain("setPaused");
+    expect(source).not.toContain("setHovered");
+    expect(source).not.toContain("home-spotlight-play");
+  });
   it("gives Home features recognisable layouts without losing their existing actions", () => {
     expect(homeDiscoverySource).toContain("<HomeSpotlight destinations={spotlightDestinations}");
     expect(readSource("src/components/HomeSpotlight.tsx")).toContain("<DestinationVisual destination={slide.destination}");

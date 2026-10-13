@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Destination, FestivalEvent } from "../types";
 import { translate, type Locale } from "../services/i18n";
 import { buildHomeSpotlights } from "../services/homeSpotlights";
@@ -15,8 +15,7 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
   const signature = slides.map((slide) => slide.id).join("|");
   const track = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [hovered, setHovered] = useState(false);
+  const [interacting, setInteracting] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(true);
   const text = (key: Parameters<typeof spotlightText>[1]) => spotlightText(locale, key);
@@ -25,11 +24,10 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
   currentIndex.current = index;
   // Reduced motion removes the sliding animation, not the timed slide changes.
   const canPlay = slides.length > 1;
-  const rotating = canPlay && !paused && !hovered && !hidden;
+  const rotating = canPlay && !interacting && !hidden;
 
-  const goTo = (next: number, manual = true) => {
+  const goTo = (next: number) => {
     if (!track.current || !slides.length) return;
-    if (manual) setPaused(true);
     const wrapped = (next + slides.length) % slides.length;
     track.current.scrollTo({ left: wrapped * track.current.clientWidth, behavior: reducedMotion ? "instant" : "smooth" });
     setCurrent(wrapped);
@@ -45,13 +43,22 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
   }, []);
 
   useEffect(() => {
+    // Do not advance during a swipe, but never leave autoplay paused after a click.
+    const finishGesture = () => setInteracting(false);
+    window.addEventListener("pointerup", finishGesture);
+    window.addEventListener("pointercancel", finishGesture);
+    window.addEventListener("blur", finishGesture);
+    return () => { window.removeEventListener("pointerup", finishGesture); window.removeEventListener("pointercancel", finishGesture); window.removeEventListener("blur", finishGesture); };
+  }, []);
+
+  useEffect(() => {
     setCurrent(0);
     track.current?.scrollTo({ left: 0, behavior: "instant" });
   }, [signature]);
 
   useEffect(() => {
     if (!rotating) return;
-    const timer = window.setTimeout(() => goTo(index + 1, false), 8000);
+    const timer = window.setTimeout(() => goTo(index + 1), 8000);
     return () => window.clearTimeout(timer);
   }, [rotating, index, signature]);
 
@@ -64,11 +71,11 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
   }, [signature]);
 
   if (!slides.length) return null;
-  return <section className="home-spotlight" aria-label={text("title")} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setPaused(true)} onKeyDown={(event) => {
+  return <section className="home-spotlight" aria-label={text("title")} onKeyDown={(event) => {
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); goTo(index + (event.key === "ArrowLeft" ? -1 : 1)); }
   }}>
     <div className="home-billboard">
-      <div className="home-spotlight-track" ref={track} onPointerDown={() => setPaused(true)} onWheel={() => setPaused(true)} onScroll={(event) => {
+      <div className="home-spotlight-track" ref={track} onPointerDown={() => setInteracting(true)} onScroll={(event) => {
         if (event.currentTarget.clientWidth) setCurrent(Math.round(event.currentTarget.scrollLeft / event.currentTarget.clientWidth));
       }} aria-live={rotating ? "off" : "polite"}>
         {slides.map((slide, slideIndex) => <div className="home-spotlight-slide" key={slide.id} inert={slideIndex !== index} aria-label={`${text("slide")} ${slideIndex + 1} / ${slides.length}`}>
@@ -82,6 +89,6 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
       </div>
       {slides.length > 1 && <><button className="home-spotlight-arrow previous" type="button" aria-label={text("previous")} title={text("previous")} onClick={() => goTo(index - 1)}><ChevronLeft size={23} /></button><button className="home-spotlight-arrow next" type="button" aria-label={text("next")} title={text("next")} onClick={() => goTo(index + 1)}><ChevronRight size={23} /></button></>}
     </div>
-    {slides.length > 1 && <div className="home-spotlight-controls"><div className="home-spotlight-dots">{slides.map((slide, slideIndex) => <button key={slide.id} type="button" aria-current={slideIndex === index ? "true" : undefined} aria-label={`${text("slide")} ${slideIndex + 1}: ${slide.event?.name ?? slide.destination.name}`} title={slide.event?.name ?? slide.destination.name} onClick={() => goTo(slideIndex)}><span /></button>)}</div><span className="home-spotlight-counter" aria-hidden="true">{index + 1} / {slides.length}</span>{canPlay && <button className="home-spotlight-play" type="button" aria-label={text(paused ? "play" : "pause")} title={text(paused ? "play" : "pause")} onClick={() => setPaused(!paused)}>{paused ? <Play size={17} /> : <Pause size={17} />}</button>}</div>}
+    {slides.length > 1 && <div className="home-spotlight-controls"><div className="home-spotlight-dots">{slides.map((slide, slideIndex) => <button key={slide.id} type="button" aria-current={slideIndex === index ? "true" : undefined} aria-label={`${text("slide")} ${slideIndex + 1}: ${slide.event?.name ?? slide.destination.name}`} title={slide.event?.name ?? slide.destination.name} onClick={() => goTo(slideIndex)}><span /></button>)}</div><span className="home-spotlight-counter" aria-hidden="true">{index + 1} / {slides.length}</span></div>}
   </section>;
 }
