@@ -849,6 +849,7 @@ export function TouristWorkspace({
     onViewChange("recommendations");
   };
   const openSafety = () => {
+    setShowCheckInPanel(false);
     setOpenSafetyPanel(true);
     onViewChange("overview");
   };

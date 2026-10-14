@@ -21,6 +21,7 @@ import { TouristSosRequests } from "./TouristSosRequests";
 import { HomeDiscovery } from "./HomeDiscovery";
 import { UnlistedCheckInForm } from "./UnlistedCheckInForm";
 import { placeText } from "../services/placeSubmissionCopy";
+import { revealSafetyPanel } from "../services/safetyNavigation";
 import type { UnlistedPlaceDraft } from "../services/unlistedPlaces";
 
 type IncidentOption = {
@@ -215,9 +216,7 @@ export function TouristHome({
 
   useEffect(() => {
     if (!openSafetyPanel || !safetyPanelRef.current) return;
-    safetyPanelRef.current.open = true;
-    safetyPanelRef.current.scrollIntoView({ block: "start", behavior: "smooth" });
-    onSafetyPanelOpened?.();
+    return revealSafetyPanel(safetyPanelRef.current, onSafetyPanelOpened);
   }, [openSafetyPanel, onSafetyPanelOpened]);
 
   return (
@@ -276,8 +275,7 @@ export function TouristHome({
         {!showCheckInPanel && discoveryControl}
         {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} onOpenSpotlightEvent={onOpenSpotlightEvent} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
           if (safetyPanelRef.current) {
-            safetyPanelRef.current.open = true;
-            safetyPanelRef.current.scrollIntoView({ block: "start", behavior: "smooth" });
+            revealSafetyPanel(safetyPanelRef.current);
           }
         }} />}
 

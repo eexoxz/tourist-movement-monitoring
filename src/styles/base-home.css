@@ -666,6 +666,7 @@ button:disabled {
 .qr-active-check-in-panel {
   scroll-margin-top: 18px;
 }
+.safety-panel { scroll-margin-top: 18px; }
 
 .new-user-guide {
   display: grid;
