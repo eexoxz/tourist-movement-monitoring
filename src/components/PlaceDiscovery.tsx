@@ -1,4 +1,4 @@
-import { CalendarDays, ThumbsDown } from "lucide-react";
+import { Building2, CalendarDays, ChevronRight, CircleCheck, Compass, Landmark, MapPin, Navigation, Sparkles, ThumbsDown, Trees, Users, Utensils, Waves } from "lucide-react";
 import { discoveryText } from "../services/discoveryCopy";
 import { useEffect, useMemo, useState } from "react";
 import { destinationCategories } from "../services/destinationManagement";
@@ -21,6 +21,7 @@ const placeDiscoveryModes: Array<{ value: PlaceDiscoveryMode; labelKey: Translat
 ];
 
 const placePreviewLimit = 4;
+const categoryIcons = { cultural: Landmark, nature: Trees, urban: Building2, heritage: Landmark, food: Utensils, coastal: Waves };
 
 const categoryLabelKeys: Record<DestinationCategory, TranslationKey> = {
   cultural: "category.cultural",
@@ -343,32 +344,40 @@ export function PlaceDiscovery({
 
       <section className="places-discovery-layout">
         <div className="places-results">
-          {visibleRows.map((row) => (
+          {visibleRows.map((row) => {
+            const CategoryIcon = categoryIcons[row.destination.category];
+            return (
             <button
               className={selectedRow?.destination.id === row.destination.id ? "place-discovery-card active" : "place-discovery-card"}
               type="button"
               key={row.destination.id}
+              aria-pressed={selectedRow?.destination.id === row.destination.id}
               onClick={() => onSelectDestination(row.destination.id)}
             >
               <DestinationVisual destination={row.destination} compact locale={locale} />
+              <div className="place-card-content">
               <div className="place-card-heading">
                 <div>
-                  <span>{getCategoryLabel(row.destination.category, t)}</span>
+                  <span className="place-card-category"><CategoryIcon size={16} aria-hidden="true" />{getCategoryLabel(row.destination.category, t)}</span>
                   <strong>{row.destination.name}</strong>
+                  <span className="place-card-city">{row.destination.city}</span>
                 </div>
-                <small>{formatPlaceFitLabel(row.score, t)}</small>
+                <ChevronRight size={20} className="place-card-open" aria-hidden="true" />
               </div>
               <p>{row.insight}</p>
-              <div className="place-card-address">{row.destination.address ?? `${row.destination.city}, Malaysia`}</div>
+              <div className="place-card-address"><MapPin size={16} aria-hidden="true" /><span>{row.destination.address ?? `${row.destination.city}, Malaysia`}</span></div>
               <div className="place-card-meta">
-                <span>{row.destination.city}</span>
-                <span>{formatDemandLabel(row.demandRow?.tier, t)}</span>
-                <span>{formatDistanceLabel(row.distance, t)}</span>
-                {row.festivalBoosted && <span>{t("tourist.places.eventLinked")}</span>}
-                {row.visited ? <span>{t("tourist.places.visited")}</span> : <span>{t("tourist.places.newToYou")}</span>}
+                <span><Navigation size={16} aria-hidden="true" />{formatDistanceLabel(row.distance, t)}</span>
+                <span><Users size={16} aria-hidden="true" />{formatDemandLabel(row.demandRow?.tier, t)}</span>
+              </div>
+              <div className="place-card-signals">
+                <small className="place-card-fit"><Sparkles size={15} aria-hidden="true" />{formatPlaceFitLabel(row.score, t)}</small>
+                {row.festivalBoosted && <span className="place-card-event"><CalendarDays size={15} aria-hidden="true" />{t("tourist.places.eventLinked")}</span>}
+                <span className="place-card-history">{row.visited ? <CircleCheck size={15} aria-hidden="true" /> : <Compass size={15} aria-hidden="true" />}{t(row.visited ? "tourist.places.visited" : "tourist.places.newToYou")}</span>
+              </div>
               </div>
             </button>
-          ))}
+          ); })}
           {hiddenPlaceCount > 0 && (
             <div className="places-results-footer">
               <p>{t("tourist.places.moreAvailable")}</p>

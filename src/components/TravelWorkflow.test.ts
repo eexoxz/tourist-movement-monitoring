@@ -12,6 +12,11 @@ import { sampleUnlistedCheckIns } from "../services/unlistedPlaces";
 import { HomeSpotlight } from "./HomeSpotlight";
 import { FestivalCalendarPanel } from "./FestivalCalendarPanel";
 import { calendarDay } from "../services/useCalendarDay";
+import { PlaceDiscovery } from "./PlaceDiscovery";
+import { TripActionDialog } from "./TripActionDialog";
+import { localeOptions, translate } from "../services/i18n";
+import { calculateDestinationDemand } from "../services/analytics";
+import { localizeDestinations } from "../services/destinationLocale";
 
 vi.mock("./MovementMap", () => ({
   MovementMap: (props: { points: unknown[]; displayMode: string }) => createElement("div", { "data-route-points": props.points.length, "data-map-mode": props.displayMode }),
@@ -31,6 +36,32 @@ const tripProps: ComponentProps<typeof TripExperience> = {
 };
 
 describe("tourist travel workflow boundaries", () => {
+  for (const { value: locale } of localeOptions) it(`keeps redesigned Places data and dialog labels in ${locale}`, () => {
+    const destination = initialData.destinations[0];
+    const html = renderToStaticMarkup(createElement(PlaceDiscovery, {
+      destinations: [destination], demand: calculateDestinationDemand(initialData), recommendations: initialData.recommendations,
+      user: initialData.users.find((user) => user.id === "tourist-demo")!, latestAnalysis: initialData.analyses[0],
+      festivals: [{ id: "card-event", name: "Card event", date: "2026-10-20", scope: "national", states: [], category: "cultural", description: "", destinationIds: [destination.id] }],
+      visitedIds: new Set<string>(), referencePoint: initialData.points[0], locale, onSelectDestination: noop, onOpenEvents: noop,
+    }));
+    expect(html).toContain(localizeDestinations([destination], locale)[0].name);
+    expect(html).toContain('class="place-card-address"');
+    expect(html).toContain('class="place-card-meta"');
+    expect(html).toContain('class="place-card-signals"');
+    expect(html).toContain(translate(locale, "tourist.places.eventLinked"));
+    expect(html).toContain(translate(locale, "tourist.places.newToYou"));
+    expect(html).toContain('aria-pressed="true"');
+    const dialog = renderToStaticMarkup(createElement(TripActionDialog, { kind: "stop", label: "", locale, onLabelChange: noop, onConfirm: noop, onCancel: noop }));
+    expect(dialog).toContain('aria-describedby="trip-dialog-description"');
+    expect(dialog).toContain('class="trip-dialog-actions"');
+    expect(dialog).toContain(translate(locale, "tourist.home.stopTrip"));
+  });
+  it("keeps the rename dialog's field and submit control", () => {
+    const html = renderToStaticMarkup(createElement(TripActionDialog, { kind: "rename", label: "My journey", locale: "en", onLabelChange: noop, onConfirm: noop, onCancel: noop }));
+    expect(html).toContain('value="My journey"');
+    expect(html).toContain("Save changes");
+    expect(html).not.toContain('aria-describedby="trip-dialog-description"');
+  });
   it("keeps nationwide banner picks separate from nearby suggestions", () => {
     const html = renderToStaticMarkup(createElement(HomeDiscovery, { ...homeProps, destinations: [initialData.destinations[0]], spotlightDestinations: initialData.destinations }));
     expect(html).toContain("Kampung Baru");
