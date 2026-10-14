@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, ChevronRight, CircleCheck, Compass, Landmark, MapPin, Navigation, Sparkles, ThumbsDown, Trees, Users, Utensils, Waves } from "lucide-react";
+import { Building2, CalendarDays, ChevronRight, CircleCheck, Compass, Landmark, MapPin, Maximize2, Navigation, Sparkles, Trees, Users, Utensils, Waves } from "lucide-react";
 import { discoveryText } from "../services/discoveryCopy";
 import { useEffect, useMemo, useState } from "react";
 import { destinationCategories } from "../services/destinationManagement";
@@ -9,6 +9,8 @@ import { DestinationVisual } from "./DestinationVisual";
 import { uiText } from "../services/uiText";
 import { localizeCity, localizeDestinations } from "../services/destinationLocale";
 import { EmptyState } from "./SummaryCards";
+import { PlaceGuide } from "./PlaceGuide";
+import { PlaceGuideDialog } from "./PlaceGuideDialog";
 
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
 
@@ -47,6 +49,10 @@ type PlaceDiscoveryProps = {
   onOpenEvents: () => void;
   onHideDestination?: (id: string) => void;
   isBrowsingArea?: boolean;
+  onCheckIn?: (id: string) => void;
+  guideRequested?: boolean;
+  onGuideRequestConsumed?: () => void;
+  requestedDestination?: Destination;
 };
 
 function getCategoryLabel(category: DestinationCategory, t: (key: TranslationKey) => string) {
@@ -158,6 +164,10 @@ export function PlaceDiscovery({
   onOpenEvents,
   onHideDestination,
   isBrowsingArea = false,
+  onCheckIn,
+  guideRequested = false,
+  onGuideRequestConsumed,
+  requestedDestination,
 }: PlaceDiscoveryProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [search, setSearch] = useState("");
@@ -165,8 +175,10 @@ export function PlaceDiscovery({
   const [cityFilter, setCityFilter] = useState("all");
   const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const cityOptions = useMemo(() => Array.from(new Set(destinations.map((destination) => destination.city))).sort(), [destinations]);
   const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
+  const localizedRequest = useMemo(() => requestedDestination ? localizeDestinations([requestedDestination], locale)[0] : undefined, [requestedDestination, locale]);
   const cityByDestinationId = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination.city])), [destinations]);
   const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
   const recommendationByDestinationId = useMemo(() => new Map(recommendations.map((recommendation) => [recommendation.destinationId, recommendation])), [recommendations]);
@@ -266,6 +278,19 @@ export function PlaceDiscovery({
   ]);
 
   const selectedRow = rows.find((row) => row.destination.id === selectedDestinationId) ?? rows[0];
+  useEffect(() => {
+    if (!guideRequested || (!localizedRequest && !selectedRow)) return;
+    setGuideOpen(true);
+    onGuideRequestConsumed?.();
+  }, [guideRequested, localizedRequest?.id, selectedRow?.destination.id, onGuideRequestConsumed]);
+  const renderGuide = (destination: Destination) => <PlaceGuide destination={destination} locale={locale}
+    distance={formatDistanceLabel(referencePoint ? distanceKm(referencePoint, destination) : undefined, t)} distanceLabel={isBrowsingArea ? discoveryText(locale, "fromArea") : t("common.distance")}
+    demand={formatDemandLabel(demandByDestinationId.get(destination.id)?.tier, t)} preference={user.travelPreferences?.includes(destination.category) || categoryFitsProfile(destination.category, latestAnalysis?.profile ?? user.expectedProfile) ? t("tourist.places.matchesProfile") : t("tourist.places.differentStyle")}
+    eventRelevance={festivalDestinationIds.has(destination.id) ? t("tourist.places.linkedUpcoming") : t("tourist.places.noCurrentEvent")}
+    onCheckIn={onCheckIn ? () => { setGuideOpen(false); onCheckIn(destination.id); } : undefined}
+    onOpenEvents={() => { setGuideOpen(false); onOpenEvents(); }}
+    onHide={onHideDestination ? () => { setGuideOpen(false); onHideDestination(destination.id); } : undefined} />;
+  const guideDestination = localizedRequest ?? selectedRow?.destination;
   const visibleRows = showAllPlaces ? rows : rows.slice(0, placePreviewLimit);
   const hiddenPlaceCount = rows.length - visibleRows.length;
   const personalized = Boolean(latestAnalysis);
@@ -352,7 +377,7 @@ export function PlaceDiscovery({
               type="button"
               key={row.destination.id}
               aria-pressed={selectedRow?.destination.id === row.destination.id}
-              onClick={() => onSelectDestination(row.destination.id)}
+              onClick={() => { onSelectDestination(row.destination.id); if (window.matchMedia("(max-width: 900px)").matches) setGuideOpen(true); }}
             >
               <DestinationVisual destination={row.destination} compact locale={locale} />
               <div className="place-card-content">
@@ -396,68 +421,9 @@ export function PlaceDiscovery({
           {rows.length === 0 && <EmptyState text={destinations.length === 0 ? discoveryText(locale, referencePoint ? "noLocal" : "locationNeeded") : t("tourist.places.noMatches")} />}
         </div>
 
-        {selectedRow && (
-          <aside className="place-detail-card">
-            <DestinationVisual destination={selectedRow.destination} locale={locale} />
-            <span>{getCategoryLabel(selectedRow.destination.category, t)}</span>
-            <h2>{selectedRow.destination.name}</h2>
-            <p>{selectedRow.destination.description}</p>
-            <dl>
-              <div>
-                <dt>{t("common.address")}</dt>
-                <dd>{selectedRow.destination.address ?? `${selectedRow.destination.city}, Malaysia`}</dd>
-              </div>
-              <div>
-                <dt>{t("common.demand")}</dt>
-                <dd>{formatDemandLabel(selectedRow.demandRow?.tier, t)}</dd>
-              </div>
-              <div>
-                <dt>{t("tourist.places.tripFit")}</dt>
-                <dd>{selectedRow.preferenceMatch ? t("tourist.places.matchesProfile") : t("tourist.places.differentStyle")}</dd>
-              </div>
-              <div>
-                <dt>{t("tourist.places.eventRelevance")}</dt>
-                <dd>{selectedRow.festivalBoosted ? t("tourist.places.linkedUpcoming") : t("tourist.places.noCurrentEvent")}</dd>
-              </div>
-              <div>
-                <dt>{isBrowsingArea ? discoveryText(locale, "fromArea") : t("common.distance")}</dt>
-                <dd>{formatDistanceLabel(selectedRow.distance, t)}</dd>
-              </div>
-              <div>
-                <dt>{t("common.averageVisit")}</dt>
-                <dd>{selectedRow.destination.averageVisitMinutes} {t("common.minutes")}</dd>
-              </div>
-              <div>
-                <dt>{t("common.openingHours")}</dt>
-                <dd>{selectedRow.destination.openingHours ?? t("common.checkLocally")}</dd>
-              </div>
-              <div>
-                <dt>{t("common.feeNote")}</dt>
-                <dd>{selectedRow.destination.feeNote ?? t("common.feeMayVary")}</dd>
-              </div>
-            </dl>
-            {selectedRow.destination.visitTips && selectedRow.destination.visitTips.length > 0 && (
-              <section className="visit-tips-panel compact">
-                <strong>{t("tourist.places.beforeYouGo")}</strong>
-                <ul>
-                  {selectedRow.destination.visitTips.map((tip) => (
-                    <li key={tip}>{tip}</li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            <div className="place-detail-actions">
-              {onHideDestination && <button className="secondary-action" type="button" onClick={() => onHideDestination(selectedRow.destination.id)}>
-                <ThumbsDown size={18} />{discoveryText(locale, "hide")}
-              </button>}
-              <button className="secondary-action" type="button" onClick={onOpenEvents}>
-                <CalendarDays size={18} />
-                {t("common.checkEvents")}
-              </button>
-            </div>
-          </aside>
-        )}
+        {selectedRow && <aside key={selectedRow.destination.id} className="place-guide-sidebar" aria-label={selectedRow.destination.name}><button type="button" className="place-guide-expand" onClick={() => { onSelectDestination(selectedRow.destination.id); setGuideOpen(true); }}><Maximize2 size={17} />{t("tourist.recommendations.viewDestination")}</button>{renderGuide(selectedRow.destination)}</aside>}
       </section>
+      {guideOpen && guideDestination && <PlaceGuideDialog title={guideDestination.name} locale={locale} onClose={() => setGuideOpen(false)}>{renderGuide(guideDestination)}</PlaceGuideDialog>}
     </section>
   );
 }

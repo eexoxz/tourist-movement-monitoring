@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
-import { Download, MapPin, RotateCcw, Trash2, UserRound } from "lucide-react";
+import { ArrowRight, ChartNoAxesCombined, ChevronDown, Download, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Trash2, UserRound, Users } from "lucide-react";
+import { interfaceText } from "../services/interfaceCopy";
 import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, TouristProfile, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
@@ -945,7 +946,7 @@ export function AdminWorkspace({
       title={t("admin.dashboard.title")}
       eyebrow={t("admin.dashboard.eyebrow")}
       actions={
-        <div className="page-action-row">
+        <details className="admin-data-tools" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}><summary><SlidersHorizontal size={18} />{interfaceText(locale, "tools")}<ChevronDown size={16} /></summary><div className="page-action-row">
           <button className="secondary-action" onClick={seedDemoTourists} disabled={Boolean(demoDatasetAction) || demoDatasetLoaded}>
             <UserRound size={18} />
             {demoDatasetAction === "loading" ? t("admin.demo.loadingButton") : demoDatasetLoaded ? t("admin.demo.loadedButton") : t("admin.demo.loadButton")}
@@ -963,41 +964,44 @@ export function AdminWorkspace({
           <small className="demo-sync-note" aria-live="polite">
             {t("admin.demo.localOnlyNote")}
           </small>
-        </div>
+        </div></details>
       }
     >
-      {pendingPlaceCount > 0 && onViewChange && <button className="secondary-action place-review-shortcut" type="button" onClick={() => onViewChange("destinations")}>
-        <MapPin size={20} />{placeText(locale, "queue")}<strong>{pendingPlaceCount}</strong>
-      </button>}
+      {demoDatasetLoaded && <p className="admin-dataset-note">{t("admin.demo.loadedButton")} · {t("admin.demo.localOnlyNote")}</p>}
+      <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
+        <button type="button" className={openSafetyRecordCount ? "needs-action safety" : "safety"} onClick={() => setAdminTab("safety")}><Siren size={22} /><span>{adminText("overview.safetyCases")}</span><strong>{openSafetyRecordCount}</strong><ArrowRight size={17} /></button>
+        {onViewChange && <button type="button" className={pendingPlaceCount ? "needs-action reviews" : "reviews"} onClick={() => onViewChange("destinations")}><MapPin size={22} /><span>{placeText(locale, "queue")}</span><strong>{pendingPlaceCount}</strong><ArrowRight size={17} /></button>}
+        <button type="button" onClick={() => { setAdminTab("overview"); window.requestAnimationFrame(() => { const panel = document.getElementById("admin-movement-alerts") as HTMLDetailsElement | null; if (panel) { panel.open = true; panel.querySelector("summary")?.focus({ preventScroll: true }); panel.scrollIntoView({ block: "start", behavior: "instant" }); } }); }}><Route size={22} /><span>{adminText("overview.movementAlerts")}</span><strong>{movementAlerts.length}</strong><ArrowRight size={17} /></button>
+      </div></section>
       {placeQueueState === "offline" && <p role="alert">{unlistedLocationText(locale, "queueOffline")}</p>}
       <div className="segmented-control admin-tabs" aria-label={t("admin.dashboard.tabsLabel")}>
-        <button className={adminTab === "overview" ? "active" : ""} type="button" onClick={() => setAdminTab("overview")}>
-          {t("admin.tabs.overview")}
+        <button className={adminTab === "overview" ? "active" : ""} aria-pressed={adminTab === "overview"} type="button" onClick={() => setAdminTab("overview")}>
+          <LayoutDashboard size={18} />{t("admin.tabs.overview")}
         </button>
-        <button className={adminTab === "tourists" ? "active" : ""} type="button" onClick={() => setAdminTab("tourists")}>
-          {t("admin.tabs.tourists")}
+        <button className={adminTab === "tourists" ? "active" : ""} aria-pressed={adminTab === "tourists"} type="button" onClick={() => setAdminTab("tourists")}>
+          <Users size={18} />{t("admin.tabs.tourists")}
         </button>
-        <button className={adminTab === "records" ? "active" : ""} type="button" onClick={() => setAdminTab("records")}>
-          {t("admin.tabs.records")}
+        <button className={adminTab === "records" ? "active" : ""} aria-pressed={adminTab === "records"} type="button" onClick={() => setAdminTab("records")}>
+          <Route size={18} />{t("admin.tabs.records")}
         </button>
-        <button className={adminTab === "safety" ? "active" : ""} type="button" onClick={() => setAdminTab("safety")}>
-          {t("admin.tabs.safety")}
+        <button className={adminTab === "safety" ? "active" : ""} aria-pressed={adminTab === "safety"} type="button" onClick={() => setAdminTab("safety")}>
+          <ShieldCheck size={18} />{t("admin.tabs.safety")}
         </button>
-        <button className={adminTab === "ai" ? "active" : ""} type="button" onClick={() => setAdminTab("ai")}>
-          {t("admin.tabs.ai")}
+        <button className={adminTab === "ai" ? "active" : ""} aria-pressed={adminTab === "ai"} type="button" onClick={() => setAdminTab("ai")}>
+          <ChartNoAxesCombined size={18} />{t("admin.tabs.ai")}
         </button>
       </div>
 
       {adminTab === "overview" && (
         <div className="admin-tab-panel">
-          <MovementPulseHero
+          <details className="admin-planning-disclosure"><summary><ChartNoAxesCombined size={19} />{adminText("overview.travelPlanSignal")}</summary><MovementPulseHero
             mode="admin"
             demand={destinationDemand}
             destinations={data.destinations}
             profile={`${tourists.length} ${adminText("overview.touristProfiles")}`}
             pointCount={summary.movementPointCount}
             plan={travelPlan}
-          locale={locale} />
+          locale={locale} /></details>
           <MetricGrid
             items={[
               [t("common.tourist"), tourists.length.toString()],
@@ -1015,7 +1019,7 @@ export function AdminWorkspace({
             <aside className="admin-command-panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
 
-              <details className="admin-overview-section" open>
+              <details className="admin-overview-section" id="admin-movement-alerts" open>
                 <summary>
                   <span>{adminText("overview.movementAlertsTitle")}</span>
                   <strong>{adminText("overview.alertCount", { count: movementAlerts.length })}</strong>

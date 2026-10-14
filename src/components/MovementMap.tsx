@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo } from "react";
 import type { Destination, DestinationDemand, MovementPoint } from "../types";
 import { translate, type Locale } from "../services/i18n";
 import { localizeDestinations } from "../services/destinationLocale";
+import { LoaderCircle } from "lucide-react";
 
 const MapView = lazy(() => import("./MapView").then((module) => ({ default: module.MapView })));
 
@@ -23,7 +24,7 @@ export function MovementMap({ points, destinations, activePoint, mode = "admin",
       fallback={
         <div className="map-frame">
           <div className="map-view map-view-placeholder" />
-          <div className="map-status">{translate(locale, "map.loading")}</div>
+          <div className="map-status" role="status"><LoaderCircle size={18} aria-hidden="true" />{translate(locale, "map.loading")}</div>
         </div>
       }
     >

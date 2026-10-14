@@ -17,6 +17,9 @@ import { TripActionDialog } from "./TripActionDialog";
 import { localeOptions, translate } from "../services/i18n";
 import { calculateDestinationDemand } from "../services/analytics";
 import { localizeDestinations } from "../services/destinationLocale";
+import { PlaceGuide } from "./PlaceGuide";
+import { PlaceGuideDialog } from "./PlaceGuideDialog";
+import { AdminWorkspace } from "../workspaces/AdminWorkspace";
 
 vi.mock("./MovementMap", () => ({
   MovementMap: (props: { points: unknown[]; displayMode: string }) => createElement("div", { "data-route-points": props.points.length, "data-map-mode": props.displayMode }),
@@ -36,6 +39,40 @@ const tripProps: ComponentProps<typeof TripExperience> = {
 };
 
 describe("tourist travel workflow boundaries", () => {
+  it("keeps useful visiting information and direct actions in the place guide", () => {
+    const destination = initialData.destinations[0];
+    const html = renderToStaticMarkup(createElement(PlaceGuide, { destination, locale: "en", distance: "1.2 km away", distanceLabel: "Distance", demand: "Low demand", preference: "Matches your profile", eventRelevance: "Upcoming event", onCheckIn: noop, onOpenEvents: noop, onHide: noop }));
+    expect(html).toContain("Plan your visit");
+    expect(html).toContain("Opening hours");
+    expect(html).toContain("Fee note");
+    expect(html).toContain("Check in");
+    expect(html).toContain("Directions");
+    expect(html).toContain("1.2 km away");
+    expect(html).toContain("Low demand");
+    expect(html).toContain("More about this place");
+    expect(html).toContain(`https://www.openstreetmap.org/directions?to=${destination.latitude}%2C${destination.longitude}`);
+    const dialog = renderToStaticMarkup(createElement(PlaceGuideDialog, { title: destination.name, locale: "en", onClose: noop, children: createElement("p", null, "Guide") }));
+    expect(dialog).toContain("<dialog");
+    expect(dialog).toContain("Close place details");
+  });
+  it("distinguishes an active recording from a trip needing location recovery", () => {
+    const activeTrip = { id: "active", userId: "tourist-demo", status: "active" as const, startedAt: new Date().toISOString(), consentId: "consent" };
+    const live = renderToStaticMarkup(createElement(TripExperience, { ...tripProps, activeTrip, isLiveTracking: true }));
+    expect(live).toContain("Recording");
+    expect(live).toContain("is-recording");
+    const recovering = renderToStaticMarkup(createElement(TripExperience, { ...tripProps, activeTrip, isLiveTracking: false }));
+    expect(recovering).toContain("Location needs attention");
+    expect(recovering).toContain("Resume tracking");
+    expect(recovering).not.toContain("is-recording");
+  });
+  it("keeps admin priority navigation connected to real pending cases and reviews", () => {
+    const html = renderToStaticMarkup(createElement(AdminWorkspace, { data: initialData, actor: initialData.users.find((user) => user.role === "admin")!, view: "dashboard", locale: "en", onDataChange: noop, onViewChange: noop, notify: noop }));
+    expect(html).toContain("Needs your attention");
+    expect(html).toContain("Unlisted places to review");
+    expect(html).toContain('id="admin-movement-alerts"');
+    expect(html).toContain('class="admin-planning-disclosure"');
+    expect(html).toContain('aria-pressed="true"');
+  });
   for (const { value: locale } of localeOptions) it(`keeps redesigned Places data and dialog labels in ${locale}`, () => {
     const destination = initialData.destinations[0];
     const html = renderToStaticMarkup(createElement(PlaceDiscovery, {

@@ -1,4 +1,4 @@
-import { Building2, ChevronDown, Flame, Hospital, PhoneCall, QrCode, Save, ShieldCheck, Square, UserRound } from "lucide-react";
+import { ArrowLeft, Building2, ChevronDown, Flame, Hospital, PhoneCall, QrCode, Save, ShieldCheck, Square, UserRound } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { malaysiaEmergencyNumbers } from "../data/emergencyServices";
 import { formatDateTime } from "../services/geo";
@@ -43,6 +43,7 @@ type TouristHomeProps = {
   activeCheckInDestination: Destination | null;
   checkInDestinationId: string;
   showCheckInPanel?: boolean;
+  onCloseCheckInPanel?: () => void;
   openSafetyPanel?: boolean;
   onSafetyPanelOpened?: () => void;
   recentCheckIns: AttractionCheckIn[];
@@ -128,6 +129,7 @@ export function TouristHome({
   activeCheckInDestination,
   checkInDestinationId,
   showCheckInPanel = false,
+  onCloseCheckInPanel,
   openSafetyPanel = false,
   onSafetyPanelOpened,
   recentCheckIns,
@@ -221,6 +223,7 @@ export function TouristHome({
 
   return (
     <Page title={displayName ? `${t("tourist.home.welcomeBack")}, ${displayName}` : t("tourist.home.planTitle")} eyebrow={t("common.tourist")}>
+      {showCheckInPanel && onCloseCheckInPanel && <button className="secondary-action check-in-back" type="button" onClick={onCloseCheckInPanel}><ArrowLeft size={18} />{t("nav.home")}</button>}
       <section className={showCheckInPanel ? "tourist-home-flow qr-check-in-mode" : "tourist-home-flow"}>
         {showCheckInPanel && (
           <section className="home-support-grid qr-check-in-priority">

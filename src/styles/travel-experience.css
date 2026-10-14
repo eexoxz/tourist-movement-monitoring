@@ -206,8 +206,8 @@ body:has(.home-spotlight) { touch-action: auto; }
 }
 
 .home-discovery-shortcuts .home-event-shortcut {
-  color: #912649;
-  border-color: #ead4dd;
+  color: #335cad;
+  border-color: #dfe5e8;
 }
 
 .home-discovery-shortcuts .home-safety-shortcut,

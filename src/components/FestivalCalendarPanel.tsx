@@ -2,7 +2,8 @@ import { uiText } from "../services/uiText";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { localizeDestinations } from "../services/destinationLocale";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ChevronDown, MapPin, SlidersHorizontal } from "lucide-react";
+import { interfaceText } from "../services/interfaceCopy";
 import { allMalaysianStates } from "../data/festivals";
 import type { Destination, FestivalCategory, FestivalEvent, MalaysianState, MovementPoint } from "../types";
 import { distanceKm } from "../services/geo";
@@ -228,7 +229,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
           </p>
         </div>
         {!compact && (
-          <div className="festival-filter-grid">
+          <details className="festival-filter-disclosure"><summary><SlidersHorizontal size={18} />{interfaceText(locale, "filters")}<ChevronDown size={18} /></summary><div className="festival-filter-grid">
             <label className="festival-filter">
               {t("tourist.events.fromDate")}
               <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
@@ -262,7 +263,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
               <input type="checkbox" checked={nearMeOnly} onChange={(event) => setNearMeOnly(event.target.checked)} disabled={!localState} />
               <span>{referenceState ? discoveryText(locale, "eventsInArea") : localState ? t("tourist.events.nearMe") : t("tourist.events.nearMeUnavailable")}</span>
             </label>
-          </div>
+          </div></details>
         )}
       </div>
       <div className="festival-list">
@@ -274,19 +275,17 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
           return (
             <article className={`festival-card festival-card-${event.category}`} key={event.id}>
               <div className="festival-date-rail">
-                <CalendarDays size={17} />
-                <strong>{formatEventDate(event, locale)}</strong>
-                <span>{t(categoryLabelKey(event.category))}</span>
+                <time dateTime={event.date} aria-label={formatEventDate(event, locale)}><strong className="festival-day">{new Intl.DateTimeFormat(dateLocale(locale), { day: "numeric" }).format(new Date(`${event.date}T00:00:00`))}</strong><span className="festival-month">{new Intl.DateTimeFormat(dateLocale(locale), { month: "short", year: "numeric" }).format(new Date(`${event.date}T00:00:00`))}</span></time>
               </div>
               <div className="festival-card-main">
                 <div className="festival-card-heading">
-                  <h3>{event.name}</h3>
+                  <span className="festival-category">{t(categoryLabelKey(event.category))}</span><h3>{event.name}</h3>
                 </div>
-                {event.venue && <small className="festival-venue">{event.venue}</small>}
-                <p>{eventDescription(event, locale, t)}</p>
+                {event.endDate && event.endDate !== event.date && <time className="festival-date-range" dateTime={event.endDate}>{formatEventDate(event, locale)}</time>}
+                {event.venue && <small className="festival-venue"><MapPin size={15} />{event.venue}</small>}
                 <div className="festival-state-details">
                   <button type="button" onClick={() => toggleEventStates(event.id)} aria-expanded={statesExpanded}>
-                    {uiText(locale, formatFestivalStateSummaryLabel(event))}
+                    <MapPin size={15} />{uiText(locale, formatFestivalStateSummaryLabel(event))}<ChevronDown size={15} />
                   </button>
                   {statesExpanded && (
                     <div>
@@ -294,7 +293,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
                     </div>
                   )}
                 </div>
-                <div className="festival-insight-row">
+                <details className="festival-event-details" open={event.id === initialEventId}><summary><CalendarDays size={16} />{interfaceText(locale, "details")}<ChevronDown size={16} /></summary><p>{eventDescription(event, locale, t)}</p><div className="festival-insight-row">
                   <small className="festival-planning-note">{eventDetails?.planningSummary && uiText(locale, eventDetails.planningSummary)}</small>
                   {matchedDestinations.length > 0 && (
                     <div className="festival-destinations">
@@ -306,7 +305,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
                       ))}
                     </div>
                   )}
-                </div>
+                </div></details>
               </div>
             </article>
           );

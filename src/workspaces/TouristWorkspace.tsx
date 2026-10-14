@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
-import { ChevronDown, Compass, MapPin, Navigation, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
+import { CalendarDays, Compass, Navigation, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
 import type { AppData, AppView, IncidentType, MovementPoint, SosClosureReason, TripSession, User } from "../types";
 import { loadData, loadSharedDestinations } from "../services/storage";
 import { distanceKm, nearestDestination } from "../services/geo";
@@ -21,7 +21,6 @@ import { getLiveNearbySuggestion, type LiveNearbySuggestion } from "../services/
 import { discoveryRadiusKm, getDiscoveryDestinations, getDiscoveryReference, getLatestDiscoveryPoint, getLocalEventAnnouncement } from "../services/discovery";
 import { discoveryAreas } from "../data/discoveryAreas";
 import { discoveryText } from "../services/discoveryCopy";
-import { DiscoveryLocationControl } from "../components/DiscoveryLocationControl";
 import { DiscoveryPrompt } from "../components/DiscoveryPrompt";
 import { ActivityBasis } from "../components/ActivityBasis";
 import { activityText } from "../services/activityCopy";
@@ -35,6 +34,7 @@ import { uiText } from "../services/uiText";
 import { FestivalCalendarPanel } from "../components/FestivalCalendarPanel";
 import { Page } from "../components/Page";
 import { PlaceDiscovery } from "../components/PlaceDiscovery";
+import { DiscoveryAreaPicker } from "../components/DiscoveryAreaPicker";
 import { TouristHome } from "../components/TouristHome";
 import { TouristPassCard } from "../components/TouristPassCard";
 import { TouristProfileForm } from "../components/TouristProfileForm";
@@ -81,6 +81,7 @@ export function TouristWorkspace({
   const [refreshingActivities, setRefreshingActivities] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>("");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
+  const [placeGuideRequested, setPlaceGuideRequested] = useState(false);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>(() => loadLastBrowserLocation(user.id));
   const [checkInDestinationId, setCheckInDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
@@ -98,7 +99,6 @@ export function TouristWorkspace({
   const [spotlightEventId, setSpotlightEventId] = useState<string>();
   const [tripDialog, setTripDialog] = useState<{ kind: "rename"; trip: TripSession } | { kind: "stop" } | null>(null);
   const [tripLabelDraft, setTripLabelDraft] = useState("");
-  const homeAreaPickerRef = useRef<HTMLDetailsElement | null>(null);
   const geofenceNoticeKey = useRef("");
   const liveSuggestionDestinationIds = useRef(new Set<string>());
   const lastSuggestionAt = useRef(0);
@@ -262,7 +262,7 @@ export function TouristWorkspace({
   };
 
   const openSuggestedPlace = () => {
-    if (liveSuggestion) setSelectedDestinationId(liveSuggestion.destination.id);
+    if (liveSuggestion) { setSelectedDestinationId(liveSuggestion.destination.id); setPlaceGuideRequested(true); }
     setLiveSuggestion(null);
     onViewChange("recommendations");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -846,6 +846,7 @@ export function TouristWorkspace({
       else browseAreaNear(destination);
     }
     setSelectedDestinationId(destinationId);
+    setPlaceGuideRequested(true);
     onViewChange("recommendations");
   };
   const openSafety = () => {
@@ -962,7 +963,7 @@ export function TouristWorkspace({
           </button>
         }
       >
-        <DiscoveryLocationControl user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
+        <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
         <ActivityBasis destinations={discoveryDestinations} user={user} locale={locale} onRefresh={user.authUid ? refreshActivities : undefined} refreshing={refreshingActivities} />
         <PlaceDiscovery
           destinations={canonicalDiscoveryDestinations}
@@ -976,6 +977,10 @@ export function TouristWorkspace({
           selectedDestinationId={selectedDestinationId}
           locale={locale}
           onSelectDestination={setSelectedDestinationId}
+          guideRequested={placeGuideRequested}
+          requestedDestination={data.destinations.find((destination) => destination.id === selectedDestinationId)}
+          onGuideRequestConsumed={() => setPlaceGuideRequested(false)}
+          onCheckIn={(id) => { setCheckInDestinationId(id); setShowCheckInPanel(true); onViewChange("overview"); }}
           onOpenEvents={() => onViewChange("events")}
           onHideDestination={hideDestination}
           isBrowsingArea={user.discoveryLocationMode === "area"}
@@ -988,18 +993,8 @@ export function TouristWorkspace({
     return (
       <Page title={t("tourist.events.pageTitle")} eyebrow={t("common.tourist")}>
         <section className="event-calendar-page">
-          <section className="recommendation-profile-card">
-            <div>
-              <span>{t("tourist.events.planningWindow")}</span>
-              <strong>{t("tourist.events.next12Months")}</strong>
-            </div>
-            <div>
-              <span>{t("tourist.events.malaysiaFocus")}</span>
-              <strong>{upcomingFestivals.length} {t("tourist.events.eventSignals")}</strong>
-            </div>
-            <p>{t("tourist.events.pageDescription")}</p>
-          </section>
-          <DiscoveryLocationControl user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
+          <section className="calendar-window"><CalendarDays size={22} aria-hidden="true" /><strong>{t("tourist.events.next12Months")}</strong><span>{upcomingFestivals.length} {t("tourist.events.eventSignals")}</span></section>
+          <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
           <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} initialEventId={spotlightEventId} referencePoint={discoveryReference} referenceState={user.discoveryLocationMode === "area" ? discoveryAreas.find((area) => area.id === user.discoveryAreaId)?.state : undefined} />
         </section>
       </Page>
@@ -1014,10 +1009,7 @@ export function TouristWorkspace({
       currentConsent={currentConsent}
       destinations={discoveryReference ? discoveryDestinations : localizedDestinations}
       checkInDestinations={localizedDestinations}
-      discoveryControl={<details className="home-area-picker" ref={homeAreaPickerRef}><summary><MapPin size={20} aria-hidden="true" /><span>{discoveryText(locale, "location")}</span><strong>{user.discoveryLocationMode === "area" ? discoveryAreas.find((area) => area.id === user.discoveryAreaId)?.name ?? discoveryText(locale, "choose") : discoveryText(locale, "current")}</strong><ChevronDown size={18} aria-hidden="true" /></summary><DiscoveryLocationControl user={user} locale={locale} onChange={(mode, areaId) => {
-        changeDiscoveryLocation(mode, areaId);
-        if ((mode === "current" || areaId) && homeAreaPickerRef.current) homeAreaPickerRef.current.open = false;
-      }} onSettings={() => onViewChange("profile")} /></details>}
+      discoveryControl={<DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />}
       hasLocalReference={Boolean(discoveryReference)}
       geofenceWarnings={geofenceWarnings}
       tourismAdvisories={tourismAdvisories}
@@ -1025,6 +1017,7 @@ export function TouristWorkspace({
       activeCheckInDestination={activeCheckInDestination}
       checkInDestinationId={checkInDestinationId}
       showCheckInPanel={showCheckInPanel}
+      onCloseCheckInPanel={() => { setShowCheckInPanel(false); onViewChange("overview"); }}
       openSafetyPanel={openSafetyPanel}
       onSafetyPanelOpened={() => setOpenSafetyPanel(false)}
       recentCheckIns={recentCheckIns}

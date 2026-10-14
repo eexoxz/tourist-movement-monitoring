@@ -653,8 +653,8 @@
 .primary-action {
   border: 0;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--teal), #0b8f81);
-  box-shadow: 0 10px 20px rgba(15, 118, 110, 0.16);
+  background: var(--teal);
+  box-shadow: 0 2px 4px rgba(15, 118, 110, 0.12);
 }
 
 .primary-action.danger {

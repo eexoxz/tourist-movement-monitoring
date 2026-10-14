@@ -1,4 +1,4 @@
-import { MapPinned, Sparkles } from "lucide-react";
+import { Inbox, MapPinned, Sparkles } from "lucide-react";
 import { formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AnalysisResult, TripSummary } from "../types";
@@ -87,8 +87,8 @@ export function CompletedTripSummary({
 
 export function EmptyState({ text }: { text: string }) {
   return (
-    <section className="empty-state">
-      <Sparkles size={22} />
+    <section className="empty-state" role="status">
+      <Inbox size={24} aria-hidden="true" />
       <p>{text}</p>
     </section>
   );

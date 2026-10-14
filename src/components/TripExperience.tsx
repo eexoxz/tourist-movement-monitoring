@@ -1,8 +1,9 @@
-import { ArrowRight, Compass, Navigation, Play, Settings2, ShieldCheck, Square } from "lucide-react";
+import { ArrowRight, CircleCheck, Clock3, Compass, Navigation, Play, Settings2, ShieldCheck, Square } from "lucide-react";
 import { distanceKm } from "../services/geo";
 import { translate, type Locale } from "../services/i18n";
 import { travelText } from "../services/travelExperienceCopy";
 import { uiText } from "../services/uiText";
+import { interfaceText } from "../services/interfaceCopy";
 import type { GeoFenceWarning } from "../services/geofencing";
 import type { Destination, DestinationDemand, LocationConsent, MovementPoint, TripSession, TripSummary } from "../types";
 import { DestinationTeaser } from "./DestinationTeaser";
@@ -35,7 +36,8 @@ export function TripExperience({ activeTrip, consent, points, reference, isBrows
   const text = (key: Parameters<typeof travelText>[1]) => travelText(locale, key);
   const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   return <div className="trip-experience">
-    <section className="trip-recorder">
+    <section className={`trip-recorder ${activeTrip ? isLiveTracking ? "is-recording" : "needs-location" : "is-idle"}`}>
+      {activeTrip && <div className="trip-recording-state" role="status"><span aria-hidden="true" />{interfaceText(locale, isLiveTracking ? "recording" : "locationAttention")}</div>}
       <div className="trip-recorder-heading"><span className={activeTrip ? "trip-live-indicator active" : "trip-live-indicator"} aria-hidden="true"><Navigation size={24} /></span><div><h2>{text(activeTrip ? "activeTitle" : "idleTitle")}</h2><p>{text(activeTrip ? "activeDescription" : "idleDescription")}</p></div></div>
       <div className="trip-recorder-actions">
         {!consent ? <button className="primary-action" type="button" onClick={onAllowLocation}><ShieldCheck size={18} />{uiText(locale, "Allow location")}</button>
@@ -44,8 +46,8 @@ export function TripExperience({ activeTrip, consent, points, reference, isBrows
         <button className="secondary-action" type="button" onClick={onManage}><Settings2 size={18} />{text("manage")}</button>
         <button className="secondary-action trip-safety-action" type="button" onClick={onSafety}><ShieldCheck size={18} />{t("tourist.safety.eyebrow")}</button>
       </div>
-      {trackingMessage && <p className="status-message" role="status">{uiText(locale, trackingMessage)}</p>}
-      {activeTrip && summary && <div className="trip-current-summary"><span><strong>{number.format(summary.distanceKm)}</strong> km</span><span><strong>{number.format(summary.durationMinutes)}</strong> {t("common.minutes")}</span><span>{t("common.active")}</span></div>}
+      {trackingMessage && (activeTrip && isLiveTracking && !locationRetryAvailable ? <details className="trip-location-status"><summary>{text("privacy")}</summary><p>{uiText(locale, trackingMessage)}</p></details> : <p className="status-message" role="status">{uiText(locale, trackingMessage)}</p>)}
+      {activeTrip && summary && <dl className="trip-current-summary"><div><dt><Navigation size={16} />{t("common.distance")}</dt><dd>{number.format(summary.distanceKm)} <small>km</small></dd></div><div><dt><Clock3 size={16} />{t("tourist.completed.duration")}</dt><dd>{number.format(summary.durationMinutes)} <small>{t("common.minutes")}</small></dd></div><div><dt><CircleCheck size={16} />{t("tourist.completed.recognisedStops")}</dt><dd>{number.format(summary.visitedDestinationCount)}</dd></div></dl>}
       {activeTrip && points.some((point) => point.source === "demo") && <small className="trip-sample-notice">{text("sampleNote")}</small>}
     </section>
 

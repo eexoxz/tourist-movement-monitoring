@@ -374,10 +374,6 @@
     grid-template-columns: 1fr;
   }
 
-  .place-detail-card {
-    position: static;
-  }
-
   .trip-diary-hero,
   .trip-story-panel,
   .trip-timeline-panel {

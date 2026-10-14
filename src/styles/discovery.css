@@ -468,7 +468,6 @@
 }
 
 .places-hero span,
-.place-detail-card > span,
 .place-card-heading span {
   font-size: 0.76rem;
   font-weight: 900;
@@ -636,8 +635,7 @@
 .place-card-heading .place-card-category { display: flex; gap: 6px; align-items: center; font-size: 0.76rem; font-weight: 600; }
 .place-card-heading .place-card-city { color: #657181; font-size: 0.84rem; font-weight: 400; text-transform: none; }
 
-.place-card-heading span,
-.place-detail-card > span {
+.place-card-heading span {
   color: #0f766e;
 }
 
@@ -648,8 +646,7 @@
   overflow-wrap: anywhere;
 }
 
-.place-discovery-card p,
-.place-detail-card p {
+.place-discovery-card p {
   margin: 0;
   color: #596575;
   line-height: 1.45;
@@ -692,61 +689,4 @@
 @media (max-width: 640px) {
   .place-discovery-card { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 14px; }
   .place-discovery-card > .destination-visual.compact { aspect-ratio: 16 / 9; }
-}
-
-.place-detail-card {
-  position: sticky;
-  top: 18px;
-  display: grid;
-  gap: 12px;
-  padding: 18px;
-  border: 1px solid #b7efe6;
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 54%),
-    #ffffff;
-  box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
-}
-
-.place-detail-card .destination-visual img {
-  max-height: 190px;
-}
-
-.place-detail-card h2 {
-  margin: 0;
-  color: #102033;
-  font-size: 1.35rem;
-}
-
-.place-detail-card dl {
-  display: grid;
-  gap: 9px;
-  margin: 0;
-}
-
-.place-detail-card dl div {
-  display: grid;
-  gap: 4px;
-  padding-bottom: 9px;
-  border-bottom: 1px solid #e9efe9;
-}
-
-.place-detail-card dt {
-  color: #64748b;
-  font-size: 0.74rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.place-detail-card dd {
-  margin: 0;
-  color: #102033;
-  font-weight: 900;
-  line-height: 1.35;
-}
-
-.place-detail-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
