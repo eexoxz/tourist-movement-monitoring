@@ -139,8 +139,9 @@ export function TouristWorkspace({
   const discoveryReference = useMemo(() => getDiscoveryReference(user, discoveryGpsPoint), [user, discoveryGpsPoint]);
   const canonicalDiscoveryDestinations = useMemo(() => discoveryReference ? getDiscoveryDestinations(data.destinations, user, discoveryReference) : [], [data.destinations, user, discoveryReference]);
   const discoveryDestinations = useMemo(() => localizeDestinations(canonicalDiscoveryDestinations, locale), [canonicalDiscoveryDestinations, locale]);
+  const nextFestival = useMemo(() => getLocalEventAnnouncement(upcomingFestivals, discoveryReference), [upcomingFestivals, discoveryReference, calendarDay]);
   const eventAnnouncement = user.eventAnnouncementsEnabled !== false && !eventAnnouncementsDismissed
-    ? getLocalEventAnnouncement(upcomingFestivals, discoveryReference)
+    ? nextFestival
     : null;
   const tourismAdvisories = useMemo(
     () => getRelevantTourismAdvisories({ destinations: data.destinations, activePoint: discoveryReference }),
@@ -179,7 +180,6 @@ export function TouristWorkspace({
   const topRecommendationDestination = recommendations[0]
     ? localizedDestinations.find((destination) => destination.id === recommendations[0].destinationId)
     : null;
-  const nextFestival = getLocalEventAnnouncement(upcomingFestivals, discoveryReference);
   const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(discoveryGpsPoint), [discoveryGpsPoint]);
 
   useEffect(() => () => clearBrowserLocationWatch(watchId), [user.id, watchId]);

@@ -2,7 +2,7 @@ import { uiText } from "../services/uiText";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { localizeDestinations } from "../services/destinationLocale";
-import { CalendarDays, ChevronDown, MapPin, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, MapPin, SlidersHorizontal } from "lucide-react";
 import { interfaceText } from "../services/interfaceCopy";
 import { allMalaysianStates } from "../data/festivals";
 import type { Destination, FestivalCategory, FestivalEvent, MalaysianState, MovementPoint } from "../types";
@@ -13,7 +13,7 @@ import {
   formatFestivalStateSummaryLabel,
   getFestivalsForState,
 } from "../services/festivals";
-import { DestinationVisual } from "./DestinationVisual";
+import { FestivalEventDetails } from "./FestivalEventDetails";
 import { EmptyState } from "./SummaryCards";
 import { discoveryText } from "../services/discoveryCopy";
 
@@ -105,57 +105,13 @@ function dateLocale(locale: Locale) {
   return locales[locale];
 }
 
-function formatEventDate(event: FestivalEvent, locale: Locale) {
-  const formatter = new Intl.DateTimeFormat(dateLocale(locale), {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+function formatEventDate(event: FestivalEvent, formatter: Intl.DateTimeFormat) {
   const start = formatter.format(new Date(`${event.date}T00:00:00`));
   if (!event.endDate || event.endDate === event.date) {
     return start;
   }
 
   return `${start} - ${formatter.format(new Date(`${event.endDate}T00:00:00`))}`;
-}
-
-function eventDescription(event: FestivalEvent, locale: Locale, t: (key: TranslationKey) => string) {
-  if (locale === "en") {
-    return event.description;
-  }
-
-  const category = t(categoryLabelKey(event.category));
-  const scope = event.scope === "national" ? t("tourist.events.allMalaysia") : uiText(locale, formatFestivalStateSummaryLabel(event));
-
-  const templates: Record<Locale, string> = {
-    en: event.description,
-    ms: `Acara ${category.toLowerCase()} ini boleh mempengaruhi pergerakan pelancong di ${scope}. Gunakan isyarat ini semasa merancang tarikh dan tempat lawatan.`,
-    zh: `这项${category}活动可能会影响 ${scope} 的游客流动。规划日期和地点时，可把它作为参考。`,
-    ja: `この${category}イベントは、${scope}周辺の観光客の動きに影響する可能性があります。日程や訪問先を決める参考にできます。`,
-    ko: `이 ${category} 이벤트는 ${scope} 지역의 관광객 이동에 영향을 줄 수 있습니다. 날짜와 방문지를 계획할 때 참고하세요.`,
-    pt: `Este evento de ${category.toLowerCase()} pode influenciar o movimento turístico em ${scope}. Use este sinal ao planear datas e locais de visita.`,
-    ta: `இந்த ${category} நிகழ்வு ${scope} பகுதியில் சுற்றுலா நகர்வை பாதிக்கலாம். பயண தேதி மற்றும் இடங்களை திட்டமிட இதை பயன்படுத்தலாம்.`,
-    es: `Este evento de ${category.toLowerCase()} puede influir en el movimiento turístico en ${scope}. Úsalo al planificar fechas y lugares de visita.`,
-    fr: `Cet événement ${category.toLowerCase()} peut influencer le mouvement touristique à ${scope}. Utilisez ce signal pour planifier les dates et les lieux de visite.`,
-  };
-
-  return templates[locale] ?? event.description;
-}
-
-function getMatchedDestinations(event: FestivalEvent, destinationById: Map<string, Destination>) {
-  return event.destinationIds.flatMap((destinationId) => {
-    const destination = destinationById.get(destinationId);
-    return destination ? [destination] : [];
-  });
-}
-
-function getPlanningSummary(matchedDestinations: Destination[]) {
-  if (matchedDestinations.length === 0) {
-    return "No linked place has been added yet. Use current movement demand to find suitable nearby destinations for this state.";
-  }
-
-  const cityNames = Array.from(new Set(matchedDestinations.map((destination) => destination.city)));
-  return `These places may become busier around this event. Compare demand in ${cityNames.join(", ")} before planning a route.`;
 }
 
 export function FestivalCalendarPanel({ events, destinations, compact = false, locale = "en", referencePoint, referenceState, onOpenCalendar, initialEventId }: FestivalCalendarPanelProps) {
@@ -169,6 +125,11 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   const [nearMeOnly, setNearMeOnly] = useState(Boolean(referenceState) && !initialEventId);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [expandedEventIds, setExpandedEventIds] = useState<string[]>(initialEventId ? [initialEventId] : []);
+  const dateFormatters = useMemo(() => ({
+    full: new Intl.DateTimeFormat(dateLocale(locale), { day: "numeric", month: "short", year: "numeric" }),
+    day: new Intl.DateTimeFormat(dateLocale(locale), { day: "numeric" }),
+    month: new Intl.DateTimeFormat(dateLocale(locale), { month: "short", year: "numeric" }),
+  }), [locale]);
   const destinationById = useMemo(() => new Map(localizeDestinations(destinations, locale).map((destination) => [destination.id, destination])), [destinations, locale]);
   const localState = useMemo(() => referenceState ?? nearestState(referencePoint, destinations), [destinations, referencePoint, referenceState]);
   const effectiveStateFilter = nearMeOnly && localState ? localState : stateFilter;
@@ -182,20 +143,6 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
   );
   const visibleLimit = showFullCalendar ? filteredEvents.length : compact ? compactCalendarPreviewLimit : fullCalendarPreviewLimit;
   const visibleEvents = useMemo(() => filteredEvents.slice(0, visibleLimit), [filteredEvents, visibleLimit]);
-  const visibleEventDetails = useMemo(() => {
-    return new Map(
-      visibleEvents.map((event) => {
-        const matchedDestinations = getMatchedDestinations(event, destinationById);
-        return [
-          event.id,
-          {
-            matchedDestinations: matchedDestinations.slice(0, 3),
-            planningSummary: getPlanningSummary(matchedDestinations),
-          },
-        ];
-      })
-    );
-  }, [destinationById, visibleEvents]);
   const hiddenEventCount = filteredEvents.length - visibleEvents.length;
   const resultScope = effectiveStateFilter === "all" ? "Malaysia" : effectiveStateFilter;
 
@@ -268,20 +215,19 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
       </div>
       <div className="festival-list">
         {visibleEvents.map((event) => {
-          const eventDetails = visibleEventDetails.get(event.id);
-          const matchedDestinations = eventDetails?.matchedDestinations ?? [];
           const statesExpanded = expandedEventIds.includes(event.id);
+          const eventDate = new Date(`${event.date}T00:00:00`);
 
           return (
             <article className={`festival-card festival-card-${event.category}`} key={event.id}>
               <div className="festival-date-rail">
-                <time dateTime={event.date} aria-label={formatEventDate(event, locale)}><strong className="festival-day">{new Intl.DateTimeFormat(dateLocale(locale), { day: "numeric" }).format(new Date(`${event.date}T00:00:00`))}</strong><span className="festival-month">{new Intl.DateTimeFormat(dateLocale(locale), { month: "short", year: "numeric" }).format(new Date(`${event.date}T00:00:00`))}</span></time>
+                <time dateTime={event.date} aria-label={formatEventDate(event, dateFormatters.full)}><strong className="festival-day">{dateFormatters.day.format(eventDate)}</strong><span className="festival-month">{dateFormatters.month.format(eventDate)}</span></time>
               </div>
               <div className="festival-card-main">
                 <div className="festival-card-heading">
                   <span className="festival-category">{t(categoryLabelKey(event.category))}</span><h3>{event.name}</h3>
                 </div>
-                {event.endDate && event.endDate !== event.date && <time className="festival-date-range" dateTime={event.endDate}>{formatEventDate(event, locale)}</time>}
+                {event.endDate && event.endDate !== event.date && <time className="festival-date-range" dateTime={event.endDate}>{formatEventDate(event, dateFormatters.full)}</time>}
                 {event.venue && <small className="festival-venue"><MapPin size={15} />{event.venue}</small>}
                 <div className="festival-state-details">
                   <button type="button" onClick={() => toggleEventStates(event.id)} aria-expanded={statesExpanded}>
@@ -293,19 +239,7 @@ export function FestivalCalendarPanel({ events, destinations, compact = false, l
                     </div>
                   )}
                 </div>
-                <details className="festival-event-details" open={event.id === initialEventId}><summary><CalendarDays size={16} />{interfaceText(locale, "details")}<ChevronDown size={16} /></summary><p>{eventDescription(event, locale, t)}</p><div className="festival-insight-row">
-                  <small className="festival-planning-note">{eventDetails?.planningSummary && uiText(locale, eventDetails.planningSummary)}</small>
-                  {matchedDestinations.length > 0 && (
-                    <div className="festival-destinations">
-                      {matchedDestinations.map((destination) => (
-                        <span key={destination.id}>
-                          <DestinationVisual destination={destination} compact locale={locale} />
-                          {destination.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div></details>
+                <FestivalEventDetails event={event} destinationById={destinationById} locale={locale} initiallyOpen={event.id === initialEventId} />
               </div>
             </article>
           );

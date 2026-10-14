@@ -189,7 +189,7 @@ export function PlaceDiscovery({
     setShowAllPlaces(false);
   }, [categoryFilter, cityFilter, mode, normalizedSearch]);
 
-  const rows = useMemo(() => {
+  const scoredRows = useMemo(() => {
     return localizedDestinations
       .map((destination) => {
         const recommendation = recommendationByDestinationId.get(destination.id);
@@ -214,7 +214,11 @@ export function PlaceDiscovery({
           score,
           insight,
         };
-      })
+      });
+  }, [demandByDestinationId, localizedDestinations, festivalDestinationIds, latestAnalysis?.profile, locale, recommendationByDestinationId, referencePoint, user.expectedProfile, user.travelPreferences, visitedIds]);
+
+  const rows = useMemo(() => {
+    return scoredRows
       .filter((row) => {
         if (categoryFilter !== "all" && row.destination.category !== categoryFilter) {
           return false;
@@ -262,19 +266,10 @@ export function PlaceDiscovery({
   }, [
     categoryFilter,
     cityFilter,
-    demandByDestinationId,
-    localizedDestinations,
     cityByDestinationId,
-    festivalDestinationIds,
-    latestAnalysis?.profile,
-    locale,
     mode,
     normalizedSearch,
-    recommendationByDestinationId,
-    referencePoint,
-    user.expectedProfile,
-    user.travelPreferences,
-    visitedIds,
+    scoredRows,
   ]);
 
   const selectedRow = rows.find((row) => row.destination.id === selectedDestinationId) ?? rows[0];
