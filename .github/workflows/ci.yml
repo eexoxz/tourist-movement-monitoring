@@ -25,5 +25,14 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Setup Java for isolated Firestore tests
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Test Firestore authorization
+        run: npm run test:rules
+
       - name: Build
         run: npm run build

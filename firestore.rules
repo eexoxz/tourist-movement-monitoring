@@ -20,31 +20,18 @@ service cloud.firestore {
         && get(userPath(request.auth.uid)).data.role == "admin";
     }
 
-    function ownsAuthBackedUser() {
+    function ownsRecord(data) {
       return signedIn()
-        && (
-          request.resource.data.authUid == request.auth.uid
-          || request.resource.data.userId == request.auth.uid
-          || request.resource.data.id == request.auth.uid
-        );
+        && data.get("userId", data.get("authUid", data.get("id", null))) == request.auth.uid
+        && data.get("authUid", request.auth.uid) == request.auth.uid;
     }
 
     function ownsExistingRecord() {
-      return signedIn()
-        && (
-          resource.data.authUid == request.auth.uid
-          || resource.data.userId == request.auth.uid
-          || resource.data.id == request.auth.uid
-        );
+      return ownsRecord(resource.data);
     }
 
     function ownsRequestedRecord() {
-      return signedIn()
-        && (
-          request.resource.data.authUid == request.auth.uid
-          || request.resource.data.userId == request.auth.uid
-          || request.resource.data.id == request.auth.uid
-        );
+      return ownsRecord(request.resource.data);
     }
 
     function isValidCoordinate(latitude, longitude) {
@@ -65,7 +52,10 @@ service cloud.firestore {
     }
 
     function canUpdateOwnedRecord() {
-      return isAdmin() || (ownsExistingRecord() && ownsRequestedRecord());
+      return isAdmin() || (ownsExistingRecord() && ownsRequestedRecord()
+        && request.resource.data.get("userId", null) == resource.data.get("userId", null)
+        && request.resource.data.get("authUid", null) == resource.data.get("authUid", null)
+        && request.resource.data.get("id", null) == resource.data.get("id", null));
     }
 
     match /users/{userId} {
@@ -73,12 +63,16 @@ service cloud.firestore {
       allow create: if isAdmin()
         || (
           isOwnUser(userId)
+          && request.resource.data.id == userId
+          && request.resource.data.get("userId", userId) == userId
           && request.resource.data.role == "tourist"
           && request.resource.data.authUid == request.auth.uid
         );
       allow update: if isAdmin()
         || (
           isOwnUser(userId)
+          && request.resource.data.id == userId
+          && request.resource.data.get("userId", userId) == userId
           && request.resource.data.role == resource.data.role
           && request.resource.data.authUid == request.auth.uid
         );
@@ -86,14 +80,20 @@ service cloud.firestore {
     }
 
     match /tourist_profiles/{profileId} {
-      allow read: if isAdmin() || ownsExistingRecord() || isOwnUser(profileId);
-      allow create, update: if isAdmin() || ownsAuthBackedUser() || isOwnUser(profileId);
+      allow read: if isAdmin() || isOwnUser(profileId);
+      allow create: if isAdmin() || (isOwnUser(profileId) && ownsRequestedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist");
+      allow update: if isAdmin() || (isOwnUser(profileId) && canUpdateOwnedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist");
       allow delete: if false;
     }
 
     match /tourist_preferences/{preferenceId} {
-      allow read: if isAdmin() || ownsExistingRecord() || isOwnUser(preferenceId);
-      allow create, update: if isAdmin() || ownsAuthBackedUser() || isOwnUser(preferenceId);
+      allow read: if isAdmin() || isOwnUser(preferenceId);
+      allow create: if isAdmin() || (isOwnUser(preferenceId) && ownsRequestedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist");
+      allow update: if isAdmin() || (isOwnUser(preferenceId) && canUpdateOwnedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist");
       allow delete: if false;
     }
 

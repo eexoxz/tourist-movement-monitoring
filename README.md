@@ -2,7 +2,7 @@
 
 Prototype web application for consent-based tourist movement tracking, route visualization, administrator monitoring, configurable movement-based travel planning, and explainable travel recommendation.
 
-The current implementation runs locally with browser storage so the main project flow is usable without Firebase credentials. The data shape is ready to move into Firebase Authentication and Firestore once the Firebase project is created.
+The app uses Firebase Authentication and Firestore when configured, with browser storage as a local backup. Without Firebase credentials it runs in a separate local demonstration mode.
 
 Demo accounts:
 
@@ -12,7 +12,7 @@ Demo accounts:
 - Urban tourist: `urban@example.com` / `urban123`
 - Tourism Administrator: `admin@tourism.local` / `admin123`
 
-The app intentionally starts at the login/register screen on each page load. A previous browser session is cleared at startup so demonstrations always begin from authentication. Demo account shortcuts appear only in local mode. When Firebase is configured, users must sign in with Firebase Authentication and newly registered tourist accounts receive an email verification link before access. Users can toggle password visibility and optionally remember login details on the same device for prototype testing.
+Demo account shortcuts appear only in local mode. With Firebase configured, newly registered tourists verify their email before signing in. "Keep me signed in" selects Firebase's persistent session; unchecked sign-ins use session persistence. The app remembers only an email address, never a password, and removes passwords from older remembered-login entries when opened. Local demo account authentication is not production authentication.
 
 Run locally:
 
@@ -50,6 +50,18 @@ Automated tests:
 ```bash
 npm test
 ```
+
+Executable Firestore authorization tests (Node 24 and Java 21 or later):
+
+```bash
+npm run test:rules
+```
+
+This starts Firebase's local Firestore emulator on `127.0.0.1:8088` with the
+isolated `demo-tourist-security` project. Fixtures are synthetic and no production
+database is accessed. The suite tests owner access, denied cross-user requests,
+identity/role forgery, checkout, SOS closure and administrator actions. CI runs
+both test suites. Java is development-only and is not required by app visitors.
 
 Firebase setup:
 

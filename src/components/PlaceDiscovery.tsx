@@ -11,6 +11,8 @@ import { localizeCity, localizeDestinations } from "../services/destinationLocal
 import { EmptyState } from "./SummaryCards";
 import { PlaceGuide } from "./PlaceGuide";
 import { PlaceGuideDialog } from "./PlaceGuideDialog";
+import { travelerStatusText } from "../services/travelerStatusCopy";
+import { activityText } from "../services/activityCopy";
 
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
 
@@ -67,12 +69,12 @@ function formatDistanceLabel(distance: number | undefined, t: (key: TranslationK
   return distance < 1 ? `${Math.round(distance * 1000)} ${t("tourist.places.mAway")}` : `${distance.toFixed(1)} ${t("tourist.places.kmAway")}`;
 }
 
-function formatDemandLabel(tier: DestinationDemand["tier"] | undefined, t: (key: TranslationKey) => string) {
-  if (!tier) {
-    return t("tourist.places.quietSignal");
+function formatDemandLabel(row: DestinationDemand | undefined, locale: Locale, t: (key: TranslationKey) => string) {
+  if (!row || row.popularityScore <= 0) {
+    return activityText(locale, "noEvidence");
   }
 
-  return `${t(`map.tier.${tier}` as TranslationKey)} ${t("common.demand").toLowerCase()}`;
+  return `${t(`map.tier.${row.tier}` as TranslationKey)} ${t("common.demand").toLowerCase()}`;
 }
 
 function formatPlaceFitLabel(score: number, t: (key: TranslationKey) => string) {
@@ -122,6 +124,7 @@ function getPlaceDiscoveryInsight({
   visited: boolean;
   t: (key: TranslationKey) => string;
 }) {
+  if (visited) return t("tourist.places.insightVisited");
   if (recommendation) {
     return preferenceMatch ? t("tourist.places.insightPreference") : demandRow && demandRow.tier !== "low" ? t("tourist.places.insightDemand") : t("tourist.places.insightRecommendationFallback");
   }
@@ -201,7 +204,9 @@ export function PlaceDiscovery({
         const demandScore = demandRow?.popularityScore ?? 0;
         const recommendationScore = recommendation?.score ?? 42;
         const score = Math.round(Math.min(100, recommendationScore * 0.45 + demandScore * 0.32 + (preferenceMatch ? 14 : 0) + (festivalBoosted ? 10 : 0) + (visited ? 0 : 8)));
-        const insight = getPlaceDiscoveryInsight({ recommendation, demandRow, festivalBoosted, preferenceMatch, visited, t });
+        const insight = user.travelPreferences?.includes(destination.category)
+          ? travelerStatusText(locale, "interest").replace("{category}", getCategoryLabel(destination.category, t))
+          : getPlaceDiscoveryInsight({ recommendation, demandRow, festivalBoosted, preferenceMatch, visited, t });
 
         return {
           destination,
@@ -280,7 +285,7 @@ export function PlaceDiscovery({
   }, [guideRequested, localizedRequest?.id, selectedRow?.destination.id, onGuideRequestConsumed]);
   const renderGuide = (destination: Destination) => <PlaceGuide destination={destination} locale={locale}
     distance={formatDistanceLabel(referencePoint ? distanceKm(referencePoint, destination) : undefined, t)} distanceLabel={isBrowsingArea ? discoveryText(locale, "fromArea") : t("common.distance")}
-    demand={formatDemandLabel(demandByDestinationId.get(destination.id)?.tier, t)} preference={user.travelPreferences?.includes(destination.category) || categoryFitsProfile(destination.category, latestAnalysis?.profile ?? user.expectedProfile) ? t("tourist.places.matchesProfile") : t("tourist.places.differentStyle")}
+    demand={formatDemandLabel(demandByDestinationId.get(destination.id), locale, t)} preference={user.travelPreferences?.includes(destination.category) || categoryFitsProfile(destination.category, latestAnalysis?.profile ?? user.expectedProfile) ? t("tourist.places.matchesProfile") : t("tourist.places.differentStyle")}
     eventRelevance={festivalDestinationIds.has(destination.id) ? t("tourist.places.linkedUpcoming") : t("tourist.places.noCurrentEvent")}
     onCheckIn={onCheckIn ? () => { setGuideOpen(false); onCheckIn(destination.id); } : undefined}
     onOpenEvents={() => { setGuideOpen(false); onOpenEvents(); }}
@@ -388,7 +393,7 @@ export function PlaceDiscovery({
               <div className="place-card-address"><MapPin size={16} aria-hidden="true" /><span>{row.destination.address ?? `${row.destination.city}, Malaysia`}</span></div>
               <div className="place-card-meta">
                 <span><Navigation size={16} aria-hidden="true" />{formatDistanceLabel(row.distance, t)}</span>
-                <span><Users size={16} aria-hidden="true" />{formatDemandLabel(row.demandRow?.tier, t)}</span>
+                <span><Users size={16} aria-hidden="true" />{formatDemandLabel(row.demandRow, locale, t)}</span>
               </div>
               <div className="place-card-signals">
                 <small className="place-card-fit"><Sparkles size={15} aria-hidden="true" />{formatPlaceFitLabel(row.score, t)}</small>

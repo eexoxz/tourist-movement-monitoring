@@ -8,8 +8,9 @@ import type { GeoFenceWarning } from "../services/geofencing";
 import type { Destination, DestinationDemand, LocationConsent, MovementPoint, TripSession, TripSummary } from "../types";
 import { DestinationTeaser } from "./DestinationTeaser";
 import { MovementMap } from "./MovementMap";
+import { TrackingStatus } from "./TrackingStatus";
 
-export function TripExperience({ activeTrip, consent, points, reference, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, onAllowLocation, onStart, onStop, onResume, onManage, onOpenPlace, onSafety }: {
+export function TripExperience({ activeTrip, consent, points, reference, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, onAllowLocation, onStart, onStop, onResume, onManage, onOpenPlace, onSafety }: {
   activeTrip?: TripSession | null;
   consent?: LocationConsent | null;
   points: MovementPoint[];
@@ -24,6 +25,7 @@ export function TripExperience({ activeTrip, consent, points, reference, isBrows
   locationRetryAvailable: boolean;
   geofenceWarnings: GeoFenceWarning[];
   locale: Locale;
+  syncStatus?: string;
   onAllowLocation: () => void;
   onStart: () => void;
   onStop: () => void;
@@ -46,6 +48,7 @@ export function TripExperience({ activeTrip, consent, points, reference, isBrows
         <button className="secondary-action" type="button" onClick={onManage}><Settings2 size={18} />{text("manage")}</button>
         <button className="secondary-action trip-safety-action" type="button" onClick={onSafety}><ShieldCheck size={18} />{t("tourist.safety.eyebrow")}</button>
       </div>
+      {activeTrip && <TrackingStatus point={points.at(-1)} listening={isLiveTracking} syncStatus={syncStatus} locale={locale} />}
       {trackingMessage && (activeTrip && isLiveTracking && !locationRetryAvailable ? <details className="trip-location-status"><summary>{text("privacy")}</summary><p>{uiText(locale, trackingMessage)}</p></details> : <p className="status-message" role="status">{uiText(locale, trackingMessage)}</p>)}
       {activeTrip && summary && <dl className="trip-current-summary"><div><dt><Navigation size={16} />{t("common.distance")}</dt><dd>{number.format(summary.distanceKm)} <small>km</small></dd></div><div><dt><Clock3 size={16} />{t("tourist.completed.duration")}</dt><dd>{number.format(summary.durationMinutes)} <small>{t("common.minutes")}</small></dd></div><div><dt><CircleCheck size={16} />{t("tourist.completed.recognisedStops")}</dt><dd>{number.format(summary.visitedDestinationCount)}</dd></div></dl>}
       {activeTrip && points.some((point) => point.source === "demo") && <small className="trip-sample-notice">{text("sampleNote")}</small>}

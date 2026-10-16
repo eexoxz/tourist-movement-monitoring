@@ -608,7 +608,7 @@ export async function saveCloudData(data: AppData, actor?: User | null) {
   }
 }
 
-function mergeUserDocuments(
+export function mergeUserDocuments(
   users: Array<Omit<User, "password">>,
   touristProfiles: TouristProfileDocument[],
   touristPreferences: TouristPreferenceDocument[]
@@ -633,7 +633,7 @@ function mergeUserDocuments(
       name: profile.name || displayName || currentUser?.name || "Tourist",
       email: profile.email || currentUser?.email || "",
       password: "",
-      role: profile.role || currentUser?.role || "tourist",
+      role: currentUser?.role ?? "tourist",
       createdAt: profile.createdAt || currentUser?.createdAt || new Date().toISOString(),
     } as User);
   }

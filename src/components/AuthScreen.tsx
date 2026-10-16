@@ -9,6 +9,7 @@ import { getPasswordStrength, passwordRequirementMessage } from "../services/pas
 import type { UserRole } from "../types";
 import type { NotifyFn } from "./ToastViewport";
 import { uiText } from "../services/uiText";
+import { clearRememberedLogin, loadRememberedLogin, saveRememberedLogin } from "../services/loginPreferences";
 
 export type AuthResult = { error?: string; message?: string };
 
@@ -21,8 +22,6 @@ export type TouristRegistrationDraft = {
   termsAccepted: boolean;
 };
 
-type RememberedLogin = { email: string; password: string };
-
 const passwordRuleKeys = {
   length: "auth.passwordRuleLength",
   upper: "auth.passwordRuleUpper",
@@ -30,36 +29,6 @@ const passwordRuleKeys = {
   number: "auth.passwordRuleNumber",
   symbol: "auth.passwordRuleSymbol",
 } satisfies Record<ReturnType<typeof getPasswordStrength>["rules"][number]["id"], TranslationKey>;
-
-const REMEMBER_LOGIN_KEY = "tourist-movement-monitoring:remember-login";
-const demoCredentialEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
-
-function loadRememberedLogin(): RememberedLogin | null {
-  try {
-    const raw = localStorage.getItem(REMEMBER_LOGIN_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    const login = JSON.parse(raw) as RememberedLogin;
-    if (demoCredentialEmails.has(login.email.trim().toLowerCase())) {
-      clearRememberedLogin();
-      return null;
-    }
-
-    return login;
-  } catch {
-    return null;
-  }
-}
-
-function saveRememberedLogin(email: string, password: string) {
-  localStorage.setItem(REMEMBER_LOGIN_KEY, JSON.stringify({ email, password }));
-}
-
-function clearRememberedLogin() {
-  localStorage.removeItem(REMEMBER_LOGIN_KEY);
-}
 
 export function LanguageSelector({ locale, onLocaleChange }: { locale: Locale; onLocaleChange: (locale: Locale) => void }) {
   const label = translate(locale, "language.label");
@@ -102,7 +71,7 @@ export function AuthScreen({
   locale: Locale;
   onLocaleChange: (locale: Locale) => void;
   onModeChange: (mode: AuthMode) => void;
-  onLogin: (email: string, password: string) => Promise<AuthResult>;
+  onLogin: (email: string, password: string, rememberSession?: boolean) => Promise<AuthResult>;
   onRegister: (draft: TouristRegistrationDraft) => Promise<AuthResult>;
   onResendVerification: (email: string, password: string) => Promise<AuthResult>;
   onPasswordReset: (email: string) => Promise<AuthResult>;
@@ -112,7 +81,7 @@ export function AuthScreen({
   const [roleHint, setRoleHint] = useState<UserRole | "nature" | "culture" | "urban">("tourist");
   const [name, setName] = useState("");
   const [email, setEmail] = useState(rememberedLogin?.email ?? "");
-  const [password, setPassword] = useState(rememberedLogin?.password ?? "");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [nationality, setNationality] = useState("");
   const [passportNumber, setPassportNumber] = useState("");
@@ -221,7 +190,7 @@ export function AuthScreen({
     setMessage(null);
     const result =
       mode === "login"
-        ? await onLogin(normalizedEmail, password)
+        ? await onLogin(normalizedEmail, password, rememberLogin)
         : await onRegister({
             name,
             email: normalizedEmail,
@@ -241,7 +210,7 @@ export function AuthScreen({
     }
     if (!result.error) {
       if (rememberLogin) {
-        saveRememberedLogin(normalizedEmail, password);
+        saveRememberedLogin(normalizedEmail);
       } else {
         clearRememberedLogin();
       }

@@ -2,26 +2,19 @@ import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 import type { User as FirebaseUser } from "firebase/auth";
 import type { User } from "../types";
 
-let persistenceSetup: Promise<void> | null = null;
-
-async function ensureLocalPersistence() {
+async function ensurePersistence(rememberSession: boolean) {
   const services = getFirebaseServices();
   if (!services) {
     return null;
   }
 
-  if (!persistenceSetup) {
-    persistenceSetup = import("firebase/auth").then(async ({ browserLocalPersistence, setPersistence }) => {
-      await setPersistence(services.auth, browserLocalPersistence);
-    });
-  }
-
-  await persistenceSetup;
+  const { browserLocalPersistence, browserSessionPersistence, setPersistence } = await import("firebase/auth");
+  await setPersistence(services.auth, rememberSession ? browserLocalPersistence : browserSessionPersistence);
   return services;
 }
 
-export async function signInWithConfiguredProvider(email: string, password: string) {
-  const services = await ensureLocalPersistence();
+export async function signInWithConfiguredProvider(email: string, password: string, rememberSession = true) {
+  const services = await ensurePersistence(rememberSession);
   if (!services) {
     return null;
   }
@@ -32,7 +25,7 @@ export async function signInWithConfiguredProvider(email: string, password: stri
 }
 
 export async function registerWithConfiguredProvider(email: string, password: string) {
-  const services = await ensureLocalPersistence();
+  const services = await ensurePersistence(false);
   if (!services) {
     return null;
   }

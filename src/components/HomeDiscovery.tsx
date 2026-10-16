@@ -5,14 +5,16 @@ import { uiText } from "../services/uiText";
 import type { AppView, Destination, FestivalEvent } from "../types";
 import { DestinationTeaser } from "./DestinationTeaser";
 import { HomeSpotlight } from "./HomeSpotlight";
+import type { ReactNode } from "react";
 
-export function HomeDiscovery({ featured, destinations, spotlightDestinations = destinations, spotlightEvents, nextFestival, activeTrip, isLocal, needsLocationConsent, locale, onOpenPlace, onViewChange, onOpenSpotlightEvent, onAllowLocation, onSafety }: {
+export function HomeDiscovery({ featured, destinations, spotlightDestinations = destinations, spotlightEvents, nextFestival, activeTrip, trackingStatus, isLocal, needsLocationConsent, locale, onOpenPlace, onViewChange, onOpenSpotlightEvent, onAllowLocation, onSafety }: {
   featured?: Destination | null;
   destinations: Destination[];
   spotlightDestinations?: Destination[];
   spotlightEvents?: FestivalEvent[];
   nextFestival: FestivalEvent | null;
   activeTrip: boolean;
+  trackingStatus?: ReactNode;
   isLocal: boolean;
   needsLocationConsent: boolean;
   locale: Locale;
@@ -27,14 +29,15 @@ export function HomeDiscovery({ featured, destinations, spotlightDestinations = 
   const places = destinations.filter((place) => place.id !== featured?.id).slice(0, 3);
   const eventDate = nextFestival ? new Date(`${nextFestival.date}T00:00:00`) : null;
 
-  return <div className="home-discovery">
-    <HomeSpotlight destinations={spotlightDestinations} events={spotlightEvents} locale={locale} onOpenPlace={onOpenPlace} onOpenEvents={onOpenSpotlightEvent ?? (() => onViewChange("events"))} />
-
-    <section className="home-journey-invitation">
+  const journeyInvitation = <section className="home-journey-invitation">
       <Compass className="home-journey-icon" size={28} aria-hidden="true" />
       <div>{activeTrip && <span className="home-active-trip">{t("common.active")}</span>}<h2>{activeTrip ? text("activeTitle") : text("journeyTitle")}</h2><p>{text("journeyDescription")}</p></div>
       <button className="primary-action" type="button" onClick={() => onViewChange("tracking")}>{text(activeTrip ? "continueTrip" : "openTrips")}<ArrowRight size={18} /></button>
-    </section>
+    </section>;
+  return <div className="home-discovery">
+    {activeTrip && <div className="home-active-journey">{journeyInvitation}{trackingStatus}</div>}
+    <HomeSpotlight destinations={spotlightDestinations} events={spotlightEvents} locale={locale} onOpenPlace={onOpenPlace} onOpenEvents={onOpenSpotlightEvent ?? (() => onViewChange("events"))} />
+    {!activeTrip && journeyInvitation}
 
     <nav className="home-discovery-shortcuts" aria-label={t("tourist.home.nextUp")}>
       <button type="button" onClick={() => onViewChange("recommendations")}><span className="home-shortcut-symbol"><Compass size={24} /></span><span>{text("places")}</span><ArrowRight size={16} /></button>

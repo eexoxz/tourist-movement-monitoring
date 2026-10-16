@@ -84,6 +84,21 @@ a.secondary-action { text-decoration: none; }
 .safety-panel > .home-tool-summary { background: #fff4f5; }
 .check-in-panel > .home-tool-summary { background: #edf8f7; }
 .check-in-back { margin-bottom: 16px; }
+.tracking-status-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 18px 0 0; padding: 14px 0; border-top: 1px solid var(--line); }
+.tracking-status-grid > div { min-width: 0; }
+.tracking-status-grid dt { display: flex; align-items: start; gap: 6px; font-size: 0.75rem; color: var(--muted); line-height: 1.5; min-width: 0; overflow-wrap: anywhere; }
+.tracking-status-grid dt svg { flex-shrink: 0; margin-top: 2px; }
+.tracking-status-grid dd { margin: 6px 0 0; font-size: 0.82rem; line-height: 1.6; overflow-wrap: anywhere; }
+.tracking-status-grid small { display: block; color: var(--muted); }
+.home-active-journey .tracking-status-grid { margin-top: 0; }
+.activity-basis-row { flex-wrap: wrap; }
+.activity-basis-row > p { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.activity-basis-explanation { flex-basis: 100%; order: 1; font-size: 0.78rem; line-height: 1.6; min-width: 0; overflow-wrap: anywhere; }
+.activity-basis-explanation summary { cursor: pointer; color: var(--teal); min-height: 36px; display: flex; align-items: center; gap: 8px; }
+.activity-basis-explanation summary svg { flex-shrink: 0; }
+.activity-basis-explanation[open] summary svg { transform: rotate(180deg); }
+.activity-basis-explanation p { max-width: 65ch; margin: 6px 0; color: var(--muted); }
+.distance-basis-note { font-size: 0.78rem; line-height: 1.6; color: var(--muted); margin: 12px 0 0; }
 
 .festival-calendar { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
 .calendar-window { display: flex; align-items: center; gap: 10px; padding-block: 14px; border-block: 1px solid var(--line); font-size: 0.86rem; color: #335cad; }
@@ -171,6 +186,9 @@ a.secondary-action { text-decoration: none; }
   .admin-priorities button { padding-inline: 0; }
 }
 @media (max-width: 640px) {
+  .tracking-status-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .tracking-status-grid > div { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 10px; }
+  .tracking-status-grid dd { margin: 0; }
   .admin-shell .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tourist-shell .toast-stack { top: 10px; bottom: auto; max-height: min(30dvh, 240px); }
   .home-discovery-shortcuts { grid-template-columns: minmax(0, 1fr); }

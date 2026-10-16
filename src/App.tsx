@@ -26,8 +26,10 @@ import { AdminWorkspace } from "./workspaces/AdminWorkspace";
 import { applyPlaceReview, mergePlaceReviewRecords } from "./services/unlistedPlaces";
 import { unlistedLocationText } from "./services/unlistedLocationCopy";
 import { placeText } from "./services/placeSubmissionCopy";
+import { loadRememberedLogin } from "./services/loginPreferences";
 
 function App() {
+  useEffect(() => { loadRememberedLogin(); }, []);
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
   const [placeQueueState, setPlaceQueueState] = useState<"loading" | "live" | "offline">();
   const [placeQueueRevision, setPlaceQueueRevision] = useState(0);
@@ -304,6 +306,7 @@ function App() {
       cacheLocalData(nextData);
       if (options.sosAlert) setSyncStatus(sosText(locale, "syncPending"));
     }
+    if (hasConfiguredAuth() && !options.sosAlert) setSyncStatus("Saving");
     void (options.sosAlert ? saveSosAlertRecord(options.sosAlert, actor) : options.checkIn ? saveCheckInRecord(options.checkIn, actor) : options.placeReview ? savePlaceReview(options.placeReview, actor) : saveData(nextData, actor))
       .then((synced) => {
         setSyncStatus(synced ? "Saved to Firestore collections" : "Saved to local browser storage");
@@ -455,7 +458,7 @@ function App() {
     }
   };
 
-  const login = async (email: string, password: string): Promise<AuthResult> => {
+  const login = async (email: string, password: string, rememberSession = true): Promise<AuthResult> => {
     const firebaseMode = hasConfiguredAuth();
     const localEmailUser = findUserByEmail(data, email);
 
@@ -464,7 +467,7 @@ function App() {
       let firebaseStoredUser: User | null = null;
 
       try {
-        const firebaseUser = await signInWithConfiguredProvider(email, password);
+        const firebaseUser = await signInWithConfiguredProvider(email, password, rememberSession);
         authUid = firebaseUser?.uid;
         if (!authUid) {
           return { error: "Firebase login could not return a user account." };
@@ -857,6 +860,7 @@ function App() {
             watchId={watchId}
             notify={notify}
             hasNotifications={notifications.length > 0}
+            syncStatus={syncStatus}
           />
         )}
       </main>

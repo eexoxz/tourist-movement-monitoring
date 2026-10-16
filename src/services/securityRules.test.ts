@@ -30,8 +30,9 @@ describe("Firestore security rules coverage", () => {
   it("keeps tourist movement records scoped to the authenticated owner", () => {
     expect(firestoreRules).toContain("function ownsExistingRecord()");
     expect(firestoreRules).toContain("function ownsRequestedRecord()");
-    expect(firestoreRules).toContain("request.resource.data.userId == request.auth.uid");
-    expect(firestoreRules).toContain("resource.data.userId == request.auth.uid");
+    expect(firestoreRules).toContain('data.get("userId", data.get("authUid", data.get("id", null))) == request.auth.uid');
+    expect(firestoreRules).toContain("return ownsRecord(resource.data)");
+    expect(firestoreRules).toContain("return ownsRecord(request.resource.data)");
     expect(firestoreRules).toContain("match /movement_records/{pointId}");
     expect(firestoreRules).toContain("match /sos_alerts/{alertId}");
     expect(firestoreRules).toContain("match /incident_reports/{reportId}");

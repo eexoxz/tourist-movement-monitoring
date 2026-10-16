@@ -1,8 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
-import { cacheLocalData, clearSession, createId, FIRESTORE_COLLECTIONS, loadData, loadSession, normalizeAppData, saveSession } from "./storage";
+import { cacheLocalData, clearSession, createId, FIRESTORE_COLLECTIONS, loadData, loadSession, mergeUserDocuments, normalizeAppData, saveSession } from "./storage";
 
 describe("storage service", () => {
+  it("takes account roles only from user records, never editable tourist profiles", () => {
+    const tourist = initialData.users.find((user) => user.role === "tourist")!;
+    const admin = initialData.users.find((user) => user.role === "admin")!;
+    const forgedProfile = { ...tourist, userId: tourist.id, displayName: tourist.name, role: "admin" as const };
+    const adminProfile = { ...admin, userId: admin.id, displayName: admin.name, role: "tourist" as const };
+    const users = mergeUserDocuments([tourist, admin], [forgedProfile, adminProfile], []);
+    expect(users.find((user) => user.id === tourist.id)?.role).toBe("tourist");
+    expect(users.find((user) => user.id === admin.id)?.role).toBe("admin");
+    expect(mergeUserDocuments([], [forgedProfile], [])[0].role).toBe("tourist");
+  });
   it("preserves SOS closure metadata on reload and normalizes unknown closure reasons", () => {
     const closed = { ...initialData.sosAlerts[0], status: "resolved" as const, closureReason: "cancelled" as const, closedBy: "test-user", resolvedAt: "2026-10-03T10:00:00Z" };
     const restored = normalizeAppData({ ...initialData, sosAlerts: [closed] });

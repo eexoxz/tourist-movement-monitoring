@@ -36,6 +36,7 @@ type TouristHomeProps = {
   destinations: Destination[];
   checkInDestinations?: Destination[];
   discoveryControl?: ReactNode;
+  trackingStatus?: ReactNode;
   hasLocalReference: boolean;
   geofenceWarnings: GeoFenceWarning[];
   tourismAdvisories: TourismAdvisory[];
@@ -122,6 +123,7 @@ export function TouristHome({
   destinations,
   checkInDestinations = destinations,
   discoveryControl,
+  trackingStatus,
   hasLocalReference,
   geofenceWarnings,
   tourismAdvisories,
@@ -276,7 +278,7 @@ export function TouristHome({
         )}
 
         {!showCheckInPanel && discoveryControl}
-        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} onOpenSpotlightEvent={onOpenSpotlightEvent} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
+        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} onOpenSpotlightEvent={onOpenSpotlightEvent} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} trackingStatus={trackingStatus} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
           if (safetyPanelRef.current) {
             revealSafetyPanel(safetyPanelRef.current);
           }
