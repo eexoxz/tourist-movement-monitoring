@@ -1,11 +1,14 @@
-import { BadgeCheck, CheckCircle2, Compass, ShieldCheck, Square } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, BadgeCheck, CheckCircle2, Compass, LoaderCircle, RotateCcw, ShieldCheck, TriangleAlert } from "lucide-react";
+import { useRef, useState } from "react";
 import { formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AttractionCheckIn, Destination } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 import { LanguageSelector } from "./AuthScreen";
 import { uiText } from "../services/uiText";
+import { checkInSyncText } from "../services/checkInSyncCopy";
+import type { CheckInSyncState } from "../services/checkInSync";
+import { getPathForView } from "../services/access";
 
 export type PublicCheckInResult = {
   tone: "success" | "info" | "error";
@@ -14,6 +17,7 @@ export type PublicCheckInResult = {
   titleKey?: TranslationKey;
   messageKey?: TranslationKey;
   checkIn?: AttractionCheckIn;
+  syncState?: CheckInSyncState;
 };
 
 type PublicCheckInPageProps = {
@@ -23,17 +27,30 @@ type PublicCheckInPageProps = {
   passId: string | null;
   passVerified: boolean;
   syncStatus: string;
-  onConfirm: () => PublicCheckInResult;
+  initializing?: boolean;
+  onConfirm: () => PublicCheckInResult | Promise<PublicCheckInResult>;
   onLocaleChange: (locale: Locale) => void;
 };
 
-export function PublicCheckInPage({ destination, locale, missingReason, passId, passVerified, syncStatus, onConfirm, onLocaleChange }: PublicCheckInPageProps) {
+export function PublicCheckInPage({ destination, locale, missingReason, passId, passVerified, syncStatus, initializing = false, onConfirm, onLocaleChange }: PublicCheckInPageProps) {
   const [result, setResult] = useState<PublicCheckInResult | null>(null);
+  const [saving, setSaving] = useState(false);
+  const confirming = useRef(false);
   const ready = Boolean(destination && passId && passVerified);
   const t = (key: TranslationKey) => translate(locale, key);
 
-  const confirmVisit = () => {
-    setResult(onConfirm());
+  const confirmVisit = async () => {
+    if (confirming.current || initializing) return;
+    confirming.current = true;
+    setSaving(true);
+    try {
+      setResult(await onConfirm());
+    } catch {
+      setResult({ tone: "error", title: t("publicCheckin.saveErrorTitle"), message: t("publicCheckin.saveErrorMessage"), titleKey: "publicCheckin.saveErrorTitle", messageKey: "publicCheckin.saveErrorMessage" });
+    } finally {
+      confirming.current = false;
+      setSaving(false);
+    }
   };
 
   return (
@@ -93,28 +110,24 @@ export function PublicCheckInPage({ destination, locale, missingReason, passId, 
 
         {result && (
           <section className={`public-check-in-result ${result.tone}`} aria-live="polite">
-            <CheckCircle2 size={20} />
+            {result.tone === "error" ? <TriangleAlert size={20} /> : <CheckCircle2 size={20} />}
             <div>
-              <strong>{result.titleKey ? t(result.titleKey) : uiText(locale, result.title)}</strong>
-              <p>{result.tone === "success" && result.checkIn
-                ? `${t("publicCheckin.successPrefix")} ${destination?.name ?? ""} ${t("publicCheckin.successSuffix")}`
-                : result.messageKey ? t(result.messageKey) : uiText(locale, result.message)}</p>
+              <strong>{result.syncState === "pending" ? checkInSyncText(locale, "pendingTitle") : result.syncState === "local" ? checkInSyncText(locale, "localTitle") : result.titleKey ? t(result.titleKey) : uiText(locale, result.title)}</strong>
+              <p>{result.syncState ? checkInSyncText(locale, result.syncState) : result.messageKey ? t(result.messageKey) : uiText(locale, result.message)}</p>
               {result.checkIn && <small>{formatDateTime(result.checkIn.checkedInAt, locale)}</small>}
             </div>
           </section>
         )}
 
         <div className="public-check-in-actions">
-          <button className="primary-action wide" type="button" onClick={confirmVisit} disabled={!ready || result?.tone === "success" || result?.tone === "info"}>
-            <ShieldCheck size={18} />
-            {t("publicCheckin.confirm")}
+          <button className="primary-action wide" type="button" onClick={() => void confirmVisit()} aria-busy={saving || initializing} disabled={!ready || initializing || saving || result?.tone === "success" || result?.tone === "info"}>
+            {saving ? <LoaderCircle size={18} /> : result?.syncState === "pending" ? <RotateCcw size={18} /> : <ShieldCheck size={18} />}
+            {saving ? checkInSyncText(locale, "saving") : result?.syncState === "pending" ? checkInSyncText(locale, "retry") : t("publicCheckin.confirm")}
           </button>
-          {result?.checkIn && (
-            <button className="secondary-action wide" type="button" disabled>
-              <Square size={18} />
-              {t("publicCheckin.checkoutInApp")}
-            </button>
-          )}
+          <a className="secondary-action wide" href={getPathForView("tourist", "overview")}>
+            <ArrowLeft size={18} />
+            {checkInSyncText(locale, "back")}
+          </a>
         </div>
       </section>
     </main>

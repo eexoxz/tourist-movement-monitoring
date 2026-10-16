@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { BarChart3, BellRing, CalendarDays, Compass, Download, LogOut, MapPinned, RotateCcw, Sparkles, UserRound } from "lucide-react";
 import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, savePlaceReview, saveSession, saveSosAlertRecord, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, savePlaceReview, saveSession, saveSosAlertRecord, subscribeCheckInRecords, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
+import { confirmCheckInSync, mergeCheckInRecords } from "./services/checkInSync";
+import { acknowledgePendingCheckIn, rememberPendingCheckIn } from "./services/pendingCheckIns";
 import { refreshAllRecommendations } from "./services/analytics";
 import { authProviderName, getConfiguredAuthState, getConfiguredUserRecord, hasConfiguredAuth, registerWithConfiguredProvider, sendPasswordResetToConfiguredProvider, sendVerificationEmail, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
@@ -41,6 +43,7 @@ function App() {
   const safeView = currentUser ? coerceViewForRole(currentUser.role, view) : view;
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const [isRetryingSync, setIsRetryingSync] = useState(false);
+  const [cloudAuthReady, setCloudAuthReady] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [browserNotificationPermission, setBrowserNotificationPermission] = useState(() => getBrowserNotificationPermission());
   const [pendingCheckInDestinationId, setPendingCheckInDestinationId] = useState<string | null>(() => getTouristCheckInDestinationIdFromUrl());
@@ -184,6 +187,8 @@ function App() {
           setSyncStatus("Local mode; Firebase sync unavailable");
           notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
         }
+      } finally {
+        if (isMounted) setCloudAuthReady(true);
       }
     };
 
@@ -338,6 +343,26 @@ function App() {
   }, [currentUser?.id, currentUser?.role, placeQueueRevision]);
 
   useEffect(() => {
+    if (!currentUser || !cloudAuthReady || !hasConfiguredAuth()) return;
+    let stopped = false;
+    let unsubscribe: (() => void) | undefined;
+    const fail = () => {
+      if (!stopped) notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
+    };
+    void subscribeCheckInRecords(currentUser, (records) => {
+      if (stopped) return;
+      setData((current) => {
+        const checkIns = mergeCheckInRecords(current.checkIns, records);
+        if (checkIns === current.checkIns) return current;
+        const next = { ...current, checkIns };
+        cacheLocalData(next);
+        return next;
+      });
+    }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
+    return () => { stopped = true; unsubscribe?.(); };
+  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady]);
+
+  useEffect(() => {
     if (!currentUser) return;
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
@@ -356,7 +381,7 @@ function App() {
     return () => { stopped = true; unsubscribe?.(); };
   }, [currentUser?.id, currentUser?.role, locale]);
 
-  const confirmPublicCheckIn = (): PublicCheckInResult => {
+  const confirmPublicCheckIn = async (): Promise<PublicCheckInResult> => {
     if (!publicCheckInRequest?.destinationId || !publicCheckInDestination) {
       return {
         tone: "error",
@@ -378,18 +403,7 @@ function App() {
     }
 
     const activeCheckIn = getActiveCheckIn(data, publicCheckInTourist.id);
-    if (activeCheckIn?.destinationId === publicCheckInDestination.id) {
-      return {
-        tone: "info",
-        title: t("publicCheckin.alreadyTitle"),
-        message: t("publicCheckin.alreadyMessage"),
-        titleKey: "publicCheckin.alreadyTitle",
-        messageKey: "publicCheckin.alreadyMessage",
-        checkIn: activeCheckIn,
-      };
-    }
-
-    if (activeCheckIn) {
+    if (activeCheckIn && activeCheckIn.destinationId !== publicCheckInDestination.id) {
       return {
         tone: "error",
         title: t("publicCheckin.checkoutNeededTitle"),
@@ -399,7 +413,7 @@ function App() {
       };
     }
 
-    const result = createAttractionCheckIn(data, {
+    const result = activeCheckIn ? { data, checkIn: activeCheckIn, error: undefined } : createAttractionCheckIn(data, {
       userId: publicCheckInTourist.id,
       destinationId: publicCheckInDestination.id,
     });
@@ -414,24 +428,25 @@ function App() {
       };
     }
 
-    setData(result.data);
-    cacheLocalData(result.data);
+    const checkIn = result.checkIn;
+    if (hasConfiguredAuth()) rememberPendingCheckIn(checkIn);
+    setData((current) => {
+      const next = { ...current, checkIns: mergeCheckInRecords(current.checkIns, [checkIn]) };
+      cacheLocalData(next);
+      return next;
+    });
     setSyncStatus("Check-in saved locally; cloud save pending");
-    void saveCheckInRecord(result.checkIn, publicCheckInTourist)
-      .then((synced) => {
-        setSyncStatus(synced ? "Check-in saved to Firestore" : "Check-in saved to local browser storage");
-      })
-      .catch(() => {
-        setSyncStatus("Check-in saved on this device; cloud retry pending");
-        notifySyncIssue("Cloud save needs retry", "The check-in was kept locally. Firestore did not accept the quick check-in save.");
-      });
+    const syncState = await confirmCheckInSync(() => saveCheckInRecord(checkIn, publicCheckInTourist), hasConfiguredAuth());
+    if (syncState === "synced") acknowledgePendingCheckIn(checkIn);
+    setSyncStatus(syncState === "synced" ? "Check-in saved to Firestore" : syncState === "local" ? "Check-in saved to local browser storage" : "Check-in saved on this device; cloud retry pending");
 
     return {
-      tone: "success",
+      tone: syncState === "synced" ? "success" : syncState === "local" ? "info" : "error",
       title: t("publicCheckin.successTitle"),
       message: `${t("publicCheckin.successPrefix")} ${publicCheckInDestination.name} ${t("publicCheckin.successSuffix")}`,
       titleKey: "publicCheckin.successTitle",
       checkIn: result.checkIn,
+      syncState,
     };
   };
 
@@ -513,6 +528,7 @@ function App() {
       setData(nextData);
       saveSession(authUid);
       setSessionUserId(authUid);
+      setCloudAuthReady(false);
       setView(defaultView);
       if (!isPublicCheckInFlow) {
         replaceBrowserPath(getPathForView(user.role, defaultView));
@@ -532,7 +548,7 @@ function App() {
         })
         .catch(() => {
           setSyncStatus("Signed in; cloud refresh needs retry");
-        });
+        }).finally(() => setCloudAuthReady(true));
 
       return {};
     }
@@ -714,6 +730,7 @@ function App() {
           passId={publicCheckInRequest.passId}
           passVerified={Boolean(publicCheckInTourist)}
           syncStatus={syncStatus}
+          initializing={hasConfiguredAuth() && !cloudAuthReady}
           onConfirm={confirmPublicCheckIn}
           onLocaleChange={changeLocale}
         />

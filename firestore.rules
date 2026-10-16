@@ -151,6 +151,7 @@ service cloud.firestore {
     }
 
     match /sos_alerts/{alertId} {
+      allow get: if signedIn() && !exists(/databases/$(database)/documents/sos_alerts/$(alertId));
       allow read: if canReadOwnedRecord();
       allow create: if canCreateOwnedRecord()
         && request.resource.data.status in ["open", "reviewing", "resolved"];
@@ -179,6 +180,7 @@ service cloud.firestore {
     }
 
     match /attraction_checkins/{checkInId} {
+      allow get: if signedIn() && !exists(/databases/$(database)/documents/attraction_checkins/$(checkInId));
       allow read: if canReadOwnedRecord();
       allow create: if canCreateOwnedRecord()
         && request.resource.data.destinationId is string

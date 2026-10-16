@@ -15,7 +15,7 @@ vi.mock("firebase/firestore", () => ({
     set: mock.set, update: mock.update,
   }),
 }));
-import { saveCheckInRecord, savePlaceReview, subscribePlaceReviewRecords } from "./storage";
+import { saveCheckInRecord, savePlaceReview, subscribeCheckInRecords, subscribePlaceReviewRecords } from "./storage";
 const actor = { id: "admin", role: "admin" } as User;
 const record: AttractionCheckIn = { id: "report", userId: "tourist", destinationId: "", status: "checked-in", checkedInAt: "2026-10-13T01:00:00Z", submittedPlace: { name: "QA visitor report", address: "Full test street address", city: "George Town", state: "Penang", category: "food", note: "" }, reviewStatus: "pending" };
 const review: PlaceReview = { checkInIds: [record.id], status: "linked", destinationId: "approved", reviewedBy: "admin", reviewedAt: "2026-10-13T02:00:00Z", destination: { ...initialData.destinations[0], id: "approved" } };
@@ -57,6 +57,37 @@ describe("place review cloud writes", () => {
     await subscribePlaceReviewRecords({ ...actor, role: "tourist" }, vi.fn(), vi.fn());
     await subscribePlaceReviewRecords({ ...actor, id: "other" }, vi.fn(), vi.fn());
     expect(mock.subscribe).not.toHaveBeenCalled();
+  });
+  it("scopes live visits to the signed-in tourist and ignores unconfirmed snapshots", async () => {
+    mock.uid = "tourist";
+    const changed = vi.fn();
+    const stop = await subscribeCheckInRecords({ id: "tourist", role: "tourist" } as User, changed, vi.fn());
+    expect(mock.subscribe.mock.calls[0][0]).toMatchObject({ filter: { field: "userId", value: "tourist" } });
+    const receive = mock.subscribe.mock.calls[0][2];
+    const docs = [{ id: record.id, data: () => record }];
+    receive({ metadata: { fromCache: true, hasPendingWrites: false }, docs });
+    receive({ metadata: { fromCache: false, hasPendingWrites: true }, docs });
+    expect(changed).not.toHaveBeenCalled();
+    receive({ metadata: { fromCache: false, hasPendingWrites: false }, docs });
+    expect(changed).toHaveBeenCalledWith([expect.objectContaining({ id: record.id, userId: "tourist" })]);
+    stop();
+    expect(mock.unsubscribe).toHaveBeenCalled();
+  });
+  it("allows admin live visits but refuses a listener for a mismatched account", async () => {
+    await subscribeCheckInRecords(actor, vi.fn(), vi.fn());
+    expect(mock.subscribe.mock.calls[0][0]).toEqual({ name: "attraction_checkins" });
+    mock.subscribe.mockClear();
+    await subscribeCheckInRecords({ ...actor, id: "other" }, vi.fn(), vi.fn());
+    expect(mock.subscribe).not.toHaveBeenCalled();
+  });
+  it("retries an existing visit without duplicating it or reopening a checkout", async () => {
+    mock.uid = "tourist";
+    const tourist = { id: "tourist", role: "tourist" } as User;
+    expect(await saveCheckInRecord(record, tourist)).toBe(true);
+    mock.reports.set(record.id, { ...record, status: "checked-out", checkedOutAt: "2026-10-13T03:00:00Z" });
+    expect(await saveCheckInRecord(record, tourist)).toBe(true);
+    expect(mock.set).not.toHaveBeenCalled();
+    expect(mock.update).not.toHaveBeenCalled();
   });
   it("creates the catalogue place and updates review fields in one transaction without replacing visit times", async () => {
     expect(await savePlaceReview(review, actor)).toBe(true);

@@ -1,0 +1,21 @@
+import type { Locale } from "./i18n";
+
+const en = {
+  back: "Back to app", saving: "Saving check-in…", retry: "Retry cloud sync", pendingTitle: "Cloud sync pending",
+  pending: "Saved on this device. Cloud sync was not confirmed. Check your connection and retry; the same visit will be reused.",
+  synced: "Saved online. Your other signed-in devices can now receive this visit.",
+  localTitle: "Saved on this device", local: "Local demo mode only. This visit is not shared with another device.",
+};
+type Key = keyof typeof en;
+const copy: Record<Locale, Record<Key, string>> = {
+  en,
+  ms: { back: "Kembali ke aplikasi", saving: "Menyimpan daftar masuk…", retry: "Cuba semula penyegerakan awan", pendingTitle: "Penyegerakan awan belum disahkan", pending: "Disimpan pada peranti ini. Penyegerakan awan belum disahkan. Semak sambungan dan cuba lagi; lawatan yang sama akan digunakan semula.", synced: "Disimpan dalam talian. Peranti lain yang telah log masuk kini boleh menerima lawatan ini.", localTitle: "Disimpan pada peranti ini", local: "Mod demo setempat sahaja. Lawatan ini tidak dikongsi dengan peranti lain." },
+  zh: { back: "返回应用", saving: "正在保存签到…", retry: "重试云端同步", pendingTitle: "云端同步待确认", pending: "已保存在此设备，但尚未确认云端同步。请检查网络后重试；将使用同一条访问记录，不会新建重复记录。", synced: "已保存到云端。其他已登录的设备现在可以接收此访问记录。", localTitle: "已保存在此设备", local: "仅限本地演示模式。此访问记录不会共享到其他设备。" },
+  ja: { back: "アプリに戻る", saving: "チェックインを保存中…", retry: "クラウド同期を再試行", pendingTitle: "クラウド同期は未確認", pending: "この端末に保存しました。クラウド同期は確認できていません。接続を確認して再試行してください。同じ訪問記録を使用します。", synced: "オンラインで保存しました。ログイン済みの他の端末でも、この訪問記録を受信できます。", localTitle: "この端末に保存済み", local: "ローカルデモモードです。この訪問記録は他の端末と共有されません。" },
+  ko: { back: "앱으로 돌아가기", saving: "체크인 저장 중…", retry: "클라우드 동기화 재시도", pendingTitle: "클라우드 동기화 확인 대기", pending: "이 기기에 저장되었습니다. 클라우드 동기화가 확인되지 않았습니다. 연결을 확인하고 재시도하세요. 같은 방문 기록을 다시 사용합니다.", synced: "온라인에 저장되었습니다. 로그인한 다른 기기에서도 이 방문 기록을 받을 수 있습니다.", localTitle: "이 기기에 저장됨", local: "로컬 데모 모드입니다. 이 방문 기록은 다른 기기와 공유되지 않습니다." },
+  pt: { back: "Voltar à aplicação", saving: "A guardar a entrada…", retry: "Repetir sincronização", pendingTitle: "Sincronização pendente", pending: "Guardado neste dispositivo. A sincronização não foi confirmada. Verifique a ligação e tente novamente; será reutilizada a mesma visita.", synced: "Guardado online. Os seus outros dispositivos com sessão iniciada podem agora receber esta visita.", localTitle: "Guardado neste dispositivo", local: "Apenas modo de demonstração local. Esta visita não é partilhada com outro dispositivo." },
+  ta: { back: "செயலிக்குத் திரும்பு", saving: "வருகையைச் சேமிக்கிறது…", retry: "மேக ஒத்திசைவை மீண்டும் முயற்சி செய்", pendingTitle: "மேக ஒத்திசைவு உறுதியாகவில்லை", pending: "இந்தச் சாதனத்தில் சேமிக்கப்பட்டது. மேக ஒத்திசைவு உறுதியாகவில்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்; அதே வருகைப் பதிவு பயன்படுத்தப்படும்.", synced: "இணையத்தில் சேமிக்கப்பட்டது. உள்நுழைந்துள்ள மற்ற சாதனங்கள் இப்போது இந்த வருகைப் பதிவைப் பெறலாம்.", localTitle: "இந்தச் சாதனத்தில் சேமிக்கப்பட்டது", local: "உள்ளூர் மாதிரி முறை மட்டுமே. இந்த வருகைப் பதிவு மற்ற சாதனத்துடன் பகிரப்படாது." },
+  es: { back: "Volver a la aplicación", saving: "Guardando la entrada…", retry: "Reintentar sincronización", pendingTitle: "Sincronización pendiente", pending: "Guardado en este dispositivo. No se confirmó la sincronización. Comprueba la conexión y reintenta; se reutilizará la misma visita.", synced: "Guardado en línea. Tus otros dispositivos con sesión iniciada ya pueden recibir esta visita.", localTitle: "Guardado en este dispositivo", local: "Solo modo de demostración local. Esta visita no se comparte con otro dispositivo." },
+  fr: { back: "Retour à l'application", saving: "Enregistrement de la visite…", retry: "Réessayer la synchronisation", pendingTitle: "Synchronisation en attente", pending: "Enregistré sur cet appareil. La synchronisation n'a pas été confirmée. Vérifiez la connexion et réessayez ; la même visite sera réutilisée.", synced: "Enregistré en ligne. Vos autres appareils connectés peuvent maintenant recevoir cette visite.", localTitle: "Enregistré sur cet appareil", local: "Mode de démonstration local uniquement. Cette visite n'est pas partagée avec un autre appareil." },
+};
+export const checkInSyncText = (locale: Locale, key: Key) => copy[locale][key];

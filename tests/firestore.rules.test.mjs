@@ -1,7 +1,7 @@
 import { after, before, beforeEach, describe, it } from "node:test";
 import { readFileSync } from "node:fs";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, runTransaction, setDoc, updateDoc, where } from "firebase/firestore";
 
 // Never fall back to the real project when an emulator is unavailable.
 if (process.env.FIRESTORE_EMULATOR_HOST !== "127.0.0.1:8088") throw new Error("Run npm run test:rules against the isolated emulator.");
@@ -89,6 +89,42 @@ describe("identity and role isolation", () => {
 });
 
 describe("owned movement and support records", () => {
+  it("delivers a phone transaction to another signed-in owner's live visit query", async () => {
+    const phone = db("alice");
+    const desktop = db("alice");
+    const reference = doc(phone, "attraction_checkins", "phone-qr-visit");
+    let stop;
+    let timer;
+    try {
+      const received = new Promise((resolve, reject) => {
+        timer = setTimeout(() => reject(new Error("Desktop did not receive the visit")), 10000);
+        stop = onSnapshot(query(collection(desktop, "attraction_checkins"), where("userId", "==", "alice")), { includeMetadataChanges: true }, (snapshot) => {
+          if (!snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites && snapshot.docs.some((visit) => visit.id === reference.id && visit.data().status === "checked-in")) resolve();
+        }, reject);
+      });
+      await assertSucceeds(runTransaction(phone, async (transaction) => {
+        const existing = await transaction.get(reference);
+        if (!existing.exists()) transaction.set(reference, { id: reference.id, userId: "alice", destinationId: "temple", status: "checked-in", checkedInAt: "2026-10-17T00:00:00Z" });
+      }));
+      await received;
+      await assertSucceeds(getDoc(doc(db("admin"), "attraction_checkins", reference.id)));
+      await assertFails(getDoc(doc(db("bob"), "attraction_checkins", reference.id)));
+    } finally {
+      clearTimeout(timer);
+      stop?.();
+    }
+  });
+  for (const name of ["attraction_checkins", "sos_alerts"]) it(`allows the app's read-before-create transaction in ${name}`, async () => {
+    const store = db("alice");
+    const reference = doc(store, name, "transaction-new");
+    await assertSucceeds(runTransaction(store, async (transaction) => {
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists()) transaction.set(reference, { ...recordFixtures[name], id: "transaction-new", userId: "alice" });
+    }));
+    await assertSucceeds(getDoc(doc(db("admin"), name, "transaction-new")));
+    await assertFails(getDoc(doc(db("bob"), name, "transaction-new")));
+    await assertFails(getDoc(doc(db(), name, "missing")));
+  });
   for (const [name, fixture] of Object.entries(recordFixtures)) describe(name, () => {
     it("allows owner queries and creates, and admin reads", async () => {
       await assertSucceeds(getDocs(query(collection(db("alice"), name), where("userId", "==", "alice"))));

@@ -21,6 +21,8 @@ import type {
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 import { preferredSosAlert } from "./safety";
 import { preserveReviewedCheckIn } from "./unlistedPlaces";
+import { acknowledgePendingCheckIns, loadPendingCheckIns } from "./pendingCheckIns";
+import { mergeCheckInRecords } from "./checkInSync";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
@@ -184,6 +186,21 @@ export async function loadPlaceReviewRecords(actor: User) {
   const { collection, getDocsFromServer, query, where } = await import("firebase/firestore");
   const snapshot = await getDocsFromServer(query(collection(services.db, FIRESTORE_COLLECTIONS.checkIns), where("reviewStatus", "==", "pending")));
   return snapshot.docs.map((record) => normalizeCheckIn({ ...record.data(), id: record.id }));
+}
+
+export async function subscribeCheckInRecords(actor: User, onChange: (records: AttractionCheckIn[]) => void, onError: () => void) {
+  const services = getFirebaseServices();
+  const uid = services?.auth.currentUser?.uid;
+  if (!services || !uid || (actor.id !== uid && actor.authUid !== uid)) return () => {};
+  const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+  const source = collection(services.db, FIRESTORE_COLLECTIONS.checkIns);
+  const scoped = actor.role === "admin" ? source : query(source, where("userId", "==", actor.id));
+  return onSnapshot(scoped, { includeMetadataChanges: true }, (snapshot) => {
+    if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return;
+    const records = snapshot.docs.map((record) => normalizeCheckIn({ ...record.data(), id: record.id }));
+    acknowledgePendingCheckIns(records);
+    onChange(records);
+  }, onError);
 }
 
 export async function subscribePlaceReviewRecords(actor: User, onChange: (pending: AttractionCheckIn[], reviewed: AttractionCheckIn[]) => void, onError: () => void) {
@@ -409,7 +426,7 @@ export async function loadCloudData(fallbackActor?: User | null) {
       recommendations,
       sosAlerts,
       incidentReports,
-      checkIns,
+      checkIns: mergeCheckInRecords(loadPendingCheckIns(authUid), checkIns),
       geofences,
     });
     saveLocalData(data);
