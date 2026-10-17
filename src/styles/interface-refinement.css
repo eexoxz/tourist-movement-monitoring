@@ -90,6 +90,15 @@ a.secondary-action { text-decoration: none; }
 .tracking-status-grid dt svg { flex-shrink: 0; margin-top: 2px; }
 .tracking-status-grid dd { margin: 6px 0 0; font-size: 0.82rem; line-height: 1.6; overflow-wrap: anywhere; }
 .tracking-status-grid small { display: block; color: var(--muted); }
+.gps-health-receiving { color: #08765e; }
+.gps-health-stale, .gps-health-attention { color: #9b3b18; font-weight: 600; }
+.device-privacy-panel { margin-top: 28px; padding-block: 18px; border-top: 1px solid var(--line); }
+.device-privacy-panel > summary { display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 44px; font-weight: 600; }
+.device-privacy-panel > p, .device-privacy-confirm p { max-width: 70ch; line-height: 1.6; color: var(--muted); }
+.device-privacy-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.device-privacy-panel button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.device-privacy-panel button svg { flex-shrink: 0; }
+.device-privacy-panel [role="alert"] { color: #9b3b18; }
 .home-active-journey .tracking-status-grid { margin-top: 0; }
 .activity-basis-row { flex-wrap: wrap; }
 .activity-basis-row > p { flex: 1; min-width: 0; overflow-wrap: anywhere; }

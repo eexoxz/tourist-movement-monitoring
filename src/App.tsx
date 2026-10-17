@@ -33,6 +33,8 @@ import { buildDataExport } from "./services/dataExport";
 import { workflowText } from "./services/workflowCopy";
 import { mergeIncidentReports } from "./services/incidentSync";
 import { mergeMonitoringSnapshot, subscribeAdminMonitoring } from "./services/monitoringSync";
+import { DevicePrivacyPanel } from "./components/DevicePrivacyPanel";
+import { deviceText } from "./services/deviceCopy";
 
 function App() {
   useEffect(() => { loadRememberedLogin(); }, []);
@@ -439,10 +441,10 @@ function App() {
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
     const fail = () => { if (!stopped) notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device."); };
-    void subscribeAdminMonitoring(currentUser, (snapshot, pending) => {
+    void subscribeAdminMonitoring(currentUser, (snapshots, pending) => {
       if (stopped) return;
       setData((current) => {
-        const next = mergeMonitoringSnapshot(current, snapshot, pending);
+        const next = snapshots.reduce((value, snapshot) => mergeMonitoringSnapshot(value, snapshot, pending), current);
         if (next !== current) cacheLocalData(next);
         return next;
       });
@@ -742,6 +744,25 @@ function App() {
     replaceBrowserPath(getPathForAuthMode("login"));
   };
 
+  const clearDeviceDownloads = async (): Promise<"pending" | "failed" | undefined> => {
+    try {
+      const privacy = await import("./services/devicePrivacy");
+      if (privacy.hasUnsyncedDeviceWork()) return "pending";
+      await signOutConfiguredProvider();
+      sessionRevision.current++;
+      clearBrowserLocationWatch(watchId);
+      clearSession();
+      setSessionUserId(null);
+      privacy.clearDownloadedDeviceData();
+      window.location.replace(getPathForAuthMode("login"));
+    } catch (error) {
+      const { UnsyncedDeviceWork } = await import("./services/devicePrivacy");
+      const result = error instanceof UnsyncedDeviceWork ? "pending" : "failed";
+      notify({ tone: "warning", title: deviceText(locale, "privacyTitle"), message: deviceText(locale, result) });
+      return result;
+    }
+  };
+
   const resetPrototype = () => {
     if (hasConfiguredAuth()) return;
     clearBrowserLocationWatch(watchId);
@@ -966,6 +987,7 @@ function App() {
             syncStatus={syncStatus}
           />
         )}
+        {hasConfiguredAuth() && (currentUser.role === "admin" || safeView === "profile") && <DevicePrivacyPanel locale={locale} onClear={clearDeviceDownloads} />}
       </main>
       <ToastViewport notifications={notifications} onDismiss={dismissNotification} locale={locale} />
     </div>

@@ -30,6 +30,7 @@ const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
 const demoUserIds = new Set(initialData.users.map((user) => user.id));
 let localDataCache: { storage: Storage; raw: string; data: AppData } | undefined;
+let privateCacheCleared = false;
 
 export const FIRESTORE_COLLECTIONS = {
   users: "users",
@@ -90,7 +91,7 @@ export function loadData(): AppData {
   const raw = localStorage.getItem(DATA_KEY);
   if (localDataCache?.storage === localStorage && localDataCache.raw === raw) return localDataCache.data;
   if (!raw) {
-    const data = normalizeAppData(initialData);
+    const data = normalizeAppData(privateCacheCleared ? {} : initialData);
     saveLocalData(data);
     return data;
   }
@@ -113,6 +114,12 @@ export function saveData(data: AppData, actor?: User | null, previousData = load
 
 export function cacheLocalData(data: AppData) {
   saveLocalData(data);
+}
+
+export function clearLocalDownloadCache() {
+  localStorage.removeItem(DATA_KEY);
+  privateCacheCleared = true;
+  localDataCache = undefined;
 }
 
 export async function loadSharedDestinations(): Promise<Destination[] | null> {
@@ -284,6 +291,7 @@ export function loadSession(): string | null {
 }
 
 export function saveSession(userId: string, rememberSession = true) {
+  privateCacheCleared = false;
   clearSession();
   try { (rememberSession ? localStorage : sessionStorage).setItem(SESSION_KEY, userId); }
   catch { /* Keep the current in-memory login without creating a persistent session. */ }
@@ -621,6 +629,7 @@ function buildDestinationCategoryRows(destinations: Destination[]): DestinationC
 }
 
 function saveLocalData(data: AppData) {
+  if (privateCacheCleared) return;
   const raw = JSON.stringify(data);
   localStorage.setItem(DATA_KEY, raw);
   localDataCache = { storage: localStorage, raw, data };

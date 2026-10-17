@@ -135,6 +135,7 @@ export function TouristWorkspace({
     recentCheckIns,
   } = touristWorkspace;
   const activeTripSummary = activeTrip ? tripSummaries.find((summary) => summary.tripId === activeTrip.id) ?? null : null;
+  const activeGpsFix = activeTrip && lastBrowserLocation?.tripId === activeTrip.id ? lastBrowserLocation : undefined;
   const destinationDemand = useMemo(() => getTouristDestinationDemand(data, user), [data, user]);
   const calendarDay = useCalendarDay();
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
@@ -910,7 +911,7 @@ export function TouristWorkspace({
 
   if (view === "tracking") {
     return <><Page title={travelText(locale, "tripTitle")} eyebrow={t("common.tourist")}>
-      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus} onAllowLocation={grantConsent} onStart={startTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
+      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} gpsFix={activeGpsFix} gpsAttention={Boolean(trackingQualityIssue)} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus} onAllowLocation={grantConsent} onStart={startTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
     </Page>{discoveryPrompt}{tripActionDialog}</>;
   }
 
@@ -1014,7 +1015,7 @@ export function TouristWorkspace({
     <>
     <TouristHome
       displayName={displayName}
-      trackingStatus={activeTrip ? <TrackingStatus point={activePoints.at(-1)} listening={isLiveTracking} syncStatus={syncStatus} locale={locale} /> : undefined}
+      trackingStatus={activeTrip ? <TrackingStatus point={activePoints.at(-1)} fix={activeGpsFix} attention={Boolean(trackingQualityIssue) || locationRetryAvailable} listening={isLiveTracking} syncStatus={syncStatus} locale={locale} /> : undefined}
       activeTrip={activeTrip}
       currentConsent={currentConsent}
       destinations={discoveryReference ? discoveryDestinations : localizedDestinations}

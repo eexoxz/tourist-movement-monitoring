@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AttractionCheckIn } from "../types";
-import { acknowledgePendingCheckIn, loadPendingCheckIns, pendingCheckInsKey, rememberPendingCheckIn } from "./pendingCheckIns";
+import { acknowledgePendingCheckIn, hasPendingCheckInChanges, loadPendingCheckIns, pendingCheckInsKey, rememberPendingCheckIn } from "./pendingCheckIns";
 import { mergeCheckInRecords } from "./checkInSync";
 
 const record: AttractionCheckIn = { id: "visit", userId: "tourist", destinationId: "temple", status: "checked-in", checkedInAt: "2026-10-17T00:00:00Z" };
@@ -44,6 +44,22 @@ describe("pending QR visit recovery", () => {
   it("still permits online saves when browser storage is blocked", () => {
     vi.stubGlobal("localStorage", { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); }, removeItem() { throw new Error("blocked"); } });
     expect(() => rememberPendingCheckIn(record)).not.toThrow();
+    expect(hasPendingCheckInChanges()).toBe(true);
+    expect(loadPendingCheckIns("tourist")).toEqual([record]);
     expect(() => acknowledgePendingCheckIn(record)).not.toThrow();
+    expect(hasPendingCheckInChanges()).toBe(false);
+  });
+  it("moves all fallback visits to durable storage when storage recovers", () => {
+    const set = vi.fn<(key: string, value: string) => void>(() => { throw new Error("quota"); });
+    vi.stubGlobal("localStorage", { getItem: (key: string) => saved.get(key) ?? "{}", setItem: set, removeItem: (key: string) => saved.delete(key) });
+    rememberPendingCheckIn(record);
+    expect(loadPendingCheckIns("tourist")).toEqual([record]);
+    set.mockImplementation((key, value) => { saved.set(key, value); });
+    const other = { ...record, id: "second" };
+    rememberPendingCheckIn(other);
+    expect(JSON.parse(saved.get(pendingCheckInsKey)!)).toEqual([record, other]);
+    acknowledgePendingCheckIn(record);
+    acknowledgePendingCheckIn(other);
+    expect(hasPendingCheckInChanges()).toBe(false);
   });
 });

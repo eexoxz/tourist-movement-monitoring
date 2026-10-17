@@ -57,3 +57,9 @@ export function acknowledgeCloudJob(job: CloudJob) {
   pending.delete(keyFor(job));
   try { localStorage.removeItem(keyFor(job)); } catch { /* Replays remain idempotent if a stale entry is retained. */ }
 }
+
+export function hasPendingCloudChanges() {
+  if (pending.size) return true;
+  for (let index = 0; index < localStorage.length; index++) if (localStorage.key(index)?.startsWith(prefix)) return true;
+  return false;
+}
