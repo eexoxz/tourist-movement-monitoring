@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ services: { auth: { currentUser: null } }, setPersistence: vi.fn(), signIn: vi.fn(), register: vi.fn(), verification: vi.fn() }));
+const mocks = vi.hoisted(() => ({ services: { auth: { currentUser: null } }, setPersistence: vi.fn(), signIn: vi.fn(), register: vi.fn(), verification: vi.fn(), observe: vi.fn() }));
 vi.mock("./firebaseClient", () => ({ getFirebaseServices: () => mocks.services, isFirebaseConfigured: () => true }));
 vi.mock("firebase/auth", () => ({
   browserLocalPersistence: "local", browserSessionPersistence: "session",
   setPersistence: mocks.setPersistence, signInWithEmailAndPassword: mocks.signIn,
   createUserWithEmailAndPassword: mocks.register, sendEmailVerification: mocks.verification,
+  onAuthStateChanged: mocks.observe,
 }));
-import { registerWithConfiguredProvider, signInWithConfiguredProvider } from "./auth";
+import { registerWithConfiguredProvider, signInWithConfiguredProvider, subscribeConfiguredSessionEnd } from "./auth";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -15,6 +16,22 @@ beforeEach(() => {
   mocks.register.mockResolvedValue({ user: { uid: "test", emailVerified: false } });
 });
 describe("Firebase session persistence", () => {
+  it("defaults to session-only persistence when no remember choice is supplied", async () => {
+    await signInWithConfiguredProvider("test@example.test", "test-password");
+    expect(mocks.setPersistence).toHaveBeenCalledWith(mocks.services.auth, "session");
+  });
+  it("ends app access on Firebase sign-out or a different account being restored", async () => {
+    const stop = vi.fn(); mocks.observe.mockReturnValue(stop);
+    const signedOut = vi.fn();
+    expect(await subscribeConfiguredSessionEnd("test", signedOut)).toBe(stop);
+    const change = mocks.observe.mock.calls[0][1];
+    change({ uid: "test" });
+    expect(signedOut).not.toHaveBeenCalled();
+    change(null);
+    expect(signedOut).toHaveBeenCalledOnce();
+    change({ uid: "another-user" });
+    expect(signedOut).toHaveBeenCalledTimes(2);
+  });
   it("uses SDK local persistence only when remember login is selected", async () => {
     await signInWithConfiguredProvider("test@example.test", "test-password", true);
     expect(mocks.setPersistence).toHaveBeenCalledWith(mocks.services.auth, "local");

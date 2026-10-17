@@ -276,15 +276,22 @@ export async function subscribeIncidentReports(actor: User, onChange: (reports: 
 }
 
 export function loadSession(): string | null {
-  return localStorage.getItem(SESSION_KEY);
+  try {
+    const session = sessionStorage.getItem(SESSION_KEY);
+    if (session) return session;
+  } catch { /* Session storage may be blocked. */ }
+  try { return localStorage.getItem(SESSION_KEY); } catch { return null; }
 }
 
-export function saveSession(userId: string) {
-  localStorage.setItem(SESSION_KEY, userId);
+export function saveSession(userId: string, rememberSession = true) {
+  clearSession();
+  try { (rememberSession ? localStorage : sessionStorage).setItem(SESSION_KEY, userId); }
+  catch { /* Keep the current in-memory login without creating a persistent session. */ }
 }
 
 export function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
+  try { localStorage.removeItem(SESSION_KEY); } catch { /* Storage can be blocked. */ }
+  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* Storage can be blocked. */ }
 }
 
 export function createId(prefix: string) {

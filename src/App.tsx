@@ -6,7 +6,7 @@ import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, 
 import { confirmCheckInSync, mergeCheckInRecords } from "./services/checkInSync";
 import { acknowledgePendingCheckIn, rememberPendingCheckIn } from "./services/pendingCheckIns";
 import { refreshAllRecommendations } from "./services/analytics";
-import { authProviderName, getConfiguredAuthState, getConfiguredUserRecord, hasConfiguredAuth, registerWithConfiguredProvider, sendPasswordResetToConfiguredProvider, sendVerificationEmail, signInWithConfiguredProvider, signOutConfiguredProvider } from "./services/auth";
+import { authProviderName, getConfiguredAuthState, getConfiguredUserRecord, hasConfiguredAuth, registerWithConfiguredProvider, sendPasswordResetToConfiguredProvider, sendVerificationEmail, signInWithConfiguredProvider, signOutConfiguredProvider, subscribeConfiguredSessionEnd } from "./services/auth";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
 import { createTouristPassId, getTouristCheckInDestinationIdFromUrl, getTouristCheckInRequestFromUrl, isTouristCheckInRoute } from "./services/checkInDeepLink";
 import { loadLocale, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
@@ -39,7 +39,7 @@ function App() {
   const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
   const [placeQueueState, setPlaceQueueState] = useState<"loading" | "live" | "offline">();
   const [placeQueueRevision, setPlaceQueueRevision] = useState(0);
-  const [sessionUserId, setSessionUserId] = useState<string | null>(() => loadSession());
+  const [sessionUserId, setSessionUserId] = useState<string | null>(() => hasConfiguredAuth() ? null : loadSession());
   const currentUser = data.users.find((user) => user.id === sessionUserId || user.authUid === sessionUserId) ?? null;
   const [view, setView] = useState<AppView>(() => getViewFromPath(getCurrentPathname()) ?? "overview");
   const [authMode, setAuthMode] = useState<AuthMode>(() => getAuthModeFromPath(getCurrentPathname()) ?? "login");
@@ -174,7 +174,17 @@ function App() {
         }
 
         if (firebaseUser?.uid) {
-          saveSession(firebaseUser.uid);
+          if (!firebaseUser.emailVerified) {
+            const account = await getConfiguredUserRecord(firebaseUser.uid);
+            if (!isCurrent()) return;
+            if (account?.role !== "admin") {
+              await signOutConfiguredProvider();
+              clearSession();
+              setSessionUserId(null);
+              return;
+            }
+          }
+          saveSession(firebaseUser.uid, false);
           setSessionUserId(firebaseUser.uid);
         }
 
@@ -207,6 +217,21 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!hasConfiguredAuth() || !currentUser) return;
+    let stopped = false;
+    let unsubscribe: (() => void) | undefined;
+    const signedOut = () => {
+      if (stopped) return;
+      sessionRevision.current++;
+      clearBrowserLocationWatch(watchId);
+      clearSession();
+      setSessionUserId(null);
+    };
+    void subscribeConfiguredSessionEnd(currentUser.authUid ?? currentUser.id, signedOut).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(signedOut);
+    return () => { stopped = true; unsubscribe?.(); };
+  }, [currentUser?.id, currentUser?.authUid]);
+
+  useEffect(() => {
     if (currentUser && safeView !== view) {
       setView(safeView);
     }
@@ -217,6 +242,7 @@ function App() {
   }, [safeView, isPublicCheckInFlow, publicCheckInRequest?.destinationId, publicCheckInRequest?.passId]);
 
   useEffect(() => {
+    if (hasConfiguredAuth() && !cloudAuthReady && !currentUser) return;
     const handlePopState = () => {
       const pathname = getCurrentPathname();
       setPublicCheckInRequest(getTouristCheckInRequestFromUrl());
@@ -241,9 +267,10 @@ function App() {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [currentUser]);
+  }, [currentUser, cloudAuthReady]);
 
   useEffect(() => {
+    if (hasConfiguredAuth() && !cloudAuthReady && !currentUser) return;
     const pathname = getCurrentPathname();
 
     if (isTouristCheckInRoute(pathname)) {
@@ -267,7 +294,7 @@ function App() {
     }
 
     replaceBrowserPath(getPathForView(currentUser.role, nextView));
-  }, [authMode, currentUser, safeView]);
+  }, [authMode, currentUser, safeView, cloudAuthReady]);
 
   const commitData = (nextData: AppData, actor: User | null = currentUser, options: CommitDataOptions = {}) => {
     const previousData = loadData();
@@ -515,7 +542,7 @@ function App() {
     }
   };
 
-  const login = async (email: string, password: string, rememberSession = true): Promise<AuthResult> => {
+  const login = async (email: string, password: string, rememberSession = false): Promise<AuthResult> => {
     const revision = ++sessionRevision.current;
     const firebaseMode = hasConfiguredAuth();
     const localEmailUser = findUserByEmail(data, email);
@@ -569,7 +596,7 @@ function App() {
 
       cacheLocalData(nextData);
       setData(nextData);
-      saveSession(authUid);
+      saveSession(authUid, rememberSession);
       setSessionUserId(authUid);
       setCloudAuthReady(false);
       setView(defaultView);
@@ -601,7 +628,7 @@ function App() {
     if (!localUser) {
       return { error: "Invalid email or password." };
     }
-    saveSession(localUser.id);
+    saveSession(localUser.id, rememberSession);
     setSessionUserId(localUser.id);
     setView(getDefaultViewForRole(localUser.role));
     if (!isPublicCheckInFlow) {
@@ -657,7 +684,7 @@ function App() {
     }
 
     commitData(created.data, user);
-    saveSession(user.id);
+    saveSession(user.id, false);
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));
     if (!isPublicCheckInFlow) {
@@ -742,6 +769,10 @@ function App() {
     URL.revokeObjectURL(url);
     notify({ tone: "success", title: "Export started", message: "The current prototype data is downloading as a JSON file." });
   };
+
+  if (hasConfiguredAuth() && !cloudAuthReady && !currentUser) {
+    return <main className="auth-layout" aria-busy="true"><div role="status">{t("auth.checkingAccess")}</div></main>;
+  }
 
   if (publicCheckInRequest && !currentUser) {
     return (

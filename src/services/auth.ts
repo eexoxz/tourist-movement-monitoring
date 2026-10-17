@@ -13,7 +13,7 @@ async function ensurePersistence(rememberSession: boolean) {
   return services;
 }
 
-export async function signInWithConfiguredProvider(email: string, password: string, rememberSession = true) {
+export async function signInWithConfiguredProvider(email: string, password: string, rememberSession = false) {
   const services = await ensurePersistence(rememberSession);
   if (!services) {
     return null;
@@ -57,6 +57,13 @@ export async function getConfiguredAuthState() {
       }
     );
   });
+}
+
+export async function subscribeConfiguredSessionEnd(userId: string, onSessionEnd: () => void) {
+  const services = getFirebaseServices();
+  if (!services) return () => {};
+  const { onAuthStateChanged } = await import("firebase/auth");
+  return onAuthStateChanged(services.auth, (user) => { if (!user || user.uid !== userId) onSessionEnd(); }, onSessionEnd);
 }
 
 export async function getConfiguredUserRecord(uid: string): Promise<User | null> {
