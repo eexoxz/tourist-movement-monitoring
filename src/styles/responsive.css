@@ -480,7 +480,7 @@
     max-width: none;
   }
 
-  .record-metrics {
+  .movement-trip-card .record-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

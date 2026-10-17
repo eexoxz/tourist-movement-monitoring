@@ -3,7 +3,7 @@ import type { Itinerary, User } from "../types";
 import { getConfiguredAuthState } from "./auth";
 import { isFirebaseConfigured } from "./firebaseClient";
 import { createItinerary, reconcileItineraries, sameItineraryContent, type ItineraryEntry } from "./itineraries";
-import { cacheItineraries, deleteItinerary, itineraryDeadline, ItineraryError, loadItineraryCache, saveItinerary, subscribeItineraries } from "./itineraryStorage";
+import { cacheItineraries, deleteItinerary, itineraryDeadline, ItineraryError, loadItineraryCache, registerItineraryDrafts, saveItinerary, subscribeItineraries } from "./itineraryStorage";
 
 export function useItineraries(user: User) {
   const cloud = isFirebaseConfigured();
@@ -16,6 +16,7 @@ export function useItineraries(user: User) {
   const locked = useRef(false);
   const latest = useRef(entries);
   latest.current = entries;
+  useEffect(() => registerItineraryDrafts(user.id, () => latest.current), [user.id]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => { if (!cacheItineraries(user.id, entries)) setNotice("storageFull"); }, 250);

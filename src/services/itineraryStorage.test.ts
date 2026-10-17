@@ -15,7 +15,7 @@ vi.mock("firebase/firestore", () => ({
     set: ({ id }: { id: string }, value: Record<string, unknown>) => mock.records.set(id, value),
   }),
 }));
-import { cacheItineraries, deleteItinerary, itineraryDeadline, loadItineraryCache, saveItinerary, subscribeItineraries } from "./itineraryStorage";
+import { cacheItineraries, deleteItinerary, itineraryDeadline, loadItineraryCache, readItineraryDrafts, registerItineraryDrafts, saveItinerary, subscribeItineraries } from "./itineraryStorage";
 
 const user = { id: "alice", role: "tourist" } as User;
 let storage: Map<string, string>;
@@ -27,6 +27,17 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("itinerary persistence", () => {
+  it("exports the current editor draft even before the debounced cache write", () => {
+    const cached = { plan: createItinerary("alice", "Cached name"), dirty: false };
+    cacheItineraries("alice", [cached]);
+    const draft = { plan: { ...cached.plan, title: "Just typed" }, dirty: true };
+    const unregister = registerItineraryDrafts("alice", () => [draft]);
+    try {
+      expect(readItineraryDrafts("alice")).toEqual([draft]);
+      expect(readItineraryDrafts("bob")).toEqual([]);
+    } finally { unregister(); }
+    expect(readItineraryDrafts("alice")).toEqual([cached]);
+  });
   it("saves a new plan and edits using sequential revision checks", async () => {
     const plan = createItinerary("alice", "A trip");
     const first = await saveItinerary(plan, user);

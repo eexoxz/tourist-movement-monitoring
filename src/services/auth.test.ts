@@ -30,6 +30,12 @@ describe("Firebase session persistence", () => {
     expect(mocks.setPersistence).toHaveBeenCalledWith(mocks.services.auth, "session");
     expect(mocks.verification).toHaveBeenCalled();
   });
+  it("keeps a created account recoverable when verification email delivery fails", async () => {
+    mocks.verification.mockRejectedValueOnce(new Error("email throttled"));
+    const result = await registerWithConfiguredProvider("test@example.test", "test-password");
+    expect(result).toMatchObject({ user: { uid: "test" }, verificationSent: false });
+    expect(mocks.register).toHaveBeenCalledTimes(1);
+  });
   it("does not sign in when persistence setup fails and allows a retry", async () => {
     mocks.setPersistence.mockRejectedValueOnce(new Error("storage unavailable"));
     await expect(signInWithConfiguredProvider("test@example.test", "test-password", false)).rejects.toThrow("storage unavailable");

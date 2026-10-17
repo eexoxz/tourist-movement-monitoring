@@ -50,6 +50,61 @@ beforeEach(async () => {
 });
 after(async () => { await environment?.cleanup(); });
 
+describe("action-scoped cloud workflows", () => {
+  it("delivers a tourist's new movement point to an admin session without refreshing", async () => {
+    let stop;
+    let timer;
+    try {
+      const received = new Promise((resolve, reject) => {
+        timer = setTimeout(() => reject(new Error("Admin did not receive movement")), 10000);
+        stop = onSnapshot(collection(db("admin"), "movement_records"), { includeMetadataChanges: true }, (snapshot) => {
+          if (!snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites && snapshot.docs.some((record) => record.id === "phone-live-point")) resolve();
+        }, reject);
+      });
+      await assertSucceeds(setDoc(doc(db("alice"), "movement_records", "phone-live-point"), { id: "phone-live-point", userId: "alice", tripId: "alice-trip", latitude: 5.42, longitude: 100.32 }));
+      await received;
+    } finally { clearTimeout(timer); stop?.(); }
+  });
+  it("supports authenticated read-before-create transactions without exposing another user's existing records", async () => {
+    for (const name of ["location_consents", "trip_sessions", "movement_records", "ai_analyses", "recommendations", "incident_reports"]) {
+      const store = db("alice");
+      const ref = doc(store, name, "fresh-record");
+      await assertSucceeds(runTransaction(store, async (transaction) => {
+        const snapshot = await transaction.get(ref);
+        if (!snapshot.exists()) transaction.set(ref, { ...recordFixtures[name], id: "fresh-record", userId: "alice" });
+      }));
+      await assertFails(getDoc(doc(db("bob"), name, "fresh-record")));
+      await assertFails(getDoc(doc(db(), name, "missing")));
+    }
+  });
+  it("retains both a phone's stop action and a desktop rename", async () => {
+    const store = db("alice");
+    const ref = doc(store, "trip_sessions", "alice-record");
+    const edit = (patch) => {
+      const client = db("alice");
+      return runTransaction(client, async (transaction) => {
+        const reference = doc(client, "trip_sessions", "alice-record");
+        const snapshot = await transaction.get(reference);
+        if (snapshot.exists()) transaction.update(reference, patch);
+      });
+    };
+    await Promise.all([edit({ label: "A renamed visit" }), edit({ status: "completed", endedAt: "2026-10-17T10:00:00Z" })]);
+    const saved = (await getDoc(ref)).data();
+    assert.equal(saved.label, "A renamed visit");
+    assert.equal(saved.status, "completed");
+    assert.equal(saved.endedAt, "2026-10-17T10:00:00Z");
+  });
+  it("reserves incident status and officer notes for admins", async () => {
+    const touristRef = doc(db("alice"), "incident_reports", "alice-record");
+    await assertFails(updateDoc(touristRef, { status: "resolved" }));
+    await assertFails(updateDoc(touristRef, { adminNote: "Forged response" }));
+    await assertFails(setDoc(doc(db("alice"), "incident_reports", "forged"), { id: "forged", userId: "alice", type: "lost-item", status: "resolved" }));
+    await assertSucceeds(updateDoc(doc(db("admin"), "incident_reports", "alice-record"), { status: "reviewing", adminNote: "Reviewed by monitoring officer" }));
+    await assertSucceeds(updateDoc(touristRef, { description: "Updated report details" }));
+    assert.equal((await getDoc(touristRef)).data().adminNote, "Reviewed by monitoring officer");
+  });
+});
+
 describe("private editable itineraries", () => {
   const plan = { id: "itinerary-test", userId: "alice", title: "A planned visit", startDate: "2026-10-17", days: 2, notes: "Private planning notes", stops: [], revision: 1, deletedAt: "", createdAt: "2026-10-17T00:00:00Z", updatedAt: "2026-10-17T00:00:00Z" };
   const create = () => setDoc(doc(db("alice"), "tourist_itineraries", plan.id), plan);

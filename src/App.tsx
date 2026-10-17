@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { BarChart3, BellRing, CalendarDays, Compass, Download, LogOut, MapPinned, RotateCcw, Sparkles, UserRound } from "lucide-react";
 import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, savePlaceReview, saveSession, saveSosAlertRecord, subscribeCheckInRecords, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveCloudData, saveData, savePlaceReview, saveSession, saveSosAlertChange, subscribeCheckInRecords, subscribeIncidentReports, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
 import { confirmCheckInSync, mergeCheckInRecords } from "./services/checkInSync";
 import { acknowledgePendingCheckIn, rememberPendingCheckIn } from "./services/pendingCheckIns";
 import { refreshAllRecommendations } from "./services/analytics";
@@ -29,6 +29,10 @@ import { applyPlaceReview, mergePlaceReviewRecords } from "./services/unlistedPl
 import { unlistedLocationText } from "./services/unlistedLocationCopy";
 import { placeText } from "./services/placeSubmissionCopy";
 import { loadRememberedLogin } from "./services/loginPreferences";
+import { buildDataExport } from "./services/dataExport";
+import { workflowText } from "./services/workflowCopy";
+import { mergeIncidentReports } from "./services/incidentSync";
+import { mergeMonitoringSnapshot, subscribeAdminMonitoring } from "./services/monitoringSync";
 
 function App() {
   useEffect(() => { loadRememberedLogin(); }, []);
@@ -51,6 +55,7 @@ function App() {
   const watchId = useRef<number | null>(null);
   const selectLocale = useRef(createLocaleSelection());
   const lastSyncWarningAt = useRef(0);
+  const sessionRevision = useRef(0);
   const t = (key: TranslationKey) => translate(locale, key);
   const isPublicCheckInFlow = Boolean(publicCheckInRequest);
   const publicCheckInDestination = publicCheckInRequest?.destinationId ? data.destinations.find((destination) => destination.id === publicCheckInRequest.destinationId) ?? null : null;
@@ -153,11 +158,13 @@ function App() {
 
   useEffect(() => {
     let isMounted = true;
+    const revision = sessionRevision.current;
+    const isCurrent = () => isMounted && sessionRevision.current === revision;
 
     const hydrateCloudData = async () => {
       try {
         const firebaseUser = hasConfiguredAuth() ? await getConfiguredAuthState() : null;
-        if (!isMounted) {
+        if (!isCurrent()) {
           return;
         }
 
@@ -171,8 +178,8 @@ function App() {
           setSessionUserId(firebaseUser.uid);
         }
 
-        const cloudData = await loadCloudData();
-        if (!isMounted || !cloudData) {
+        const cloudData = await loadCloudData(undefined, isCurrent);
+        if (!isCurrent() || !cloudData) {
           return;
         }
 
@@ -183,12 +190,12 @@ function App() {
         }
         setSyncStatus("Loaded from Firebase Firestore");
       } catch {
-        if (isMounted) {
+        if (isCurrent()) {
           setSyncStatus("Local mode; Firebase sync unavailable");
           notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
         }
       } finally {
-        if (isMounted) setCloudAuthReady(true);
+        if (isCurrent()) setCloudAuthReady(true);
       }
     };
 
@@ -263,6 +270,7 @@ function App() {
   }, [authMode, currentUser, safeView]);
 
   const commitData = (nextData: AppData, actor: User | null = currentUser, options: CommitDataOptions = {}) => {
+    const previousData = loadData();
     if (options.checkIn?.submittedPlace && hasConfiguredAuth()) {
       const checkIn = options.checkIn;
       setSyncStatus(t("sync.retrying"));
@@ -312,9 +320,9 @@ function App() {
       if (options.sosAlert) setSyncStatus(sosText(locale, "syncPending"));
     }
     if (hasConfiguredAuth() && !options.sosAlert) setSyncStatus("Saving");
-    void (options.sosAlert ? saveSosAlertRecord(options.sosAlert, actor) : options.checkIn ? saveCheckInRecord(options.checkIn, actor) : options.placeReview ? savePlaceReview(options.placeReview, actor) : saveData(nextData, actor))
+    void (options.sosAlert ? saveSosAlertChange(options.sosAlert, actor) : options.placeReview ? savePlaceReview(options.placeReview, actor) : saveData(nextData, actor, previousData))
       .then((synced) => {
-        setSyncStatus(synced ? "Saved to Firestore collections" : "Saved to local browser storage");
+        setSyncStatus(synced ? "Saved to Firestore collections" : hasConfiguredAuth() ? "Saved on this device; cloud retry pending" : "Saved to local browser storage");
       })
       .catch(() => {
         setSyncStatus("Saved on this device; cloud retry pending");
@@ -363,7 +371,7 @@ function App() {
   }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !cloudAuthReady) return;
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
     void subscribeSosAlerts(currentUser, (alerts) => {
@@ -379,7 +387,41 @@ function App() {
       if (!stopped) notifySyncIssue(sosText(locale, "syncUnavailable"), sosText(locale, "syncDetail"));
     });
     return () => { stopped = true; unsubscribe?.(); };
-  }, [currentUser?.id, currentUser?.role, locale]);
+  }, [currentUser?.id, currentUser?.role, locale, cloudAuthReady]);
+
+  useEffect(() => {
+    if (!currentUser || !cloudAuthReady || !hasConfiguredAuth()) return;
+    let stopped = false;
+    let unsubscribe: (() => void) | undefined;
+    const fail = () => { if (!stopped) notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device."); };
+    void subscribeIncidentReports(currentUser, (reports) => {
+      if (stopped) return;
+      setData((current) => {
+        const incidentReports = mergeIncidentReports(current.incidentReports, reports);
+        if (incidentReports === current.incidentReports) return current;
+        const next = { ...current, incidentReports };
+        cacheLocalData(next);
+        return next;
+      });
+    }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
+    return () => { stopped = true; unsubscribe?.(); };
+  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady]);
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== "admin" || !cloudAuthReady || !hasConfiguredAuth()) return;
+    let stopped = false;
+    let unsubscribe: (() => void) | undefined;
+    const fail = () => { if (!stopped) notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device."); };
+    void subscribeAdminMonitoring(currentUser, (snapshot, pending) => {
+      if (stopped) return;
+      setData((current) => {
+        const next = mergeMonitoringSnapshot(current, snapshot, pending);
+        if (next !== current) cacheLocalData(next);
+        return next;
+      });
+    }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
+    return () => { stopped = true; unsubscribe?.(); };
+  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady]);
 
   const confirmPublicCheckIn = async (): Promise<PublicCheckInResult> => {
     if (!publicCheckInRequest?.destinationId || !publicCheckInDestination) {
@@ -457,7 +499,7 @@ function App() {
 
     setIsRetryingSync(true);
     try {
-      const synced = await saveData(data, currentUser);
+      const synced = await saveCloudData(data, currentUser);
       if (synced) {
         setSyncStatus("Saved to Firestore collections");
         notify({ tone: "success", title: "Cloud sync restored", message: "The latest local data was saved to Firestore." });
@@ -474,6 +516,7 @@ function App() {
   };
 
   const login = async (email: string, password: string, rememberSession = true): Promise<AuthResult> => {
+    const revision = ++sessionRevision.current;
     const firebaseMode = hasConfiguredAuth();
     const localEmailUser = findUserByEmail(data, email);
 
@@ -488,15 +531,15 @@ function App() {
           return { error: "Firebase login could not return a user account." };
         }
 
-        const needsFirestoreProfile = !localEmailUser || localEmailUser.role === "admin";
-        firebaseStoredUser = needsFirestoreProfile ? await getConfiguredUserRecord(authUid).catch(() => null) : null;
-        const loginRole = firebaseStoredUser?.role ?? localEmailUser?.role ?? "tourist";
+        firebaseStoredUser = await getConfiguredUserRecord(authUid);
+        const loginRole = firebaseStoredUser?.role ?? "tourist";
         if (firebaseUser && !firebaseUser.emailVerified && loginRole !== "admin") {
-          await sendVerificationEmail(firebaseUser).catch(() => undefined);
+          const sent = await sendVerificationEmail(firebaseUser).catch(() => false);
           await signOutConfiguredProvider().catch(() => undefined);
-          return { error: "Verify your email first. A fresh verification email has been sent." };
+          return { error: sent ? "Verify your email first. A fresh verification email has been sent." : "Verification email could not be sent." };
         }
       } catch (error) {
+        await signOutConfiguredProvider().catch(() => undefined);
         return { error: friendlyAuthError(error, "Firebase login failed.") };
       }
 
@@ -534,21 +577,22 @@ function App() {
         replaceBrowserPath(getPathForView(user.role, defaultView));
       }
 
-      void loadCloudData({ ...user, authUid })
+      void loadCloudData({ ...user, authUid }, () => sessionRevision.current === revision)
         .then((cloudData) => {
+          if (sessionRevision.current !== revision) return;
           if (!cloudData) {
             setSyncStatus("Signed in; local backup ready");
             return;
           }
 
-          const refreshed = refreshAllRecommendations(mergeUserRecord(cloudData, { ...user, authUid }));
+          const refreshed = refreshAllRecommendations(cloudData.users.some((record) => record.id === authUid) ? cloudData : mergeUserRecord(cloudData, { ...user, authUid }));
           cacheLocalData(refreshed);
           setData(refreshed);
           setSyncStatus("Loaded from Firebase Firestore");
         })
         .catch(() => {
-          setSyncStatus("Signed in; cloud refresh needs retry");
-        }).finally(() => setCloudAuthReady(true));
+          if (sessionRevision.current === revision) setSyncStatus("Signed in; cloud refresh needs retry");
+        }).finally(() => { if (sessionRevision.current === revision) setCloudAuthReady(true); });
 
       return {};
     }
@@ -567,6 +611,7 @@ function App() {
   };
 
   const register = async (draft: TouristRegistrationDraft): Promise<AuthResult> => {
+    sessionRevision.current++;
     const precheck = validateTouristAccount(data, {
       name: draft.name,
       email: draft.email,
@@ -580,9 +625,11 @@ function App() {
     }
 
     let authUid: string | undefined;
+    let verificationSent = false;
     try {
-      const firebaseUser = await registerWithConfiguredProvider(draft.email, draft.password);
-      authUid = firebaseUser?.uid;
+      const registration = await registerWithConfiguredProvider(draft.email, draft.password);
+      authUid = registration?.user.uid;
+      verificationSent = registration?.verificationSent ?? false;
     } catch (error) {
       return { error: friendlyAuthError(error, "Firebase registration failed.") };
     }
@@ -603,9 +650,10 @@ function App() {
     const user = created.user;
     if (hasConfiguredAuth()) {
       setData(created.data);
-      await saveData(created.data, user).catch(() => false);
+      const synced = await saveData(created.data, user).catch(() => false);
       await signOutConfiguredProvider().catch(() => undefined);
-      return { message: "Account created. Check your email for the Firebase verification link, then log in after verifying." };
+      const message = verificationSent ? uiText(locale, "Account created. Check your email for the Firebase verification link, then log in after verifying.") : workflowText(locale, "emailFailed");
+      return { message: synced ? message : `${message} ${workflowText(locale, "profilePending")}` };
     }
 
     commitData(created.data, user);
@@ -619,6 +667,7 @@ function App() {
   };
 
   const resendVerification = async (email: string, password: string): Promise<AuthResult> => {
+    sessionRevision.current++;
     if (!hasConfiguredAuth()) {
       return { error: "Verification email is only available in Firebase mode." };
     }
@@ -634,10 +683,11 @@ function App() {
       }
 
       await sendVerificationEmail(firebaseUser);
-      await signOutConfiguredProvider().catch(() => undefined);
       return { message: "Verification email sent again. Check your inbox or spam folder." };
     } catch (error) {
       return { error: friendlyAuthError(error, "Verification email could not be sent.") };
+    } finally {
+      await signOutConfiguredProvider().catch(() => undefined);
     }
   };
 
@@ -655,6 +705,7 @@ function App() {
   };
 
   const logout = async () => {
+    sessionRevision.current++;
     clearBrowserLocationWatch(watchId);
 
     await signOutConfiguredProvider().catch(() => undefined);
@@ -665,10 +716,11 @@ function App() {
   };
 
   const resetPrototype = () => {
+    if (hasConfiguredAuth()) return;
     clearBrowserLocationWatch(watchId);
 
     const freshData = refreshAllRecommendations(resetData());
-    saveData(freshData, currentUser);
+    cacheLocalData(freshData);
     setData(freshData);
     setSessionUserId(null);
     setPublicCheckInRequest(null);
@@ -677,8 +729,11 @@ function App() {
     notify({ tone: "info", title: "Demo data reset", message: "The prototype data has been restored to its prepared sample state." });
   };
 
-  const exportData = () => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const exportData = async () => {
+    if (!currentUser) return;
+    const { readItineraryDrafts } = await import("./services/itineraryStorage");
+    const plans = readItineraryDrafts(currentUser.id).map((entry) => entry.plan);
+    const blob = new Blob([JSON.stringify(buildDataExport(data, currentUser, plans), null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -843,10 +898,10 @@ function App() {
             <Download size={18} />
             {t("nav.exportData")}
           </button>
-          <button className="nav-item utility danger" onClick={resetPrototype} title={t("nav.resetDemo")}>
+          {!hasConfiguredAuth() && <button className="nav-item utility danger" onClick={resetPrototype} title={t("nav.resetDemo")}>
             <RotateCcw size={18} />
             {t("nav.resetDemo")}
-          </button>
+          </button>}
         </div>
 
         <button className="nav-item logout" onClick={logout}>

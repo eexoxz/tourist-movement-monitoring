@@ -32,8 +32,8 @@ export async function registerWithConfiguredProvider(email: string, password: st
 
   const { createUserWithEmailAndPassword } = await import("firebase/auth");
   const credential = await createUserWithEmailAndPassword(services.auth, email, password);
-  await sendVerificationEmail(credential.user);
-  return credential.user;
+  const verificationSent = await sendVerificationEmail(credential.user).catch(() => false);
+  return { user: credential.user, verificationSent };
 }
 
 export async function getConfiguredAuthState() {
@@ -65,7 +65,7 @@ export async function getConfiguredUserRecord(uid: string): Promise<User | null>
     return null;
   }
 
-  const { doc, getDoc } = await import("firebase/firestore");
+  const { doc, getDocFromServer: getDoc } = await import("firebase/firestore");
   const snapshot = await getDoc(doc(services.db, "users", uid));
   if (!snapshot.exists()) {
     return null;

@@ -23,12 +23,13 @@ import { preferredSosAlert } from "./safety";
 import { preserveReviewedCheckIn } from "./unlistedPlaces";
 import { acknowledgePendingCheckIns, loadPendingCheckIns } from "./pendingCheckIns";
 import { mergeCheckInRecords } from "./checkInSync";
+import { acknowledgeCloudJob, buildCloudChanges, queueCloudChanges, type CloudTables } from "./cloudChanges";
+import { flushCloudChanges } from "./cloudSync";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
+const demoUserIds = new Set(initialData.users.map((user) => user.id));
 let localDataCache: { storage: Storage; raw: string; data: AppData } | undefined;
-const LEGACY_DATA_COLLECTION = "prototype";
-const LEGACY_DATA_DOCUMENT = "appData";
 
 export const FIRESTORE_COLLECTIONS = {
   users: "users",
@@ -53,8 +54,6 @@ const LEGACY_FIRESTORE_COLLECTIONS = {
   movementPoints: "movementPoints",
   analyses: "analyses",
 } as const;
-
-const FIRESTORE_BATCH_LIMIT = 450;
 
 type TouristProfileDocument = Omit<User, "password"> & {
   userId: string;
@@ -107,9 +106,9 @@ export function loadData(): AppData {
   }
 }
 
-export function saveData(data: AppData, actor?: User | null) {
+export function saveData(data: AppData, actor?: User | null, previousData = loadData()) {
   saveLocalData(data);
-  return saveCloudData(data, actor);
+  return saveCloudData(data, actor, previousData);
 }
 
 export function cacheLocalData(data: AppData) {
@@ -240,6 +239,16 @@ export async function saveSosAlertRecord(alert: SosAlert, actor?: User | null) {
   return true;
 }
 
+export async function saveSosAlertChange(alert: SosAlert, actor?: User | null) {
+  const uid = getFirebaseServices()?.auth.currentUser?.uid;
+  if (!uid || !actor || (actor.id !== uid && actor.authUid !== uid)) return false;
+  const job = queueCloudChanges(actor.id, [{ collection: FIRESTORE_COLLECTIONS.sosAlerts, id: alert.id, kind: "update", data: cleanFirestoreData(alert) as unknown as Record<string, unknown>, remove: [] }]);
+  // Emergency requests bypass ordinary queued saves, but retain their own durable retry.
+  const synced = await saveSosAlertRecord(alert, actor);
+  if (synced && job) acknowledgeCloudJob(job);
+  return synced;
+}
+
 export async function subscribeSosAlerts(actor: User, onChange: (alerts: SosAlert[]) => void, onError: () => void) {
   const services = getFirebaseServices();
   if (!services?.auth.currentUser) return () => {};
@@ -250,6 +259,19 @@ export async function subscribeSosAlerts(actor: User, onChange: (alerts: SosAler
   const scoped = actor.role === "admin" ? source : query(source, where("userId", "==", actor.id));
   return onSnapshot(scoped, (snapshot) => {
     onChange(snapshot.docs.map((record) => normalizeSosAlert({ ...record.data(), id: record.id })));
+  }, onError);
+}
+
+export async function subscribeIncidentReports(actor: User, onChange: (reports: IncidentReport[]) => void, onError: () => void) {
+  const services = getFirebaseServices();
+  const uid = services?.auth.currentUser?.uid;
+  if (!services || !uid || (actor.id !== uid && actor.authUid !== uid)) return () => {};
+  const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+  const source = collection(services.db, FIRESTORE_COLLECTIONS.incidentReports);
+  const scoped = actor.role === "admin" ? source : query(source, where("userId", "==", actor.id));
+  return onSnapshot(scoped, { includeMetadataChanges: true }, (snapshot) => {
+    if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return;
+    onChange(snapshot.docs.map((record) => normalizeIncidentReport({ ...record.data(), id: record.id })));
   }, onError);
 }
 
@@ -316,7 +338,7 @@ export function getStorageMode() {
   return isFirebaseConfigured() ? "Firestore collections + local backup" : "Local browser storage";
 }
 
-export async function loadCloudData(fallbackActor?: User | null) {
+export async function loadCloudData(fallbackActor?: User | null, isCurrent = () => true) {
   const services = getFirebaseServices();
   if (!services) {
     return null;
@@ -326,34 +348,24 @@ export async function loadCloudData(fallbackActor?: User | null) {
     return null;
   }
 
-  const { collection, doc, getDoc, getDocs, query, where } = await import("firebase/firestore");
+  const { collection, doc, getDocFromServer: getDoc, getDocsFromServer: getDocs, query, where } = await import("firebase/firestore");
   const authUid = services.auth.currentUser.uid;
+  const cachedActor = fallbackActor ?? loadData().users.find((user) => user.id === authUid || user.authUid === authUid);
+  if (cachedActor) await saveCloudData(loadData(), cachedActor);
 
   const readDocument = async <T>(name: string, id: string) => {
-    try {
       const snapshot = await getDoc(doc(services.db, name, id));
       return snapshot.exists() ? ({ id: snapshot.id, ...snapshot.data() } as T) : null;
-    } catch {
-      return null;
-    }
   };
 
   const readCollection = async <T>(name: string) => {
-    try {
       const snapshot = await getDocs(collection(services.db, name));
       return snapshot.docs.map((document) => ({ id: document.id, ...document.data() }) as T);
-    } catch {
-      return [];
-    }
   };
 
   const readOwnedCollection = async <T>(name: string) => {
-    try {
       const snapshot = await getDocs(query(collection(services.db, name), where("userId", "==", authUid)));
       return snapshot.docs.map((document) => ({ id: document.id, ...document.data() }) as T);
-    } catch {
-      return [];
-    }
   };
 
   const readPreferredCollection = async <T>(preferredName: string, legacyName?: string) => {
@@ -373,8 +385,7 @@ export async function loadCloudData(fallbackActor?: User | null) {
   };
 
   const currentUserRecord = await readDocument<Omit<User, "password">>(FIRESTORE_COLLECTIONS.users, authUid);
-  const fallbackCurrentUser = fallbackActor && (fallbackActor.id === authUid || fallbackActor.authUid === authUid) ? fallbackActor : null;
-  const isAdminUser = currentUserRecord?.role === "admin" || fallbackCurrentUser?.role === "admin";
+  const isAdminUser = currentUserRecord?.role === "admin";
   const readScopedCollection = isAdminUser ? readCollection : readOwnedCollection;
   const readScopedPreferredCollection = isAdminUser ? readPreferredCollection : readPreferredOwnedCollection;
   const userRows = isAdminUser ? readCollection<Omit<User, "password">>(FIRESTORE_COLLECTIONS.users) : Promise.resolve(currentUserRecord ? [currentUserRecord] : []);
@@ -400,6 +411,8 @@ export async function loadCloudData(fallbackActor?: User | null) {
     readScopedCollection<AttractionCheckIn>(FIRESTORE_COLLECTIONS.checkIns),
     readCollection<GeoFence>(FIRESTORE_COLLECTIONS.geofences),
   ]);
+
+  if (services.auth.currentUser?.uid !== authUid || !isCurrent()) return null;
 
   const mergedUsers = mergeUserDocuments(users, touristProfiles, touristPreferences);
   const hasStructuredData =
@@ -433,196 +446,67 @@ export async function loadCloudData(fallbackActor?: User | null) {
     return data;
   }
 
-  const legacySnapshot = await getDoc(doc(services.db, LEGACY_DATA_COLLECTION, LEGACY_DATA_DOCUMENT));
-  const data = normalizeAppData(legacySnapshot.exists() ? (legacySnapshot.data() as Partial<AppData>) : initialData);
-
-  await saveCloudData(data, fallbackCurrentUser);
+  const data = normalizeAppData({});
   saveLocalData(data);
   return data;
 }
 
-export async function saveCloudData(data: AppData, actor?: User | null) {
+export async function saveCloudData(data: AppData, actor?: User | null, previousData?: AppData) {
   const services = getFirebaseServices();
-  if (!services) {
-    return false;
+  const uid = services?.auth.currentUser?.uid;
+  const currentActor = actor ?? data.users.find((user) => user.authUid === uid || user.id === uid);
+  if (!uid || !currentActor || (currentActor.id !== uid && currentActor.authUid !== uid)) return false;
+  if (previousData) {
+    const after = cloudTables(data, currentActor);
+    const changes = buildCloudChanges(cloudTables(previousData, currentActor), after, new Set([
+      FIRESTORE_COLLECTIONS.locationConsents, FIRESTORE_COLLECTIONS.tripSessions, FIRESTORE_COLLECTIONS.movementRecords,
+      FIRESTORE_COLLECTIONS.aiAnalyses, FIRESTORE_COLLECTIONS.recommendations, FIRESTORE_COLLECTIONS.incidentReports,
+      ...(currentActor.role === "admin" ? [FIRESTORE_COLLECTIONS.destinations, FIRESTORE_COLLECTIONS.destinationCategories, FIRESTORE_COLLECTIONS.geofences] : []),
+    ]));
+    const lifecycleCollections: string[] = [FIRESTORE_COLLECTIONS.sosAlerts, FIRESTORE_COLLECTIONS.checkIns];
+    queueCloudChanges(currentActor.id, changes.map((change) => lifecycleCollections.includes(change.collection)
+      ? { ...change, data: cleanFirestoreData(after[change.collection].find((row) => row.id === change.id)!.data), remove: [] }
+      : change));
   }
-
-  if (!services.auth.currentUser) {
-    return false;
+  const synced = await flushCloudChanges(currentActor, (change) => {
+    if (change.collection === FIRESTORE_COLLECTIONS.sosAlerts) return saveSosAlertRecord(change.data as unknown as SosAlert, currentActor);
+    if (change.collection === FIRESTORE_COLLECTIONS.checkIns) return saveCheckInRecord(change.data as unknown as AttractionCheckIn, currentActor);
+    return Promise.resolve(undefined);
+  });
+  if (!synced) return false;
+  for (const checkIn of loadPendingCheckIns(currentActor.id)) {
+    if (!await saveCheckInRecord(checkIn, currentActor)) return false;
+    acknowledgePendingCheckIns([checkIn]);
   }
-
-  const { collection, doc, getDocs, query, where, writeBatch } = await import("firebase/firestore");
-  const authUid = services.auth.currentUser.uid;
-  const currentActor = actor ?? data.users.find((user) => user.authUid === authUid || user.id === authUid);
-
-  if (!currentActor) {
-    return false;
-  }
-
-  const actorId = currentActor.id;
-  const db = services.db;
-  type FirestoreWriteBatch = ReturnType<typeof writeBatch>;
-  let batch = writeBatch(db);
-  let batchWriteCount = 0;
-
-  const queueWrite = async (write: (currentBatch: FirestoreWriteBatch) => void) => {
-    write(batch);
-    batchWriteCount += 1;
-
-    if (batchWriteCount >= FIRESTORE_BATCH_LIMIT) {
-      await batch.commit();
-      batch = writeBatch(db);
-      batchWriteCount = 0;
-    }
-  };
-
-  const commitQueuedWrites = async () => {
-    if (batchWriteCount > 0) {
-      await batch.commit();
-      batch = writeBatch(db);
-      batchWriteCount = 0;
-    }
-  };
-
-  const syncCollection = async <T>(name: string, rows: T[], getId: (row: T) => string) => {
-    const existing = await getDocs(collection(db, name));
-    const nextIds = new Set<string>();
-
-    for (const row of rows) {
-      const id = getId(row);
-      if (!id) {
-        continue;
-      }
-      nextIds.add(id);
-      await queueWrite((currentBatch) => currentBatch.set(doc(db, name, id), cleanFirestoreData(row) as Record<string, unknown>));
-    }
-
-    for (const snapshot of existing.docs) {
-      if (!nextIds.has(snapshot.id)) {
-        await queueWrite((currentBatch) => currentBatch.delete(snapshot.ref));
-      }
-    }
-  };
-
-  const syncSosRecords = async (rows: SosAlert[]) => {
-    const source = collection(db, FIRESTORE_COLLECTIONS.sosAlerts);
-    const snapshot = await getDocs(currentActor.role === "admin" ? source : query(source, where("userId", "==", currentActor.id)));
-    const existing = new Map(snapshot.docs.map((record) => [record.id, normalizeSosAlert({ ...record.data(), id: record.id })]));
-    for (const alert of rows) {
-      const remote = existing.get(alert.id);
-      if (remote && preferredSosAlert(alert, remote) === remote) continue;
-      await saveSosAlertRecord(alert, currentActor);
-    }
-  };
-
-  if (currentActor?.role === "tourist") {
-    const ownConsents = data.consents.filter((row) => row.userId === currentActor.id);
-    const ownTrips = data.trips.filter((row) => row.userId === currentActor.id);
-    const ownTripIds = new Set(ownTrips.map((trip) => trip.id));
-    const ownPoints = data.points.filter((row) => row.userId === currentActor.id || ownTripIds.has(row.tripId));
-    const ownAnalyses = data.analyses.filter((row) => row.userId === currentActor.id);
-    const ownRecommendations = data.recommendations.filter((row) => row.userId === currentActor.id);
-    const ownSosAlerts = data.sosAlerts.filter((row) => row.userId === currentActor.id);
-    const ownIncidentReports = data.incidentReports.filter((row) => row.userId === currentActor.id);
-    const ownCheckIns = data.checkIns.filter((row) => row.userId === currentActor.id && !row.isDemo);
-    const existingTrips = await getDocs(query(collection(db, FIRESTORE_COLLECTIONS.tripSessions), where("userId", "==", currentActor.id)));
-    const nextConsentIds = new Set(ownConsents.map((consent) => consent.id));
-    const nextTripIds = new Set(ownTrips.map((trip) => trip.id));
-    const nextPointIds = new Set(ownPoints.map((point) => point.id));
-    const nextAnalysisIds = new Set(ownAnalyses.map((analysis) => analysis.tripId));
-    const nextRecommendationIds = new Set(ownRecommendations.map((recommendation) => recommendation.id));
-    const nextIncidentReportIds = new Set(ownIncidentReports.map((report) => report.id));
-
-    await queueWrite((currentBatch) =>
-      currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.users, currentActor.id), cleanFirestoreData(publicUser(currentActor)) as Record<string, unknown>)
-    );
-    await queueWrite((currentBatch) =>
-      currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.touristProfiles, currentActor.id), cleanFirestoreData(buildTouristProfileDocument(currentActor)) as Record<string, unknown>)
-    );
-    await queueWrite((currentBatch) =>
-      currentBatch.set(
-        doc(db, FIRESTORE_COLLECTIONS.touristPreferences, currentActor.id),
-        cleanFirestoreData(buildTouristPreferenceDocument(currentActor)) as Record<string, unknown>
-      )
-    );
-
-    for (const consent of ownConsents) {
-      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.locationConsents, consent.id), cleanFirestoreData(consent) as Record<string, unknown>));
-    }
-    for (const trip of ownTrips) {
-      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.tripSessions, trip.id), cleanFirestoreData(trip) as Record<string, unknown>));
-    }
-    for (const point of ownPoints) {
-      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.movementRecords, point.id), cleanFirestoreData(point) as Record<string, unknown>));
-    }
-    for (const analysis of ownAnalyses) {
-      await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.aiAnalyses, analysis.tripId), cleanFirestoreData(analysis) as Record<string, unknown>));
-    }
-    for (const recommendation of ownRecommendations) {
-      await queueWrite((currentBatch) =>
-        currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.recommendations, recommendation.id), cleanFirestoreData(recommendation) as Record<string, unknown>)
-      );
-    }
-    await syncSosRecords(ownSosAlerts);
-    for (const report of ownIncidentReports) {
-      await queueWrite((currentBatch) =>
-        currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.incidentReports, report.id), cleanFirestoreData(report) as Record<string, unknown>)
-      );
-    }
-    const remoteCheckIns = await getDocs(query(collection(db, FIRESTORE_COLLECTIONS.checkIns), where("userId", "==", currentActor.id)));
-    const remoteById = new Map(remoteCheckIns.docs.map((record) => [record.id, normalizeCheckIn({ ...record.data(), id: record.id })]));
-    for (const checkIn of ownCheckIns) {
-      const existing = remoteById.get(checkIn.id);
-      if (!existing) await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
-      else if (existing.status === "checked-in" && checkIn.status === "checked-out") await queueWrite((currentBatch) => currentBatch.update(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), { status: "checked-out", checkedOutAt: checkIn.checkedOutAt ?? new Date().toISOString() }));
-    }
-
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.locationConsents, nextConsentIds);
-    for (const snapshot of existingTrips.docs) {
-      const trip = snapshot.data() as TripSession;
-      if (trip.userId === currentActor.id && !nextTripIds.has(snapshot.id)) {
-        await queueWrite((currentBatch) => currentBatch.delete(snapshot.ref));
-      }
-    }
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.movementRecords, nextPointIds);
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.aiAnalyses, nextAnalysisIds);
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.recommendations, nextRecommendationIds);
-    await deleteMissingOwnedDocs(FIRESTORE_COLLECTIONS.incidentReports, nextIncidentReportIds);
-  } else {
-    const touristUsers = data.users.filter((user) => user.role === "tourist");
-    await syncCollection(FIRESTORE_COLLECTIONS.users, data.users.map(publicUser), (user) => user.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.touristProfiles, touristUsers.map(buildTouristProfileDocument), (user) => user.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.touristPreferences, touristUsers.map(buildTouristPreferenceDocument), (preference) => preference.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.locationConsents, data.consents, (consent) => consent.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.tripSessions, data.trips, (trip) => trip.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.movementRecords, data.points, (point) => point.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.destinationCategories, buildDestinationCategoryRows(data.destinations), (category) => category.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.destinations, data.destinations, (destination) => destination.id);
-    await syncCollection(FIRESTORE_COLLECTIONS.aiAnalyses, data.analyses, (analysis) => analysis.tripId);
-    await syncCollection(FIRESTORE_COLLECTIONS.recommendations, data.recommendations, (recommendation) => recommendation.id);
-    await syncSosRecords(data.sosAlerts);
-    await syncCollection(FIRESTORE_COLLECTIONS.incidentReports, data.incidentReports, (report) => report.id);
-    const remoteCheckIns = await getDocs(collection(db, FIRESTORE_COLLECTIONS.checkIns));
-    const remoteById = new Map(remoteCheckIns.docs.map((record) => [record.id, normalizeCheckIn({ ...record.data(), id: record.id })]));
-    for (const checkIn of data.checkIns.filter((record) => !record.isDemo)) {
-      const existing = remoteById.get(checkIn.id);
-      if (!existing) await queueWrite((currentBatch) => currentBatch.set(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), cleanFirestoreData(checkIn) as Record<string, unknown>));
-      else if (existing.status === "checked-in" && checkIn.status === "checked-out") await queueWrite((currentBatch) => currentBatch.update(doc(db, FIRESTORE_COLLECTIONS.checkIns, checkIn.id), { status: "checked-out", checkedOutAt: checkIn.checkedOutAt ?? new Date().toISOString() }));
-    }
-    await syncCollection(FIRESTORE_COLLECTIONS.geofences, data.geofences, (geofence) => geofence.id);
-  }
-
-  await commitQueuedWrites();
   return true;
+}
 
-  async function deleteMissingOwnedDocs(name: string, nextIds: Set<string>) {
-    const existing = await getDocs(query(collection(db, name), where("userId", "==", actorId)));
-    for (const snapshot of existing.docs) {
-      if (!nextIds.has(snapshot.id)) {
-        await queueWrite((currentBatch) => currentBatch.delete(snapshot.ref));
-      }
-    }
+function cloudTables(data: AppData, actor: User): CloudTables {
+  const tables: CloudTables = {};
+  const isDemoUser = (id: string) => demoUserIds.has(id) || id.startsWith("tourist-seed-");
+  const owned = <T extends { userId?: string }>(rows: T[]) => rows.filter((row) => !isDemoUser(row.userId ?? "") && (actor.role === "admin" || row.userId === actor.id));
+  const add = <T>(name: string, rows: T[], getId: (row: T) => string) => {
+    tables[name] = rows.map((row) => ({ id: getId(row), data: row as Record<string, unknown> }));
+  };
+  const users = data.users.filter((user) => !isDemoUser(user.id) && (actor.role === "admin" || user.id === actor.id));
+  const tourists = users.filter((user) => user.role === "tourist");
+  add(FIRESTORE_COLLECTIONS.users, users.map(publicUser), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.touristProfiles, tourists.map(buildTouristProfileDocument), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.touristPreferences, tourists.map(buildTouristPreferenceDocument), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.locationConsents, owned(data.consents), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.tripSessions, owned(data.trips), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.movementRecords, owned(data.points), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.aiAnalyses, owned(data.analyses), (row) => row.tripId);
+  add(FIRESTORE_COLLECTIONS.recommendations, owned(data.recommendations), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.incidentReports, owned(data.incidentReports), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.sosAlerts, owned(data.sosAlerts), (row) => row.id);
+  add(FIRESTORE_COLLECTIONS.checkIns, owned(data.checkIns).filter((row) => !row.isDemo), (row) => row.id);
+  if (actor.role === "admin") {
+    add(FIRESTORE_COLLECTIONS.destinationCategories, buildDestinationCategoryRows(data.destinations), (row) => row.id);
+    add(FIRESTORE_COLLECTIONS.destinations, data.destinations, (row) => row.id);
+    add(FIRESTORE_COLLECTIONS.geofences, data.geofences, (row) => row.id);
   }
+  return tables;
 }
 
 export function mergeUserDocuments(

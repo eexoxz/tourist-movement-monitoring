@@ -44,7 +44,7 @@ service cloud.firestore {
     }
 
     function canReadOwnedRecord() {
-      return isAdmin() || ownsExistingRecord();
+      return signedIn() && (resource == null || isAdmin() || ownsExistingRecord());
     }
 
     function canCreateOwnedRecord() {
@@ -198,9 +198,12 @@ service cloud.firestore {
     match /incident_reports/{reportId} {
       allow read: if canReadOwnedRecord();
       allow create: if canCreateOwnedRecord()
+        && (isAdmin() || (request.resource.data.status == "open" && !request.resource.data.keys().hasAny(["adminNote"])))
         && request.resource.data.status in ["open", "reviewing", "resolved"]
         && request.resource.data.type in ["lost-item", "accident", "suspicious-activity", "medical", "other"];
       allow update: if canUpdateOwnedRecord()
+        && (isAdmin() || (request.resource.data.status == resource.data.status
+          && request.resource.data.get("adminNote", null) == resource.data.get("adminNote", null)))
         && request.resource.data.status in ["open", "reviewing", "resolved"]
         && request.resource.data.type in ["lost-item", "accident", "suspicious-activity", "medical", "other"];
       allow delete: if isAdmin() || ownsExistingRecord();

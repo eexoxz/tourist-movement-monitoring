@@ -528,7 +528,7 @@ export function AdminWorkspace({
           <option value="all">{adminText("records.allTrips")}</option>
           {tripOptions.map((trip) => (
             <option key={trip.id} value={trip.id}>
-              {formatDateTime(trip.startedAt, locale)} - {trip.status}
+              {formatDateTime(trip.startedAt, locale)} - {t(trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}
             </option>
           ))}
         </select>
@@ -573,7 +573,7 @@ export function AdminWorkspace({
                 >
                   <div>
                     <strong>{record.tourist?.name ?? adminText("common.unknownTourist")}</strong>
-                    <span>{record.trip.status}</span>
+                    <span>{t(record.trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}</span>
                   </div>
                   <small className="mono-text">{record.trip.id}</small>
                   <p>{destinationText}</p>

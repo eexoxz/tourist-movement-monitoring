@@ -8,6 +8,16 @@ export class ItineraryError extends Error {
 
 const collectionName = "tourist_itineraries";
 const cacheKey = (userId: string) => `tourist-movement-monitoring:itineraries:${userId}`;
+const openDrafts = new Map<string, () => ItineraryEntry[]>();
+
+export function registerItineraryDrafts(userId: string, read: () => ItineraryEntry[]) {
+  openDrafts.set(userId, read);
+  return () => { if (openDrafts.get(userId) === read) openDrafts.delete(userId); };
+}
+
+export function readItineraryDrafts(userId: string) {
+  return openDrafts.get(userId)?.() ?? loadItineraryCache(userId);
+}
 
 export function loadItineraryCache(userId: string): ItineraryEntry[] {
   try {
