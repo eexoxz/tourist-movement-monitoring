@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { CalendarDays, Compass, Navigation, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
 import type { AppData, AppView, IncidentType, MovementPoint, SosClosureReason, TripSession, User } from "../types";
@@ -49,6 +49,8 @@ import { placeText } from "../services/placeSubmissionCopy";
 import { getDisplayName } from "../services/profile";
 import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWatch, loadLastBrowserLocation, saveLastBrowserLocation, movementPointFromBrowserPosition } from "../services/browserLocation";
 import { type CommitDataOptions, incidentTypeOptions, loadProfileSetupSkipped, saveProfileSetupSkipped } from "../services/workspaceSupport";
+
+const ItineraryPage = lazy(() => import("../components/ItineraryPage").then((module) => ({ default: module.ItineraryPage })));
 
 export function TouristWorkspace({
   data,
@@ -151,7 +153,7 @@ export function TouristWorkspace({
     [data.destinations, discoveryReference, calendarDay]
   );
   const recommendations = useMemo(
-    () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking") ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
+    () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking" || view === "itinerary") ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
     [destinationDemand, latestAnalysis, discoveryReference, localizedData, user.id, view]
   );
   const activeSamplePoint = activeTrip && activePoints.at(-1)?.source === "demo" ? activePoints.at(-1) : undefined;
@@ -908,8 +910,12 @@ export function TouristWorkspace({
 
   if (view === "tracking") {
     return <><Page title={travelText(locale, "tripTitle")} eyebrow={t("common.tourist")}>
-      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus} onAllowLocation={grantConsent} onStart={startTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onOpenPlace={openPlace} onSafety={openSafety} />
+      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus} onAllowLocation={grantConsent} onStart={startTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
     </Page>{discoveryPrompt}{tripActionDialog}</>;
+  }
+
+  if (view === "itinerary") {
+    return <Suspense fallback={<p role="status">{travelText(locale, "itinerary")}…</p>}><ItineraryPage key={user.id} user={user} destinations={localizedDestinations} suggestedIds={recommendations.map((item) => item.destinationId)} locale={locale} onBack={() => onViewChange("tracking")} onOpenPlace={openPlace} /></Suspense>;
   }
 
   if (view === "history") {

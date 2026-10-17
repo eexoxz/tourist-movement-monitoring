@@ -798,7 +798,7 @@ function App() {
 
         <nav className="nav-list" aria-label={uiText(locale, "Primary navigation")}>
           {roleViews.filter(([key]) => primaryViews.includes(key)).map(([key, label, Icon]) => (
-            <button key={key} className={safeView === key || (key === "tracking" && safeView === "history") ? "nav-item active" : "nav-item"} onClick={() => goToView(key)}>
+            <button key={key} className={safeView === key || (key === "tracking" && (safeView === "history" || safeView === "itinerary")) ? "nav-item active" : "nav-item"} onClick={() => goToView(key)}>
               <Icon size={18} />
               {label}
             </button>

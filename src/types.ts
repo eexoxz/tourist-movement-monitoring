@@ -1,6 +1,28 @@
 export type UserRole = "tourist" | "admin";
 
-export type AppView = "overview" | "tracking" | "history" | "recommendations" | "events" | "profile" | "dashboard" | "records" | "destinations" | "ai";
+export type AppView = "overview" | "tracking" | "history" | "itinerary" | "recommendations" | "events" | "profile" | "dashboard" | "records" | "destinations" | "ai";
+
+export type ItineraryStop = {
+  id: string;
+  destinationId: string;
+  day: number;
+  minutes: number;
+  note: string;
+};
+
+export type Itinerary = {
+  id: string;
+  userId: string;
+  title: string;
+  startDate: string;
+  days: number;
+  notes: string;
+  stops: ItineraryStop[];
+  revision: number;
+  deletedAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type DestinationCategory =
   | "cultural"

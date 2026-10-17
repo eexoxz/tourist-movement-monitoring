@@ -1,4 +1,4 @@
-import { ArrowRight, CircleCheck, Clock3, Compass, Navigation, Play, Settings2, ShieldCheck, Square } from "lucide-react";
+import { ArrowRight, CalendarDays, CircleCheck, Clock3, Compass, Navigation, Play, Settings2, ShieldCheck, Square } from "lucide-react";
 import { distanceKm } from "../services/geo";
 import { translate, type Locale } from "../services/i18n";
 import { travelText } from "../services/travelExperienceCopy";
@@ -10,7 +10,7 @@ import { DestinationTeaser } from "./DestinationTeaser";
 import { MovementMap } from "./MovementMap";
 import { TrackingStatus } from "./TrackingStatus";
 
-export function TripExperience({ activeTrip, consent, points, reference, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, onAllowLocation, onStart, onStop, onResume, onManage, onOpenPlace, onSafety }: {
+export function TripExperience({ activeTrip, consent, points, reference, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, onAllowLocation, onStart, onStop, onResume, onManage, onPlan, onOpenPlace, onSafety }: {
   activeTrip?: TripSession | null;
   consent?: LocationConsent | null;
   points: MovementPoint[];
@@ -31,6 +31,7 @@ export function TripExperience({ activeTrip, consent, points, reference, isBrows
   onStop: () => void;
   onResume: () => void;
   onManage: () => void;
+  onPlan?: () => void;
   onOpenPlace: (id: string) => void;
   onSafety: () => void;
 }) {
@@ -46,6 +47,7 @@ export function TripExperience({ activeTrip, consent, points, reference, isBrows
           : !activeTrip ? <button className="primary-action" type="button" onClick={onStart}><Play size={18} />{t("tourist.home.startTrip")}</button>
             : <><button className="primary-action" type="button" onClick={onStop}><Square size={18} />{t("tourist.home.stopTrip")}</button>{(!isLiveTracking || locationRetryAvailable) && <button className="secondary-action" type="button" onClick={onResume}><Navigation size={18} />{t(locationRetryAvailable ? "tourist.home.tryLocationAgain" : "tourist.home.resumeTracking")}</button>}</>}
         <button className="secondary-action" type="button" onClick={onManage}><Settings2 size={18} />{text("manage")}</button>
+        {onPlan && <button className="secondary-action" type="button" onClick={onPlan}><CalendarDays size={18} />{text("itinerary")}</button>}
         <button className="secondary-action trip-safety-action" type="button" onClick={onSafety}><ShieldCheck size={18} />{t("tourist.safety.eyebrow")}</button>
       </div>
       {activeTrip && <TrackingStatus point={points.at(-1)} listening={isLiveTracking} syncStatus={syncStatus} locale={locale} />}

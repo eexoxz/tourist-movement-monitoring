@@ -1,6 +1,7 @@
 import type { Locale } from "./i18n";
 
 const en = {
+  itinerary: "My itinerary",
   featured: "Discover Malaysia",
   explore: "Explore this place",
   nearby: "Around you",
@@ -32,6 +33,7 @@ export type TravelExperienceKey = keyof typeof en;
 const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
   en,
   ms: {
+    itinerary: "Itinerari saya",
     noNextPlaces: "Belum ada tempat baharu untuk dicadangkan berhampiran laluan ini. Anda masih boleh meneroka kawasan ini.",
     tripName: "Nama perjalanan",
     historyNote: "Lihat semula laluan, persinggahan dan tempat untuk lawatan seterusnya.",
@@ -42,6 +44,7 @@ const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
     manage: "Urus perjalanan", back: "Kembali ke perjalanan anda", alongRoute: "Tempat sepanjang perjalanan", noNearby: "Pilih kawasan atau benarkan lokasi untuk menemui tempat berdekatan.", privacy: "Lokasi dan privasi", sampleTools: "Laluan contoh dan kawalan ujian", sampleNote: "Laluan contoh ialah simulasi, bukan rekod GPS.", locationNote: "Lokasi anda hanya digunakan dengan kebenaran anda.",
   },
   zh: {
+    itinerary: "我的行程计划",
     noNextPlaces: "这条路线附近暂时没有新的地点可推荐。您仍然可以探索这一地区。",
     tripName: "行程名称",
     historyNote: "回顾您的路线、停留地点和下次想去的地方。",
@@ -52,6 +55,7 @@ const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
     manage: "管理行程", back: "返回您的旅程", alongRoute: "沿途的好去处", noNearby: "选择地区或允许定位，以探索附近的地点。", privacy: "位置与隐私", sampleTools: "示例路线与测试控制", sampleNote: "示例路线为模拟数据，并非 GPS 记录。", locationNote: "仅在您允许的情况下使用您的位置。",
   },
   ja: {
+    itinerary: "旅程",
     noNextPlaces: "このルートの近くには、まだ新しくおすすめできる場所がありません。周辺エリアは引き続き探索できます。",
     tripName: "旅行名",
     historyNote: "これまでのルートや立ち寄り先、次に行きたいスポットを振り返りましょう。",
@@ -62,6 +66,7 @@ const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
     manage: "旅行を管理", back: "旅行に戻る", alongRoute: "道中のスポット", noNearby: "エリアを選ぶか位置情報を許可して、近くのスポットを探しましょう。", privacy: "位置情報とプライバシー", sampleTools: "サンプルルートとテスト操作", sampleNote: "サンプルルートはシミュレーションであり、GPSの記録ではありません。", locationNote: "位置情報は許可を得た場合にのみ使用します。",
   },
   ko: {
+    itinerary: "내 여행 일정",
     noNextPlaces: "이 경로 근처에 새롭게 추천할 장소가 아직 없습니다. 주변 지역은 계속 둘러볼 수 있습니다.",
     tripName: "여행 이름",
     historyNote: "이전 경로와 방문한 장소, 다음에 가볼 곳을 살펴보세요.",
@@ -72,6 +77,7 @@ const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
     manage: "여행 관리", back: "여행으로 돌아가기", alongRoute: "이동 경로 주변 장소", noNearby: "지역을 선택하거나 위치를 허용하여 주변 장소를 찾아보세요.", privacy: "위치 및 개인정보", sampleTools: "샘플 경로 및 테스트 도구", sampleNote: "샘플 경로는 시뮬레이션이며 GPS 기록이 아닙니다.", locationNote: "위치는 허용한 경우에만 사용됩니다.",
   },
   pt: {
+    itinerary: "O meu itinerário",
     noNextPlaces: "Ainda não há novos lugares para sugerir perto deste percurso. Pode continuar a explorar a zona.",
     tripName: "Nome da viagem",
     historyNote: "Reveja os seus percursos, paragens e locais a visitar a seguir.",
@@ -82,6 +88,7 @@ const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
     manage: "Gerir viagens", back: "Voltar à sua viagem", alongRoute: "Locais pelo caminho", noNearby: "Escolha uma zona ou permita a localização para descobrir locais próximos.", privacy: "Localização e privacidade", sampleTools: "Percursos de exemplo e controlos de teste", sampleNote: "Os percursos de exemplo são simulados, não são registos GPS.", locationNote: "A sua localização só é utilizada com a sua autorização.",
   },
   ta: {
+    itinerary: "எனது பயணத் திட்டம்",
     noNextPlaces: "இந்தப் பாதைக்கு அருகில் பரிந்துரைக்கப் புதிய இடங்கள் இன்னும் இல்லை. நீங்கள் அந்தப் பகுதியைத் தொடர்ந்து ஆராயலாம்.",
     tripName: "பயணத்தின் பெயர்",
     historyNote: "உங்கள் பாதைகள், நிறுத்தங்கள் மற்றும் அடுத்து செல்லக்கூடிய இடங்களை மீண்டும் பாருங்கள்.",
@@ -92,6 +99,7 @@ const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
     manage: "பயணங்களை நிர்வகி", back: "உங்கள் பயணத்திற்குத் திரும்பு", alongRoute: "பயண வழியில் உள்ள இடங்கள்", noNearby: "அருகிலுள்ள இடங்களைக் கண்டறிய பகுதியைத் தேர்ந்தெடுக்கவும் அல்லது இருப்பிடத்தை அனுமதிக்கவும்.", privacy: "இருப்பிடம் மற்றும் தனியுரிமை", sampleTools: "மாதிரிப் பாதைகள் மற்றும் சோதனைக் கருவிகள்", sampleNote: "மாதிரிப் பாதைகள் உருவகப்படுத்தப்பட்டவை; அவை GPS பதிவுகள் அல்ல.", locationNote: "உங்கள் அனுமதியுடன் மட்டுமே இருப்பிடம் பயன்படுத்தப்படுகிறது.",
   },
   es: {
+    itinerary: "Mi itinerario",
     noNextPlaces: "Todavía no hay nuevos lugares que recomendar cerca de esta ruta. Puedes seguir explorando la zona.",
     tripName: "Nombre del viaje",
     historyNote: "Revisa tus rutas, paradas y lugares para tu próxima visita.",
@@ -102,6 +110,7 @@ const copy: Record<Locale, Record<TravelExperienceKey, string>> = {
     manage: "Gestionar viajes", back: "Volver a tu viaje", alongRoute: "Lugares por el camino", noNearby: "Elige una zona o permite la ubicación para descubrir lugares cercanos.", privacy: "Ubicación y privacidad", sampleTools: "Rutas de ejemplo y controles de prueba", sampleNote: "Las rutas de ejemplo son simulaciones, no registros GPS.", locationNote: "Tu ubicación solo se utiliza con tu permiso.",
   },
   fr: {
+    itinerary: "Mon itinéraire",
     noNextPlaces: "Il n'y a pas encore de nouveaux lieux à suggérer près de ce parcours. Vous pouvez toujours explorer les environs.",
     tripName: "Nom du voyage",
     historyNote: "Retrouvez vos parcours, vos étapes et les lieux à découvrir ensuite.",

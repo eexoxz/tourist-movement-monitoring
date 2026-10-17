@@ -18,7 +18,7 @@ describe("access service", () => {
   });
 
   it("keeps tourist users out of administrator views", () => {
-    expect(getAllowedViewsForRole("tourist")).toEqual(["overview", "tracking", "history", "recommendations", "events", "profile"]);
+    expect(getAllowedViewsForRole("tourist")).toEqual(["overview", "tracking", "history", "itinerary", "recommendations", "events", "profile"]);
     expect(getPrimaryViewsForRole("tourist")).toEqual(["overview", "tracking", "recommendations", "events"]);
     expect(canAccessView("tourist", "dashboard")).toBe(false);
     expect(coerceViewForRole("tourist", "records")).toBe("overview");
@@ -47,6 +47,8 @@ describe("access service", () => {
     expect(getPathForView("tourist", "overview")).toBe("/app/home");
     expect(getPathForView("tourist", "tracking")).toBe("/app/trips");
     expect(getPathForView("tourist", "history")).toBe("/app/trips/manage");
+    expect(getPathForView("tourist", "itinerary")).toBe("/app/trips/itinerary");
+    expect(canAccessView("admin", "itinerary")).toBe(false);
     expect(getPathForView("tourist", "events")).toBe("/app/events");
     expect(getPathForView("tourist", "dashboard")).toBe("/app/home");
     expect(getPathForView("admin", "dashboard")).toBe("/admin/dashboard");

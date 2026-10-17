@@ -1,5 +1,6 @@
 import { after, before, beforeEach, describe, it } from "node:test";
 import { readFileSync } from "node:fs";
+import assert from "node:assert/strict";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, runTransaction, setDoc, updateDoc, where } from "firebase/firestore";
 
@@ -48,6 +49,80 @@ beforeEach(async () => {
   });
 });
 after(async () => { await environment?.cleanup(); });
+
+describe("private editable itineraries", () => {
+  const plan = { id: "itinerary-test", userId: "alice", title: "A planned visit", startDate: "2026-10-17", days: 2, notes: "Private planning notes", stops: [], revision: 1, deletedAt: "", createdAt: "2026-10-17T00:00:00Z", updatedAt: "2026-10-17T00:00:00Z" };
+  const create = () => setDoc(doc(db("alice"), "tourist_itineraries", plan.id), plan);
+  it("supports the real read-before-create transaction and owner-scoped query", async () => {
+    const store = db("alice");
+    const reference = doc(store, "tourist_itineraries", plan.id);
+    await assertSucceeds(runTransaction(store, async (transaction) => {
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists()) transaction.set(reference, plan);
+    }));
+    const results = await assertSucceeds(getDocs(query(collection(db("alice"), "tourist_itineraries"), where("userId", "==", "alice"))));
+    assert.equal(results.size, 1);
+  });
+  it("keeps another tourist and admins out of private planning notes", async () => {
+    await create();
+    await assertFails(getDoc(doc(db("bob"), "tourist_itineraries", plan.id)));
+    await assertFails(getDoc(doc(db("admin"), "tourist_itineraries", plan.id)));
+    await assertFails(getDocs(collection(db("alice"), "tourist_itineraries")));
+    await assertFails(getDoc(doc(db(), "tourist_itineraries", "missing")));
+  });
+  it("rejects forged ownership, ID changes and unbounded payloads", async () => {
+    await assertFails(setDoc(doc(db("bob"), "tourist_itineraries", plan.id), plan));
+    for (const patch of [{ id: "other-id" }, { days: 15 }, { days: 0 }, { notes: "x".repeat(1001) }, { title: "x".repeat(81) }, { stops: Array(41).fill({}) }, { revision: 5 }, { secretField: "unexpected" }]) {
+      await assertFails(setDoc(doc(db("alice"), "tourist_itineraries", plan.id), { ...plan, ...patch }));
+    }
+    await create();
+    await assertFails(updateDoc(doc(db("alice"), "tourist_itineraries", plan.id), { userId: "bob", revision: 2 }));
+    await assertFails(updateDoc(doc(db("alice"), "tourist_itineraries", plan.id), { createdAt: "changed", revision: 2 }));
+  });
+  it("requires sequential versions and rejects stale updates", async () => {
+    await create();
+    const ref = doc(db("alice"), "tourist_itineraries", plan.id);
+    await assertSucceeds(updateDoc(ref, { title: "Phone edit", revision: 2 }));
+    await assertFails(setDoc(ref, { ...plan, title: "Stale desktop", revision: 2 }));
+    assert.equal((await getDoc(ref)).data().title, "Phone edit");
+  });
+  it("prevents a deleted itinerary being resurrected by a delayed save", async () => {
+    await create();
+    const ref = doc(db("alice"), "tourist_itineraries", plan.id);
+    await assertSucceeds(updateDoc(ref, { deletedAt: "2026-10-17T01:00:00Z", revision: 2 }));
+    await assertFails(setDoc(ref, { ...plan, revision: 3 }));
+    await assertFails(deleteDoc(ref));
+  });
+  it("allows only one of two concurrent editors to save the same base revision", async () => {
+    await create();
+    const edit = (title) => {
+      const store = db("alice");
+      return runTransaction(store, async (transaction) => {
+        const ref = doc(store, "tourist_itineraries", plan.id);
+        const snapshot = await transaction.get(ref);
+        if (snapshot.data().revision !== 1) throw new Error("conflict");
+        transaction.set(ref, { ...plan, title, revision: 2 });
+      });
+    };
+    const results = await Promise.allSettled([edit("Phone edit"), edit("Desktop edit")]);
+    assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+    assert.equal(results.filter((result) => result.status === "rejected").length, 1);
+  });
+  it("delivers a saved itinerary to a second owner session without a refresh", async () => {
+    let stop;
+    let timer;
+    try {
+      const received = new Promise((resolve, reject) => {
+        timer = setTimeout(() => reject(new Error("Itinerary was not received")), 10000);
+        stop = onSnapshot(query(collection(db("alice"), "tourist_itineraries"), where("userId", "==", "alice"), where("deletedAt", "==", "")), { includeMetadataChanges: true }, (snapshot) => {
+          if (!snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites && snapshot.docs.some((entry) => entry.id === plan.id)) resolve();
+        }, reject);
+      });
+      await create();
+      await received;
+    } finally { clearTimeout(timer); stop?.(); }
+  });
+});
 
 describe("identity and role isolation", () => {
   it("allows an owner profile save and rejects cross-user profile access", async () => {
