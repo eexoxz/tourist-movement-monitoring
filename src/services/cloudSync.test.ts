@@ -5,7 +5,7 @@ const mock = vi.hoisted(() => ({
   currentUser: { uid: "alice" } as { uid: string } | null,
   documents: new Map<string, Record<string, unknown>>(), fail: false, failRead: false,
   queryReads: vi.fn(), changeSessionOnRead: false,
-  listener: vi.fn(),
+  listener: vi.fn(), transactionSizes: [] as number[],
 }));
 vi.mock("./firebaseClient", () => ({ isFirebaseConfigured: () => true, getFirebaseServices: () => ({ auth: { get currentUser() { return mock.currentUser; } }, db: {} }) }));
 vi.mock("firebase/firestore", () => {
@@ -28,6 +28,7 @@ vi.mock("firebase/firestore", () => {
         }),
       });
       if (mock.fail) throw new Error("offline");
+      mock.transactionSizes.push(writes.length);
       writes.forEach((write) => write());
     },
     getDocFromServer: async (path: string) => { if (mock.failRead) throw new Error("read denied"); return snapshot(path); },
@@ -52,7 +53,7 @@ const base = () => normalizeAppData({ users: [alice], trips: [trip as AppData["t
 beforeEach(() => {
   const values = new Map<string, string>();
   vi.stubGlobal("localStorage", { get length() { return values.size; }, key: (index: number) => [...values.keys()][index] ?? null, getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => { values.set(key, value); }, removeItem: (key: string) => { values.delete(key); } });
-  mock.currentUser = { uid: "alice" }; mock.documents.clear(); mock.fail = false; mock.failRead = false; mock.changeSessionOnRead = false;
+  mock.currentUser = { uid: "alice" }; mock.documents.clear(); mock.fail = false; mock.failRead = false; mock.changeSessionOnRead = false; mock.transactionSizes = [];
   vi.clearAllMocks();
   mock.documents.set("users/alice", { ...alice });
   mock.documents.set("trip_sessions/trip", { ...trip });
@@ -61,6 +62,15 @@ beforeEach(() => {
 afterEach(() => { for (const job of pendingCloudJobs(alice)) acknowledgeCloudJob(job); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("scoped cloud workflow persistence", () => {
+  it("keeps mixed-owner admin changes within the deletion-lock rule lookup budget", async () => {
+    mock.currentUser = { uid: "admin" };
+    const admin = { ...alice, id: "admin", authUid: "admin", role: "admin" as const };
+    const before = normalizeAppData({ users: [admin], recommendations: [] });
+    const recommendations = Array.from({ length: 31 }, (_, index) => ({ id: `recommendation-${index}`, userId: `owner-${index}`, destinationId: "temple", score: 1 })) as AppData["recommendations"];
+    await saveData({ ...before, recommendations }, admin, before);
+    expect(mock.transactionSizes).toEqual([15, 15, 1]);
+    expect(mock.documents.has("recommendations/recommendation-30")).toBe(true);
+  });
   it("never uploads local sample identities or their refreshed recommendations", async () => {
     mock.currentUser = { uid: "admin" };
     const admin = { ...alice, id: "admin", authUid: "admin", role: "admin" as const };

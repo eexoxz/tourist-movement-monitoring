@@ -66,6 +66,7 @@ export function AuthScreen({
   onResendVerification,
   onPasswordReset,
   notify,
+  initialNotice,
 }: {
   mode: AuthMode;
   locale: Locale;
@@ -76,6 +77,7 @@ export function AuthScreen({
   onResendVerification: (email: string, password: string) => Promise<AuthResult>;
   onPasswordReset: (email: string) => Promise<AuthResult>;
   notify: NotifyFn;
+  initialNotice?: string;
 }) {
   const [rememberedLogin] = useState(() => loadRememberedLogin());
   const [roleHint, setRoleHint] = useState<UserRole | "nature" | "culture" | "urban">("tourist");
@@ -89,7 +91,7 @@ export function AuthScreen({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(Boolean(rememberedLogin));
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(initialNotice ?? null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firebaseMode = hasConfiguredAuth();
   const t = (key: TranslationKey) => translate(locale, key);

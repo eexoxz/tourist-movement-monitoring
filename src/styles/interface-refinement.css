@@ -99,6 +99,21 @@ a.secondary-action { text-decoration: none; }
 .device-privacy-panel button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .device-privacy-panel button svg { flex-shrink: 0; }
 .device-privacy-panel [role="alert"] { color: #9b3b18; }
+.account-deletion-panel { margin-top: 20px; padding-block: 18px; border-top: 1px solid var(--line); }
+.account-deletion-panel > summary { display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 44px; font-weight: 600; color: #a12a3a; }
+.account-deletion-panel p { max-width: 70ch; line-height: 1.6; }
+.account-deletion-email { display: block; margin-top: 14px; overflow-wrap: anywhere; }
+.account-deletion-panel .account-deletion-warning { color: #9b3b18; }
+.account-deletion-panel form { max-width: 600px; }
+.account-deletion-panel fieldset { display: grid; gap: 18px; border: 0; padding: 0; margin: 20px 0; min-width: 0; }
+.account-deletion-panel .account-deletion-consent { display: flex; align-items: flex-start; gap: 10px; line-height: 1.6; }
+.account-deletion-consent input { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 3px; }
+.account-deletion-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.account-deletion-panel button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; min-height: 44px; }
+.account-deletion-panel button svg, .account-deletion-panel summary svg { flex-shrink: 0; }
+.account-deletion-panel [role="alert"] { color: #a12a3a; }
+.account-deletion-page { max-width: 760px; margin: 0 auto; padding: 24px 20px; }
+.account-deletion-page h1 { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; }
 .home-active-journey .tracking-status-grid { margin-top: 0; }
 .activity-basis-row { flex-wrap: wrap; }
 .activity-basis-row > p { flex: 1; min-width: 0; overflow-wrap: anywhere; }

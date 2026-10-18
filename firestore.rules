@@ -6,6 +6,22 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function deletionPath(userId) {
+      return /databases/$(database)/documents/account_deletions/$(userId);
+    }
+
+    function activeAccount() {
+      return signedIn() && !exists(deletionPath(request.auth.uid));
+    }
+
+    function recentLogin() {
+      return signedIn() && request.auth.token.get("auth_time", 0) > request.time.toMillis() / 1000 - 300;
+    }
+
+    function canEraseOwnAccount(userId) {
+      return signedIn() && userId == request.auth.uid && recentLogin() && exists(deletionPath(userId));
+    }
+
     function userPath(userId) {
       return /databases/$(database)/documents/users/$(userId);
     }
@@ -15,7 +31,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return signedIn()
+      return activeAccount()
         && exists(userPath(request.auth.uid))
         && get(userPath(request.auth.uid)).data.role == "admin";
     }
@@ -48,14 +64,24 @@ service cloud.firestore {
     }
 
     function canCreateOwnedRecord() {
-      return isAdmin() || ownsRequestedRecord();
+      return activeAccount() && !exists(deletionPath(request.resource.data.get("userId", request.auth.uid)))
+        && (isAdmin() || ownsRequestedRecord());
     }
 
     function canUpdateOwnedRecord() {
-      return isAdmin() || (ownsExistingRecord() && ownsRequestedRecord()
+      return activeAccount() && (isAdmin() || (ownsExistingRecord() && ownsRequestedRecord()
         && request.resource.data.get("userId", null) == resource.data.get("userId", null)
         && request.resource.data.get("authUid", null) == resource.data.get("authUid", null)
-        && request.resource.data.get("id", null) == resource.data.get("id", null));
+        && request.resource.data.get("id", null) == resource.data.get("id", null)));
+    }
+
+    match /account_deletions/{userId} {
+      allow get: if isOwnUser(userId);
+      allow create: if isOwnUser(userId) && recentLogin()
+        && get(userPath(userId)).data.role == "tourist"
+        && request.resource.data.keys().hasOnly(["version", "startedAt"])
+        && request.resource.data.version == 1 && request.resource.data.startedAt == request.time;
+      allow list, update, delete: if false;
     }
 
     function validItinerary(data, itineraryId) {
@@ -76,52 +102,52 @@ service cloud.firestore {
     match /tourist_itineraries/{itineraryId} {
       allow get: if signedIn() && (!exists(/databases/$(database)/documents/tourist_itineraries/$(itineraryId)) || ownsExistingRecord());
       allow list: if ownsExistingRecord();
-      allow create: if signedIn() && validItinerary(request.resource.data, itineraryId) && request.resource.data.revision == 1;
-      allow update: if ownsExistingRecord() && validItinerary(request.resource.data, itineraryId)
+      allow create: if activeAccount() && validItinerary(request.resource.data, itineraryId) && request.resource.data.revision == 1;
+      allow update: if activeAccount() && ownsExistingRecord() && validItinerary(request.resource.data, itineraryId)
         && request.resource.data.userId == resource.data.userId
         && request.resource.data.createdAt == resource.data.createdAt
         && resource.data.deletedAt == ""
         && request.resource.data.revision == resource.data.revision + 1;
-      allow delete: if false;
+      allow delete: if ownsExistingRecord() && canEraseOwnAccount(request.auth.uid);
     }
 
     match /users/{userId} {
       allow read: if isOwnUser(userId) || isAdmin();
-      allow create: if isAdmin()
+      allow create: if activeAccount() && !exists(deletionPath(userId)) && (isAdmin()
         || (
           isOwnUser(userId)
           && request.resource.data.id == userId
           && request.resource.data.get("userId", userId) == userId
           && request.resource.data.role == "tourist"
           && request.resource.data.authUid == request.auth.uid
-        );
-      allow update: if isAdmin()
+        ));
+      allow update: if activeAccount() && !exists(deletionPath(userId)) && (isAdmin()
         || (
           isOwnUser(userId)
           && request.resource.data.id == userId
           && request.resource.data.get("userId", userId) == userId
           && request.resource.data.role == resource.data.role
           && request.resource.data.authUid == request.auth.uid
-        );
-      allow delete: if false;
+        ));
+      allow delete: if canEraseOwnAccount(userId);
     }
 
     match /tourist_profiles/{profileId} {
       allow read: if isAdmin() || isOwnUser(profileId);
-      allow create: if isAdmin() || (isOwnUser(profileId) && ownsRequestedRecord()
-        && request.resource.data.get("role", "tourist") == "tourist");
-      allow update: if isAdmin() || (isOwnUser(profileId) && canUpdateOwnedRecord()
-        && request.resource.data.get("role", "tourist") == "tourist");
-      allow delete: if false;
+      allow create: if activeAccount() && !exists(deletionPath(profileId)) && (isAdmin() || (isOwnUser(profileId) && ownsRequestedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist"));
+      allow update: if activeAccount() && !exists(deletionPath(profileId)) && (isAdmin() || (isOwnUser(profileId) && canUpdateOwnedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist"));
+      allow delete: if canEraseOwnAccount(profileId);
     }
 
     match /tourist_preferences/{preferenceId} {
       allow read: if isAdmin() || isOwnUser(preferenceId);
-      allow create: if isAdmin() || (isOwnUser(preferenceId) && ownsRequestedRecord()
-        && request.resource.data.get("role", "tourist") == "tourist");
-      allow update: if isAdmin() || (isOwnUser(preferenceId) && canUpdateOwnedRecord()
-        && request.resource.data.get("role", "tourist") == "tourist");
-      allow delete: if false;
+      allow create: if activeAccount() && !exists(deletionPath(preferenceId)) && (isAdmin() || (isOwnUser(preferenceId) && ownsRequestedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist"));
+      allow update: if activeAccount() && !exists(deletionPath(preferenceId)) && (isAdmin() || (isOwnUser(preferenceId) && canUpdateOwnedRecord()
+        && request.resource.data.get("role", "tourist") == "tourist"));
+      allow delete: if canEraseOwnAccount(preferenceId);
     }
 
     match /location_consents/{consentId} {

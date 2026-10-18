@@ -7,7 +7,7 @@ import { confirmCheckInSync, mergeCheckInRecords } from "./services/checkInSync"
 import { acknowledgePendingCheckIn, rememberPendingCheckIn } from "./services/pendingCheckIns";
 import { refreshAllRecommendations } from "./services/analytics";
 import { authProviderName, getConfiguredAuthState, getConfiguredUserRecord, hasConfiguredAuth, registerWithConfiguredProvider, sendPasswordResetToConfiguredProvider, sendVerificationEmail, signInWithConfiguredProvider, signOutConfiguredProvider, subscribeConfiguredSessionEnd } from "./services/auth";
-import { authenticateLocalUser, createTouristAccount, findUserByEmail, validateTouristAccount } from "./services/accounts";
+import { authenticateLocalUser, createTouristAccount, findUserByEmail, registrationData, validateTouristAccount } from "./services/accounts";
 import { createTouristPassId, getTouristCheckInDestinationIdFromUrl, getTouristCheckInRequestFromUrl, isTouristCheckInRoute } from "./services/checkInDeepLink";
 import { loadLocale, saveLocale, translate, type Locale, type TranslationKey } from "./services/i18n";
 import { createLocaleSelection } from "./services/localeCatalog";
@@ -35,6 +35,9 @@ import { mergeIncidentReports } from "./services/incidentSync";
 import { mergeMonitoringSnapshot, subscribeAdminMonitoring } from "./services/monitoringSync";
 import { DevicePrivacyPanel } from "./components/DevicePrivacyPanel";
 import { deviceText } from "./services/deviceCopy";
+import { AccountDeletionPanel } from "./components/AccountDeletionPanel";
+import { deletionText, type DeletionCopyKey } from "./services/accountDeletionCopy";
+import type { DeletionPhase } from "./services/accountDeletion";
 
 function App() {
   useEffect(() => { loadRememberedLogin(); }, []);
@@ -58,6 +61,24 @@ function App() {
   const selectLocale = useRef(createLocaleSelection());
   const lastSyncWarningAt = useRef(0);
   const sessionRevision = useRef(0);
+  const [deletionUid, setDeletionUid] = useState<string | null>(null);
+  const [deletionEmail, setDeletionEmail] = useState("");
+  const [deletionBusy, setDeletionBusy] = useState(false);
+  const [deletionPhase, setDeletionPhase] = useState<DeletionPhase>();
+  const [deletionError, setDeletionError] = useState<DeletionCopyKey>();
+  const deletionAccount = useRef<string | null>(null);
+  const deletionRunning = useRef(false);
+  const lockForDeletion = (uid: string, email?: string | null) => {
+    if (deletionAccount.current === uid) return;
+    deletionAccount.current = uid;
+    sessionRevision.current++;
+    clearBrowserLocationWatch(watchId);
+    clearSession();
+    setSessionUserId(null);
+    setDeletionUid(uid);
+    setDeletionEmail(email ?? currentUser?.email ?? "");
+    setCloudAuthReady(true);
+  };
   const t = (key: TranslationKey) => translate(locale, key);
   const isPublicCheckInFlow = Boolean(publicCheckInRequest);
   const publicCheckInDestination = publicCheckInRequest?.destinationId ? data.destinations.find((destination) => destination.id === publicCheckInRequest.destinationId) ?? null : null;
@@ -176,6 +197,12 @@ function App() {
         }
 
         if (firebaseUser?.uid) {
+          const { hasAccountDeletion } = await import("./services/accountDeletion");
+          if (await hasAccountDeletion(firebaseUser.uid)) {
+            if (isCurrent()) lockForDeletion(firebaseUser.uid, firebaseUser.email);
+            return;
+          }
+          if (!isCurrent()) return;
           if (!firebaseUser.emailVerified) {
             const account = await getConfiguredUserRecord(firebaseUser.uid);
             if (!isCurrent()) return;
@@ -231,6 +258,16 @@ function App() {
     };
     void subscribeConfiguredSessionEnd(currentUser.authUid ?? currentUser.id, signedOut).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(signedOut);
     return () => { stopped = true; unsubscribe?.(); };
+  }, [currentUser?.id, currentUser?.authUid]);
+
+  useEffect(() => {
+    if (!currentUser || !hasConfiguredAuth()) return;
+    let stopped = false;
+    let stop: (() => void) | undefined;
+    const uid = currentUser.authUid ?? currentUser.id;
+    void import("./services/accountDeletion").then(({ subscribeAccountDeletion }) => subscribeAccountDeletion(uid, () => { if (!stopped) lockForDeletion(uid); }, () => {}))
+      .then((cleanup) => { if (stopped) cleanup(); else stop = cleanup; }).catch(() => {});
+    return () => { stopped = true; stop?.(); };
   }, [currentUser?.id, currentUser?.authUid]);
 
   useEffect(() => {
@@ -560,6 +597,9 @@ function App() {
           return { error: "Firebase login could not return a user account." };
         }
 
+        const { hasAccountDeletion } = await import("./services/accountDeletion");
+        if (await hasAccountDeletion(authUid)) { lockForDeletion(authUid, firebaseUser?.email); return {}; }
+
         firebaseStoredUser = await getConfiguredUserRecord(authUid);
         const loginRole = firebaseStoredUser?.role ?? "tourist";
         if (firebaseUser && !firebaseUser.emailVerified && loginRole !== "admin") {
@@ -641,7 +681,8 @@ function App() {
 
   const register = async (draft: TouristRegistrationDraft): Promise<AuthResult> => {
     sessionRevision.current++;
-    const precheck = validateTouristAccount(data, {
+    const registrationSnapshot = registrationData(data, draft.email, hasConfiguredAuth());
+    const precheck = validateTouristAccount(registrationSnapshot, {
       name: draft.name,
       email: draft.email,
       password: draft.password,
@@ -663,7 +704,7 @@ function App() {
       return { error: friendlyAuthError(error, "Firebase registration failed.") };
     }
 
-    const created = createTouristAccount(data, {
+    const created = createTouristAccount(registrationSnapshot, {
       name: draft.name,
       email: draft.email,
       password: draft.password,
@@ -738,6 +779,8 @@ function App() {
     clearBrowserLocationWatch(watchId);
 
     await signOutConfiguredProvider().catch(() => undefined);
+    deletionAccount.current = null;
+    setDeletionUid(null);
     clearSession();
     setSessionUserId(null);
     setPublicCheckInRequest(null);
@@ -761,6 +804,28 @@ function App() {
       notify({ tone: "warning", title: deviceText(locale, "privacyTitle"), message: deviceText(locale, result) });
       return result;
     }
+  };
+
+  const deleteAccount = async (password: string) => {
+    if (deletionRunning.current) return;
+    const uid = deletionUid ?? currentUser?.authUid ?? currentUser?.id;
+    if (!uid || (!deletionUid && currentUser?.role !== "tourist")) { setDeletionError("unavailable"); return; }
+    deletionRunning.current = true;
+    setDeletionBusy(true); setDeletionError(undefined);
+    try {
+      const { deleteOwnAccount, AccountDeletionError } = await import("./services/accountDeletion");
+      const { clearDeletedAccountDeviceData } = await import("./services/accountDeletionLocal");
+      try {
+        await deleteOwnAccount(uid, password, { onStarted: () => lockForDeletion(uid), onPhase: setDeletionPhase, clearLocal: () => clearDeletedAccountDeviceData(uid) });
+      } catch (error) {
+        if (error instanceof AccountDeletionError) { setDeletionError(error.code === "timeout" ? "failed" : error.code); return; }
+        throw error;
+      }
+      window.location.replace("/login?account=deleted");
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
+      setDeletionError(["auth/wrong-password", "auth/invalid-credential", "auth/invalid-login-credentials"].includes(code ?? "") ? "badPassword" : code === "auth/requires-recent-login" || code === "auth/user-token-expired" ? "session" : "failed");
+    } finally { deletionRunning.current = false; setDeletionBusy(false); }
   };
 
   const resetPrototype = () => {
@@ -790,6 +855,8 @@ function App() {
     URL.revokeObjectURL(url);
     notify({ tone: "success", title: "Export started", message: "The current prototype data is downloading as a JSON file." });
   };
+
+  if (deletionUid) return <main className="account-deletion-page"><LanguageSelector locale={locale} onLocaleChange={changeLocale} /><AccountDeletionPanel locale={locale} email={deletionEmail} pending busy={deletionBusy} phase={deletionPhase} error={deletionError} onDelete={deleteAccount} onLogout={() => void logout()} /></main>;
 
   if (hasConfiguredAuth() && !cloudAuthReady && !currentUser) {
     return <main className="auth-layout" aria-busy="true"><div role="status">{t("auth.checkingAccess")}</div></main>;
@@ -850,6 +917,7 @@ function App() {
     return (
       <>
         <AuthScreen
+          initialNotice={new URLSearchParams(window.location.search).get("account") === "deleted" ? deletionText(locale, "deleted") : undefined}
           mode={authMode}
           locale={locale}
           onLocaleChange={changeLocale}
@@ -988,6 +1056,7 @@ function App() {
           />
         )}
         {hasConfiguredAuth() && (currentUser.role === "admin" || safeView === "profile") && <DevicePrivacyPanel locale={locale} onClear={clearDeviceDownloads} />}
+        {hasConfiguredAuth() && currentUser.role === "tourist" && safeView === "profile" && <AccountDeletionPanel locale={locale} email={currentUser.email} busy={deletionBusy} phase={deletionPhase} error={deletionError} onDelete={deleteAccount} onExport={() => void exportData()} />}
       </main>
       <ToastViewport notifications={notifications} onDismiss={dismissNotification} locale={locale} />
     </div>

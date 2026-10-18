@@ -19,7 +19,7 @@ function readPending(): AttractionCheckIn[] {
   }
 }
 
-function writePending(records: AttractionCheckIn[]) {
+function writePending(records: unknown[]) {
   try {
     if (records.length) localStorage.setItem(pendingCheckInsKey, JSON.stringify(records));
     else localStorage.removeItem(pendingCheckInsKey);
@@ -40,6 +40,14 @@ export function rememberPendingCheckIn(record: AttractionCheckIn) {
 }
 
 export const hasPendingCheckInChanges = () => readPending().length > 0;
+
+export function forgetAccountCheckIns(userId: string) {
+  const stored: unknown = JSON.parse(localStorage.getItem(pendingCheckInsKey) ?? "[]");
+  if (!Array.isArray(stored)) throw new Error("Pending visit storage is unreadable");
+  const remaining = [...stored.filter((record) => !record || record.userId !== userId), ...[...fallback.values()].filter((record) => record.userId !== userId)];
+  if (!writePending(remaining)) throw new Error("Pending visit cleanup failed");
+  for (const [id, record] of fallback) if (record.userId === userId) fallback.delete(id);
+}
 
 export function acknowledgePendingCheckIns(records: AttractionCheckIn[]) {
   const pending = readPending();

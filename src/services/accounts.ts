@@ -59,6 +59,11 @@ export function findUserByEmail(data: AppData, email: string) {
   return data.users.find((candidate) => candidate.email.toLowerCase() === normalizedEmail) ?? null;
 }
 
+export function registrationData(data: AppData, email: string, cloud: boolean): AppData {
+  // Firebase, not a potentially stale cache, decides whether an online email is registered.
+  return cloud ? { ...data, users: data.users.filter((user) => normalizeEmail(user.email) !== normalizeEmail(email)) } : data;
+}
+
 export function validateTouristAccount(data: AppData, input: RegisterInput) {
   const name = input.name.trim();
   const email = normalizeEmail(input.email);

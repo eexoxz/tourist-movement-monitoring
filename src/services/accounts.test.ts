@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
-import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, validateTouristAccount } from "./accounts";
+import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, registrationData, validateTouristAccount } from "./accounts";
 
 const validRegistration = {
   name: "New Tourist",
@@ -12,6 +12,17 @@ const validRegistration = {
 };
 
 describe("accounts service", () => {
+  it("lets Firebase decide duplicate emails instead of stale local records after account deletion", () => {
+    const draft = { ...validRegistration, email: "TOURIST@example.com", authUid: "new-firebase-uid" };
+    expect(registrationData(initialData, draft.email, false)).toBe(initialData);
+    expect(createTouristAccount(initialData, draft).error).toContain("already exists");
+    const snapshot = registrationData(initialData, draft.email, true);
+    const created = createTouristAccount(snapshot, draft);
+    expect(created.error).toBeUndefined();
+    expect(created.user?.id).toBe("new-firebase-uid");
+    expect(created.data?.users.filter((user) => user.email.toLowerCase() === draft.email.toLowerCase())).toHaveLength(1);
+    expect(initialData.users).toContainEqual(expect.objectContaining({ id: "tourist-demo" }));
+  });
   it("authenticates a valid local tourist account", () => {
     const user = authenticateLocalUser(initialData, "tourist@example.com", "tourist123");
 

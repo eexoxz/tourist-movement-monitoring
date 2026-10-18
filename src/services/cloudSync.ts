@@ -15,11 +15,13 @@ export function flushCloudChanges(actor: User, special: (change: CloudChange) =>
     const assertSession = () => {
       if (services.auth.currentUser?.uid !== uid) throw new Error("Cloud session changed during save");
     };
+    // Admin creates can involve different owners, each with a deletion-lock rule lookup.
+    const chunkSize = actor.role === "admin" ? 15 : CHUNK_SIZE;
     for (const job of pendingCloudJobs(actor)) {
-      for (let offset = 0; offset < job.changes.length; offset += CHUNK_SIZE) {
+      for (let offset = 0; offset < job.changes.length; offset += chunkSize) {
         assertSession();
         const changes: CloudChange[] = [];
-        for (const change of job.changes.slice(offset, offset + CHUNK_SIZE)) {
+        for (const change of job.changes.slice(offset, offset + chunkSize)) {
           const handled = await special(change);
           if (handled === false) throw new Error("Cloud record was not accepted");
           if (handled === undefined) changes.push(change);

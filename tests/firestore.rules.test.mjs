@@ -2,12 +2,13 @@ import { after, before, beforeEach, describe, it } from "node:test";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
-import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, runTransaction, setDoc, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, query, runTransaction, serverTimestamp, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
 
 // Never fall back to the real project when an emulator is unavailable.
 if (process.env.FIRESTORE_EMULATOR_HOST !== "127.0.0.1:8088") throw new Error("Run npm run test:rules against the isolated emulator.");
 let environment;
 const db = (uid) => uid ? environment.authenticatedContext(uid).firestore() : environment.unauthenticatedContext().firestore();
+const recentDb = (uid, age = 0) => environment.authenticatedContext(uid, { auth_time: Math.floor(Date.now() / 1000) - age }).firestore();
 const own = { id: "alice", userId: "alice", authUid: "alice", role: "tourist", name: "Alice test" };
 const other = { id: "bob", userId: "bob", authUid: "bob", role: "tourist", name: "Bob test" };
 const recordFixtures = {
@@ -24,6 +25,87 @@ const recordFixtures = {
   movementPoints: { tripId: "alice-trip", latitude: 5.4, longitude: 100.3 },
   analyses: { tripId: "alice-trip" },
 };
+
+describe("self-service account removal", () => {
+  const lock = (store, uid = "alice") => setDoc(doc(store, "account_deletions", uid), { version: 1, startedAt: serverTimestamp() });
+  it("requires recent authentication and disallows admins or other users starting deletion", async () => {
+    await assertFails(lock(db("alice")));
+    await assertFails(lock(recentDb("alice", 600)));
+    await assertFails(lock(recentDb("bob")));
+    await assertFails(lock(recentDb("admin")));
+    await assertFails(lock(recentDb("admin"), "admin"));
+    await assertFails(lock(db()));
+    await assertSucceeds(lock(recentDb("alice")));
+  });
+  it("keeps the minimal lock private, immutable and free of profile fields", async () => {
+    const store = recentDb("alice");
+    await assertFails(setDoc(doc(store, "account_deletions/alice"), { version: 1, startedAt: serverTimestamp(), email: "private@example.test" }));
+    await lock(store);
+    await assertSucceeds(getDoc(doc(store, "account_deletions/alice")));
+    await assertFails(getDoc(doc(db("bob"), "account_deletions/alice")));
+    await assertFails(getDocs(collection(store, "account_deletions")));
+    await assertFails(updateDoc(doc(store, "account_deletions/alice"), { version: 2 }));
+    await assertFails(deleteDoc(doc(store, "account_deletions/alice")));
+  });
+  it("allows owner-only profile removal only after locking and leaves shared places untouched", async () => {
+    const store = recentDb("alice");
+    for (const name of ["users", "tourist_profiles", "tourist_preferences"]) {
+      await assertFails(deleteDoc(doc(store, name, "alice")));
+      await assertFails(deleteDoc(doc(db("admin"), name, "alice")));
+    }
+    await lock(store);
+    for (const name of ["tourist_profiles", "tourist_preferences", "users"]) {
+      await assertFails(deleteDoc(doc(store, name, "bob")));
+      await assertSucceeds(deleteDoc(doc(store, name, "alice")));
+      await assertSucceeds(deleteDoc(doc(store, name, "alice")));
+    }
+    await assertSucceeds(setDoc(doc(db("admin"), "destinations/shared"), { latitude: 5.4, longitude: 100.3 }));
+    await assertFails(deleteDoc(doc(store, "destinations/shared")));
+    await assertFails(setDoc(doc(store, "users/alice"), own));
+    await assertFails(setDoc(doc(db("admin"), "users/alice"), own));
+  });
+  it("allows paged cleanup while blocking old-session creates and updates", async () => {
+    const store = recentDb("alice"); await lock(store);
+    for (const [name, fixture] of Object.entries(recordFixtures)) {
+      await assertSucceeds(getDocs(query(collection(store, name), where("userId", "==", "alice"), limit(100))));
+      await assertFails(setDoc(doc(store, name, "late"), { ...fixture, id: "late", userId: "alice" }));
+      await assertFails(setDoc(doc(db("admin"), name, "late-admin"), { ...fixture, id: "late-admin", userId: "alice" }));
+      await assertFails(updateDoc(doc(store, name, "alice-record"), { updatedAt: "late" }));
+      await assertFails(deleteDoc(doc(store, name, "bob-record")));
+      await assertSucceeds(deleteDoc(doc(store, name, "alice-record")));
+    }
+  });
+  it("hard-deletes only the locked owner's itinerary and blocks draft resurrection", async () => {
+    const plan = { id: "itinerary-removal", userId: "alice", title: "Plan", startDate: "", days: 1, notes: "", stops: [], revision: 1, deletedAt: "", createdAt: "now", updatedAt: "now" };
+    const store = recentDb("alice");
+    await assertSucceeds(setDoc(doc(store, "tourist_itineraries", plan.id), plan));
+    await assertFails(deleteDoc(doc(store, "tourist_itineraries", plan.id)));
+    await lock(store);
+    await assertFails(updateDoc(doc(store, "tourist_itineraries", plan.id), { revision: 2 }));
+    await assertFails(deleteDoc(doc(recentDb("bob"), "tourist_itineraries", plan.id)));
+    await assertSucceeds(deleteDoc(doc(store, "tourist_itineraries", plan.id)));
+    await assertFails(setDoc(doc(store, "tourist_itineraries", plan.id), plan));
+  });
+  it("cleans a 100-document page within Firestore rule access limits", async () => {
+    await environment.withSecurityRulesDisabled(async (context) => {
+      const batch = writeBatch(context.firestore());
+      for (let index = 0; index < 100; index++) batch.set(doc(context.firestore(), "movement_records", `page-${index}`), { userId: "alice", tripId: "trip", latitude: 5.4, longitude: 100.3 });
+      await batch.commit();
+    });
+    const store = recentDb("alice"); await lock(store);
+    const rows = await getDocs(query(collection(store, "movement_records"), where("userId", "==", "alice"), limit(100)));
+    const batch = writeBatch(store); rows.forEach((row) => batch.delete(row.ref));
+    await assertSucceeds(batch.commit());
+  });
+  it("permits the admin's 15-owner sync transaction within rule access limits", async () => {
+    const store = db("admin");
+    const refs = Array.from({ length: 15 }, (_, index) => doc(store, "recommendations", `admin-sync-${index}`));
+    await assertSucceeds(runTransaction(store, async (transaction) => {
+      await Promise.all(refs.map((ref) => transaction.get(ref)));
+      refs.forEach((ref, index) => transaction.set(ref, { id: ref.id, userId: `owner-${index}`, destinationId: "temple" }));
+    }));
+  });
+});
 
 before(async () => {
   environment = await initializeTestEnvironment({ projectId: "demo-tourist-security", firestore: {

@@ -63,3 +63,10 @@ export function hasPendingCloudChanges() {
   for (let index = 0; index < localStorage.length; index++) if (localStorage.key(index)?.startsWith(prefix)) return true;
   return false;
 }
+
+export function forgetAccountCloudChanges(userId: string) {
+  const ownerPrefix = `${prefix}${userId}:`;
+  for (const key of pending.keys()) if (key.startsWith(ownerPrefix)) pending.delete(key);
+  const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index));
+  for (const key of keys) if (key?.startsWith(ownerPrefix)) localStorage.removeItem(key);
+}
