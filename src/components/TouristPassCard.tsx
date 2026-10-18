@@ -45,6 +45,12 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
   const localOnlyQr = isLocalOnlyQrOrigin();
   const passport = maskPassport(user.passportNumber) || t("tourist.profile.notSetYet");
   const nationality = user.nationality || t("tourist.profile.notSetYet");
+  const details = <dl className="tourist-pass-details">
+    <div className="pass-identity"><dt>{t("tourist.pass.passId")}</dt><dd>{passId}</dd></div>
+    <div><dt>{t("tourist.pass.nationality")}</dt><dd>{nationality}</dd></div>
+    <div><dt>{t("tourist.pass.passport")}</dt><dd>{passport}</dd></div>
+    {!compact && <div className="pass-preferences"><dt>{t("tourist.pass.travelStyle")}</dt><dd>{formatPreferences(user, t)}</dd></div>}
+  </dl>;
 
   return (
     <article className={compact ? "tourist-pass-card compact" : "tourist-pass-card"}>
@@ -57,26 +63,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
         {destination && <DestinationVisual destination={destination} compact locale={locale} />}
         <p>{destination ? `${t("tourist.pass.checkInDescription")} ${destination.name}.` : t("tourist.pass.description")}</p>
 
-        <dl className="tourist-pass-details">
-          <div>
-            <dt>{t("tourist.pass.passId")}</dt>
-            <dd>{passId}</dd>
-          </div>
-          <div>
-            <dt>{t("tourist.pass.nationality")}</dt>
-            <dd>{nationality}</dd>
-          </div>
-          <div>
-            <dt>{t("tourist.pass.passport")}</dt>
-            <dd>{passport}</dd>
-          </div>
-          {!compact && (
-            <div>
-              <dt>{t("tourist.pass.travelStyle")}</dt>
-              <dd>{formatPreferences(user, t)}</dd>
-            </div>
-          )}
-        </dl>
+        {compact && details}
       </div>
 
       <div className="tourist-pass-qr">
@@ -89,6 +76,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
           {localOnlyQr ? t("tourist.pass.localQrNote") : t("tourist.pass.qrNote")}
         </small>
       </div>
+      {!compact && details}
     </article>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eraser, ShieldCheck } from "lucide-react";
+import { ChevronDown, Eraser, ShieldCheck } from "lucide-react";
 import type { Locale } from "../services/i18n";
 import { deviceText } from "../services/deviceCopy";
 import { uiText } from "../services/uiText";
@@ -14,7 +14,7 @@ export function DevicePrivacyPanel({ locale, onClear }: { locale: Locale; onClea
     finally { setBusy(false); }
   };
   return <details className="device-privacy-panel">
-    <summary><ShieldCheck size={18} />{deviceText(locale, "privacyTitle")}</summary>
+    <summary><ShieldCheck size={18} />{deviceText(locale, "privacyTitle")}<ChevronDown className="account-control-chevron" size={18} aria-hidden="true" /></summary>
     <p>{deviceText(locale, "privacyBody")}</p>
     {!confirm ? <button className="secondary-action danger" type="button" onClick={() => setConfirm(true)}><Eraser size={18} />{deviceText(locale, "clearAction")}</button> : <div className="device-privacy-confirm">
       <p>{deviceText(locale, "confirmBody")}</p>

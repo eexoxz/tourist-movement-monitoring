@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, LoaderCircle, LogOut, Trash2 } from "lucide-react";
+import { ChevronDown, Download, LoaderCircle, LogOut, Trash2 } from "lucide-react";
 import { translate, type Locale } from "../services/i18n";
 import { deletionText, type DeletionCopyKey } from "../services/accountDeletionCopy";
 import type { DeletionPhase } from "../services/accountDeletion";
@@ -32,5 +32,5 @@ export function AccountDeletionPanel({ locale, email, pending = false, busy = fa
     {error && <p role="alert">{text(error)}</p>}
     {pending && onLogout && <button className="secondary-action" type="button" onClick={onLogout} disabled={busy}><LogOut size={18} />{translate(locale, "nav.logout")}</button>}
   </>;
-  return pending ? <section className="account-deletion-panel"><h1><Trash2 size={24} />{text("resume")}</h1>{content}</section> : <details className="account-deletion-panel" open={expanded} onToggle={(event) => { setExpanded(event.currentTarget.open); if (!event.currentTarget.open) { setPassword(""); setAgreed(false); } }}><summary><Trash2 size={18} />{text("title")}</summary>{content}</details>;
+  return pending ? <section className="account-deletion-panel"><h1><Trash2 size={24} />{text("resume")}</h1>{content}</section> : <details className="account-deletion-panel" open={expanded} onToggle={(event) => { setExpanded(event.currentTarget.open); if (!event.currentTarget.open) { setPassword(""); setAgreed(false); } }}><summary><Trash2 size={18} />{text("title")}<ChevronDown className="account-control-chevron" size={18} aria-hidden="true" /></summary>{content}</details>;
 }

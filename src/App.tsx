@@ -1055,8 +1055,11 @@ function App() {
             syncStatus={syncStatus}
           />
         )}
-        {hasConfiguredAuth() && (currentUser.role === "admin" || safeView === "profile") && <DevicePrivacyPanel locale={locale} onClear={clearDeviceDownloads} />}
-        {hasConfiguredAuth() && currentUser.role === "tourist" && safeView === "profile" && <AccountDeletionPanel locale={locale} email={currentUser.email} busy={deletionBusy} phase={deletionPhase} error={deletionError} onDelete={deleteAccount} onExport={() => void exportData()} />}
+        {hasConfiguredAuth() && currentUser.role === "admin" && <DevicePrivacyPanel locale={locale} onClear={clearDeviceDownloads} />}
+        {hasConfiguredAuth() && currentUser.role === "tourist" && safeView === "profile" && <div className="profile-account-controls">
+          <DevicePrivacyPanel locale={locale} onClear={clearDeviceDownloads} />
+          <AccountDeletionPanel locale={locale} email={currentUser.email} busy={deletionBusy} phase={deletionPhase} error={deletionError} onDelete={deleteAccount} onExport={() => void exportData()} />
+        </div>}
       </main>
       <ToastViewport notifications={notifications} onDismiss={dismissNotification} locale={locale} />
     </div>

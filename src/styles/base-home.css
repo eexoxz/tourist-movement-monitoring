@@ -755,9 +755,10 @@ button:disabled {
 
 .profile-page-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 36px;
   align-items: start;
+  max-width: 1120px;
 }
 
 .profile-summary-grid {

@@ -4,7 +4,7 @@
 .destination-form-modal label,
 .mini-form label,
 .auth-form label,
-.profile-form-grid label {
+.profile-form-grid label:not(.preference-chip):not(.discovery-checkbox) {
   display: grid;
   gap: 7px;
   color: #344155;

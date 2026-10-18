@@ -97,10 +97,6 @@
     position: static;
   }
 
-  .profile-setup-copy {
-    min-height: 260px;
-  }
-
   .profile-actions {
     grid-column: auto;
     justify-content: flex-start;
@@ -242,19 +238,6 @@
 
   .public-check-in-card .destination-visual img {
     max-height: 220px;
-  }
-
-  .profile-setup-card,
-  .profile-setup-copy {
-    padding: 18px;
-  }
-
-  .profile-setup-copy {
-    min-height: 220px;
-  }
-
-  .profile-setup-copy h2 {
-    font-size: 1.9rem;
   }
 
   .preference-grid {

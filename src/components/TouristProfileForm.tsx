@@ -1,4 +1,4 @@
-import { Save } from "lucide-react";
+import { Building2, Castle, HeartHandshake, Landmark, Radar, Save, SlidersHorizontal, TreePine, Utensils, Waves } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { getCategoryLabel, getDisplayName, inferExpectedProfileFromPreferences, profilePreferenceOptions } from "../services/profile";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -17,6 +17,8 @@ type TouristProfileFormProps = {
   onSave: (user: User) => void;
   onSkip?: () => void;
 };
+
+const preferenceIcons = { cultural: Landmark, nature: TreePine, urban: Building2, heritage: Castle, food: Utensils, coastal: Waves };
 
 export function TouristProfileForm({
   user,
@@ -74,11 +76,11 @@ export function TouristProfileForm({
   return (
     <form className="profile-setup" onSubmit={saveProfile}>
       <section className="profile-setup-card">
-        <div className="profile-setup-copy">
-          <span>{t("tourist.profile.personalSetup")}</span>
+        <header className="profile-setup-copy">
+          <span><SlidersHorizontal size={18} aria-hidden="true" />{t("tourist.profile.personalSetup")}</span>
           <h2>{title}</h2>
           <p>{description}</p>
-        </div>
+        </header>
 
         <div className="profile-form-grid">
           <label>
@@ -89,12 +91,15 @@ export function TouristProfileForm({
           <fieldset>
             <legend>{t("tourist.profile.preferencesLegend")}</legend>
             <div className="preference-grid">
-              {profilePreferenceOptions.map((option) => (
+              {profilePreferenceOptions.map((option) => {
+                const Icon = preferenceIcons[option.value];
+                return (
                 <label className={preferences.includes(option.value) ? "preference-chip active" : "preference-chip"} key={option.value}>
                   <input type="checkbox" checked={preferences.includes(option.value)} onChange={() => togglePreference(option.value)} />
-                  {getCategoryLabel(option.value, t)}
+                  <Icon size={18} aria-hidden="true" /><span>{getCategoryLabel(option.value, t)}</span>
                 </label>
-              ))}
+                );
+              })}
             </div>
           </fieldset>
 
@@ -129,7 +134,7 @@ export function TouristProfileForm({
 
           <section className="profile-emergency-fields">
             <div>
-              <span>{t("tourist.profile.trackingSettings")}</span>
+              <h3><Radar size={19} aria-hidden="true" />{t("tourist.profile.trackingSettings")}</h3>
               <p>{t("tourist.profile.trackingDescription")}</p>
             </div>
             <div className="field-pair">
@@ -168,7 +173,7 @@ export function TouristProfileForm({
 
           <section className="profile-emergency-fields">
             <div>
-              <span>{t("tourist.profile.emergencyContact")}</span>
+              <h3><HeartHandshake size={19} aria-hidden="true" />{t("tourist.profile.emergencyContact")}</h3>
               <p>{t("tourist.profile.emergencyDescription")}</p>
             </div>
             <div className="field-pair">
