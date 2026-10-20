@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
 import type { MovementPoint } from "../types";
-import { clearBrowserLocationWatch, getLastBrowserLocationKey, loadLastBrowserLocation, movementPointFromBrowserPosition, saveLastBrowserLocation } from "./browserLocation";
+import { clearBrowserLocationWatch, createBrowserLocationWatchGuard, getLastBrowserLocationKey, loadLastBrowserLocation, movementPointFromBrowserPosition, saveLastBrowserLocation } from "./browserLocation";
 import { appendMovementPoint, grantLocationConsent, startTripSession, stopActiveTrip, summarizeTrip } from "./movement";
 import { getMovementQualityIssue } from "./movementQuality";
 import { getLiveNearbySuggestion } from "./liveSuggestions";
@@ -15,6 +15,47 @@ function position(latitude: number, longitude: number, timestamp: number, accura
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("browser GPS workflow", () => {
+  it("records and completes a route even with an empty attraction catalogue", () => {
+    vi.useFakeTimers();
+    const start = Date.parse("2026-10-21T01:00:00Z");
+    vi.setSystemTime(start);
+    const userId = "tourist-demo";
+    const started = startTripSession(grantLocationConsent({ ...initialData, destinations: [], trips: [], points: [], checkIns: [] }, userId), userId);
+    let data = started.data!;
+    for (let index = 0; index < 5; index++) {
+      vi.setSystemTime(start + index * 60000);
+      const point = movementPointFromBrowserPosition(position(5.25 + index * 0.001, 100.45, Date.now()), started.trip!.id, userId);
+      const result = appendMovementPoint(data, point);
+      expect(result.error).toBeUndefined();
+      data = result.data!;
+    }
+    const stopped = stopActiveTrip(data, userId).data!;
+    expect(summarizeTrip(stopped, started.trip!.id)).toMatchObject({ pointCount: 5, visitedDestinationCount: 0, durationMinutes: 4 });
+    expect(summarizeTrip(stopped, started.trip!.id).distanceKm).toBeGreaterThan(0.4);
+    expect(stopped.trips[0].status).toBe("completed");
+  });
+  it("invalidates callbacks on stop and restart even if the browser reuses a watch ID", () => {
+    vi.stubGlobal("navigator", { geolocation: { clearWatch: vi.fn() } });
+    const watch = { current: 7 as number | null };
+    const first = createBrowserLocationWatchGuard(watch);
+    expect(first()).toBe(true);
+    clearBrowserLocationWatch(watch);
+    expect(first()).toBe(false);
+    watch.current = 7;
+    const restarted = createBrowserLocationWatchGuard(watch);
+    expect(first()).toBe(false);
+    expect(restarted()).toBe(true);
+    const replaced = createBrowserLocationWatchGuard(watch);
+    expect(restarted()).toBe(false);
+    expect(replaced()).toBe(true);
+  });
+  it("invalidates a pending initial fix even before a watch ID is assigned", () => {
+    const watch = { current: null as number | null };
+    const pending = createBrowserLocationWatchGuard(watch);
+    expect(pending()).toBe(true);
+    clearBrowserLocationWatch(watch);
+    expect(pending()).toBe(false);
+  });
   it("records a local route, recommends nearby places and completes without joining an old KL route", () => {
     vi.useFakeTimers();
     const start = Date.parse("2026-10-03T10:00:00Z");

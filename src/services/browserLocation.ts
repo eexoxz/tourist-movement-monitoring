@@ -2,6 +2,13 @@ import type { MovementPoint } from "../types";
 import { movementQualityLimits } from "./movementQuality";
 
 export const LAST_BROWSER_LOCATION_KEY_PREFIX = "tourist-movement-monitoring:last-location:";
+const watchTokens = new WeakMap<{ current: number | null }, object>();
+
+export function createBrowserLocationWatchGuard(watchId: { current: number | null }) {
+  const token = {};
+  watchTokens.set(watchId, token);
+  return () => watchTokens.get(watchId) === token;
+}
 
 export function geolocationErrorMessage(error: GeolocationPositionError) {
   const needsSecureContext = typeof window !== "undefined" && window.isSecureContext === false;
@@ -30,6 +37,8 @@ export function hasBrowserGeolocation() {
 }
 
 export function clearBrowserLocationWatch(watchId: { current: number | null }) {
+  // clearWatch cannot cancel already queued callbacks or a pending initial fix.
+  watchTokens.delete(watchId);
   if (watchId.current === null) {
     return;
   }

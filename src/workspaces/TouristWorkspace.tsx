@@ -47,7 +47,7 @@ import { createUnlistedCheckIn, type UnlistedPlaceDraft } from "../services/unli
 import { unlistedLocationText } from "../services/unlistedLocationCopy";
 import { placeText } from "../services/placeSubmissionCopy";
 import { getDisplayName } from "../services/profile";
-import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWatch, loadLastBrowserLocation, saveLastBrowserLocation, movementPointFromBrowserPosition } from "../services/browserLocation";
+import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWatch, createBrowserLocationWatchGuard, loadLastBrowserLocation, saveLastBrowserLocation, movementPointFromBrowserPosition } from "../services/browserLocation";
 import { type CommitDataOptions, incidentTypeOptions, loadProfileSetupSkipped, saveProfileSetupSkipped } from "../services/workspaceSupport";
 
 const ItineraryPage = lazy(() => import("../components/ItineraryPage").then((module) => ({ default: module.ItineraryPage })));
@@ -289,10 +289,11 @@ export function TouristWorkspace({
   }, [geofenceWarnings, notify]);
 
   useEffect(() => {
-    if (!activeTrip && isLiveTracking) {
+    if (!activeTrip || !currentConsent) {
+      clearBrowserLocationWatch(watchId);
       setIsLiveTracking(false);
     }
-  }, [activeTrip, isLiveTracking]);
+  }, [activeTrip?.id, currentConsent?.id, isLiveTracking, watchId]);
 
   useEffect(() => {
     setLastBrowserLocation(loadLastBrowserLocation(user.id));
@@ -383,12 +384,17 @@ export function TouristWorkspace({
     }
 
     if (watchId.current !== null) {
-      setIsLiveTracking(true);
-      showTrackingNotice("info", "Tracking already active", "Live browser tracking is already active.");
-      return true;
+      if (!locationRetryAvailable) {
+        setIsLiveTracking(true);
+        showTrackingNotice("info", "Tracking already active", "Live browser tracking is already active.");
+        return true;
+      }
+      clearBrowserLocationWatch(watchId);
     }
 
+    const isCurrentWatch = createBrowserLocationWatchGuard(watchId);
     const rememberBrowserPosition = (position: GeolocationPosition, saveInitialPoint = false) => {
+      if (!isCurrentWatch()) return false;
       const current = loadData();
       if (!current.trips.some((trip) => trip.id === tripId && trip.userId === user.id && trip.status === "active") || !current.consents.some((consent) => consent.userId === user.id && consent.granted)) return false;
       const browserPoint = movementPointFromBrowserPosition(position, tripId, user.id);
@@ -431,6 +437,7 @@ export function TouristWorkspace({
     watchId.current = navigator.geolocation.watchPosition(
       saveBrowserPosition,
       (error) => {
+        if (!isCurrentWatch() || !loadData().trips.some((trip) => trip.id === tripId && trip.userId === user.id && trip.status === "active")) return;
         if (error.code === error.PERMISSION_DENIED) {
           clearBrowserLocationWatch(watchId);
           setIsLiveTracking(false);
@@ -470,7 +477,7 @@ export function TouristWorkspace({
   }, [activeTrip?.id, currentConsent?.id, isLiveTracking, watchId]);
 
   const startTrip = () => {
-    const result = startTripSession(data, user.id);
+    const result = startTripSession(loadData(), user.id);
     if (result.error || !result.trip || !result.data) {
       showTrackingNotice("error", "Trip could not start", result.error ?? "Trip could not be started.");
       return;
@@ -494,7 +501,7 @@ export function TouristWorkspace({
     setIsLiveTracking(false);
     setLocationRetryAvailable(false);
 
-    const result = stopActiveTrip(data, user.id);
+    const result = stopActiveTrip(loadData(), user.id);
     if (result.error || !result.data) {
       showTrackingNotice("error", "Trip could not stop", result.error ?? "Trip could not be stopped.");
       return;
