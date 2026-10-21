@@ -14,6 +14,7 @@ import {
   grantLocationConsent,
   revokeLocationConsent,
   startTripSession,
+  startFreshTripSession,
   stopActiveTrip,
   summarizeTrip,
   summarizeUserTrips,
@@ -21,6 +22,30 @@ import {
 } from "./movement";
 
 describe("movement service", () => {
+  it("starts a fresh trip only when explicitly requested and preserves the old route", () => {
+    const existing = { ...initialData, trips: [{ id: "unfinished", userId: "tourist-demo", status: "active" as const, startedAt: "2026-08-22T09:24:59Z", consentId: "consent" }] };
+    expect(startTripSession(existing, "tourist-demo").error).toContain("already");
+    const fresh = startFreshTripSession(existing, "tourist-demo");
+    expect(fresh.error).toBeUndefined();
+    expect(fresh.trip?.id).not.toBe("unfinished");
+    expect(fresh.data?.trips.find(trip => trip.id === "unfinished")?.status).toBe("completed");
+    expect(fresh.data?.trips.filter(trip => trip.status === "active")).toHaveLength(1);
+    expect(fresh.data?.points).toBe(existing.points);
+    expect(existing.trips[0].status).toBe("active");
+  });
+  it("counts recorded intervals, not unattended weeks or gaps without GPS", () => {
+    const now = Date.now();
+    const trip = { id: "unfinished", userId: "tourist-demo", status: "active" as const, startedAt: new Date(now - 60 * 86400000).toISOString(), consentId: "consent" };
+    const point = { id: "p", tripId: trip.id, userId: trip.userId, latitude: 5.25, longitude: 100.45, accuracyMeters: 15, source: "browser" as const };
+    const data = { ...initialData, trips: [trip], points: [
+      { ...point, recordedAt: trip.startedAt },
+      { ...point, id: "recent1", recordedAt: new Date(now - 600000).toISOString() },
+      { ...point, id: "recent2", recordedAt: new Date(now).toISOString() },
+    ] };
+    expect(summarizeTrip(data, trip.id).durationMinutes).toBe(10);
+    expect(summarizeTrip({ ...data, points: [] }, trip.id).durationMinutes).toBe(0);
+    expect(summarizeTrip({ ...data, points: [data.points[0]] }, trip.id).durationMinutes).toBe(0);
+  });
   it("requires consent before starting a trip", () => {
     const data: AppData = {
       ...initialData,

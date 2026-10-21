@@ -22,6 +22,8 @@
   filter: saturate(0.76) contrast(0.96) brightness(1.04);
 }
 
+.map-frame > .map-view.leaflet-container { touch-action: none; }
+
 .map-view .leaflet-control-zoom {
   overflow: hidden;
   border: 1px solid rgba(148, 132, 103, 0.42);

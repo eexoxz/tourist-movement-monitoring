@@ -2,8 +2,8 @@ import type { AppData, Destination, LocationConsent, MovementPoint, TouristProfi
 import { createId } from "./storage";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
-import { compareTimeAsc, minutesBetween, timeValue } from "./time";
-import { filterQualityMovementPoints, getMovementQualityIssue, isContinuousMovementSegment } from "./movementQuality";
+import { compareTimeAsc, timeValue } from "./time";
+import { filterQualityMovementPoints, getMovementQualityIssue, isContinuousMovementSegment, recordedMovementMinutes } from "./movementQuality";
 import { discoveryRadiusKm } from "./discovery";
 import { getRecordedStopIds } from "./stopEvidence";
 
@@ -65,9 +65,7 @@ export function summarizeTrip(data: AppData, tripId: string): TripSummary {
 
   });
 
-  const startedAt = points[0]?.recordedAt ?? trip?.startedAt;
-  const endedAt = points.at(-1)?.recordedAt ?? trip?.endedAt ?? startedAt;
-  const durationMinutes = minutesBetween(startedAt, endedAt);
+  const durationMinutes = recordedMovementMinutes(points);
   const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(accuracyTotal / points.length);
 
   return {
@@ -304,6 +302,11 @@ export function startTripSession(data: AppData, userId: string) {
 
 export function isValidCoordinate(latitude: number, longitude: number) {
   return Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180;
+}
+
+export function startFreshTripSession(data: AppData, userId: string) {
+  const previous = getActiveTrip(data, userId) ? stopActiveTrip(data, userId).data : data;
+  return startTripSession(previous ?? data, userId);
 }
 
 export function appendMovementPoint(data: AppData, input: MovementInput) {

@@ -40,6 +40,15 @@ export function isContinuousMovementSegment(previous: QualityPoint, point: Quali
   return point.source === "demo" || Date.parse(point.recordedAt) - Date.parse(previous.recordedAt) <= movementQualityLimits.continuousGapMs;
 }
 
+export function recordedMovementMinutes(points: readonly QualityPoint[]) {
+  const milliseconds = points.reduce((total, point, index) => {
+    if (!index || !isContinuousMovementSegment(points[index - 1], point)) return total;
+    const elapsed = Date.parse(point.recordedAt) - Date.parse(points[index - 1].recordedAt);
+    return total + (Number.isFinite(elapsed) ? Math.max(0, elapsed) : 0);
+  }, 0);
+  return Math.round(milliseconds / 60000);
+}
+
 export function filterQualityMovementPoints(points: MovementPoint[], now = Date.now()) {
   const previousByTrip = new Map<string, MovementPoint>();
   return [...points].sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt)).filter((point) => {

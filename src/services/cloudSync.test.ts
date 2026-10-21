@@ -62,6 +62,32 @@ beforeEach(() => {
 afterEach(() => { for (const job of pendingCloudJobs(alice)) acknowledgeCloudJob(job); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("scoped cloud workflow persistence", () => {
+  it("saves completion back to the legacy trip instead of silently losing the update", async () => {
+    const before = base();
+    mock.documents.delete("trip_sessions/trip");
+    mock.documents.set("trips/trip", { ...trip });
+    await saveData({ ...before, trips: [{ ...before.trips[0], status: "completed", endedAt: "2026-10-21T01:00:00Z" }] }, alice, before);
+    expect(mock.documents.get("trips/trip")).toMatchObject({ status: "completed", endedAt: "2026-10-21T01:00:00Z" });
+    expect(mock.documents.has("trip_sessions/trip")).toBe(false);
+    expect(pendingCloudJobs(alice)).toHaveLength(0);
+  });
+  it("merges modern and legacy route history with modern rows winning duplicate IDs", async () => {
+    mock.documents.set("trips/trip", { ...trip, status: "completed" });
+    mock.documents.set("trips/old-route", { ...trip, id: "old-route", status: "completed" });
+    mock.documents.set("movementPoints/old-point", { id: "old-point", userId: "alice", tripId: "old-route", latitude: 5.25, longitude: 100.45, accuracyMeters: 15, source: "browser", recordedAt: "2026-10-17T00:00:00Z" });
+    const loaded = await loadCloudData(alice);
+    expect(loaded?.trips.filter(row => row.id === "trip")).toHaveLength(1);
+    expect(loaded?.trips.find(row => row.id === "trip")?.status).toBe("active");
+    expect(loaded?.trips.find(row => row.id === "old-route")?.status).toBe("completed");
+    expect(loaded?.points.some(row => row.id === "old-point")).toBe(true);
+  });
+  it("deletes both copies of the same trip so a legacy duplicate cannot reappear", async () => {
+    const before = base();
+    mock.documents.set("trips/trip", { ...trip });
+    await saveData({ ...before, trips: [] }, alice, before);
+    expect(mock.documents.has("trip_sessions/trip")).toBe(false);
+    expect(mock.documents.has("trips/trip")).toBe(false);
+  });
   it("keeps mixed-owner admin changes within the deletion-lock rule lookup budget", async () => {
     mock.currentUser = { uid: "admin" };
     const admin = { ...alice, id: "admin", authUid: "admin", role: "admin" as const };

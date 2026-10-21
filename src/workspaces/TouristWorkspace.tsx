@@ -9,7 +9,7 @@ import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
 import { getRelevantTourismAdvisories } from "../services/advisories";
-import { appendMovementPoint, addLocalTestRouteToActiveTrip, createSampleTripForUser, deleteTrip, deleteTouristMovementData, getLocalSampleDestinations, grantLocationConsent, revokeLocationConsent, simulatedPointNear, startTripSession, stopActiveTrip, updateTripLabel } from "../services/movement";
+import { appendMovementPoint, addLocalTestRouteToActiveTrip, createSampleTripForUser, deleteTrip, deleteTouristMovementData, getLocalSampleDestinations, grantLocationConsent, revokeLocationConsent, simulatedPointNear, startFreshTripSession, startTripSession, stopActiveTrip, updateTripLabel } from "../services/movement";
 import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn } from "../services/checkIns";
 import { getActiveGeofenceWarnings } from "../services/geofencing";
 import { closeOwnSosAlert, createIncidentReport, createSosAlert } from "../services/safety";
@@ -476,8 +476,8 @@ export function TouristWorkspace({
     return () => { cancelled = true; window.clearInterval(timer); };
   }, [activeTrip?.id, currentConsent?.id, isLiveTracking, watchId]);
 
-  const startTrip = () => {
-    const result = startTripSession(loadData(), user.id);
+  const beginTrip = (fresh: boolean) => {
+    const result = fresh ? startFreshTripSession(loadData(), user.id) : startTripSession(loadData(), user.id);
     if (result.error || !result.trip || !result.data) {
       showTrackingNotice("error", "Trip could not start", result.error ?? "Trip could not be started.");
       return;
@@ -486,6 +486,8 @@ export function TouristWorkspace({
     onDataChange(result.data);
     startLocationWatch(result.trip.id, "Trip started and live browser tracking is active.");
   };
+  const startTrip = () => beginTrip(false);
+  const startNewTrip = () => beginTrip(true);
 
   const resumeLiveTracking = () => {
     if (!activeTrip) {
@@ -918,7 +920,7 @@ export function TouristWorkspace({
 
   if (view === "tracking") {
     return <><Page title={travelText(locale, "tripTitle")} eyebrow={t("common.tourist")}>
-      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} gpsFix={activeGpsFix} gpsAttention={Boolean(trackingQualityIssue)} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus} onAllowLocation={grantConsent} onStart={startTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
+      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} gpsFix={activeGpsFix} gpsAttention={Boolean(trackingQualityIssue)} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus} onAllowLocation={grantConsent} onStart={startTrip} onStartNew={startNewTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
     </Page>{discoveryPrompt}{tripActionDialog}</>;
   }
 

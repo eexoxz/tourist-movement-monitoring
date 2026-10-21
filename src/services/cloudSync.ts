@@ -31,13 +31,20 @@ export function flushCloudChanges(actor: User, special: (change: CloudChange) =>
           assertSession();
           const references = changes.map((change) => doc(services.db, change.collection, change.id));
           const snapshots = await Promise.all(references.map((reference) => transaction.get(reference)));
+          // Old trips must be edited where they were loaded, not silently acknowledged as missing.
+          const legacyReferences = changes.map((change) => change.collection === "trip_sessions" && change.kind !== "create" ? doc(services.db, "trips", change.id) : null);
+          const legacySnapshots = await Promise.all(legacyReferences.map((reference) => reference ? transaction.get(reference) : null));
           assertSession();
           changes.forEach((change, index) => {
-            const reference = references[index];
-            const exists = snapshots[index].exists();
+            const legacy = legacySnapshots[index];
+            const reference = snapshots[index].exists() ? references[index] : legacyReferences[index] ?? references[index];
+            const exists = snapshots[index].exists() || Boolean(legacy?.exists());
             if (change.kind === "create") {
               if (!exists) transaction.set(reference, change.data);
-            } else if (exists && change.kind === "delete") transaction.delete(reference);
+            } else if (exists && change.kind === "delete") {
+              transaction.delete(reference);
+              if (snapshots[index].exists() && legacy?.exists()) transaction.delete(legacyReferences[index]!);
+            }
             else if (exists) transaction.update(reference, { ...change.data, ...Object.fromEntries(change.remove.map((field) => [field, deleteField()])) });
             // A deletion on another device wins over a late edit; never recreate the deleted record.
           });

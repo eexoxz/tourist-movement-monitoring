@@ -10,7 +10,7 @@ import { DestinationTeaser } from "./DestinationTeaser";
 import { MovementMap } from "./MovementMap";
 import { TrackingStatus } from "./TrackingStatus";
 
-export function TripExperience({ activeTrip, consent, points, reference, gpsFix, gpsAttention, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, onAllowLocation, onStart, onStop, onResume, onManage, onPlan, onOpenPlace, onSafety }: {
+export function TripExperience({ activeTrip, consent, points, reference, gpsFix, gpsAttention, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, onAllowLocation, onStart, onStartNew, onStop, onResume, onManage, onPlan, onOpenPlace, onSafety }: {
   activeTrip?: TripSession | null;
   consent?: LocationConsent | null;
   points: MovementPoint[];
@@ -30,6 +30,7 @@ export function TripExperience({ activeTrip, consent, points, reference, gpsFix,
   syncStatus?: string;
   onAllowLocation: () => void;
   onStart: () => void;
+  onStartNew?: () => void;
   onStop: () => void;
   onResume: () => void;
   onManage: () => void;
@@ -42,19 +43,19 @@ export function TripExperience({ activeTrip, consent, points, reference, gpsFix,
   const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   return <div className="trip-experience">
     <section className={`trip-recorder ${activeTrip ? isLiveTracking ? "is-recording" : "needs-location" : "is-idle"}`}>
-      {activeTrip && <div className="trip-recording-state" role="status"><span aria-hidden="true" />{interfaceText(locale, isLiveTracking ? "recording" : "locationAttention")}</div>}
-      <div className="trip-recorder-heading"><span className={activeTrip ? "trip-live-indicator active" : "trip-live-indicator"} aria-hidden="true"><Navigation size={24} /></span><div><h2>{text(activeTrip ? "activeTitle" : "idleTitle")}</h2><p>{text(activeTrip ? "activeDescription" : "idleDescription")}</p></div></div>
+      {activeTrip && <div className="trip-recording-state" role="status"><span aria-hidden="true" />{isLiveTracking ? interfaceText(locale, "recording") : text("pausedStatus")}</div>}
+      <div className="trip-recorder-heading"><span className={isLiveTracking ? "trip-live-indicator active" : "trip-live-indicator"} aria-hidden="true"><Navigation size={24} /></span><div><h2>{text(activeTrip ? isLiveTracking ? "activeTitle" : "pausedTitle" : "idleTitle")}</h2><p>{text(activeTrip ? isLiveTracking ? "activeDescription" : "pausedDescription" : "idleDescription")}</p></div></div>
       <div className="trip-recorder-actions">
         {!consent ? <button className="primary-action" type="button" onClick={onAllowLocation}><ShieldCheck size={18} />{uiText(locale, "Allow location")}</button>
           : !activeTrip ? <button className="primary-action" type="button" onClick={onStart}><Play size={18} />{t("tourist.home.startTrip")}</button>
-            : <><button className="primary-action" type="button" onClick={onStop}><Square size={18} />{t("tourist.home.stopTrip")}</button>{(!isLiveTracking || locationRetryAvailable) && <button className="secondary-action" type="button" onClick={onResume}><Navigation size={18} />{t(locationRetryAvailable ? "tourist.home.tryLocationAgain" : "tourist.home.resumeTracking")}</button>}</>}
+            : <><button className={isLiveTracking ? "primary-action" : "secondary-action"} type="button" onClick={onStop}><Square size={18} />{isLiveTracking ? t("tourist.home.stopTrip") : text("finishTrip")}</button>{(!isLiveTracking || locationRetryAvailable) && <button className={isLiveTracking ? "secondary-action" : "primary-action"} type="button" onClick={onResume}><Navigation size={18} />{t(locationRetryAvailable ? "tourist.home.tryLocationAgain" : "tourist.home.resumeTracking")}</button>}{!isLiveTracking && onStartNew && <button className="secondary-action" type="button" onClick={onStartNew}><Play size={18} />{text("startNewTrip")}</button>}</>}
         <button className="secondary-action" type="button" onClick={onManage}><Settings2 size={18} />{text("manage")}</button>
         {onPlan && <button className="secondary-action" type="button" onClick={onPlan}><CalendarDays size={18} />{text("itinerary")}</button>}
         <button className="secondary-action trip-safety-action" type="button" onClick={onSafety}><ShieldCheck size={18} />{t("tourist.safety.eyebrow")}</button>
       </div>
       {activeTrip && <TrackingStatus point={points.at(-1)} fix={gpsFix} attention={gpsAttention || locationRetryAvailable} listening={isLiveTracking} syncStatus={syncStatus} locale={locale} />}
       {trackingMessage && (activeTrip && isLiveTracking && !locationRetryAvailable ? <details className="trip-location-status"><summary>{text("privacy")}</summary><p>{uiText(locale, trackingMessage)}</p></details> : <p className="status-message" role="status">{uiText(locale, trackingMessage)}</p>)}
-      {activeTrip && summary && <dl className="trip-current-summary"><div><dt><Navigation size={16} />{t("common.distance")}</dt><dd>{number.format(summary.distanceKm)} <small>km</small></dd></div><div><dt><Clock3 size={16} />{t("tourist.completed.duration")}</dt><dd>{number.format(summary.durationMinutes)} <small>{t("common.minutes")}</small></dd></div><div><dt><CircleCheck size={16} />{t("tourist.completed.recognisedStops")}</dt><dd>{number.format(summary.visitedDestinationCount)}</dd></div></dl>}
+      {activeTrip && summary && <dl className="trip-current-summary"><div><dt><Navigation size={16} />{t("common.distance")}</dt><dd>{number.format(summary.distanceKm)} <small>km</small></dd></div><div><dt><Clock3 size={16} />{text("recordedTime")}</dt><dd>{number.format(summary.durationMinutes)} <small>{t("common.minutes")}</small></dd></div><div><dt><CircleCheck size={16} />{t("tourist.completed.recognisedStops")}</dt><dd>{number.format(summary.visitedDestinationCount)}</dd></div></dl>}
       {activeTrip && points.some((point) => point.source === "demo") && <small className="trip-sample-notice">{text("sampleNote")}</small>}
     </section>
 

@@ -2,8 +2,8 @@ import type { AnalysisResult, AppData, AttractionCheckIn, MovementPoint, Recomme
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
 import { getRecognizedDestinationNames } from "./tripPresentation";
-import { compareTimeAsc, compareTimeDesc, minutesBetween, timeValue } from "./time";
-import { filterQualityMovementPoints, isContinuousMovementSegment } from "./movementQuality";
+import { compareTimeAsc, compareTimeDesc, timeValue } from "./time";
+import { filterQualityMovementPoints, isContinuousMovementSegment, recordedMovementMinutes } from "./movementQuality";
 import { getRecordedStopIds } from "./stopEvidence";
 
 export type TouristWorkspaceData = {
@@ -50,9 +50,7 @@ function summarizeTripFromPoints(trip: TripSession, points: MovementPoint[], des
 
   }
 
-  const startedAt = points[0]?.recordedAt ?? trip.startedAt;
-  const endedAt = points.at(-1)?.recordedAt ?? trip.endedAt ?? startedAt;
-  const durationMinutes = minutesBetween(startedAt, endedAt);
+  const durationMinutes = recordedMovementMinutes(points);
   const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(accuracyTotal / points.length);
 
   return {

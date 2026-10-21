@@ -403,6 +403,10 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
   const isAdminUser = currentUserRecord?.role === "admin";
   const readScopedCollection = isAdminUser ? readCollection : readOwnedCollection;
   const readScopedPreferredCollection = isAdminUser ? readPreferredCollection : readPreferredOwnedCollection;
+  const readTripHistory = async <T extends { id: string }>(modern: string, legacy: string) => {
+    const [current, older] = await Promise.all([readScopedCollection<T>(modern), readScopedCollection<T>(legacy)]);
+    return [...new Map([...older, ...current].map((record) => [record.id, record])).values()];
+  };
   const userRows = isAdminUser ? readCollection<Omit<User, "password">>(FIRESTORE_COLLECTIONS.users) : Promise.resolve(currentUserRecord ? [currentUserRecord] : []);
   const profileRows = isAdminUser
     ? readCollection<TouristProfileDocument>(FIRESTORE_COLLECTIONS.touristProfiles)
@@ -416,8 +420,8 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
     profileRows,
     preferenceRows,
     readScopedPreferredCollection<LocationConsent>(FIRESTORE_COLLECTIONS.locationConsents, LEGACY_FIRESTORE_COLLECTIONS.consents),
-    readScopedPreferredCollection<TripSession>(FIRESTORE_COLLECTIONS.tripSessions, LEGACY_FIRESTORE_COLLECTIONS.trips),
-    readScopedPreferredCollection<MovementPoint>(FIRESTORE_COLLECTIONS.movementRecords, LEGACY_FIRESTORE_COLLECTIONS.movementPoints),
+    readTripHistory<TripSession>(FIRESTORE_COLLECTIONS.tripSessions, LEGACY_FIRESTORE_COLLECTIONS.trips),
+    readTripHistory<MovementPoint>(FIRESTORE_COLLECTIONS.movementRecords, LEGACY_FIRESTORE_COLLECTIONS.movementPoints),
     readCollection<Destination>(FIRESTORE_COLLECTIONS.destinations),
     readScopedPreferredCollection<AnalysisResult>(FIRESTORE_COLLECTIONS.aiAnalyses, LEGACY_FIRESTORE_COLLECTIONS.analyses),
     readScopedCollection<Recommendation>(FIRESTORE_COLLECTIONS.recommendations),

@@ -1,7 +1,8 @@
 import type { AnalysisResult, AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
-import { compareTimeAsc, compareTimeDesc, minutesBetween } from "./time";
+import { compareTimeAsc, compareTimeDesc } from "./time";
+import { isContinuousMovementSegment, recordedMovementMinutes } from "./movementQuality";
 
 export type MovementRecordView = {
   point: MovementPoint;
@@ -349,7 +350,7 @@ function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destina
     const point = points[index];
     accuracyTotal += point.accuracyMeters;
 
-    if (index > 0) {
+    if (index > 0 && isContinuousMovementSegment(points[index - 1], point)) {
       distance += distanceKm(points[index - 1], point);
     }
 
@@ -360,9 +361,7 @@ function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destina
     }
   }
 
-  const startedAt = points[0]?.recordedAt ?? trip.startedAt;
-  const endedAt = points.at(-1)?.recordedAt ?? trip.endedAt ?? startedAt;
-  const durationMinutes = minutesBetween(startedAt, endedAt);
+  const durationMinutes = recordedMovementMinutes(points);
   const averageAccuracyMeters = points.length === 0 ? 0 : Math.round(accuracyTotal / points.length);
 
   return {
@@ -489,16 +488,14 @@ export function buildMovementRecordsCsv(records: MovementRecordView[]) {
   const summaries = new Map(
     [...recordsByTrip.entries()].map(([tripId, tripRecords]) => {
       const sortedTripRecords = [...tripRecords].sort((a, b) => compareTimeAsc(a.point.recordedAt, b.point.recordedAt));
-      const distance = sortedTripRecords.slice(1).reduce((total, record, index) => total + distanceKm(sortedTripRecords[index].point, record.point), 0);
-      const startedAt = sortedTripRecords[0]?.point.recordedAt ?? sortedTripRecords[0]?.trip?.startedAt;
-      const endedAt = sortedTripRecords.at(-1)?.point.recordedAt ?? sortedTripRecords[0]?.trip?.endedAt ?? startedAt;
+      const distance = sortedTripRecords.slice(1).reduce((total, record, index) => total + (isContinuousMovementSegment(sortedTripRecords[index].point, record.point) ? distanceKm(sortedTripRecords[index].point, record.point) : 0), 0);
       const visited = new Set(sortedTripRecords.map((record) => record.nearestDestinationName).filter((name) => name !== "Unmapped destination"));
 
       return [
         tripId,
         {
           distanceKm: Number(distance.toFixed(2)),
-          durationMinutes: minutesBetween(startedAt, endedAt),
+          durationMinutes: recordedMovementMinutes(sortedTripRecords.map(record => record.point)),
           visitedDestinationCount: visited.size,
         },
       ] as const;

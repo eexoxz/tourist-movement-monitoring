@@ -133,6 +133,19 @@ beforeEach(async () => {
 after(async () => { await environment?.cleanup(); });
 
 describe("action-scoped cloud workflows", () => {
+  it("permits an owner to finish a legacy trip and start a separate modern trip", async () => {
+    const store = db("alice");
+    await assertSucceeds(runTransaction(store, async (transaction) => {
+      const modern = doc(store, "trip_sessions", "alice-record");
+      const legacy = doc(store, "trips", "alice-record");
+      const next = doc(store, "trip_sessions", "fresh-after-legacy");
+      await Promise.all([transaction.get(modern), transaction.get(legacy), transaction.get(next)]);
+      transaction.update(legacy, { status: "completed", endedAt: "2026-10-21T01:00:00Z" });
+      transaction.set(next, { id: next.id, userId: "alice", status: "active", startedAt: "2026-10-21T01:00:00Z" });
+    }));
+    assert.equal((await getDoc(doc(store, "trips/alice-record"))).data().status, "completed");
+    await assertFails(updateDoc(doc(db("bob"), "trips/alice-record"), { status: "completed" }));
+  });
   it("delivers a tourist's new movement point to an admin session without refreshing", async () => {
     let stop;
     let timer;

@@ -147,6 +147,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const lastAutoFocusKeyRef = useRef("");
+  const manualBrowseRef = useRef(false);
+  const automaticViewRef = useRef(false);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
   const [expandedDestinationId, setExpandedDestinationId] = useState<string | null>(null);
@@ -186,22 +188,23 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     }
 
     try {
-      const prefersPageScroll =
-        typeof window !== "undefined" && window.matchMedia("(pointer: coarse) and (max-width: 760px)").matches;
-
       mapRef.current = L.map(containerRef.current, {
         // Zoom transition timers can outlive a map removed by page navigation.
         zoomAnimation: false,
-        dragging: !prefersPageScroll,
+        dragging: true,
         zoomControl: false,
         attributionControl: true,
         scrollWheelZoom: false,
-        touchZoom: !prefersPageScroll,
+        touchZoom: true,
       }).setView([3.1478, 101.6937], 13);
+      mapRef.current.on("dragstart", () => { manualBrowseRef.current = true; });
+      mapRef.current.on("zoomstart", () => { if (!automaticViewRef.current) manualBrowseRef.current = true; });
 
       L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
+        updateWhenZooming: false,
+        updateWhenIdle: true,
         attribution: "&copy; OpenStreetMap contributors",
       })
         .on("load", () => setMapStatus("ready"))
@@ -228,6 +231,11 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   }, [locale]);
 
   useEffect(() => {
+    manualBrowseRef.current = false;
+    lastAutoFocusKeyRef.current = "";
+  }, [points[0]?.tripId, isBrowsingArea ? activePoint?.id : undefined]);
+
+  useEffect(() => {
     const map = mapRef.current;
     if (!map) {
       return;
@@ -244,7 +252,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         setSelectedDestinationId(destination.id);
         setExpandedDestinationId(null);
         setDismissedPreviewId(null);
-        map.panTo([destination.latitude, destination.longitude], { animate: true });
+        manualBrowseRef.current = true;
+        map.panTo([destination.latitude, destination.longitude], { animate: false });
       };
 
       if (drawDemandHalo) {
@@ -330,7 +339,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
     const latestRoutePoint = points.at(-1);
     const autoFocusKey = activePoint && mode === "tourist"
-      ? `active:${activePoint.latitude}:${activePoint.longitude}:${activePoint.recordedAt}`
+      ? `active:${activePoint.latitude}:${activePoint.longitude}`
       : displayMode === "signals"
         ? `signals:${visibleDestinations.length}:${points.length}`
       : latestRoutePoint
@@ -338,19 +347,24 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         : "";
 
     if (autoFocusKey && autoFocusKey !== lastAutoFocusKeyRef.current) {
+      const hadFocus = Boolean(lastAutoFocusKeyRef.current);
       lastAutoFocusKeyRef.current = autoFocusKey;
-
-      if (activePoint && mode === "tourist") {
-        map.setView([activePoint.latitude, activePoint.longitude], 15);
-      } else if (displayMode === "route" && route.length > 0) {
-        map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15 });
-      } else if (displayMode === "signals" && visibleDestinations.length > 1) {
-        const signalBoundDestinations = visibleDestinations.filter((destination) => (destinationSignals.get(destination.id)?.nearbyPointCount ?? 0) > 0);
-        const boundsDestinations = signalBoundDestinations.length > 1 ? signalBoundDestinations : visibleDestinations;
-        const destinationBounds = L.latLngBounds(boundsDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
-        map.fitBounds(destinationBounds, { padding: [42, 42], maxZoom: 8 });
-      } else if (activePoint) {
-        map.setView([activePoint.latitude, activePoint.longitude], 15);
+      if (!manualBrowseRef.current) {
+        automaticViewRef.current = true;
+        try {
+          if (activePoint && mode === "tourist") {
+            map.setView([activePoint.latitude, activePoint.longitude], hadFocus ? map.getZoom() : 15, { animate: false });
+          } else if (displayMode === "route" && route.length > 0) {
+            map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15, animate: false });
+          } else if (displayMode === "signals" && visibleDestinations.length > 1) {
+            const signalBoundDestinations = visibleDestinations.filter((destination) => (destinationSignals.get(destination.id)?.nearbyPointCount ?? 0) > 0);
+            const boundsDestinations = signalBoundDestinations.length > 1 ? signalBoundDestinations : visibleDestinations;
+            const destinationBounds = L.latLngBounds(boundsDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
+            map.fitBounds(destinationBounds, { padding: [42, 42], maxZoom: 8, animate: false });
+          } else if (activePoint) {
+            map.setView([activePoint.latitude, activePoint.longitude], 15, { animate: false });
+          }
+        } finally { automaticViewRef.current = false; }
       }
     }
 
@@ -364,7 +378,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       return;
     }
 
-    mapRef.current?.setView([activePoint.latitude, activePoint.longitude], 16);
+    manualBrowseRef.current = false;
+    automaticViewRef.current = true;
+    try { mapRef.current?.setView([activePoint.latitude, activePoint.longitude], 16, { animate: false }); }
+    finally { automaticViewRef.current = false; }
   };
 
   const visibleCategories = useMemo(() => Array.from(new Set(visibleDestinations.map((destination) => destination.category))), [visibleDestinations]);

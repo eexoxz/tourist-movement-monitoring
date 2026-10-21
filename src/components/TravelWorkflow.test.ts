@@ -60,10 +60,16 @@ describe("tourist travel workflow boundaries", () => {
     const live = renderToStaticMarkup(createElement(TripExperience, { ...tripProps, activeTrip, isLiveTracking: true }));
     expect(live).toContain("Recording");
     expect(live).toContain("is-recording");
-    const recovering = renderToStaticMarkup(createElement(TripExperience, { ...tripProps, activeTrip, isLiveTracking: false }));
-    expect(recovering).toContain("Location needs attention");
+    const startNew = vi.fn(), resume = vi.fn();
+    const recovering = renderToStaticMarkup(createElement(TripExperience, { ...tripProps, activeTrip, isLiveTracking: false, onStartNew: startNew, onResume: resume }));
+    expect(recovering).toContain("Not recording");
+    expect(recovering).toContain("An unfinished trip is saved");
+    expect(recovering).toContain("Start a new trip");
+    expect(recovering).toContain("Finish saved trip");
     expect(recovering).toContain("Resume tracking");
     expect(recovering).not.toContain("is-recording");
+    expect(startNew).not.toHaveBeenCalled();
+    expect(resume).not.toHaveBeenCalled();
   });
   it("keeps admin priority navigation connected to real pending cases and reviews", () => {
     const html = renderToStaticMarkup(createElement(AdminWorkspace, { data: initialData, actor: initialData.users.find((user) => user.role === "admin")!, view: "dashboard", locale: "en", onDataChange: noop, onViewChange: noop, notify: noop }));
@@ -219,7 +225,7 @@ describe("tourist travel workflow boundaries", () => {
 
   it("keeps active-route controls and recovery on Trips, not sample analytics", () => {
     const html = renderToStaticMarkup(createElement(TripExperience, { ...tripProps, activeTrip: { id: "test-trip", userId: "test-user", status: "active", startedAt: new Date().toISOString(), consentId: "test-consent" } }));
-    expect(html).toContain("Stop Trip");
+    expect(html).toContain("Finish saved trip");
     expect(html).toContain("Resume tracking");
     expect(html).toContain('data-route-points="3"');
     expect(html).not.toContain("Add test movement");
