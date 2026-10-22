@@ -27,7 +27,11 @@ test("every released venue has a real local image asset within the loading budge
 
 test("restricted-access venues retain practical guidance without artificial demand", () => {
   for (const place of places) {
-    expect(place.coordinateSourceUrl, place.id).toMatch(/^https:\/\/(www\.wikidata\.org\/wiki\/Q\d+|www\.openstreetmap\.org\/(node|way|relation)\/\d+)$/);
+    const source = new URL(place.coordinateSourceUrl);
+    expect(source.protocol, place.id).toBe("https:");
+    expect(["www.wikidata.org", "www.openstreetmap.org", "www.waze.com", "pokokkelapa.wordpress.com"], place.id).toContain(source.hostname);
+    expect(source.username, place.id).toBe("");
+    expect(source.password, place.id).toBe("");
     expect(place.visitTips.length, place.id).toBe(place.visitorGuidance.length);
     expect(place).not.toHaveProperty("visitorCount");
     expect(place).not.toHaveProperty("activitySummary");

@@ -1,6 +1,6 @@
 {
   "version": "2026-10",
-  "coordinateAttribution": "Coordinates: Wikidata (CC0) and OpenStreetMap contributors (ODbL). See each coordinateSourceUrl.",
+  "coordinateAttribution": "Coordinates: Wikidata (CC0), OpenStreetMap contributors (ODbL), and linked map/first-hand visitor references. See each coordinateSourceUrl.",
   "durationNote": "averageVisitMinutes is a planning suggestion, not measured visitor duration.",
   "places": [
     {
@@ -2914,6 +2914,604 @@
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": []
+    },
+    {
+      "id": "my-perlis-perlis-state-mosque-arau",
+      "name": "Perlis State Mosque, Arau",
+      "city": "Arau",
+      "state": "Perlis",
+      "address": "Masjid Negeri Perlis, Jalan Besar, Arau, Perlis, Malaysia",
+      "category": "cultural",
+      "description": "Royal-town mosque with a prominent dome and an architectural stop near the Arau palace precinct.",
+      "latitude": 6.43003,
+      "longitude": 100.27,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perlis-perlis-state-mosque-arau.jpg",
+      "imageAlt": "Perlis State Mosque, Arau",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Perlis_State_Mosque.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7385137",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-perlis-bukit-kubu-recreational-forest",
+      "name": "Bukit Kubu Recreational Forest",
+      "city": "Kuala Perlis",
+      "state": "Perlis",
+      "address": "Hutan Lipur Bukit Kubu, Jalan Bukit Kubu, Kuala Perlis, Perlis, Malaysia",
+      "category": "nature",
+      "description": "Limestone-hill forest recreation area near Kuala Perlis, suited to a short outdoor stop.",
+      "latitude": 6.407522,
+      "longitude": 100.142618,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-perlis-bukit-kubu-recreational-forest.jpg",
+      "imageAlt": "Bukit Kubu Recreational Forest",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kubu_Hill_Recreational_Forest.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://pokokkelapa.wordpress.com/2020/02/19/bukit-kubu-recreational-forest-kuala-perlis/",
+      "visitorGuidance": [
+        "trail"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
+      ]
+    },
+    {
+      "id": "my-perlis-kechor-river-recreational-park",
+      "name": "Kechor River Recreational Park",
+      "city": "Kangar",
+      "state": "Perlis",
+      "address": "Taman Rekreasi Sungai Kechor, Kangar, Perlis, Malaysia",
+      "category": "nature",
+      "description": "Riverside public park for a relaxed walk and a quieter stop in Kangar.",
+      "latitude": 6.4383591,
+      "longitude": 100.1895867,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-perlis-kechor-river-recreational-park.jpg",
+      "imageAlt": "Kechor River Recreational Park",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kechor_River_Recreational_Park.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.waze.com/live-map/directions/my/perlis/kangar/taman-rekreasi-sungai-kechor?to=place.ChIJDaZwLJ-ZTDARVXUmzh4fysM",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-perlis-yasmeen-nasi-kandar-arau",
+      "name": "Yasmeen Nasi Kandar, Arau",
+      "city": "Arau",
+      "state": "Perlis",
+      "address": "Restoran Nasi Kandar Yasmeen, Jalan Satu, Arau, Perlis, Malaysia",
+      "category": "food",
+      "description": "Local nasi kandar restaurant for rice-and-curry meals in Arau. Check the current menu and operating times before visiting.",
+      "latitude": 6.427633041,
+      "longitude": 100.272298831,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perlis-yasmeen-nasi-kandar-arau.jpg",
+      "imageAlt": "Yasmeen Nasi Kandar, Arau",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yasmeen_Restaurant.jpg"
+      },
+      "sourceUrl": "https://www.sukanmara.com/direktori/",
+      "coordinateSourceUrl": "https://www.waze.com/live-map/directions/restoran-nasi-kandar-yasmeen-jalan-satu-arau?to=place.w.65732672.657130115.7269840",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-perlis-dato-sheikh-ahmad-square",
+      "name": "Dato' Sheikh Ahmad Square",
+      "city": "Kangar",
+      "state": "Perlis",
+      "address": "Dataran Dato' Sheikh Ahmad, Jalan Home Guard, Kangar, Perlis, Malaysia",
+      "category": "urban",
+      "description": "Central civic square in Kangar, suitable for a short town-centre walking and landmark stop.",
+      "latitude": 6.438497286,
+      "longitude": 100.190277059,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perlis-dato-sheikh-ahmad-square.jpg",
+      "imageAlt": "Dato' Sheikh Ahmad Square",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dato%27_Sheikh_Ahmad_Square.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.waze.com/ms/live-map/directions/dataran-dato-sheikh-ahmad-jalan-home-guard-kangar?to=place.w.65667136.656605828.1420004",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kedah-dataran-lang-langkawi",
+      "name": "Dataran Lang, Langkawi",
+      "city": "Kuah",
+      "state": "Kedah",
+      "address": "Dataran Lang, Persiaran Putera, Kuah, Langkawi, Kedah, Malaysia",
+      "category": "urban",
+      "description": "Waterfront square in Kuah with Langkawi's large eagle landmark and views over the bay.",
+      "latitude": 6.3084571,
+      "longitude": 99.8519597,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-dataran-lang-langkawi.jpg",
+      "imageAlt": "Dataran Lang, Langkawi",
+      "imageCredit": {
+        "author": "SNN95",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dataran_Lang_2018_(cropped).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/langkawi/5-your-first-stop-kuah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q48769617",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kedah-mahsuri-mausoleum",
+      "name": "Mahsuri Mausoleum",
+      "city": "Langkawi",
+      "state": "Kedah",
+      "address": "Makam Mahsuri, Kampung Mawat, Ulu Melaka, Langkawi, Kedah, Malaysia",
+      "category": "heritage",
+      "description": "Heritage visitor site associated with the legend of Mahsuri and traditional Langkawi village life.",
+      "latitude": 6.3388131,
+      "longitude": 99.7841479,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-mahsuri-mausoleum.jpg",
+      "imageAlt": "Mahsuri Mausoleum",
+      "imageCredit": {
+        "author": "Taufik",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Makam_Mahsuri.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/langkawi/16-thing-to-do-sights-to-see/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/2893236816",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-johor-arulmigu-sri-rajakaliamman-glass-temple",
+      "name": "Arulmigu Sri Rajakaliamman Glass Temple",
+      "city": "Johor Bahru",
+      "state": "Johor",
+      "address": "Arulmigu Sri Rajakaliamman Glass Temple, Lorong Satu, Jalan Tebrau, Johor Bahru, Johor, Malaysia",
+      "category": "cultural",
+      "description": "Hindu temple noted for its glass-covered interior and detailed decorative work.",
+      "latitude": 1.46861111,
+      "longitude": 103.75972222,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-arulmigu-sri-rajakaliamman-glass-temple.jpg",
+      "imageAlt": "Arulmigu Sri Rajakaliamman Glass Temple",
+      "imageCredit": {
+        "author": "Chainwit.",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Arulmigu_Sri_Rajakaliamman_Glass_Temple,_JB_(2025)_-_img_43.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q4802043",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-johor-johor-bahru-old-chinese-temple",
+      "name": "Johor Bahru Old Chinese Temple",
+      "city": "Johor Bahru",
+      "state": "Johor",
+      "address": "Johor Bahru Old Chinese Temple, Jalan Trus, Johor Bahru, Johor, Malaysia",
+      "category": "heritage",
+      "description": "Historic city-centre temple linked to Johor Bahru's Chinese communities.",
+      "latitude": 1.46055556,
+      "longitude": 103.76305556,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-johor-bahru-old-chinese-temple.jpg",
+      "imageAlt": "Johor Bahru Old Chinese Temple",
+      "imageCredit": {
+        "author": "Chainwit.",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alter_chinesischer_Tempel_-_Old_Chinese_Temple_of_Johor_Bahru_(2025)_-_img_16.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2117455",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-johor-kota-tinggi-museum",
+      "name": "Kota Tinggi Museum",
+      "city": "Kota Tinggi",
+      "state": "Johor",
+      "address": "Muzium Kota Tinggi, Jalan Laksamana, Kota Tinggi, Johor, Malaysia",
+      "category": "heritage",
+      "description": "District museum introducing the history of Kota Tinggi and the Johor Sultanate.",
+      "latitude": 1.73722222,
+      "longitude": 103.91211111,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-kota-tinggi-museum.jpg",
+      "imageAlt": "Kota Tinggi Museum",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kota_Tinggi_Museum.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q20454754",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kelantan-muhammadi-mosque",
+      "name": "Muhammadi Mosque",
+      "city": "Kota Bharu",
+      "state": "Kelantan",
+      "address": "Masjid Muhammadi, Jalan Sultanah Zainab, Kota Bharu, Kelantan, Malaysia",
+      "category": "heritage",
+      "description": "Historic state mosque in Kota Bharu, close to the city's royal and museum quarter.",
+      "latitude": 6.1322164,
+      "longitude": 102.2363003,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-muhammadi-mosque.jpg",
+      "imageAlt": "Muhammadi Mosque",
+      "imageCredit": {
+        "author": "Neponenpasila",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Street_view_of_the_Muhammadi_Mosque.jpg"
+      },
+      "sourceUrl": "https://info.mpkb.gov.my/masjid-muhammadi/index.html",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/904011177",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-kelantan-bank-kerapu-war-museum",
+      "name": "Bank Kerapu War Museum",
+      "city": "Kota Bharu",
+      "state": "Kelantan",
+      "address": "Bank Kerapu, Jalan Sultan, Kota Bharu, Kelantan, Malaysia",
+      "category": "heritage",
+      "description": "Historic former bank building housing exhibits about Kelantan during the Second World War.",
+      "latitude": 6.1318655,
+      "longitude": 102.2354708,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-bank-kerapu-war-museum.jpg",
+      "imageAlt": "Bank Kerapu War Museum",
+      "imageCredit": {
+        "author": "Zamwan",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bank_Kerapu_Kota_Bharu,_Kelantan.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/157560557",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kelantan-wat-mai-suwankhiri",
+      "name": "Wat Mai Suwankhiri",
+      "city": "Tumpat",
+      "state": "Kelantan",
+      "address": "Wat Mai Suwankhiri, Kampung Bukit Tanah, Tumpat, Kelantan, Malaysia",
+      "category": "cultural",
+      "description": "Thai Buddhist temple complex known for its ornate architecture and boat-shaped main building.",
+      "latitude": 6.1781806,
+      "longitude": 102.1881694,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-wat-mai-suwankhiri.jpg",
+      "imageAlt": "Wat Mai Suwankhiri",
+      "imageCredit": {
+        "author": "Photo Dharma from Sadao, Thailand",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:001_Dragon_Boat_Temple_(9140504701).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q111521688",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-negeri-sembilan-seri-menanti-royal-museum",
+      "name": "Seri Menanti Royal Museum",
+      "city": "Seri Menanti",
+      "state": "Negeri Sembilan",
+      "address": "Muzium Diraja Seri Menanti, Istana Lama Seri Menanti, Kuala Pilah, Negeri Sembilan, Malaysia",
+      "category": "heritage",
+      "description": "Former royal palace showcasing traditional timber architecture and Negeri Sembilan royal heritage.",
+      "latitude": 2.69833333,
+      "longitude": 102.15916667,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-seri-menanti-royal-museum.jpg",
+      "imageAlt": "Seri Menanti Royal Museum",
+      "imageCredit": {
+        "author": "Adhmi",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Istana_Seri_Menanti_Negeri_Sembilan.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q1136563",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-pahang-chin-swee-caves-temple",
+      "name": "Chin Swee Caves Temple",
+      "city": "Genting Highlands",
+      "state": "Pahang",
+      "address": "Chin Swee Caves Temple, Genting Highlands, Pahang, Malaysia",
+      "category": "cultural",
+      "description": "Hillside Chinese temple with a pagoda, landscaped grounds and mountain views.",
+      "latitude": 3.413204,
+      "longitude": 101.788373,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-pahang-chin-swee-caves-temple.jpg",
+      "imageAlt": "Chin Swee Caves Temple",
+      "imageCredit": {
+        "author": "Gryffindor",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chin_Swee_Caves_Temple_KL10.JPG"
+      },
+      "sourceUrl": "https://www.chinswee.org/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2269147",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-pahang-colmar-tropicale",
+      "name": "Colmar Tropicale",
+      "city": "Bukit Tinggi",
+      "state": "Pahang",
+      "address": "Colmar Tropicale, Berjaya Hills, Bukit Tinggi, Bentong, Pahang, Malaysia",
+      "category": "urban",
+      "description": "French-inspired visitor village in the Berjaya Hills highlands, with themed architecture and walking streets.",
+      "latitude": 3.400811,
+      "longitude": 101.83963,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-pahang-colmar-tropicale.jpg",
+      "imageAlt": "Colmar Tropicale",
+      "imageCredit": {
+        "author": "Peter coxhead",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Colmar_Tropicale_outside.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/pahang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q5147746",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-pahang-sultan-ahmad-shah-state-mosque",
+      "name": "Sultan Ahmad Shah State Mosque",
+      "city": "Kuantan",
+      "state": "Pahang",
+      "address": "Masjid Negeri Sultan Ahmad Shah, Jalan Mahkota, Kuantan, Pahang, Malaysia",
+      "category": "cultural",
+      "description": "Large state mosque in central Kuantan, recognised for its domes and blue-toned architecture.",
+      "latitude": 3.808,
+      "longitude": 103.3278,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-pahang-sultan-ahmad-shah-state-mosque.jpg",
+      "imageAlt": "Sultan Ahmad Shah State Mosque",
+      "imageCredit": {
+        "author": "Ibnu ariff at English Wikipedia",
+        "license": "Public domain",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pahang_state_mosque.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/pahang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2667445",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-pahang-fraser-s-hill-clock-tower",
+      "name": "Fraser's Hill Clock Tower",
+      "city": "Fraser's Hill",
+      "state": "Pahang",
+      "address": "Clock Tower, Jalan Genting, Bukit Fraser, Raub, Pahang, Malaysia",
+      "category": "heritage",
+      "description": "Stone clock-tower landmark at the centre of Fraser's Hill, a starting point for a highland town walk.",
+      "latitude": 3.7118746,
+      "longitude": 101.7363895,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-pahang-fraser-s-hill-clock-tower.jpg",
+      "imageAlt": "Fraser's Hill Clock Tower",
+      "imageCredit": {
+        "author": "RoB",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fraser%27s_Hill_Clock_Tower.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/pahang/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/4609258775",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-pahang-cameron-lavender-garden",
+      "name": "Cameron Lavender Garden",
+      "city": "Cameron Highlands",
+      "state": "Pahang",
+      "address": "Cameron Lavender Garden, Tringkap, Cameron Highlands, Pahang, Malaysia",
+      "category": "nature",
+      "description": "Hillside flower garden in Tringkap with planted terraces and colourful floral displays.",
+      "latitude": 4.5268438,
+      "longitude": 101.4265498,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-pahang-cameron-lavender-garden.jpg",
+      "imageAlt": "Cameron Lavender Garden",
+      "imageCredit": {
+        "author": "Pro QueeNia",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lavenders_field_at_Cameron_Lavender_Garden.jpg"
+      },
+      "sourceUrl": "https://www.malaysia.travel/storage/files/pdf/agro-tourism.pdf",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/4288062794",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sabah-kota-kinabalu-city-mosque",
+      "name": "Kota Kinabalu City Mosque",
+      "city": "Kota Kinabalu",
+      "state": "Sabah",
+      "address": "Masjid Bandaraya Kota Kinabalu, Jalan Pasir, Likas, Kota Kinabalu, Sabah, Malaysia",
+      "category": "cultural",
+      "description": "Waterfront city mosque in Likas, known for its lagoon setting and reflected domes.",
+      "latitude": 5.995858,
+      "longitude": 116.10775,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sabah-kota-kinabalu-city-mosque.jpg",
+      "imageAlt": "Kota Kinabalu City Mosque",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:KotaKinabalu_Sabah_CityMosque-08.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q3397006",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-terengganu-tengku-tengah-zaharah-mosque",
+      "name": "Tengku Tengah Zaharah Mosque",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Masjid Tengku Tengah Zaharah, Kuala Ibai, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "cultural",
+      "description": "Mosque in Kuala Ibai set beside a lagoon, often known as the Floating Mosque.",
+      "latitude": 5.283838,
+      "longitude": 103.170626,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-tengku-tengah-zaharah-mosque.jpg",
+      "imageAlt": "Tengku Tengah Zaharah Mosque",
+      "imageCredit": {
+        "author": "bbbsheep from singa-po",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Floating_Mosque.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q3410151",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-terengganu-abidin-mosque",
+      "name": "Abidin Mosque",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Masjid Abidin, Jalan Masjid Abidin, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "heritage",
+      "description": "Historic white mosque near the centre of Kuala Terengganu, also called the State Mosque.",
+      "latitude": 5.334552777,
+      "longitude": 103.137875,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-abidin-mosque.jpg",
+      "imageAlt": "Abidin Mosque",
+      "imageCredit": {
+        "author": "rasmuscleve",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Abidin_Mosque,_Kuala_Terengganu.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q4667606",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
     }
   ]
 }
