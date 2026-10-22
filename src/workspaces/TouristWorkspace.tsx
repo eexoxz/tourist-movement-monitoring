@@ -149,6 +149,12 @@ export function TouristWorkspace({
   const discoveryReference = useMemo(() => getDiscoveryReference(user, discoveryGpsPoint), [user, discoveryGpsPoint]);
   const canonicalDiscoveryDestinations = useMemo(() => discoveryReference ? getDiscoveryDestinations(data.destinations, user, discoveryReference) : [], [data.destinations, user, discoveryReference]);
   const discoveryDestinations = useMemo(() => localizeDestinations(canonicalDiscoveryDestinations, locale), [canonicalDiscoveryDestinations, locale]);
+  const spotlightContext = useMemo(() => ({
+    localDestinationIds: discoveryReference ? canonicalDiscoveryDestinations.map((place) => place.id) : undefined,
+    referencePoint: user.discoveryLocationMode === "area" ? undefined : discoveryReference,
+    activityDemand: destinationDemand,
+    excludedDestinationIds: user.hiddenDestinationIds,
+  }), [canonicalDiscoveryDestinations, discoveryReference, destinationDemand, user.discoveryLocationMode, user.hiddenDestinationIds]);
   const nextFestival = useMemo(() => getLocalEventAnnouncement(upcomingFestivals, discoveryReference), [upcomingFestivals, discoveryReference, calendarDay]);
   const eventAnnouncement = user.eventAnnouncementsEnabled !== false && !eventAnnouncementsDismissed
     ? nextFestival
@@ -1067,6 +1073,7 @@ export function TouristWorkspace({
       topRecommendationDestination={topRecommendationDestination ?? (discoveryReference ? discoveryDestinations[0] : localizedDestinations[0])}
       nextFestival={nextFestival}
       spotlightEvents={upcomingFestivals}
+      spotlightContext={spotlightContext}
       onOpenSpotlightEvent={(id) => { setSpotlightEventId(id); onViewChange("events"); }}
       locale={locale}
       onViewChange={onViewChange}

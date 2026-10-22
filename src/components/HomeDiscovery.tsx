@@ -6,12 +6,14 @@ import type { AppView, Destination, FestivalEvent } from "../types";
 import { DestinationTeaser } from "./DestinationTeaser";
 import { HomeSpotlight } from "./HomeSpotlight";
 import type { ReactNode } from "react";
+import type { HomeSpotlightContext } from "../services/homeSpotlights";
 
-export function HomeDiscovery({ featured, destinations, spotlightDestinations = destinations, spotlightEvents, nextFestival, activeTrip, trackingStatus, isLocal, needsLocationConsent, locale, onOpenPlace, onViewChange, onOpenSpotlightEvent, onAllowLocation, onSafety }: {
+export function HomeDiscovery({ featured, destinations, spotlightDestinations = destinations, spotlightEvents, spotlightContext, nextFestival, activeTrip, trackingStatus, isLocal, needsLocationConsent, locale, onOpenPlace, onViewChange, onOpenSpotlightEvent, onAllowLocation, onSafety }: {
   featured?: Destination | null;
   destinations: Destination[];
   spotlightDestinations?: Destination[];
   spotlightEvents?: FestivalEvent[];
+  spotlightContext?: HomeSpotlightContext;
   nextFestival: FestivalEvent | null;
   activeTrip: boolean;
   trackingStatus?: ReactNode;
@@ -36,7 +38,7 @@ export function HomeDiscovery({ featured, destinations, spotlightDestinations = 
     </section>;
   return <div className="home-discovery">
     {activeTrip && <div className="home-active-journey">{journeyInvitation}{trackingStatus}</div>}
-    <HomeSpotlight destinations={spotlightDestinations} events={spotlightEvents} locale={locale} onOpenPlace={onOpenPlace} onOpenEvents={onOpenSpotlightEvent ?? (() => onViewChange("events"))} />
+    <HomeSpotlight destinations={spotlightDestinations} events={spotlightEvents} context={spotlightContext} locale={locale} onOpenPlace={onOpenPlace} onOpenEvents={onOpenSpotlightEvent ?? (() => onViewChange("events"))} />
     {!activeTrip && journeyInvitation}
 
     <nav className="home-discovery-shortcuts" aria-label={t("tourist.home.nextUp")}>

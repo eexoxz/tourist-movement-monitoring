@@ -160,6 +160,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const [selectedDestinationId, setSelectedDestinationId] = useState<string | null>(null);
   const [expandedDestinationId, setExpandedDestinationId] = useState<string | null>(null);
   const [dismissedPreviewId, setDismissedPreviewId] = useState<string | null>(null);
+  const [routePopupOpen, setRoutePopupOpen] = useState(false);
   const visibleDestinations = useMemo(() => {
     if (mode !== "tourist") {
       return destinations;
@@ -206,6 +207,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       }).setView([3.1478, 101.6937], 13);
       mapRef.current.on("dragstart", () => { manualBrowseRef.current = true; });
       mapRef.current.on("zoomstart", () => { if (!automaticViewRef.current) manualBrowseRef.current = true; });
+      mapRef.current.on("popupopen", () => setRoutePopupOpen(true));
+      mapRef.current.on("popupclose", () => setRoutePopupOpen(false));
 
       L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -256,6 +259,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       const signal = destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination);
       const drawDemandHalo = shouldDrawDemandHalo(signal, displayMode, Boolean(activePoint));
       const selectDestination = () => {
+        map.closePopup();
         setSelectedDestinationId(destination.id);
         setExpandedDestinationId(null);
         setDismissedPreviewId(null);
@@ -282,12 +286,6 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         title: destination.name,
         zIndexOffset: markerZIndex(signal),
       }).on("click", selectDestination);
-
-      if (mode !== "tourist") {
-        marker.bindPopup(
-          `<section class="map-popup"><strong>${escapeHtml(destination.name)}</strong><span>${escapeHtml(categoryLabel(destination.category))} · ${escapeHtml(destination.city)}</span><p>${escapeHtml(destination.description)}</p><dl><div><dt>${escapeHtml(t("map.movementPoints"))}</dt><dd>${signal.nearbyPointCount}</dd></div><div><dt>${escapeHtml(t("map.demandSignal"))}</dt><dd>${escapeHtml(signalTierLabel(signal.tier))}</dd></div></dl></section>`
-        );
-      }
 
       marker.addTo(layer);
     });
@@ -432,7 +430,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           </span>
         ))}
       </div>
-      {!previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
+      {!routePopupOpen && !previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
         {detailsExpanded && selectedDestination && selectedSignal ? (
           <>
             <button
@@ -469,6 +467,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
                 <dt>{t("common.demand")}</dt>
                 <dd>{mode === "tourist" && selectedSignal.activityScore === 0 ? activityText(locale, "noEvidence") : t(crowdLabelKey(selectedSignal))}</dd>
               </div>
+              {mode === "admin" && <div><dt>{t("map.movementPoints")}</dt><dd>{new Intl.NumberFormat(locale).format(selectedSignal.nearbyPointCount)}</dd></div>}
             </dl>
             <section className="map-visit-notes">
               <div>
@@ -501,10 +500,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
             }} title={discoveryText(locale, "dismiss")} aria-label={discoveryText(locale, "dismiss")}>
               <X size={16} aria-hidden="true" />
             </button>
-            <span>{mode === "tourist" ? discoveryText(locale, "nearby") : t("map.topMapSignals")}</span>
+            <span>{selectedDestination ? `${categoryLabel(previewDestination.category)} · ${previewDestination.city}` : mode === "tourist" ? discoveryText(locale, "nearby") : t("map.topMapSignals")}</span>
             <h2>{previewDestination.name}</h2>
             <p className="map-preview-description">
-              {mode === "tourist" ? previewDestination.description : `${previewSignal.nearbyPointCount} ${t("common.points")} ${t("map.nearbyMovementDescription")}`}
+              {mode === "tourist" ? previewDestination.description : `${t("map.movementPoints")}: ${new Intl.NumberFormat(locale).format(previewSignal.nearbyPointCount)} · ${t("map.demandSignal")}: ${signalTierLabel(previewSignal.tier)}`}
             </p>
             <div className="map-preview-actions">
               {previewSignal.distanceFromActiveKm !== undefined && <small>{new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(previewSignal.distanceFromActiveKm)} km {t("map.away")}</small>}

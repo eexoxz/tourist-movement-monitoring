@@ -23,6 +23,7 @@ import { UnlistedCheckInForm } from "./UnlistedCheckInForm";
 import { placeText } from "../services/placeSubmissionCopy";
 import { revealSafetyPanel } from "../services/safetyNavigation";
 import type { UnlistedPlaceDraft } from "../services/unlistedPlaces";
+import type { HomeSpotlightContext } from "../services/homeSpotlights";
 
 type IncidentOption = {
   value: IncidentType;
@@ -66,6 +67,7 @@ type TouristHomeProps = {
   topRecommendationDestination: Destination | null | undefined;
   nextFestival: FestivalEvent | null;
   spotlightEvents?: FestivalEvent[];
+  spotlightContext?: HomeSpotlightContext;
   onOpenSpotlightEvent?: (id: string) => void;
   locale?: Locale;
   onViewChange: (view: AppView) => void;
@@ -153,6 +155,7 @@ export function TouristHome({
   topRecommendationDestination,
   nextFestival,
   spotlightEvents,
+  spotlightContext,
   onOpenSpotlightEvent,
   locale = "en",
   onViewChange,
@@ -278,7 +281,7 @@ export function TouristHome({
         )}
 
         {!showCheckInPanel && discoveryControl}
-        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} onOpenSpotlightEvent={onOpenSpotlightEvent} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} trackingStatus={trackingStatus} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
+        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} spotlightContext={spotlightContext} onOpenSpotlightEvent={onOpenSpotlightEvent} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} trackingStatus={trackingStatus} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
           if (safetyPanelRef.current) {
             revealSafetyPanel(safetyPanelRef.current);
           }

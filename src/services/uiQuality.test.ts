@@ -31,6 +31,16 @@ const stylesSource = styleImports.map(([, file]) => readSource(`src/${file}`)).j
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("uses one destination preview and hides it while a route-point popup is open", () => {
+    expect(mapSource).not.toContain("marker.bindPopup(");
+    expect(mapSource).toContain('on("popupopen", () => setRoutePopupOpen(true))');
+    expect(mapSource).toContain('on("popupclose", () => setRoutePopupOpen(false))');
+    expect(mapSource).toContain("!routePopupOpen && !previewDismissed");
+    expect(mapSource).toMatch(/const selectDestination = \(\) => \{\s*map.closePopup\(\)/);
+    expect(mapSource).toContain('t("map.demandSignal")');
+    expect(readSource("src/workspaces/TouristWorkspace.tsx")).toContain("localDestinationIds: discoveryReference ? canonicalDiscoveryDestinations.map");
+    expect(homeDiscoverySource).toContain("context={spotlightContext}");
+  });
   it("loads role workspaces on demand and prepares movement detail only on the records tab", () => {
     const app = readSource("src/App.tsx");
     const admin = readSource("src/workspaces/AdminWorkspace.tsx");

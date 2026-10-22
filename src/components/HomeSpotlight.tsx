@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Destination, FestivalEvent } from "../types";
 import { translate, type Locale } from "../services/i18n";
-import { buildHomeSpotlights } from "../services/homeSpotlights";
+import { buildHomeSpotlights, type HomeSpotlightContext } from "../services/homeSpotlights";
 import { spotlightText } from "../services/spotlightCopy";
 import { travelText } from "../services/travelExperienceCopy";
 import { useCalendarDay } from "../services/useCalendarDay";
@@ -10,9 +10,9 @@ import { uiText } from "../services/uiText";
 import { DestinationVisual } from "./DestinationVisual";
 import { animateSpotlightMove } from "../services/spotlightAnimation";
 
-export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, onOpenEvents }: { destinations: Destination[]; events?: FestivalEvent[]; locale: Locale; onOpenPlace: (id: string) => void; onOpenEvents: (id: string) => void }) {
+export function HomeSpotlight({ destinations, events = [], context, locale, onOpenPlace, onOpenEvents }: { destinations: Destination[]; events?: FestivalEvent[]; context?: HomeSpotlightContext; locale: Locale; onOpenPlace: (id: string) => void; onOpenEvents: (id: string) => void }) {
   const today = useCalendarDay();
-  const slides = useMemo(() => buildHomeSpotlights(destinations, events, today), [destinations, events, today]);
+  const slides = useMemo(() => buildHomeSpotlights(destinations, events, today, context), [destinations, events, today, context]);
   const signature = slides.map((slide) => slide.id).join("|");
   const track = useRef<HTMLDivElement>(null);
   const cancelTransition = useRef<() => void>(() => undefined);
@@ -85,7 +85,7 @@ export function HomeSpotlight({ destinations, events = [], locale, onOpenPlace, 
           <DestinationVisual destination={slide.destination} locale={locale} priority={slideIndex === 0} />
           {slide.event && <span className="home-spotlight-photo-note">{uiText(locale, "Location photo")}: {slide.destination.name}</span>}
           <div className="home-billboard-copy">
-            <div><span>{slide.event ? translate(locale, "nav.events") : translate(locale, `category.${slide.destination.category}`)} · {slide.event ? <time dateTime={slide.event.date}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(`${slide.event.date}T00:00:00`))}</time> : slide.destination.city}</span><h2>{slide.event?.name ?? slide.destination.name}</h2></div>
+            <div><span>{slide.scope === "national" ? text("national") : slide.event ? translate(locale, "nav.events") : translate(locale, `category.${slide.destination.category}`)} · {slide.event ? <time dateTime={slide.event.date}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(`${slide.event.date}T00:00:00`))}</time> : slide.destination.city}</span><h2>{slide.event?.name ?? slide.destination.name}</h2></div>
             <button className="secondary-action icon-action" type="button" title={slide.event ? translate(locale, "common.checkEvents") : travelText(locale, "explore")} aria-label={`${slide.event ? translate(locale, "common.checkEvents") : travelText(locale, "explore")}: ${slide.event?.name ?? slide.destination.name}`} onClick={() => slide.event ? onOpenEvents(slide.event.id) : onOpenPlace(slide.destination.id)}><ArrowRight size={22} /></button>
           </div>
         </div>)}
