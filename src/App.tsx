@@ -4,6 +4,8 @@ import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
 import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveCloudData, saveData, savePlaceReview, saveSession, saveSosAlertChange, subscribeCheckInRecords, subscribeIncidentReports, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
 import { confirmCheckInSync, mergeCheckInRecords } from "./services/checkInSync";
+import { hasTouristIdentity } from "./services/touristIdentity";
+import { reviewText } from "./services/reviewUpdateCopy";
 import { acknowledgePendingCheckIn, rememberPendingCheckIn } from "./services/pendingCheckIns";
 import { refreshAllRecommendations } from "./services/analytics";
 import { authProviderName, getConfiguredAuthState, getConfiguredUserRecord, hasConfiguredAuth, registerWithConfiguredProvider, sendPasswordResetToConfiguredProvider, sendVerificationEmail, signInWithConfiguredProvider, signOutConfiguredProvider, subscribeConfiguredSessionEnd } from "./services/auth";
@@ -510,6 +512,7 @@ function App() {
       };
     }
 
+    if (!hasTouristIdentity(publicCheckInTourist)) return { tone: "error", title: reviewText(locale, "identity"), message: reviewText(locale, "identityRequired") };
     const activeCheckIn = getActiveCheckIn(data, publicCheckInTourist.id);
     if (activeCheckIn && activeCheckIn.destinationId !== publicCheckInDestination.id) {
       return {
@@ -890,6 +893,8 @@ function App() {
           ? t("publicCheckin.missingPass")
           : !publicCheckInPassOwner
             ? t("publicCheckin.missingUser")
+            : publicCheckInTourist && !hasTouristIdentity(publicCheckInTourist)
+              ? reviewText(locale, "identityRequired")
             : !publicCheckInTourist
               ? t("publicCheckin.accountMismatch")
             : undefined;
@@ -902,7 +907,7 @@ function App() {
           locale={locale}
           missingReason={missingReason}
           passId={publicCheckInRequest.passId}
-          passVerified={Boolean(publicCheckInTourist)}
+          passVerified={Boolean(publicCheckInTourist && hasTouristIdentity(publicCheckInTourist))}
           syncStatus={syncStatus}
           initializing={hasConfiguredAuth() && !cloudAuthReady}
           onConfirm={confirmPublicCheckIn}

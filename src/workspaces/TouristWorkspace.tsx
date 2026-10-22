@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { CalendarDays, Compass, Navigation, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
-import type { AppData, AppView, IncidentType, MovementPoint, SosClosureReason, TripSession, User } from "../types";
+import type { AppData, AppView, Destination, IncidentType, MovementPoint, SosClosureReason, TripSession, User } from "../types";
 import { loadData, loadSharedDestinations } from "../services/storage";
 import { distanceKm, nearestDestination } from "../services/geo";
 import { recommendForUser, refreshAllRecommendations, refreshAnalysis } from "../services/analytics";
@@ -9,7 +9,10 @@ import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
 import { getRelevantTourismAdvisories } from "../services/advisories";
-import { appendMovementPoint, addLocalTestRouteToActiveTrip, createSampleTripForUser, deleteTrip, deleteTouristMovementData, getLocalSampleDestinations, grantLocationConsent, revokeLocationConsent, simulatedPointNear, startFreshTripSession, startTripSession, stopActiveTrip, updateTripLabel } from "../services/movement";
+import { appendMovementPoint, addLocalTestRouteToActiveTrip, archiveTrip, createSampleTripForUser, deleteTouristMovementData, getLocalSampleDestinations, grantLocationConsent, revokeLocationConsent, simulatedPointNear, startFreshTripSession, startTripSession, stopActiveTrip, updateTripLabel } from "../services/movement";
+import { hasTouristIdentity } from "../services/touristIdentity";
+import { reviewText } from "../services/reviewUpdateCopy";
+import { getDestinationState } from "../services/destinationState";
 import { checkOutFromAttraction, createAttractionCheckIn, getActiveCheckIn } from "../services/checkIns";
 import { getActiveGeofenceWarnings } from "../services/geofencing";
 import { closeOwnSosAlert, createIncidentReport, createSosAlert } from "../services/safety";
@@ -19,7 +22,7 @@ import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from ".
 import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "../services/incidentAttachments";
 import { getLiveNearbySuggestion, type LiveNearbySuggestion } from "../services/liveSuggestions";
 import { discoveryRadiusKm, getDiscoveryDestinations, getDiscoveryReference, getLatestDiscoveryPoint, getLocalEventAnnouncement } from "../services/discovery";
-import { discoveryAreas } from "../data/discoveryAreas";
+import { discoveryAreas, getDiscoveryState } from "../data/discoveryAreas";
 import { discoveryText } from "../services/discoveryCopy";
 import { DiscoveryPrompt } from "../components/DiscoveryPrompt";
 import { ActivityBasis } from "../components/ActivityBasis";
@@ -97,6 +100,7 @@ export function TouristWorkspace({
   const [incidentPhotoMessage, setIncidentPhotoMessage] = useState<string | null>(null);
   const [isPreparingIncidentPhoto, setIsPreparingIncidentPhoto] = useState(false);
   const [profileSetupSkipped, setProfileSetupSkipped] = useState(() => loadProfileSetupSkipped(user.id));
+  const [identitySafetyAccess, setIdentitySafetyAccess] = useState(false);
   const [showCheckInPanel, setShowCheckInPanel] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [openSafetyPanel, setOpenSafetyPanel] = useState(false);
@@ -154,13 +158,13 @@ export function TouristWorkspace({
     [data.destinations, discoveryReference, calendarDay]
   );
   const recommendations = useMemo(
-    () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking" || view === "itinerary") ? recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
-    [destinationDemand, latestAnalysis, discoveryReference, localizedData, user.id, view]
+    () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking" || view === "itinerary") ? recommendForUser(user.id, { ...localizedData, destinations: discoveryDestinations }, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: user.discoveryLocationMode === "area" ? Infinity : discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
+    [destinationDemand, latestAnalysis, discoveryReference, discoveryDestinations, localizedData, user.id, user.discoveryLocationMode, view]
   );
   const activeSamplePoint = activeTrip && activePoints.at(-1)?.source === "demo" ? activePoints.at(-1) : undefined;
   const tripReference = activeSamplePoint ?? discoveryGpsPoint;
   const tripBrowsingReference = tripReference ?? (!activeTrip ? discoveryReference : undefined);
-  const tripDestinations = useMemo(() => view === "tracking" && tripBrowsingReference ? getDiscoveryDestinations(localizedDestinations, user, tripBrowsingReference) : [], [localizedDestinations, tripBrowsingReference, user, view]);
+  const tripDestinations = useMemo(() => view === "tracking" && tripBrowsingReference ? getDiscoveryDestinations(localizedDestinations, tripReference ? { ...user, discoveryLocationMode: "current" } : user, tripBrowsingReference) : [], [localizedDestinations, tripReference, tripBrowsingReference, user, view]);
   const tripRecommendations = useMemo(() => {
     if (view !== "tracking" || !tripBrowsingReference) return [];
     if (tripBrowsingReference === discoveryReference) return recommendations;
@@ -634,7 +638,7 @@ export function TouristWorkspace({
   };
 
   const deleteSelectedTrip = (trip: TripSession, fallbackTitle: string) => {
-    if (!window.confirm(uiText(locale, 'Delete "{name}" and its saved movement points?', { name: fallbackTitle }))) {
+    if (!window.confirm(`${fallbackTitle}\n\n${reviewText(locale, "retention")}`)) {
       return;
     }
 
@@ -644,16 +648,16 @@ export function TouristWorkspace({
       setLocationRetryAvailable(false);
     }
 
-    const result = deleteTrip(data, user.id, trip.id);
+    const result = archiveTrip(loadData(), user.id, trip.id);
     if (result.error || !result.data) {
-      notify({ tone: "error", title: "Trip not deleted", message: result.error ?? "Try again in a moment." });
+      notify({ tone: "error", title: reviewText(locale, "removeFailed"), message: result.error ?? "Try again in a moment." });
       return;
     }
 
     const nextTrip = recentTrips.find((candidate) => candidate.id !== trip.id);
     onDataChange(refreshAllRecommendations(result.data));
     setSelectedTripId(nextTrip?.id ?? "");
-    notify({ tone: "success", title: "Trip deleted", message: "The selected route and its movement points were removed." });
+    notify({ tone: "success", title: reviewText(locale, "removed"), message: reviewText(locale, "retention") });
   };
 
   const saveProfile = (nextUser: User) => {
@@ -748,6 +752,7 @@ export function TouristWorkspace({
   };
 
   const startAttractionCheckIn = (destinationIdOverride?: string) => {
+    if (!hasTouristIdentity(user)) { notify({ tone: "warning", title: reviewText(locale, "identity"), message: reviewText(locale, "identityRequired") }); onViewChange("profile"); return; }
     const destinationId = destinationIdOverride ?? checkInDestinationId;
     const result = createAttractionCheckIn(data, {
       userId: user.id,
@@ -781,6 +786,7 @@ export function TouristWorkspace({
   };
 
   const startUnlistedCheckIn = async (draft: UnlistedPlaceDraft, point?: MovementPoint): Promise<string | null> => {
+    if (!hasTouristIdentity(user)) return reviewText(locale, "identityRequired");
     const result = createUnlistedCheckIn(loadData(), user.id, draft, point);
     if (result.error || !result.data) return placeText(locale, result.error ?? "invalid");
     const synced = await onDataChange(result.data, user, { checkIn: result.checkIn });
@@ -850,9 +856,9 @@ export function TouristWorkspace({
     notify({ tone: "info", title: "Profile skipped", message: "You can complete your travel profile later from Home." });
   };
 
-  const browseAreaNear = (location: Pick<MovementPoint, "latitude" | "longitude">) => {
+  const browseAreaNear = (location: Pick<MovementPoint, "latitude" | "longitude"> | Destination) => {
     const area = discoveryAreas.reduce((nearest, candidate) => distanceKm(location, candidate) < distanceKm(location, nearest) ? candidate : nearest);
-    changeDiscoveryLocation("area", area.id);
+    changeDiscoveryLocation("area", `state:${"city" in location ? getDestinationState(location) ?? area.state : area.state}`);
   };
   const openPlace = (destinationId: string) => {
     const destination = data.destinations.find((candidate) => candidate.id === destinationId);
@@ -865,6 +871,7 @@ export function TouristWorkspace({
     onViewChange("recommendations");
   };
   const openSafety = () => {
+    setIdentitySafetyAccess(true);
     setShowCheckInPanel(false);
     setOpenSafetyPanel(true);
     onViewChange("overview");
@@ -901,18 +908,19 @@ export function TouristWorkspace({
     );
   }
 
-  if (view === "overview" && showProfileSetup) {
+  if ((!hasTouristIdentity(user) && !(view === "overview" && identitySafetyAccess)) || (view === "overview" && showProfileSetup && !identitySafetyAccess)) {
     return (
       <Page title={t("tourist.profile.setupPageTitle")} eyebrow={t("common.tourist")}>
+        <button className="secondary-action" type="button" onClick={openSafety}><ShieldCheck size={18} />{t("tourist.safety.eyebrow")}</button>
         <TouristProfileForm
           user={user}
           title={t("tourist.profile.setupTitle")}
-          description={t("tourist.profile.setupDescription")}
+          description={hasTouristIdentity(user) ? t("tourist.profile.setupDescription") : t("tourist.profile.formDescription")}
           primaryLabel={t("tourist.profile.saveProfile")}
           secondaryLabel={t("tourist.profile.skipForNow")}
           locale={locale}
           onSave={saveProfile}
-          onSkip={skipProfileSetup}
+          onSkip={hasTouristIdentity(user) ? skipProfileSetup : undefined}
         />
       </Page>
     );
@@ -937,7 +945,7 @@ export function TouristWorkspace({
       <Page title={travelText(locale, "manage")} eyebrow={t("nav.trips")} actions={<button className="secondary-action" type="button" onClick={() => onViewChange("tracking")}><Navigation size={18} />{travelText(locale, "back")}</button>}>
         <section className="trip-management-tools">
           <button className="secondary-action" type="button" onClick={() => onViewChange("profile")}><Compass size={18} />{t("tourist.profile.formTitle")}</button>
-          <details><summary>{travelText(locale, "privacy")}</summary><p>{travelText(locale, "locationNote")}</p><button className="secondary-action" type="button" onClick={currentConsent ? revokeConsent : grantConsent}><ShieldCheck size={18} />{uiText(locale, currentConsent ? "Revoke consent" : "Allow location")}</button><button className="secondary-action danger" type="button" onClick={deleteMyMovementData} disabled={userTrips.length === 0}><Trash2 size={18} />{uiText(locale, "Delete my route history")}</button></details>
+          <details><summary>{travelText(locale, "privacy")}</summary><p>{travelText(locale, "locationNote")}</p><button className="secondary-action" type="button" onClick={currentConsent ? revokeConsent : grantConsent}><ShieldCheck size={18} />{uiText(locale, currentConsent ? "Revoke consent" : "Allow location")}</button><button className="secondary-action danger" type="button" onClick={deleteMyMovementData} disabled={!data.trips.some((trip) => trip.userId === user.id) && !data.points.some((point) => point.userId === user.id)}><Trash2 size={18} />{uiText(locale, "Delete my route history")}</button></details>
           <details><summary>{travelText(locale, "sampleTools")}</summary><p>{travelText(locale, "sampleNote")}</p><div className="action-row"><button className="secondary-action" type="button" onClick={createSampleRoute} disabled={Boolean(activeTrip)}><Compass size={18} />{t("tourist.home.addSampleRoute")}</button><button className="secondary-action" type="button" onClick={addDemoPoint} disabled={!activeTrip}>{t("tourist.home.addDemoPoint")}</button><button className="secondary-action" type="button" onClick={addLocalTestRoute} disabled={!activeTrip}><Navigation size={18} />{t("tourist.home.simulateLocalRoute")}</button></div>
             <form className="mini-form" onSubmit={addManualPoint}><div className="field-pair"><label>{uiText(locale, "Latitude")}<input value={manualLocation.latitude} onChange={(event) => setManualLocation({ ...manualLocation, latitude: event.target.value })} required /></label><label>{uiText(locale, "Longitude")}<input value={manualLocation.longitude} onChange={(event) => setManualLocation({ ...manualLocation, longitude: event.target.value })} required /></label></div><label>{uiText(locale, "Accuracy meters")}<input value={manualLocation.accuracyMeters} onChange={(event) => setManualLocation({ ...manualLocation, accuracyMeters: event.target.value })} required /></label><button className="secondary-action" type="submit" disabled={!activeTrip}><Save size={18} />{uiText(locale, "Save manual point")}</button></form>
           </details>
@@ -1014,7 +1022,7 @@ export function TouristWorkspace({
         <section className="event-calendar-page">
           <section className="calendar-window"><CalendarDays size={22} aria-hidden="true" /><strong>{t("tourist.events.next12Months")}</strong><span>{upcomingFestivals.length} {t("tourist.events.eventSignals")}</span></section>
           <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
-          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} initialEventId={spotlightEventId} referencePoint={discoveryReference} referenceState={user.discoveryLocationMode === "area" ? discoveryAreas.find((area) => area.id === user.discoveryAreaId)?.state : undefined} />
+          <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} initialEventId={spotlightEventId} referencePoint={discoveryReference} referenceState={user.discoveryLocationMode === "area" ? getDiscoveryState(user.discoveryAreaId) : undefined} />
         </section>
       </Page>
     );

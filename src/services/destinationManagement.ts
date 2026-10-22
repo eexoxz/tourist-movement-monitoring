@@ -1,4 +1,5 @@
-import type { Destination, DestinationCategory } from "../types";
+import type { Destination, DestinationCategory, MalaysianState } from "../types";
+import { discoveryStates } from "../data/discoveryAreas";
 import { createId } from "./storage";
 
 export const destinationCategories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
@@ -6,6 +7,7 @@ export const destinationCategories: DestinationCategory[] = ["cultural", "nature
 type DestinationInput = {
   name: string;
   city: string;
+  state?: MalaysianState | "";
   category: DestinationCategory | string;
   latitude: number | string;
   longitude: number | string;
@@ -84,6 +86,7 @@ export function validateDestination(input: DestinationInput) {
     value: {
       name,
       city,
+      ...(input.state && discoveryStates.includes(input.state) ? { state: input.state } : {}),
       category: input.category as DestinationCategory,
       latitude,
       longitude,

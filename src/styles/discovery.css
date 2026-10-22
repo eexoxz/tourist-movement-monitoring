@@ -540,7 +540,7 @@
 
 .places-controls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(150px, 210px) minmax(150px, 210px);
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 240px);
   gap: 12px;
   padding: 14px;
   border: 1px solid #e4ded1;

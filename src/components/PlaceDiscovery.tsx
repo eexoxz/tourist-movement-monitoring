@@ -7,7 +7,7 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AnalysisResult, Destination, DestinationCategory, DestinationDemand, FestivalEvent, MovementPoint, Recommendation, TouristProfile, User } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 import { uiText } from "../services/uiText";
-import { localizeCity, localizeDestinations } from "../services/destinationLocale";
+import { localizeDestinations } from "../services/destinationLocale";
 import { EmptyState } from "./SummaryCards";
 import { PlaceGuide } from "./PlaceGuide";
 import { PlaceGuideDialog } from "./PlaceGuideDialog";
@@ -175,14 +175,11 @@ export function PlaceDiscovery({
   const t = (key: TranslationKey) => translate(locale, key);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
-  const [cityFilter, setCityFilter] = useState("all");
   const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
-  const cityOptions = useMemo(() => Array.from(new Set(destinations.map((destination) => destination.city))).sort(), [destinations]);
   const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
   const localizedRequest = useMemo(() => requestedDestination ? localizeDestinations([requestedDestination], locale)[0] : undefined, [requestedDestination, locale]);
-  const cityByDestinationId = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination.city])), [destinations]);
   const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
   const recommendationByDestinationId = useMemo(() => new Map(recommendations.map((recommendation) => [recommendation.destinationId, recommendation])), [recommendations]);
   const demandByDestinationId = useMemo(() => new Map(demand.map((row) => [row.destinationId, row])), [demand]);
@@ -190,7 +187,8 @@ export function PlaceDiscovery({
 
   useEffect(() => {
     setShowAllPlaces(false);
-  }, [categoryFilter, cityFilter, mode, normalizedSearch]);
+  }, [categoryFilter, mode, normalizedSearch, user.discoveryAreaId]);
+  useEffect(() => { if (isBrowsingArea && mode === "nearby") setMode("recommended"); }, [isBrowsingArea, mode]);
 
   const scoredRows = useMemo(() => {
     return localizedDestinations
@@ -226,10 +224,6 @@ export function PlaceDiscovery({
     return scoredRows
       .filter((row) => {
         if (categoryFilter !== "all" && row.destination.category !== categoryFilter) {
-          return false;
-        }
-
-        if (cityFilter !== "all" && cityByDestinationId.get(row.destination.id) !== cityFilter) {
           return false;
         }
 
@@ -270,8 +264,6 @@ export function PlaceDiscovery({
       });
   }, [
     categoryFilter,
-    cityFilter,
-    cityByDestinationId,
     mode,
     normalizedSearch,
     scoredRows,
@@ -346,21 +338,10 @@ export function PlaceDiscovery({
             ))}
           </select>
         </label>
-        <label>
-          {t("tourist.places.area")}
-          <select value={cityFilter} onChange={(event) => setCityFilter(event.target.value)}>
-            <option value="all">{t("tourist.places.allMalaysia")}</option>
-            {cityOptions.map((city) => (
-              <option key={city} value={city}>
-                {localizeCity(city, locale)}
-              </option>
-            ))}
-          </select>
-        </label>
       </section>
 
       <div className="places-mode-row" aria-label={uiText(locale, "Place discovery mode")}>
-        {placeDiscoveryModes.map((option) => (
+        {placeDiscoveryModes.filter((option) => !isBrowsingArea || option.value !== "nearby").map((option) => (
           <button key={option.value} className={mode === option.value ? "active" : ""} type="button" onClick={() => setMode(option.value)}>
             {t(option.labelKey)}
           </button>
@@ -392,7 +373,7 @@ export function PlaceDiscovery({
               <p>{row.insight}</p>
               <div className="place-card-address"><MapPin size={16} aria-hidden="true" /><span>{row.destination.address ?? `${row.destination.city}, Malaysia`}</span></div>
               <div className="place-card-meta">
-                <span><Navigation size={16} aria-hidden="true" />{formatDistanceLabel(row.distance, t)}</span>
+                {!isBrowsingArea && <span><Navigation size={16} aria-hidden="true" />{formatDistanceLabel(row.distance, t)}</span>}
                 <span><Users size={16} aria-hidden="true" />{formatDemandLabel(row.demandRow, locale, t)}</span>
               </div>
               <div className="place-card-signals">

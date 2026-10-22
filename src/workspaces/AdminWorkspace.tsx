@@ -17,6 +17,10 @@ import { getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "../se
 import { sosText } from "../services/sosCopy";
 import { SosRequestActions } from "../components/SosRequestActions";
 import { getTouristManagementRows } from "../services/touristManagement";
+import { TouristCountryReport } from "../components/TouristCountryReport";
+import { getCountryCounts, matchesTouristIdentity, type IdentityFilter } from "../services/touristReports";
+import { hasTouristIdentity } from "../services/touristIdentity";
+import { reviewText } from "../services/reviewUpdateCopy";
 import { ActivitySummaryPublisher } from "../components/ActivitySummaryPublisher";
 import { activityText } from "../services/activityCopy";
 import { buildDestinationActivitySummaries } from "../services/activitySummary";
@@ -80,6 +84,8 @@ export function AdminWorkspace({
   const [planDiversifyCategories, setPlanDiversifyCategories] = useState(true);
   const [selectedAnalysisKey, setSelectedAnalysisKey] = useState<string | null>(null);
   const [touristSearch, setTouristSearch] = useState("");
+  const [touristCountry, setTouristCountry] = useState("all");
+  const [identityFilter, setIdentityFilter] = useState<IdentityFilter>("all");
   const [touristProfileFilter, setTouristProfileFilter] = useState<TouristProfile | "all" | "incomplete">("all");
   const [selectedManagedTouristId, setSelectedManagedTouristId] = useState<string | null>(null);
   const [safetyAdminNotes, setSafetyAdminNotes] = useState<Record<string, string>>({});
@@ -118,19 +124,14 @@ export function AdminWorkspace({
     const search = touristSearch.trim().toLowerCase();
 
     return touristManagementRows.filter((row) => {
-      const matchesSearch =
-        !search ||
-        row.tourist.name.toLowerCase().includes(search) ||
-        row.tourist.email.toLowerCase().includes(search) ||
-        (row.tourist.nationality ?? "").toLowerCase().includes(search) ||
-        (row.tourist.passportNumber ?? "").toLowerCase().includes(search);
+      const matchesSearch = matchesTouristIdentity(row.tourist, search, touristCountry, identityFilter);
       const matchesProfile =
         touristProfileFilter === "all" ||
         (touristProfileFilter === "incomplete" ? !row.tourist.profileCompletedAt && !row.tourist.travelPreferences?.length : row.profile === touristProfileFilter);
 
       return matchesSearch && matchesProfile;
     });
-  }, [touristManagementRows, touristProfileFilter, touristSearch]);
+  }, [touristManagementRows, touristProfileFilter, touristSearch, touristCountry, identityFilter]);
   const travelPlan = useMemo(
     () =>
       createMovementBasedTravelPlan(data, {
@@ -264,7 +265,7 @@ export function AdminWorkspace({
 
   useEffect(() => {
     setShowAllAdminTourists(false);
-  }, [touristProfileFilter, touristSearch]);
+  }, [touristProfileFilter, touristSearch, touristCountry, identityFilter]);
 
   useEffect(() => {
     setShowAllAiResults(false);
@@ -416,7 +417,7 @@ export function AdminWorkspace({
       </div>
       <div className="filter-toolbar admin-filter-toolbar">
         <input className="toolbar-input" value={touristSearch} onChange={(event) => setTouristSearch(event.target.value)} placeholder={adminText("tourists.search")} aria-label={adminText("tourists.search")} />
-        <select className="toolbar-select" value={touristProfileFilter} onChange={(event) => setTouristProfileFilter(event.target.value as TouristProfile | "all" | "incomplete")}>
+        <select className="toolbar-select" aria-label={adminText("tourists.allProfiles")} value={touristProfileFilter} onChange={(event) => setTouristProfileFilter(event.target.value as TouristProfile | "all" | "incomplete")}>
           <option value="all">{adminText("tourists.allProfiles")}</option>
           <option value="cultural">{adminText("tourists.cultural")}</option>
           <option value="nature">{adminText("tourists.nature")}</option>
@@ -424,15 +425,23 @@ export function AdminWorkspace({
           <option value="mixed">{adminText("tourists.mixed")}</option>
           <option value="incomplete">{adminText("tourists.incomplete")}</option>
         </select>
+        <select className="toolbar-select" aria-label={reviewText(locale, "country")} value={touristCountry} onChange={(event) => setTouristCountry(event.target.value)}>
+          <option value="all">{reviewText(locale, "allCountries")}</option>
+          {getCountryCounts(tourists).map((row) => <option key={row.key} value={row.key}>{row.name || reviewText(locale, "missing")} ({row.count})</option>)}
+        </select>
+        <select className="toolbar-select" aria-label={reviewText(locale, "identity")} value={identityFilter} onChange={(event) => setIdentityFilter(event.target.value as IdentityFilter)}>
+          <option value="all">{reviewText(locale, "allIdentity")}</option><option value="provided">{reviewText(locale, "withIdentity")}</option><option value="missing">{reviewText(locale, "missingIdentity")}</option>
+        </select>
       </div>
       <MetricGrid
         items={[
           [adminText("tourists.registered"), tourists.length.toString()],
-          [adminText("tourists.withPassport"), tourists.filter((tourist) => tourist.passportNumber).length.toString()],
+          [reviewText(locale, "withIdentity"), tourists.filter(hasTouristIdentity).length.toString()],
           [adminText("tourists.activeTrips"), summary.activeTripCount.toString()],
           [adminText("tourists.openSafety"), openSafetyRecordCount.toString()],
         ]}
       />
+      <TouristCountryReport users={tourists} rows={filteredTouristManagementRows} locale={locale} country={touristCountry} onCountryChange={setTouristCountry} />
       <section className="tourist-management-layout">
         <div className="list-panel tourist-management-list">
           {visibleTouristManagementRows.map((row) => (
@@ -460,6 +469,7 @@ export function AdminWorkspace({
             <h2>{selectedManagedTourist.tourist.name}</h2>
             <p>{selectedManagedTourist.latestActivityAt ? adminText("tourists.latestActivity", { date: formatDateTime(selectedManagedTourist.latestActivityAt, locale) }) : adminText("tourists.noActivity")}</p>
             <dl>
+              <div><dt>{reviewText(locale, "touristId")}</dt><dd>{selectedManagedTourist.tourist.id}</dd></div>
               <div>
                 <dt>{adminText("tourists.email")}</dt>
                 <dd>{selectedManagedTourist.tourist.email}</dd>

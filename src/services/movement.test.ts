@@ -6,7 +6,7 @@ import {
   addLocalTestRouteToActiveTrip,
   appendMovementPoint,
   createSampleTripForUser,
-  deleteTrip,
+  archiveTrip,
   deleteTouristMovementData,
   getActiveTrip,
   getGrantedConsent,
@@ -218,15 +218,23 @@ describe("movement service", () => {
     expect(result.data?.points.filter((point) => point.tripId === "trip-demo-1")).toHaveLength(4);
   });
 
-  it("deletes one owned trip with its route analysis and linked visit log only", () => {
-    const result = deleteTrip(initialData, "tourist-cultural-demo", "trip-cultural-demo");
+  it("hides one owned trip while retaining route, analysis and linked visits for monitoring", () => {
+    const result = archiveTrip(initialData, "tourist-cultural-demo", "trip-cultural-demo");
 
     expect(result.error).toBeUndefined();
-    expect(result.data?.trips.some((trip) => trip.id === "trip-cultural-demo")).toBe(false);
-    expect(result.data?.points.some((point) => point.tripId === "trip-cultural-demo")).toBe(false);
-    expect(result.data?.analyses.some((analysis) => analysis.tripId === "trip-cultural-demo")).toBe(false);
-    expect(result.data?.checkIns.some((checkIn) => checkIn.tripId === "trip-cultural-demo")).toBe(false);
+    expect(result.data?.trips.find((trip) => trip.id === "trip-cultural-demo")?.hiddenFromHistoryAt).toBeTruthy();
+    expect(result.data?.points).toBe(initialData.points);
+    expect(result.data?.analyses).toBe(initialData.analyses);
+    expect(result.data?.checkIns).toBe(initialData.checkIns);
+    expect(result.data?.recommendations).toBe(initialData.recommendations);
     expect(result.data?.trips.some((trip) => trip.userId === "tourist-demo")).toBe(true);
+  });
+  it("refuses cross-owner archiving and stops an archived active session", () => {
+    expect(archiveTrip(initialData, "wrong-owner", "trip-demo-1").error).toBeTruthy();
+    const data = { ...initialData, trips: initialData.trips.map((trip) => trip.id === "trip-demo-1" ? { ...trip, status: "active" as const } : trip) };
+    const archived = archiveTrip(data, "tourist-demo", "trip-demo-1").data!;
+    expect(getActiveTrip(archived, "tourist-demo")).toBeNull();
+    expect(archived.trips.find((trip) => trip.id === "trip-demo-1")?.endedAt).toBeTruthy();
   });
 
   it("detects destinations already visited from tourist movement records", () => {

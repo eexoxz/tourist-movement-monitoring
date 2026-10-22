@@ -6,6 +6,9 @@ import { discoveryText } from "../services/discoveryCopy";
 import { activityText } from "../services/activityCopy";
 import { usesSampleActivity } from "../services/activitySummary";
 import type { DestinationCategory, User } from "../types";
+import { nationalityOptions } from "../data/nationalities";
+import { hasTouristIdentity, normalizeIdentity } from "../services/touristIdentity";
+import { reviewText } from "../services/reviewUpdateCopy";
 
 type TouristProfileFormProps = {
   user: User;
@@ -32,6 +35,9 @@ export function TouristProfileForm({
 }: TouristProfileFormProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [name, setName] = useState(getDisplayName(user));
+  const [nationality, setNationality] = useState(user.nationality ?? "");
+  const [passportNumber, setPassportNumber] = useState(user.passportNumber ?? "");
+  const [identityError, setIdentityError] = useState(false);
   const [preferences, setPreferences] = useState<DestinationCategory[]>(user.travelPreferences ?? []);
   const [tripPace, setTripPace] = useState<User["tripPace"]>(user.tripPace ?? "balanced");
   const [travelGroup, setTravelGroup] = useState<User["travelGroup"]>(user.travelGroup ?? "solo");
@@ -53,9 +59,13 @@ export function TouristProfileForm({
 
   const saveProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!hasTouristIdentity({ nationality, passportNumber })) { setIdentityError(true); return; }
+    setIdentityError(false);
     onSave({
       ...user,
       name: name.trim() || user.name,
+      nationality: nationality.trim(),
+      passportNumber: normalizeIdentity(passportNumber),
       expectedProfile: inferExpectedProfileFromPreferences(preferences),
       travelPreferences: preferences,
       tripPace,
@@ -83,6 +93,16 @@ export function TouristProfileForm({
         </header>
 
         <div className="profile-form-grid">
+          {!hasTouristIdentity(user) && <p className="status-message" role="status">{reviewText(locale, "identityRequired")}</p>}
+          <div className="field-pair">
+            <label>{reviewText(locale, "country")}<select required value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name">
+              <option value="">{t("auth.nationality")}</option>
+              {nationality && !(nationalityOptions as readonly string[]).includes(nationality) && <option value={nationality}>{nationality}</option>}
+              {nationalityOptions.map((country) => <option key={country} value={country}>{country}</option>)}
+            </select></label>
+            <label>{reviewText(locale, "identity")}<input required minLength={5} maxLength={28} value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" aria-invalid={identityError || undefined} /></label>
+          </div>
+          {identityError && <p role="alert">{reviewText(locale, "identityInvalid")}</p>}
           <label>
             {t("tourist.profile.preferredName")}
             <input value={name} onChange={(event) => setName(event.target.value)} placeholder={t("tourist.profile.preferredNamePlaceholder")} />

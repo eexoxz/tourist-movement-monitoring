@@ -1,6 +1,8 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { CheckCircle2, Circle, Eye, EyeOff, KeyRound, MapPinned, RotateCcw, ShieldCheck } from "lucide-react";
 import { nationalityOptions } from "../data/nationalities";
+import { hasTouristIdentity, normalizeIdentity } from "../services/touristIdentity";
+import { reviewText } from "../services/reviewUpdateCopy";
 import { type AuthMode } from "../services/access";
 import { isValidEmail } from "../services/accounts";
 import { hasConfiguredAuth } from "../services/auth";
@@ -173,10 +175,10 @@ export function AuthScreen({
       return;
     }
 
-    if (mode === "register" && !/^[A-Za-z0-9 ]{5,20}$/.test(passportNumber.trim())) {
-      setError("Enter a valid passport number using letters or numbers.");
+    if (mode === "register" && !hasTouristIdentity({ nationality, passportNumber })) {
+      setError(reviewText(locale, "identityInvalid"));
       setMessage(null);
-      notify({ tone: "error", title: "Passport number missing", message: "Use 5 to 20 letters or numbers from the passport." });
+      notify({ tone: "error", title: reviewText(locale, "identity"), message: reviewText(locale, "identityInvalid") });
       return;
     }
 
@@ -198,7 +200,7 @@ export function AuthScreen({
             email: normalizedEmail,
             password,
             nationality,
-            passportNumber,
+            passportNumber: normalizeIdentity(passportNumber),
             termsAccepted,
           });
     setError(result.error ?? null);
@@ -407,9 +409,9 @@ export function AuthScreen({
                 </select>
               </label>
               <label>
-                {t("auth.passportNumber")}
-                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" placeholder="A12345678" required />
-                <small className="field-hint">{t("auth.passportHint")}</small>
+                {reviewText(locale, "identity")}
+                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" placeholder="A12345678" maxLength={28} required />
+                <small className="field-hint">{reviewText(locale, "identityInvalid")}</small>
               </label>
             </div>
           )}

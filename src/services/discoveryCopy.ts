@@ -114,6 +114,20 @@ const copy: Record<Locale, Record<DiscoveryCopyKey, string>> = {
   },
 };
 
+const stateWords: Record<Locale, string[]> = {
+    en: ["Choose a state", "Select a state", "From the selected state's reference point", "Centre on selected state", "No places in this state yet. Try another state.", "Allow location or choose a state to see suggestions."],
+    ms: ["Pilih negeri", "Pilih negeri", "Dari titik rujukan negeri pilihan", "Pusatkan pada negeri pilihan", "Belum ada tempat di negeri ini. Cuba negeri lain.", "Benarkan lokasi atau pilih negeri untuk melihat cadangan."],
+    zh: ["选择州", "选择州", "距所选州参考点", "回到所选州", "此州暂无地点。请尝试其他州。", "允许定位或选择州以查看推荐。"],
+    ja: ["州を選ぶ", "州を選択", "選択した州の基準地点から", "選択した州に戻る", "この州にはまだスポットがありません。別の州をお試しください。", "位置情報を許可するか、州を選んでおすすめをご覧ください。"],
+    ko: ["주 선택", "주 선택", "선택한 주의 기준점에서", "선택한 주로 돌아가기", "이 주에는 아직 장소가 없습니다. 다른 주를 선택하세요.", "위치를 허용하거나 주를 선택하여 추천을 확인하세요."],
+    pt: ["Escolher um estado", "Selecionar um estado", "Do ponto de referência do estado escolhido", "Centrar no estado escolhido", "Ainda não há lugares neste estado. Tente outro estado.", "Permita a localização ou escolha um estado para ver sugestões."],
+    ta: ["மாநிலத்தைத் தேர்ந்தெடுக்கவும்", "மாநிலத்தைத் தேர்ந்தெடுக்கவும்", "தேர்ந்தெடுத்த மாநிலத்தின் குறிப்புப் புள்ளியிலிருந்து", "தேர்ந்தெடுத்த மாநிலத்திற்குத் திரும்பவும்", "இந்த மாநிலத்தில் இன்னும் இடங்கள் இல்லை. வேறு மாநிலத்தை முயற்சிக்கவும்.", "பரிந்துரைகளைப் பார்க்க இருப்பிடத்தை அனுமதிக்கவும் அல்லது மாநிலத்தைத் தேர்ந்தெடுக்கவும்."],
+    es: ["Elegir un estado", "Seleccionar un estado", "Desde el punto de referencia del estado elegido", "Centrar en el estado elegido", "Todavía no hay lugares en este estado. Prueba otro estado.", "Permite la ubicación o elige un estado para ver sugerencias."],
+    fr: ["Choisir un État", "Sélectionner un État", "Depuis le point de référence de l'État choisi", "Recentrer sur l'État choisi", "Aucun lieu dans cet État. Essayez un autre État.", "Autorisez la localisation ou choisissez un État pour voir les suggestions."],
+};
+const stateKeys = ["area", "choose", "fromArea", "centreArea", "noLocal", "locationNeeded"];
 export function discoveryText(locale: Locale, key: DiscoveryCopyKey) {
+  const stateKey = stateKeys.indexOf(key);
+  if (stateKey >= 0) return stateWords[locale][stateKey];
   return copy[locale][key];
 }

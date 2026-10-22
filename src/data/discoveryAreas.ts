@@ -42,6 +42,18 @@ export const discoveryAreas: DiscoveryArea[] = [
 
 export const discoveryStates = [...new Set(discoveryAreas.map((area) => area.state))];
 
+// Accept old district preferences while new selections store only a state.
+export function getDiscoveryState(id?: string): MalaysianState | undefined {
+  const state = id?.startsWith("state:") ? id.slice(6) : discoveryAreas.find((area) => area.id === id)?.state;
+  return discoveryStates.find((candidate) => candidate === state);
+}
+
+export function getStateBrowseArea(id?: string) {
+  const state = getDiscoveryState(id);
+  const centre = discoveryAreas.find((area) => area.state === state);
+  return centre ? { ...centre, id: `state:${state}`, name: state! } : undefined;
+}
+
 export function getDiscoveryAreasForState(state: MalaysianState | "") {
   return discoveryAreas.filter((area) => area.state === state);
 }

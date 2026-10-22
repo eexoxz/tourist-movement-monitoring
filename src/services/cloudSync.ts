@@ -45,7 +45,16 @@ export function flushCloudChanges(actor: User, special: (change: CloudChange) =>
               transaction.delete(reference);
               if (snapshots[index].exists() && legacy?.exists()) transaction.delete(legacyReferences[index]!);
             }
-            else if (exists) transaction.update(reference, { ...change.data, ...Object.fromEntries(change.remove.map((field) => [field, deleteField()])) });
+            else if (exists) {
+              const update = { ...change.data, ...Object.fromEntries(change.remove.map((field) => [field, deleteField()])) };
+              const stored = snapshots[index].exists() ? snapshots[index].data() : legacy?.data();
+              if (change.collection === "trip_sessions" && stored?.hiddenFromHistoryAt) {
+                update.hiddenFromHistoryAt = stored.hiddenFromHistoryAt;
+                update.status = "completed";
+                if (stored.endedAt) update.endedAt = stored.endedAt;
+              }
+              transaction.update(reference, update);
+            }
             // A deletion on another device wins over a late edit; never recreate the deleted record.
           });
         });

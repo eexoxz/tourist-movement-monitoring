@@ -877,3 +877,24 @@ textarea {
   min-height: 40px;
   padding: 0;
 }
+.tourist-country-report {
+  padding-block: 20px;
+  border-block: 1px solid var(--border, #d6e3e3);
+  margin-block: 18px;
+  min-width: 0;
+}
+.tourist-country-report h3 { margin: 0; font-size: 18px; }
+.tourist-country-report .action-row { flex-wrap: wrap; }
+.country-count-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 0 24px; margin-block: 12px; }
+.country-count-list button { display: flex; justify-content: space-between; gap: 12px; align-items: center; text-align: left; border: 0; border-bottom: 1px solid #e1e8eb; background: transparent; color: inherit; border-radius: 0; padding: 12px 4px; min-width: 0; }
+.country-count-list button[aria-pressed="true"] { color: #087c77; box-shadow: inset 3px 0 #087c77; padding-left: 12px; }
+.country-count-list span { overflow-wrap: anywhere; }
+.country-count-list strong { font-variant-numeric: tabular-nums; }
+.report-identity-option { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.report-identity-option input { width: 18px; height: 18px; flex: 0 0 auto; }
+.report-export-note, .trip-retention-note { font-size: 13px; line-height: 1.6; color: #526776; max-width: 78ch; }
+@media (max-width: 600px) {
+  .tourist-country-report .admin-tab-heading { display: grid; gap: 12px; }
+  .tourist-country-report .action-row { display: grid; width: 100%; }
+  .tourist-country-report .secondary-action { white-space: normal; text-align: left; justify-content: flex-start; }
+}

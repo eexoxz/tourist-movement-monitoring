@@ -1,4 +1,5 @@
-import { discoveryAreas } from "../data/discoveryAreas";
+import { discoveryAreas, getDiscoveryState, getStateBrowseArea } from "../data/discoveryAreas";
+import { getDestinationState } from "./destinationState";
 import type { Destination, FestivalEvent, MovementPoint, User } from "../types";
 import { distanceKm } from "./geo";
 import { getFestivalTimeframe } from "./festivals";
@@ -18,7 +19,7 @@ export function getDiscoveryReference(user: User, gpsPoint?: MovementPoint): Mov
     const age = Date.now() - new Date(gpsPoint.recordedAt).getTime();
     return Number.isFinite(age) && age >= -60000 && age <= 5 * 60 * 1000 ? gpsPoint : undefined;
   }
-  const area = discoveryAreas.find((candidate) => candidate.id === user.discoveryAreaId);
+  const area = getStateBrowseArea(user.discoveryAreaId);
   return area ? {
     id: `browse-${area.id}`,
     tripId: "",
@@ -32,6 +33,10 @@ export function getDiscoveryReference(user: User, gpsPoint?: MovementPoint): Mov
 
 export function getDiscoveryDestinations(destinations: Destination[], user: User, reference?: MovementPoint) {
   const hidden = new Set(user.hiddenDestinationIds ?? []);
+  if (user.discoveryLocationMode === "area") {
+    const state = getDiscoveryState(user.discoveryAreaId);
+    return state ? destinations.filter((destination) => !hidden.has(destination.id) && getDestinationState(destination) === state) : [];
+  }
   return destinations.filter((destination) => !hidden.has(destination.id) && (!reference || distanceKm(reference, destination) <= discoveryRadiusKm));
 }
 

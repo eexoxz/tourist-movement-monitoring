@@ -33,14 +33,24 @@ describe("privacy-aware local discovery", () => {
     expect(getLatestDiscoveryPoint(gpsPoint, { ...routePoint, recordedAt: new Date(Date.now() + 10 * 60000).toISOString() })).toBe(gpsPoint);
   });
 
-  it("uses the chosen district without creating or altering movement records", () => {
+  it("uses a state reference without creating or altering movement records", () => {
     const before = initialData.points.length;
     const gpsPoint = initialData.points[0];
     const point = getDiscoveryReference({ ...user, discoveryLocationMode: "area", discoveryAreaId: "air-itam" }, gpsPoint);
-    expect(point?.latitude).toBe(5.4);
+    expect(point?.latitude).toBe(5.42);
     expect(point?.tripId).toBe("");
     expect(getDiscoveryDestinations(initialData.destinations, user, point).every((place) => place.city === "Penang")).toBe(true);
     expect(initialData.points).toHaveLength(before);
+  });
+  it("includes far-apart locations within a chosen state without leaking adjacent states", () => {
+    const kedah = { ...user, discoveryLocationMode: "area" as const, discoveryAreaId: "state:Kedah" };
+    const locations = [
+      { ...initialData.destinations[0], id: "mainland", city: "Alor Setar", state: "Kedah" as const, latitude: 6.12, longitude: 100.37 },
+      { ...initialData.destinations[0], id: "island", city: "Langkawi", state: "Kedah" as const, latitude: 6.3, longitude: 99.8 },
+      { ...initialData.destinations[0], id: "other", city: "Penang", latitude: 5.4, longitude: 100.3 },
+    ];
+    expect(getDiscoveryDestinations(locations, kedah, getDiscoveryReference(kedah)).map((place) => place.id)).toEqual(["mainland", "island"]);
+    expect(getDiscoveryDestinations(locations, { ...kedah, discoveryAreaId: "missing" })).toEqual([]);
   });
 
   it("does not silently use old GPS for an invalid or unselected area", () => {

@@ -28,7 +28,7 @@ export function getUserTrips(data: AppData, userId: string) {
 }
 
 export function getActiveTrip(data: AppData, userId: string) {
-  return getUserTrips(data, userId).find((trip) => trip.status === "active") ?? null;
+  return getUserTrips(data, userId).find((trip) => trip.status === "active" && !trip.hiddenFromHistoryAt) ?? null;
 }
 
 export function getGrantedConsent(data: AppData, userId: string) {
@@ -399,7 +399,7 @@ export function updateTripLabel(data: AppData, userId: string, tripId: string, l
   };
 }
 
-export function deleteTrip(data: AppData, userId: string, tripId: string) {
+export function archiveTrip(data: AppData, userId: string, tripId: string) {
   const trip = data.trips.find((candidate) => candidate.id === tripId);
   if (!trip || trip.userId !== userId) {
     return { error: "This trip could not be found in your account." };
@@ -408,11 +408,10 @@ export function deleteTrip(data: AppData, userId: string, tripId: string) {
   return {
     data: {
       ...data,
-      trips: data.trips.filter((candidate) => candidate.id !== tripId),
-      points: data.points.filter((point) => point.tripId !== tripId),
-      analyses: data.analyses.filter((analysis) => analysis.tripId !== tripId),
-      recommendations: data.recommendations.filter((recommendation) => recommendation.userId !== userId),
-      checkIns: data.checkIns.filter((checkIn) => checkIn.tripId !== tripId),
+      trips: data.trips.map((candidate) => candidate.id === tripId ? {
+        ...candidate, hiddenFromHistoryAt: new Date().toISOString(), status: "completed" as const,
+        endedAt: candidate.endedAt ?? new Date().toISOString(),
+      } : candidate),
     },
   };
 }
@@ -428,12 +427,12 @@ export function revokeLocationConsent(data: AppData, userId: string) {
 }
 
 export function deleteTouristMovementData(data: AppData, userId: string) {
-  const tripIds = new Set(getUserTrips(data, userId).map((trip) => trip.id));
+  const tripIds = new Set(data.trips.filter((trip) => trip.userId === userId).map((trip) => trip.id));
 
   return {
     ...data,
     trips: data.trips.filter((trip) => trip.userId !== userId),
-    points: data.points.filter((point) => !tripIds.has(point.tripId)),
+    points: data.points.filter((point) => point.userId !== userId && !tripIds.has(point.tripId)),
     analyses: data.analyses.filter((analysis) => analysis.userId !== userId),
     recommendations: data.recommendations.filter((recommendation) => recommendation.userId !== userId),
   };

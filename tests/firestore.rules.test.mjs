@@ -133,6 +133,14 @@ beforeEach(async () => {
 after(async () => { await environment?.cleanup(); });
 
 describe("action-scoped cloud workflows", () => {
+  it("keeps archived modern and legacy trips readable by admins without deleting movement", async () => {
+    for (const name of ["trip_sessions", "trips"]) {
+      await assertSucceeds(updateDoc(doc(db("alice"), name, "alice-record"), { hiddenFromHistoryAt: "2026-10-22T01:00:00Z", status: "completed" }));
+      assert.equal((await getDoc(doc(db("admin"), name, "alice-record"))).data().hiddenFromHistoryAt, "2026-10-22T01:00:00Z");
+      await assertFails(updateDoc(doc(db("bob"), name, "alice-record"), { hiddenFromHistoryAt: "forged" }));
+    }
+    assert.equal((await getDoc(doc(db("admin"), "movement_records/alice-record"))).exists(), true);
+  });
   it("permits an owner to finish a legacy trip and start a separate modern trip", async () => {
     const store = db("alice");
     await assertSucceeds(runTransaction(store, async (transaction) => {

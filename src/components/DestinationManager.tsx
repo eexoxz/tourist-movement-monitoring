@@ -1,6 +1,8 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { MapPin, MapPinned, Pencil, RotateCcw, Save, Tag, Trash2, X } from "lucide-react";
-import type { AttractionCheckIn, Destination, DestinationCategory } from "../types";
+import type { AttractionCheckIn, Destination, DestinationCategory, MalaysianState } from "../types";
+import { discoveryStates } from "../data/discoveryAreas";
+import { getDestinationState } from "../services/destinationState";
 import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "../services/destinationManagement";
 import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
@@ -15,6 +17,7 @@ import { placeText } from "../services/placeSubmissionCopy";
 type DestinationFormState = {
   name: string;
   city: string;
+  state: MalaysianState | "";
   address: string;
   category: DestinationCategory;
   latitude: string;
@@ -32,6 +35,7 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
   return {
     name: destination?.name ?? "",
     city: destination?.city ?? "",
+    state: destination ? getDestinationState(destination) ?? "" : "",
     address: destination?.address ?? "",
     category: destination?.category ?? "cultural",
     latitude: destination ? String(destination.latitude) : "3.1478",
@@ -176,7 +180,7 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
     <>
       {onReview && <UnlistedPlaceReview checkIns={checkIns} destinations={destinations} locale={locale} onReview={onReview} onRefresh={onRefreshReports} refreshing={refreshingReports} onToggleSamples={onToggleSamples} placeQueueState={placeQueueState} onCreate={(group) => {
         setCandidate(group); setEditingId(null); setModalMode("add"); setMessage(null);
-        setForm({ ...createDestinationForm(), name: group.place.name, city: group.place.city, address: group.place.address, category: group.place.category, latitude: group.latitude === undefined ? "" : String(group.latitude), longitude: group.longitude === undefined ? "" : String(group.longitude) });
+        setForm({ ...createDestinationForm(), name: group.place.name, city: group.place.city, state: group.place.state ?? "", address: group.place.address, category: group.place.category, latitude: group.latitude === undefined ? "" : String(group.latitude), longitude: group.longitude === undefined ? "" : String(group.longitude) });
       }} />}
       <section className="destination-management-panel">
         <div className="section-heading">
@@ -272,6 +276,7 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
               {text("City")}
               <input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
             </label>
+            <label>{translate(locale, "tourist.events.state")}<select required value={form.state} onChange={(event) => setForm({ ...form, state: event.target.value as MalaysianState | "" })}><option value="">{translate(locale, "tourist.events.state")}</option>{discoveryStates.map((state) => <option key={state} value={state}>{state}</option>)}</select></label>
             <label>
               {translate(locale, "common.address")}
               <input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder="Concubine Lane, Lorong Panglima, 30000 Ipoh, Perak" />

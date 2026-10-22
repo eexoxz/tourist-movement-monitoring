@@ -1,4 +1,5 @@
-import { Pencil, Sparkles, Trash2 } from "lucide-react";
+import { Archive, Pencil, Sparkles } from "lucide-react";
+import { reviewText } from "../services/reviewUpdateCopy";
 import { useMemo } from "react";
 import { formatDateTime } from "../services/geo";
 import { uiText } from "../services/uiText";
@@ -91,6 +92,7 @@ export function TripDiary({
           <span>{t("tourist.trips.routeHistory")}</span>
           <h2>{t("tourist.trips.savedTrips")}</h2>
           <p>{travelText(locale, "historyNote")}</p>
+          <p className="trip-retention-note">{reviewText(locale, "retention")}</p>
         </div>
         <div className="trip-diary-stats" aria-label={uiText(locale, "Trip diary totals")}>
           <span>
@@ -136,8 +138,8 @@ export function TripDiary({
                     {t("tourist.trips.renameTrip")}
                   </button>
                   <button className="secondary-action compact danger" type="button" onClick={() => onDeleteTrip(selectedTrip, selectedTripTitle)}>
-                    <Trash2 size={16} />
-                    {t("tourist.trips.deleteTrip")}
+                    <Archive size={16} />
+                    {reviewText(locale, "remove")}
                   </button>
                 </div>
               </div>
@@ -238,8 +240,8 @@ export function TripDiary({
                     {t("tourist.trips.renameTrip")}
                   </button>
                   <button className="danger" type="button" onClick={() => onDeleteTrip(trip, fallbackTitle)}>
-                    <Trash2 size={15} />
-                    {t("tourist.trips.deleteTrip")}
+                    <Archive size={15} />
+                    {reviewText(locale, "remove")}
                   </button>
                 </div>
               </article>

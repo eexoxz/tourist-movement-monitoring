@@ -100,6 +100,8 @@ export type Destination = {
   latitude: number;
   longitude: number;
   city: string;
+  state?: MalaysianState;
+  sourceUrl?: string;
   address?: string;
   description: string;
   averageVisitMinutes: number;
@@ -168,6 +170,7 @@ export type TripSession = {
   status: TripStatus;
   startedAt: string;
   endedAt?: string;
+  hiddenFromHistoryAt?: string;
   consentId: string;
 };
 

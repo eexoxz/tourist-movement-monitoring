@@ -352,7 +352,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       if (!manualBrowseRef.current) {
         automaticViewRef.current = true;
         try {
-          if (activePoint && mode === "tourist") {
+          if (isBrowsingArea && visibleDestinations.length > 1) {
+            map.fitBounds(L.latLngBounds(visibleDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number])), { padding: [36, 36], maxZoom: 12, animate: false });
+          } else if (activePoint && mode === "tourist") {
             map.setView([activePoint.latitude, activePoint.longitude], hadFocus ? map.getZoom() : 15, { animate: false });
           } else if (displayMode === "route" && route.length > 0) {
             map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15, animate: false });

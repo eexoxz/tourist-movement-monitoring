@@ -79,8 +79,9 @@ describe("user interface quality guardrails", () => {
     expect(touristSource).toContain("getRelevantTourismAdvisories({ destinations: data.destinations");
     expect(touristSource).toMatch(/FestivalCalendarPanel[^>]+destinations=\{data.destinations\}/);
     expect(readSource("src/components/FestivalCalendarPanel.tsx")).toContain("localizeDestinations(destinations, locale)");
-    expect(readSource("src/components/PlaceDiscovery.tsx")).toContain("cityByDestinationId.get(row.destination.id) !== cityFilter");
-    expect(readSource("src/components/PlaceDiscovery.tsx")).toContain("{localizeCity(city, locale)}");
+    expect(touristSource).toContain("getDiscoveryDestinations(data.destinations, user, discoveryReference)");
+    expect(readSource("src/services/discovery.ts")).toContain("getDestinationState(destination) === state");
+    expect(readSource("src/components/PlaceDiscovery.tsx")).not.toContain("cityFilter");
   });
 
   it("keeps the rolling calendar current after midnight or returning to the app", () => {

@@ -16,6 +16,7 @@ import {
 import { FestivalEventDetails } from "./FestivalEventDetails";
 import { EmptyState } from "./SummaryCards";
 import { discoveryText } from "../services/discoveryCopy";
+import { getDestinationState } from "../services/destinationState";
 
 const compactCalendarPreviewLimit = 5;
 const fullCalendarPreviewLimit = 6;
@@ -55,21 +56,7 @@ function festivalOverlapsRange(event: FestivalEvent, startDate: string, endDate:
 }
 
 function inferStateFromDestination(destination?: Destination): MalaysianState | undefined {
-  if (!destination) {
-    return undefined;
-  }
-
-  const searchable = `${destination.city} ${destination.address ?? ""}`.toLowerCase();
-  const directMatch = allMalaysianStates.find((state) => searchable.includes(state.toLowerCase()));
-  if (directMatch) {
-    return directMatch;
-  }
-
-  if (searchable.includes("kuala lumpur") || searchable.includes("putrajaya") || searchable.includes("labuan")) {
-    return "Federal Territories";
-  }
-
-  return undefined;
+  return destination ? getDestinationState(destination) : undefined;
 }
 
 function nearestState(point: MovementPoint | undefined, destinations: Destination[]) {

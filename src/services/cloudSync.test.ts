@@ -62,6 +62,12 @@ beforeEach(() => {
 afterEach(() => { for (const job of pendingCloudJobs(alice)) acknowledgeCloudJob(job); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("scoped cloud workflow persistence", () => {
+  it("does not reopen or unhide an archived trip when another device sends a stale rename", async () => {
+    const before = base();
+    mock.documents.set("trip_sessions/trip", { ...trip, hiddenFromHistoryAt: "2026-10-22T01:00:00Z", endedAt: "2026-10-22T01:00:00Z", status: "completed" });
+    await saveData({ ...before, trips: [{ ...before.trips[0], label: "Late rename" }] }, alice, before);
+    expect(mock.documents.get("trip_sessions/trip")).toMatchObject({ hiddenFromHistoryAt: "2026-10-22T01:00:00Z", status: "completed", endedAt: "2026-10-22T01:00:00Z", label: "Late rename" });
+  });
   it("saves completion back to the legacy trip instead of silently losing the update", async () => {
     const before = base();
     mock.documents.delete("trip_sessions/trip");

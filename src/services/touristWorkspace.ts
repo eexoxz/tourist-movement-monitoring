@@ -92,15 +92,15 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
   const recentCheckIns: AttractionCheckIn[] = [];
 
   data.trips.forEach((trip) => {
-    if (trip.userId === userId) {
+    if (trip.userId === userId && !trip.hiddenFromHistoryAt) {
       userTrips.push(trip);
       pointsByTrip.set(trip.id, []);
     }
   });
 
   const userTripIds = new Set(userTrips.map((trip) => trip.id));
-
-  const qualityPoints = filterQualityMovementPoints(data.points.filter((point) => userTripIds.has(point.tripId)));
+  const ownedTripIds = new Set(data.trips.filter((trip) => trip.userId === userId).map((trip) => trip.id));
+  const qualityPoints = filterQualityMovementPoints(data.points.filter((point) => ownedTripIds.has(point.tripId)));
   getRecordedStopIds(qualityPoints, destinationIndex).forEach((id) => visitedDestinationIds.add(id));
   data.checkIns.filter((checkIn) => checkIn.destinationId && checkIn.userId === userId).forEach((checkIn) => visitedDestinationIds.add(checkIn.destinationId));
   qualityPoints.forEach((point) => {
