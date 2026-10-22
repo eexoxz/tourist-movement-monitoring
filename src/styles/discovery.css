@@ -291,10 +291,7 @@
   padding: 24px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background:
-    linear-gradient(125deg, rgba(15, 118, 110, 0.12), transparent 36%),
-    linear-gradient(315deg, rgba(232, 93, 117, 0.12), transparent 28%),
-    var(--canvas);
+  background: var(--canvas);
 }
 
 .public-check-in-card {
@@ -302,10 +299,9 @@
   display: grid;
   gap: 16px;
   padding: 18px;
-  border: 1px solid rgba(20, 184, 166, 0.28);
-  border-radius: 8px;
-  background: rgba(255, 253, 248, 0.96);
-  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
 }
 
 .public-check-in-header {
@@ -319,8 +315,8 @@
 .public-check-in-copy > span {
   color: var(--teal-dark);
   font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 600;
+  text-transform: none;
 }
 
 .public-check-in-header h1,
@@ -332,7 +328,7 @@
 }
 
 .public-check-in-header h1 {
-  font-size: clamp(1.4rem, 5vw, 2.4rem);
+  font-size: 1.6rem;
 }
 
 .public-check-in-copy {
@@ -382,15 +378,15 @@
 .public-check-in-details dt {
   color: #64748b;
   font-size: 0.76rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 500;
+  text-transform: none;
 }
 
 .public-check-in-details dd {
   margin: 0;
   color: #07142e;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 550;
   overflow-wrap: anywhere;
 }
 

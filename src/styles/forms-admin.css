@@ -186,10 +186,10 @@ textarea {
 
 .admin-overview-section {
   overflow: hidden;
-  border: 1px solid #d7e8e1;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .admin-overview-section > summary {
@@ -232,8 +232,8 @@ textarea {
   min-width: 0;
   color: var(--teal-dark);
   font-size: 0.82rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 600;
+  text-transform: none;
 }
 
 .admin-overview-section > summary strong {
@@ -272,17 +272,18 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
 }
 
 .admin-tab-heading h2,
 .admin-tab-heading p {
   margin: 0;
 }
+
+.admin-tab-heading h2 { font-size: 1.15rem; }
+.admin-tab-heading p { font-size: 0.86rem; max-width: 75ch; }
 
 .admin-tab-heading p {
   margin-top: 5px;
@@ -308,14 +309,14 @@ textarea {
   display: grid;
   gap: 14px;
   padding: 16px;
-  border: 1px solid #e4ded1;
-  border-radius: 8px;
-  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
 }
 
 .safety-admin-card.urgent {
-  border-color: #fecaca;
-  background: #fff7f7;
+  border-left: 3px solid #b3344f;
+  background: var(--surface);
 }
 
 .safety-admin-heading {
@@ -343,7 +344,7 @@ textarea {
   border-radius: 8px;
   color: #102033;
   background: #ffffff;
-  font-weight: 900;
+  font-weight: 500;
 }
 
 .safety-admin-meta {
@@ -355,22 +356,22 @@ textarea {
 
 .safety-admin-meta div {
   min-width: 0;
-  padding: 10px;
-  border-radius: 8px;
-  background: #f8fafc;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
 }
 
 .safety-admin-meta dt {
   color: #64748b;
   font-size: 0.7rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 500;
+  text-transform: none;
 }
 
 .safety-admin-meta dd {
   margin: 4px 0 0;
   color: #102033;
-  font-weight: 900;
+  font-weight: 550;
+  font-size: 0.86rem;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
@@ -388,8 +389,8 @@ textarea {
   gap: 7px;
   color: #51606f;
   font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 500;
+  text-transform: none;
 }
 
 .safety-admin-response textarea {
@@ -573,17 +574,6 @@ textarea {
   padding: 18px;
 }
 
-.selectable {
-  width: 100%;
-  color: inherit;
-  text-align: left;
-}
-
-.selectable.active {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
-}
-
 .detail-panel p {
   margin: 0;
   color: #596575;
@@ -655,13 +645,16 @@ textarea {
 }
 
 .admin-filter-toolbar {
-  justify-content: flex-start;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr)) repeat(2, minmax(130px, 0.8fr)) auto auto;
+  align-items: end;
+  gap: 12px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--line);
 }
+.admin-filter-toolbar label { display: grid; gap: 6px; min-width: 0; font-size: 0.78rem; font-weight: 500; }
+.admin-filter-toolbar label input, .admin-filter-toolbar label select { width: 100%; min-width: 0; max-width: none; font-size: 0.82rem; }
+@media (max-width: 1200px) { .admin-filter-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 .toolbar-input {
   min-height: 44px;
@@ -698,31 +691,17 @@ textarea {
 }
 
 .matrix-table {
-  display: grid;
-  grid-template-columns: 120px repeat(4, minmax(90px, 1fr));
-  overflow-x: auto;
-  border: 1px solid #dde4e0;
-  border-radius: 8px;
+  min-width: 520px;
+  font-variant-numeric: tabular-nums;
 }
 
-.matrix-table > * {
-  min-width: 90px;
-  padding: 10px;
-  border-right: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
-  color: #172033;
-  background: #ffffff;
+.matrix-table th, .matrix-table td {
+  padding: 12px;
   text-align: center;
 }
 
-.matrix-table > strong {
-  background: #f3efe4;
-  font-size: 0.82rem;
-}
-
-.matrix-table > span {
-  font-weight: 800;
-}
+.matrix-table tbody th { font-weight: 500; color: var(--muted); background: #f2f5f7; }
+.matrix-table td.matrix-correct { background: #edf6fa; color: #2e5b78; font-weight: 650; }
 
 .card-actions,
 .form-heading,

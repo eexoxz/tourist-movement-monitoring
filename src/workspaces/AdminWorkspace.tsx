@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { ArrowRight, ChartNoAxesCombined, ChevronDown, Download, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Trash2, UserRound, Users } from "lucide-react";
 import { interfaceText } from "../services/interfaceCopy";
@@ -19,6 +19,11 @@ import { sosText } from "../services/sosCopy";
 import { SosRequestActions } from "../components/SosRequestActions";
 import { getTouristManagementRows } from "../services/touristManagement";
 import { TouristDirectory } from "../components/TouristDirectory";
+import { RecordPagination } from "../components/RecordPagination";
+import { PlaceGuideDialog } from "../components/PlaceGuideDialog";
+import { directoryPage } from "../services/touristDirectory";
+import { directoryText } from "../services/touristDirectoryCopy";
+import { discoveryText } from "../services/discoveryCopy";
 import { ActivitySummaryPublisher } from "../components/ActivitySummaryPublisher";
 import { activityText } from "../services/activityCopy";
 import { buildDestinationActivitySummaries } from "../services/activitySummary";
@@ -38,7 +43,7 @@ import { MovementMap } from "../components/MovementMap";
 import { MovementPulseHero } from "../components/MovementPulseHero";
 import { Page } from "../components/Page";
 import { RecommendationList } from "../components/RecommendationList";
-import { type PlanAudience, type PlanTier, type AdminDashboardTab, type CommitDataOptions, DEMO_DATASET_LOCAL_ONLY_STATUS, adminMovementPreviewLimit, adminSafetyPreviewLimit, adminAiPreviewLimit, analysisKey, getIncidentTypeLabel } from "../services/workspaceSupport";
+import { type PlanAudience, type PlanTier, type AdminDashboardTab, type CommitDataOptions, DEMO_DATASET_LOCAL_ONLY_STATUS, adminSafetyPreviewLimit, analysisKey, getIncidentTypeLabel } from "../services/workspaceSupport";
 
 const emptyMovementViews: MovementDashboardViews = { records: [], tripRecords: [] };
 
@@ -84,9 +89,13 @@ export function AdminWorkspace({
   const [planDiversifyCategories, setPlanDiversifyCategories] = useState(true);
   const [selectedAnalysisKey, setSelectedAnalysisKey] = useState<string | null>(null);
   const [safetyAdminNotes, setSafetyAdminNotes] = useState<Record<string, string>>({});
-  const [showAllMovementRecords, setShowAllMovementRecords] = useState(false);
+  const [movementPage, setMovementPage] = useState(1);
+  const [movementPageSize, setMovementPageSize] = useState(25);
   const [showAllSafetyCases, setShowAllSafetyCases] = useState(false);
-  const [showAllAiResults, setShowAllAiResults] = useState(false);
+  const [analysisPage, setAnalysisPage] = useState(1);
+  const [analysisPageSize, setAnalysisPageSize] = useState(25);
+  const movementScroller = useRef<HTMLDivElement>(null);
+  const analysisScroller = useRef<HTMLDivElement>(null);
   const [demoDatasetAction, setDemoDatasetAction] = useState<"loading" | "removing" | null>(null);
   const [refreshingReports, setRefreshingReports] = useState(false);
 
@@ -151,7 +160,7 @@ export function AdminWorkspace({
 
     return grouped;
   }, [data.recommendations]);
-  const selectedAnalysis = analysisRows.find((analysis) => analysisKey(analysis) === selectedAnalysisKey) ?? analysisRows[0] ?? null;
+  const selectedAnalysis = analysisRows.find((analysis) => analysisKey(analysis) === selectedAnalysisKey) ?? null;
   const selectedAnalysisUser = selectedAnalysis ? userById.get(selectedAnalysis.userId) ?? null : null;
   const selectedAnalysisTrip = selectedAnalysis ? tripById.get(selectedAnalysis.tripId) ?? null : null;
   const selectedAnalysisRecommendations = selectedAnalysis ? (recommendationsByUser.get(selectedAnalysis.userId) ?? []).slice(0, 3) : [];
@@ -197,12 +206,10 @@ export function AdminWorkspace({
   const openIncidentCount = data.incidentReports.filter((report) => report.status !== "resolved").length;
   const openSafetyRecordCount = getOpenSafetyCount(data);
   const resolvedSafetyRecordCount = safetyRecords.filter((record) => record.status === "resolved").length;
-  const visibleMovementTripRecords = showAllMovementRecords ? movementTripRecords : movementTripRecords.slice(0, adminMovementPreviewLimit);
-  const hiddenMovementRecordCount = movementTripRecords.length - visibleMovementTripRecords.length;
+  const movementPageResult = directoryPage(movementTripRecords, movementPage, movementPageSize);
   const visibleSafetyRecords = showAllSafetyCases ? safetyRecords : safetyRecords.slice(0, adminSafetyPreviewLimit);
   const hiddenSafetyRecordCount = safetyRecords.length - visibleSafetyRecords.length;
-  const visibleAnalysisRows = showAllAiResults ? analysisRows : analysisRows.slice(0, adminAiPreviewLimit);
-  const hiddenAnalysisCount = analysisRows.length - visibleAnalysisRows.length;
+  const analysisPageResult = directoryPage(analysisRows, analysisPage, analysisPageSize);
   const selectedKValue = aiEvaluation.validClusteredRecordCount > 0 ? Math.min(3, aiEvaluation.validClusteredRecordCount) : 0;
   const clusterSummaries = useMemo(() => {
     const clusters = new Map<number, { cluster: number; label: string; profileCounts: Record<string, number>; silhouetteTotal: number; size: number }>();
@@ -241,13 +248,17 @@ export function AdminWorkspace({
   }, [selectedTripId, tripOptions]);
 
   useEffect(() => {
-    setShowAllMovementRecords(false);
+    setMovementPage(1);
   }, [fromDate, selectedTouristId, selectedTripId, toDate]);
 
 
   useEffect(() => {
-    setShowAllAiResults(false);
-  }, [adminTab]);
+    if (recordsActive && movementPage !== movementPageResult.page) setMovementPage(movementPageResult.page);
+  }, [recordsActive, movementPage, movementPageResult.page]);
+
+  useEffect(() => {
+    if (analysisPage !== analysisPageResult.page) setAnalysisPage(analysisPageResult.page);
+  }, [analysisPage, analysisPageResult.page]);
 
   useEffect(() => {
     if (recordsActive && selectedRecordTripId && !movementTripRecords.some((record) => record.trip.id === selectedRecordTripId)) {
@@ -388,7 +399,9 @@ export function AdminWorkspace({
   const movementRecordsPanel = (
     <div className="admin-tab-panel">
       <div className="filter-toolbar admin-filter-toolbar">
+        <label><span>{t("admin.tabs.tourists")}</span>
         <select
+          aria-label={adminText("records.allTourists")}
           className="toolbar-select"
           value={selectedTouristId}
           onChange={(event) => {
@@ -402,17 +415,17 @@ export function AdminWorkspace({
               {tourist.name}
             </option>
           ))}
-        </select>
-        <select className="toolbar-select" value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
+        </select></label>
+        <label><span>{adminText("records.allTrips")}</span><select className="toolbar-select" aria-label={adminText("records.allTrips")} value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
           <option value="all">{adminText("records.allTrips")}</option>
           {tripOptions.map((trip) => (
             <option key={trip.id} value={trip.id}>
               {formatDateTime(trip.startedAt, locale)} - {t(trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}
             </option>
           ))}
-        </select>
-        <input className="toolbar-input" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} aria-label={t("tourist.events.fromDate")} />
-        <input className="toolbar-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} aria-label={t("tourist.events.toDate")} />
+        </select></label>
+        <label><span>{t("tourist.events.fromDate")}</span><input className="toolbar-input" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} /></label>
+        <label><span>{t("tourist.events.toDate")}</span><input className="toolbar-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} /></label>
         <button className="secondary-action" onClick={resetRecordFilters} disabled={!hasRecordFilters}>
           <RotateCcw size={18} />
           {adminText("common.reset")}
@@ -430,47 +443,26 @@ export function AdminWorkspace({
           [adminText("records.dateRange"), fromDate || toDate ? adminText("records.custom") : adminText("records.all")],
         ]}
       />
-      <div className="two-column">
-        <MovementMap
-          points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints}
-          destinations={data.destinations}
-          displayMode={selectedRecord?.points.length ? "route" : "signals"}
-          locale={locale}
-        />
-        <section className="admin-records-layout">
-          <div className="list-panel">
-            {visibleMovementTripRecords.map((record) => {
-              const profile = record.analysis ? `${profileLabel(locale, record.analysis.profile)} ${t("common.tourist")}` : adminText("common.pending");
-              const destinationText = record.destinationNames.length > 0 ? record.destinationNames.join(", ") : adminText("records.noRecognised");
-
-              return (
-                <button
-                  className={selectedRecord?.trip.id === record.trip.id ? "record-card movement-trip-card selectable active" : "record-card movement-trip-card selectable"}
-                  key={record.trip.id}
-                  onClick={() => setSelectedRecordTripId(record.trip.id)}
-                  type="button"
-                >
-                  <div>
-                    <strong>{record.tourist?.name ?? adminText("common.unknownTourist")}</strong>
-                    <span>{t(record.trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}</span>
-                  </div>
-                  <small className="mono-text">{record.trip.id}</small>
-                  <p>{destinationText}</p>
-                  <div className="record-metrics">
-                    <span>{formatDateTime(record.trip.startedAt, locale)}</span>
-                    <span>{record.summary.durationMinutes} {t("common.minutes")}</span>
-                    <span>{record.summary.pointCount} {adminText("common.points")}</span>
-                    <span>{record.summary.visitedDestinationCount}{" "}{uiText(locale, "stops")}</span>
-                    <span>{record.analysis ? `${adminText("ai.cluster")} ${record.analysis.cluster + 1}` : adminText("records.clusterPending")}</span>
-                    <span>{profile}</span>
-                  </div>
-                </button>
-              );
-            })}
-            <ListLimitFooter hiddenCount={hiddenMovementRecordCount} isExpanded={showAllMovementRecords} itemLabel="movement record" pluralLabel="movement records" onToggle={() => setShowAllMovementRecords((value) => !value)} locale={locale} />
-            {movementTripRecords.length === 0 && <EmptyState text={adminText("records.empty")} />}
+      <div className="admin-records-layout">
+        <section className="admin-record-list">
+          <div className="directory-heading"><h2>{t("admin.tabs.records")}</h2><span>{directoryText(locale, "range", { from: movementPageResult.from, to: movementPageResult.to, total: movementPageResult.total })}</span></div>
+          <div className="directory-table-scroll" ref={movementScroller} tabIndex={0} aria-label={t("admin.tabs.records")}>
+            <table className="directory-table record-table movement-record-table">
+              <caption className="sr-only">{t("admin.tabs.records")}</caption>
+              <thead><tr><th scope="col">{t("auth.name")}</th><th scope="col" className="record-wide-column">{adminText("records.destinationsVisited")}</th><th scope="col" className="directory-numeric">{adminText("records.duration")}</th><th scope="col" className="directory-numeric">{adminText("common.points")}</th></tr></thead>
+              <tbody>{movementPageResult.rows.map((record) => <tr key={record.trip.id} className={selectedRecord?.trip.id === record.trip.id ? "record-selected" : undefined}>
+                <th scope="row"><button className="directory-person" type="button" aria-pressed={selectedRecord?.trip.id === record.trip.id} onClick={() => setSelectedRecordTripId(record.trip.id)}><strong>{record.tourist?.name ?? adminText("common.unknownTourist")}</strong><time dateTime={record.trip.startedAt}>{formatDateTime(record.trip.startedAt, locale)}</time><small>{t(record.trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}</small></button></th>
+                <td className="record-wide-column">{record.destinationNames.join(", ") || adminText("records.noRecognised")}</td>
+                <td className="directory-numeric">{new Intl.NumberFormat(locale).format(record.summary.durationMinutes)} <small>{adminText("common.minutes")}</small></td>
+                <td className="directory-numeric">{new Intl.NumberFormat(locale).format(record.summary.pointCount)}</td>
+              </tr>)}</tbody>
+            </table>
+            {!movementTripRecords.length && <EmptyState text={adminText("records.empty")} />}
           </div>
-
+          <RecordPagination page={movementPageResult.page} pages={movementPageResult.pages} pageSize={movementPageSize} locale={locale} scrollTarget={movementScroller} onPageChange={setMovementPage} onPageSizeChange={(size) => { setMovementPageSize(size); setMovementPage(1); }} />
+        </section>
+        <div className="admin-movement-detail">
+          <MovementMap points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints} destinations={data.destinations} displayMode={selectedRecord?.points.length ? "route" : "signals"} locale={locale} />
           {selectedRecord && (
             <aside className="record-detail-panel">
               <span>{adminText("records.selected")}</span>
@@ -512,7 +504,7 @@ export function AdminWorkspace({
               <p>{adminText("records.readOnly")}</p>
             </aside>
           )}
-        </section>
+        </div>
       </div>
     </div>
   );
@@ -579,7 +571,7 @@ export function AdminWorkspace({
           [adminText("safety.emergencyContacts"), tourists.filter((tourist) => tourist.emergencyContactPhone).length.toString()],
         ]}
       />
-      <section className="list-panel safety-admin-list">
+      <section className="safety-admin-list">
         {visibleSafetyRecords.map((record) => {
           const tourist = userById.get(record.userId);
           const caseKey = `${record.kind}:${record.id}`;
@@ -680,7 +672,8 @@ export function AdminWorkspace({
         ]}
       />
       <div className="ai-results-layout">
-        <section className="panel ai-cluster-panel">
+        <section className="ai-cluster-panel">
+          <div>
           <div className="section-heading">
             <h2>{adminText("ai.clusterSummary")}</h2>
             <span>K = {selectedKValue}</span>
@@ -698,35 +691,28 @@ export function AdminWorkspace({
             ))}
             {clusterSummaries.length === 0 && <EmptyState text={adminText("ai.noClusters")} />}
           </div>
-          <h2>{adminText("ai.categoryDistribution")}</h2>
-          <CategoryBars values={profileDistribution} locale={locale} />
+          </div>
+          <div className="ai-category-summary"><h2>{adminText("ai.categoryDistribution")}</h2><CategoryBars values={profileDistribution} locale={locale} /></div>
         </section>
 
-        <section className="list-panel ai-analysis-list">
-          {visibleAnalysisRows.map((analysis) => {
-            const user = userById.get(analysis.userId);
-            const active = selectedAnalysis ? analysisKey(selectedAnalysis) === analysisKey(analysis) : false;
-
-            return (
-              <button className={active ? "record-card selectable active" : "record-card selectable"} key={analysisKey(analysis)} onClick={() => setSelectedAnalysisKey(analysisKey(analysis))} type="button">
-                <div>
-                  <strong>{user?.name ?? adminText("common.unknownTourist")}</strong>
-                  <span>{adminText("ai.cluster")} {analysis.cluster + 1}</span>
-                </div>
-                <p>{clusterText(locale, analysis.clusterLabel)}</p>
-                <div className="record-metrics">
-                  <span>{profileLabel(locale, analysis.profile)} {t("common.tourist")}</span>
-                  <span>{analysis.dataPointCount} {adminText("common.points")}</span>
-                  <span>{Math.round(analysis.classificationConfidence * 100)}% {adminText("ai.confidence")}</span>
-                </div>
-              </button>
-            );
-          })}
-          <ListLimitFooter hiddenCount={hiddenAnalysisCount} isExpanded={showAllAiResults} itemLabel={adminText("ai.resultLabel")} pluralLabel="AI results" onToggle={() => setShowAllAiResults((value) => !value)} locale={locale} />
-          {analysisRows.length === 0 && <EmptyState text={adminText("ai.empty")} />}
+        <section className="ai-analysis-list">
+          <div className="directory-heading"><h2>{adminText("ai.title")}</h2><span>{directoryText(locale, "range", { from: analysisPageResult.from, to: analysisPageResult.to, total: analysisPageResult.total })}</span></div>
+          <div className="directory-table-scroll" ref={analysisScroller} tabIndex={0} aria-label={adminText("ai.title")}>
+            <table className="directory-table record-table analysis-record-table">
+              <caption className="sr-only">{adminText("ai.title")}</caption>
+              <thead><tr><th scope="col">{t("auth.name")}</th><th scope="col">{adminText("ai.cluster")}</th><th scope="col" className="record-wide-column">{adminText("records.touristCategory")}</th><th scope="col" className="directory-numeric record-wide-column">{adminText("common.points")}</th><th scope="col" className="directory-numeric">{adminText("ai.confidence")}</th></tr></thead>
+              <tbody>{analysisPageResult.rows.map((analysis) => {
+                const tripDate = tripById.get(analysis.tripId)?.startedAt ?? analysis.generatedAt;
+                return <tr key={analysisKey(analysis)}><th scope="row"><button className="directory-person" aria-haspopup="dialog" type="button" onClick={() => setSelectedAnalysisKey(analysisKey(analysis))}><strong>{userById.get(analysis.userId)?.name ?? adminText("common.unknownTourist")}</strong><time dateTime={tripDate}>{formatDateTime(tripDate, locale)}</time></button></th><td>{new Intl.NumberFormat(locale).format(analysis.cluster + 1)}</td><td className="record-wide-column">{profileLabel(locale, analysis.profile)}</td><td className="directory-numeric record-wide-column">{new Intl.NumberFormat(locale).format(analysis.dataPointCount)}</td><td className="directory-numeric">{new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(analysis.classificationConfidence)}</td></tr>;
+              })}</tbody>
+            </table>
+            {!analysisRows.length && <EmptyState text={adminText("ai.empty")} />}
+          </div>
+          <RecordPagination page={analysisPageResult.page} pages={analysisPageResult.pages} pageSize={analysisPageSize} locale={locale} scrollTarget={analysisScroller} onPageChange={setAnalysisPage} onPageSizeChange={(size) => { setAnalysisPageSize(size); setAnalysisPage(1); }} />
         </section>
 
         {selectedAnalysis && (
+          <PlaceGuideDialog title={adminText("ai.selectedResult")} locale={locale} closeLabel={discoveryText(locale, "dismiss")} onClose={() => setSelectedAnalysisKey(null)}>
           <aside className="ai-detail-panel">
             <span>{adminText("ai.selectedResult")}</span>
             <h2>{selectedAnalysisUser?.name ?? adminText("common.unknownTourist")}</h2>
@@ -814,6 +800,7 @@ export function AdminWorkspace({
               )}
             </section>
           </aside>
+          </PlaceGuideDialog>
         )}
       </div>
       {aiEvaluation.labelledRecordCount > 0 && <ConfusionMatrix values={aiEvaluation.confusionMatrix} locale={locale} />}

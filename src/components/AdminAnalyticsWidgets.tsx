@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type { KMeansFeatureVector } from "../types";
 import type { Locale } from "../services/i18n";
 import { uiText } from "../services/uiText";
@@ -14,12 +13,12 @@ export function CategoryBars({ values, locale }: { values: Record<string, number
   return (
     <div className="category-bars">
       {Object.entries(values).map(([label, value]) => (
-        <div className="bar-row" key={label}>
+        <div className="bar-row" key={label} data-category={label}>
           <span>{profileText(locale, label)}</span>
           <div>
-            <i style={{ width: `${Math.max(8, (value / max) * 100)}%` }} />
+            <i style={{ width: `${Math.max(0, (value / max) * 100)}%` }} />
           </div>
-          <strong>{value}</strong>
+          <strong>{new Intl.NumberFormat(locale).format(value)}</strong>
         </div>
       ))}
     </div>
@@ -40,7 +39,7 @@ export function KMeansFeatureBars({ features, locale }: { features: KMeansFeatur
         <div className="bar-row" key={row.label}>
           <span>{uiText(locale, row.label)}</span>
           <div>
-            <i style={{ width: `${Math.max(8, row.width)}%` }} />
+            <i style={{ width: `${Math.max(0, Math.min(100, row.width))}%` }} />
           </div>
           <strong>
             {row.value}
@@ -58,19 +57,14 @@ export function ConfusionMatrix({ values, locale }: { values: Record<string, Rec
   return (
     <section className="panel">
       <h2>{uiText(locale, "Decision Tree Test Matrix")}</h2>
-      <div className="matrix-table" role="table" aria-label={uiText(locale, "Decision Tree confusion matrix")}>
-        <span />
-        {profiles.map((profile) => (
-          <strong key={profile}>{uiText(locale, "Predicted {profile}", { profile: profileText(locale, profile) })}</strong>
-        ))}
-        {profiles.map((actual) => (
-          <Fragment key={actual}>
-            <strong key={`${actual}-label`}>{uiText(locale, "Actual {profile}", { profile: profileText(locale, actual) })}</strong>
-            {profiles.map((predicted) => (
-              <span key={`${actual}-${predicted}`}>{values[actual]?.[predicted] ?? 0}</span>
-            ))}
-          </Fragment>
-        ))}
+      <div className="directory-table-scroll" tabIndex={0} aria-label={uiText(locale, "Decision Tree confusion matrix")}>
+        <table className="directory-table matrix-table" aria-label={uiText(locale, "Decision Tree confusion matrix")}>
+          <thead><tr><th scope="col" aria-hidden="true" />{profiles.map((profile) => <th scope="col" key={profile}>{uiText(locale, "Predicted {profile}", { profile: profileText(locale, profile) })}</th>)}</tr></thead>
+          <tbody>{profiles.map((actual) => <tr key={actual}>
+            <th scope="row">{uiText(locale, "Actual {profile}", { profile: profileText(locale, actual) })}</th>
+            {profiles.map((predicted) => <td key={predicted} className={actual === predicted ? "matrix-correct" : undefined}>{new Intl.NumberFormat(locale).format(values[actual]?.[predicted] ?? 0)}</td>)}
+          </tr>)}</tbody>
+        </table>
       </div>
     </section>
   );

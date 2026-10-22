@@ -10,13 +10,9 @@
   grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
   gap: 18px;
   align-items: end;
-  padding: 20px;
-  border: 1px solid #d9e7df;
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(15, 118, 110, 0.14), transparent 54%),
-    linear-gradient(90deg, rgba(255, 247, 237, 0.95), rgba(240, 253, 250, 0.95));
-  box-shadow: 0 18px 40px rgba(73, 55, 32, 0.08);
+  padding: 0 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
 }
 
 .trip-diary-hero span,
@@ -24,16 +20,16 @@
 .trip-timeline-panel .section-heading span {
   color: #0f766e;
   font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 600;
+  text-transform: none;
 }
 
 .trip-diary-hero h2 {
   max-width: 620px;
   margin: 6px 0 8px;
   color: #102033;
-  font-size: 2rem;
-  line-height: 1.08;
+  font-size: 1.45rem;
+  line-height: 1.35;
 }
 
 .trip-diary-hero p,
@@ -57,12 +53,11 @@
   gap: 4px;
   min-width: 0;
   padding: 12px;
-  border: 1px solid rgba(15, 118, 110, 0.18);
-  border-radius: 8px;
+  border-left: 1px solid var(--line);
   color: #475569;
-  background: rgba(255, 255, 255, 0.72);
+  background: transparent;
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 500;
 }
 
 .trip-diary-stats strong {
@@ -96,11 +91,9 @@
 
 .trip-story-panel,
 .trip-timeline-panel {
-  padding: 16px;
-  border: 1px solid #d8d0bf;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 14px 28px rgba(73, 55, 32, 0.06);
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
 }
 
 .trip-status-badge {
@@ -234,10 +227,10 @@
   gap: 7px;
   width: 100%;
   padding: 13px;
-  border: 1px solid #dde4e0;
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
   color: inherit;
-  background: #f8fafc;
+  background: var(--surface);
   text-align: left;
 }
 
@@ -265,8 +258,8 @@
 .trip-timeline-card span {
   color: #0f766e;
   font-size: 0.74rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 500;
+  text-transform: none;
 }
 
 .trip-timeline-card strong {
@@ -282,7 +275,7 @@
 }
 
 .trip-timeline-card p {
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .trip-card-actions {
@@ -319,13 +312,6 @@
   background: #fff1f2;
 }
 
-.movement-trip-card {
-  width: 100%;
-  color: inherit;
-  text-align: left;
-}
-
-.movement-trip-card .mono-text,
 .record-detail-panel .mono-text,
 .trip-detail-panel .mono-text,
 .ai-detail-panel .mono-text {
@@ -335,35 +321,16 @@
   font-size: 0.76rem;
 }
 
-.movement-trip-card .record-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.record-metrics span {
-  min-height: 30px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: #f7f4ec;
-  color: #344155;
-  font-size: 0.76rem;
-  font-weight: 800;
-}
-
 .record-detail-panel,
 .trip-detail-panel,
 .ai-detail-panel {
   display: grid;
   gap: 12px;
   padding: 16px;
-  border: 1px solid #d8d0bf;
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 58%),
-    #ffffff;
-  box-shadow: 0 12px 24px rgba(73, 55, 32, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .record-detail-panel > span,
@@ -371,9 +338,9 @@
 .ai-detail-panel > span {
   color: var(--teal-dark);
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: 0;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .record-detail-panel h2,
@@ -401,7 +368,7 @@
   display: grid;
   gap: 3px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #eee5d5;
+  border-bottom: 1px solid var(--line);
 }
 
 .record-detail-panel dt,
@@ -409,7 +376,7 @@
 .ai-detail-panel dt {
   color: #64748b;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .record-detail-panel dd,
@@ -417,7 +384,8 @@
 .ai-detail-panel dd {
   margin: 0;
   color: #0f172a;
-  font-weight: 800;
+  font-weight: 550;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 

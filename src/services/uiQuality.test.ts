@@ -31,6 +31,20 @@ const stylesSource = styleImports.map(([, file]) => readSource(`src/${file}`)).j
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("shares compact paginated record layouts and uses on-demand AI details", () => {
+    const source = readSource("src/workspaces/AdminWorkspace.tsx");
+    expect(source).not.toContain("record-card");
+    expect(source).not.toContain("showAllAiResults");
+    expect(source).not.toContain("showAllMovementRecords");
+    expect(source).toContain("directory-table record-table analysis-record-table");
+    expect(source).toContain("directory-table record-table movement-record-table");
+    expect(source).toContain('<PlaceGuideDialog title={adminText("ai.selectedResult")}');
+    expect(source).not.toContain("?? analysisRows[0]");
+    expect(source.match(/<RecordPagination /g)).toHaveLength(2);
+    expect(readSource("src/components/TouristDirectory.tsx")).toContain("<RecordPagination");
+    expect(stylesSource).toContain("--font-display: var(--font-body)");
+    expect(stylesSource).toContain(".record-table .record-wide-column { display: none; }");
+  });
   it("uses one destination preview and hides it while a route-point popup is open", () => {
     expect(mapSource).not.toContain("marker.bindPopup(");
     expect(mapSource).toContain('on("popupopen", () => setRoutePopupOpen(true))');

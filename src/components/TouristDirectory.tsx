@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, FlaskConical, RotateCcw, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, FlaskConical, RotateCcw, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import type { DestinationCategory } from "../types";
 import { translate, type Locale } from "../services/i18n";
 import { translateAdmin, type AdminCopyKey } from "../services/adminI18n";
@@ -15,6 +15,7 @@ import { formatTravelPreferenceList, getCategoryLabel } from "../services/profil
 import { formatDateTime } from "../services/geo";
 import { TouristCountryReport } from "./TouristCountryReport";
 import { PlaceGuideDialog } from "./PlaceGuideDialog";
+import { RecordPagination } from "./RecordPagination";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 
@@ -54,9 +55,6 @@ export function TouristDirectory({ rows, locale, onViewMovement, onViewSafety }:
     setSort((current) => ({ key, direction: current.key === key ? current.direction === "asc" ? "desc" : "asc" : ["name", "country", "profile"].includes(key) ? "asc" : "desc" }));
     setPage(1); resetScroll();
   }
-  function changePage(next: number) {
-    setPage(next); resetScroll(); scroller.current?.scrollIntoView({ block: "start", behavior: "instant" });
-  }
   function source(row: TouristManagementRow) {
     const sample = isSampleTourist(row.tourist);
     return <span className="directory-source">{sample ? <FlaskConical size={12} aria-hidden="true" /> : <ShieldCheck size={12} aria-hidden="true" />}{demoDatasetText(locale, sample ? "sampleRecord" : "realRecord")}</span>;
@@ -91,7 +89,7 @@ export function TouristDirectory({ rows, locale, onViewMovement, onViewSafety }:
         {!result.total && <tr><td colSpan={8} className="directory-empty">{admin("tourists.empty")}</td></tr>}
       </tbody></table>
     </div>
-    <div className="directory-pagination"><label>{text("rows")}<select value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); resetScroll(); }}>{[10, 25, 50].map((size) => <option key={size} value={size}>{number(size)}</option>)}</select></label><span aria-live="polite">{text("page", { page: result.page, pages: result.pages })}</span><div><button type="button" className="icon-action" title={text("previous")} aria-label={text("previous")} disabled={result.page === 1} onClick={() => changePage(result.page - 1)}><ChevronLeft size={19} /></button><button type="button" className="icon-action" title={text("next")} aria-label={text("next")} disabled={result.page === result.pages} onClick={() => changePage(result.page + 1)}><ChevronRight size={19} /></button></div></div>
+    <RecordPagination page={result.page} pages={result.pages} pageSize={pageSize} locale={locale} scrollTarget={scroller} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
     {selected && <PlaceGuideDialog title={selected.tourist.name} locale={locale} closeLabel={text("close")} onClose={() => setSelectedId(null)}><section className="directory-detail">
       {source(selected)}<p>{selected.latestActivityAt ? `${text("recent")}: ${formatDateTime(selected.latestActivityAt, locale)}` : admin("tourists.noActivity")}</p>
       <dl>{[

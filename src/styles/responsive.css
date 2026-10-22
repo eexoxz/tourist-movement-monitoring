@@ -83,13 +83,8 @@
   .movement-hero,
   .profile-page-grid,
   .profile-setup-card,
-  .destination-admin-grid,
-  .ai-results-layout {
+  .destination-admin-grid {
     grid-template-columns: 1fr;
-  }
-
-  .ai-detail-panel {
-    position: static;
   }
 
   .profile-actions {
@@ -456,10 +451,6 @@
     bottom: 10px;
     left: 10px;
     max-width: none;
-  }
-
-  .movement-trip-card .record-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .recommendation-card-footer,

@@ -52,7 +52,7 @@
 .qr-visit-card > strong {
   color: #07142e;
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 4vw, 1.8rem);
+  font-size: 1.35rem;
   line-height: 1.12;
 }
 
@@ -413,10 +413,10 @@
 .auth-panel,
 .analysis-card,
 .empty-state {
-  border: 1px solid #e4ded1;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 16px 34px rgba(73, 55, 32, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: none;
 }
 
 .metric-card {

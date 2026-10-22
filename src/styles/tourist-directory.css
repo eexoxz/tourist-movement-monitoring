@@ -46,6 +46,17 @@
 .directory-numeric { text-align: right; font-variant-numeric: tabular-nums; }
 .directory-table .directory-case-count { color: #ac283c; font-weight: 700; }
 .directory-table .directory-empty { padding: 32px 16px; text-align: center; color: var(--muted); }
+.record-table .directory-person time, .record-table .directory-person small { color: var(--muted); font-size: 0.72rem; font-weight: 400; }
+.record-table .directory-person { gap: 3px; }
+.record-table tbody tr.record-selected { background: #edf8f5; box-shadow: inset 3px 0 0 var(--teal); }
+.record-table .directory-person[aria-pressed="true"] strong { color: var(--teal-dark); }
+.analysis-record-table th:first-child { width: 34%; }
+.analysis-record-table th:last-child { width: 18%; }
+.movement-record-table th:first-child { width: 35%; }
+.movement-record-table th:nth-child(2) { width: 35%; }
+.movement-record-table th:nth-child(3) { width: 18%; }
+.record-table small { font-weight: 400; color: var(--muted); }
+.admin-tab-panel > .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .directory-mobile-country { display: none; }
 .directory-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
 .directory-pagination label { display: flex; align-items: center; gap: 8px; }
@@ -64,7 +75,18 @@
 @media (max-width: 1100px) {
   .directory-primary-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+@media (max-width: 1000px) {
+  .admin-records-layout { grid-template-columns: minmax(0, 1fr); }
+  .ai-cluster-panel { grid-template-columns: minmax(0, 1fr); }
+  .ai-category-summary { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 20px; }
+}
 @media (max-width: 700px) {
+  .record-table .record-wide-column { display: none; }
+  .analysis-record-table th:first-child { width: 56%; }
+  .analysis-record-table th:last-child { width: 26%; }
+  .movement-record-table th:first-child { width: 55%; }
+  .movement-record-table th:nth-child(3) { width: 28%; }
+  .admin-tab-panel > .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .directory-primary-filters, .directory-extra-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .directory-primary-filters .directory-search { grid-column: 1 / -1; }
   .directory-heading { flex-wrap: wrap; gap: 6px; }
