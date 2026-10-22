@@ -65,6 +65,37 @@
   aspect-ratio: auto;
 }
 
+.destination-photo-credit {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: calc(100% - 16px);
+  min-height: 28px;
+  padding: 4px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #102033;
+  font-size: 11px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.destination-photo-credit span:last-child {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.destination-photo-credit:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+
 .destination-visual.compact.empty {
   min-height: 82px;
   aspect-ratio: auto;

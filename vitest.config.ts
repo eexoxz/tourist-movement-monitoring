@@ -4,6 +4,6 @@ export default defineConfig({
   test: {
     environment: "node",
     setupFiles: ["src/services/testLocales.ts"],
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "catalogue/**/*.test.mjs"],
   },
 });

@@ -1,5 +1,6 @@
 import type { Destination, DestinationCategory } from "../types";
 import type { Locale } from "./i18n";
+import { catalogueGuidance } from "./catalogueGuidance";
 
 type DestinationCopy = Pick<Destination, "name" | "city" | "description" | "openingHours" | "feeNote" | "visitTips" | "imageAlt">;
 
@@ -227,9 +228,8 @@ function interpolate(template: string, values: Record<string, string>) {
 }
 
 export function localizeDestination(destination: Destination, locale: Locale): Destination {
-  if (locale === "en") {
-    return destination;
-  }
+  if (locale === "en") return destination;
+  const guidance = catalogueGuidance(destination, locale);
 
   const city = localizeCity(destination.city, locale);
   const copy = practicalCopy[locale] ?? practicalCopy.en;
@@ -242,7 +242,7 @@ export function localizeDestination(destination: Destination, locale: Locale): D
     description: interpolate(descriptionTemplate, { city }),
     openingHours: copy.openingHours,
     feeNote: copy.feeNote,
-    visitTips: copy.visitTips,
+    visitTips: [...guidance, ...(copy.visitTips ?? [])],
     imageAlt: `${locale === "zh" ? chineseDestinationNames[destination.id] ?? destination.name : destination.name}`,
   };
 }

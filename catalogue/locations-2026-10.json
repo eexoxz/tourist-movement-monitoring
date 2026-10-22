@@ -1,0 +1,2919 @@
+{
+  "version": "2026-10",
+  "coordinateAttribution": "Coordinates: Wikidata (CC0) and OpenStreetMap contributors (ODbL). See each coordinateSourceUrl.",
+  "durationNote": "averageVisitMinutes is a planning suggestion, not measured visitor duration.",
+  "places": [
+    {
+      "id": "my-perlis-gua-kelam",
+      "name": "Gua Kelam",
+      "city": "Kaki Bukit",
+      "state": "Perlis",
+      "address": "Gua Kelam Ecotourism Complex, Kaki Bukit, Perlis, Malaysia",
+      "category": "nature",
+      "description": "Limestone cave and former mining passage.",
+      "latitude": 6.6442672,
+      "longitude": 100.2026603,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-perlis-gua-kelam.jpg",
+      "imageAlt": "Gua Kelam",
+      "imageCredit": {
+        "author": "Marufish from Alor Setar, Malaysia",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gua_Kelam_-_Cave_of_Darkness_(2652390310).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/2610748545",
+      "visitorGuidance": [
+        "trail"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
+      ]
+    },
+    {
+      "id": "my-perlis-wang-kelian-viewpoint",
+      "name": "Wang Kelian Viewpoint",
+      "city": "Kaki Bukit",
+      "state": "Perlis",
+      "address": "Wang Kelian Viewpoint, Jalan Kaki Bukit-Wang Kelian, Perlis, Malaysia",
+      "category": "nature",
+      "description": "Landscape viewpoint near the border hills.",
+      "latitude": 6.6659228,
+      "longitude": 100.2013226,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-perlis-wang-kelian-viewpoint.jpg",
+      "imageAlt": "Wang Kelian Viewpoint",
+      "imageCredit": {
+        "author": "NurulJannahSazaly",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Puncak_Wang_Kelian_-_2025.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/relation/13669344",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-perlis-timah-tasoh-lake",
+      "name": "Timah Tasoh Lake",
+      "city": "Beseri",
+      "state": "Perlis",
+      "address": "Tasik Timah Tasoh, Beseri, Perlis, Malaysia",
+      "category": "nature",
+      "description": "Reservoir scenery and lakeside recreation.",
+      "latitude": 6.5652,
+      "longitude": 100.2177,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-perlis-timah-tasoh-lake.jpg",
+      "imageAlt": "Timah Tasoh Lake",
+      "imageCredit": {
+        "author": "Suriana Abdullah",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Empangan_Timah_Tasoh.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q12686069",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-perlis-al-hussain-mosque-kuala-perlis",
+      "name": "Al-Hussain Mosque, Kuala Perlis",
+      "city": "Kuala Perlis",
+      "state": "Perlis",
+      "address": "Masjid Al-Hussain, Persiaran Putra Timur, Kuala Perlis, Perlis, Malaysia",
+      "category": "cultural",
+      "description": "Waterfront religious architecture.",
+      "latitude": 6.397368175,
+      "longitude": 100.126982797,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perlis-al-hussain-mosque-kuala-perlis.jpg",
+      "imageAlt": "Al-Hussain Mosque, Kuala Perlis",
+      "imageCredit": {
+        "author": "WanYipieee",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Masjid_terapung_kuala_perlis_cantik.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7384905",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-perlis-alwi-mosque-kangar",
+      "name": "Alwi Mosque, Kangar",
+      "city": "Kangar",
+      "state": "Perlis",
+      "address": "Masjid Alwi, Jalan Kangar, Kangar, Perlis, Malaysia",
+      "category": "heritage",
+      "description": "Historic mosque in the state capital.",
+      "latitude": 6.440861111,
+      "longitude": 100.197888888,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perlis-alwi-mosque-kangar.jpg",
+      "imageAlt": "Alwi Mosque, Kangar",
+      "imageCredit": {
+        "author": "Jensennbj",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Masjid_Syed_Alwi.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perlis/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q24949420",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-kedah-bujang-valley-archaeology-museum",
+      "name": "Bujang Valley Archaeology Museum",
+      "city": "Merbok",
+      "state": "Kedah",
+      "address": "Muzium Arkeologi Lembah Bujang, Bukit Batu Pahat, Merbok, Kedah, Malaysia",
+      "category": "heritage",
+      "description": "Archaeology and ancient settlement history.",
+      "latitude": 5.736777,
+      "longitude": 100.414193,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-bujang-valley-archaeology-museum.jpg",
+      "imageAlt": "Bujang Valley Archaeology Museum",
+      "imageCredit": {
+        "author": "Marufish from Alor Setar, Malaysia",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bujang_Valley_Museum_(11270614344).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q12698634",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kedah-zahir-mosque",
+      "name": "Zahir Mosque",
+      "city": "Alor Setar",
+      "state": "Kedah",
+      "address": "Masjid Zahir, Jalan Kampung Perak, Alor Setar, Kedah, Malaysia",
+      "category": "cultural",
+      "description": "Landmark mosque and architectural stop.",
+      "latitude": 6.12028,
+      "longitude": 100.365,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-zahir-mosque.jpg",
+      "imageAlt": "Zahir Mosque",
+      "imageCredit": {
+        "author": "Ecoblueprint",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Masjid_zahir,_alor_setar.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q4022372",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-kedah-alor-setar-tower",
+      "name": "Alor Setar Tower",
+      "city": "Alor Setar",
+      "state": "Kedah",
+      "address": "Menara Alor Setar, Lebuhraya Darul Aman, Alor Setar, Kedah, Malaysia",
+      "category": "urban",
+      "description": "City observation landmark.",
+      "latitude": 6.12445,
+      "longitude": 100.367261,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-alor-setar-tower.jpg",
+      "imageAlt": "Alor Setar Tower",
+      "imageCredit": {
+        "author": "Qhairy",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Menara_Alor_Setar_01.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q1584276",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kedah-laman-padi-langkawi",
+      "name": "Laman Padi, Langkawi",
+      "city": "Langkawi",
+      "state": "Kedah",
+      "address": "Laman Padi, Pantai Cenang, Langkawi, Kedah, Malaysia",
+      "category": "cultural",
+      "description": "Rice-growing heritage and landscape.",
+      "latitude": 6.298208,
+      "longitude": 99.722621,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-laman-padi-langkawi.jpg",
+      "imageAlt": "Laman Padi, Langkawi",
+      "imageCredit": {
+        "author": "Balou46",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:MY-Langkawi-laman_padi-1.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q115325901",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kedah-langkawi-skybridge",
+      "name": "Langkawi SkyBridge",
+      "city": "Langkawi",
+      "state": "Kedah",
+      "address": "Langkawi SkyBridge, Gunung Machinchang, Langkawi, Kedah, Malaysia",
+      "category": "urban",
+      "description": "Elevated viewpoint and visitor attraction.",
+      "latitude": 6.386441666,
+      "longitude": 99.662405555,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-langkawi-skybridge.jpg",
+      "imageAlt": "Langkawi SkyBridge",
+      "imageCredit": {
+        "author": "Flickr user \"The Dilly Lama\"",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Langkawi_sky_bridge.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q1164611",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-kedah-oriental-village-langkawi",
+      "name": "Oriental Village, Langkawi",
+      "city": "Langkawi",
+      "state": "Kedah",
+      "address": "Oriental Village, Burau Bay, Langkawi, Kedah, Malaysia",
+      "category": "urban",
+      "description": "Visitor precinct with shops and attractions.",
+      "latitude": 6.370119,
+      "longitude": 99.6713267,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-oriental-village-langkawi.jpg",
+      "imageAlt": "Oriental Village, Langkawi",
+      "imageCredit": {
+        "author": "Hzh",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Oriental_Village_in_Langkawi.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/12180234201",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kedah-tanjung-rhu-beach",
+      "name": "Tanjung Rhu Beach",
+      "city": "Langkawi",
+      "state": "Kedah",
+      "address": "Pantai Tanjung Rhu, Tanjung Rhu, Langkawi, Kedah, Malaysia",
+      "category": "coastal",
+      "description": "Beach scenery on northern Langkawi.",
+      "latitude": 6.45747,
+      "longitude": 99.82444,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-tanjung-rhu-beach.jpg",
+      "imageAlt": "Tanjung Rhu Beach",
+      "imageCredit": {
+        "author": "jetsun",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jalan_Tanjung_Rhu,_07000_Langkawi,_Kedah,_Malaysia_-_panoramio_-_jetsun_(7).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7446891",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-kedah-pekan-rabu-alor-setar",
+      "name": "Pekan Rabu, Alor Setar",
+      "city": "Alor Setar",
+      "state": "Kedah",
+      "address": "Pekan Rabu, Jalan Tunku Ibrahim, Alor Setar, Kedah, Malaysia",
+      "category": "food",
+      "description": "Local food products and traditional market shopping.",
+      "latitude": 6.11707,
+      "longitude": 100.367438,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kedah-pekan-rabu-alor-setar.jpg",
+      "imageAlt": "Pekan Rabu, Alor Setar",
+      "imageCredit": {
+        "author": "The_Son_of_Abdullah",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pekan_Rabu,_Alor_Setar.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kedah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7161019",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-penang-armenian-street",
+      "name": "Armenian Street",
+      "city": "George Town",
+      "state": "Penang",
+      "address": "Lebuh Armenian, George Town, Penang, Malaysia",
+      "category": "heritage",
+      "description": "Historic streetscape and public art walking stop.",
+      "latitude": 5.41474444,
+      "longitude": 100.33811111,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-penang-armenian-street.jpg",
+      "imageAlt": "Armenian Street",
+      "imageCredit": {
+        "author": "RaffiKojian",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Armenian_street-penang-095749145.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/penang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q28936939",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-penang-pinang-peranakan-mansion",
+      "name": "Pinang Peranakan Mansion",
+      "city": "George Town",
+      "state": "Penang",
+      "address": "Pinang Peranakan Mansion, 29 Church Street, George Town, Penang, Malaysia",
+      "category": "cultural",
+      "description": "Peranakan domestic culture and collections.",
+      "latitude": 5.417999,
+      "longitude": 100.341192,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-penang-pinang-peranakan-mansion.jpg",
+      "imageAlt": "Pinang Peranakan Mansion",
+      "imageCredit": {
+        "author": "Vnonymous",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pinang_Peranakan_Mansion,_George_Town,_Penang.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/penang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q28034427",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-penang-khoo-kongsi",
+      "name": "Khoo Kongsi",
+      "city": "George Town",
+      "state": "Penang",
+      "address": "Leong San Tong Khoo Kongsi, 18 Cannon Square, George Town, Penang, Malaysia",
+      "category": "heritage",
+      "description": "Clan-house architecture and community history.",
+      "latitude": 5.414438,
+      "longitude": 100.337024,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-penang-khoo-kongsi.jpg",
+      "imageAlt": "Khoo Kongsi",
+      "imageCredit": {
+        "author": "This Photo was taken by Supanut Arunoprayote . Feel free to use any of my images, but please mention me as the author and may send me a message. (สามารถใช้ภาพได้อิสระ แต่กรุณาใส่เครดิตผู้ถ่ายและอาจส่ง ข้อความบอกกล่าวด้วย ) Please do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved. Please if you think that any changes should be required, please inform the author. Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract .",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Khoo_Kongsi_(I).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/penang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q6402268",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-penang-penang-botanic-gardens",
+      "name": "Penang Botanic Gardens",
+      "city": "George Town",
+      "state": "Penang",
+      "address": "Penang Botanic Gardens, Jalan Kebun Bunga, George Town, Penang, Malaysia",
+      "category": "nature",
+      "description": "Established gardens and walking routes.",
+      "latitude": 5.43995833,
+      "longitude": 100.28833333,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-penang-penang-botanic-gardens.jpg",
+      "imageAlt": "Penang Botanic Gardens",
+      "imageCredit": {
+        "author": "Dr htgoon",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pg_botanic_gardens_trees.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/penang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7162208",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-penang-tropical-spice-garden",
+      "name": "Tropical Spice Garden",
+      "city": "Teluk Bahang",
+      "state": "Penang",
+      "address": "Tropical Spice Garden, Lot 595, Mukim 2, Teluk Bahang, Penang, Malaysia",
+      "category": "nature",
+      "description": "Tropical planting and spice interpretation.",
+      "latitude": 5.463376,
+      "longitude": 100.229248,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-penang-tropical-spice-garden.jpg",
+      "imageAlt": "Tropical Spice Garden",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tropical_Spice_Garden.jpg"
+      },
+      "sourceUrl": "https://tropicalspicegarden.com/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q137924067",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-penang-entopia",
+      "name": "Entopia",
+      "city": "Teluk Bahang",
+      "state": "Penang",
+      "address": "Entopia, 830 Jalan Teluk Bahang, Teluk Bahang, Penang, Malaysia",
+      "category": "nature",
+      "description": "Butterfly and insect visitor attraction.",
+      "latitude": 5.447587,
+      "longitude": 100.21522,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-penang-entopia.jpg",
+      "imageAlt": "Entopia",
+      "imageCredit": {
+        "author": "Dominic Nelson",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Penang_-_Entopia_view_from_Teluk_Bahang_Dam_-_May_2024.jpg"
+      },
+      "sourceUrl": "https://www.entopia.com/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q137938768",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-penang-the-top-penang",
+      "name": "The TOP Penang",
+      "city": "George Town",
+      "state": "Penang",
+      "address": "The TOP, KOMTAR, 1 Jalan Penang, George Town, Penang, Malaysia",
+      "category": "urban",
+      "description": "KOMTAR visitor attractions and city views.",
+      "latitude": 5.4145615,
+      "longitude": 100.329814,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-penang-the-top-penang.jpg",
+      "imageAlt": "The TOP Penang",
+      "imageCredit": {
+        "author": "Vnonymous",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:KOMTAR_Skywalk,_George_Town,_Penang.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/penang/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/993213417",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-penang-gurney-drive-hawker-centre",
+      "name": "Gurney Drive Hawker Centre",
+      "city": "George Town",
+      "state": "Penang",
+      "address": "Gurney Drive Hawker Centre, Persiaran Gurney, George Town, Penang, Malaysia",
+      "category": "food",
+      "description": "Established hawker-food destination.",
+      "latitude": 5.4398178,
+      "longitude": 100.3090147,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-penang-gurney-drive-hawker-centre.jpg",
+      "imageAlt": "Gurney Drive Hawker Centre",
+      "imageCredit": {
+        "author": "Htgoon at en.wikipedia",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gurneydrive1.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/penang/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/156926499",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-penang-batu-ferringhi-beach",
+      "name": "Batu Ferringhi Beach",
+      "city": "Batu Ferringhi",
+      "state": "Penang",
+      "address": "Pantai Batu Ferringhi, Jalan Batu Ferringhi, Penang, Malaysia",
+      "category": "coastal",
+      "description": "Beachfront and coastal leisure stop.",
+      "latitude": 5.470833333,
+      "longitude": 100.245277777,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-penang-batu-ferringhi-beach.jpg",
+      "imageAlt": "Batu Ferringhi Beach",
+      "imageCredit": {
+        "author": "HundenvonPenang",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Batu_Ferringhi,_George_Town,_Penang_2023.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/penang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q4873309",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-perak-taiping-lake-gardens",
+      "name": "Taiping Lake Gardens",
+      "city": "Taiping",
+      "state": "Perak",
+      "address": "Taiping Lake Gardens, Jalan Pekeliling, Taiping, Perak, Malaysia",
+      "category": "nature",
+      "description": "Lakeside gardens and established walking routes.",
+      "latitude": 4.85389,
+      "longitude": 100.733,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-perak-taiping-lake-gardens.jpg",
+      "imageAlt": "Taiping Lake Gardens",
+      "imageCredit": {
+        "author": "Wohin Auswandern",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wohin_auswandern_malaysia_Taiping_Lake_Gardens_4.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7676335",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-perak-perak-museum-taiping",
+      "name": "Perak Museum, Taiping",
+      "city": "Taiping",
+      "state": "Perak",
+      "address": "Muzium Perak, Jalan Taming Sari, Taiping, Perak, Malaysia",
+      "category": "cultural",
+      "description": "Museum collections and regional history.",
+      "latitude": 4.860555555,
+      "longitude": 100.745,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perak-perak-museum-taiping.jpg",
+      "imageAlt": "Perak Museum, Taiping",
+      "imageCredit": {
+        "author": "Taipingite",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Museum_Perak_Taiping.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7166877",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-perak-han-chin-pet-soo",
+      "name": "Han Chin Pet Soo",
+      "city": "Ipoh",
+      "state": "Perak",
+      "address": "Han Chin Pet Soo, 3 Jalan Bijeh Timah, Ipoh, Perak, Malaysia",
+      "category": "heritage",
+      "description": "Ipoh tin-mining and community history.",
+      "latitude": 4.596111111,
+      "longitude": 101.078888888,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perak-han-chin-pet-soo.jpg",
+      "imageAlt": "Han Chin Pet Soo",
+      "imageCredit": {
+        "author": "Chriscwy5435",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:HCPS_Dining_hall.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q22079917",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-perak-ipoh-railway-station",
+      "name": "Ipoh Railway Station",
+      "city": "Ipoh",
+      "state": "Perak",
+      "address": "Ipoh Railway Station, Jalan Panglima Bukit Gantang Wahab, Ipoh, Perak, Malaysia",
+      "category": "heritage",
+      "description": "Historic station architecture; public access areas only.",
+      "latitude": 4.597222,
+      "longitude": 101.073333,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perak-ipoh-railway-station.jpg",
+      "imageAlt": "Ipoh Railway Station",
+      "imageCredit": {
+        "author": "Sharon Hahn Darlin",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ipoh_Train_Station_2023-03-27.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q1101067",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-perak-sam-poh-tong-temple",
+      "name": "Sam Poh Tong Temple",
+      "city": "Ipoh",
+      "state": "Perak",
+      "address": "Sam Poh Tong Temple, Gunung Rapat, Ipoh, Perak, Malaysia",
+      "category": "cultural",
+      "description": "Limestone cave temple and religious landscape.",
+      "latitude": 4.56373028,
+      "longitude": 101.11540667,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perak-sam-poh-tong-temple.jpg",
+      "imageAlt": "Sam Poh Tong Temple",
+      "imageCredit": {
+        "author": "Miss Prema Darshini",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sam_Poh_Tong_Temple.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q19595617",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-perak-lost-world-of-tambun",
+      "name": "Lost World of Tambun",
+      "city": "Ipoh",
+      "state": "Perak",
+      "address": "Lost World of Tambun, 1 Persiaran Lagun Sunway, Sunway City Ipoh, Perak, Malaysia",
+      "category": "urban",
+      "description": "Family-oriented visitor attraction.",
+      "latitude": 4.62580556,
+      "longitude": 101.15516667,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perak-lost-world-of-tambun.jpg",
+      "imageAlt": "Lost World of Tambun",
+      "imageCredit": {
+        "author": "Shafika Tahir",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lost_Word_of_Tambun_Main_Entrance.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q21634292",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-perak-gerbang-malam-ipoh",
+      "name": "Gerbang Malam, Ipoh",
+      "city": "Ipoh",
+      "state": "Perak",
+      "address": "Gerbang Malam, Jalan Dato Tahwil Azar, Ipoh, Perak, Malaysia",
+      "category": "urban",
+      "description": "Evening market and urban browsing.",
+      "latitude": 4.5957018,
+      "longitude": 101.0845708,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perak-gerbang-malam-ipoh.jpg",
+      "imageAlt": "Gerbang Malam, Ipoh",
+      "imageCredit": {
+        "author": "Insankerdilmahubersuara1993",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Landmark_of_Ipoh_(5).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/1193708557",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-perak-teluk-nipah-beach-pangkor",
+      "name": "Teluk Nipah Beach, Pangkor",
+      "city": "Pulau Pangkor",
+      "state": "Perak",
+      "address": "Pantai Teluk Nipah, Pulau Pangkor, Perak, Malaysia",
+      "category": "coastal",
+      "description": "Island beach and coastal scenery.",
+      "latitude": 4.2302734,
+      "longitude": 100.5431265,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-perak-teluk-nipah-beach-pangkor.jpg",
+      "imageAlt": "Teluk Nipah Beach, Pangkor",
+      "imageCredit": {
+        "author": "Michael",
+        "license": "Public domain",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Teluk_Nipah.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/perak/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/324737796",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-selangor-forest-research-institute-malaysia-kepong",
+      "name": "Forest Research Institute Malaysia, Kepong",
+      "city": "Kepong",
+      "state": "Selangor",
+      "address": "Forest Research Institute Malaysia, Jalan FRIM, Kepong, Selangor, Malaysia",
+      "category": "nature",
+      "description": "Forest recreation and interpretation.",
+      "latitude": 3.2369,
+      "longitude": 101.6378,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-selangor-forest-research-institute-malaysia-kepong.jpg",
+      "imageAlt": "Forest Research Institute Malaysia, Kepong",
+      "imageCredit": {
+        "author": "Hannah 50",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lush_greenery_in_Forest_Research_Institute_of_Malaysia_(FRIM).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q5469091",
+      "visitorGuidance": [
+        "trail"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
+      ]
+    },
+    {
+      "id": "my-selangor-sultan-alam-shah-museum",
+      "name": "Sultan Alam Shah Museum",
+      "city": "Shah Alam",
+      "state": "Selangor",
+      "address": "Muzium Sultan Alam Shah, Persiaran Bandaraya, Seksyen 14, Shah Alam, Selangor, Malaysia",
+      "category": "cultural",
+      "description": "Selangor history and cultural collections.",
+      "latitude": 3.07522222,
+      "longitude": 101.52111111,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-sultan-alam-shah-museum.jpg",
+      "imageAlt": "Sultan Alam Shah Museum",
+      "imageCredit": {
+        "author": "凯乐",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%E8%8B%8F%E4%B8%B9%E8%8E%8E%E9%98%BF%E5%8D%97%E5%8D%9A%E7%89%A9%E9%A6%86.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7393595",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-selangor-sultan-salahuddin-abdul-aziz-shah-mosque",
+      "name": "Sultan Salahuddin Abdul Aziz Shah Mosque",
+      "city": "Shah Alam",
+      "state": "Selangor",
+      "address": "Masjid Sultan Salahuddin Abdul Aziz Shah, Persiaran Masjid, Seksyen 14, Shah Alam, Selangor, Malaysia",
+      "category": "cultural",
+      "description": "Landmark mosque in Shah Alam.",
+      "latitude": 3.07861111,
+      "longitude": 101.52055556,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-sultan-salahuddin-abdul-aziz-shah-mosque.jpg",
+      "imageAlt": "Sultan Salahuddin Abdul Aziz Shah Mosque",
+      "imageCredit": {
+        "author": "Ezry Abdul Rahman from Petaling Jaya, Selangor , Malaysia",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shah_Alam_Blue_mosque_at_night.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q308510",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-selangor-sunway-lagoon",
+      "name": "Sunway Lagoon",
+      "city": "Subang Jaya",
+      "state": "Selangor",
+      "address": "Sunway Lagoon, 3 Jalan PJS 11/11, Bandar Sunway, Selangor, Malaysia",
+      "category": "urban",
+      "description": "Established family-oriented theme park.",
+      "latitude": 3.06921,
+      "longitude": 101.607,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-sunway-lagoon.jpg",
+      "imageAlt": "Sunway Lagoon",
+      "imageCredit": {
+        "author": "Img by Calvin Teo",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sunway_Lagoon.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q3503999",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-selangor-i-city-shah-alam",
+      "name": "i-City, Shah Alam",
+      "city": "Shah Alam",
+      "state": "Selangor",
+      "address": "i-City, Seksyen 7, Shah Alam, Selangor, Malaysia",
+      "category": "urban",
+      "description": "Urban leisure and visitor attractions.",
+      "latitude": 3.065954,
+      "longitude": 101.483355,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-i-city-shah-alam.jpg",
+      "imageAlt": "i-City, Shah Alam",
+      "imageCredit": {
+        "author": "Stefan Fussan",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shah_Alam_-_i-City_0005.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q5967609",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-selangor-sky-mirror-kuala-selangor",
+      "name": "Sky Mirror, Kuala Selangor",
+      "city": "Kuala Selangor",
+      "state": "Selangor",
+      "address": "Sky Mirror tour departure area, Pasir Penambang, Kuala Selangor, Selangor, Malaysia",
+      "category": "coastal",
+      "description": "Guided tidal-sandbank excursion, not a road-access beach.",
+      "latitude": 3.2094,
+      "longitude": 101.1865,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-sky-mirror-kuala-selangor.jpg",
+      "imageAlt": "Sky Mirror, Kuala Selangor",
+      "imageCredit": {
+        "author": "Fuzheado ( talk )",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sandbar_and_tourist_attraction_in_the_Straits_of_Malacca.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q66093703",
+      "visitorGuidance": [
+        "boat",
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Boat access is required. Confirm the departure point, weather and return arrangements with the operator.",
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-selangor-bukit-melawati",
+      "name": "Bukit Melawati",
+      "city": "Kuala Selangor",
+      "state": "Selangor",
+      "address": "Bukit Melawati, Kuala Selangor, Selangor, Malaysia",
+      "category": "heritage",
+      "description": "Hilltop history and heritage landscape.",
+      "latitude": 3.341944444,
+      "longitude": 101.246111111,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-bukit-melawati.jpg",
+      "imageAlt": "Bukit Melawati",
+      "imageCredit": {
+        "author": "Leonard Reback",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bukit_Melawati_cannons.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7318280",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-selangor-jugra-lighthouse-viewpoint",
+      "name": "Jugra Lighthouse viewpoint",
+      "city": "Banting",
+      "state": "Selangor",
+      "address": "Bukit Jugra Lighthouse, Jugra, Banting, Selangor, Malaysia",
+      "category": "heritage",
+      "description": "Lighthouse surroundings and historic hill setting.",
+      "latitude": 2.8357776,
+      "longitude": 101.4176138,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-jugra-lighthouse-viewpoint.jpg",
+      "imageAlt": "Jugra Lighthouse viewpoint",
+      "imageCredit": {
+        "author": "Slleong",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jugra_Hill_3.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/relation/15057021",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-selangor-morib-beach",
+      "name": "Morib Beach",
+      "city": "Banting",
+      "state": "Selangor",
+      "address": "Pantai Morib, Morib, Banting, Selangor, Malaysia",
+      "category": "coastal",
+      "description": "Public coastal recreation stop.",
+      "latitude": 2.75195,
+      "longitude": 101.443,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-selangor-morib-beach.jpg",
+      "imageAlt": "Morib Beach",
+      "imageCredit": {
+        "author": "Ajayrb135",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Morib_Beach.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/selangor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q6912158",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-johor-legoland-malaysia",
+      "name": "LEGOLAND Malaysia",
+      "city": "Iskandar Puteri",
+      "state": "Johor",
+      "address": "LEGOLAND Malaysia, 7 Jalan LEGOLAND, Bandar Medini Iskandar, Iskandar Puteri, Johor, Malaysia",
+      "category": "urban",
+      "description": "Established family theme-park destination.",
+      "latitude": 1.425,
+      "longitude": 103.62722222,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-legoland-malaysia.jpg",
+      "imageAlt": "LEGOLAND Malaysia",
+      "imageCredit": {
+        "author": "milst1",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Entrance_Legoland_Malaysia.jpg"
+      },
+      "sourceUrl": "https://www.legoland.com.my/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q3229105",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-johor-johor-zoo",
+      "name": "Johor Zoo",
+      "city": "Johor Bahru",
+      "state": "Johor",
+      "address": "Zoo Johor, Jalan Gertak Merah, Johor Bahru, Johor, Malaysia",
+      "category": "nature",
+      "description": "Wildlife visitor attraction in Johor Bahru.",
+      "latitude": 1.4575,
+      "longitude": 103.75225,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-johor-johor-zoo.jpg",
+      "imageAlt": "Johor Zoo",
+      "imageCredit": {
+        "author": "Stress 043",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Zoo_Johor_entrance.jpg"
+      },
+      "sourceUrl": "https://zootiket.johor.gov.my/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q28219616",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-johor-tanjung-piai-national-park",
+      "name": "Tanjung Piai National Park",
+      "city": "Pontian",
+      "state": "Johor",
+      "address": "Taman Negara Johor Tanjung Piai, Tanjung Piai, Pontian, Johor, Malaysia",
+      "category": "nature",
+      "description": "Mangrove boardwalks and coastal ecology.",
+      "latitude": 1.2683,
+      "longitude": 103.5101,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-johor-tanjung-piai-national-park.jpg",
+      "imageAlt": "Tanjung Piai National Park",
+      "imageCredit": {
+        "author": "D.W. Fisher-Freberg",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tanjung_Piai_statue.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q20452389",
+      "visitorGuidance": [
+        "trail",
+        "wildlife"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out.",
+        "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
+      ]
+    },
+    {
+      "id": "my-johor-sultan-abu-bakar-state-mosque",
+      "name": "Sultan Abu Bakar State Mosque",
+      "city": "Johor Bahru",
+      "state": "Johor",
+      "address": "Masjid Sultan Abu Bakar, Jalan Skudai, Johor Bahru, Johor, Malaysia",
+      "category": "cultural",
+      "description": "Landmark mosque overlooking the strait.",
+      "latitude": 1.456955555,
+      "longitude": 103.751052777,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-sultan-abu-bakar-state-mosque.jpg",
+      "imageAlt": "Sultan Abu Bakar State Mosque",
+      "imageCredit": {
+        "author": "Chainwit.",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Masjid_Sultan_Abu_Bakar,_JB_(2025)_-_img_02.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2478866",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-johor-johor-bahru-chinese-heritage-museum",
+      "name": "Johor Bahru Chinese Heritage Museum",
+      "city": "Johor Bahru",
+      "state": "Johor",
+      "address": "Johor Bahru Chinese Heritage Museum, 42 Jalan Ibrahim, Johor Bahru, Johor, Malaysia",
+      "category": "heritage",
+      "description": "Local community and trading history.",
+      "latitude": 1.45605556,
+      "longitude": 103.76319444,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-johor-bahru-chinese-heritage-museum.jpg",
+      "imageAlt": "Johor Bahru Chinese Heritage Museum",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Johor_Bahru_Chinese_Heritage_Museum.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q28219618",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-johor-kota-johor-lama-museum",
+      "name": "Kota Johor Lama Museum",
+      "city": "Kota Tinggi",
+      "state": "Johor",
+      "address": "Muzium Kota Johor Lama, Kampung Johor Lama, Kota Tinggi, Johor, Malaysia",
+      "category": "heritage",
+      "description": "History of the old Johor capital.",
+      "latitude": 1.57994444,
+      "longitude": 104.01863889,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-kota-johor-lama-museum.jpg",
+      "imageAlt": "Kota Johor Lama Museum",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kota_Johor_Lama_Museum.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q27966944",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-johor-desaru-beach",
+      "name": "Desaru Beach",
+      "city": "Bandar Penawar",
+      "state": "Johor",
+      "address": "Pantai Desaru, Bandar Penawar, Kota Tinggi, Johor, Malaysia",
+      "category": "coastal",
+      "description": "East-coast beach destination.",
+      "latitude": 1.547194444,
+      "longitude": 104.262638888,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-johor-desaru-beach.jpg",
+      "imageAlt": "Desaru Beach",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Desaru_Beach.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/johor/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q96651626",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-melaka-a-famosa-porta-de-santiago",
+      "name": "A Famosa / Porta de Santiago",
+      "city": "Melaka City",
+      "state": "Melaka",
+      "address": "Porta de Santiago, Jalan Parameswara, Bandar Hilir, Melaka, Malaysia",
+      "category": "heritage",
+      "description": "Surviving historic gateway.",
+      "latitude": 2.19161667,
+      "longitude": 102.25030556,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-a-famosa-porta-de-santiago.jpg",
+      "imageAlt": "A Famosa / Porta de Santiago",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_Famosa_Fortress.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q1955098",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-melaka-st-paul-s-church-ruins",
+      "name": "St Paul's Church ruins",
+      "city": "Melaka City",
+      "state": "Melaka",
+      "address": "St Paul's Hill, Bandar Hilir, Melaka, Malaysia",
+      "category": "heritage",
+      "description": "Historic hilltop church remains.",
+      "latitude": 2.19278,
+      "longitude": 102.249,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-st-paul-s-church-ruins.jpg",
+      "imageAlt": "St Paul's Church ruins",
+      "imageCredit": {
+        "author": "Bjørn Christian Tørrissen",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:St._Paul%27s_Church_Malacca_2012.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7591055",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-melaka-cheng-hoon-teng-temple",
+      "name": "Cheng Hoon Teng Temple",
+      "city": "Melaka City",
+      "state": "Melaka",
+      "address": "Cheng Hoon Teng Temple, 25 Jalan Tokong, Melaka, Malaysia",
+      "category": "cultural",
+      "description": "Historic temple and religious architecture.",
+      "latitude": 2.19747,
+      "longitude": 102.247,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-cheng-hoon-teng-temple.jpg",
+      "imageAlt": "Cheng Hoon Teng Temple",
+      "imageCredit": {
+        "author": "Marcin Konsek",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2016_Malakka,_%C5%9Awi%C4%85tynia_Cheng_Hoon_Teng_(01).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2178942",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-melaka-baba-nyonya-heritage-museum",
+      "name": "Baba & Nyonya Heritage Museum",
+      "city": "Melaka City",
+      "state": "Melaka",
+      "address": "Baba & Nyonya Heritage Museum, 48-50 Jalan Tun Tan Cheng Lock, Melaka, Malaysia",
+      "category": "cultural",
+      "description": "Peranakan home and cultural collections.",
+      "latitude": 2.19535,
+      "longitude": 102.247,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-baba-nyonya-heritage-museum.jpg",
+      "imageAlt": "Baba & Nyonya Heritage Museum",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Baba_Nyonya_Heritage_Museum.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q4837359",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-melaka-melaka-sultanate-palace-museum",
+      "name": "Melaka Sultanate Palace Museum",
+      "city": "Melaka City",
+      "state": "Melaka",
+      "address": "Muzium Istana Kesultanan Melaka, Jalan Kota, Bandar Hilir, Melaka, Malaysia",
+      "category": "heritage",
+      "description": "Interpretation of the sultanate's history.",
+      "latitude": 2.192878,
+      "longitude": 102.250439,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-melaka-sultanate-palace-museum.jpg",
+      "imageAlt": "Melaka Sultanate Palace Museum",
+      "imageCredit": {
+        "author": "Adiput ( talk )",
+        "license": "Public domain",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Malacca_Sultanate_Palace.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7353928",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-melaka-maritime-museum",
+      "name": "Maritime Museum",
+      "city": "Melaka City",
+      "state": "Melaka",
+      "address": "Maritime Museum, Jalan Merdeka, Bandar Hilir, Melaka, Malaysia",
+      "category": "cultural",
+      "description": "Maritime history and the ship-replica landmark.",
+      "latitude": 2.19181,
+      "longitude": 102.246,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-maritime-museum.jpg",
+      "imageAlt": "Maritime Museum",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Maritime_Museum.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7393527",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-melaka-zoo-melaka",
+      "name": "Zoo Melaka",
+      "city": "Ayer Keroh",
+      "state": "Melaka",
+      "address": "Zoo Melaka, Jalan Tun Abdul Razak, Ayer Keroh, Melaka, Malaysia",
+      "category": "nature",
+      "description": "Wildlife visitor attraction in Ayer Keroh.",
+      "latitude": 2.27777778,
+      "longitude": 102.30166667,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-melaka-zoo-melaka.jpg",
+      "imageAlt": "Zoo Melaka",
+      "imageCredit": {
+        "author": "Stress 043",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Malacca_Zoo_and_Bird_Farm.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q4802284",
+      "visitorGuidance": [
+        "wildlife"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
+      ]
+    },
+    {
+      "id": "my-melaka-klebang-beach",
+      "name": "Klebang Beach",
+      "city": "Klebang",
+      "state": "Melaka",
+      "address": "Pantai Klebang, Klebang, Melaka, Malaysia",
+      "category": "coastal",
+      "description": "Beachfront recreation and coastal views.",
+      "latitude": 2.216416666,
+      "longitude": 102.192222222,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-klebang-beach.jpg",
+      "imageAlt": "Klebang Beach",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Klebang_Beach.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q20639331",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-melaka-portuguese-settlement-seafood-area",
+      "name": "Portuguese Settlement seafood area",
+      "city": "Melaka City",
+      "state": "Melaka",
+      "address": "Portuguese Square, Portuguese Settlement, Ujong Pasir, Melaka, Malaysia",
+      "category": "food",
+      "description": "Food stop in a living cultural neighbourhood.",
+      "latitude": 2.185833333,
+      "longitude": 102.265833333,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-melaka-portuguese-settlement-seafood-area.jpg",
+      "imageAlt": "Portuguese Settlement seafood area",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Portuguese_Settlement.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/melaka/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7232683",
+      "visitorGuidance": [
+        "residential"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "This is a living neighbourhood. Respect residents' privacy and stay on public visitor routes."
+      ]
+    },
+    {
+      "id": "my-negeri-sembilan-army-museum-port-dickson",
+      "name": "Army Museum, Port Dickson",
+      "city": "Port Dickson",
+      "state": "Negeri Sembilan",
+      "address": "Muzium Tentera Darat, Kem Sirusa, Port Dickson, Negeri Sembilan, Malaysia",
+      "category": "heritage",
+      "description": "Military history and outdoor exhibits.",
+      "latitude": 2.496621401,
+      "longitude": 101.847754057,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-army-museum-port-dickson.jpg",
+      "imageAlt": "Army Museum, Port Dickson",
+      "imageCredit": {
+        "author": "Zahirulnukman",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muzium_Tentera_Darat_PD_2.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7393385",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-negeri-sembilan-fort-lukut-and-lukut-museum",
+      "name": "Fort Lukut and Lukut Museum",
+      "city": "Port Dickson",
+      "state": "Negeri Sembilan",
+      "address": "Muzium Lukut, Lot 730, Jalan Besar, Taman PD Jaya, Port Dickson, Negeri Sembilan, Malaysia",
+      "category": "heritage",
+      "description": "Historic fort and tin-trade history.",
+      "latitude": 2.567,
+      "longitude": 101.822,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-fort-lukut-and-lukut-museum.jpg",
+      "imageAlt": "Fort Lukut and Lukut Museum",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lukut_Museum_and_Fort.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q6433807",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-negeri-sembilan-negeri-sembilan-state-museum-complex",
+      "name": "Negeri Sembilan State Museum Complex",
+      "city": "Seremban",
+      "state": "Negeri Sembilan",
+      "address": "Kompleks Muzium Negeri Sembilan, Jalan Sungai Ujong, Seremban, Negeri Sembilan, Malaysia",
+      "category": "cultural",
+      "description": "Regional culture and architecture.",
+      "latitude": 2.71821194,
+      "longitude": 101.92114996,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-negeri-sembilan-state-museum-complex.jpg",
+      "imageAlt": "Negeri Sembilan State Museum Complex",
+      "imageCredit": {
+        "author": "Zahirulnukman",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Teratak_Perpatih.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q116608941",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-negeri-sembilan-custom-museum-kuala-klawang",
+      "name": "Custom Museum, Kuala Klawang",
+      "city": "Kuala Klawang",
+      "state": "Negeri Sembilan",
+      "address": "Muzium Adat, Jalan Dato Umbi, Kuala Klawang, Negeri Sembilan, Malaysia",
+      "category": "cultural",
+      "description": "Local customs and cultural interpretation.",
+      "latitude": 2.93763889,
+      "longitude": 102.07108333,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-custom-museum-kuala-klawang.jpg",
+      "imageAlt": "Custom Museum, Kuala Klawang",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Custom_Museum.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7393287",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-negeri-sembilan-seremban-lake-gardens",
+      "name": "Seremban Lake Gardens",
+      "city": "Seremban",
+      "state": "Negeri Sembilan",
+      "address": "Taman Tasik Seremban, Jalan Taman Bunga, Seremban, Negeri Sembilan, Malaysia",
+      "category": "nature",
+      "description": "Urban gardens and lakeside walks.",
+      "latitude": 2.7224863,
+      "longitude": 101.9471893,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-seremban-lake-gardens.jpg",
+      "imageAlt": "Seremban Lake Gardens",
+      "imageCredit": {
+        "author": "AyyanD",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seremban_Lake_Gardens,_Seremban.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/553528514",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-negeri-sembilan-blue-lagoon-tanjung-biru-beach",
+      "name": "Blue Lagoon / Tanjung Biru Beach",
+      "city": "Port Dickson",
+      "state": "Negeri Sembilan",
+      "address": "Pantai Tanjung Biru, Jalan Pantai, Port Dickson, Negeri Sembilan, Malaysia",
+      "category": "coastal",
+      "description": "Sheltered beach recreation stop.",
+      "latitude": 2.4153769,
+      "longitude": 101.8558862,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-blue-lagoon-tanjung-biru-beach.jpg",
+      "imageAlt": "Blue Lagoon / Tanjung Biru Beach",
+      "imageCredit": {
+        "author": "AyyanD",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tanjung_Biru_beach,_low_tide.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/494766304",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-negeri-sembilan-teluk-kemang-beach",
+      "name": "Teluk Kemang Beach",
+      "city": "Port Dickson",
+      "state": "Negeri Sembilan",
+      "address": "Pantai Teluk Kemang, Jalan Pantai, Port Dickson, Negeri Sembilan, Malaysia",
+      "category": "coastal",
+      "description": "Established Port Dickson beachfront.",
+      "latitude": 2.454483333,
+      "longitude": 101.859311111,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-teluk-kemang-beach.jpg",
+      "imageAlt": "Teluk Kemang Beach",
+      "imageCredit": {
+        "author": "AyyanD",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Teluk_Kemang_Beach,_Port_Dickson.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7697907",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-negeri-sembilan-palm-mall-seremban",
+      "name": "Palm Mall, Seremban",
+      "city": "Seremban",
+      "state": "Negeri Sembilan",
+      "address": "Palm Mall, Jalan Sungai Ujong, Seremban, Negeri Sembilan, Malaysia",
+      "category": "urban",
+      "description": "Indoor shopping and leisure stop.",
+      "latitude": 2.7198503,
+      "longitude": 101.9228509,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-palm-mall-seremban.jpg",
+      "imageAlt": "Palm Mall, Seremban",
+      "imageCredit": {
+        "author": "PulauKakatua19",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Palm_Mall_front_at_evening.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/289186527",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-negeri-sembilan-pasar-besar-seremban-food-area",
+      "name": "Pasar Besar Seremban food area",
+      "city": "Seremban",
+      "state": "Negeri Sembilan",
+      "address": "Pasar Besar Seremban, Jalan Pasar, Seremban, Negeri Sembilan, Malaysia",
+      "category": "food",
+      "description": "Local market food and everyday culinary culture.",
+      "latitude": 2.730712,
+      "longitude": 101.9366215,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-negeri-sembilan-pasar-besar-seremban-food-area.jpg",
+      "imageAlt": "Pasar Besar Seremban food area",
+      "imageCredit": {
+        "author": "Zahirul Nukman",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pasar_besar_seremban.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/negeri-sembilan/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/496754268",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-pahang-teluk-chempedak",
+      "name": "Teluk Chempedak",
+      "city": "Kuantan",
+      "state": "Pahang",
+      "address": "Teluk Chempedak, Jalan Teluk Cempedak, Kuantan, Pahang, Malaysia",
+      "category": "coastal",
+      "description": "Beach and coastal promenade near Kuantan.",
+      "latitude": 3.8098087,
+      "longitude": 103.3728617,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-pahang-teluk-chempedak.jpg",
+      "imageAlt": "Teluk Chempedak",
+      "imageCredit": {
+        "author": "Dominic Nelson",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kuantan_-_rocks_on_the_beach_at_Teluk_Cempedak_-_May_2024.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/pahang/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/35571484",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-pahang-sungai-pandan-waterfall",
+      "name": "Sungai Pandan Waterfall",
+      "city": "Kuantan",
+      "state": "Pahang",
+      "address": "Air Terjun Sungai Pandan, Panching, Kuantan, Pahang, Malaysia",
+      "category": "nature",
+      "description": "Waterfall and forest recreation.",
+      "latitude": 3.790225,
+      "longitude": 103.143555555,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-pahang-sungai-pandan-waterfall.png",
+      "imageAlt": "Sungai Pandan Waterfall",
+      "imageCredit": {
+        "author": "Pandanwaterfall",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sungai_Pandan_Waterfall.png"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/pahang/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7304285",
+      "visitorGuidance": [
+        "trail"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
+      ]
+    },
+    {
+      "id": "my-pahang-sungai-lembing-museum",
+      "name": "Sungai Lembing Museum",
+      "city": "Sungai Lembing",
+      "state": "Pahang",
+      "address": "Muzium Sungai Lembing, Sungai Lembing, Kuantan, Pahang, Malaysia",
+      "category": "heritage",
+      "description": "Tin-mining history and local industrial heritage.",
+      "latitude": 3.9137441,
+      "longitude": 103.0324427,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-pahang-sungai-lembing-museum.jpg",
+      "imageAlt": "Sungai Lembing Museum",
+      "imageCredit": {
+        "author": "WPSamson",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sungai_Lembing_Museum_October_2011.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/pahang/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/870001527",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-pahang-genting-skyworlds",
+      "name": "Genting SkyWorlds",
+      "city": "Genting Highlands",
+      "state": "Pahang",
+      "address": "Genting SkyWorlds, Resorts World Genting, Genting Highlands, Pahang, Malaysia",
+      "category": "urban",
+      "description": "Established highland theme-park destination.",
+      "latitude": 3.422611111,
+      "longitude": 101.795666666,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-pahang-genting-skyworlds.jpg",
+      "imageAlt": "Genting SkyWorlds",
+      "imageCredit": {
+        "author": "Chongkian",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Genting_SkyWorlds_Theme_Park.jpg"
+      },
+      "sourceUrl": "https://www.gentingskyworlds.com/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q17058506",
+      "visitorGuidance": [
+        "booking"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Check whether advance booking or a timed entry is required before travelling."
+      ]
+    },
+    {
+      "id": "my-pahang-boh-sungai-palas-tea-centre",
+      "name": "BOH Sungai Palas Tea Centre",
+      "city": "Cameron Highlands",
+      "state": "Pahang",
+      "address": "BOH Sungai Palas Tea Centre, Sungai Palas, Brinchang, Cameron Highlands, Pahang, Malaysia",
+      "category": "nature",
+      "description": "Tea landscape and visitor centre.",
+      "latitude": 4.5161604,
+      "longitude": 101.4162142,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-pahang-boh-sungai-palas-tea-centre.jpg",
+      "imageAlt": "BOH Sungai Palas Tea Centre",
+      "imageCredit": {
+        "author": "udeyismail",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cameron_highland.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/pahang/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/1989261238",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kelantan-siti-khadijah-market",
+      "name": "Siti Khadijah Market",
+      "city": "Kota Bharu",
+      "state": "Kelantan",
+      "address": "Pasar Siti Khadijah, Jalan Buluh Kubu, Kota Bharu, Kelantan, Malaysia",
+      "category": "food",
+      "description": "Local produce, prepared food and regional food products.",
+      "latitude": 6.13011111,
+      "longitude": 102.23905556,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-siti-khadijah-market.jpg",
+      "imageAlt": "Siti Khadijah Market",
+      "imageCredit": {
+        "author": "CK Tan",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kota_Bharu_Central_Market_-_panoramio.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q27561626",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-kelantan-istana-jahar-museum",
+      "name": "Istana Jahar museum",
+      "city": "Kota Bharu",
+      "state": "Kelantan",
+      "address": "Istana Jahar, Jalan Sultan, Kota Bharu, Kelantan, Malaysia",
+      "category": "cultural",
+      "description": "Royal customs and Kelantanese culture.",
+      "latitude": 6.13156,
+      "longitude": 102.23706,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-istana-jahar-museum.jpg",
+      "imageAlt": "Istana Jahar museum",
+      "imageCredit": {
+        "author": "Comelote",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Istana_Jahar,_Kota_Bharu.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q6088519",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kelantan-istana-batu-royal-museum",
+      "name": "Istana Batu Royal Museum",
+      "city": "Kota Bharu",
+      "state": "Kelantan",
+      "address": "Muzium Diraja Istana Batu, Jalan Hilir Kota, Kota Bharu, Kelantan, Malaysia",
+      "category": "heritage",
+      "description": "Royal history and former palace collections.",
+      "latitude": 6.13216667,
+      "longitude": 102.23733333,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-istana-batu-royal-museum.jpg",
+      "imageAlt": "Istana Batu Royal Museum",
+      "imageCredit": {
+        "author": "Muhamad Fadhli Ahmad",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muzium_Diraja_Istana_Batu.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q27558470",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kelantan-kelantan-state-museum",
+      "name": "Kelantan State Museum",
+      "city": "Kota Bharu",
+      "state": "Kelantan",
+      "address": "Muzium Negeri Kelantan, Jalan Hospital, Kota Bharu, Kelantan, Malaysia",
+      "category": "cultural",
+      "description": "State history and cultural exhibits.",
+      "latitude": 6.12497222,
+      "longitude": 102.23827778,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-kelantan-state-museum.jpg",
+      "imageAlt": "Kelantan State Museum",
+      "imageCredit": {
+        "author": "CK Tan",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Museum_Kelantan_-_panoramio.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q28219680",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-kelantan-wat-phothivihan",
+      "name": "Wat Phothivihan",
+      "city": "Tumpat",
+      "state": "Kelantan",
+      "address": "Wat Phothivihan, Kampung Jambu, Tumpat, Kelantan, Malaysia",
+      "category": "cultural",
+      "description": "Reclining Buddha and Buddhist temple complex.",
+      "latitude": 6.130228888,
+      "longitude": 102.137639444,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-wat-phothivihan.jpg",
+      "imageAlt": "Wat Phothivihan",
+      "imageCredit": {
+        "author": "Photo Dharma from Sadao, Thailand",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:001_Gateway_Signboard_(9143224672).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q7972952",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-kelantan-pantai-irama",
+      "name": "Pantai Irama",
+      "city": "Bachok",
+      "state": "Kelantan",
+      "address": "Pantai Irama, Bachok, Kelantan, Malaysia",
+      "category": "coastal",
+      "description": "Beachfront recreation in Bachok.",
+      "latitude": 6.071111111,
+      "longitude": 102.397777777,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-kelantan-pantai-irama.jpg",
+      "imageAlt": "Pantai Irama",
+      "imageCredit": {
+        "author": "Azmin/Az08ProGamers",
+        "license": "Public domain",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pantai_Irama,_Bachok,_Kelantan.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q33328221",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-kelantan-gunung-stong-state-park",
+      "name": "Gunung Stong State Park",
+      "city": "Dabong",
+      "state": "Kelantan",
+      "address": "Gunung Stong State Park visitor area, Jelawang, Dabong, Kelantan, Malaysia",
+      "category": "nature",
+      "description": "Forest and waterfall recreation; use the visitor trailhead.",
+      "latitude": 5.3395228,
+      "longitude": 101.9747147,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-kelantan-gunung-stong-state-park.jpg",
+      "imageAlt": "Gunung Stong State Park",
+      "imageCredit": {
+        "author": "Iyliatalib",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gunung_stong,_kelantan.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kelantan/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/5281244920",
+      "visitorGuidance": [
+        "trail"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
+      ]
+    },
+    {
+      "id": "my-terengganu-terengganu-state-museum-complex",
+      "name": "Terengganu State Museum Complex",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Kompleks Muzium Negeri Terengganu, Bukit Losong, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "cultural",
+      "description": "Regional culture, history and traditional buildings.",
+      "latitude": 5.3186,
+      "longitude": 103.10209,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-terengganu-state-museum-complex.jpg",
+      "imageAlt": "Terengganu State Museum Complex",
+      "imageCredit": {
+        "author": "Wiki Farazi",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muzium_Negeri_Terengganu,_Kampung_Bukit_Losong_20240227_095051.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q65219529",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-terengganu-crystal-mosque",
+      "name": "Crystal Mosque",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Masjid Kristal, Pulau Wan Man, Losong, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "cultural",
+      "description": "Waterfront mosque and architectural landmark.",
+      "latitude": 5.322285,
+      "longitude": 103.120663,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-crystal-mosque.jpg",
+      "imageAlt": "Crystal Mosque",
+      "imageCredit": {
+        "author": "Ikhwan Salleh",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Masjid_Kristal_(Mei_2011).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q1789166",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-terengganu-islamic-civilisation-park",
+      "name": "Islamic Civilisation Park",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Taman Tamadun Islam, Pulau Wan Man, Losong, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "cultural",
+      "description": "Architectural monuments and cultural interpretation.",
+      "latitude": 5.321867,
+      "longitude": 103.116586,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-islamic-civilisation-park.jpg",
+      "imageAlt": "Islamic Civilisation Park",
+      "imageCredit": {
+        "author": "Airil anuar",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Masjid_Qolsharif.jpg"
+      },
+      "sourceUrl": "https://www.tti.com.my/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q6082489",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-terengganu-pasar-payang",
+      "name": "Pasar Payang",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Pasar Payang, Jalan Sultan Zainal Abidin, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "food",
+      "description": "Food products, local market browsing and crafts.",
+      "latitude": 5.3358877,
+      "longitude": 103.1353224,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-pasar-payang.jpg",
+      "imageAlt": "Pasar Payang",
+      "imageCredit": {
+        "author": "Wiki Farazi",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pasar_Besar_Kedai_Payang,_Kuala_Terengganu_20240227_085529.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/1395013579",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-terengganu-kampung-cina-kuala-terengganu",
+      "name": "Kampung Cina, Kuala Terengganu",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Kampung Cina, Jalan Kampung Cina, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "heritage",
+      "description": "Historic streetscape and community heritage.",
+      "latitude": 5.3332,
+      "longitude": 103.1328,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-kampung-cina-kuala-terengganu.jpg",
+      "imageAlt": "Kampung Cina, Kuala Terengganu",
+      "imageCredit": {
+        "author": "Rozi Salleh",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chinatown_Gate,_Kuala_Terengganu.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q19356838",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-terengganu-setiu-wetlands",
+      "name": "Setiu Wetlands",
+      "city": "Setiu",
+      "state": "Terengganu",
+      "address": "Setiu Wetlands visitor boardwalk, Kampung Pengkalan Gelap, Setiu, Terengganu, Malaysia",
+      "category": "nature",
+      "description": "Wetland ecology; identify a visitor-access point/operator.",
+      "latitude": 5.671977777,
+      "longitude": 102.717766666,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-terengganu-setiu-wetlands.jpg",
+      "imageAlt": "Setiu Wetlands",
+      "imageCredit": {
+        "author": "Fikku fiq",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_boardwalk_of_Setiu_Wetlands_State_Park.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q12691217",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-terengganu-sekayu-waterfall",
+      "name": "Sekayu Waterfall",
+      "city": "Hulu Terengganu",
+      "state": "Terengganu",
+      "address": "Hutan Lipur Sekayu, Kuala Berang, Hulu Terengganu, Terengganu, Malaysia",
+      "category": "nature",
+      "description": "Forest recreation and waterfall scenery.",
+      "latitude": 4.9626,
+      "longitude": 102.95048,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-terengganu-sekayu-waterfall.jpg",
+      "imageAlt": "Sekayu Waterfall",
+      "imageCredit": {
+        "author": "espiemovic",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sekayu_Waterfall_-_panoramio.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/12087284128",
+      "visitorGuidance": [
+        "trail"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
+      ]
+    },
+    {
+      "id": "my-terengganu-batu-buruk-beach",
+      "name": "Batu Buruk Beach",
+      "city": "Kuala Terengganu",
+      "state": "Terengganu",
+      "address": "Pantai Batu Buruk, Kuala Terengganu, Terengganu, Malaysia",
+      "category": "coastal",
+      "description": "Coastal promenade and beach scenery, not a swimming recommendation.",
+      "latitude": 5.3125699,
+      "longitude": 103.1615953,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-terengganu-batu-buruk-beach.jpg",
+      "imageAlt": "Batu Buruk Beach",
+      "imageCredit": {
+        "author": "Airil anuar",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pantai_batu_buruk.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/terengganu/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/584341836",
+      "visitorGuidance": [
+        "beach"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
+      ]
+    },
+    {
+      "id": "my-sabah-sepilok-orangutan-rehabilitation-centre",
+      "name": "Sepilok Orangutan Rehabilitation Centre",
+      "city": "Sandakan",
+      "state": "Sabah",
+      "address": "Sepilok Orangutan Rehabilitation Centre, Jalan Sepilok, Sandakan, Sabah, Malaysia",
+      "category": "nature",
+      "description": "Conservation-oriented wildlife viewing.",
+      "latitude": 5.864978,
+      "longitude": 117.949086,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-sabah-sepilok-orangutan-rehabilitation-centre.jpg",
+      "imageAlt": "Sepilok Orangutan Rehabilitation Centre",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sandakan_Sabah_Sepilok-Orangutan-Rehabilitation-Centre-01a.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q1584292",
+      "visitorGuidance": [
+        "wildlife"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
+      ]
+    },
+    {
+      "id": "my-sabah-bornean-sun-bear-conservation-centre",
+      "name": "Bornean Sun Bear Conservation Centre",
+      "city": "Sandakan",
+      "state": "Sabah",
+      "address": "Bornean Sun Bear Conservation Centre, Sepilok, Sandakan, Sabah, Malaysia",
+      "category": "nature",
+      "description": "Wildlife conservation visitor centre.",
+      "latitude": 5.86376,
+      "longitude": 117.950016,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-sabah-bornean-sun-bear-conservation-centre.jpg",
+      "imageAlt": "Bornean Sun Bear Conservation Centre",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sepilok_Sabah_Bornean-Sun-Bear-Conservation-Centre-02.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q18205266",
+      "visitorGuidance": [
+        "wildlife"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
+      ]
+    },
+    {
+      "id": "my-sabah-sabah-state-museum-and-heritage-village",
+      "name": "Sabah State Museum and Heritage Village",
+      "city": "Kota Kinabalu",
+      "state": "Sabah",
+      "address": "Sabah State Museum, Jalan Muzium, Kota Kinabalu, Sabah, Malaysia",
+      "category": "cultural",
+      "description": "Regional collections and traditional houses.",
+      "latitude": 5.960555555,
+      "longitude": 116.071666666,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sabah-sabah-state-museum-and-heritage-village.jpg",
+      "imageAlt": "Sabah State Museum and Heritage Village",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:KotaKinabalu_Sabah_Sabah-State-Museum-01.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2209383",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sabah-monsopiad-heritage-village",
+      "name": "Monsopiad Heritage Village",
+      "city": "Penampang",
+      "state": "Sabah",
+      "address": "Monsopiad Heritage Village, Kampung Kuai Kandazon, Penampang, Sabah, Malaysia",
+      "category": "cultural",
+      "description": "Kadazandusun heritage interpretation.",
+      "latitude": 5.889145833,
+      "longitude": 116.079190833,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sabah-monsopiad-heritage-village.jpg",
+      "imageAlt": "Monsopiad Heritage Village",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:KgKuaiKandazon_Sabah_Monsopiad-Cultural-Village-01.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q6902629",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sabah-atkinson-clock-tower",
+      "name": "Atkinson Clock Tower",
+      "city": "Kota Kinabalu",
+      "state": "Sabah",
+      "address": "Atkinson Clock Tower, Jalan Istana, Kota Kinabalu, Sabah, Malaysia",
+      "category": "heritage",
+      "description": "Historic Kota Kinabalu landmark.",
+      "latitude": 5.982186,
+      "longitude": 116.077333,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sabah-atkinson-clock-tower.jpg",
+      "imageAlt": "Atkinson Clock Tower",
+      "imageCredit": {
+        "author": "(WT-shared) Robert Biuk-Aghai",
+        "license": "CC BY-SA 1.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:AtkinsonClockTower-KotaKinabalu.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q4281727",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sabah-agnes-keith-house",
+      "name": "Agnes Keith House",
+      "city": "Sandakan",
+      "state": "Sabah",
+      "address": "Agnes Keith House, Jalan Istana, Sandakan, Sabah, Malaysia",
+      "category": "heritage",
+      "description": "Historic house and Sandakan history.",
+      "latitude": 5.842713888,
+      "longitude": 118.116338888,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sabah-agnes-keith-house.jpg",
+      "imageAlt": "Agnes Keith House",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sandakan_Sabah_AgnesKeithHouse-16.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q64615217",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sabah-gaya-street-sunday-market",
+      "name": "Gaya Street Sunday Market",
+      "city": "Kota Kinabalu",
+      "state": "Sabah",
+      "address": "Gaya Street Sunday Market, Jalan Gaya, Kota Kinabalu, Sabah, Malaysia",
+      "category": "urban",
+      "description": "Scheduled street market and browsing.",
+      "latitude": 5.98431,
+      "longitude": 116.07742,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sabah-gaya-street-sunday-market.jpg",
+      "imageAlt": "Gaya Street Sunday Market",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:KotaKinabalu_Sabah_Gaya-Street-Sunday-Market-12.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sabah/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q24439138",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-sarawak-borneo-cultures-museum",
+      "name": "Borneo Cultures Museum",
+      "city": "Kuching",
+      "state": "Sarawak",
+      "address": "Borneo Cultures Museum, Jalan Tun Abang Haji Openg, Kuching, Sarawak, Malaysia",
+      "category": "cultural",
+      "description": "Major museum of Borneo's cultures and history.",
+      "latitude": 1.5556,
+      "longitude": 110.3427,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sarawak-borneo-cultures-museum.jpg",
+      "imageAlt": "Borneo Cultures Museum",
+      "imageCredit": {
+        "author": "愛子棋枰",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Front_view_of_Borneo_Cultural_Museum_20220408153640.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q111536310",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sarawak-kuching-cat-museum",
+      "name": "Kuching Cat Museum",
+      "city": "Kuching",
+      "state": "Sarawak",
+      "address": "DBKU Cat Museum, Bukit Siol, Jalan Semariang, Petra Jaya, Kuching, Sarawak, Malaysia",
+      "category": "cultural",
+      "description": "Specialist museum and themed collections.",
+      "latitude": 1.58661,
+      "longitude": 110.334,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sarawak-kuching-cat-museum.jpg",
+      "imageAlt": "Kuching Cat Museum",
+      "imageCredit": {
+        "author": "Shoestring at wts.wikivoyage",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cat_Museum_001,_Kuching,_Malaysia.JPG"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q6441508",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sarawak-fort-margherita",
+      "name": "Fort Margherita",
+      "city": "Kuching",
+      "state": "Sarawak",
+      "address": "Fort Margherita, Petra Jaya, Kuching, Sarawak, Malaysia",
+      "category": "heritage",
+      "description": "Historic fort and Kuching history.",
+      "latitude": 1.56055556,
+      "longitude": 110.34944444,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sarawak-fort-margherita.jpg",
+      "imageAlt": "Fort Margherita",
+      "imageCredit": {
+        "author": "Graystravels",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fort_Margherita_-_Kuching.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2007681",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sarawak-old-kuching-courthouse",
+      "name": "Old Kuching Courthouse",
+      "city": "Kuching",
+      "state": "Sarawak",
+      "address": "Old Courthouse, Jalan Tun Abang Haji Openg, Kuching, Sarawak, Malaysia",
+      "category": "heritage",
+      "description": "Historic civic architecture and visitor precinct.",
+      "latitude": 1.5594459,
+      "longitude": 110.3448088,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sarawak-old-kuching-courthouse.jpg",
+      "imageAlt": "Old Kuching Courthouse",
+      "imageCredit": {
+        "author": "Yeo Jiun Tzen",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Old_Court_House_Complex,_Kuching_03.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/relation/10459393",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-sarawak-kubah-national-park",
+      "name": "Kubah National Park",
+      "city": "Kuching",
+      "state": "Sarawak",
+      "address": "Kubah National Park Headquarters, Jalan Lundu-Sampadi, Matang, Kuching, Sarawak, Malaysia",
+      "category": "nature",
+      "description": "Rainforest trails and biodiversity; use the park entrance.",
+      "latitude": 1.6125826,
+      "longitude": 110.1966225,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-sarawak-kubah-national-park.jpg",
+      "imageAlt": "Kubah National Park",
+      "imageCredit": {
+        "author": "KelvinToh",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kubah_waterafall_at_morning.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/node/4324654691",
+      "visitorGuidance": [
+        "trail",
+        "wildlife"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out.",
+        "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
+      ]
+    },
+    {
+      "id": "my-sarawak-gunung-gading-national-park",
+      "name": "Gunung Gading National Park",
+      "city": "Lundu",
+      "state": "Sarawak",
+      "address": "Gunung Gading National Park Headquarters, Lundu, Sarawak, Malaysia",
+      "category": "nature",
+      "description": "Forest and Rafflesia interpretation; sightings are not guaranteed.",
+      "latitude": 1.690549,
+      "longitude": 109.84583,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-sarawak-gunung-gading-national-park.jpg",
+      "imageAlt": "Gunung Gading National Park",
+      "imageCredit": {
+        "author": "Annette Teng",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Waterfall_in_Mt_Gading_NP_-_panoramio.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q65071172",
+      "visitorGuidance": [
+        "trail",
+        "wildlife"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out.",
+        "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
+      ]
+    },
+    {
+      "id": "my-sarawak-sibu-central-market",
+      "name": "Sibu Central Market",
+      "city": "Sibu",
+      "state": "Sarawak",
+      "address": "Sibu Central Market, Jalan Channel, Sibu, Sarawak, Malaysia",
+      "category": "food",
+      "description": "Regional produce and local-food exploration.",
+      "latitude": 2.28707,
+      "longitude": 111.82867,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sarawak-sibu-central-market.jpg",
+      "imageAlt": "Sibu Central Market",
+      "imageCredit": {
+        "author": "Benjy8769",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Sibu_Central_Market.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/402320205",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-sarawak-kuching-waterfront",
+      "name": "Kuching Waterfront",
+      "city": "Kuching",
+      "state": "Sarawak",
+      "address": "Kuching Waterfront, Jalan Main Bazaar, Kuching, Sarawak, Malaysia",
+      "category": "urban",
+      "description": "Public riverfront walking route.",
+      "latitude": 1.560469444,
+      "longitude": 110.343130555,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-sarawak-kuching-waterfront.jpg",
+      "imageAlt": "Kuching Waterfront",
+      "imageCredit": {
+        "author": "Bernard DUPONT from FRANCE",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kuching_Waterfront_at_night_(15834807985).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/sarawak/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q135485718",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-federal-territories-petronas-twin-towers",
+      "name": "PETRONAS Twin Towers",
+      "city": "Kuala Lumpur",
+      "state": "Federal Territories",
+      "address": "PETRONAS Twin Towers, Kuala Lumpur City Centre, Kuala Lumpur, Malaysia",
+      "category": "urban",
+      "description": "Landmark towers and observation experience.",
+      "latitude": 3.157777777,
+      "longitude": 101.711666666,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-petronas-twin-towers.jpg",
+      "imageAlt": "PETRONAS Twin Towers",
+      "imageCredit": {
+        "author": "Someformofhuman",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Petronas_Panorama_II.jpg"
+      },
+      "sourceUrl": "https://www.petronastwintowers.com.my/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q83063",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-federal-territories-kuala-lumpur-tower",
+      "name": "Kuala Lumpur Tower",
+      "city": "Kuala Lumpur",
+      "state": "Federal Territories",
+      "address": "Kuala Lumpur Tower, Jalan Puncak, Kuala Lumpur, Malaysia",
+      "category": "urban",
+      "description": "Observation landmark and city views.",
+      "latitude": 3.15282771,
+      "longitude": 101.703748809,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-kuala-lumpur-tower.jpg",
+      "imageAlt": "Kuala Lumpur Tower",
+      "imageCredit": {
+        "author": "DvTor8303",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kuala_Lumpur_Tower_20250822_(1).jpg"
+      },
+      "sourceUrl": "https://www.menarakl.com.my/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q745016",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-federal-territories-national-museum-muzium-negara",
+      "name": "National Museum / Muzium Negara",
+      "city": "Kuala Lumpur",
+      "state": "Federal Territories",
+      "address": "Muzium Negara, Jalan Damansara, Kuala Lumpur, Malaysia",
+      "category": "cultural",
+      "description": "National history and cultural collections.",
+      "latitude": 3.13758,
+      "longitude": 101.68739,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-national-museum-muzium-negara.jpg",
+      "imageAlt": "National Museum / Muzium Negara",
+      "imageCredit": {
+        "author": "Bahnfrend",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muzium_Negara,_2023_(01).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kuala-lumpur/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q917630",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-federal-territories-national-textile-museum",
+      "name": "National Textile Museum",
+      "city": "Kuala Lumpur",
+      "state": "Federal Territories",
+      "address": "National Textile Museum, 26 Jalan Sultan Hishamuddin, Kuala Lumpur, Malaysia",
+      "category": "cultural",
+      "description": "Textile traditions and cultural exhibits.",
+      "latitude": 3.14675,
+      "longitude": 101.694,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-national-textile-museum.jpg",
+      "imageAlt": "National Textile Museum",
+      "imageCredit": {
+        "author": "Marcin Konsek",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2016_Kuala_Lumpur,_Narodowe_Muzeum_W%C5%82%C3%B3kiennictwa.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kuala-lumpur/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q19117247",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-federal-territories-royal-museum-kuala-lumpur",
+      "name": "Royal Museum, Kuala Lumpur",
+      "city": "Kuala Lumpur",
+      "state": "Federal Territories",
+      "address": "Royal Museum, Jalan Istana, Kuala Lumpur, Malaysia",
+      "category": "heritage",
+      "description": "Former palace and royal history.",
+      "latitude": 3.132486111,
+      "longitude": 101.695702777,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-royal-museum-kuala-lumpur.jpg",
+      "imageAlt": "Royal Museum, Kuala Lumpur",
+      "imageCredit": {
+        "author": "Dekoelie",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Muzium_Diraja-3.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kuala-lumpur/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q61115119",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-federal-territories-jalan-alor-food-street",
+      "name": "Jalan Alor food street",
+      "city": "Kuala Lumpur",
+      "state": "Federal Territories",
+      "address": "Jalan Alor, Bukit Bintang, Kuala Lumpur, Malaysia",
+      "category": "food",
+      "description": "Established city food destination.",
+      "latitude": 3.1456933,
+      "longitude": 101.7086665,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-jalan-alor-food-street.jpg",
+      "imageAlt": "Jalan Alor food street",
+      "imageCredit": {
+        "author": "McKay Savage from London, UK",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Busy_food_street_%3D_happy_(5086911721).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kuala-lumpur/",
+      "coordinateSourceUrl": "https://www.openstreetmap.org/way/471992046",
+      "visitorGuidance": [
+        "market"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Market activity and food stalls operate on different days and hours; check before visiting."
+      ]
+    },
+    {
+      "id": "my-federal-territories-titiwangsa-lake-gardens",
+      "name": "Titiwangsa Lake Gardens",
+      "city": "Kuala Lumpur",
+      "state": "Federal Territories",
+      "address": "Taman Tasik Titiwangsa, Jalan Kuantan, Kuala Lumpur, Malaysia",
+      "category": "nature",
+      "description": "Public lake gardens and skyline views.",
+      "latitude": 3.17808333,
+      "longitude": 101.70769444,
+      "averageVisitMinutes": 90,
+      "imageUrl": "/images/catalogue/my-federal-territories-titiwangsa-lake-gardens.jpg",
+      "imageAlt": "Titiwangsa Lake Gardens",
+      "imageCredit": {
+        "author": "*angys*",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taman_Tasik_Titiwangsa_(220413)_04.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/kuala-lumpur/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q20457989",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    },
+    {
+      "id": "my-federal-territories-putra-mosque-putrajaya",
+      "name": "Putra Mosque, Putrajaya",
+      "city": "Putrajaya",
+      "state": "Federal Territories",
+      "address": "Putra Mosque, Persiaran Persekutuan, Precinct 1, Putrajaya, Malaysia",
+      "category": "cultural",
+      "description": "Lakeside mosque and city landmark.",
+      "latitude": 2.936066666,
+      "longitude": 101.68905,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-putra-mosque-putrajaya.jpg",
+      "imageAlt": "Putra Mosque, Putrajaya",
+      "imageCredit": {
+        "author": "Azuladnan",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Putra_Mosque_being_reflected_in_the_lake_(crop).jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/putrajaya/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q2344561",
+      "visitorGuidance": [
+        "worship"
+      ],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": [
+        "Respect worshippers, dress requirements and any areas closed to visitors."
+      ]
+    },
+    {
+      "id": "my-federal-territories-labuan-chimney-museum",
+      "name": "Labuan Chimney Museum",
+      "city": "Labuan",
+      "state": "Federal Territories",
+      "address": "Chimney Museum, Jalan Tanjung Kubong, Labuan, Malaysia",
+      "category": "heritage",
+      "description": "Industrial archaeology and island history.",
+      "latitude": 5.380555555,
+      "longitude": 115.248888888,
+      "averageVisitMinutes": 60,
+      "imageUrl": "/images/catalogue/my-federal-territories-labuan-chimney-museum.jpg",
+      "imageAlt": "Labuan Chimney Museum",
+      "imageCredit": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Labuan_Malaysia_Chimney-Museum-01.jpg"
+      },
+      "sourceUrl": "https://ebrochures.malaysia.travel/en/malaysia-travel-guide/labuan/",
+      "coordinateSourceUrl": "https://www.wikidata.org/wiki/Q27648891",
+      "visitorGuidance": [],
+      "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
+      "feeNote": "Check current admission charges and any activity fees with the venue.",
+      "visitTips": []
+    }
+  ]
+}

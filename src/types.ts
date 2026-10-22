@@ -102,14 +102,21 @@ export type Destination = {
   city: string;
   state?: MalaysianState;
   sourceUrl?: string;
+  coordinateSourceUrl?: string;
   address?: string;
   description: string;
   averageVisitMinutes: number;
   openingHours?: string;
   feeNote?: string;
   visitTips?: string[];
+  visitorGuidance?: Array<"boat" | "trail" | "worship" | "residential" | "booking" | "market" | "wildlife" | "beach">;
   imageUrl?: string;
   imageAlt?: string;
+  imageCredit?: {
+    author: string;
+    license: string;
+    sourceUrl: string;
+  };
   activitySummary?: DestinationActivitySummary;
   demoActivitySummary?: DestinationActivitySummary;
 };

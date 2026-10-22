@@ -135,9 +135,11 @@ export function updateDestinationRecord(destinations: Destination[], input: Dest
     return { error: validation.error ?? "Destination could not be updated." };
   }
 
+  const destination: Destination = { ...existing, ...validation.value };
+  if (existing.imageUrl !== destination.imageUrl) delete destination.imageCredit;
   return {
-    destination: { ...existing, ...validation.value },
-    destinations: destinations.map((destination) => (destination.id === input.id ? { ...existing, ...validation.value } : destination)),
+    destination,
+    destinations: destinations.map((row) => row.id === input.id ? destination : row),
   };
 }
 

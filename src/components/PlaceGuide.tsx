@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, Coins, MapPin, Navigation, QrCode, Sparkles, ThumbsDown, Users } from "lucide-react";
+import { CalendarDays, Clock3, Coins, ExternalLink, MapPin, Navigation, QrCode, Sparkles, ThumbsDown, Users } from "lucide-react";
 import type { Destination } from "../types";
 import { translate, type Locale } from "../services/i18n";
 import { discoveryText } from "../services/discoveryCopy";
@@ -29,6 +29,10 @@ export function PlaceGuide({ destination, locale, distance, distanceLabel, deman
         <div className="wide"><dt><Coins size={16} />{t("common.feeNote")}</dt><dd>{destination.feeNote ?? t("common.feeMayVary")}</dd></div>
       </dl><p className="distance-basis-note">{travelerStatusText(locale, "distance")}</p></section>
       {Boolean(destination.visitTips?.length) && <section className="place-guide-section"><h3>{t("tourist.places.beforeYouGo")}</h3><ul className="place-guide-tips">{destination.visitTips!.map((tip) => <li key={tip}>{tip}</li>)}</ul></section>}
+      {(destination.sourceUrl || destination.coordinateSourceUrl) && <div className="place-guide-secondary">
+        {destination.sourceUrl?.startsWith("https://") && <a className="secondary-action compact-action" href={destination.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} />{emergencyHelpText(locale, "source")}</a>}
+        {destination.coordinateSourceUrl?.startsWith("https://www.openstreetmap.org/") && <a className="secondary-action compact-action" href={destination.coordinateSourceUrl} target="_blank" rel="noopener noreferrer"><MapPin size={16} />OpenStreetMap</a>}
+      </div>}
       <details className="place-guide-context"><summary>{interfaceText(locale, "more")}</summary><dl className="place-guide-facts">
         <div className="wide"><dt><Users size={16} />{t("common.demand")}</dt><dd>{demand}</dd></div>
         <div className="wide"><dt><Sparkles size={16} />{t("tourist.places.tripFit")}</dt><dd>{preference}</dd></div>

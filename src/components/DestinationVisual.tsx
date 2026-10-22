@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useState } from "react";
 import type { Destination } from "../types";
 import type { Locale } from "../services/i18n";
 import { uiText } from "../services/uiText";
+import { destinationPhotoCredit } from "../services/destinationPhoto";
 
 type DestinationVisualProps = {
   destination: Destination;
@@ -31,6 +32,7 @@ function DestinationVisualComponent({ destination, compact = false, locale, prio
   const displaySrc = useMemo(() => (src ? resizeCommonsImageUrl(src, compact ? 360 : 760) : ""), [compact, src]);
   const [imageFailed, setImageFailed] = useState(() => Boolean(displaySrc && failedImageUrls.has(displaySrc)));
   const alt = destination.imageAlt?.trim() || `${destination.name} · ${uiText(locale, "Location photo")}`;
+  const credit = destinationPhotoCredit(destination);
 
   useEffect(() => {
     setImageFailed(Boolean(displaySrc && failedImageUrls.has(displaySrc)));
@@ -52,6 +54,7 @@ function DestinationVisualComponent({ destination, compact = false, locale, prio
       <img
         src={displaySrc}
         alt={alt}
+        title={credit ? `${credit.label} · ${credit.href}` : undefined}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         fetchPriority={priority ? "high" : compact ? "low" : "auto"}
@@ -63,6 +66,7 @@ function DestinationVisualComponent({ destination, compact = false, locale, prio
         }}
       />
       {!compact && <figcaption>{destination.name}</figcaption>}
+      {credit && !compact && <a className="destination-photo-credit" href={credit.href} target="_blank" rel="noopener noreferrer" title={credit.label} aria-label={`${uiText(locale, "Location photo")}: ${credit.label}`}><span aria-hidden="true">©</span><span>{credit.label}</span></a>}
     </figure>
   );
 }
