@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
 import { ArrowRight, ChartNoAxesCombined, ChevronDown, Download, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Trash2, UserRound, Users } from "lucide-react";
 import { interfaceText } from "../services/interfaceCopy";
-import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, TouristProfile, User } from "../types";
+import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
 import { buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
 import { translateAdmin, type AdminCopyKey } from "../services/adminI18n";
-import { demoDatasetMetadata, getPreparedDemoTouristCount, isSampleTourist, isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
+import { demoDatasetMetadata, getPreparedDemoTouristCount, isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
 import { demoDatasetText } from "../services/demoDatasetCopy";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -18,10 +18,7 @@ import { getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "../se
 import { sosText } from "../services/sosCopy";
 import { SosRequestActions } from "../components/SosRequestActions";
 import { getTouristManagementRows } from "../services/touristManagement";
-import { TouristCountryReport } from "../components/TouristCountryReport";
-import { getCountryCounts, matchesTouristIdentity, type IdentityFilter } from "../services/touristReports";
-import { hasTouristIdentity } from "../services/touristIdentity";
-import { reviewText } from "../services/reviewUpdateCopy";
+import { TouristDirectory } from "../components/TouristDirectory";
 import { ActivitySummaryPublisher } from "../components/ActivitySummaryPublisher";
 import { activityText } from "../services/activityCopy";
 import { buildDestinationActivitySummaries } from "../services/activitySummary";
@@ -41,8 +38,7 @@ import { MovementMap } from "../components/MovementMap";
 import { MovementPulseHero } from "../components/MovementPulseHero";
 import { Page } from "../components/Page";
 import { RecommendationList } from "../components/RecommendationList";
-import { formatTravelPreferenceList } from "../services/profile";
-import { type PlanAudience, type PlanTier, type AdminDashboardTab, type CommitDataOptions, DEMO_DATASET_LOCAL_ONLY_STATUS, adminTouristPreviewLimit, adminMovementPreviewLimit, adminSafetyPreviewLimit, adminAiPreviewLimit, analysisKey, getIncidentTypeLabel } from "../services/workspaceSupport";
+import { type PlanAudience, type PlanTier, type AdminDashboardTab, type CommitDataOptions, DEMO_DATASET_LOCAL_ONLY_STATUS, adminMovementPreviewLimit, adminSafetyPreviewLimit, adminAiPreviewLimit, analysisKey, getIncidentTypeLabel } from "../services/workspaceSupport";
 
 export function AdminWorkspace({
   data,
@@ -84,13 +80,7 @@ export function AdminWorkspace({
   const [planMinimumTier, setPlanMinimumTier] = useState<PlanTier>("emerging");
   const [planDiversifyCategories, setPlanDiversifyCategories] = useState(true);
   const [selectedAnalysisKey, setSelectedAnalysisKey] = useState<string | null>(null);
-  const [touristSearch, setTouristSearch] = useState("");
-  const [touristCountry, setTouristCountry] = useState("all");
-  const [identityFilter, setIdentityFilter] = useState<IdentityFilter>("all");
-  const [touristProfileFilter, setTouristProfileFilter] = useState<TouristProfile | "all" | "incomplete">("all");
-  const [selectedManagedTouristId, setSelectedManagedTouristId] = useState<string | null>(null);
   const [safetyAdminNotes, setSafetyAdminNotes] = useState<Record<string, string>>({});
-  const [showAllAdminTourists, setShowAllAdminTourists] = useState(false);
   const [showAllMovementRecords, setShowAllMovementRecords] = useState(false);
   const [showAllSafetyCases, setShowAllSafetyCases] = useState(false);
   const [showAllAiResults, setShowAllAiResults] = useState(false);
@@ -123,18 +113,6 @@ export function AdminWorkspace({
   const demoTouristCount = getPreparedDemoTouristCount(data);
   const nextDemoBatchCount = Math.min(demoDatasetMetadata.batchSize, demoDatasetMetadata.generatedTouristCount - demoTouristCount);
   const touristManagementRows = useMemo(() => getTouristManagementRows(data), [data]);
-  const filteredTouristManagementRows = useMemo(() => {
-    const search = touristSearch.trim().toLowerCase();
-
-    return touristManagementRows.filter((row) => {
-      const matchesSearch = matchesTouristIdentity(row.tourist, search, touristCountry, identityFilter);
-      const matchesProfile =
-        touristProfileFilter === "all" ||
-        (touristProfileFilter === "incomplete" ? !row.tourist.profileCompletedAt && !row.tourist.travelPreferences?.length : row.profile === touristProfileFilter);
-
-      return matchesSearch && matchesProfile;
-    });
-  }, [touristManagementRows, touristProfileFilter, touristSearch, touristCountry, identityFilter]);
   const travelPlan = useMemo(
     () =>
       createMovementBasedTravelPlan(data, {
@@ -216,9 +194,6 @@ export function AdminWorkspace({
   const openIncidentCount = data.incidentReports.filter((report) => report.status !== "resolved").length;
   const openSafetyRecordCount = getOpenSafetyCount(data);
   const resolvedSafetyRecordCount = safetyRecords.filter((record) => record.status === "resolved").length;
-  const selectedManagedTourist = filteredTouristManagementRows.find((row) => row.tourist.id === selectedManagedTouristId) ?? filteredTouristManagementRows[0] ?? null;
-  const visibleTouristManagementRows = showAllAdminTourists ? filteredTouristManagementRows : filteredTouristManagementRows.slice(0, adminTouristPreviewLimit);
-  const hiddenTouristManagementCount = filteredTouristManagementRows.length - visibleTouristManagementRows.length;
   const visibleMovementTripRecords = showAllMovementRecords ? movementTripRecords : movementTripRecords.slice(0, adminMovementPreviewLimit);
   const hiddenMovementRecordCount = movementTripRecords.length - visibleMovementTripRecords.length;
   const visibleSafetyRecords = showAllSafetyCases ? safetyRecords : safetyRecords.slice(0, adminSafetyPreviewLimit);
@@ -266,9 +241,6 @@ export function AdminWorkspace({
     setShowAllMovementRecords(false);
   }, [fromDate, selectedTouristId, selectedTripId, toDate]);
 
-  useEffect(() => {
-    setShowAllAdminTourists(false);
-  }, [touristProfileFilter, touristSearch, touristCountry, identityFilter]);
 
   useEffect(() => {
     setShowAllAiResults(false);
@@ -286,11 +258,6 @@ export function AdminWorkspace({
     }
   }, [analysisRows, selectedAnalysisKey]);
 
-  useEffect(() => {
-    if (selectedManagedTouristId && !filteredTouristManagementRows.some((row) => row.tourist.id === selectedManagedTouristId)) {
-      setSelectedManagedTouristId(null);
-    }
-  }, [filteredTouristManagementRows, selectedManagedTouristId]);
 
   useEffect(() => {
     setSafetyAdminNotes((current) => {
@@ -409,117 +376,11 @@ export function AdminWorkspace({
     });
   };
 
-  const touristManagementPanel = (
-    <div className="admin-tab-panel">
-      <div className="admin-tab-heading">
-        <div>
-          <h2>{adminText("tourists.title")}</h2>
-          <p>{adminText("tourists.description")}</p>
-        </div>
-        <strong>{adminText("common.shown", { count: filteredTouristManagementRows.length })}</strong>
-      </div>
-      <div className="filter-toolbar admin-filter-toolbar">
-        <input className="toolbar-input" value={touristSearch} onChange={(event) => setTouristSearch(event.target.value)} placeholder={adminText("tourists.search")} aria-label={adminText("tourists.search")} />
-        <select className="toolbar-select" aria-label={adminText("tourists.allProfiles")} value={touristProfileFilter} onChange={(event) => setTouristProfileFilter(event.target.value as TouristProfile | "all" | "incomplete")}>
-          <option value="all">{adminText("tourists.allProfiles")}</option>
-          <option value="cultural">{adminText("tourists.cultural")}</option>
-          <option value="nature">{adminText("tourists.nature")}</option>
-          <option value="urban">{adminText("tourists.urban")}</option>
-          <option value="mixed">{adminText("tourists.mixed")}</option>
-          <option value="incomplete">{adminText("tourists.incomplete")}</option>
-        </select>
-        <select className="toolbar-select" aria-label={reviewText(locale, "country")} value={touristCountry} onChange={(event) => setTouristCountry(event.target.value)}>
-          <option value="all">{reviewText(locale, "allCountries")}</option>
-          {getCountryCounts(tourists).map((row) => <option key={row.key} value={row.key}>{row.name || reviewText(locale, "missing")} ({row.count})</option>)}
-        </select>
-        <select className="toolbar-select" aria-label={reviewText(locale, "identity")} value={identityFilter} onChange={(event) => setIdentityFilter(event.target.value as IdentityFilter)}>
-          <option value="all">{reviewText(locale, "allIdentity")}</option><option value="provided">{reviewText(locale, "withIdentity")}</option><option value="missing">{reviewText(locale, "missingIdentity")}</option>
-        </select>
-      </div>
-      <MetricGrid
-        items={[
-          [adminText("tourists.registered"), tourists.length.toString()],
-          [reviewText(locale, "withIdentity"), tourists.filter(hasTouristIdentity).length.toString()],
-          [adminText("tourists.activeTrips"), summary.activeTripCount.toString()],
-          [adminText("tourists.openSafety"), openSafetyRecordCount.toString()],
-        ]}
-      />
-      <TouristCountryReport users={tourists} rows={filteredTouristManagementRows} locale={locale} country={touristCountry} onCountryChange={setTouristCountry} />
-      <section className="tourist-management-layout">
-        <div className="list-panel tourist-management-list">
-          {visibleTouristManagementRows.map((row) => (
-            <button className={selectedManagedTourist?.tourist.id === row.tourist.id ? "tourist-management-card active" : "tourist-management-card"} key={row.tourist.id} type="button" onClick={() => setSelectedManagedTouristId(row.tourist.id)}>
-              <div>
-                <strong>{row.tourist.name}</strong>
-                <span>{row.profile ? `${profileLabel(locale, row.profile)} ${t("common.tourist")}` : adminText("tourists.profilePending")}</span>
-              </div>
-              {isSampleTourist(row.tourist) && <small className="demo-profile-label">{demoDatasetText(locale, "sampleRecord")}</small>}
-              <p>{row.tourist.nationality ?? adminText("common.notProvided")} · {row.consentGranted ? adminText("tourists.locationConsentActive") : adminText("tourists.noActiveConsent")}</p>
-              <div className="record-metrics">
-                <span>{row.completedTrips} {adminText("common.trips")}</span>
-                <span>{row.movementPoints} {adminText("common.points")}</span>
-                <span>{row.checkIns} {adminText("tourists.checkIns")}</span>
-                <span>{row.openSafetyCases} {adminText("tourists.safety")}</span>
-              </div>
-            </button>
-          ))}
-          <ListLimitFooter hiddenCount={hiddenTouristManagementCount} isExpanded={showAllAdminTourists} itemLabel="tourist record" pluralLabel="tourist records" onToggle={() => setShowAllAdminTourists((value) => !value)} locale={locale} />
-          {filteredTouristManagementRows.length === 0 && <EmptyState text={adminText("tourists.empty")} />}
-        </div>
-
-        {selectedManagedTourist && (
-          <aside className="tourist-management-detail">
-            <span>{adminText("tourists.selected")}</span>
-            <h2>{selectedManagedTourist.tourist.name}</h2>
-            {isSampleTourist(selectedManagedTourist.tourist) && <small className="demo-profile-label">{demoDatasetText(locale, "sampleRecord")}</small>}
-            <p>{selectedManagedTourist.latestActivityAt ? adminText("tourists.latestActivity", { date: formatDateTime(selectedManagedTourist.latestActivityAt, locale) }) : adminText("tourists.noActivity")}</p>
-            <dl>
-              <div><dt>{reviewText(locale, "touristId")}</dt><dd>{selectedManagedTourist.tourist.id}</dd></div>
-              <div>
-                <dt>{adminText("tourists.email")}</dt>
-                <dd>{selectedManagedTourist.tourist.email}</dd>
-              </div>
-              <div>
-                <dt>{adminText("tourists.nationality")}</dt>
-                <dd>{selectedManagedTourist.tourist.nationality ?? adminText("common.notProvided")}</dd>
-              </div>
-              <div>
-                <dt>{adminText("tourists.passport")}</dt>
-                <dd>{selectedManagedTourist.tourist.passportNumber ?? adminText("common.notProvided")}</dd>
-              </div>
-              <div>
-                <dt>{adminText("tourists.travelStyle")}</dt>
-                <dd>{formatTravelPreferenceList(selectedManagedTourist.tourist.travelPreferences, locale)}</dd>
-              </div>
-              <div>
-                <dt>{adminText("tourists.emergencyContact")}</dt>
-                <dd>
-                  {selectedManagedTourist.tourist.emergencyContactPhone
-                    ? `${selectedManagedTourist.tourist.emergencyContactName || adminText("tourists.savedContact")} · ${selectedManagedTourist.tourist.emergencyContactPhone}`
-                    : adminText("common.notProvided")}
-                </dd>
-              </div>
-              <div>
-                <dt>{adminText("tourists.recentPlaces")}</dt>
-                <dd>{selectedManagedTourist.latestDestinationNames.length > 0 ? selectedManagedTourist.latestDestinationNames.join(", ") : adminText("tourists.noRecognisedPlaces")}</dd>
-              </div>
-            </dl>
-            <div className="tourist-detail-actions">
-              <button className="secondary-action" type="button" onClick={() => {
-                setSelectedTouristId(selectedManagedTourist.tourist.id);
-                setAdminTab("records");
-              }}>
-                {adminText("tourists.viewMovement")}
-              </button>
-              <button className="secondary-action" type="button" onClick={() => setAdminTab("safety")}>
-                {adminText("tourists.viewSafety")}
-              </button>
-            </div>
-          </aside>
-        )}
-      </section>
-    </div>
-  );
+  const touristManagementPanel = <TouristDirectory rows={touristManagementRows} locale={locale} onViewMovement={(userId) => {
+    setSelectedTouristId(userId);
+    setSelectedTripId("all");
+    setAdminTab("records");
+  }} onViewSafety={() => setAdminTab("safety")} />;
 
   const movementRecordsPanel = (
     <div className="admin-tab-panel">
@@ -983,11 +844,11 @@ export function AdminWorkspace({
       }
     >
       {demoTouristCount > 0 && <p className="admin-dataset-note">{demoDatasetText(locale, "progress", { count: demoTouristCount, max: demoDatasetMetadata.generatedTouristCount })} · {t("admin.demo.localOnlyNote")} {demoDatasetText(locale, "dataNote")}</p>}
-      <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
+      {adminTab !== "tourists" && <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
         <button type="button" className={openSafetyRecordCount ? "needs-action safety" : "safety"} onClick={() => setAdminTab("safety")}><Siren size={22} /><span>{adminText("overview.safetyCases")}</span><strong>{openSafetyRecordCount}</strong><ArrowRight size={17} /></button>
         {onViewChange && <button type="button" className={pendingPlaceCount ? "needs-action reviews" : "reviews"} onClick={() => onViewChange("destinations")}><MapPin size={22} /><span>{placeText(locale, "queue")}</span><strong>{pendingPlaceCount}</strong><ArrowRight size={17} /></button>}
         <button type="button" onClick={() => { setAdminTab("overview"); window.requestAnimationFrame(() => { const panel = document.getElementById("admin-movement-alerts") as HTMLDetailsElement | null; if (panel) { panel.open = true; panel.querySelector("summary")?.focus({ preventScroll: true }); panel.scrollIntoView({ block: "start", behavior: "instant" }); } }); }}><Route size={22} /><span>{adminText("overview.movementAlerts")}</span><strong>{movementAlerts.length}</strong><ArrowRight size={17} /></button>
-      </div></section>
+      </div></section>}
       {placeQueueState === "offline" && <p role="alert">{unlistedLocationText(locale, "queueOffline")}</p>}
       <div className="segmented-control admin-tabs" aria-label={t("admin.dashboard.tabsLabel")}>
         <button className={adminTab === "overview" ? "active" : ""} aria-pressed={adminTab === "overview"} type="button" onClick={() => setAdminTab("overview")}>
@@ -1151,7 +1012,7 @@ export function AdminWorkspace({
           </section>
         </div>
       )}
-      {adminTab === "tourists" && touristManagementPanel}
+      <div hidden={adminTab !== "tourists"}>{touristManagementPanel}</div>
       {adminTab === "records" && movementRecordsPanel}
       {adminTab === "safety" && safetyPanel}
       {adminTab === "ai" && aiResultsPanel}

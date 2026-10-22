@@ -18,7 +18,6 @@ export const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip
 
 export const DEMO_DATASET_LOCAL_ONLY_STATUS = "Demo dataset loaded locally; Firestore sync skipped";
 
-export const adminTouristPreviewLimit = 8;
 export const adminMovementPreviewLimit = 8;
 export const adminSafetyPreviewLimit = 5;
 export const adminAiPreviewLimit = 8;

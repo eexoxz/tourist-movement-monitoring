@@ -84,13 +84,8 @@
   .profile-page-grid,
   .profile-setup-card,
   .destination-admin-grid,
-  .tourist-management-layout,
   .ai-results-layout {
     grid-template-columns: 1fr;
-  }
-
-  .tourist-management-detail {
-    position: static;
   }
 
   .ai-detail-panel {
@@ -471,8 +466,6 @@
   .festival-card > div:not(.festival-destinations),
   .destination-modal dl div,
   .admin-tab-heading,
-  .tourist-management-card > div,
-  .tourist-detail-actions,
   .destination-management-panel > .section-heading,
   .modal-actions {
     display: grid;
