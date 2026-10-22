@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BarChart3, BellRing, CalendarDays, Compass, Download, LogOut, MapPinned, RotateCcw, Sparkles, UserRound } from "lucide-react";
 import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
@@ -25,8 +25,6 @@ import { clearBrowserLocationWatch } from "./services/browserLocation";
 import { getCurrentPathname, replaceBrowserPath, pushBrowserPath } from "./services/browserRouting";
 import { friendlyAuthError } from "./services/authError";
 import { type CommitDataOptions, mergeUserRecord } from "./services/workspaceSupport";
-import { TouristWorkspace } from "./workspaces/TouristWorkspace";
-import { AdminWorkspace } from "./workspaces/AdminWorkspace";
 import { applyPlaceReview, mergePlaceReviewRecords } from "./services/unlistedPlaces";
 import { unlistedLocationText } from "./services/unlistedLocationCopy";
 import { placeText } from "./services/placeSubmissionCopy";
@@ -40,6 +38,9 @@ import { deviceText } from "./services/deviceCopy";
 import { AccountDeletionPanel } from "./components/AccountDeletionPanel";
 import { deletionText, type DeletionCopyKey } from "./services/accountDeletionCopy";
 import type { DeletionPhase } from "./services/accountDeletion";
+
+const TouristWorkspace = lazy(() => import("./workspaces/TouristWorkspace").then((module) => ({ default: module.TouristWorkspace })));
+const AdminWorkspace = lazy(() => import("./workspaces/AdminWorkspace").then((module) => ({ default: module.AdminWorkspace })));
 
 function App() {
   useEffect(() => { loadRememberedLogin(); }, []);
@@ -1042,24 +1043,26 @@ function App() {
           <button className="secondary-action icon-action" type="button" title={browserNotificationLabel} aria-label={browserNotificationLabel} disabled={browserNotificationDisabled} onClick={enableBrowserNotifications}><BellRing size={18} /></button>
           <button className="secondary-action icon-action" type="button" title={t("nav.logout")} aria-label={t("nav.logout")} onClick={logout}><LogOut size={18} /></button>
         </div>}
-        {currentUser.role === "admin" ? (
-          <AdminWorkspace data={data} actor={currentUser} view={safeView} locale={locale} onDataChange={commitData} onViewChange={goToView} placeQueueState={placeQueueState} onRetryPlaceQueue={() => setPlaceQueueRevision((current) => current + 1)} notify={notify} />
-        ) : (
-          <TouristWorkspace
-            data={data}
-            view={safeView}
-            user={currentUser}
-            locale={locale}
-            pendingCheckInDestinationId={pendingCheckInDestinationId}
-            onPendingCheckInConsumed={() => setPendingCheckInDestinationId(null)}
-            onDataChange={commitData}
-            onViewChange={goToView}
-            watchId={watchId}
-            notify={notify}
-            hasNotifications={notifications.length > 0}
-            syncStatus={syncStatus}
-          />
-        )}
+        <Suspense fallback={<div role="status" aria-busy="true">{t(currentUser.role === "admin" ? "nav.dashboard" : "nav.home")}...</div>}>
+          {currentUser.role === "admin" ? (
+            <AdminWorkspace data={data} actor={currentUser} view={safeView} locale={locale} onDataChange={commitData} onViewChange={goToView} placeQueueState={placeQueueState} onRetryPlaceQueue={() => setPlaceQueueRevision((current) => current + 1)} notify={notify} />
+          ) : (
+            <TouristWorkspace
+              data={data}
+              view={safeView}
+              user={currentUser}
+              locale={locale}
+              pendingCheckInDestinationId={pendingCheckInDestinationId}
+              onPendingCheckInConsumed={() => setPendingCheckInDestinationId(null)}
+              onDataChange={commitData}
+              onViewChange={goToView}
+              watchId={watchId}
+              notify={notify}
+              hasNotifications={notifications.length > 0}
+              syncStatus={syncStatus}
+            />
+          )}
+        </Suspense>
         {hasConfiguredAuth() && currentUser.role === "admin" && <DevicePrivacyPanel locale={locale} onClear={clearDeviceDownloads} />}
         {hasConfiguredAuth() && currentUser.role === "tourist" && safeView === "profile" && <div className="profile-account-controls">
           <DevicePrivacyPanel locale={locale} onClear={clearDeviceDownloads} />

@@ -12,7 +12,7 @@ import { demoDatasetText } from "../services/demoDatasetCopy";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
-import { buildMovementRecordsCsv, getDailyMovementTrend, getMovementDashboardViews, getMovementDataStatus, getProfileDistribution, getTourists, getTripFilterOptions, summarizeDashboard } from "../services/dashboard";
+import { buildMovementRecordsCsv, getDailyMovementTrend, getMovementDashboardViews, getMovementDataStatus, getProfileDistribution, getTourists, getTripFilterOptions, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
 import { calculateGeofenceActivity } from "../services/geofencing";
 import { getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "../services/safety";
 import { sosText } from "../services/sosCopy";
@@ -40,6 +40,8 @@ import { Page } from "../components/Page";
 import { RecommendationList } from "../components/RecommendationList";
 import { type PlanAudience, type PlanTier, type AdminDashboardTab, type CommitDataOptions, DEMO_DATASET_LOCAL_ONLY_STATUS, adminMovementPreviewLimit, adminSafetyPreviewLimit, adminAiPreviewLimit, analysisKey, getIncidentTypeLabel } from "../services/workspaceSupport";
 
+const emptyMovementViews: MovementDashboardViews = { records: [], tripRecords: [] };
+
 export function AdminWorkspace({
   data,
   actor,
@@ -63,12 +65,13 @@ export function AdminWorkspace({
 }) {
   const t = (key: TranslationKey) => translate(locale, key);
   const adminText = (key: AdminCopyKey, values?: Record<string, string | number>) => translateAdmin(locale, key, values);
-  const tourists = useMemo(() => getTourists(data), [data]);
+  const tourists = useMemo(() => getTourists(data), [data.users]);
   const pendingPlaceCount = useMemo(() => groupUnlistedCheckIns(data.checkIns.filter((record) => !record.isDemo)).length, [data.checkIns]);
-  const summary = useMemo(() => summarizeDashboard(data), [data]);
-  const profileDistribution = useMemo(() => getProfileDistribution(data), [data]);
-  const movementTrend = useMemo(() => getDailyMovementTrend(data), [data]);
-  const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data]);
+  const summary = useMemo(() => summarizeDashboard(data), [data.users, data.consents, data.trips, data.points, data.destinations]);
+  const profileDistribution = useMemo(() => getProfileDistribution(data), [data.analyses]);
+  const calendarDay = useCalendarDay();
+  const movementTrend = useMemo(() => getDailyMovementTrend(data), [data.points, calendarDay]);
+  const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data.points]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
   const [selectedTripId, setSelectedTripId] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
@@ -87,27 +90,27 @@ export function AdminWorkspace({
   const [demoDatasetAction, setDemoDatasetAction] = useState<"loading" | "removing" | null>(null);
   const [refreshingReports, setRefreshingReports] = useState(false);
 
-  const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data, selectedTouristId]);
+  const recordsActive = view === "dashboard" && adminTab === "records";
+  const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data.trips, selectedTouristId]);
   const movementViews = useMemo(
     () =>
-      getMovementDashboardViews(data, {
+      recordsActive ? getMovementDashboardViews(data, {
         touristId: selectedTouristId,
         tripId: selectedTripId,
         fromDate,
         toDate,
-      }),
-    [data, selectedTouristId, selectedTripId, fromDate, toDate]
+      }) : emptyMovementViews,
+    [data.trips, data.points, data.destinations, data.users, data.analyses, recordsActive, selectedTouristId, selectedTripId, fromDate, toDate]
   );
   const movementRecords = movementViews.records;
   const movementTripRecords = movementViews.tripRecords;
   const filteredPoints = useMemo(() => movementRecords.map((record) => record.point), [movementRecords]);
   const allDashboardPoints = data.points;
-  const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data]);
-  const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data]);
-  const movementAlerts = useMemo(() => calculateMovementAlerts(data, destinationDemand), [data, destinationDemand]);
-  const calendarDay = useCalendarDay();
+  const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data.trips, data.points, data.destinations, data.users]);
+  const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data.trips, data.points, data.destinations]);
+  const movementAlerts = useMemo(() => calculateMovementAlerts(data, destinationDemand), [data.destinations, destinationDemand]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
-  const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data]);
+  const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data.geofences, data.points]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
   const demoDatasetLoaded = isPreparedDemoDatasetLoaded(data);
   const demoTouristCount = getPreparedDemoTouristCount(data);
@@ -122,7 +125,7 @@ export function AdminWorkspace({
         minimumTier: planMinimumTier,
         diversifyCategories: planDiversifyCategories,
       }, destinationDemand),
-    [data, destinationDemand, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
+    [data.destinations, destinationDemand, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
   );
   const cityOptions = useMemo(() => Array.from(new Set(data.destinations.map((destination) => destination.city))).sort(), [data.destinations]);
   const filteredTouristCount = new Set(movementTripRecords.map((record) => record.trip.userId)).size;
@@ -247,10 +250,10 @@ export function AdminWorkspace({
   }, [adminTab]);
 
   useEffect(() => {
-    if (selectedRecordTripId && !movementTripRecords.some((record) => record.trip.id === selectedRecordTripId)) {
+    if (recordsActive && selectedRecordTripId && !movementTripRecords.some((record) => record.trip.id === selectedRecordTripId)) {
       setSelectedRecordTripId(null);
     }
-  }, [movementTripRecords, selectedRecordTripId]);
+  }, [recordsActive, movementTripRecords, selectedRecordTripId]);
 
   useEffect(() => {
     if (selectedAnalysisKey && !analysisRows.some((analysis) => analysisKey(analysis) === selectedAnalysisKey)) {

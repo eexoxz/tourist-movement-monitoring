@@ -327,12 +327,17 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
   const data = value ?? {};
   const destinations = Array.isArray(data.destinations) && data.destinations.length > 0 ? data.destinations : initialData.destinations;
   const geofences = Array.isArray(data.geofences) && data.geofences.length > 0 ? data.geofences : initialData.geofences;
+  const trips = asArray<TripSession>(data.trips);
+  const tripOwners = new Map<string, string>();
+  for (const trip of trips) {
+    if (!tripOwners.has(trip.id)) tripOwners.set(trip.id, trip.userId);
+  }
 
   return {
     users: refreshLegacyDemoProfiles(asArray<User>(data.users)),
     consents: asArray<LocationConsent>(data.consents),
-    trips: asArray<TripSession>(data.trips),
-    points: asArray<MovementPoint>(data.points).map((point) => normalizeMovementPoint(point, data)),
+    trips,
+    points: asArray<MovementPoint>(data.points).map((point) => normalizeMovementPoint(point, tripOwners)),
     destinations: destinations.map(normalizeDestination),
     analyses: asArray<Partial<AnalysisResult>>(data.analyses).map(normalizeAnalysis),
     recommendations: asArray<Partial<Recommendation>>(data.recommendations).map(normalizeRecommendation),
@@ -657,11 +662,10 @@ function normalizeDestination(destination: Destination): Destination {
   };
 }
 
-function normalizeMovementPoint(point: MovementPoint, data: Partial<AppData>): MovementPoint {
-  const trip = data.trips?.find((candidate) => candidate.id === point.tripId);
+function normalizeMovementPoint(point: MovementPoint, tripOwners: ReadonlyMap<string, string>): MovementPoint {
   return {
     ...point,
-    userId: point.userId ?? trip?.userId,
+    userId: point.userId ?? tripOwners.get(point.tripId),
   };
 }
 

@@ -49,9 +49,16 @@ function escapeHtml(value: string) {
   });
 }
 
+const categoryIconMarkup = new Map<string, string>();
+
 function categoryIconHtml(category: DestinationCategory, size = 16) {
+  const key = `${category}:${size}`;
+  const cached = categoryIconMarkup.get(key);
+  if (cached) return cached;
   const Icon = categoryMeta[category].Icon;
-  return renderToStaticMarkup(<Icon size={size} strokeWidth={2.7} aria-hidden="true" />);
+  const markup = renderToStaticMarkup(<Icon size={size} strokeWidth={2.7} aria-hidden="true" />);
+  categoryIconMarkup.set(key, markup);
+  return markup;
 }
 
 function tierLabelKey(tier: DestinationSignal["tier"]): TranslationKey {

@@ -33,6 +33,10 @@ export default defineConfig({
             return "icons";
           }
 
+          if (normalizedId.includes("node_modules/react-dom/server") || normalizedId.includes("node_modules/react-dom/cjs/react-dom-server")) {
+            return "map-markup";
+          }
+
           if (normalizedId.includes("node_modules/react") || normalizedId.includes("node_modules/react-dom")) {
             return "react";
           }

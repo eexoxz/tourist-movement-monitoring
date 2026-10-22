@@ -31,6 +31,19 @@ const stylesSource = styleImports.map(([, file]) => readSource(`src/${file}`)).j
 const viteConfigSource = readFileSync(resolve(process.cwd(), "vite.config.js"), "utf8");
 
 describe("user interface quality guardrails", () => {
+  it("loads role workspaces on demand and prepares movement detail only on the records tab", () => {
+    const app = readSource("src/App.tsx");
+    const admin = readSource("src/workspaces/AdminWorkspace.tsx");
+    expect(app).toContain('lazy(() => import("./workspaces/AdminWorkspace")');
+    expect(app).toContain('lazy(() => import("./workspaces/TouristWorkspace")');
+    expect(app).not.toContain('import { AdminWorkspace }');
+    expect(app).not.toContain('import { TouristWorkspace }');
+    expect(viteConfigSource).toContain('return "map-markup"');
+    expect(mapSource).toContain("categoryIconMarkup.get(key)");
+    expect(admin).toContain('view === "dashboard" && adminTab === "records"');
+    expect(admin).toContain("recordsActive ? getMovementDashboardViews");
+    expect(admin).toContain("if (recordsActive && selectedRecordTripId");
+  });
   it("keeps banner autoplay automatic after clicks and hover without a play button", () => {
     const source = readSource("src/components/HomeSpotlight.tsx");
     expect(source).toContain("goTo(index + 1), 8000");

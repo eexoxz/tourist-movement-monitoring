@@ -3,6 +3,21 @@ import { initialData } from "../data/demoData";
 import { cacheLocalData, clearSession, createId, FIRESTORE_COLLECTIONS, loadData, loadSession, mergeUserDocuments, normalizeAppData, saveSession } from "./storage";
 
 describe("storage service", () => {
+  it("normalizes large movement histories without searching the trip list for each point", () => {
+    const trips = [...initialData.trips];
+    const firstTrip = trips[0];
+    const template = initialData.points[0];
+    const points = Array.from({ length: 30000 }, (_, index) => ({ ...template, id: `legacy-${index}`, tripId: trips[index % trips.length].id, userId: undefined }));
+    const find = vi.spyOn(trips, "find");
+    const normalized = normalizeAppData({ trips, points: [...points, { ...template, id: "explicit", tripId: firstTrip.id, userId: "recorded-owner" }, { ...template, id: "orphan", tripId: "missing", userId: undefined }] });
+    expect(find).not.toHaveBeenCalled();
+    expect(normalized.points).toHaveLength(30002);
+    expect(normalized.points[29999].userId).toBe(trips[29999 % trips.length].userId);
+    expect(normalized.points.at(-2)?.userId).toBe("recorded-owner");
+    expect(normalized.points.at(-1)?.userId).toBeUndefined();
+    expect(points[0].userId).toBeUndefined();
+    find.mockRestore();
+  });
   it("takes account roles only from user records, never editable tourist profiles", () => {
     const tourist = initialData.users.find((user) => user.role === "tourist")!;
     const admin = initialData.users.find((user) => user.role === "admin")!;

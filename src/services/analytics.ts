@@ -18,8 +18,8 @@ import { createId } from "./storage";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
 import { filterQualityMovementPoints, isContinuousMovementSegment } from "./movementQuality";
-import { getRecordedStopIds } from "./stopEvidence";
 import { silhouetteScores } from "./clusterMetrics";
+import { getRecommendationEvidence } from "./recommendationEvidence";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 const kMeansFeatureNames: Array<keyof KMeansFeatureVector> = ["culturalProportion", "natureProportion", "urbanProportion", "uniqueDestinations"];
@@ -720,32 +720,8 @@ export function recommendForUser(
   referencePoint?: Pick<MovementPoint, "latitude" | "longitude" | "recordedAt">,
   options: { localOnly?: boolean; radiusKm?: number; ignoreHistoryLocation?: boolean } = {}
 ): Recommendation[] {
-  const userTrips = data.trips.filter((trip) => trip.userId === userId);
-  const completedTripIds = new Set(userTrips.filter((trip) => trip.status === "completed").map((trip) => trip.id));
-  const allUserTripIds = new Set(userTrips.map((trip) => trip.id));
-  const completedPoints: MovementPoint[] = [];
-  const points: MovementPoint[] = [];
-  const destinationIndex = createDestinationSpatialIndex(data.destinations);
-
-  data.points.forEach((point) => {
-    if (!allUserTripIds.has(point.tripId)) {
-      return;
-    }
-
-    points.push(point);
-
-    if (completedTripIds.has(point.tripId)) {
-      completedPoints.push(point);
-    }
-  });
-
-  const visited = getRecordedStopIds(completedPoints, destinationIndex);
-  data.checkIns.filter((checkIn) => checkIn.destinationId && checkIn.userId === userId).forEach((checkIn) => visited.add(checkIn.destinationId));
-  const historyLocation = options.ignoreHistoryLocation
-    ? undefined
-    : points.reduce<MovementPoint | undefined>((latest, point) => {
-        return !latest || new Date(point.recordedAt).getTime() > new Date(latest.recordedAt).getTime() ? point : latest;
-      }, undefined);
+  const { visited, latestPoint: lastRecordedPoint } = getRecommendationEvidence(data, userId);
+  const historyLocation = options.ignoreHistoryLocation ? undefined : lastRecordedPoint;
   const latestPoint = referencePoint ?? historyLocation;
   if (options.localOnly && !latestPoint) {
     return [];
@@ -821,17 +797,15 @@ export function recommendForUser(
           : `Matches the ${profile} travel profile and has not been visited in the current history.`;
 
       return {
-        id: createId("recommendation"),
-        userId,
         destinationId: destination.id,
         score,
         scoreBreakdown,
         reason,
-        generatedAt: new Date().toISOString(),
       };
     })
     .sort((a, b) => Number(localDestinationIds.has(b.destinationId)) - Number(localDestinationIds.has(a.destinationId)) || b.score - a.score)
-    .slice(0, 3);
+    .slice(0, 3)
+    .map((recommendation) => ({ ...recommendation, id: createId("recommendation"), userId, generatedAt: new Date().toISOString() }));
 }
 
 export function refreshAnalysis(data: AppData, userId: string): AppData {
