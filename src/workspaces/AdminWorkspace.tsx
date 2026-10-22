@@ -7,7 +7,8 @@ import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
 import { buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
 import { translateAdmin, type AdminCopyKey } from "../services/adminI18n";
-import { isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
+import { demoDatasetMetadata, getPreparedDemoTouristCount, isSampleTourist, isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
+import { demoDatasetText } from "../services/demoDatasetCopy";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
@@ -119,6 +120,8 @@ export function AdminWorkspace({
   const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
   const demoDatasetLoaded = isPreparedDemoDatasetLoaded(data);
+  const demoTouristCount = getPreparedDemoTouristCount(data);
+  const nextDemoBatchCount = Math.min(demoDatasetMetadata.batchSize, demoDatasetMetadata.generatedTouristCount - demoTouristCount);
   const touristManagementRows = useMemo(() => getTouristManagementRows(data), [data]);
   const filteredTouristManagementRows = useMemo(() => {
     const search = touristSearch.trim().toLowerCase();
@@ -329,7 +332,7 @@ export function AdminWorkspace({
         notify({
           tone: "success",
           title: t("admin.demo.loadedTitle"),
-          message: t("admin.demo.loadedMessage"),
+          message: demoDatasetText(locale, "batchMessage", { count: nextDemoBatchCount }),
         });
       } finally {
         setDemoDatasetAction(null);
@@ -450,6 +453,7 @@ export function AdminWorkspace({
                 <strong>{row.tourist.name}</strong>
                 <span>{row.profile ? `${profileLabel(locale, row.profile)} ${t("common.tourist")}` : adminText("tourists.profilePending")}</span>
               </div>
+              {isSampleTourist(row.tourist) && <small className="demo-profile-label">{demoDatasetText(locale, "sampleRecord")}</small>}
               <p>{row.tourist.nationality ?? adminText("common.notProvided")} · {row.consentGranted ? adminText("tourists.locationConsentActive") : adminText("tourists.noActiveConsent")}</p>
               <div className="record-metrics">
                 <span>{row.completedTrips} {adminText("common.trips")}</span>
@@ -467,6 +471,7 @@ export function AdminWorkspace({
           <aside className="tourist-management-detail">
             <span>{adminText("tourists.selected")}</span>
             <h2>{selectedManagedTourist.tourist.name}</h2>
+            {isSampleTourist(selectedManagedTourist.tourist) && <small className="demo-profile-label">{demoDatasetText(locale, "sampleRecord")}</small>}
             <p>{selectedManagedTourist.latestActivityAt ? adminText("tourists.latestActivity", { date: formatDateTime(selectedManagedTourist.latestActivityAt, locale) }) : adminText("tourists.noActivity")}</p>
             <dl>
               <div><dt>{reviewText(locale, "touristId")}</dt><dd>{selectedManagedTourist.tourist.id}</dd></div>
@@ -959,9 +964,9 @@ export function AdminWorkspace({
         <details className="admin-data-tools" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}><summary><SlidersHorizontal size={18} />{interfaceText(locale, "tools")}<ChevronDown size={16} /></summary><div className="page-action-row">
           <button className="secondary-action" onClick={seedDemoTourists} disabled={Boolean(demoDatasetAction) || demoDatasetLoaded}>
             <UserRound size={18} />
-            {demoDatasetAction === "loading" ? t("admin.demo.loadingButton") : demoDatasetLoaded ? t("admin.demo.loadedButton") : t("admin.demo.loadButton")}
+            {demoDatasetAction === "loading" ? t("admin.demo.loadingButton") : demoDatasetLoaded ? t("admin.demo.loadedButton") : demoDatasetText(locale, "batchButton", { count: nextDemoBatchCount })}
           </button>
-          {demoDatasetLoaded && (
+          {demoTouristCount > 0 && (
             <button className="secondary-action" onClick={clearDemoTourists} disabled={Boolean(demoDatasetAction)}>
               <Trash2 size={18} />
               {demoDatasetAction === "removing" ? t("admin.demo.removingButton") : t("admin.demo.removeButton")}
@@ -977,7 +982,7 @@ export function AdminWorkspace({
         </div></details>
       }
     >
-      {demoDatasetLoaded && <p className="admin-dataset-note">{t("admin.demo.loadedButton")} · {t("admin.demo.localOnlyNote")}</p>}
+      {demoTouristCount > 0 && <p className="admin-dataset-note">{demoDatasetText(locale, "progress", { count: demoTouristCount, max: demoDatasetMetadata.generatedTouristCount })} · {t("admin.demo.localOnlyNote")} {demoDatasetText(locale, "dataNote")}</p>}
       <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
         <button type="button" className={openSafetyRecordCount ? "needs-action safety" : "safety"} onClick={() => setAdminTab("safety")}><Siren size={22} /><span>{adminText("overview.safetyCases")}</span><strong>{openSafetyRecordCount}</strong><ArrowRight size={17} /></button>
         {onViewChange && <button type="button" className={pendingPlaceCount ? "needs-action reviews" : "reviews"} onClick={() => onViewChange("destinations")}><MapPin size={22} /><span>{placeText(locale, "queue")}</span><strong>{pendingPlaceCount}</strong><ArrowRight size={17} /></button>}

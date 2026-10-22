@@ -209,7 +209,7 @@ describe("storage service", () => {
     vi.unstubAllGlobals();
   });
 
-  it("restores the prepared dataset when browser storage has been cleared", () => {
+  it("starts with a smaller sample batch when browser storage has been cleared", () => {
     const storage = new Map<string, string>();
     vi.stubGlobal("localStorage", {
       getItem: (key: string) => storage.get(key) ?? null,
@@ -219,7 +219,7 @@ describe("storage service", () => {
 
     const data = loadData();
 
-    expect(data.users.length).toBeGreaterThanOrEqual(initialData.users.length);
+    expect(data.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(50);
     expect(data.destinations).toHaveLength(initialData.destinations.length);
     expect(data.trips.length).toBeGreaterThan(0);
     vi.unstubAllGlobals();

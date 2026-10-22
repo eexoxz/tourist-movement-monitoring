@@ -164,6 +164,7 @@ a.secondary-action { text-decoration: none; }
 
 .admin-priorities { padding-block: 16px; border-block: 1px solid var(--line); margin-bottom: 18px; }
 .admin-dataset-note { margin: 0 0 16px; color: var(--muted); font-size: 0.78rem; line-height: 1.5; }
+.demo-profile-label { display: block; margin-block: 6px; color: var(--muted); font-size: 0.75rem; font-weight: 500; line-height: 1.5; }
 .admin-shell .page-header h1 { font-size: 1.65rem; line-height: 1.35; }
 .admin-data-tools { position: relative; }
 .admin-data-tools > summary { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font-size: 0.85rem; list-style: none; background: #fff; }

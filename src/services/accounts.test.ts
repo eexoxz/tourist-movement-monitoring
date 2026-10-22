@@ -27,7 +27,7 @@ describe("accounts service", () => {
     const user = authenticateLocalUser(initialData, "tourist@example.com", "tourist123");
 
     expect(user?.role).toBe("tourist");
-    expect(user?.name).toBe("Demo Tourist");
+    expect(user?.name).toBe("Alya Zainal");
   });
 
   it("rejects invalid login credentials", () => {

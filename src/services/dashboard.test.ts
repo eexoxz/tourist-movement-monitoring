@@ -73,8 +73,8 @@ describe("dashboard service", () => {
       sosAlerts: [],
       incidentReports: [],
       checkIns: [],
-    });
-    const mergedAgain = mergePreparedDemoDataset(merged);
+    }, 300);
+    const mergedAgain = mergePreparedDemoDataset(merged, 300);
 
     expect(merged.users.some((user) => user.id === currentUser.id)).toBe(true);
     expect(merged.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(300);
@@ -129,7 +129,7 @@ describe("dashboard service", () => {
 
     expect(records).toHaveLength(4);
     expect(records.every((record) => record.trip?.userId === "tourist-demo")).toBe(true);
-    expect(records.every((record) => record.tourist?.name === "Demo Tourist")).toBe(true);
+    expect(records.every((record) => record.tourist?.name === "Alya Zainal")).toBe(true);
     expect(records.every((record) => record.nearestDestinationName !== "Unmapped destination")).toBe(true);
     expect(records[0].point.id).toBe("point-demo-4");
   });
@@ -167,7 +167,7 @@ describe("dashboard service", () => {
 
     expect(records).toHaveLength(1);
     expect(records[0].trip.id).toBe("trip-demo-1");
-    expect(records[0].tourist?.name).toBe("Demo Tourist");
+    expect(records[0].tourist?.name).toBe("Alya Zainal");
     expect(records[0].summary.pointCount).toBe(4);
     expect(records[0].destinationNames.length).toBeGreaterThan(0);
     expect(records[0].analysis?.profile).toBeDefined();
@@ -197,7 +197,7 @@ describe("dashboard service", () => {
     const csv = buildMovementRecordsCsv(records);
 
     expect(csv).toContain('"tourist","trip_id","recorded_at"');
-    expect(csv).toContain('"Demo Tourist"');
+    expect(csv).toContain('"Alya Zainal"');
     expect(csv).toContain('"Merdeka Square"');
     expect(csv).toContain('"trip_distance_km"');
     expect(csv).toContain('"trip_duration_minutes"');

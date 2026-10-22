@@ -5,6 +5,8 @@ import { hasTouristIdentity, normalizeIdentity } from "./touristIdentity";
 import { reviewText } from "./reviewUpdateCopy";
 import { translateAdmin } from "./adminI18n";
 import { translate } from "./i18n";
+import { isSampleTourist } from "../data/demoData";
+import { demoDatasetText } from "./demoDatasetCopy";
 
 export type IdentityFilter = "all" | "provided" | "missing";
 export function countryKey(user: User) { return user.nationality?.trim().toLocaleLowerCase("en") ?? ""; }
@@ -36,9 +38,9 @@ function identityForExport(user: User, full: boolean) {
 
 function reportTable(rows: TouristManagementRow[], locale: Locale, full: boolean) {
   const label = (key: Parameters<typeof reviewText>[1]) => reviewText(locale, key);
-  const header = [label("touristId"), translate(locale, "auth.name"), translateAdmin(locale, "tourists.email"), label("country"), label("identity"), label("registered")];
+  const header = [label("touristId"), translate(locale, "auth.name"), translateAdmin(locale, "tourists.email"), label("country"), label("identity"), label("registered"), translate(locale, "map.source")];
   // Reuse existing translated field labels for both export formats.
-  return [header, ...rows.map(({ tourist: user }) => [user.id, user.name, user.email, user.nationality?.trim() || label("missing"), identityForExport(user, full) || label("missing"), user.createdAt.slice(0, 10)])];
+  return [header, ...rows.map(({ tourist: user }) => [user.id, user.name, user.email, user.nationality?.trim() || label("missing"), identityForExport(user, full) || label("missing"), user.createdAt.slice(0, 10), demoDatasetText(locale, isSampleTourist(user) ? "sampleRecord" : "realRecord")])];
 }
 
 function csvCell(value: string) {
@@ -60,6 +62,7 @@ export function buildTouristReportHtml(rows: TouristManagementRow[], locale: Loc
     @page{size:A4 landscape;margin:14mm}*{box-sizing:border-box}body{font:11px Arial,sans-serif;color:#17242b}h1{font-size:22px}p{line-height:1.5}table{border-collapse:collapse;width:100%;table-layout:fixed}thead{display:table-header-group}tr{break-inside:avoid}th,td{border:1px solid #cbd5da;padding:7px;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#edf4f4}small{display:block;margin-bottom:14px}
     </style></head><body><h1>${escapeHtml(title)}</h1><small>${rows.length} · ${escapeHtml(new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date()))}</small>
     <p>${countries.map((country) => `${escapeHtml(country.name || reviewText(locale, "missing"))}: ${country.count}`).join(" · ")}</p>
+    ${rows.some((row) => isSampleTourist(row.tourist)) ? `<p>${escapeHtml(demoDatasetText(locale, "dataNote"))}</p>` : ""}
     <table><thead><tr>${header.map((cell) => `<th>${escapeHtml(cell)}</th>`).join("")}</tr></thead><tbody>${body.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table></body></html>`;
 }
 

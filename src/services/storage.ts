@@ -1,4 +1,4 @@
-import { initialData } from "../data/demoData";
+import { createStarterDemoData, initialData, refreshLegacyDemoProfiles } from "../data/demoData";
 import type {
   AnalysisResult,
   AppData,
@@ -91,7 +91,7 @@ export function loadData(): AppData {
   const raw = localStorage.getItem(DATA_KEY);
   if (localDataCache?.storage === localStorage && localDataCache.raw === raw) return localDataCache.data;
   if (!raw) {
-    const data = normalizeAppData(privateCacheCleared ? {} : initialData);
+    const data = normalizeAppData(privateCacheCleared ? {} : createStarterDemoData());
     saveLocalData(data);
     return data;
   }
@@ -101,7 +101,7 @@ export function loadData(): AppData {
     saveLocalData(data);
     return data;
   } catch {
-    const data = normalizeAppData(initialData);
+    const data = normalizeAppData(createStarterDemoData());
     saveLocalData(data);
     return data;
   }
@@ -329,7 +329,7 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
   const geofences = Array.isArray(data.geofences) && data.geofences.length > 0 ? data.geofences : initialData.geofences;
 
   return {
-    users: asArray<User>(data.users),
+    users: refreshLegacyDemoProfiles(asArray<User>(data.users)),
     consents: asArray<LocationConsent>(data.consents),
     trips: asArray<TripSession>(data.trips),
     points: asArray<MovementPoint>(data.points).map((point) => normalizeMovementPoint(point, data)),
@@ -344,9 +344,10 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
 }
 
 export function resetData() {
-  saveLocalData(initialData);
+  const data = createStarterDemoData();
+  saveLocalData(data);
   clearSession();
-  return initialData;
+  return data;
 }
 
 export function getStorageMode() {

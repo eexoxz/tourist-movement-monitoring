@@ -1,4 +1,5 @@
 import { destinations } from "./destinations";
+import { demoPersona, demoRandom } from "./demoPersonas";
 import type { AppData, AttractionCheckIn, Destination, DestinationCategory, GeoFence, IncidentReport, LocationConsent, MovementPoint, SosAlert, TouristProfile, TripSession, User } from "../types";
 
 const now = new Date();
@@ -10,16 +11,17 @@ const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1
 
 export const demoDatasetMetadata = {
   generatedTouristCount: GENERATED_TOURIST_COUNT,
-  generatedTripsPerTourist: GENERATED_TRIPS_PER_TOURIST,
-  generatedPointsPerTrip: GENERATED_POINTS_PER_TRIP,
-  generatedCheckInsPerTrip: GENERATED_CHECK_INS_PER_TRIP,
+  maxTripsPerTourist: GENERATED_TRIPS_PER_TOURIST,
+  maxPointsPerTrip: GENERATED_POINTS_PER_TRIP,
+  maxCheckInsPerTrip: GENERATED_CHECK_INS_PER_TRIP,
+  batchSize: 50,
   namedDemoAccountCount: 5,
 } as const;
 
 const baseUsers: User[] = [
   {
     id: "tourist-demo",
-    name: "Demo Tourist",
+    name: "Alya Zainal",
     email: "tourist@example.com",
     password: "tourist123",
     role: "tourist",
@@ -30,8 +32,8 @@ const baseUsers: User[] = [
     accessibilityPreference: "none",
     nationality: "Malaysia",
     passportNumber: "MYD000001",
-    emergencyContactName: "Demo Emergency Contact",
-    emergencyContactPhone: "+60123456789",
+    emergencyContactName: "Hafiz Zainal",
+    emergencyContactPhone: "",
     emergencyContactRelation: "Sibling",
     termsAcceptedAt: hoursAgo(120),
     privacyAcceptedAt: hoursAgo(120),
@@ -48,7 +50,7 @@ const baseUsers: User[] = [
   },
   {
     id: "tourist-nature-demo",
-    name: "Nature Demo Tourist",
+    name: "Rani Kusuma",
     email: "nature@example.com",
     password: "nature123",
     role: "tourist",
@@ -60,7 +62,7 @@ const baseUsers: User[] = [
     nationality: "Indonesia",
     passportNumber: "IDN000002",
     emergencyContactName: "Rina Putri",
-    emergencyContactPhone: "+628123456789",
+    emergencyContactPhone: "",
     emergencyContactRelation: "Friend",
     termsAcceptedAt: hoursAgo(96),
     privacyAcceptedAt: hoursAgo(96),
@@ -69,7 +71,7 @@ const baseUsers: User[] = [
   },
   {
     id: "tourist-cultural-demo",
-    name: "Culture Demo Tourist",
+    name: "Adrian Goh",
     email: "culture@example.com",
     password: "culture123",
     role: "tourist",
@@ -81,7 +83,7 @@ const baseUsers: User[] = [
     nationality: "Singapore",
     passportNumber: "SGP000003",
     emergencyContactName: "Tan Mei Lin",
-    emergencyContactPhone: "+6591234567",
+    emergencyContactPhone: "",
     emergencyContactRelation: "Partner",
     termsAcceptedAt: hoursAgo(84),
     privacyAcceptedAt: hoursAgo(84),
@@ -90,7 +92,7 @@ const baseUsers: User[] = [
   },
   {
     id: "tourist-urban-demo",
-    name: "Urban Demo Tourist",
+    name: "Mali Somchai",
     email: "urban@example.com",
     password: "urban123",
     role: "tourist",
@@ -102,7 +104,7 @@ const baseUsers: User[] = [
     nationality: "Thailand",
     passportNumber: "THA000004",
     emergencyContactName: "Araya Chai",
-    emergencyContactPhone: "+66812345678",
+    emergencyContactPhone: "",
     emergencyContactRelation: "Friend",
     termsAcceptedAt: hoursAgo(72),
     privacyAcceptedAt: hoursAgo(72),
@@ -111,7 +113,7 @@ const baseUsers: User[] = [
   },
   {
     id: "tourist-insufficient-demo",
-    name: "Learning Demo Tourist",
+    name: "Sofia Hamdan",
     email: "learning@example.com",
     password: "learning123",
     role: "tourist",
@@ -122,8 +124,8 @@ const baseUsers: User[] = [
     accessibilityPreference: "none",
     nationality: "Malaysia",
     passportNumber: "MYD000005",
-    emergencyContactName: "Learning Contact",
-    emergencyContactPhone: "+60129876543",
+    emergencyContactName: "Azlan Hamdan",
+    emergencyContactPhone: "",
     emergencyContactRelation: "Parent",
     termsAcceptedAt: hoursAgo(66),
     privacyAcceptedAt: hoursAgo(66),
@@ -155,7 +157,7 @@ const basePoints: MovementPoint[] = [
   { id: "point-demo-4", tripId: "trip-demo-1", userId: "tourist-demo", latitude: 3.1556, longitude: 101.7139, accuracyMeters: 30, recordedAt: hoursAgo(3.2), source: "demo" },
   { id: "point-nature-1", tripId: "trip-demo-2", userId: "tourist-nature-demo", latitude: 5.4242, longitude: 100.2697, accuracyMeters: 34, recordedAt: hoursAgo(28), source: "demo" },
   { id: "point-nature-2", tripId: "trip-demo-2", userId: "tourist-nature-demo", latitude: 5.4141, longitude: 100.3288, accuracyMeters: 38, recordedAt: hoursAgo(27.2), source: "demo" },
-  { id: "point-nature-3", tripId: "trip-demo-2", userId: "tourist-nature-demo", latitude: 5.9487, longitude: 116.0474, accuracyMeters: 42, recordedAt: hoursAgo(25.4), source: "demo" },
+  { id: "point-nature-3", tripId: "trip-demo-2", userId: "tourist-nature-demo", latitude: 5.4242, longitude: 100.2697, accuracyMeters: 42, recordedAt: hoursAgo(25.4), source: "demo" },
   { id: "point-cultural-1", tripId: "trip-cultural-demo", userId: "tourist-cultural-demo", latitude: 3.2379, longitude: 101.684, accuracyMeters: 36, recordedAt: hoursAgo(56), source: "demo" },
   { id: "point-cultural-2", tripId: "trip-cultural-demo", userId: "tourist-cultural-demo", latitude: 3.142, longitude: 101.6894, accuracyMeters: 32, recordedAt: hoursAgo(55.1), source: "demo" },
   { id: "point-cultural-3", tripId: "trip-cultural-demo", userId: "tourist-cultural-demo", latitude: 3.1478, longitude: 101.6937, accuracyMeters: 27, recordedAt: hoursAgo(54.2), source: "demo" },
@@ -163,7 +165,7 @@ const basePoints: MovementPoint[] = [
   { id: "point-urban-1", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 3.1556, longitude: 101.7139, accuracyMeters: 28, recordedAt: hoursAgo(12), source: "demo" },
   { id: "point-urban-2", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 3.1579, longitude: 101.7116, accuracyMeters: 30, recordedAt: hoursAgo(11.2), source: "demo" },
   { id: "point-urban-3", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 3.1457, longitude: 101.6954, accuracyMeters: 26, recordedAt: hoursAgo(10.1), source: "demo" },
-  { id: "point-urban-4", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 2.196, longitude: 102.2477, accuracyMeters: 40, recordedAt: hoursAgo(9.3), source: "demo" },
+  { id: "point-urban-4", tripId: "trip-urban-demo", userId: "tourist-urban-demo", latitude: 3.1556, longitude: 101.7139, accuracyMeters: 40, recordedAt: hoursAgo(9.3), source: "demo" },
   { id: "point-insufficient-1", tripId: "trip-insufficient-demo", userId: "tourist-insufficient-demo", latitude: 3.1478, longitude: 101.6937, accuracyMeters: 35, recordedAt: hoursAgo(5.9), source: "demo" },
 ];
 
@@ -318,10 +320,10 @@ const routesByProfile: Record<TouristProfile, string[][]> = {
     ["merdeka-square", "perdana-botanical-garden", "klcc-park"],
     ["batu-caves", "thean-hou-temple", "sekinchan-paddy-gallery"],
     ["george-town-heritage-zone", "penang-hill", "hin-bus-depot", "kek-lok-si-temple"],
-    ["kellies-castle", "jonker-street", "taman-botani-putrajaya"],
-    ["jonker-street", "kellies-castle", "sekinchan-paddy-gallery"],
-    ["mari-mari-cultural-village", "tanjung-aru", "jonker-street"],
-    ["sarawak-cultural-village", "semenggoh-nature-reserve", "jonker-street"],
+    ["kellies-castle", "concubine-lane", "kellies-castle"],
+    ["jonker-street", "jonker-street", "jonker-street"],
+    ["mari-mari-cultural-village", "tanjung-aru", "mari-mari-cultural-village"],
+    ["sarawak-cultural-village", "semenggoh-nature-reserve", "sarawak-cultural-village"],
   ],
 };
 
@@ -355,27 +357,30 @@ function createGeneratedSeedData() {
 
   for (let userIndex = 0; userIndex < GENERATED_TOURIST_COUNT; userIndex += 1) {
     const sequence = String(userIndex + 1).padStart(3, "0");
-    const profile = profiles[userIndex % profiles.length];
+    const random = demoRandom(userIndex + 20261022);
+    const pick = <T,>(values: readonly T[]) => values[Math.floor(random() * values.length)];
+    const persona = demoPersona(userIndex);
+    const profile = pick(profiles);
     const userId = `tourist-seed-${sequence}`;
     const consentId = `consent-seed-${sequence}`;
     const createdHoursAgo = 120 + (userIndex % 18) * 18 + Math.floor(userIndex / 18) * 3;
 
     users.push({
       id: userId,
-      name: `Demo Tourist ${sequence}`,
-      email: `demo.tourist.${sequence}@example.com`,
+      name: persona.name,
+      email: persona.email,
       password: "demo1234",
       role: "tourist",
       expectedProfile: profile,
-      travelPreferences: travelPreferencesByProfile[profile],
-      tripPace: tripPaces[userIndex % tripPaces.length],
-      travelGroup: travelGroups[userIndex % travelGroups.length],
-      accessibilityPreference: userIndex % 9 === 0 ? "low-walking" : "none",
-      nationality: ["Malaysia", "Indonesia", "Singapore", "Thailand", "Brunei"][userIndex % 5],
+      travelPreferences: [...travelPreferencesByProfile[profile]],
+      tripPace: pick(tripPaces),
+      travelGroup: pick(travelGroups),
+      accessibilityPreference: random() < 0.15 ? "low-walking" : "none",
+      nationality: persona.nationality,
       passportNumber: `FYP${sequence}26`,
-      emergencyContactName: `Emergency Contact ${sequence}`,
-      emergencyContactPhone: `+6012${String(7000000 + userIndex).padStart(7, "0")}`,
-      emergencyContactRelation: ["Friend", "Parent", "Partner", "Sibling"][userIndex % 4],
+      emergencyContactName: persona.contact,
+      emergencyContactPhone: "",
+      emergencyContactRelation: pick(["Friend", "Parent", "Partner", "Sibling"]),
       termsAcceptedAt: hoursAgo(createdHoursAgo),
       privacyAcceptedAt: hoursAgo(createdHoursAgo),
       profileCompletedAt: hoursAgo(createdHoursAgo - 2),
@@ -389,23 +394,29 @@ function createGeneratedSeedData() {
       grantedAt: hoursAgo(createdHoursAgo - 3),
     });
 
-    for (let tripIndex = 0; tripIndex < GENERATED_TRIPS_PER_TOURIST; tripIndex += 1) {
+    const tripCount = 1 + Math.floor(random() * GENERATED_TRIPS_PER_TOURIST);
+    for (let tripIndex = 0; tripIndex < tripCount; tripIndex += 1) {
       const tripId = `trip-seed-${sequence}-${tripIndex + 1}`;
       const startedHoursAgo = Math.max(4, createdHoursAgo - 18 - tripIndex * 36);
       const routeOptions = routesByProfile[profile];
-      const route = routeOptions[(userIndex + tripIndex) % routeOptions.length];
+      const route = pick(routeOptions);
+      const stopCount = 2 + Math.floor(random() * 2);
+      const visitMinutes = 25 + Math.floor(random() * 56);
+      const legMinutes = 40 + Math.floor(random() * 31);
+      const durationMinutes = stopCount * (visitMinutes + legMinutes);
 
       trips.push({
         id: tripId,
         userId,
         status: "completed",
         startedAt: hoursAgo(startedHoursAgo),
-        endedAt: hoursAgo(startedHoursAgo - 2.4),
+        endedAt: hoursAgo(startedHoursAgo - durationMinutes / 60),
         consentId,
       });
 
-      for (let pointIndex = 0; pointIndex < GENERATED_POINTS_PER_TRIP; pointIndex += 1) {
-        const destination = destinationById(route[pointIndex % route.length]);
+      for (let pointIndex = 0; pointIndex < stopCount * 2; pointIndex += 1) {
+        const stopIndex = Math.floor(pointIndex / 2);
+        const destination = destinationById(route[stopIndex % route.length]);
         const { latitudeOffset, longitudeOffset } = coordinateJitter(userIndex, tripIndex, pointIndex);
 
         points.push({
@@ -415,14 +426,15 @@ function createGeneratedSeedData() {
           latitude: Number((destination.latitude + latitudeOffset).toFixed(6)),
           longitude: Number((destination.longitude + longitudeOffset).toFixed(6)),
           accuracyMeters: 18 + ((userIndex + tripIndex + pointIndex) % 28),
-          recordedAt: hoursAgo(startedHoursAgo - pointIndex * 0.42),
+          recordedAt: hoursAgo(startedHoursAgo - (stopIndex * (visitMinutes + legMinutes) + pointIndex % 2 * visitMinutes) / 60),
           source: "demo",
         });
       }
 
-      Array.from(new Set(route)).slice(0, GENERATED_CHECK_INS_PER_TRIP).forEach((destinationId, checkInIndex) => {
+      const checkInCount = 1 + Math.floor(random() * GENERATED_CHECK_INS_PER_TRIP);
+      Array.from(new Set(route.slice(0, stopCount))).slice(0, checkInCount).forEach((destinationId, checkInIndex) => {
         const destination = destinationById(destinationId);
-        const checkedInHoursAgo = startedHoursAgo - 0.35 - checkInIndex * 0.72;
+        const checkedInHoursAgo = startedHoursAgo - checkInIndex * (visitMinutes + legMinutes) / 60;
 
         checkIns.push({
           id: `checkin-seed-${sequence}-${tripIndex + 1}-${checkInIndex + 1}`,
@@ -431,7 +443,7 @@ function createGeneratedSeedData() {
           tripId,
           status: "checked-out",
           checkedInAt: hoursAgo(checkedInHoursAgo),
-          checkedOutAt: hoursAgo(checkedInHoursAgo - destination.averageVisitMinutes / 60),
+          checkedOutAt: hoursAgo(checkedInHoursAgo - visitMinutes / 60),
           latitude: destination.latitude,
           longitude: destination.longitude,
         });
@@ -464,41 +476,76 @@ function mergeById<T extends { id: string }>(current: T[], prepared: T[]) {
 }
 
 function isGeneratedSeedUserId(userId: string) {
-  return userId.startsWith("tourist-seed-");
-}
-
-function isGeneratedSeedTripId(tripId: string) {
-  return tripId.startsWith("trip-seed-");
+  return /^tourist-seed-\d{3}$/.test(userId);
 }
 
 export function isPreparedDemoDatasetLoaded(data: AppData) {
-  return data.users.filter((user) => isGeneratedSeedUserId(user.id)).length >= demoDatasetMetadata.generatedTouristCount;
+  return getPreparedDemoTouristCount(data) >= demoDatasetMetadata.generatedTouristCount;
 }
 
-export function mergePreparedDemoDataset(data: AppData): AppData {
+export function isSampleTourist(user: User) {
+  return user.role === "tourist" && !user.authUid && (isGeneratedSeedUserId(user.id) || baseUsers.some((base) => base.role === "tourist" && base.id === user.id));
+}
+
+export function getPreparedDemoTouristCount(data: AppData) {
+  const ids = new Set(data.users.filter((user) => isSampleTourist(user)).map((user) => user.id));
+  return generatedSeedData.users.filter((user) => ids.has(user.id)).length;
+}
+
+const legacyNames = new Map([
+  ["tourist-demo", "Demo Tourist"], ["tourist-nature-demo", "Nature Demo Tourist"],
+  ["tourist-cultural-demo", "Culture Demo Tourist"], ["tourist-urban-demo", "Urban Demo Tourist"],
+  ["tourist-insufficient-demo", "Learning Demo Tourist"],
+]);
+const preparedUsers = new Map(initialData.users.map((user) => [user.id, user]));
+
+export function refreshLegacyDemoProfiles(users: User[]) {
+  return users.map((user) => {
+    if (!isSampleTourist(user)) return user;
+    const prepared = preparedUsers.get(user.id);
+    const legacyName = legacyNames.get(user.id) ?? `Demo Tourist ${user.id.slice(-3)}`;
+    if (!prepared || user.name !== legacyName) return user;
+    return { ...user, name: prepared.name, nationality: prepared.nationality, emergencyContactName: prepared.emergencyContactName, emergencyContactPhone: "" };
+  });
+}
+
+export function mergePreparedDemoDataset(data: AppData, batchSize: number = demoDatasetMetadata.batchSize): AppData {
+  if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > GENERATED_TOURIST_COUNT) throw new Error("Invalid demo batch size");
+  const existingIds = new Set(data.users.map((user) => user.id));
+  const selected = new Set(generatedSeedData.users.filter((user) => !existingIds.has(user.id)).slice(0, batchSize).map((user) => user.id));
+  const include = (userId: string) => !isGeneratedSeedUserId(userId) || selected.has(userId);
   return {
     ...data,
-    users: mergeById(data.users, initialData.users),
-    consents: mergeById(data.consents, initialData.consents),
-    trips: mergeById(data.trips, initialData.trips),
-    points: mergeById(data.points, initialData.points),
+    users: refreshLegacyDemoProfiles(mergeById(data.users, initialData.users.filter((user) => include(user.id)))),
+    consents: mergeById(data.consents, initialData.consents.filter((consent) => include(consent.userId))),
+    trips: mergeById(data.trips, initialData.trips.filter((trip) => include(trip.userId))),
+    points: mergeById(data.points, initialData.points.filter((point) => include(point.userId ?? ""))),
     destinations: mergeById(data.destinations, initialData.destinations),
     sosAlerts: mergeById(data.sosAlerts, initialData.sosAlerts),
     incidentReports: mergeById(data.incidentReports, initialData.incidentReports),
-    checkIns: mergeById(data.checkIns, initialData.checkIns),
+    checkIns: mergeById(data.checkIns, initialData.checkIns.filter((checkIn) => include(checkIn.userId))),
     geofences: mergeById(data.geofences, initialData.geofences),
   };
 }
 
+export function createStarterDemoData() {
+  return mergePreparedDemoDataset(removeGeneratedDemoDataset(initialData));
+}
+
 export function removeGeneratedDemoDataset(data: AppData): AppData {
+  const protectedUsers = new Set(data.users.filter((user) => !isSampleTourist(user)).map((user) => user.id));
+  const removeUser = (userId: string) => isGeneratedSeedUserId(userId) && !protectedUsers.has(userId);
+  const removedTrips = new Set(data.trips.filter((trip) => removeUser(trip.userId)).map((trip) => trip.id));
   return {
     ...data,
-    users: data.users.filter((user) => !isGeneratedSeedUserId(user.id)),
-    consents: data.consents.filter((consent) => !isGeneratedSeedUserId(consent.userId)),
-    trips: data.trips.filter((trip) => !isGeneratedSeedTripId(trip.id) && !isGeneratedSeedUserId(trip.userId)),
-    points: data.points.filter((point) => !isGeneratedSeedTripId(point.tripId) && !isGeneratedSeedUserId(point.userId ?? "")),
-    analyses: data.analyses.filter((analysis) => !isGeneratedSeedTripId(analysis.tripId) && !isGeneratedSeedUserId(analysis.userId)),
-    recommendations: data.recommendations.filter((recommendation) => !isGeneratedSeedUserId(recommendation.userId)),
-    checkIns: data.checkIns.filter((checkIn) => !isGeneratedSeedTripId(checkIn.tripId ?? "") && !isGeneratedSeedUserId(checkIn.userId)),
+    users: data.users.filter((user) => !removeUser(user.id)),
+    consents: data.consents.filter((consent) => !removeUser(consent.userId)),
+    trips: data.trips.filter((trip) => !removedTrips.has(trip.id)),
+    points: data.points.filter((point) => !removedTrips.has(point.tripId) && !removeUser(point.userId ?? "")),
+    analyses: data.analyses.filter((analysis) => !removedTrips.has(analysis.tripId) && !removeUser(analysis.userId)),
+    recommendations: data.recommendations.filter((recommendation) => !removeUser(recommendation.userId)),
+    checkIns: data.checkIns.filter((checkIn) => !removedTrips.has(checkIn.tripId ?? "") && !removeUser(checkIn.userId)),
+    sosAlerts: data.sosAlerts.filter((alert) => !removeUser(alert.userId)),
+    incidentReports: data.incidentReports.filter((report) => !removeUser(report.userId)),
   };
 }
