@@ -9,7 +9,7 @@ import { buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand,
 import { translateAdmin, type AdminCopyKey } from "../services/adminI18n";
 import { demoDatasetMetadata, getPreparedDemoTouristCount, isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
 import { demoDatasetText } from "../services/demoDatasetCopy";
-import { rememberDemoDatasetSelection } from "../services/demoDatasetSelection";
+import { applyDemoDatasetSelection, rememberDemoDatasetSelection } from "../services/demoDatasetSelection";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
@@ -331,8 +331,9 @@ export function AdminWorkspace({
     setDemoDatasetAction("removing");
     window.setTimeout(() => {
       try {
-        const cleaned = refreshAllRecommendations(removeGeneratedDemoDataset(data));
-        rememberDemoDatasetSelection(cleaned);
+        const selected = removeGeneratedDemoDataset(data);
+        rememberDemoDatasetSelection(selected);
+        const cleaned = refreshAllRecommendations(applyDemoDatasetSelection(selected));
         onDataChange(cleaned, null, { localOnlyStatus: "Generated demo dataset removed locally; Firestore sync skipped" });
         notify({
           tone: "info",

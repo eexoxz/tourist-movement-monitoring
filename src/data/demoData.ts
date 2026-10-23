@@ -479,6 +479,11 @@ function isGeneratedSeedUserId(userId: string) {
   return /^tourist-seed-\d{3}$/.test(userId);
 }
 
+function retainRows<T>(rows: T[], keep: (row: T) => boolean) {
+  const filtered = rows.filter(keep);
+  return filtered.length === rows.length ? rows : filtered;
+}
+
 export function isPreparedDemoDatasetLoaded(data: AppData) {
   return getPreparedDemoTouristCount(data) >= demoDatasetMetadata.generatedTouristCount;
 }
@@ -541,10 +546,7 @@ export function removeGeneratedDemoDataset(data: AppData, retainedUserIds: Reado
     const legacyOwner = /^trip-seed-(\d{3})(?:-\d+)?$/.exec(tripId)?.[1];
     return removeUser(tripOwners.get(tripId) ?? (legacyOwner ? `tourist-seed-${legacyOwner}` : ""));
   };
-  const retain = <T>(rows: T[], keep: (row: T) => boolean) => {
-    const filtered = rows.filter(keep);
-    return filtered.length === rows.length ? rows : filtered;
-  };
+  const retain = retainRows;
   const next = {
     ...data,
     users: retain(data.users, (user) => !removeUser(user.id)),
@@ -556,6 +558,31 @@ export function removeGeneratedDemoDataset(data: AppData, retainedUserIds: Reado
     checkIns: retain(data.checkIns, (checkIn) => !removeTrip(checkIn.tripId ?? "") && !removeUser(checkIn.userId)),
     sosAlerts: retain(data.sosAlerts, (alert) => !removeUser(alert.userId)),
     incidentReports: retain(data.incidentReports, (report) => !removeUser(report.userId)),
+  };
+  return Object.keys(next).every((key) => next[key as keyof AppData] === data[key as keyof AppData]) ? data : next;
+}
+
+export function removeBuiltInDemoActivity(data: AppData): AppData {
+  const sampleIds = new Set(baseUsers.filter((user) => user.role === "tourist").map((user) => user.id));
+  for (const user of data.users) if (!isSampleTourist(user)) sampleIds.delete(user.id);
+  const tripOwners = new Map([...preparedTripOwners, ...data.trips.map((trip) => [trip.id, trip.userId] as const)]);
+  const browserTrips = new Set(data.points.filter((point) => point.source === "browser").map((point) => point.tripId));
+  const removeTrip = (id: string) => sampleIds.has(tripOwners.get(id) ?? "") && preparedTripOwners.has(id) && !browserTrips.has(id);
+  const known = (rows: { id: string; userId: string }[]) => new Set(rows.filter((row) => sampleIds.has(row.userId)).map((row) => row.id));
+  const visits = known(initialData.checkIns);
+  const alerts = known(initialData.sosAlerts);
+  const reports = known(initialData.incidentReports);
+  const trips = retainRows(data.trips, (trip) => !removeTrip(trip.id));
+  const retainedOwners = new Set(trips.map((trip) => trip.userId));
+  const next = {
+    ...data,
+    trips,
+    points: retainRows(data.points, (point) => !removeTrip(point.tripId)),
+    analyses: retainRows(data.analyses, (analysis) => !removeTrip(analysis.tripId)),
+    recommendations: retainRows(data.recommendations, (row) => !sampleIds.has(row.userId) || retainedOwners.has(row.userId)),
+    checkIns: retainRows(data.checkIns, (row) => !removeTrip(row.tripId ?? "") && !(sampleIds.has(row.userId) && visits.has(row.id))),
+    sosAlerts: retainRows(data.sosAlerts, (row) => !(sampleIds.has(row.userId) && alerts.has(row.id))),
+    incidentReports: retainRows(data.incidentReports, (row) => !(sampleIds.has(row.userId) && reports.has(row.id))),
   };
   return Object.keys(next).every((key) => next[key as keyof AppData] === data[key as keyof AppData]) ? data : next;
 }

@@ -28,7 +28,8 @@ describe("durable local demo selection", () => {
     expect(getPreparedDemoTouristCount(data)).toBe(0);
     expect(data.points).toEqual(normalizeAppData(cleaned).points);
     expect(loadData()).toBe(data);
-    expect(calculateDestinationSignals(data.destinations, data.points)).toEqual(calculateDestinationSignals(cleaned.destinations, cleaned.points));
+    expect(data.points).toEqual([]);
+    expect([...calculateDestinationSignals(data.destinations, data.points).values()].every((signal) => signal.nearbyPointCount === 0)).toBe(true);
     expect(applyDemoDatasetSelection(data)).toBe(data);
   });
 
@@ -71,5 +72,23 @@ describe("durable local demo selection", () => {
     expect(retained.incidentReports).toContain(report);
     expect(retained.points.filter((row) => row.userId === sample.id)).toEqual(data.points.filter((row) => row.userId === sample.id));
     expect(retained.destinations).toBe(data.destinations);
+  });
+
+  it("clears built-in example activity without erasing new recordings made with a demo login", () => {
+    const owner = initialData.users.find((row) => row.id === "tourist-demo")!;
+    const trip = { ...initialData.trips[0], id: "new-browser-trip", userId: owner.id };
+    const point = { ...initialData.points[0], id: "new-browser-point", tripId: trip.id, userId: owner.id, source: "browser" as const };
+    const visit = { ...initialData.checkIns[0], id: "new-visit", userId: owner.id, tripId: trip.id };
+    const data = { ...initialData, trips: [...initialData.trips, trip], points: [...initialData.points, point], checkIns: [...initialData.checkIns, visit] };
+    rememberDemoDatasetSelection(removeGeneratedDemoDataset(data));
+    const retained = applyDemoDatasetSelection(data);
+    expect(retained.users).toContain(owner);
+    expect(retained.trips).toEqual([trip]);
+    expect(retained.points).toEqual([point]);
+    expect(retained.checkIns).toEqual([visit]);
+    expect(retained.sosAlerts).toEqual([]);
+    expect(retained.incidentReports).toEqual([]);
+    expect(retained.consents.find((row) => row.userId === owner.id)).toBe(data.consents.find((row) => row.userId === owner.id));
+    expect(retained.consents.some((row) => row.userId.startsWith("tourist-seed-"))).toBe(false);
   });
 });

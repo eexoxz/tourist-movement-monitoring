@@ -1,4 +1,4 @@
-import { demoDatasetMetadata, initialData, isSampleTourist, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
+import { demoDatasetMetadata, initialData, isSampleTourist, mergePreparedDemoDataset, removeBuiltInDemoActivity, removeGeneratedDemoDataset } from "../data/demoData";
 import type { AppData } from "../types";
 
 const selectionKey = "tourist-movement-monitoring:demo-dataset-selection";
@@ -29,6 +29,7 @@ export function applyDemoDatasetSelection(data: AppData, restoreSelected = false
   const ids = readSelection();
   if (!ids) return data;
   const filtered = removeGeneratedDemoDataset(data, ids);
+  if (!ids.size) return removeBuiltInDemoActivity(filtered);
   // Restore only explicitly loaded samples after a cloud refresh, never the whole legacy dataset.
   return restoreSelected && ids.size ? mergePreparedDemoDataset(filtered, demoDatasetMetadata.generatedTouristCount, ids) : filtered;
 }
