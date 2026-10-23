@@ -7,6 +7,7 @@ import { distanceKm, formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { calculateDestinationSignals, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
 import { DestinationVisual } from "./DestinationVisual";
+import { PlacePracticalInfo } from "./PlacePracticalInfo";
 import { discoveryText } from "../services/discoveryCopy";
 import { activityText } from "../services/activityCopy";
 import { isContinuousMovementSegment } from "../services/movementQuality";
@@ -461,15 +462,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
               </div>
               {mode === "admin" && <div><dt>{t("map.movementPoints")}</dt><dd>{new Intl.NumberFormat(locale).format(selectedSignal.nearbyPointCount)}</dd></div>}
             </dl>
+            <PlacePracticalInfo destination={selectedDestination} locale={locale} />
             <section className="map-visit-notes">
-              <div>
-                <strong>{t("common.openingHours")}</strong>
-                <p>{selectedDestination.openingHours ?? t("common.checkLocally")}</p>
-              </div>
-              <div>
-                <strong>{t("common.feeNote")}</strong>
-                <p>{selectedDestination.feeNote ?? t("common.feeMayVary")}</p>
-              </div>
               {selectedDestination.visitTips && selectedDestination.visitTips.length > 0 && (
                 <div>
                   <strong>{t("map.goodToKnow")}</strong>

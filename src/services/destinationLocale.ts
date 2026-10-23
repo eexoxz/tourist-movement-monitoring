@@ -1,6 +1,7 @@
 import type { Destination, DestinationCategory } from "../types";
 import type { Locale } from "./i18n";
 import { catalogueGuidance } from "./catalogueGuidance";
+import { destinations as sourceDestinations } from "../data/destinations";
 
 type DestinationCopy = Pick<Destination, "name" | "city" | "description" | "openingHours" | "feeNote" | "visitTips" | "imageAlt">;
 
@@ -223,6 +224,18 @@ export function localizeCity(city: string, locale: Locale) {
   return cityNames[locale]?.[city] ?? city;
 }
 
+const defaultHours = new Set(sourceDestinations.map((destination) => destination.openingHours));
+const defaultFees = new Set(sourceDestinations.map((destination) => destination.feeNote));
+defaultHours.add("Check the latest visitor access and opening hours with the venue before travelling.");
+defaultFees.add("Check current admission charges and any activity fees with the venue.");
+
+export function hasCustomDestinationFact(destination: Destination, field: "openingHours" | "feeNote") {
+  const value = destination[field]?.trim();
+  if (!value) return false;
+  const defaults = field === "openingHours" ? defaultHours : defaultFees;
+  return !defaults.has(value) && !Object.values(practicalCopy).some((copy) => copy[field] === value);
+}
+
 function interpolate(template: string, values: Record<string, string>) {
   return Object.entries(values).reduce((current, [key, value]) => current.replaceAll(`{${key}}`, value), template);
 }
@@ -240,8 +253,8 @@ export function localizeDestination(destination: Destination, locale: Locale): D
     name: locale === "zh" ? chineseDestinationNames[destination.id] ?? destination.name : destination.name,
     city,
     description: interpolate(descriptionTemplate, { city }),
-    openingHours: copy.openingHours,
-    feeNote: copy.feeNote,
+    openingHours: hasCustomDestinationFact(destination, "openingHours") ? destination.openingHours : copy.openingHours,
+    feeNote: hasCustomDestinationFact(destination, "feeNote") ? destination.feeNote : copy.feeNote,
     visitTips: [...guidance, ...(copy.visitTips ?? [])],
     imageAlt: `${locale === "zh" ? chineseDestinationNames[destination.id] ?? destination.name : destination.name}`,
   };

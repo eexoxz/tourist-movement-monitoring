@@ -19,6 +19,11 @@
   background: var(--canvas);
 }
 
+.app-recovery { display: grid; place-content: center; min-height: 100dvh; padding: 24px; background: var(--canvas); color: var(--ink); }
+.app-recovery section { width: min(460px, 100%); }
+.app-recovery h1 { font-size: 1.5rem; line-height: 1.4; overflow-wrap: anywhere; }
+.app-recovery p { color: var(--muted); line-height: 1.6; }
+
 * {
   box-sizing: border-box;
 }

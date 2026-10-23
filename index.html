@@ -7,7 +7,21 @@
     <title>Tourist Movement Monitoring</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><main id="app-boot" role="status" style="min-height:100vh;display:grid;place-content:center;gap:12px;padding:24px;font-family:system-ui,sans-serif;color:#172033;background:#f4f6f8"><strong>Tourist Movement</strong><p>Loading...</p><button type="button" hidden>Reload app</button></main></div>
+    <noscript>Please enable JavaScript to use Tourist Movement.</noscript>
+    <script>
+      (() => {
+        const showRetry = () => {
+          const boot = document.getElementById('app-boot');
+          if (!boot) return;
+          boot.querySelector('p').textContent = 'Taking longer than expected. Check your connection or reload.';
+          boot.querySelector('button').hidden = false;
+          boot.querySelector('button').onclick = () => location.reload();
+        };
+        window.addEventListener('error', event => { if (event.target instanceof HTMLScriptElement) showRetry(); }, true);
+        setTimeout(showRetry, 20000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

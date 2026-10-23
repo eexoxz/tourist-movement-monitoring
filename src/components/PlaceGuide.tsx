@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, Coins, ExternalLink, MapPin, Navigation, QrCode, Sparkles, ThumbsDown, Users } from "lucide-react";
+import { CalendarDays, Clock3, ExternalLink, MapPin, Navigation, QrCode, Sparkles, ThumbsDown, Users } from "lucide-react";
 import type { Destination } from "../types";
 import { translate, type Locale } from "../services/i18n";
 import { discoveryText } from "../services/discoveryCopy";
@@ -6,6 +6,7 @@ import { emergencyHelpText } from "../services/emergencyHelpCopy";
 import { interfaceText } from "../services/interfaceCopy";
 import { DestinationVisual } from "./DestinationVisual";
 import { travelerStatusText } from "../services/travelerStatusCopy";
+import { PlacePracticalInfo } from "./PlacePracticalInfo";
 
 export function PlaceGuide({ destination, locale, distance, distanceLabel, demand, preference, eventRelevance, onCheckIn, onOpenEvents, onHide }: {
   destination: Destination; locale: Locale; distance: string; distanceLabel: string; demand: string; preference: string; eventRelevance: string;
@@ -25,9 +26,8 @@ export function PlaceGuide({ destination, locale, distance, distanceLabel, deman
       <section className="place-guide-section"><h3>{interfaceText(locale, "guide")}</h3><dl className="place-guide-facts">
         <div><dt><Navigation size={16} />{distanceLabel}</dt><dd>{distance}</dd></div>
         <div><dt><Clock3 size={16} />{t("common.averageVisit")}</dt><dd>{destination.averageVisitMinutes} {t("common.minutes")}</dd></div>
-        <div className="wide"><dt><Clock3 size={16} />{t("common.openingHours")}</dt><dd>{destination.openingHours ?? t("common.checkLocally")}</dd></div>
-        <div className="wide"><dt><Coins size={16} />{t("common.feeNote")}</dt><dd>{destination.feeNote ?? t("common.feeMayVary")}</dd></div>
       </dl><p className="distance-basis-note">{travelerStatusText(locale, "distance")}</p></section>
+      <PlacePracticalInfo destination={destination} locale={locale} />
       {Boolean(destination.visitTips?.length) && <section className="place-guide-section"><h3>{t("tourist.places.beforeYouGo")}</h3><ul className="place-guide-tips">{destination.visitTips!.map((tip) => <li key={tip}>{tip}</li>)}</ul></section>}
       {(destination.sourceUrl || destination.coordinateSourceUrl) && <div className="place-guide-secondary">
         {destination.sourceUrl?.startsWith("https://") && <a className="secondary-action compact-action" href={destination.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} />{emergencyHelpText(locale, "source")}</a>}
