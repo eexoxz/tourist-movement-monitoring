@@ -62,8 +62,11 @@ describe("user interface quality guardrails", () => {
     expect(app).toContain('lazy(() => import("./workspaces/TouristWorkspace")');
     expect(app).not.toContain('import { AdminWorkspace }');
     expect(app).not.toContain('import { TouristWorkspace }');
-    expect(viteConfigSource).toContain('return "map-markup"');
-    expect(mapSource).toContain("categoryIconMarkup.get(key)");
+    expect(viteConfigSource).not.toContain('return "map-markup"');
+    expect(mapSource).toContain("categoryIconMarkup[category][size]");
+    for (const file of ["MapView", "EmergencyServiceMap", "CheckInLocationMap"]) {
+      expect(readSource(`src/components/${file}.tsx`)).not.toContain("react-dom/server");
+    }
     expect(admin).toContain('view === "dashboard" && adminTab === "records"');
     expect(admin).toContain("recordsActive ? getMovementDashboardViews");
     expect(admin).toContain("if (recordsActive && selectedRecordTripId");

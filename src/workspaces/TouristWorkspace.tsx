@@ -27,7 +27,7 @@ import { discoveryText } from "../services/discoveryCopy";
 import { DiscoveryPrompt } from "../components/DiscoveryPrompt";
 import { ActivityBasis } from "../components/ActivityBasis";
 import { activityText } from "../services/activityCopy";
-import { getTouristDestinationDemand } from "../services/activitySummary";
+import { createTouristDemandSelector } from "../services/activitySummary";
 import { getMovementQualityIssue, type MovementQualityIssue } from "../services/movementQuality";
 import { getNearbyEmergencyServices } from "../services/emergencyServices";
 import { emergencyHelpText } from "../services/emergencyHelpCopy";
@@ -140,7 +140,8 @@ export function TouristWorkspace({
   } = touristWorkspace;
   const activeTripSummary = activeTrip ? tripSummaries.find((summary) => summary.tripId === activeTrip.id) ?? null : null;
   const activeGpsFix = activeTrip && lastBrowserLocation?.tripId === activeTrip.id ? lastBrowserLocation : undefined;
-  const destinationDemand = useMemo(() => getTouristDestinationDemand(data, user), [data, user]);
+  const selectDestinationDemand = useMemo(createTouristDemandSelector, []);
+  const destinationDemand = useMemo(() => selectDestinationDemand(data, user), [data, user, selectDestinationDemand]);
   const calendarDay = useCalendarDay();
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
   const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));

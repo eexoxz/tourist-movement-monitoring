@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
 import type { AppData, MovementPoint, TripSession } from "../types";
 import { calculateDestinationDemand } from "./analytics";
-import { buildDestinationActivitySummaries, getTouristDestinationDemand, isFreshActivitySummary } from "./activitySummary";
+import { buildDestinationActivitySummaries, createTouristDemandSelector, getTouristDestinationDemand, isFreshActivitySummary } from "./activitySummary";
 import { activityText } from "./activityCopy";
 import { localeOptions } from "./i18n";
 
@@ -16,6 +16,56 @@ function activityData(visitorCount = 3, source: MovementPoint["source"] = "brows
 }
 
 describe("bounded and anonymous place activity", () => {
+  it("reuses unchanged activity through unrelated updates without retaining another account's result", () => {
+    const select = createTouristDemandSelector();
+    const data = activityData();
+    const user = data.users[0];
+    const first = select(data, user, now);
+    expect(select({ ...data, sosAlerts: [] }, { ...user, name: "Updated name" }, now + 1)).toBe(first);
+    expect(first).toEqual(getTouristDestinationDemand(data, user, now));
+    const switched = select(data, { ...user, id: "another-account" }, now + 2);
+    expect(switched).not.toBe(first);
+    expect(select(data, user, now + 3)).not.toBe(switched);
+    expect(createTouristDemandSelector()(data, user, now)).not.toBe(first);
+  });
+
+  it("invalidates activity reuse for changed inputs, source preferences, clock rollback and expiry", () => {
+    const data = activityData();
+    const user = data.users[0];
+    const changes = [
+      { ...data, points: [...data.points] },
+      { ...data, trips: [...data.trips] },
+      { ...data, destinations: [...data.destinations] },
+    ];
+    for (const changed of changes) {
+      const select = createTouristDemandSelector();
+      const first = select(data, user, now);
+      const next = select(changed, user, now + 1);
+      expect(next).not.toBe(first);
+      expect(next).toEqual(getTouristDestinationDemand(changed, user, now + 1));
+    }
+    const select = createTouristDemandSelector();
+    const first = select(data, user, now);
+    const observed = select(data, { ...user, sampleActivityEnabled: false }, now + 1);
+    expect(observed).not.toBe(first);
+    const rolledBack = select(data, { ...user, sampleActivityEnabled: false }, now);
+    expect(rolledBack).not.toBe(observed);
+    expect(select(data, { ...user, sampleActivityEnabled: false }, now + 5000)).not.toBe(rolledBack);
+  });
+
+  it("does not reuse a shared band beyond its exact freshness boundary", () => {
+    const user = { ...initialData.users[0], authUid: "cloud-tourist" };
+    const data = { ...activityData(), points: [], destinations: buildDestinationActivitySummaries(activityData(), now) };
+    const select = createTouristDemandSelector();
+    const boundary = now + 24 * 3600000;
+    const fresh = select(data, user, boundary);
+    expect(fresh[0].popularityScore).toBe(100);
+    const expired = select(data, user, boundary + 1);
+    expect(expired).not.toBe(fresh);
+    expect(expired[0].popularityScore).toBe(0);
+    expect(expired).toEqual(getTouristDestinationDemand(data, user, boundary + 1));
+  });
+
   it("does not reward repeated samples from one visitor on one day", () => {
     const data = activityData();
     const otherDestination = initialData.destinations[1];

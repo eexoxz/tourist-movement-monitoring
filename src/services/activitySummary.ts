@@ -46,3 +46,22 @@ export function getTouristDestinationDemand(data: AppData, user: User, now = Dat
     return { ...row, popularityScore: freshSummary?.popularityScore ?? (sample ? row.popularityScore : 0), tier: freshSummary?.tier ?? (sample ? row.tier : "low") };
   }).sort((a, b) => b.popularityScore - a.popularityScore);
 }
+
+export function createTouristDemandSelector() {
+  let cache: { points: AppData["points"]; trips: AppData["trips"]; destinations: AppData["destinations"]; userId: string; sample: boolean; computedAt: number; expiresAt: number; rows: DestinationDemand[] } | undefined;
+  return (data: AppData, user: User, now = Date.now()) => {
+    const sample = usesSampleActivity(user);
+    if (cache && cache.points === data.points && cache.trips === data.trips && cache.destinations === data.destinations && cache.userId === user.id && cache.sample === sample && now >= cache.computedAt && now < cache.expiresAt) return cache.rows;
+    const rows = getTouristDestinationDemand(data, user, now);
+    let expiresAt = now + 5000;
+    // A shared activity band must expire on time even within the short reuse window.
+    for (const destination of data.destinations) {
+      const summary = sample ? destination.demoActivitySummary : destination.activitySummary;
+      const updatedAt = Date.parse(summary?.updatedAt ?? "");
+      if (updatedAt > now) expiresAt = Math.min(expiresAt, updatedAt);
+      else if (updatedAt + summaryMaxAgeMs >= now) expiresAt = Math.min(expiresAt, updatedAt + summaryMaxAgeMs + 1);
+    }
+    cache = { points: data.points, trips: data.trips, destinations: data.destinations, userId: user.id, sample, computedAt: now, expiresAt, rows };
+    return rows;
+  };
+}

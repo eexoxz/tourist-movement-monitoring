@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
-import { renderToStaticMarkup } from "react-dom/server";
-import { Building2 } from "lucide-react";
+import { emergencyIconMarkup } from "../generated/mapIconMarkup";
 import "leaflet/dist/leaflet.css";
 import type { EmergencyService } from "../data/emergencyServices";
 
@@ -16,7 +15,7 @@ export default function EmergencyServiceMap({ service }: { service: EmergencySer
       maxZoom: 19,
     }).addTo(map);
     L.marker([service.latitude, service.longitude], {
-      icon: L.divIcon({ className: "police-help-marker", html: renderToStaticMarkup(<Building2 size={18} aria-hidden="true" />), iconSize: [32, 32], iconAnchor: [16, 16] }),
+      icon: L.divIcon({ className: "police-help-marker", html: emergencyIconMarkup, iconSize: [32, 32], iconAnchor: [16, 16] }),
       title: service.name,
     }).addTo(map);
     const observer = new ResizeObserver(() => map.invalidateSize());

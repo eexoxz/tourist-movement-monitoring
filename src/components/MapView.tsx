@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
-import { renderToStaticMarkup } from "react-dom/server";
-import { Building2, Landmark, LocateFixed, MapPinned, Trees, Utensils, Waves, X, type LucideIcon } from "lucide-react";
+import { LocateFixed, MapPinned, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, DestinationDemand, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
@@ -12,6 +11,7 @@ import { discoveryText } from "../services/discoveryCopy";
 import { activityText } from "../services/activityCopy";
 import { isContinuousMovementSegment } from "../services/movementQuality";
 import { uiText } from "../services/uiText";
+import { categoryIconMarkup, type CategoryIconSize } from "../generated/mapIconMarkup";
 
 type MapViewProps = {
   points: MovementPoint[];
@@ -24,13 +24,13 @@ type MapViewProps = {
   activityDemand?: DestinationDemand[];
 };
 
-const categoryMeta: Record<DestinationCategory, { Icon: LucideIcon; labelKey: TranslationKey }> = {
-  cultural: { Icon: Landmark, labelKey: "category.cultural" },
-  nature: { Icon: Trees, labelKey: "category.nature" },
-  urban: { Icon: Building2, labelKey: "category.urban" },
-  heritage: { Icon: Landmark, labelKey: "category.heritage" },
-  food: { Icon: Utensils, labelKey: "category.food" },
-  coastal: { Icon: Waves, labelKey: "category.coastal" },
+const categoryMeta: Record<DestinationCategory, { labelKey: TranslationKey }> = {
+  cultural: { labelKey: "category.cultural" },
+  nature: { labelKey: "category.nature" },
+  urban: { labelKey: "category.urban" },
+  heritage: { labelKey: "category.heritage" },
+  food: { labelKey: "category.food" },
+  coastal: { labelKey: "category.coastal" },
 };
 const routeJumpLimitKm = 120;
 const maxRenderedRoutePointMarkers = 80;
@@ -49,16 +49,8 @@ function escapeHtml(value: string) {
   });
 }
 
-const categoryIconMarkup = new Map<string, string>();
-
-function categoryIconHtml(category: DestinationCategory, size = 16) {
-  const key = `${category}:${size}`;
-  const cached = categoryIconMarkup.get(key);
-  if (cached) return cached;
-  const Icon = categoryMeta[category].Icon;
-  const markup = renderToStaticMarkup(<Icon size={size} strokeWidth={2.7} aria-hidden="true" />);
-  categoryIconMarkup.set(key, markup);
-  return markup;
+function categoryIconHtml(category: DestinationCategory, size: CategoryIconSize) {
+  return categoryIconMarkup[category][size];
 }
 
 function tierLabelKey(tier: DestinationSignal["tier"]): TranslationKey {
@@ -84,7 +76,7 @@ function crowdLabelKey(signal: DestinationSignal): TranslationKey {
 function destinationIcon(category: DestinationCategory, signal: DestinationSignal, locale: Locale, showCounts = true) {
   const meta = categoryMeta[category];
   const size = signal.tier === "high" ? 46 : signal.tier === "medium" ? 42 : signal.tier === "emerging" ? 38 : 34;
-  const iconSize = Math.round(size * 0.44);
+  const iconSize = signal.tier === "high" ? 20 : signal.tier === "medium" ? 18 : signal.tier === "emerging" ? 17 : 15;
   const badgeLabel = signal.nearbyPointCount > 999 ? "999+" : signal.nearbyPointCount.toString();
   const badge = showCounts && signal.nearbyPointCount > 0 ? `<b>${badgeLabel}</b>` : "";
 
