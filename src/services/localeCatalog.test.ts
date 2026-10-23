@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { createLocaleSelection, getLocaleCatalog, loadLocaleCatalog } from "./localeCatalog";
 import { localeOptions, type Locale } from "./i18n";
-import originalHashes from "../locales/catalogueParity.json";
+import reviewedHashes from "../locales/catalogueParity.json";
 
 describe("language catalogue loading", () => {
   for (const { value: locale } of localeOptions) {
-    it(`preserves the original catalogue payload in ${locale}`, async () => {
+    it(`preserves the reviewed catalogue payload in ${locale}`, async () => {
       await loadLocaleCatalog(locale);
       const catalog = getLocaleCatalog(locale)!;
       const newSources = new Set(["Language unavailable", "Could not load this language. Check your connection and try again.", "Stop recording this trip?"]);
       const originalCatalog = { ...catalog, coverage: Object.fromEntries(Object.entries(catalog.coverage).filter(([source]) => !newSources.has(source))) };
       const hash = createHash("sha256").update(JSON.stringify(originalCatalog)).digest("hex");
-      expect(hash).toBe(originalHashes[locale]);
+      expect(hash).toBe(reviewedHashes[locale]);
     });
   }
 

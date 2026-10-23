@@ -26,7 +26,7 @@ describe("supervisor-reviewed tourist interface", () => {
     expect(html).toContain(renderToStaticMarkup(createElement(Fragment, null, reviewText(locale, "identity"))));
     expect(html).toContain(renderToStaticMarkup(createElement(Fragment, null, reviewText(locale, "identityRequired"))));
     expect(html).toMatch(/select required=""/);
-    expect(html).toMatch(/input required="" minLength="5"/);
+    expect(html).toMatch(/<input\b[^>]*required=""[^>]*minLength="5"/);
     expect(html).toContain(translate(locale, "auth.nationality"));
   });
 });

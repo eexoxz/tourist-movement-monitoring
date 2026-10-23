@@ -567,6 +567,22 @@ textarea {
   line-height: 1.4;
 }
 
+.profile-identity-fields { align-items: start; }
+.identity-number-field { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.identity-number-field input { width: 100%; min-width: 0; }
+.identity-number-field .field-hint { font-weight: 400; overflow-wrap: anywhere; }
+.identity-number-help { min-width: 0; font-size: 0.8rem; line-height: 1.6; }
+.identity-number-help > summary { display: flex; align-items: center; gap: 7px; min-height: 44px; color: var(--teal); cursor: pointer; list-style: none; }
+.identity-number-help > summary::-webkit-details-marker { display: none; }
+.identity-number-help > summary span { min-width: 0; overflow-wrap: anywhere; }
+.identity-number-help > summary svg { flex-shrink: 0; }
+.identity-number-help > summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 4px; }
+.identity-help-chevron { margin-left: auto; }
+.identity-number-help[open] .identity-help-chevron { transform: rotate(180deg); }
+.identity-number-help > div { padding: 10px 12px; border-left: 2px solid var(--line); color: var(--muted); overflow-wrap: anywhere; }
+.identity-number-help ul { display: grid; gap: 8px; margin: 0; padding-left: 18px; }
+.identity-number-help p { margin: 10px 0 0; }
+
 .empty-state {
   display: flex;
   align-items: center;

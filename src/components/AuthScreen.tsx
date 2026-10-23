@@ -12,6 +12,7 @@ import type { UserRole } from "../types";
 import type { NotifyFn } from "./ToastViewport";
 import { uiText } from "../services/uiText";
 import { clearRememberedLogin, loadRememberedLogin, saveRememberedLogin } from "../services/loginPreferences";
+import { IdentityNumberField } from "./IdentityNumberField";
 
 export type AuthResult = { error?: string; message?: string };
 
@@ -408,11 +409,7 @@ export function AuthScreen({
                   ))}
                 </select>
               </label>
-              <label>
-                {reviewText(locale, "identity")}
-                <input value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" placeholder="A12345678" maxLength={28} required />
-                <small className="field-hint">{reviewText(locale, "identityInvalid")}</small>
-              </label>
+              <IdentityNumberField value={passportNumber} onChange={setPassportNumber} locale={locale} />
             </div>
           )}
 

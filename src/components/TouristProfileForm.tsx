@@ -9,6 +9,7 @@ import type { DestinationCategory, User } from "../types";
 import { nationalityOptions } from "../data/nationalities";
 import { hasTouristIdentity, normalizeIdentity } from "../services/touristIdentity";
 import { reviewText } from "../services/reviewUpdateCopy";
+import { IdentityNumberField } from "./IdentityNumberField";
 
 type TouristProfileFormProps = {
   user: User;
@@ -94,13 +95,13 @@ export function TouristProfileForm({
 
         <div className="profile-form-grid">
           {!hasTouristIdentity(user) && <p className="status-message" role="status">{reviewText(locale, "identityRequired")}</p>}
-          <div className="field-pair">
+          <div className="field-pair profile-identity-fields">
             <label>{reviewText(locale, "country")}<select required value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name">
               <option value="">{t("auth.nationality")}</option>
               {nationality && !(nationalityOptions as readonly string[]).includes(nationality) && <option value={nationality}>{nationality}</option>}
               {nationalityOptions.map((country) => <option key={country} value={country}>{country}</option>)}
             </select></label>
-            <label>{reviewText(locale, "identity")}<input required minLength={5} maxLength={28} value={passportNumber} onChange={(event) => setPassportNumber(event.target.value)} autoComplete="off" aria-invalid={identityError || undefined} /></label>
+            <IdentityNumberField value={passportNumber} onChange={setPassportNumber} locale={locale} invalid={identityError} />
           </div>
           {identityError && <p role="alert">{reviewText(locale, "identityInvalid")}</p>}
           <label>
