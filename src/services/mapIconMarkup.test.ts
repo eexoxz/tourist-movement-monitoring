@@ -7,11 +7,11 @@ import { categoryIconMarkup, checkInIconMarkup, emergencyIconMarkup, type Catego
 describe("build-time map icon markup", () => {
   const icons = { cultural: Landmark, nature: Trees, urban: Building2, heritage: Landmark, food: Utensils, coastal: Waves };
   for (const category of Object.keys(icons) as (keyof typeof icons)[]) {
-    for (const size of [13, 15, 17, 18, 20] as CategoryIconSize[]) {
-      it(`preserves the Lucide ${category} icon at ${size}px`, () => {
-        expect(categoryIconMarkup[category][size]).toBe(renderToStaticMarkup(createElement(icons[category], { size, strokeWidth: 2.7, "aria-hidden": "true" })));
-      });
-    }
+    it(`preserves the Lucide ${category} icon at every supported size`, () => {
+      for (const size of [13, 15, 17, 18, 20] as CategoryIconSize[]) {
+        expect(categoryIconMarkup[category][size], `${category} at ${size}px`).toBe(renderToStaticMarkup(createElement(icons[category], { size, strokeWidth: 2.7, "aria-hidden": "true" })));
+      }
+    });
   }
   it("preserves check-in and emergency pins without a browser-side server renderer", () => {
     expect(emergencyIconMarkup).toBe(renderToStaticMarkup(createElement(Building2, { size: 18, "aria-hidden": "true" })));

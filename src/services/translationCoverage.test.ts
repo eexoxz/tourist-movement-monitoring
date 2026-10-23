@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasDirectTranslation, localeOptions, translate, translationKeys } from "./i18n";
+import { hasDirectTranslation, localeOptions, translate, translationKeys, type Locale } from "./i18n";
 import { adminTranslationKeys, hasDirectAdminTranslation, translateAdmin } from "./adminI18n";
 import fs from "node:fs";
 import path from "node:path";
@@ -11,6 +11,16 @@ import { clusterText, decisionStepText, recommendationReason } from "./planningT
 import { sosText } from "./sosCopy";
 import { formatFestivalScope, formatFestivalStateSummaryLabel, getFestivalPlanningSummary } from "./festivals";
 import { malaysiaFestivalEvents } from "../data/festivals";
+import { interfaceKeys, interfaceText } from "./interfaceCopy";
+import { travelExperienceKeys, travelText } from "./travelExperienceCopy";
+import { demoDatasetText } from "./demoDatasetCopy";
+
+const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort();
+const featureCopy = [
+  ...interfaceKeys.map((key) => ({ name: `interface.${key}`, text: (locale: Locale) => interfaceText(locale, key) })),
+  ...travelExperienceKeys.map((key) => ({ name: `travel.${key}`, text: (locale: Locale) => travelText(locale, key) })),
+  ...(["batchButton", "progress", "sampleRecord", "realRecord", "batchMessage", "dataNote"] as const).map((key) => ({ name: `demo.${key}`, text: (locale: Locale) => demoDatasetText(locale, key, { count: 50, max: 300 }) })),
+];
 
 const sourceFiles = [path.resolve("src/App.tsx"), ...["src/components", "src/workspaces"].flatMap((directory) => fs.readdirSync(directory).filter((name) => name.endsWith(".tsx")).map((name) => path.resolve(directory, name))), path.resolve("src/services/planningText.ts")];
 const uiSources = new Set<string>();
@@ -47,22 +57,25 @@ describe("complete translation catalogues", () => {
     expect(missingLocaleProps).toEqual([]);
   });
   for (const { value: locale } of localeOptions) {
-    it(`covers every app key in ${locale}`, () => {
+    it(`covers app and admin catalogues in ${locale} without lost placeholders`, () => {
       expect(translationKeys.filter((key) => !hasDirectTranslation(locale, key))).toEqual([]);
       for (const key of translationKeys) {
-        expect(translate(locale, key).trim()).not.toBe("");
-        expect([...new Set(translate(locale, key).match(/\{\w+\}/g) ?? [])].sort(), key).toEqual([...new Set(translate("en", key).match(/\{\w+\}/g) ?? [])].sort());
+        expect(translate(locale, key).trim(), `app.${key}`).not.toBe("");
+        expect(placeholders(translate(locale, key)), `app.${key}`).toEqual(placeholders(translate("en", key)));
       }
-    });
-    it(`covers every admin key in ${locale}`, () => {
       expect(adminTranslationKeys.filter((key) => !hasDirectAdminTranslation(locale, key))).toEqual([]);
       for (const key of adminTranslationKeys) {
-        expect(translateAdmin(locale, key).trim()).not.toBe("");
-        expect([...new Set(translateAdmin(locale, key).match(/\{\w+\}/g) ?? [])].sort(), key).toEqual([...new Set(translateAdmin("en", key).match(/\{\w+\}/g) ?? [])].sort());
+        expect(translateAdmin(locale, key).trim(), `admin.${key}`).not.toBe("");
+        expect(placeholders(translateAdmin(locale, key)), `admin.${key}`).toEqual(placeholders(translateAdmin("en", key)));
       }
     });
     it(`covers app-authored supplemental UI copy in ${locale}`, () => {
       expect([...uiSources].filter((source) => source && !hasUiTranslation(locale, source))).toEqual([]);
+      for (const source of supplementalSources) {
+        const translated = coverageText(locale, source);
+        expect(translated?.trim(), source).toBeTruthy();
+        expect(placeholders(translated ?? ""), source).toEqual(placeholders(source));
+      }
     });
     it(`translates generated calendar labels and planning notes in ${locale}`, () => {
       for (const event of malaysiaFestivalEvents) {
@@ -74,11 +87,12 @@ describe("complete translation catalogues", () => {
       expect(uiText(locale, "These places may become busier around this event. Compare demand in Penang before planning a route.")).not.toContain("{cities}");
       if (locale !== "en") expect(uiText(locale, "These places may become busier around this event. Compare demand in Penang before planning a route.")).not.toContain("These places may");
     });
-    it(`covers every supplemental phrase in ${locale} without lost placeholders`, () => {
-      for (const source of supplementalSources) {
-        const translated = coverageText(locale, source);
-        expect(translated, source).toBeTruthy();
-        expect((translated?.match(/\{\w+\}/g) ?? []).sort(), source).toEqual((source.match(/\{\w+\}/g) ?? []).sort());
+    it(`covers standalone feature labels in ${locale}`, () => {
+      for (const { name, text } of featureCopy) {
+        const translated = text(locale);
+        expect(translated.trim(), name).not.toBe("");
+        expect(translated, name).not.toMatch(/\{\w+\}/);
+        if (locale !== "en") expect(translated, name).not.toBe(text("en"));
       }
     });
   }

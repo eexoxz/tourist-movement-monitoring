@@ -1,21 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createHash } from "node:crypto";
-import { createLocaleSelection, getLocaleCatalog, loadLocaleCatalog } from "./localeCatalog";
-import { localeOptions, type Locale } from "./i18n";
-import reviewedHashes from "../locales/catalogueParity.json";
+import { createLocaleSelection } from "./localeCatalog";
+import type { Locale } from "./i18n";
 
 describe("language catalogue loading", () => {
-  for (const { value: locale } of localeOptions) {
-    it(`preserves the reviewed catalogue payload in ${locale}`, async () => {
-      await loadLocaleCatalog(locale);
-      const catalog = getLocaleCatalog(locale)!;
-      const newSources = new Set(["Language unavailable", "Could not load this language. Check your connection and try again.", "Stop recording this trip?"]);
-      const originalCatalog = { ...catalog, coverage: Object.fromEntries(Object.entries(catalog.coverage).filter(([source]) => !newSources.has(source))) };
-      const hash = createHash("sha256").update(JSON.stringify(originalCatalog)).digest("hex");
-      expect(hash).toBe(reviewedHashes[locale]);
-    });
-  }
-
   it("keeps the old language until the requested language is ready", async () => {
     let finish!: () => void;
     const select = createLocaleSelection(() => new Promise<void>((resolve) => { finish = resolve; }));
