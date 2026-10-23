@@ -34,6 +34,7 @@ export function getDiscoveryReference(user: User, gpsPoint?: MovementPoint): Mov
 export function getDiscoveryDestinations(destinations: Destination[], user: User, reference?: MovementPoint) {
   const hidden = new Set(user.hiddenDestinationIds ?? []);
   if (user.discoveryLocationMode === "area") {
+    if (!user.discoveryAreaId) return destinations.filter((destination) => !hidden.has(destination.id));
     const state = getDiscoveryState(user.discoveryAreaId);
     return state ? destinations.filter((destination) => !hidden.has(destination.id) && getDestinationState(destination) === state) : [];
   }

@@ -10,6 +10,14 @@ import type { FestivalEvent, User } from "../types";
 const user: User = { ...initialData.users[0], id: "discovery-test", hiddenDestinationIds: [] };
 
 describe("privacy-aware local discovery", () => {
+  it("browses nationwide without a selected state or GPS while respecting hidden places", () => {
+    const nationwide = { ...user, discoveryLocationMode: "area" as const, discoveryAreaId: "", hiddenDestinationIds: [initialData.destinations[0].id] };
+    const expected = initialData.destinations.slice(1);
+    expect(getDiscoveryReference(nationwide)).toBeUndefined();
+    expect(getDiscoveryDestinations(initialData.destinations, nationwide)).toEqual(expected);
+    expect(getDiscoveryDestinations(initialData.destinations, { ...nationwide, discoveryLocationMode: "current" })).toEqual(expected);
+    expect(getDiscoveryDestinations(initialData.destinations, { ...nationwide, discoveryAreaId: "missing" })).toEqual([]);
+  });
   it("groups every existing area by state without mixing states or duplicating options", () => {
     expect(discoveryStates).toHaveLength(14);
     expect(getDiscoveryAreasForState("")).toEqual([]);

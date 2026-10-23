@@ -45,6 +45,8 @@ import { cacheLocalData, loadCloudData, loadData, normalizeAppData, saveCloudDat
 import { acknowledgeCloudJob, pendingCloudJobs, queueCloudChanges } from "./cloudChanges";
 import { mergeIncidentReports } from "./incidentSync";
 import { loadPendingCheckIns, rememberPendingCheckIn } from "./pendingCheckIns";
+import { getPreparedDemoTouristCount, initialData, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
+import { rememberDemoDatasetSelection } from "./demoDatasetSelection";
 
 const alice = { id: "alice", authUid: "alice", role: "tourist", name: "Alice", email: "alice@example.test", password: "", createdAt: "2026-10-17T00:00:00Z" } as User;
 const trip = { id: "trip", userId: "alice", status: "active", label: "Original", startedAt: "2026-10-17T00:00:00Z" };
@@ -62,6 +64,27 @@ beforeEach(() => {
 afterEach(() => { for (const job of pendingCloudJobs(alice)) acknowledgeCloudJob(job); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("scoped cloud workflow persistence", () => {
+  it("does not resurrect removed cloud samples at sign-in or delete genuine remote history", async () => {
+    const admin = { ...alice, id: "admin", authUid: "admin", role: "admin" as const };
+    mock.currentUser = { uid: admin.id };
+    mock.documents.set("users/admin", admin);
+    const generated = initialData.users.filter((row) => row.id.startsWith("tourist-seed-"));
+    for (const user of generated) mock.documents.set(`users/${user.id}`, { ...user });
+    const sampleTrip = initialData.trips.find((row) => row.userId === generated[0].id)!;
+    mock.documents.set(`trips/${sampleTrip.id}`, { ...sampleTrip });
+    const point = initialData.points.find((row) => row.tripId === sampleTrip.id)!;
+    mock.documents.set(`movementPoints/${point.id}`, { ...point, userId: undefined });
+    const before = structuredClone([...mock.documents]);
+    const cleaned = removeGeneratedDemoDataset(initialData);
+    rememberDemoDatasetSelection(cleaned);
+    const loaded = await loadCloudData(admin);
+    expect(getPreparedDemoTouristCount(loaded!)).toBe(0);
+    expect(loaded!.points).toEqual([]);
+    expect(loaded!.trips.some((row) => row.userId === alice.id)).toBe(true);
+    rememberDemoDatasetSelection(mergePreparedDemoDataset(cleaned));
+    expect(getPreparedDemoTouristCount((await loadCloudData(admin))!)).toBe(50);
+    expect([...mock.documents]).toEqual(before);
+  });
   it("does not reopen or unhide an archived trip when another device sends a stale rename", async () => {
     const before = base();
     mock.documents.set("trip_sessions/trip", { ...trip, hiddenFromHistoryAt: "2026-10-22T01:00:00Z", endedAt: "2026-10-22T01:00:00Z", status: "completed" });

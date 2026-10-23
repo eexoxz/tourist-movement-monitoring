@@ -412,8 +412,7 @@ function App() {
         const checkIns = mergePlaceReviewRecords(current.checkIns, pending, reviewed);
         if (checkIns === current.checkIns) return current;
         const next = { ...current, checkIns };
-        cacheLocalData(next);
-        return next;
+        return cacheLocalData(next);
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
@@ -432,8 +431,7 @@ function App() {
         const checkIns = mergeCheckInRecords(current.checkIns, records);
         if (checkIns === current.checkIns) return current;
         const next = { ...current, checkIns };
-        cacheLocalData(next);
-        return next;
+        return cacheLocalData(next);
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
@@ -447,8 +445,7 @@ function App() {
       if (stopped) return;
       setData((current) => {
         const next = { ...current, sosAlerts: mergeSosAlerts(current.sosAlerts, alerts) };
-        cacheLocalData(next);
-        return next;
+        return cacheLocalData(next);
       });
     }, () => {
       if (!stopped) notifySyncIssue(sosText(locale, "syncUnavailable"), sosText(locale, "syncDetail"));
@@ -469,8 +466,7 @@ function App() {
         const incidentReports = mergeIncidentReports(current.incidentReports, reports);
         if (incidentReports === current.incidentReports) return current;
         const next = { ...current, incidentReports };
-        cacheLocalData(next);
-        return next;
+        return cacheLocalData(next);
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
@@ -485,8 +481,7 @@ function App() {
       if (stopped) return;
       setData((current) => {
         const next = snapshots.reduce((value, snapshot) => mergeMonitoringSnapshot(value, snapshot, pending), current);
-        if (next !== current) cacheLocalData(next);
-        return next;
+        return next === current ? current : cacheLocalData(next);
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };

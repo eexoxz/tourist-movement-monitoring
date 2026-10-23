@@ -498,6 +498,7 @@ const legacyNames = new Map([
   ["tourist-insufficient-demo", "Learning Demo Tourist"],
 ]);
 const preparedUsers = new Map(initialData.users.map((user) => [user.id, user]));
+const preparedTripOwners = new Map(initialData.trips.map((trip) => [trip.id, trip.userId]));
 
 export function refreshLegacyDemoProfiles(users: User[]) {
   return users.map((user) => {
@@ -509,10 +510,10 @@ export function refreshLegacyDemoProfiles(users: User[]) {
   });
 }
 
-export function mergePreparedDemoDataset(data: AppData, batchSize: number = demoDatasetMetadata.batchSize): AppData {
+export function mergePreparedDemoDataset(data: AppData, batchSize: number = demoDatasetMetadata.batchSize, selectedUserIds?: ReadonlySet<string>): AppData {
   if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > GENERATED_TOURIST_COUNT) throw new Error("Invalid demo batch size");
   const existingIds = new Set(data.users.map((user) => user.id));
-  const selected = new Set(generatedSeedData.users.filter((user) => !existingIds.has(user.id)).slice(0, batchSize).map((user) => user.id));
+  const selected = selectedUserIds ?? new Set(generatedSeedData.users.filter((user) => !existingIds.has(user.id)).slice(0, batchSize).map((user) => user.id));
   const include = (userId: string) => !isGeneratedSeedUserId(userId) || selected.has(userId);
   return {
     ...data,
@@ -532,20 +533,29 @@ export function createStarterDemoData() {
   return mergePreparedDemoDataset(removeGeneratedDemoDataset(initialData));
 }
 
-export function removeGeneratedDemoDataset(data: AppData): AppData {
+export function removeGeneratedDemoDataset(data: AppData, retainedUserIds: ReadonlySet<string> = new Set()): AppData {
   const protectedUsers = new Set(data.users.filter((user) => !isSampleTourist(user)).map((user) => user.id));
-  const removeUser = (userId: string) => isGeneratedSeedUserId(userId) && !protectedUsers.has(userId);
-  const removedTrips = new Set(data.trips.filter((trip) => removeUser(trip.userId)).map((trip) => trip.id));
-  return {
-    ...data,
-    users: data.users.filter((user) => !removeUser(user.id)),
-    consents: data.consents.filter((consent) => !removeUser(consent.userId)),
-    trips: data.trips.filter((trip) => !removedTrips.has(trip.id)),
-    points: data.points.filter((point) => !removedTrips.has(point.tripId) && !removeUser(point.userId ?? "")),
-    analyses: data.analyses.filter((analysis) => !removedTrips.has(analysis.tripId) && !removeUser(analysis.userId)),
-    recommendations: data.recommendations.filter((recommendation) => !removeUser(recommendation.userId)),
-    checkIns: data.checkIns.filter((checkIn) => !removedTrips.has(checkIn.tripId ?? "") && !removeUser(checkIn.userId)),
-    sosAlerts: data.sosAlerts.filter((alert) => !removeUser(alert.userId)),
-    incidentReports: data.incidentReports.filter((report) => !removeUser(report.userId)),
+  const removeUser = (userId: string) => isGeneratedSeedUserId(userId) && !protectedUsers.has(userId) && !retainedUserIds.has(userId);
+  const tripOwners = new Map([...preparedTripOwners, ...data.trips.map((trip) => [trip.id, trip.userId] as const)]);
+  const removeTrip = (tripId: string) => {
+    const legacyOwner = /^trip-seed-(\d{3})(?:-\d+)?$/.exec(tripId)?.[1];
+    return removeUser(tripOwners.get(tripId) ?? (legacyOwner ? `tourist-seed-${legacyOwner}` : ""));
   };
+  const retain = <T>(rows: T[], keep: (row: T) => boolean) => {
+    const filtered = rows.filter(keep);
+    return filtered.length === rows.length ? rows : filtered;
+  };
+  const next = {
+    ...data,
+    users: retain(data.users, (user) => !removeUser(user.id)),
+    consents: retain(data.consents, (consent) => !removeUser(consent.userId)),
+    trips: retain(data.trips, (trip) => !removeTrip(trip.id)),
+    points: retain(data.points, (point) => !removeTrip(point.tripId) && !removeUser(point.userId ?? "")),
+    analyses: retain(data.analyses, (analysis) => !removeTrip(analysis.tripId) && !removeUser(analysis.userId)),
+    recommendations: retain(data.recommendations, (recommendation) => !removeUser(recommendation.userId)),
+    checkIns: retain(data.checkIns, (checkIn) => !removeTrip(checkIn.tripId ?? "") && !removeUser(checkIn.userId)),
+    sosAlerts: retain(data.sosAlerts, (alert) => !removeUser(alert.userId)),
+    incidentReports: retain(data.incidentReports, (report) => !removeUser(report.userId)),
+  };
+  return Object.keys(next).every((key) => next[key as keyof AppData] === data[key as keyof AppData]) ? data : next;
 }

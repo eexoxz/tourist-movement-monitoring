@@ -25,6 +25,7 @@ import { acknowledgePendingCheckIns, loadPendingCheckIns } from "./pendingCheckI
 import { mergeCheckInRecords } from "./checkInSync";
 import { acknowledgeCloudJob, buildCloudChanges, queueCloudChanges, type CloudTables } from "./cloudChanges";
 import { flushCloudChanges } from "./cloudSync";
+import { applyDemoDatasetSelection } from "./demoDatasetSelection";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
@@ -113,7 +114,9 @@ export function saveData(data: AppData, actor?: User | null, previousData = load
 }
 
 export function cacheLocalData(data: AppData) {
-  saveLocalData(data);
+  const selected = applyDemoDatasetSelection(data);
+  saveLocalData(selected);
+  return selected;
 }
 
 export function clearLocalDownloadCache() {
@@ -333,7 +336,7 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
     if (!tripOwners.has(trip.id)) tripOwners.set(trip.id, trip.userId);
   }
 
-  return {
+  return applyDemoDatasetSelection({
     users: refreshLegacyDemoProfiles(asArray<User>(data.users)),
     consents: asArray<LocationConsent>(data.consents),
     trips,
@@ -345,7 +348,7 @@ export function normalizeAppData(value: Partial<AppData> | null | undefined): Ap
     incidentReports: asArray<Partial<IncidentReport>>(data.incidentReports).map(normalizeIncidentReport),
     checkIns: asArray<Partial<AttractionCheckIn>>(data.checkIns).map(normalizeCheckIn),
     geofences: asArray<Partial<GeoFence>>(geofences).map(normalizeGeofence),
-  };
+  });
 }
 
 export function resetData() {
@@ -454,7 +457,7 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
     geofences.length > 0;
 
   if (hasStructuredData) {
-    const data = normalizeAppData({
+    const data = applyDemoDatasetSelection(normalizeAppData({
       users: mergedUsers,
       consents,
       trips,
@@ -466,7 +469,7 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
       incidentReports,
       checkIns: mergeCheckInRecords(loadPendingCheckIns(authUid), checkIns),
       geofences,
-    });
+    }), isAdminUser);
     saveLocalData(data);
     return data;
   }

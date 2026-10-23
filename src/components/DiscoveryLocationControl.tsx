@@ -24,7 +24,7 @@ export function DiscoveryLocationControl({ user, locale, onChange, onSettings }:
       {mode === "area" && <label>
         {translate(locale, "tourist.events.state")}
         <select aria-label={translate(locale, "tourist.events.state")} value={state} onChange={(event) => onChange("area", event.target.value ? `state:${event.target.value}` : "")}>
-          <option value="">{discoveryText(locale, "chooseState")}</option>
+          <option value="">{translate(locale, "tourist.places.allMalaysia")}</option>
           {discoveryStates.map((candidate) => <option key={candidate} value={candidate}>{candidate}</option>)}
         </select>
       </label>}

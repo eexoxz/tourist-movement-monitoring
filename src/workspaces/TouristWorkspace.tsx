@@ -148,7 +148,7 @@ export function TouristWorkspace({
   const latestGpsPoint = currentConsent ? getLatestDiscoveryPoint(activePoints.at(-1), lastBrowserLocation) : undefined;
   const discoveryGpsPoint = getDiscoveryReference({ ...user, discoveryLocationMode: "current" }, latestGpsPoint);
   const discoveryReference = useMemo(() => getDiscoveryReference(user, discoveryGpsPoint), [user, discoveryGpsPoint]);
-  const canonicalDiscoveryDestinations = useMemo(() => discoveryReference ? getDiscoveryDestinations(data.destinations, user, discoveryReference) : [], [data.destinations, user, discoveryReference]);
+  const canonicalDiscoveryDestinations = useMemo(() => getDiscoveryDestinations(data.destinations, user, discoveryReference), [data.destinations, user, discoveryReference]);
   const discoveryDestinations = useMemo(() => localizeDestinations(canonicalDiscoveryDestinations, locale), [canonicalDiscoveryDestinations, locale]);
   const spotlightContext = useMemo(() => ({
     localDestinationIds: discoveryReference ? canonicalDiscoveryDestinations.map((place) => place.id) : undefined,

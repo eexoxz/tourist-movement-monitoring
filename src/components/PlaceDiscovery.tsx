@@ -188,7 +188,7 @@ export function PlaceDiscovery({
   useEffect(() => {
     setShowAllPlaces(false);
   }, [categoryFilter, mode, normalizedSearch, user.discoveryAreaId]);
-  useEffect(() => { if (isBrowsingArea && mode === "nearby") setMode("recommended"); }, [isBrowsingArea, mode]);
+  useEffect(() => { if ((isBrowsingArea || !referencePoint) && mode === "nearby") setMode("recommended"); }, [isBrowsingArea, referencePoint, mode]);
 
   const scoredRows = useMemo(() => {
     return localizedDestinations
@@ -341,7 +341,7 @@ export function PlaceDiscovery({
       </section>
 
       <div className="places-mode-row" aria-label={uiText(locale, "Place discovery mode")}>
-        {placeDiscoveryModes.filter((option) => !isBrowsingArea || option.value !== "nearby").map((option) => (
+        {placeDiscoveryModes.filter((option) => option.value !== "nearby" || (!isBrowsingArea && referencePoint)).map((option) => (
           <button key={option.value} className={mode === option.value ? "active" : ""} type="button" onClick={() => setMode(option.value)}>
             {t(option.labelKey)}
           </button>
