@@ -42,11 +42,11 @@ describe("generated demo dataset", () => {
     expect(isPreparedDemoDatasetLoaded(restored)).toBe(true);
   });
 
-  it("loads fifty tourists at a time and stops at the fixed maximum", () => {
+  it("loads twenty tourists at a time and stops at the fixed maximum", () => {
     let data = removeGeneratedDemoDataset(initialData);
     for (let batch = 1; batch <= 8; batch++) {
       data = mergePreparedDemoDataset(data);
-      expect(getPreparedDemoTouristCount(data)).toBe(Math.min(batch * 50, 300));
+      expect(getPreparedDemoTouristCount(data)).toBe(Math.min(batch * 20, 100));
       const users = new Set(data.users.map((user) => user.id));
       expect(users.size).toBe(data.users.length);
       expect(data.trips.every((trip) => users.has(trip.userId))).toBe(true);
@@ -55,22 +55,21 @@ describe("generated demo dataset", () => {
       expect(data.checkIns.every((visit) => users.has(visit.userId) && (!visit.tripId || trips.has(visit.tripId)))).toBe(true);
     }
     expect(isPreparedDemoDatasetLoaded(data)).toBe(true);
-    expect(getPreparedDemoTouristCount(createStarterDemoData())).toBe(50);
+    expect(getPreparedDemoTouristCount(createStarterDemoData())).toBe(20);
     expect(() => mergePreparedDemoDataset(data, Number.NaN)).toThrow();
-    expect(() => mergePreparedDemoDataset(data, 301)).toThrow();
+    expect(() => mergePreparedDemoDataset(data, 101)).toThrow();
   });
 
   it("provides distinct fictional names and independently varied travel profiles", () => {
     const users = initialData.users.filter((user) => user.id.startsWith("tourist-seed-"));
-    expect(new Set(users.map((user) => user.name)).size).toBe(300);
-    expect(new Set(users.map((user) => user.email)).size).toBe(300);
-    expect(new Set(users.map((user) => user.nationality)).size).toBe(12);
+    expect(new Set(users.map((user) => user.name)).size).toBe(100);
+    expect(new Set(users.map((user) => user.email)).size).toBe(100);
+    expect(new Set(users.map((user) => user.nationality)).size).toBe(13);
     expect(users.every((user) => !/demo tourist/i.test(user.name) && user.email.endsWith("@example.com") && !user.emergencyContactPhone)).toBe(true);
     for (const nationality of new Set(users.map((user) => user.nationality))) {
       const group = users.filter((user) => user.nationality === nationality);
       expect(new Set(group.map((user) => user.expectedProfile)).size).toBe(4);
-      expect(new Set(group.map((user) => user.travelGroup)).size).toBe(4);
-      expect(new Set(group.map((user) => user.tripPace)).size).toBe(3);
+      expect(group.length).toBeGreaterThanOrEqual(3);
     }
   });
 

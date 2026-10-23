@@ -10,6 +10,7 @@ const origins = [
   ["India", ["Priya", "Arjun", "Ananya", "Rohan", "Kavya"], ["Sharma", "Patel", "Nair", "Rao", "Mehta"]],
   ["United Kingdom", ["Oliver", "Amelia", "Harry", "Sophie", "Jack"], ["Bennett", "Clarke", "Evans", "Turner", "Wilson"]],
   ["Australia", ["Charlotte", "Noah", "Isla", "Liam", "Mia"], ["Cooper", "Walker", "Harris", "Mitchell", "Campbell"]],
+  ["New Zealand", ["Ella", "James", "Lucy", "Thomas", "Grace"], ["Taylor", "Scott", "Wilson", "Reid", "Anderson"]],
   ["Germany", ["Lena", "Jonas", "Emma", "Felix", "Hannah"], ["Schmidt", "Weber", "Fischer", "Wagner", "Becker"]],
   ["France", ["Camille", "Lucas", "Manon", "Hugo", "Lea"], ["Martin", "Bernard", "Dubois", "Laurent", "Moreau"]],
 ] as const;

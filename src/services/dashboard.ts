@@ -1,4 +1,5 @@
 import type { AnalysisResult, AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
+import { demoDatasetMetadata } from "../data/demoData";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
 import { compareTimeAsc, compareTimeDesc } from "./time";
@@ -120,7 +121,7 @@ export function getDemoReadiness(data: AppData): DemoReadiness {
       id: "seeded-tourists",
       label: "Synthetic tourist profiles",
       value: `${seededTourists.length} seeded`,
-      ready: seededTourists.length >= 100,
+      ready: seededTourists.length >= demoDatasetMetadata.batchSize,
     },
     {
       id: "demo-accounts",
@@ -138,13 +139,13 @@ export function getDemoReadiness(data: AppData): DemoReadiness {
       id: "movement-records",
       label: "Movement records",
       value: `${data.points.length} points`,
-      ready: data.points.length >= 1200,
+      ready: data.points.length >= demoDatasetMetadata.batchSize * 4,
     },
     {
       id: "profile-preferences",
       label: "Tourist preferences",
       value: `${touristProfilesWithPreferences.length} profiles`,
-      ready: touristProfilesWithPreferences.length >= 100,
+      ready: touristProfilesWithPreferences.length >= demoDatasetMetadata.batchSize,
     },
     {
       id: "ai-analyses",

@@ -768,6 +768,41 @@ textarea {
 .report-identity-option { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
 .report-identity-option input { width: 18px; height: 18px; flex: 0 0 auto; }
 .report-export-note, .trip-retention-note { font-size: 13px; line-height: 1.6; color: #526776; max-width: 78ch; }
+.demo-dataset-manager { padding: 20px; min-width: 0; }
+.demo-dataset-status { display: flex; gap: 10px; align-items: flex-start; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.demo-dataset-status svg { flex: 0 0 auto; color: #087c77; margin-top: 2px; }
+.demo-dataset-current { font-size: 13px; margin-block: 16px; }
+.demo-dataset-filters, .demo-dataset-countries { min-width: 0; margin: 0; padding: 0; border: 0; }
+.demo-dataset-options { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.demo-dataset-options label { min-width: 0; font-size: 13px; }
+.demo-dataset-options select { width: 100%; min-height: 44px; margin-top: 8px; }
+.demo-dataset-country-picker { margin-top: 16px; }
+.demo-dataset-country-picker > summary { display: flex; align-items: center; gap: 10px; min-height: 44px; padding-block: 6px; cursor: pointer; font-size: 13px; list-style: none; border-bottom: 1px solid var(--line); }
+.demo-dataset-country-picker summary span { flex: 1; }
+.demo-dataset-country-picker summary strong { font-size: 12px; }
+.demo-dataset-country-picker summary svg { flex-shrink: 0; }
+.demo-dataset-country-picker[open] summary svg { transform: rotate(180deg); }
+.demo-dataset-countries > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 14px; max-height: 190px; overflow-y: auto; overscroll-behavior: contain; padding-inline: 2px 8px; }
+.demo-dataset-countries label { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; font-weight: 400; overflow-wrap: anywhere; }
+.demo-dataset-countries input { flex: 0 0 18px; width: 18px; height: 18px; margin: 0; accent-color: #087c77; }
+.demo-dataset-countries .demo-dataset-all { border-bottom: 1px solid var(--line); margin-bottom: 6px; font-weight: 700; }
+.demo-dataset-preview { border-block: 1px solid var(--line); margin-top: 18px; padding-block: 16px; }
+.demo-dataset-preview > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+.demo-dataset-preview h3 { font-size: 15px; margin: 0; }
+.demo-dataset-preview span, .demo-dataset-preview p { font-size: 12px; color: var(--muted); }
+.demo-dataset-preview dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; }
+.demo-dataset-preview dt { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.demo-dataset-preview dd { margin: 5px 0 0; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.demo-dataset-note { font-size: 12px; line-height: 1.6; color: var(--muted); margin-block: 14px; }
+.demo-dataset-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; position: sticky; bottom: -1px; background: #fff; padding-block: 10px; }
+.demo-dataset-actions button { min-width: 0; white-space: normal; font-size: 13px; }
+@media (max-width: 440px) {
+  .demo-dataset-manager { padding: 16px; }
+  .demo-dataset-options { grid-template-columns: minmax(0, 1fr); }
+  .demo-dataset-preview dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .demo-dataset-actions { display: grid; }
+  .demo-dataset-actions button { width: 100%; justify-content: center; }
+}
 @media (max-width: 600px) {
   .tourist-country-report .admin-tab-heading { display: grid; gap: 12px; }
   .tourist-country-report .action-row { display: grid; width: 100%; }

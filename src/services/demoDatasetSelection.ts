@@ -27,7 +27,7 @@ export function rememberDemoDatasetSelection(data: AppData) {
 
 export function applyDemoDatasetSelection(data: AppData, restoreSelected = false): AppData {
   const ids = readSelection();
-  if (!ids) return data;
+  if (!ids) return removeGeneratedDemoDataset(data, preparedIds);
   const filtered = removeGeneratedDemoDataset(data, ids);
   if (!ids.size) return removeBuiltInDemoActivity(filtered);
   // Restore only explicitly loaded samples after a cloud refresh, never the whole legacy dataset.

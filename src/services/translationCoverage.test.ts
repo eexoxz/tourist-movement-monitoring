@@ -14,9 +14,11 @@ import { malaysiaFestivalEvents } from "../data/festivals";
 import { interfaceKeys, interfaceText } from "./interfaceCopy";
 import { travelExperienceKeys, travelText } from "./travelExperienceCopy";
 import { demoDatasetText } from "./demoDatasetCopy";
+import { demoDatasetControlKeys, demoControlsText } from "./demoDatasetControlsCopy";
 
 const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort();
 const featureCopy = [
+  ...demoDatasetControlKeys.map((key) => ({ name: `demoControls.${key}`, text: (locale: Locale) => demoControlsText(locale, key, { count: 20, max: 100, points: 1800 }) })),
   ...interfaceKeys.map((key) => ({ name: `interface.${key}`, text: (locale: Locale) => interfaceText(locale, key) })),
   ...travelExperienceKeys.map((key) => ({ name: `travel.${key}`, text: (locale: Locale) => travelText(locale, key) })),
   ...(["batchButton", "progress", "sampleRecord", "realRecord", "batchMessage", "dataNote"] as const).map((key) => ({ name: `demo.${key}`, text: (locale: Locale) => demoDatasetText(locale, key, { count: 50, max: 300 }) })),

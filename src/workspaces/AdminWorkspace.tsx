@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
-import { ArrowRight, ChartNoAxesCombined, ChevronDown, Download, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Trash2, UserRound, Users } from "lucide-react";
+import { ArrowRight, ChartNoAxesCombined, ChevronDown, Download, FlaskConical, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Users } from "lucide-react";
 import { interfaceText } from "../services/interfaceCopy";
 import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
 import { buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
 import { translateAdmin, type AdminCopyKey } from "../services/adminI18n";
-import { demoDatasetMetadata, getPreparedDemoTouristCount, isPreparedDemoDatasetLoaded, mergePreparedDemoDataset, removeGeneratedDemoDataset } from "../data/demoData";
+import { demoDatasetMetadata, getPreparedDemoTouristCount } from "../data/demoData";
 import { demoDatasetText } from "../services/demoDatasetCopy";
-import { applyDemoDatasetSelection, rememberDemoDatasetSelection } from "../services/demoDatasetSelection";
+import { rememberDemoDatasetSelection } from "../services/demoDatasetSelection";
+import { replaceDemoDataset } from "../services/demoDataset";
+import { demoControlsText } from "../services/demoDatasetControlsCopy";
+import { DemoDatasetManager } from "../components/DemoDatasetManager";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
@@ -98,6 +101,11 @@ export function AdminWorkspace({
   const movementScroller = useRef<HTMLDivElement>(null);
   const analysisScroller = useRef<HTMLDivElement>(null);
   const [demoDatasetAction, setDemoDatasetAction] = useState<"loading" | "removing" | null>(null);
+  const [showDemoDataset, setShowDemoDataset] = useState(false);
+  const demoDatasetTask = useRef<number | null>(null);
+  const latestDataset = useRef(data);
+  latestDataset.current = data;
+  useEffect(() => () => { if (demoDatasetTask.current !== null) window.clearTimeout(demoDatasetTask.current); }, []);
   const [refreshingReports, setRefreshingReports] = useState(false);
 
   const recordsActive = view === "dashboard" && adminTab === "records";
@@ -122,9 +130,7 @@ export function AdminWorkspace({
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
   const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data.geofences, data.points]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
-  const demoDatasetLoaded = isPreparedDemoDatasetLoaded(data);
   const demoTouristCount = getPreparedDemoTouristCount(data);
-  const nextDemoBatchCount = Math.min(demoDatasetMetadata.batchSize, demoDatasetMetadata.generatedTouristCount - demoTouristCount);
   const touristManagementRows = useMemo(() => getTouristManagementRows(data), [data]);
   const travelPlan = useMemo(
     () =>
@@ -292,55 +298,21 @@ export function AdminWorkspace({
     notify({ tone: "success", title: adminText("notify.aiTitle"), message: adminText("notify.aiMessage") });
   };
 
-  const seedDemoTourists = () => {
-    if (demoDatasetAction) {
-      return;
-    }
-
-    if (demoDatasetLoaded) {
-      notify({
-        tone: "info",
-        title: t("admin.demo.alreadyLoadedTitle"),
-        message: t("admin.demo.alreadyLoadedMessage"),
-      });
-      return;
-    }
-
-    setDemoDatasetAction("loading");
-    window.setTimeout(() => {
+  const changeDemoDataset = (ids: ReadonlySet<string>) => {
+    if (demoDatasetTask.current !== null || demoDatasetAction) return;
+    const loading = ids.size > 0;
+    setDemoDatasetAction(loading ? "loading" : "removing");
+    // Let the busy state paint, then use the latest live snapshot rather than a captured dataset.
+    demoDatasetTask.current = window.setTimeout(() => {
       try {
-        const refreshed = refreshAllRecommendations(mergePreparedDemoDataset(data));
-        rememberDemoDatasetSelection(refreshed);
-        onDataChange(refreshed, null, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS });
-        notify({
-          tone: "success",
-          title: t("admin.demo.loadedTitle"),
-          message: demoDatasetText(locale, "batchMessage", { count: nextDemoBatchCount }),
-        });
+        const next = refreshAllRecommendations(replaceDemoDataset(latestDataset.current, ids));
+        rememberDemoDatasetSelection(next);
+        onDataChange(next, null, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS });
+        notify({ tone: loading ? "success" : "info", title: t(loading ? "admin.demo.loadedTitle" : "admin.demo.removedTitle"), message: loading ? demoControlsText(locale, "loaded", { count: getPreparedDemoTouristCount(next) }) : t("admin.demo.removedMessage") });
+      } catch {
+        notify({ tone: "warning", title: demoControlsText(locale, "manage"), message: demoControlsText(locale, "failed") });
       } finally {
-        setDemoDatasetAction(null);
-      }
-    }, 0);
-  };
-
-  const clearDemoTourists = () => {
-    if (demoDatasetAction) {
-      return;
-    }
-
-    setDemoDatasetAction("removing");
-    window.setTimeout(() => {
-      try {
-        const selected = removeGeneratedDemoDataset(data);
-        rememberDemoDatasetSelection(selected);
-        const cleaned = refreshAllRecommendations(applyDemoDatasetSelection(selected));
-        onDataChange(cleaned, null, { localOnlyStatus: "Generated demo dataset removed locally; Firestore sync skipped" });
-        notify({
-          tone: "info",
-          title: t("admin.demo.removedTitle"),
-          message: t("admin.demo.removedMessage"),
-        });
-      } finally {
+        demoDatasetTask.current = null;
         setDemoDatasetAction(null);
       }
     }, 0);
@@ -817,16 +789,10 @@ export function AdminWorkspace({
       eyebrow={t("admin.dashboard.eyebrow")}
       actions={
         <details className="admin-data-tools" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false; }}><summary><SlidersHorizontal size={18} />{interfaceText(locale, "tools")}<ChevronDown size={16} /></summary><div className="page-action-row">
-          <button className="secondary-action" onClick={seedDemoTourists} disabled={Boolean(demoDatasetAction) || demoDatasetLoaded}>
-            <UserRound size={18} />
-            {demoDatasetAction === "loading" ? t("admin.demo.loadingButton") : demoDatasetLoaded ? t("admin.demo.loadedButton") : demoDatasetText(locale, "batchButton", { count: nextDemoBatchCount })}
+          <button className="secondary-action" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); setShowDemoDataset(true); }} disabled={Boolean(demoDatasetAction)}>
+            <FlaskConical size={18} />
+            {demoControlsText(locale, "manage")}
           </button>
-          {demoTouristCount > 0 && (
-            <button className="secondary-action" onClick={clearDemoTourists} disabled={Boolean(demoDatasetAction)}>
-              <Trash2 size={18} />
-              {demoDatasetAction === "removing" ? t("admin.demo.removingButton") : t("admin.demo.removeButton")}
-            </button>
-          )}
           <button className="secondary-action" onClick={recomputeAi} disabled={Boolean(demoDatasetAction)}>
             <RotateCcw size={18} />
             {t("admin.dashboard.refreshAi")}
@@ -837,6 +803,7 @@ export function AdminWorkspace({
         </div></details>
       }
     >
+      {showDemoDataset && <DemoDatasetManager data={data} locale={locale} action={demoDatasetAction} onApply={changeDemoDataset} onRemove={() => changeDemoDataset(new Set())} onClose={() => { if (!demoDatasetAction) setShowDemoDataset(false); }} />}
       {demoTouristCount > 0 && <p className="admin-dataset-note">{demoDatasetText(locale, "progress", { count: demoTouristCount, max: demoDatasetMetadata.generatedTouristCount })} · {t("admin.demo.localOnlyNote")} {demoDatasetText(locale, "dataNote")}</p>}
       {adminTab !== "tourists" && <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
         <button type="button" className={openSafetyRecordCount ? "needs-action safety" : "safety"} onClick={() => setAdminTab("safety")}><Siren size={22} /><span>{adminText("overview.safetyCases")}</span><strong>{openSafetyRecordCount}</strong><ArrowRight size={17} /></button>

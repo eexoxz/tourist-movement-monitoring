@@ -134,9 +134,10 @@ describe("workspace integration guardrails", () => {
 
   it("keeps bulk demo actions local-only and disabled while running", () => {
     expect(admin).toContain("DEMO_DATASET_LOCAL_ONLY_STATUS");
-    expect(admin).toContain("onDataChange(refreshed, null, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS })");
+    expect(admin).toContain("onDataChange(next, null, { localOnlyStatus: DEMO_DATASET_LOCAL_ONLY_STATUS })");
     expect(app).toMatch(/if \(options\.localOnlyStatus\) \{\s*cacheLocalData\(nextData\);\s*setSyncStatus\(options\.localOnlyStatus\);\s*return;/);
-    expect(admin).toContain('disabled={Boolean(demoDatasetAction) || demoDatasetLoaded}');
+    expect(admin).toContain("DemoDatasetManager");
+    expect(readSource("src/components/DemoDatasetManager.tsx")).toContain("!preview.touristCount || unchanged");
     expect(admin).toContain('disabled={Boolean(demoDatasetAction)}');
   });
 });

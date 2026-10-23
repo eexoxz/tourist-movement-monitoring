@@ -16,7 +16,7 @@ export type CommitDataOptions = {
 
 export const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";
 
-export const DEMO_DATASET_LOCAL_ONLY_STATUS = "Demo dataset loaded locally; Firestore sync skipped";
+export const DEMO_DATASET_LOCAL_ONLY_STATUS = "Saved to local browser storage";
 
 export const adminSafetyPreviewLimit = 5;
 

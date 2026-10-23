@@ -8,7 +8,7 @@ describe("tourist management service", () => {
     const rows = getTouristManagementRows(initialData);
     const culturalDemo = rows.find((row) => row.tourist.id === "tourist-cultural-demo");
 
-    expect(rows.length).toBeGreaterThanOrEqual(300);
+    expect(rows.length).toBeGreaterThanOrEqual(100);
     expect(culturalDemo?.completedTrips).toBeGreaterThan(0);
     expect(culturalDemo?.checkIns).toBeGreaterThan(0);
     expect(culturalDemo?.openSafetyCases).toBeGreaterThan(0);

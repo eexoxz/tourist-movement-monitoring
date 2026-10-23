@@ -49,7 +49,7 @@ describe("dashboard service", () => {
 
     expect(readiness.readyCount).toBe(readiness.totalCount);
     expect(readiness.completionRate).toBe(1);
-    expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("300");
+    expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("100");
     expect(readiness.items.find((item) => item.id === "movement-records")?.ready).toBe(true);
   });
 
@@ -73,11 +73,11 @@ describe("dashboard service", () => {
       sosAlerts: [],
       incidentReports: [],
       checkIns: [],
-    }, 300);
-    const mergedAgain = mergePreparedDemoDataset(merged, 300);
+    }, 100);
+    const mergedAgain = mergePreparedDemoDataset(merged, 100);
 
     expect(merged.users.some((user) => user.id === currentUser.id)).toBe(true);
-    expect(merged.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(300);
+    expect(merged.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(100);
     expect(mergedAgain.users).toHaveLength(merged.users.length);
     expect(mergedAgain.points).toHaveLength(merged.points.length);
   });

@@ -33,20 +33,20 @@ describe("durable local demo selection", () => {
     expect(applyDemoDatasetSelection(data)).toBe(data);
   });
 
-  it("restores only explicitly loaded batches instead of all 300 cloud samples", () => {
+  it("restores only explicitly loaded batches instead of the whole sample pool", () => {
     const cleaned = removeGeneratedDemoDataset(initialData);
     rememberDemoDatasetSelection(cleaned);
     let selected = mergePreparedDemoDataset(cleaned);
     rememberDemoDatasetSelection(selected);
     const stale = applyDemoDatasetSelection(initialData, true);
-    expect(getPreparedDemoTouristCount(stale)).toBe(50);
+    expect(getPreparedDemoTouristCount(stale)).toBe(20);
     const remoteOnly = { ...cleaned, users: [], consents: [], trips: [], points: [], checkIns: [] };
     const restored = applyDemoDatasetSelection(remoteOnly, true);
-    expect(getPreparedDemoTouristCount(restored)).toBe(50);
-    expect(restored.points).toEqual(stale.points);
+    expect(getPreparedDemoTouristCount(restored)).toBe(20);
+    expect(restored.points).toEqual(stale.points.filter((point) => point.userId?.startsWith("tourist-seed-")));
     selected = mergePreparedDemoDataset(selected);
     rememberDemoDatasetSelection(selected);
-    expect(getPreparedDemoTouristCount(applyDemoDatasetSelection(initialData, true))).toBe(100);
+    expect(getPreparedDemoTouristCount(applyDemoDatasetSelection(initialData, true))).toBe(40);
     rememberDemoDatasetSelection(cleaned);
     expect(getPreparedDemoTouristCount(applyDemoDatasetSelection(initialData, true))).toBe(0);
   });

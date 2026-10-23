@@ -3,7 +3,7 @@ import { demoPersona, demoRandom } from "./demoPersonas";
 import type { AppData, AttractionCheckIn, Destination, DestinationCategory, GeoFence, IncidentReport, LocationConsent, MovementPoint, SosAlert, TouristProfile, TripSession, User } from "../types";
 
 const now = new Date();
-const GENERATED_TOURIST_COUNT = 300;
+const GENERATED_TOURIST_COUNT = 100;
 const GENERATED_TRIPS_PER_TOURIST = 3;
 const GENERATED_POINTS_PER_TRIP = 6;
 const GENERATED_CHECK_INS_PER_TRIP = 2;
@@ -14,7 +14,7 @@ export const demoDatasetMetadata = {
   maxTripsPerTourist: GENERATED_TRIPS_PER_TOURIST,
   maxPointsPerTrip: GENERATED_POINTS_PER_TRIP,
   maxCheckInsPerTrip: GENERATED_CHECK_INS_PER_TRIP,
-  batchSize: 50,
+  batchSize: 20,
   namedDemoAccountCount: 5,
 } as const;
 
@@ -360,7 +360,7 @@ function createGeneratedSeedData() {
     const random = demoRandom(userIndex + 20261022);
     const pick = <T,>(values: readonly T[]) => values[Math.floor(random() * values.length)];
     const persona = demoPersona(userIndex);
-    const profile = pick(profiles);
+    const profile = profiles[userIndex % profiles.length];
     const userId = `tourist-seed-${sequence}`;
     const consentId = `consent-seed-${sequence}`;
     const createdHoursAgo = 120 + (userIndex % 18) * 18 + Math.floor(userIndex / 18) * 3;
@@ -472,7 +472,8 @@ export const initialData: AppData = {
 
 function mergeById<T extends { id: string }>(current: T[], prepared: T[]) {
   const currentIds = new Set(current.map((item) => item.id));
-  return [...current, ...prepared.filter((item) => !currentIds.has(item.id))];
+  const added = prepared.filter((item) => !currentIds.has(item.id));
+  return added.length ? [...current, ...added] : current;
 }
 
 function isGeneratedSeedUserId(userId: string) {
@@ -519,7 +520,8 @@ export function mergePreparedDemoDataset(data: AppData, batchSize: number = demo
   if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > GENERATED_TOURIST_COUNT) throw new Error("Invalid demo batch size");
   const existingIds = new Set(data.users.map((user) => user.id));
   const selected = selectedUserIds ?? new Set(generatedSeedData.users.filter((user) => !existingIds.has(user.id)).slice(0, batchSize).map((user) => user.id));
-  const include = (userId: string) => !isGeneratedSeedUserId(userId) || selected.has(userId);
+  const protectedIds = new Set(data.users.filter((user) => !isSampleTourist(user)).map((user) => user.id));
+  const include = (userId: string) => isGeneratedSeedUserId(userId) && selected.has(userId) && !protectedIds.has(userId);
   return {
     ...data,
     users: refreshLegacyDemoProfiles(mergeById(data.users, initialData.users.filter((user) => include(user.id)))),
@@ -527,8 +529,6 @@ export function mergePreparedDemoDataset(data: AppData, batchSize: number = demo
     trips: mergeById(data.trips, initialData.trips.filter((trip) => include(trip.userId))),
     points: mergeById(data.points, initialData.points.filter((point) => include(point.userId ?? ""))),
     destinations: mergeById(data.destinations, initialData.destinations),
-    sosAlerts: mergeById(data.sosAlerts, initialData.sosAlerts),
-    incidentReports: mergeById(data.incidentReports, initialData.incidentReports),
     checkIns: mergeById(data.checkIns, initialData.checkIns.filter((checkIn) => include(checkIn.userId))),
     geofences: mergeById(data.geofences, initialData.geofences),
   };

@@ -234,7 +234,7 @@ describe("storage service", () => {
 
     const data = loadData();
 
-    expect(data.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(50);
+    expect(data.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(20);
     expect(data.destinations).toHaveLength(initialData.destinations.length);
     expect(data.trips.length).toBeGreaterThan(0);
     vi.unstubAllGlobals();
