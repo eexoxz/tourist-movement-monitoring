@@ -38,6 +38,7 @@ import { summarizeAiResults } from "../services/aiInsights";
 import { aiText } from "../services/aiInsightsCopy";
 import { EmptyState, MetricGrid } from "../components/SummaryCards";
 import { ListLimitFooter } from "../components/ListLimitFooter";
+import { DeferredDetails } from "../components/DeferredDetails";
 import { type NotifyFn } from "../components/ToastViewport";
 import { DestinationManager } from "../components/DestinationManager";
 import { reviewUnlistedCheckIns, mergePlaceReviewRecords, sampleUnlistedCheckIns, groupUnlistedCheckIns } from "../services/unlistedPlaces";
@@ -112,6 +113,7 @@ export function AdminWorkspace({
 
   const recordsActive = view === "dashboard" && adminTab === "records";
   const aiActive = view === "dashboard" && adminTab === "ai";
+  const touristsActive = view === "dashboard" && adminTab === "tourists";
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data.trips, selectedTouristId]);
   const movementViews = useMemo(
     () =>
@@ -133,7 +135,7 @@ export function AdminWorkspace({
   const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data.geofences, data.points]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
   const demoTouristCount = getPreparedDemoTouristCount(data);
-  const touristManagementRows = useMemo(() => getTouristManagementRows(data), [data]);
+  const touristManagementRows = useMemo(() => touristsActive ? getTouristManagementRows(data) : [], [touristsActive, data]);
   const travelPlan = useMemo(
     () =>
       createMovementBasedTravelPlan(data, {
@@ -793,14 +795,14 @@ export function AdminWorkspace({
 
       {adminTab === "overview" && (
         <div className="admin-tab-panel">
-          <details className="admin-planning-disclosure"><summary><ChartNoAxesCombined size={19} />{adminText("overview.travelPlanSignal")}</summary><MovementPulseHero
+          <DeferredDetails className="admin-planning-disclosure" summary={<><ChartNoAxesCombined size={19} />{adminText("overview.travelPlanSignal")}</>}><MovementPulseHero
             mode="admin"
             demand={destinationDemand}
             destinations={data.destinations}
             profile={`${tourists.length} ${adminText("overview.touristProfiles")}`}
             pointCount={summary.movementPointCount}
             plan={travelPlan}
-          locale={locale} /></details>
+          locale={locale} /></DeferredDetails>
           <MetricGrid
             items={[
               [t("common.tourist"), tourists.length.toString()],
@@ -828,11 +830,10 @@ export function AdminWorkspace({
                 </div>
               </details>
 
-              <details className="admin-overview-section">
-                <summary>
+              <DeferredDetails className="admin-overview-section" summary={<>
                   <span>{adminText("overview.geofenceActivity")}</span>
                   <strong>{adminText("overview.activeCount", { count: activeGeofenceCount })}</strong>
-                </summary>
+                </>}>
                 <div className="admin-overview-section-body">
                   <div className="geofence-admin-list">
                     {geofenceActivity.slice(0, 5).map((row) => (
@@ -850,26 +851,24 @@ export function AdminWorkspace({
                     ))}
                   </div>
                 </div>
-              </details>
+              </DeferredDetails>
 
-              <details className="admin-overview-section">
-                <summary>
+              <DeferredDetails className="admin-overview-section" summary={<>
                   <span>{adminText("overview.demandEvents")}</span>
                   <strong>{adminText("overview.eventCount", { count: upcomingFestivals.length })}</strong>
-                </summary>
+                </>}>
                 <div className="admin-overview-section-body">
                   <h2>{adminText("overview.movementTrend")}</h2>
                   <CategoryBars values={movementTrend} locale={locale} />
                   <MovementDemandList title={adminText("overview.topTouristFlow")} demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact locale={locale} />
                   <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact locale={locale} />
                 </div>
-              </details>
+              </DeferredDetails>
 
-              <details className="admin-overview-section">
-                <summary>
+              <DeferredDetails className="admin-overview-section" summary={<>
                   <span>{adminText("overview.travelPlanSignal")}</span>
                   <strong>{adminText("overview.stopCount", { count: travelPlan.stops.length })}</strong>
-                </summary>
+                </>}>
                 <div className="admin-overview-section-body">
                   <div className="section-heading">
                     <h2>{adminText("overview.travelPlanSignal")}</h2>
@@ -920,17 +919,16 @@ export function AdminWorkspace({
                   </div>
                   <TravelPlanPanel plan={travelPlan} destinations={data.destinations} locale={locale} />
                 </div>
-              </details>
+              </DeferredDetails>
 
-              <details className="admin-overview-section">
-                <summary>
+              <DeferredDetails className="admin-overview-section" summary={<>
                   <span>{adminText("overview.recentRecommendations")}</span>
                   <strong>{adminText("overview.resultCount", { count: data.recommendations.length })}</strong>
-                </summary>
+                </>}>
                 <div className="admin-overview-section-body">
                   <RecommendationList recommendations={data.recommendations.slice(0, 3)} destinations={data.destinations} compact locale={locale} />
                 </div>
-              </details>
+              </DeferredDetails>
             </aside>
           </section>
         </div>

@@ -74,11 +74,14 @@ export function createDestinationSpatialIndex(destinations: Destination[], cellD
     },
     nearest(point, maxDistanceKm) {
       const candidates = maxDistanceKm ? candidatesNear(point, maxDistanceKm) : destinations;
-
-      return candidates
-        .map((destination) => ({ destination, distance: distanceKm(point, destination) }))
-        .filter((candidate) => maxDistanceKm === undefined || candidate.distance <= maxDistanceKm)
-        .sort((a, b) => a.distance - b.distance)[0];
+      let nearest: DestinationDistance | undefined;
+      for (const destination of candidates) {
+        const distance = distanceKm(point, destination);
+        if ((maxDistanceKm === undefined || distance <= maxDistanceKm) && (!nearest || distance < nearest.distance)) {
+          nearest = { destination, distance };
+        }
+      }
+      return nearest;
     },
     candidatesBetween(previous, current, radiusKm) {
       const paddingDegrees = radiusKm / kmPerLatitudeDegree;
