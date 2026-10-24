@@ -5,7 +5,7 @@ import { interfaceText } from "../services/interfaceCopy";
 import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
-import { buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
+import { analyzeAllTrips, buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
 import { translateAdmin, type AdminCopyKey } from "../services/adminI18n";
 import { demoDatasetMetadata, getPreparedDemoTouristCount } from "../data/demoData";
 import { demoDatasetText } from "../services/demoDatasetCopy";
@@ -16,7 +16,7 @@ import { DemoDatasetManager } from "../components/DemoDatasetManager";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
-import { buildMovementRecordsCsv, getDailyMovementTrend, getMovementDashboardViews, getMovementDataStatus, getProfileDistribution, getTourists, getTripFilterOptions, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
+import { buildMovementRecordsCsv, getDailyMovementTrend, getMovementDashboardViews, getMovementDataStatus, getTourists, getTripFilterOptions, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
 import { calculateGeofenceActivity } from "../services/geofencing";
 import { getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "../services/safety";
 import { sosText } from "../services/sosCopy";
@@ -32,7 +32,10 @@ import { ActivitySummaryPublisher } from "../components/ActivitySummaryPublisher
 import { activityText } from "../services/activityCopy";
 import { buildDestinationActivitySummaries } from "../services/activitySummary";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "../components/AdminPlanningPanels";
-import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "../components/AdminAnalyticsWidgets";
+import { CategoryBars, ConfusionMatrix } from "../components/AdminAnalyticsWidgets";
+import { AiCoverage, ClusterComposition, TripClusterComparison } from "../components/AiResultInsights";
+import { summarizeAiResults } from "../services/aiInsights";
+import { aiText } from "../services/aiInsightsCopy";
 import { EmptyState, MetricGrid } from "../components/SummaryCards";
 import { ListLimitFooter } from "../components/ListLimitFooter";
 import { type NotifyFn } from "../components/ToastViewport";
@@ -77,7 +80,6 @@ export function AdminWorkspace({
   const tourists = useMemo(() => getTourists(data), [data.users]);
   const pendingPlaceCount = useMemo(() => groupUnlistedCheckIns(data.checkIns.filter((record) => !record.isDemo)).length, [data.checkIns]);
   const summary = useMemo(() => summarizeDashboard(data), [data.users, data.consents, data.trips, data.points, data.destinations]);
-  const profileDistribution = useMemo(() => getProfileDistribution(data), [data.analyses]);
   const calendarDay = useCalendarDay();
   const movementTrend = useMemo(() => getDailyMovementTrend(data), [data.points, calendarDay]);
   const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data.points]);
@@ -109,6 +111,7 @@ export function AdminWorkspace({
   const [refreshingReports, setRefreshingReports] = useState(false);
 
   const recordsActive = view === "dashboard" && adminTab === "records";
+  const aiActive = view === "dashboard" && adminTab === "ai";
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data.trips, selectedTouristId]);
   const movementViews = useMemo(
     () =>
@@ -124,7 +127,6 @@ export function AdminWorkspace({
   const movementTripRecords = movementViews.tripRecords;
   const filteredPoints = useMemo(() => movementRecords.map((record) => record.point), [movementRecords]);
   const allDashboardPoints = data.points;
-  const aiEvaluation = useMemo(() => evaluateAiOutput(data), [data.trips, data.points, data.destinations, data.users]);
   const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data.trips, data.points, data.destinations]);
   const movementAlerts = useMemo(() => calculateMovementAlerts(data, destinationDemand), [data.destinations, destinationDemand]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
@@ -150,9 +152,11 @@ export function AdminWorkspace({
   const [selectedRecordTripId, setSelectedRecordTripId] = useState<string | null>(null);
   const selectedRecord = movementTripRecords.find((record) => record.trip.id === selectedRecordTripId) ?? movementTripRecords[0] ?? null;
   const analysisRows = useMemo(
-    () => [...data.analyses].sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()),
-    [data.analyses]
+    () => aiActive ? [...analyzeAllTrips(data)].sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()) : [],
+    [aiActive, data.trips, data.points, data.destinations]
   );
+  const aiEvaluation = useMemo(() => aiActive ? evaluateAiOutput(data, analysisRows) : null, [aiActive, data.trips, data.users, analysisRows]);
+  const aiInsights = useMemo(() => aiActive ? summarizeAiResults(data, analysisRows) : null, [aiActive, data.trips, data.points, data.users, analysisRows]);
   const userById = useMemo(() => new Map(data.users.map((candidate) => [candidate.id, candidate])), [data.users]);
   const tripById = useMemo(() => new Map(data.trips.map((candidate) => [candidate.id, candidate])), [data.trips]);
   const destinationById = useMemo(() => new Map(data.destinations.map((candidate) => [candidate.id, candidate])), [data.destinations]);
@@ -217,36 +221,8 @@ export function AdminWorkspace({
   const visibleSafetyRecords = showAllSafetyCases ? safetyRecords : safetyRecords.slice(0, adminSafetyPreviewLimit);
   const hiddenSafetyRecordCount = safetyRecords.length - visibleSafetyRecords.length;
   const analysisPageResult = directoryPage(analysisRows, analysisPage, analysisPageSize);
-  const selectedKValue = aiEvaluation.validClusteredRecordCount > 0 ? Math.min(3, aiEvaluation.validClusteredRecordCount) : 0;
-  const clusterSummaries = useMemo(() => {
-    const clusters = new Map<number, { cluster: number; label: string; profileCounts: Record<string, number>; silhouetteTotal: number; size: number }>();
-
-    analysisRows.forEach((analysis) => {
-      const cluster = clusters.get(analysis.cluster) ?? {
-        cluster: analysis.cluster,
-        label: analysis.clusterLabel ?? "Unlabelled cluster",
-        profileCounts: {},
-        silhouetteTotal: 0,
-        size: 0,
-      };
-
-      cluster.size += 1;
-      cluster.silhouetteTotal += analysis.silhouetteScore;
-      cluster.profileCounts[analysis.profile] = (cluster.profileCounts[analysis.profile] ?? 0) + 1;
-      clusters.set(analysis.cluster, cluster);
-    });
-
-    return [...clusters.values()]
-      .sort((a, b) => a.cluster - b.cluster)
-      .map((cluster) => ({
-        cluster: cluster.cluster,
-        size: cluster.size,
-        label: cluster.label,
-        dominantProfile: Object.entries(cluster.profileCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "mixed",
-        averageSilhouette: cluster.size ? Number((cluster.silhouetteTotal / cluster.size).toFixed(2)) : 0,
-      }));
-  }, [analysisRows]);
-  const selectedClusterSize = selectedAnalysis ? clusterSummaries.find((summary) => summary.cluster === selectedAnalysis.cluster)?.size ?? 0 : 0;
+  const selectedKValue = Math.min(3, analysisRows.length);
+  const selectedClusterSize = selectedAnalysis ? aiInsights?.clusters.find((summary) => summary.cluster === selectedAnalysis.cluster)?.size ?? 0 : 0;
 
   useEffect(() => {
     if (selectedTripId !== "all" && !tripOptions.some((trip) => trip.id === selectedTripId)) {
@@ -627,7 +603,7 @@ export function AdminWorkspace({
     </div>
   );
 
-  const aiResultsPanel = (
+  const aiResultsPanel = aiInsights && aiEvaluation && (
     <div className="admin-tab-panel">
       <div className="admin-tab-heading">
         <div>
@@ -643,32 +619,15 @@ export function AdminWorkspace({
         items={[
           [adminText("ai.clusteredRecords"), aiEvaluation.validClusteredRecordCount.toString()],
           [adminText("ai.labelledRecords"), aiEvaluation.labelledRecordCount.toString()],
-          [adminText("ai.decisionAccuracy"), `${Math.round(aiEvaluation.classificationAccuracy * 100)}%`],
+          [aiText(locale, "agreement"), aiEvaluation.labelledRecordCount ? new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(aiEvaluation.classificationAccuracy) : "--"],
           [adminText("ai.selectedK"), selectedKValue.toString()],
         ]}
       />
+      <AiCoverage insights={aiInsights} locale={locale} />
       <div className="ai-results-layout">
         <section className="ai-cluster-panel">
-          <div>
-          <div className="section-heading">
-            <h2>{adminText("ai.clusterSummary")}</h2>
-            <span>K = {selectedKValue}</span>
-          </div>
-          <div className="cluster-summary-grid">
-            {clusterSummaries.map((summary) => (
-              <article key={summary.cluster}>
-                <strong>{adminText("ai.cluster")} {summary.cluster + 1}</strong>
-                <span>{adminText("ai.tripCount", { count: summary.size })}</span>
-                <p>{clusterText(locale, summary.label)}</p>
-                <small>
-                  {adminText("ai.dominantCategory")}: {profileLabel(locale, summary.dominantProfile)} | {adminText("ai.avgSilhouette")} {summary.averageSilhouette}
-                </small>
-              </article>
-            ))}
-            {clusterSummaries.length === 0 && <EmptyState text={adminText("ai.noClusters")} />}
-          </div>
-          </div>
-          <div className="ai-category-summary"><h2>{adminText("ai.categoryDistribution")}</h2><CategoryBars values={profileDistribution} locale={locale} /></div>
+          <ClusterComposition clusters={aiInsights.clusters} locale={locale} />
+          <div className="ai-category-summary"><h2>{aiText(locale, "classifications")}</h2><CategoryBars values={aiInsights.profileCounts} locale={locale} /></div>
         </section>
 
         <section className="ai-analysis-list">
@@ -692,6 +651,11 @@ export function AdminWorkspace({
           <aside className="ai-detail-panel">
             <span>{adminText("ai.selectedResult")}</span>
             <h2>{selectedAnalysisUser?.name ?? adminText("common.unknownTourist")}</h2>
+            <p className="ai-recording-source">{aiText(locale, "source")}: <strong>{aiText(locale, aiInsights.sourceByTrip.get(selectedAnalysis.tripId) ?? "none")}</strong></p>
+            <p className="ai-decision-summary"><strong>{profileLabel(locale, selectedAnalysis.profile)}</strong><span>{new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(selectedAnalysis.classificationConfidence)} {adminText("ai.confidence")}</span></p>
+            <p className="ai-method-note">{aiText(locale, "ruleNote")}</p>
+            <TripClusterComparison trip={selectedAnalysis.kMeansInput} centroid={selectedAnalysis.kMeansCentroid} locale={locale} />
+            <details className="ai-technical-details"><summary><ChevronDown size={16} aria-hidden="true" />{aiText(locale, "technical")}</summary>
             <dl>
               <div>
                 <dt>{adminText("records.tripId")}</dt>
@@ -746,14 +710,7 @@ export function AdminWorkspace({
                 ))}
               </ul>
             </section>
-            <section className="ai-detail-section">
-              <h3>{adminText("ai.inputPattern")}</h3>
-              <KMeansFeatureBars features={selectedAnalysis.kMeansInput} locale={locale} />
-            </section>
-            <section className="ai-detail-section">
-              <h3>{adminText("ai.clusterCentroid")}</h3>
-              <KMeansFeatureBars features={selectedAnalysis.kMeansCentroid} locale={locale} />
-            </section>
+            </details>
             <section className="ai-detail-section">
               <h3>{adminText("ai.recommendationResult")}</h3>
               {selectedAnalysisRecommendations.length > 0 ? (
@@ -779,7 +736,12 @@ export function AdminWorkspace({
           </PlaceGuideDialog>
         )}
       </div>
-      {aiEvaluation.labelledRecordCount > 0 && <ConfusionMatrix values={aiEvaluation.confusionMatrix} locale={locale} />}
+      <section className="ai-evaluation-basis" aria-label={aiText(locale, "agreement")}>
+        <h3>{aiText(locale, "agreement")}</h3>
+        <p className="ai-method-note">{aiText(locale, "evaluationNote")}</p>
+        <dl className="ai-source-counts"><div><dt>{aiText(locale, "labelledSamples")}</dt><dd>{new Intl.NumberFormat(locale).format(aiInsights.labelledSamples)}</dd></div><div><dt>{aiText(locale, "labelledOther")}</dt><dd>{new Intl.NumberFormat(locale).format(aiInsights.labelledOther)}</dd></div></dl>
+        {aiEvaluation.labelledRecordCount > 0 ? <ConfusionMatrix values={aiEvaluation.confusionMatrix} locale={locale} /> : <p>{aiText(locale, "noLabels")}</p>}
+      </section>
     </div>
   );
 

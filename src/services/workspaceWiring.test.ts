@@ -28,6 +28,8 @@ describe("workspace integration guardrails", () => {
     expect(admin).toContain('view === "dashboard" && adminTab === "records"');
     expect(admin).toContain("recordsActive ? getMovementDashboardViews");
     expect(admin).toContain("if (recordsActive && selectedRecordTripId");
+    expect(admin).toContain("aiActive ? [...analyzeAllTrips(data)]");
+    expect(admin).toContain("evaluateAiOutput(data, analysisRows)");
   });
 
   it("shows one map preview and hides it while a route-point popup is open", () => {

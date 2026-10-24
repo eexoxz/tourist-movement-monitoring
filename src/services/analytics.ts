@@ -23,7 +23,7 @@ import { getRecommendationEvidence } from "./recommendationEvidence";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 const kMeansFeatureNames: Array<keyof KMeansFeatureVector> = ["culturalProportion", "natureProportion", "urbanProportion", "uniqueDestinations"];
-const uniqueDestinationScale = 10;
+export const uniqueDestinationScale = 10;
 type TripFeature = {
   trip: TripSession;
   counts: Record<DestinationCategory, number>;
@@ -853,15 +853,14 @@ function emptyConfusionMatrix(): Record<TouristProfile, Record<TouristProfile, n
   >;
 }
 
-export function evaluateAiOutput(data: AppData): AiEvaluation {
-  const analyses = analyzeAllTrips(data);
+export function evaluateAiOutput(data: AppData, analyses: readonly AnalysisResult[] = analyzeAllTrips(data)): AiEvaluation {
   const matrix = emptyConfusionMatrix();
-  const pointsByTrip = movementPointsByTrip(data.points);
+  const users = new Map(data.users.map((user) => [user.id, user]));
   let labelledRecordCount = 0;
   let correctClassificationCount = 0;
 
   analyses.forEach((analysis) => {
-    const expectedProfile = data.users.find((user) => user.id === analysis.userId)?.expectedProfile;
+    const expectedProfile = users.get(analysis.userId)?.expectedProfile;
     if (!expectedProfile) {
       return;
     }
@@ -874,7 +873,8 @@ export function evaluateAiOutput(data: AppData): AiEvaluation {
   });
 
   const completedTrips = data.trips.filter((trip) => trip.status === "completed");
-  const insufficientTripCount = completedTrips.filter((trip) => (pointsByTrip.get(trip.id)?.length ?? 0) < 2).length;
+  const analysedIds = new Set(analyses.map((analysis) => analysis.tripId));
+  const insufficientTripCount = completedTrips.filter((trip) => !analysedIds.has(trip.id)).length;
   const averageSilhouetteScore =
     analyses.length === 0 ? 0 : Number((analyses.reduce((sum, analysis) => sum + analysis.silhouetteScore, 0) / analyses.length).toFixed(2));
 

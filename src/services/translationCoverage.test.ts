@@ -15,9 +15,11 @@ import { interfaceKeys, interfaceText } from "./interfaceCopy";
 import { travelExperienceKeys, travelText } from "./travelExperienceCopy";
 import { demoDatasetText } from "./demoDatasetCopy";
 import { demoDatasetControlKeys, demoControlsText } from "./demoDatasetControlsCopy";
+import { aiInsightKeys, aiText } from "./aiInsightsCopy";
 
 const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort();
 const featureCopy = [
+  ...aiInsightKeys.map((key) => ({ name: `aiInsights.${key}`, text: (locale: Locale) => aiText(locale, key, { count: 10, profile: "Culture" }) })),
   ...demoDatasetControlKeys.map((key) => ({ name: `demoControls.${key}`, text: (locale: Locale) => demoControlsText(locale, key, { count: 20, max: 100, points: 1800 }) })),
   ...interfaceKeys.map((key) => ({ name: `interface.${key}`, text: (locale: Locale) => interfaceText(locale, key) })),
   ...travelExperienceKeys.map((key) => ({ name: `travel.${key}`, text: (locale: Locale) => travelText(locale, key) })),
@@ -27,7 +29,7 @@ const featureCopy = [
 const sourceFiles = [path.resolve("src/App.tsx"), ...["src/components", "src/workspaces"].flatMap((directory) => fs.readdirSync(directory).filter((name) => name.endsWith(".tsx")).map((name) => path.resolve(directory, name))), path.resolve("src/services/planningText.ts")];
 const uiSources = new Set<string>();
 const missingLocaleProps: string[] = [];
-const translatedComponents = new Set(["DestinationVisual", "DestinationManager", "ToastViewport", "TourismAdvisoryPanel", "CategoryBars", "ConfusionMatrix", "KMeansFeatureBars", "MovementPulseHero", "MovementAlertList", "MovementDemandList", "TravelPlanPanel", "ListLimitFooter", "FestivalCalendarPanel", "RecommendationList"]);
+const translatedComponents = new Set(["DestinationVisual", "DestinationManager", "ToastViewport", "TourismAdvisoryPanel", "CategoryBars", "ConfusionMatrix", "KMeansFeatureBars", "AiCoverage", "ClusterComposition", "TripClusterComparison", "MovementPulseHero", "MovementAlertList", "MovementDemandList", "TravelPlanPanel", "ListLimitFooter", "FestivalCalendarPanel", "RecommendationList"]);
 for (const file of sourceFiles) {
   const source = ts.createSourceFile(file, fs.readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const collect = (node: ts.Node): void => {

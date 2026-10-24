@@ -12,6 +12,20 @@ const validRegistration = {
 };
 
 describe("accounts service", () => {
+  it("keeps email aliases as distinct cloud profiles without collapsing them into the base inbox", () => {
+    let data = initialData;
+    const aliases = ["owner+tourist-a@gmail.com", "owner+tourist-b@gmail.com", "owner+tourist-c@gmail.com"];
+    aliases.forEach((email, index) => {
+      const created = createTouristAccount(data, { ...validRegistration, email: `  ${email.toUpperCase()}  `, authUid: `tracking-test-${index}` });
+      expect(created.error).toBeUndefined();
+      expect(created.user?.email).toBe(email);
+      expect(created.user?.password).toBe("");
+      data = created.data!;
+    });
+    expect(new Set(aliases.map((email) => findUserByEmail(data, email)?.authUid)).size).toBe(3);
+    expect(findUserByEmail(data, "owner@gmail.com")).toBeNull();
+    expect(validateTouristAccount(data, { ...validRegistration, email: aliases[0] }).error).toContain("already exists");
+  });
   it("lets Firebase decide duplicate emails instead of stale local records after account deletion", () => {
     const draft = { ...validRegistration, email: "TOURIST@example.com", authUid: "new-firebase-uid" };
     expect(registrationData(initialData, draft.email, false)).toBe(initialData);

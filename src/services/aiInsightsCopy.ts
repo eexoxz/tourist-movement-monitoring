@@ -1,0 +1,100 @@
+import type { Locale } from "./i18n";
+
+const en = {
+  composition: "Cluster composition", compositionNote: "Classifications per cluster. Counts represent trips, not unique tourists.", classifications: "Trip classifications",
+  coverage: "Analysis coverage", sources: "Completed trip sources", analysed: "Analysed trips", insufficient: "Insufficient movement", sparse: "Limited place evidence",
+  browser: "Browser GPS", sample: "Sample / manual", mixed: "Mixed / unknown source", none: "No recorded points",
+  coverageNote: "A trip needs at least two usable readings for analysis. Usable GPS alone does not establish place interests; trips with fewer than two matched place points have limited evidence.",
+  agreement: "Label agreement", evaluationNote: "Compared with stored expected profiles, including sample labels and stated preferences. This is not independently validated predictive accuracy.",
+  noLabels: "No labelled analysed trips", labelledSamples: "Labelled sample trips", labelledOther: "Other labelled trips",
+  comparison: "Trip and cluster comparison", thisTrip: "This trip", clusterAverage: "Cluster average", capNote: "Destination counts are capped at {count}, matching the clustering input.",
+  ruleNote: "Confidence is a rule-based score, not a probability of being correct.", referenceProfile: "Reference: {profile}", source: "Recording source", technical: "Technical details",
+};
+type Copy = Record<keyof typeof en, string>;
+const copy: Record<Locale, Copy> = {
+  en,
+  ms: {
+    composition: "Komposisi kelompok", compositionNote: "Pengelasan setiap kelompok. Bilangan merujuk kepada perjalanan, bukan pelancong unik.", classifications: "Pengelasan perjalanan",
+    coverage: "Liputan analisis", sources: "Sumber perjalanan selesai", analysed: "Perjalanan dianalisis", insufficient: "Pergerakan tidak mencukupi", sparse: "Bukti tempat terhad",
+    browser: "GPS pelayar", sample: "Contoh / manual", mixed: "Sumber campuran / tidak diketahui", none: "Tiada titik direkodkan",
+    coverageNote: "Perjalanan memerlukan sekurang-kurangnya dua bacaan boleh guna untuk analisis. GPS sahaja tidak membuktikan minat tempat; kurang daripada dua titik yang sepadan dengan tempat memberikan bukti terhad.",
+    agreement: "Kesepadanan label", evaluationNote: "Dibandingkan dengan profil jangkaan tersimpan, termasuk label contoh dan pilihan yang dinyatakan. Ini bukan ketepatan ramalan yang disahkan secara bebas.",
+    noLabels: "Tiada perjalanan dianalisis berlabel", labelledSamples: "Perjalanan contoh berlabel", labelledOther: "Perjalanan berlabel lain",
+    comparison: "Perbandingan perjalanan dan kelompok", thisTrip: "Perjalanan ini", clusterAverage: "Purata kelompok", capNote: "Bilangan destinasi dihadkan kepada {count}, selaras dengan input pengelompokan.",
+    ruleNote: "Keyakinan ialah skor berasaskan peraturan, bukan kebarangkalian keputusan itu betul.", referenceProfile: "Rujukan: {profile}", source: "Sumber rakaman", technical: "Butiran teknikal",
+  },
+  zh: {
+    composition: "聚类构成", compositionNote: "各聚类中的分类分布。数量代表行程，而非独立游客。", classifications: "行程分类",
+    coverage: "分析覆盖情况", sources: "已完成行程的数据来源", analysed: "已分析行程", insufficient: "移动数据不足", sparse: "地点证据有限",
+    browser: "浏览器 GPS", sample: "示例 / 手动", mixed: "混合 / 未知来源", none: "没有记录点",
+    coverageNote: "行程至少需要两个可用定位点才能分析。仅有可用 GPS 不足以证明地点兴趣；匹配地点的点少于两个时，证据有限。",
+    agreement: "标签一致率", evaluationNote: "与已保存的预期档案比较，包括示例标签和自述偏好。这不是经过独立验证的预测准确率。",
+    noLabels: "没有带标签的已分析行程", labelledSamples: "带标签的示例行程", labelledOther: "其他带标签行程",
+    comparison: "行程与聚类对比", thisTrip: "此行程", clusterAverage: "聚类平均值", capNote: "目的地数量上限为 {count}，与聚类输入一致。",
+    ruleNote: "置信度是基于规则的评分，并非结果正确的概率。", referenceProfile: "参考：{profile}", source: "记录来源", technical: "技术详情",
+  },
+  ja: {
+    composition: "クラスタの構成", compositionNote: "クラスタ内の分類分布です。人数ではなく旅行件数を表します。", classifications: "旅行の分類",
+    coverage: "分析対象の状況", sources: "完了した旅行の記録元", analysed: "分析済みの旅行", insufficient: "移動記録不足", sparse: "場所の根拠が少ない旅行",
+    browser: "ブラウザーGPS", sample: "サンプル / 手動", mixed: "混在 / 不明な記録元", none: "記録地点なし",
+    coverageNote: "分析には利用可能な位置情報が2件以上必要です。GPSだけでは場所への興味を示せません。場所に一致する地点が2件未満なら根拠は限定的です。",
+    agreement: "ラベル一致率", evaluationNote: "サンプルのラベルや申告された好みを含む、保存済みの想定プロフィールと比較します。独立した検証による予測精度ではありません。",
+    noLabels: "ラベル付き分析済み旅行なし", labelledSamples: "ラベル付きサンプル旅行", labelledOther: "その他のラベル付き旅行",
+    comparison: "旅行とクラスタの比較", thisTrip: "この旅行", clusterAverage: "クラスタ平均", capNote: "目的地数はクラスタリングの入力と同じく{count}件を上限とします。",
+    ruleNote: "信頼度はルールに基づくスコアであり、正解の確率ではありません。", referenceProfile: "参照：{profile}", source: "記録元", technical: "技術的な詳細",
+  },
+  ko: {
+    composition: "군집 구성", compositionNote: "군집별 분류입니다. 수치는 순 관광객 수가 아닌 여행 건수입니다.", classifications: "여행 분류",
+    coverage: "분석 범위", sources: "완료된 여행의 기록 출처", analysed: "분석된 여행", insufficient: "이동 기록 부족", sparse: "장소 근거 부족",
+    browser: "브라우저 GPS", sample: "샘플 / 수동", mixed: "혼합 / 알 수 없는 출처", none: "기록된 지점 없음",
+    coverageNote: "분석에는 사용 가능한 위치 기록이 두 개 이상 필요합니다. GPS만으로 장소 관심사를 입증할 수 없으며, 장소와 일치한 지점이 두 개 미만이면 근거가 제한적입니다.",
+    agreement: "라벨 일치율", evaluationNote: "샘플 라벨과 사용자가 밝힌 선호를 포함하여 저장된 예상 프로필과 비교합니다. 독립적으로 검증된 예측 정확도가 아닙니다.",
+    noLabels: "라벨이 있는 분석 여행 없음", labelledSamples: "라벨이 있는 샘플 여행", labelledOther: "기타 라벨이 있는 여행",
+    comparison: "여행과 군집 비교", thisTrip: "이 여행", clusterAverage: "군집 평균", capNote: "목적지 수는 군집 입력과 동일하게 {count}개로 제한됩니다.",
+    ruleNote: "신뢰도는 규칙 기반 점수이며 결과가 정확할 확률이 아닙니다.", referenceProfile: "참조: {profile}", source: "기록 출처", technical: "기술 세부 정보",
+  },
+  pt: {
+    composition: "Composição dos grupos", compositionNote: "Classificações por grupo. As contagens representam viagens, não turistas únicos.", classifications: "Classificações das viagens",
+    coverage: "Cobertura da análise", sources: "Origem das viagens concluídas", analysed: "Viagens analisadas", insufficient: "Movimento insuficiente", sparse: "Pouca evidência de locais",
+    browser: "GPS do navegador", sample: "Exemplo / manual", mixed: "Origem mista / desconhecida", none: "Sem pontos registados",
+    coverageNote: "Uma viagem precisa de pelo menos duas leituras utilizáveis para análise. O GPS por si só não comprova interesses; menos de dois pontos associados a locais oferece evidência limitada.",
+    agreement: "Concordância com os rótulos", evaluationNote: "Comparação com perfis esperados guardados, incluindo exemplos e preferências declaradas. Não é uma precisão preditiva validada de forma independente.",
+    noLabels: "Sem viagens analisadas com rótulo", labelledSamples: "Viagens de exemplo com rótulo", labelledOther: "Outras viagens com rótulo",
+    comparison: "Comparação da viagem e do grupo", thisTrip: "Esta viagem", clusterAverage: "Média do grupo", capNote: "A contagem de destinos é limitada a {count}, tal como na entrada do agrupamento.",
+    ruleNote: "A confiança é uma pontuação baseada em regras, não a probabilidade de estar correto.", referenceProfile: "Referência: {profile}", source: "Origem do registo", technical: "Detalhes técnicos",
+  },
+  ta: {
+    composition: "குழுக்களின் அமைப்பு", compositionNote: "ஒவ்வொரு குழுவின் வகைப்பாடுகள். எண்ணிக்கைகள் பயணங்களைக் குறிக்கும்; தனிப்பட்ட பயணிகளை அல்ல.", classifications: "பயண வகைப்பாடுகள்",
+    coverage: "பகுப்பாய்வு வரம்பு", sources: "முடிந்த பயணங்களின் தரவு மூலம்", analysed: "பகுப்பாய்வு செய்த பயணங்கள்", insufficient: "போதிய இயக்கம் இல்லை", sparse: "குறைந்த இடச் சான்றுகள்",
+    browser: "உலாவி GPS", sample: "மாதிரி / கைமுறை", mixed: "கலப்பு / தெரியாத மூலம்", none: "பதிவுப் புள்ளிகள் இல்லை",
+    coverageNote: "பகுப்பாய்விற்கு குறைந்தது இரண்டு பயன்படுத்தக்கூடிய இருப்பிடப் பதிவுகள் தேவை. GPS மட்டும் இட ஆர்வத்தை நிரூபிக்காது; இடங்களுடன் பொருந்தும் புள்ளிகள் இரண்டுக்கும் குறைவாக இருந்தால் சான்றுகள் குறைவு.",
+    agreement: "குறியீட்டுப் பொருத்தம்", evaluationNote: "மாதிரிக் குறியீடுகள் மற்றும் தெரிவிக்கப்பட்ட விருப்பங்கள் உட்பட சேமித்த எதிர்பார்க்கும் சுயவிவரங்களுடன் ஒப்பிடுகிறது. இது தனியாகச் சரிபார்க்கப்பட்ட கணிப்புத் துல்லியம் அல்ல.",
+    noLabels: "குறியீடுள்ள பகுப்பாய்வுப் பயணங்கள் இல்லை", labelledSamples: "குறியீடுள்ள மாதிரிப் பயணங்கள்", labelledOther: "பிற குறியீடுள்ள பயணங்கள்",
+    comparison: "பயணம் மற்றும் குழு ஒப்பீடு", thisTrip: "இந்தப் பயணம்", clusterAverage: "குழுச் சராசரி", capNote: "குழுவாக்க உள்ளீட்டைப் போல இடங்களின் எண்ணிக்கை {count} வரை மட்டுமே கணக்கிடப்படும்.",
+    ruleNote: "நம்பிக்கை என்பது விதி அடிப்படையிலான மதிப்பெண்; முடிவு சரியாக இருக்கும் நிகழ்தகவு அல்ல.", referenceProfile: "ஒப்பீட்டுக் குறியீடு: {profile}", source: "பதிவின் மூலம்", technical: "தொழில்நுட்ப விவரங்கள்",
+  },
+  es: {
+    composition: "Composición de los grupos", compositionNote: "Clasificaciones por grupo. Las cifras representan viajes, no turistas únicos.", classifications: "Clasificaciones de viajes",
+    coverage: "Cobertura del análisis", sources: "Origen de los viajes completados", analysed: "Viajes analizados", insufficient: "Movimiento insuficiente", sparse: "Poca evidencia de lugares",
+    browser: "GPS del navegador", sample: "Ejemplo / manual", mixed: "Origen mixto / desconocido", none: "Sin puntos registrados",
+    coverageNote: "El análisis requiere al menos dos lecturas utilizables. El GPS por sí solo no demuestra intereses; menos de dos puntos asociados a lugares ofrece evidencia limitada.",
+    agreement: "Coincidencia con las etiquetas", evaluationNote: "Comparación con perfiles esperados guardados, incluidas etiquetas de ejemplo y preferencias declaradas. No es una precisión predictiva validada de forma independiente.",
+    noLabels: "Sin viajes analizados etiquetados", labelledSamples: "Viajes de ejemplo etiquetados", labelledOther: "Otros viajes etiquetados",
+    comparison: "Comparación del viaje y el grupo", thisTrip: "Este viaje", clusterAverage: "Media del grupo", capNote: "El número de destinos se limita a {count}, igual que en la entrada del agrupamiento.",
+    ruleNote: "La confianza es una puntuación basada en reglas, no la probabilidad de acertar.", referenceProfile: "Referencia: {profile}", source: "Origen del registro", technical: "Detalles técnicos",
+  },
+  fr: {
+    composition: "Composition des groupes", compositionNote: "Classifications par groupe. Les nombres représentent des voyages, pas des touristes uniques.", classifications: "Classifications des voyages",
+    coverage: "Couverture de l'analyse", sources: "Origine des voyages terminés", analysed: "Voyages analysés", insufficient: "Déplacements insuffisants", sparse: "Peu d'indices sur les lieux",
+    browser: "GPS du navigateur", sample: "Exemple / manuel", mixed: "Origine mixte / inconnue", none: "Aucun point enregistré",
+    coverageNote: "L'analyse nécessite au moins deux relevés utilisables. Le GPS seul ne prouve pas les intérêts ; moins de deux points associés à des lieux offre des indices limités.",
+    agreement: "Accord avec les étiquettes", evaluationNote: "Comparaison avec les profils attendus enregistrés, y compris les exemples et préférences déclarées. Il ne s'agit pas d'une précision prédictive validée indépendamment.",
+    noLabels: "Aucun voyage analysé étiqueté", labelledSamples: "Voyages d'exemple étiquetés", labelledOther: "Autres voyages étiquetés",
+    comparison: "Comparaison du voyage et du groupe", thisTrip: "Ce voyage", clusterAverage: "Moyenne du groupe", capNote: "Le nombre de destinations est plafonné à {count}, comme dans les données de regroupement.",
+    ruleNote: "La confiance est un score fondé sur des règles, pas une probabilité d'exactitude.", referenceProfile: "Référence : {profile}", source: "Origine de l'enregistrement", technical: "Détails techniques",
+  },
+};
+export const aiInsightKeys = Object.keys(en) as (keyof typeof en)[];
+export function aiText(locale: Locale, key: keyof typeof en, values: Record<string, string | number> = {}) {
+  return copy[locale][key].replace(/\{(\w+)\}/g, (placeholder, name: string) => name in values ? typeof values[name] === "number" ? new Intl.NumberFormat(locale).format(values[name]) : values[name] : placeholder);
+}

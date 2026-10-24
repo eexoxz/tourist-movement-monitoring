@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { localeOptions } from "../services/i18n";
 import { directoryText } from "../services/touristDirectoryCopy";
 import { RecordPagination } from "./RecordPagination";
-import { CategoryBars, ConfusionMatrix, KMeansFeatureBars } from "./AdminAnalyticsWidgets";
+import { CategoryBars, ConfusionMatrix } from "./AdminAnalyticsWidgets";
 
 describe("consistent record and report controls", () => {
   for (const { value: locale } of localeOptions) {
@@ -29,8 +29,6 @@ describe("consistent record and report controls", () => {
     expect(categories).toContain('data-category="cultural"');
     expect(categories).toContain('width:0%');
     expect(categories).toContain('width:100%');
-    const features = renderToStaticMarkup(createElement(KMeansFeatureBars, { features: { culturalProportion: 0, natureProportion: 0, urbanProportion: 100, uniqueDestinations: 0 }, locale: "en" }));
-    expect(features.match(/width:0%/g)).toHaveLength(3);
   });
 
   it("uses real row and column headers for the complete confusion matrix", () => {
