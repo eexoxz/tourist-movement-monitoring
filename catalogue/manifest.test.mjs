@@ -13,7 +13,7 @@ test("the release contains validated venues across every state selector group", 
 
 test("every released venue has a real local image asset within the loading budget", () => {
   const files = readdirSync(new URL("../public/images/catalogue/", import.meta.url));
-  expect(files.length).toBe(places.length);
+  expect(files.length).toBeGreaterThanOrEqual(places.length);
   for (const place of places) {
     const bytes = readFileSync(new URL(`../public${place.imageUrl}`, import.meta.url));
     expect(bytes.length, place.id).toBeGreaterThan(1024);

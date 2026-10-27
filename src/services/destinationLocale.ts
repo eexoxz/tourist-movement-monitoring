@@ -1,6 +1,7 @@
 import type { Destination, DestinationCategory } from "../types";
 import type { Locale } from "./i18n";
 import { catalogueGuidance } from "./catalogueGuidance";
+import { destinationNarrative } from "./destinationNarrative";
 import { destinations as sourceDestinations } from "../data/destinations";
 
 type DestinationCopy = Pick<Destination, "name" | "city" | "description" | "openingHours" | "feeNote" | "visitTips" | "imageAlt">;
@@ -252,7 +253,7 @@ export function localizeDestination(destination: Destination, locale: Locale): D
     ...destination,
     name: locale === "zh" ? chineseDestinationNames[destination.id] ?? destination.name : destination.name,
     city,
-    description: interpolate(descriptionTemplate, { city }),
+    description: destinationNarrative({ ...destination, city }, locale) ?? interpolate(descriptionTemplate, { city }),
     openingHours: hasCustomDestinationFact(destination, "openingHours") ? destination.openingHours : copy.openingHours,
     feeNote: hasCustomDestinationFact(destination, "feeNote") ? destination.feeNote : copy.feeNote,
     visitTips: [...guidance, ...(copy.visitTips ?? [])],

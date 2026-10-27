@@ -7,6 +7,7 @@ import { interfaceText } from "../services/interfaceCopy";
 import { DestinationVisual } from "./DestinationVisual";
 import { travelerStatusText } from "../services/travelerStatusCopy";
 import { PlacePracticalInfo } from "./PlacePracticalInfo";
+import { visitorText } from "../services/visitorInformationCopy";
 
 export function PlaceGuide({ destination, locale, distance, distanceLabel, demand, preference, eventRelevance, onCheckIn, onOpenEvents, onHide }: {
   destination: Destination; locale: Locale; distance: string; distanceLabel: string; demand: string; preference: string; eventRelevance: string;
@@ -30,7 +31,7 @@ export function PlaceGuide({ destination, locale, distance, distanceLabel, deman
       <PlacePracticalInfo destination={destination} locale={locale} />
       {Boolean(destination.visitTips?.length) && <section className="place-guide-section"><h3>{t("tourist.places.beforeYouGo")}</h3><ul className="place-guide-tips">{destination.visitTips!.map((tip) => <li key={tip}>{tip}</li>)}</ul></section>}
       {(destination.sourceUrl || destination.coordinateSourceUrl) && <div className="place-guide-secondary">
-        {destination.sourceUrl?.startsWith("https://") && <a className="secondary-action compact-action" href={destination.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} />{emergencyHelpText(locale, "source")}</a>}
+        {destination.sourceUrl?.startsWith("https://") && <a className="secondary-action compact-action" href={destination.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} />{visitorText(locale, "source")}</a>}
         {destination.coordinateSourceUrl?.startsWith("https://www.openstreetmap.org/") && <a className="secondary-action compact-action" href={destination.coordinateSourceUrl} target="_blank" rel="noopener noreferrer"><MapPin size={16} />OpenStreetMap</a>}
       </div>}
       <details className="place-guide-context"><summary>{interfaceText(locale, "more")}</summary><dl className="place-guide-facts">

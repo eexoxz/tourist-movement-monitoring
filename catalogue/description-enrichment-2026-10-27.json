@@ -1,0 +1,1981 @@
+{
+  "version": "2026-10-27",
+  "updates": [
+    {
+      "id": "merdeka-square",
+      "beforeDescription": "Historic civic square surrounded by colonial-era architecture.",
+      "description": "Dataran Merdeka is the ceremonial heart of old Kuala Lumpur, associated with the lowering of the British flag as Malaya became independent in 1957. The broad lawn faces a distinctive group of historic civic buildings. Look out for Malaysia's independence story, architectural details, and city skyline views.",
+      "visitorStory": {
+        "theme": "independence",
+        "highlights": [
+          "independence",
+          "architecture",
+          "skyline"
+        ]
+      }
+    },
+    {
+      "id": "islamic-arts-museum",
+      "beforeDescription": "Museum with Islamic art, architecture, textile, and manuscript collections.",
+      "description": "This Kuala Lumpur museum explores Islamic artistic traditions across regions, rather than presenting a single architectural style. Its collections connect decorative arts, textiles and craftsmanship with the wider societies that produced them. Look out for Islamic art and craftsmanship, architectural details, and traditional textiles.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "islamicArt",
+          "architecture",
+          "textiles"
+        ]
+      }
+    },
+    {
+      "id": "klcc-park",
+      "beforeDescription": "Urban park beside the Petronas Twin Towers with walking paths and fountains.",
+      "description": "KLCC Park creates a landscaped retreat at the foot of the PETRONAS Twin Towers. Its paths and lake offer changing views of the towers, making it a useful outdoor pause between city-centre visits. Look out for gardens, city skyline views, and lakeside scenery.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "gardens",
+          "skyline",
+          "lake"
+        ]
+      }
+    },
+    {
+      "id": "batu-caves",
+      "beforeDescription": "Limestone hill temple complex and major cultural landmark.",
+      "description": "Batu Caves combines limestone scenery with an important Hindu pilgrimage site. The monumental Murugan statue and staircase lead towards cave temple spaces, while religious festivals give the place a significance that extends well beyond its photographs. Look out for Hindu religious art, cave landscapes, and religious statues.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "hindu",
+          "caves",
+          "statues"
+        ]
+      }
+    },
+    {
+      "id": "perdana-botanical-garden",
+      "beforeDescription": "Large garden area with lakes, walking trails, and landscaped green spaces.",
+      "description": "Within Kuala Lumpur's older Lake Gardens area, Perdana Botanical Garden offers planted landscapes and walking paths away from the commercial centre. It pairs well with nearby museums when a slower outdoor break is needed. Look out for plant collections, lakeside scenery, and shaded paths.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "plants",
+          "lake",
+          "trees"
+        ]
+      }
+    },
+    {
+      "id": "central-market",
+      "beforeDescription": "Market for local crafts, snacks, heritage goods, and casual food stops.",
+      "description": "Central Market grew from a trading market into a visitor destination for Malaysian crafts, souvenirs and creative businesses. Its heritage setting makes browsing the stalls an introduction to local design as well as a shopping stop. Look out for local crafts, art displays, and traditional shophouses.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "crafts",
+          "art",
+          "shophouses"
+        ]
+      }
+    },
+    {
+      "id": "penang-hill",
+      "beforeDescription": "Hilltop viewpoint with trails, cooler air, and panoramic island scenery.",
+      "description": "Penang Hill brings visitors above the coastal city into a cooler hill landscape reached by funicular. Viewpoints, hillside walks and the hill-station setting offer a different side of Penang from George Town's streets. Look out for hill and mountain views, rainforest habitats, and city skyline views.",
+      "visitorStory": {
+        "theme": "mountain",
+        "highlights": [
+          "mountain",
+          "rainforest",
+          "skyline"
+        ]
+      }
+    },
+    {
+      "id": "george-town-heritage-zone",
+      "beforeDescription": "UNESCO-listed streetscape known for heritage buildings and cultural walks.",
+      "description": "George Town's historic streets reflect generations of maritime trade and migration. Religious buildings, clan associations and rows of shophouses sit within a living city, so its appeal comes from neighbourhood details as much as famous monuments. Look out for traditional shophouses, clan and community heritage, and architectural details.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "shophouses",
+          "clan",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "jonker-street",
+      "beforeDescription": "Lively heritage street with food stalls, shops, and evening activity.",
+      "description": "Jonker Street runs through Melaka's historic commercial quarter, where older shophouses now accommodate food, shops and visitor businesses. Exploring the street and its side lanes gives context to the city's Peranakan and trading heritage. Look out for traditional shophouses, food stalls, and Peranakan domestic heritage.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "shophouses",
+          "stalls",
+          "peranakan"
+        ]
+      }
+    },
+    {
+      "id": "tanjung-aru",
+      "beforeDescription": "Coastal sunset spot with beach walks and nearby food areas.",
+      "description": "Close to Kota Kinabalu, Tanjung Aru is known for its broad beachfront and west-facing sunset views. It offers a relaxed contrast to urban sightseeing, with the changing evening light forming much of the attraction. Look out for sunset views, beach scenery, and island views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "sunset",
+          "beach",
+          "islands"
+        ]
+      }
+    },
+    {
+      "id": "kwai-chai-hong",
+      "beforeDescription": "Restored Chinatown lane with murals, shophouses, cafes, and heritage storytelling.",
+      "description": "Kwai Chai Hong uses restored shophouse surroundings and street art to evoke stories of Kuala Lumpur's older Chinese neighbourhood. The lane rewards a short, attentive walk and fits naturally into a wider Chinatown visit. Look out for murals, traditional shophouses, and local history.",
+      "visitorStory": {
+        "theme": "art",
+        "highlights": [
+          "murals",
+          "shophouses",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "kampung-baru-kl",
+      "beforeDescription": "Historic Malay enclave known for traditional houses, local food streets, and city-skyline contrast.",
+      "description": "Kampung Baru is a long-established Malay neighbourhood within Kuala Lumpur's modern skyline. Traditional houses and local dining give visitors a view of everyday urban heritage, while residents' privacy remains important along public routes. Look out for traditional houses, local food, and city skyline views.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "houses",
+          "food",
+          "skyline"
+        ]
+      }
+    },
+    {
+      "id": "thean-hou-temple",
+      "beforeDescription": "Hilltop Chinese temple with lantern courtyards, religious halls, and skyline views.",
+      "description": "Thean Hou Temple occupies an elevated site overlooking parts of Kuala Lumpur. Its courtyards, decorated halls and Chinese religious art make it visually striking, while worship and community celebrations remain central to its purpose. Look out for courtyards, religious statues, and architectural details.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "courtyards",
+          "statues",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "taman-botani-putrajaya",
+      "beforeDescription": "Large botanical garden with themed plant collections, cycling paths, and lakeside green spaces.",
+      "description": "Putrajaya's botanical garden combines planted collections with a spacious lakeside setting. It offers a slower way to explore the administrative city, with paths and changing garden views providing an alternative to its monumental buildings. Look out for plant collections, gardens, and lakeside scenery.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "plants",
+          "gardens",
+          "lake"
+        ]
+      }
+    },
+    {
+      "id": "sekinchan-paddy-gallery",
+      "beforeDescription": "Agro-tourism stop where visitors learn about paddy planting, milling, and rice production.",
+      "description": "Sekinchan's paddy landscape is central to its identity as a rice-growing town. The gallery introduces visitors to rice cultivation and processing, adding an explanation to the agricultural scenery found around the surrounding fields. Look out for rice-growing traditions, agricultural heritage, and interpretive displays.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "rice",
+          "agriculture",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "kellies-castle",
+      "beforeDescription": "Unfinished historic mansion in Batu Gajah with colonial-era architecture and hilltop views.",
+      "description": "This unfinished mansion near Batu Gajah is associated with Scottish planter William Kellie Smith. Its exposed spaces and ambitious design make it a memorable stop, while the incomplete structure gives a tangible connection to its unusual development story. Look out for historic interiors, architectural details, and local history.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "interiors",
+          "architecture",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "concubine-lane",
+      "beforeDescription": "Old Town lane with restored shophouses, snacks, cafes, and heritage streetscape activity.",
+      "description": "Lorong Panglima is a compact lane within Ipoh's old commercial centre. Restored shophouses, food and visitor shops make it lively today, while its setting connects it with the city's earlier trading and mining prosperity. Look out for traditional shophouses, local food, and local history.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "shophouses",
+          "food",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "kek-lok-si-temple",
+      "beforeDescription": "Large Air Itam temple complex with pagoda, prayer halls, hillside paths, and viewpoints.",
+      "description": "Kek Lok Si spreads across the hillside above Air Itam, with successive halls and terraces rather than a single small shrine. The pagoda and elevated religious spaces combine Buddhist heritage with views over the surrounding neighbourhood. Look out for pagoda architecture, prayer halls, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "pagoda",
+          "prayer",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "hin-bus-depot",
+      "beforeDescription": "George Town creative hub with art spaces, weekend markets, independent shops, and cafes.",
+      "description": "A former bus-depot setting gives this George Town creative space its industrial character. Art, independent businesses and scheduled market activity make it a contemporary stop that contrasts with the city's older religious and civic landmarks. Look out for art displays, market trading, and cafes and dining.",
+      "visitorStory": {
+        "theme": "art",
+        "highlights": [
+          "art",
+          "markets",
+          "cafes"
+        ]
+      }
+    },
+    {
+      "id": "mari-mari-cultural-village",
+      "beforeDescription": "Sabah living museum experience introducing indigenous houses, food, crafts, and performances.",
+      "description": "Mari Mari introduces selected indigenous traditions of Sabah through a visitor-oriented village setting. Traditional house forms and demonstrations provide context for cultural practices, making a guided visit more informative than viewing buildings alone. Look out for Sabah's indigenous cultures, traditional houses, and cultural performances.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "sabahPeoples",
+          "houses",
+          "performance"
+        ]
+      }
+    },
+    {
+      "id": "sarawak-cultural-village",
+      "beforeDescription": "Living museum near Mount Santubong showcasing Sarawak ethnic houses, crafts, and performances.",
+      "description": "Near Mount Santubong, this living-museum attraction brings together house forms and cultural presentations associated with Sarawak's communities. It offers an accessible introduction to the state's diversity before exploring its individual places and histories in greater depth. Look out for Sarawak's indigenous cultures, traditional houses, and cultural performances.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "sarawakPeoples",
+          "houses",
+          "performance"
+        ]
+      }
+    },
+    {
+      "id": "semenggoh-nature-reserve",
+      "beforeDescription": "Rainforest reserve and wildlife centre best known for orangutan conservation viewing sessions.",
+      "description": "Semenggoh is associated with orangutan rehabilitation and conservation near Kuching. The forest setting gives the visit its character, but free-ranging animals follow their own behaviour, so viewing opportunities vary and are not guaranteed. Look out for orangutan conservation, rainforest habitats, and forest trails.",
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "orangutans",
+          "rainforest",
+          "trails"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-gua-kelam",
+      "beforeDescription": "Limestone cave and former mining passage.",
+      "description": "Gua Kelam combines a limestone cave landscape with a former tin-mining passage near Kaki Bukit. Understanding its mining use gives the underground setting a human history as well as a geological attraction. Look out for cave landscapes, limestone scenery, and tin-mining history.",
+      "visitorStory": {
+        "theme": "mining",
+        "highlights": [
+          "caves",
+          "limestone",
+          "tin"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-wang-kelian-viewpoint",
+      "beforeDescription": "Landscape viewpoint near the border hills.",
+      "description": "The hill approach to Wang Kelian offers views across the limestone-and-agricultural landscape of northern Perlis. It is primarily a scenery stop, with visibility and changing light determining the experience on a particular day. Look out for hill and mountain views, agricultural heritage, and rainforest habitats.",
+      "visitorStory": {
+        "theme": "mountain",
+        "highlights": [
+          "mountain",
+          "agriculture",
+          "rainforest"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-timah-tasoh-lake",
+      "beforeDescription": "Reservoir scenery and lakeside recreation.",
+      "description": "Tasik Timah Tasoh is a reservoir whose wide water surface and surrounding hills form a distinctive Perlis landscape. Lakeside viewpoints suit a slower visit, while the reservoir's role adds context beyond a simple photo stop. Look out for lakeside scenery, birdlife, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "birds",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-al-hussain-mosque-kuala-perlis",
+      "beforeDescription": "Waterfront religious architecture.",
+      "description": "Al-Hussain Mosque is a waterfront landmark at Kuala Perlis, where its position creates the impression of a building beside the sea. The coastal setting is part of its appeal, alongside its active religious role. Look out for domes, sunset views, and waterfront walks.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "sunset",
+          "promenade"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-alwi-mosque-kangar",
+      "beforeDescription": "Historic mosque in the state capital.",
+      "description": "Masjid Alwi is an important historic mosque in Kangar. Its dome and formal architectural composition provide a cultural landmark within the town, while its continuing use makes respectful visitor behaviour essential. Look out for domes, architectural details, and local history.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "architecture",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-bujang-valley-archaeology-museum",
+      "beforeDescription": "Archaeology and ancient settlement history.",
+      "description": "The Bujang Valley museum introduces the archaeology of an early settlement and trading landscape in Kedah. Its setting and collections help explain the region's connections before the growth of modern towns and transport routes. Look out for archaeological heritage, historical collections, and local history.",
+      "visitorStory": {
+        "theme": "archaeology",
+        "highlights": [
+          "archaeology",
+          "objects",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-zahir-mosque",
+      "beforeDescription": "Landmark mosque and architectural stop.",
+      "description": "Masjid Zahir forms part of Alor Setar's historic civic and royal setting. Its dark domes and repeated arches make it a recognisable landmark, while nearby heritage buildings help place the mosque within the city's wider history. Look out for domes, minarets, and architectural details.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "minarets",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-alor-setar-tower",
+      "beforeDescription": "City observation landmark.",
+      "description": "Menara Alor Setar is a prominent modern landmark rising above the Kedah capital. Its visitor viewing facilities offer an overview of the surrounding city and landscape, making it useful for understanding the area before exploring at street level. Look out for city skyline views, architectural details, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "architecture",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-laman-padi-langkawi",
+      "beforeDescription": "Rice-growing heritage and landscape.",
+      "description": "Laman Padi introduces the rice-growing traditions that helped shape rural life in Langkawi and Kedah. Its agricultural setting provides an alternative to the island's beaches, with the relationship between cultivation and everyday life as its main story. Look out for rice-growing traditions, agricultural heritage, and gardens.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "rice",
+          "agriculture",
+          "gardens"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-langkawi-skybridge",
+      "beforeDescription": "Elevated viewpoint and visitor attraction.",
+      "description": "Langkawi SkyBridge combines an elevated pedestrian structure with mountain scenery above the island. The engineering and changing views are both part of the appeal, while access depends on the attraction's operating arrangements and weather. Look out for bridge design, hill and mountain views, and rainforest habitats.",
+      "visitorStory": {
+        "theme": "mountain",
+        "highlights": [
+          "bridges",
+          "mountain",
+          "rainforest"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-oriental-village-langkawi",
+      "beforeDescription": "Visitor precinct with shops and attractions.",
+      "description": "Oriental Village is a visitor complex at the foot of Langkawi's mountain attractions. Shops, dining and its role as an access area make it a practical stop, rather than a historic village preserved from an earlier period. Look out for shopping, cafes and dining, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "shopping",
+        "highlights": [
+          "shops",
+          "cafes",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-tanjung-rhu-beach",
+      "beforeDescription": "Beach scenery on northern Langkawi.",
+      "description": "Tanjung Rhu offers a northern Langkawi coastal setting with offshore limestone scenery. The open shore suits a relaxed visit, but tidal changes and local access arrangements should guide how visitors explore the beach area. Look out for beach scenery, limestone scenery, and island views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "limestone",
+          "islands"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-pekan-rabu-alor-setar",
+      "beforeDescription": "Local food products and traditional market shopping.",
+      "description": "Pekan Rabu is associated with Malay trading activity in Alor Setar, with food, local products and small businesses forming its character. Browsing is a way to encounter everyday commerce alongside Kedah's larger monuments. Look out for market trading, local food, and local crafts.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "food",
+          "crafts"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-armenian-street",
+      "beforeDescription": "Historic streetscape and public art walking stop.",
+      "description": "Lebuh Armenian sits within George Town's historic street network, linking clan heritage, older shophouses and contemporary street art. A short walk can reveal how visitor activity and long-established community spaces now share the same urban setting. Look out for traditional shophouses, murals, and clan and community heritage.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "shophouses",
+          "murals",
+          "clan"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-pinang-peranakan-mansion",
+      "beforeDescription": "Peranakan domestic culture and collections.",
+      "description": "This restored George Town mansion presents the domestic world associated with wealthy Peranakan households. Furniture, decorative objects and the house itself work together, making it a useful introduction to the culture behind Penang's heritage streets. Look out for Peranakan domestic heritage, historic interiors, and historical collections.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "peranakan",
+          "interiors",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-khoo-kongsi",
+      "beforeDescription": "Clan-house architecture and community history.",
+      "description": "Khoo Kongsi is a clan-house complex whose decorated halls express the history and identity of the Khoo community. The craftsmanship rewards close viewing, while its courtyard setting makes the social role of a clan association easier to understand. Look out for clan and community heritage, decorative carvings, and courtyards.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "clan",
+          "carvings",
+          "courtyards"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-penang-botanic-gardens",
+      "beforeDescription": "Established gardens and walking routes.",
+      "description": "At the foot of Penang's hills, the Botanic Gardens combine landscaped collections with a green valley setting. They offer a calmer alternative to city streets, with established paths allowing visitors to appreciate plants and the surrounding hillside. Look out for plant collections, hill and mountain views, and shaded paths.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "plants",
+          "mountain",
+          "trees"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-tropical-spice-garden",
+      "beforeDescription": "Tropical planting and spice interpretation.",
+      "description": "This garden near Teluk Bahang places tropical plants and spices within a landscaped visitor setting. It adds a sensory and botanical stop to a coastal itinerary, encouraging visitors to look beyond scenery to the plants used in everyday life. Look out for plant collections, gardens, and forest trails.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "plants",
+          "gardens",
+          "trails"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-entopia",
+      "beforeDescription": "Butterfly and insect visitor attraction.",
+      "description": "Entopia develops the butterfly-farm experience into a broader introduction to insects and their environments. Living displays and interpretation make it a nature-learning stop, particularly for visitors interested in the small animals often overlooked outdoors. Look out for butterflies, plant collections, and interpretive displays.",
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "butterflies",
+          "plants",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-the-top-penang",
+      "beforeDescription": "KOMTAR visitor attractions and city views.",
+      "description": "The TOP brings visitor attractions into KOMTAR, a defining landmark of George Town's modern skyline. Observation and entertainment experiences make it a different type of city stop from nearby historic shophouses and religious buildings. Look out for city skyline views, visitor rides and attractions, and interpretive displays.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "rides",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-gurney-drive-hawker-centre",
+      "beforeDescription": "Established hawker-food destination.",
+      "description": "Gurney Drive's hawker area is associated with Penang's street-food culture. The variety comes from individual vendors rather than one fixed menu, so exploring available stalls can be more useful than expecting every dish to be sold at all times. Look out for food stalls, local food, and waterfront walks.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "stalls",
+          "food",
+          "promenade"
+        ]
+      }
+    },
+    {
+      "id": "my-penang-batu-ferringhi-beach",
+      "beforeDescription": "Beachfront and coastal leisure stop.",
+      "description": "Batu Ferringhi is one of Penang's best-known resort-coast settings. Its beachfront offers a contrast to George Town's historic streets, with the atmosphere changing between daytime activity and evening views along the shore. Look out for beach scenery, sunset views, and island views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "sunset",
+          "islands"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-taiping-lake-gardens",
+      "beforeDescription": "Lakeside gardens and established walking routes.",
+      "description": "Taiping Lake Gardens developed within a landscape associated with the town's mining past. Mature rain trees, reflective water and the surrounding hills make it a distinctive walking stop rather than simply another urban park. Look out for lakeside scenery, shaded paths, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "trees",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-perak-museum-taiping",
+      "beforeDescription": "Museum collections and regional history.",
+      "description": "Perak Museum is an early museum institution in Taiping, connecting collections with the development of the town. Its exhibits offer a way to understand the region's people and natural history before exploring the surrounding heritage area. Look out for local history, historical collections, and architectural details.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "objects",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-han-chin-pet-soo",
+      "beforeDescription": "Ipoh tin-mining and community history.",
+      "description": "Han Chin Pet Soo uses a former miners' club setting to explore Ipoh's tin-mining world and Hakka community connections. The building gives the displays a social context, linking industrial wealth with the lives of people around it. Look out for tin-mining history, historic interiors, and local history.",
+      "visitorStory": {
+        "theme": "mining",
+        "highlights": [
+          "tin",
+          "interiors",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-ipoh-railway-station",
+      "beforeDescription": "Historic station architecture; public access areas only.",
+      "description": "Ipoh's railway station reflects the importance of transport in the growth of a mining-era town. Its formal facade and public setting make it a useful starting point for exploring nearby civic buildings and the old commercial centre. Look out for railway architecture, architectural details, and gardens.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "railway",
+          "architecture",
+          "gardens"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-sam-poh-tong-temple",
+      "beforeDescription": "Limestone cave temple and religious landscape.",
+      "description": "Sam Poh Tong uses Ipoh's limestone setting as part of a Buddhist temple landscape. Religious spaces and garden elements sit alongside natural rock, making the relationship between worship and geology a distinctive part of the visit. Look out for cave landscapes, religious statues, and gardens.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "caves",
+          "statues",
+          "gardens"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-lost-world-of-tambun",
+      "beforeDescription": "Family-oriented visitor attraction.",
+      "description": "Lost World of Tambun combines visitor recreation with the limestone landscape around Ipoh. Its attraction areas offer a more activity-focused stop than the city's heritage streets, with the specific experience depending on the ticketed facilities selected. Look out for visitor rides and attractions, hot springs, and limestone scenery.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "hotSprings",
+          "limestone"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-gerbang-malam-ipoh",
+      "beforeDescription": "Evening market and urban browsing.",
+      "description": "Gerbang Malam adds an evening-market stop to central Ipoh, with small traders shaping the street atmosphere. It offers a view of local commerce after daytime sightseeing, while the range of stalls depends on the trading session. Look out for market trading, food stalls, and shopping.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "stalls",
+          "shops"
+        ]
+      }
+    },
+    {
+      "id": "my-perak-teluk-nipah-beach-pangkor",
+      "beforeDescription": "Island beach and coastal scenery.",
+      "description": "Teluk Nipah is a beach area on Pangkor with a more relaxed island setting than the mainland towns nearby. Shoreline views and nearby offshore scenery provide its main appeal, with conditions changing with the tide and weather. Look out for beach scenery, island views, and sunset views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "islands",
+          "sunset"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-forest-research-institute-malaysia-kepong",
+      "beforeDescription": "Forest recreation and interpretation.",
+      "description": "FRIM is both a research institution and a place associated with forest learning. Visitor access allows selected experiences of its green setting, but research areas, trails and special facilities have their own entry conditions. Look out for rainforest habitats, plant collections, and forest trails.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "rainforest",
+          "plants",
+          "trails"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-sultan-alam-shah-museum",
+      "beforeDescription": "Selangor history and cultural collections.",
+      "description": "Sultan Alam Shah Museum introduces Selangor's historical and cultural background from its location in Shah Alam. The collections make a useful companion to visits to the state's royal and civic landmarks, adding context beyond their architecture. Look out for local history, royal history, and historical collections.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "royalty",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-sultan-salahuddin-abdul-aziz-shah-mosque",
+      "beforeDescription": "Landmark mosque in Shah Alam.",
+      "description": "Shah Alam's Blue Mosque is distinguished by its large blue dome and tall minarets. The building is an important state religious landmark, with architectural scale forming only one part of its continuing role in community worship. Look out for domes, minarets, and Islamic art and craftsmanship.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "minarets",
+          "islamicArt"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-sunway-lagoon",
+      "beforeDescription": "Established family-oriented theme park.",
+      "description": "Sunway Lagoon is an activity-focused theme-park destination within Bandar Sunway. Its different attraction zones offer a contrast to cultural sightseeing, and the available experience depends on the selected ticket, operating areas and any activity restrictions. Look out for visitor rides and attractions, gardens, and interpretive displays.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "gardens",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-i-city-shah-alam",
+      "beforeDescription": "Urban leisure and visitor attractions.",
+      "description": "i-City is a modern leisure and commercial destination in Shah Alam, known for visitor attractions and illuminated settings. It suits an entertainment-focused stop, while specific activities and access arrangements vary across the development. Look out for visitor rides and attractions, city skyline views, and shopping.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "rides",
+          "skyline",
+          "shops"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-sky-mirror-kuala-selangor",
+      "beforeDescription": "Guided tidal-sandbank excursion, not a road-access beach.",
+      "description": "Sky Mirror is a tidal sandbank experience rather than a beach that is always exposed. Suitable tide windows and boat arrangements determine access, so the reflective-water photographs depend on conditions rather than a guaranteed appearance. Look out for marine habitats, island views, and sunset views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "marine",
+          "islands",
+          "sunset"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-bukit-melawati",
+      "beforeDescription": "Hilltop history and heritage landscape.",
+      "description": "Bukit Melawati combines a hilltop setting with remains linked to Kuala Selangor's defensive history. Looking at the old structures alongside river and coastal views helps explain why the elevated position once mattered strategically. Look out for fort remains, historic cannons, and river views.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "fort",
+          "cannons",
+          "river"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-jugra-lighthouse-viewpoint",
+      "beforeDescription": "Lighthouse surroundings and historic hill setting.",
+      "description": "Jugra's lighthouse viewpoint offers a perspective over the landscape around this historic Selangor locality. The appeal is mainly the elevated setting and outward views, with visitors needing to follow the actual public access arrangements. Look out for hill and mountain views, river views, and architectural details.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "mountain",
+          "river",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-selangor-morib-beach",
+      "beforeDescription": "Public coastal recreation stop.",
+      "description": "Morib is a long-established coastal recreation stop in Kuala Langat. Its shore and public surroundings suit an easy break from inland travel, while the character of the waterfront changes significantly with tidal conditions. Look out for beach scenery, waterfront walks, and sunset views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "promenade",
+          "sunset"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-legoland-malaysia",
+      "beforeDescription": "Established family theme-park destination.",
+      "description": "LEGOLAND Malaysia offers a themed family-attraction experience in Iskandar Puteri. Model-building design and visitor rides give it a different purpose from Johor's historical sites, with entry choices and height restrictions shaping individual activities. Look out for visitor rides and attractions, interpretive displays, and gardens.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "interactive",
+          "gardens"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-johor-zoo",
+      "beforeDescription": "Wildlife visitor attraction in Johor Bahru.",
+      "description": "Johor Zoo adds an animal-focused stop near Johor Bahru's older landmarks. Its long place in the city's visitor landscape provides historical context, while responsible viewing and the current operating guidance remain central to a visit. Look out for local history, gardens, and rainforest habitats.",
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "history",
+          "gardens",
+          "rainforest"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-tanjung-piai-national-park",
+      "beforeDescription": "Mangrove boardwalks and coastal ecology.",
+      "description": "Tanjung Piai is a mangrove-coast national park associated with the southern end of mainland Asia. Boardwalk access makes the coastal habitat part of the visitor experience, while tides and maintenance can affect which sections are available. Look out for mangroves, boardwalks, and marine habitats.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "mangroves",
+          "boardwalks",
+          "marine"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-sultan-abu-bakar-state-mosque",
+      "beforeDescription": "Landmark mosque overlooking the strait.",
+      "description": "Sultan Abu Bakar State Mosque is a major religious landmark overlooking the straits at Johor Bahru. Its formal architecture reflects the state's historical development, making the surrounding setting important as well as the building itself. Look out for architectural details, minarets, and marine habitats.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "architecture",
+          "minarets",
+          "marine"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-johor-bahru-chinese-heritage-museum",
+      "beforeDescription": "Local community and trading history.",
+      "description": "This museum introduces the history of Johor Bahru's Chinese community and its part in the town's development. The collections add social context to nearby trading streets, showing why heritage is about people as much as surviving buildings. Look out for clan and community heritage, local history, and historical collections.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "clan",
+          "history",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-kota-johor-lama-museum",
+      "beforeDescription": "History of the old Johor capital.",
+      "description": "Kota Johor Lama's museum setting introduces a historic settlement on the Johor River. Archaeological interpretation helps connect the site's remains with earlier political and trading activity, making it more meaningful than an isolated stop by old earthworks. Look out for archaeological heritage, the Melaka Sultanate story, and river views.",
+      "visitorStory": {
+        "theme": "archaeology",
+        "highlights": [
+          "archaeology",
+          "sultanate",
+          "river"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-desaru-beach",
+      "beforeDescription": "East-coast beach destination.",
+      "description": "Desaru is a well-known east-coast beach destination in Johor, offering an open seafront setting rather than an urban landmark. A visit can be kept simple and scenic, with sea conditions and local access guiding any activities. Look out for beach scenery, marine habitats, and sunset views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "marine",
+          "sunset"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-a-famosa-porta-de-santiago",
+      "beforeDescription": "Surviving historic gateway.",
+      "description": "Porta de Santiago is a surviving gateway from Melaka's Portuguese fortifications. Its modest scale today makes the historical context particularly important: the remaining structure represents only a fragment of the much larger defensive complex. Look out for fort remains, architectural details, and local history.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "fort",
+          "architecture",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-st-paul-s-church-ruins",
+      "beforeDescription": "Historic hilltop church remains.",
+      "description": "The church ruins above central Melaka place the city's colonial past within a hilltop setting. The surviving walls and elevated position invite a slower look at how successive periods of rule shaped this compact historic area. Look out for architectural details, local history, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "architecture",
+          "history",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-cheng-hoon-teng-temple",
+      "beforeDescription": "Historic temple and religious architecture.",
+      "description": "Cheng Hoon Teng is a long-established Chinese temple in Melaka's historic quarter. Its decorated halls and craftsmanship reflect community religious traditions, while the surrounding streets connect it with the city's wider multicultural trading past. Look out for decorative carvings, prayer halls, and clan and community heritage.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "carvings",
+          "prayer",
+          "clan"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-baba-nyonya-heritage-museum",
+      "beforeDescription": "Peranakan home and cultural collections.",
+      "description": "The Baba & Nyonya Heritage Museum uses a historic domestic setting to explain Peranakan life in Melaka. Furniture, room arrangements and family objects make the culture tangible, complementing a walk through the surrounding shophouse streets. Look out for Peranakan domestic heritage, historic interiors, and historical collections.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "peranakan",
+          "interiors",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-melaka-sultanate-palace-museum",
+      "beforeDescription": "Interpretation of the sultanate's history.",
+      "description": "This museum is housed in a reconstruction inspired by descriptions of Melaka's earlier royal palace. It introduces the sultanate's cultural world, while the building should be understood as a later interpretation rather than an untouched surviving palace. Look out for the Melaka Sultanate story, traditional houses, and historical collections.",
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "sultanate",
+          "houses",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-maritime-museum",
+      "beforeDescription": "Maritime history and the ship-replica landmark.",
+      "description": "Melaka's maritime museum connects the city with seaborne trade and the importance of its harbour. The visitor setting helps explain how shipping brought people, goods and competing powers to the historic trading centre. Look out for maritime traditions, maritime trading history, and the Melaka Sultanate story.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "boats",
+          "tradingHistory",
+          "sultanate"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-zoo-melaka",
+      "beforeDescription": "Wildlife visitor attraction in Ayer Keroh.",
+      "description": "Zoo Melaka provides an animal-focused visit within the Ayer Keroh attraction area. It can complement cultural sightseeing with a different kind of learning, while visitors should follow staff guidance and current facility arrangements. Look out for rainforest habitats, gardens, and interpretive displays.",
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "rainforest",
+          "gardens",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-klebang-beach",
+      "beforeDescription": "Beachfront recreation and coastal views.",
+      "description": "Klebang offers a coastal recreation setting outside Melaka's tightly packed historic centre. Its open shoreline provides a change of pace from museums and old streets, with the visit shaped more by scenery and conditions than formal exhibits. Look out for beach scenery, marine habitats, and sunset views.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "marine",
+          "sunset"
+        ]
+      }
+    },
+    {
+      "id": "my-melaka-portuguese-settlement-seafood-area",
+      "beforeDescription": "Food stop in a living cultural neighbourhood.",
+      "description": "The Portuguese Settlement is a living community with cultural roots in Melaka's maritime history. Its dining area offers a food-focused visit, but public visitor spaces should be distinguished from residents' homes and private neighbourhood life. Look out for fishing-community heritage, local food, and traditional houses.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "fisheries",
+          "food",
+          "houses"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-army-museum-port-dickson",
+      "beforeDescription": "Military history and outdoor exhibits.",
+      "description": "The Army Museum in Port Dickson introduces Malaysia's military history through collections and outdoor displays. It provides background to the people and institutions involved in national defence, rather than functioning only as a photo stop beside equipment. Look out for military history, historical collections, and memorials.",
+      "visitorStory": {
+        "theme": "war",
+        "highlights": [
+          "military",
+          "objects",
+          "memorials"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-fort-lukut-and-lukut-museum",
+      "beforeDescription": "Historic fort and tin-trade history.",
+      "description": "The Lukut site links fort remains with a museum explaining the area's earlier settlement and trading development. Its connection with the tin economy helps visitors understand why this locality once held greater regional importance. Look out for fort remains, tin-mining history, and local history.",
+      "visitorStory": {
+        "theme": "archaeology",
+        "highlights": [
+          "fort",
+          "tin",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-negeri-sembilan-state-museum-complex",
+      "beforeDescription": "Regional culture and architecture.",
+      "description": "The state museum complex introduces Negeri Sembilan's heritage through collections and traditional architectural forms. It is a useful orientation stop for understanding the state's identity before visiting individual royal or community landmarks. Look out for traditional houses, historical collections, and local history.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "houses",
+          "objects",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-custom-museum-kuala-klawang",
+      "beforeDescription": "Local customs and cultural interpretation.",
+      "description": "Muzium Adat focuses on customs and social traditions rather than presenting only a list of historical rulers. Its Kuala Klawang setting makes it a useful stop for visitors interested in how cultural practices shape everyday community life. Look out for historical collections, local history, and traditional houses.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "objects",
+          "history",
+          "houses"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-seremban-lake-gardens",
+      "beforeDescription": "Urban gardens and lakeside walks.",
+      "description": "Seremban Lake Gardens offers a landscaped break close to the town's civic landmarks. Walking around the water and planted spaces allows a slower view of the city, making it useful between more structured visits. Look out for lakeside scenery, shaded paths, and gardens.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "trees",
+          "gardens"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-blue-lagoon-tanjung-biru-beach",
+      "beforeDescription": "Sheltered beach recreation stop.",
+      "description": "Tanjung Biru, also called Blue Lagoon, provides a sheltered-looking coastal setting near Port Dickson's southern beach area. The surrounding vegetation adds to its appeal, but the appearance of calm water should not replace checking local safety advice. Look out for beach scenery, shaded paths, and marine habitats.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "trees",
+          "marine"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-teluk-kemang-beach",
+      "beforeDescription": "Established Port Dickson beachfront.",
+      "description": "Teluk Kemang is one of Port Dickson's established public beach destinations. Its combination of open shore and visitor activity makes it a lively coastal stop, with the actual atmosphere varying between quieter periods and busy holidays. Look out for beach scenery, food stalls, and marine habitats.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "stalls",
+          "marine"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-palm-mall-seremban",
+      "beforeDescription": "Indoor shopping and leisure stop.",
+      "description": "Palm Mall provides an indoor shopping and dining stop in Seremban. It is a practical option between outdoor visits or during wet weather, with its appeal coming from current businesses rather than a historic setting. Look out for shopping, cafes and dining, and cinema and entertainment.",
+      "visitorStory": {
+        "theme": "shopping",
+        "highlights": [
+          "shops",
+          "cafes",
+          "cinema"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-pasar-besar-seremban-food-area",
+      "beforeDescription": "Local market food and everyday culinary culture.",
+      "description": "Seremban's main market offers a view of everyday trading alongside its food stalls. Visiting the food area gives a local counterpoint to landmark sightseeing, with vendor schedules determining which dishes are available. Look out for food stalls, market trading, and local food.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "stalls",
+          "markets",
+          "food"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-teluk-chempedak",
+      "beforeDescription": "Beach and coastal promenade near Kuantan.",
+      "description": "Teluk Chempedak combines a beach near Kuantan with a recognisable rocky shoreline. The setting works well for an easy scenic stop, with the coast and its public visitor spaces providing a contrast to the city centre. Look out for beach scenery, limestone scenery, and waterfront walks.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "limestone",
+          "promenade"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-sungai-pandan-waterfall",
+      "beforeDescription": "Waterfall and forest recreation.",
+      "description": "Sungai Pandan provides a waterfall-focused outdoor stop near Kuantan. The surrounding forest gives the site much of its atmosphere, while access and any water activity should depend on current weather and local conditions. Look out for waterfalls, forest trails, and rainforest habitats.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "waterfalls",
+          "trails",
+          "rainforest"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-sungai-lembing-museum",
+      "beforeDescription": "Tin-mining history and local industrial heritage.",
+      "description": "Sungai Lembing Museum explains the mining history behind this former industrial town. Its collections make the surrounding settlement easier to understand, connecting the landscape with the work and communities once supported by tin extraction. Look out for tin-mining history, industrial history, and local history.",
+      "visitorStory": {
+        "theme": "mining",
+        "highlights": [
+          "tin",
+          "industry",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-genting-skyworlds",
+      "beforeDescription": "Established highland theme-park destination.",
+      "description": "Genting SkyWorlds is a theme-park experience in the highland resort setting. Its rides and themed areas offer an activity-based visit, with weather, operating arrangements and individual ride restrictions affecting the day. Look out for visitor rides and attractions, hill and mountain views, and interpretive displays.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "mountain",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-boh-sungai-palas-tea-centre",
+      "beforeDescription": "Tea landscape and visitor centre.",
+      "description": "Sungai Palas Tea Centre places visitors within the tea-growing landscape of the Cameron Highlands. The views are the immediate draw, while the tea-related setting adds context to the cultivated slopes and the area's agricultural identity. Look out for tea-growing scenery, agricultural heritage, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "tea",
+          "agriculture",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-siti-khadijah-market",
+      "beforeDescription": "Local produce, prepared food and regional food products.",
+      "description": "Siti Khadijah Market is closely associated with Kota Bharu's trading culture and its women traders. Exploring food, produce and local goods makes it a useful way to encounter everyday Kelantan alongside formal museums and royal buildings. Look out for market trading, local food, and local crafts.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "food",
+          "crafts"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-istana-jahar-museum",
+      "beforeDescription": "Royal customs and Kelantanese culture.",
+      "description": "Istana Jahar combines a historic royal building with interpretation of Kelantanese court traditions. The building's timber detailing and the cultural material inside make it a useful introduction to ceremonial life rather than only palace architecture. Look out for royal history, decorative carvings, and historical collections.",
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "carvings",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-istana-batu-royal-museum",
+      "beforeDescription": "Royal history and former palace collections.",
+      "description": "Istana Batu offers a domestic view of Kelantan's royal history through a former palace setting. The interiors and collections help visitors imagine court life more concretely than a brief look at a royal building from outside. Look out for royal history, historic interiors, and historical collections.",
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "interiors",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-kelantan-state-museum",
+      "beforeDescription": "State history and cultural exhibits.",
+      "description": "Kelantan State Museum provides an overview of the state's historical and cultural identity. Its collections are a useful starting point before exploring Kota Bharu's more specialised royal, religious and craft-related destinations. Look out for local history, historical collections, and local crafts.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "objects",
+          "crafts"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-wat-phothivihan",
+      "beforeDescription": "Reclining Buddha and Buddhist temple complex.",
+      "description": "Wat Phothivihan is particularly associated with its reclining Buddha and the Siamese Buddhist traditions of the Tumpat area. The scale of the image is striking, but the temple remains an active religious setting rather than only a monument. Look out for Siamese Buddhist traditions, religious statues, and prayer halls.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "siamese",
+          "statues",
+          "prayer"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-pantai-irama",
+      "beforeDescription": "Beachfront recreation in Bachok.",
+      "description": "Pantai Irama is a public coastal recreation destination at Bachok. The beach setting and local food activity provide its visitor appeal, while sea conditions and the availability of individual facilities vary over time. Look out for beach scenery, food stalls, and marine habitats.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "stalls",
+          "marine"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-gunung-stong-state-park",
+      "beforeDescription": "Forest and waterfall recreation; use the visitor trailhead.",
+      "description": "Gunung Stong's mountain and waterfall landscape makes it a distinctive outdoor destination in Kelantan. A visit involves more planning than an urban attraction, with the selected route, guide arrangements and fitness shaping the experience. Look out for hill and mountain views, waterfalls, and rainforest habitats.",
+      "visitorStory": {
+        "theme": "mountain",
+        "highlights": [
+          "mountain",
+          "waterfalls",
+          "rainforest"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-terengganu-state-museum-complex",
+      "beforeDescription": "Regional culture, history and traditional buildings.",
+      "description": "The Terengganu museum complex combines large traditional-inspired buildings with collections on the state's history and culture. Its scale allows a broader visit than a single gallery, connecting architecture with the region's maritime and community traditions. Look out for traditional houses, historical collections, and maritime traditions.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "houses",
+          "objects",
+          "boats"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-crystal-mosque",
+      "beforeDescription": "Waterfront mosque and architectural landmark.",
+      "description": "The Crystal Mosque is a modern religious landmark beside the Terengganu River. Reflective materials and its waterside position give it a distinctive appearance, while the mosque's actual visitor access remains separate from neighbouring attractions. Look out for domes, river views, and architectural details.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "river",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-islamic-civilisation-park",
+      "beforeDescription": "Architectural monuments and cultural interpretation.",
+      "description": "Islamic Civilisation Park presents an interpretive visitor attraction inspired by significant Islamic monuments. It is a place to explore architectural references and cultural themes, rather than a claim that the original buildings themselves are located in Terengganu. Look out for Islamic art and craftsmanship, architectural details, and interpretive displays.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "islamicArt",
+          "architecture",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-pasar-payang",
+      "beforeDescription": "Food products, local market browsing and crafts.",
+      "description": "Pasar Payang is a major trading stop in Kuala Terengganu, associated with local products, food and traditional goods. Browsing introduces visitors to everyday commerce and regional craft identity alongside the city's larger landmarks. Look out for market trading, local crafts, and local food.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "crafts",
+          "food"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-kampung-cina-kuala-terengganu",
+      "beforeDescription": "Historic streetscape and community heritage.",
+      "description": "Kuala Terengganu's Chinatown preserves a streetscape shaped by a long-established trading community. Shophouses, religious spaces and local businesses make the area a useful walking stop for understanding the city's multicultural riverfront history. Look out for traditional shophouses, clan and community heritage, and local food.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "shophouses",
+          "clan",
+          "food"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-setiu-wetlands",
+      "beforeDescription": "Wetland ecology; identify a visitor-access point/operator.",
+      "description": "Setiu's wetland environment brings together coastal habitats and the livelihoods associated with them. The interest lies in understanding this living landscape, with routes and boat arrangements needing to suit the specific visitor site chosen. Look out for mangroves, marine habitats, and birdlife.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "mangroves",
+          "marine",
+          "birds"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-sekayu-waterfall",
+      "beforeDescription": "Forest recreation and waterfall scenery.",
+      "description": "Sekayu offers a waterfall landscape within Terengganu's forested interior. It provides a change from coastal sightseeing, with the surrounding vegetation and water features best appreciated through permitted visitor routes and current access guidance. Look out for waterfalls, rainforest habitats, and forest trails.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "waterfalls",
+          "rainforest",
+          "trails"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-batu-buruk-beach",
+      "beforeDescription": "Coastal promenade and beach scenery, not a swimming recommendation.",
+      "description": "Batu Buruk provides an accessible beachfront setting close to Kuala Terengganu. It is suited to enjoying the shore and local visitor atmosphere, while the open sea requires attention to warnings rather than an assumption that swimming is safe. Look out for beach scenery, food stalls, and waterfront walks.",
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "stalls",
+          "promenade"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-sepilok-orangutan-rehabilitation-centre",
+      "beforeDescription": "Conservation-oriented wildlife viewing.",
+      "description": "Sepilok introduces visitors to orangutan rehabilitation within a forest reserve near Sandakan. The conservation purpose gives meaning to the viewing experience, while semi-wild animals and seasonal food availability mean encounters cannot be promised. Look out for orangutan conservation, rainforest habitats, and interpretive displays.",
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "orangutans",
+          "rainforest",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-bornean-sun-bear-conservation-centre",
+      "beforeDescription": "Wildlife conservation visitor centre.",
+      "description": "This Sepilok centre focuses on the conservation of Bornean sun bears. Viewing areas and interpretation connect the animals with their natural habitat and welfare, making it an educational companion to nearby wildlife attractions. Look out for sun bear conservation, rainforest habitats, and interpretive displays.",
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "bears",
+          "rainforest",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-sabah-state-museum-and-heritage-village",
+      "beforeDescription": "Regional collections and traditional houses.",
+      "description": "Sabah Museum combines historical and cultural collections with a heritage-village setting. It helps visitors place the state's diverse communities within a broader story, offering context before visits to individual districts and cultural sites. Look out for Sabah's indigenous cultures, traditional houses, and historical collections.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "sabahPeoples",
+          "houses",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-monsopiad-heritage-village",
+      "beforeDescription": "Kadazandusun heritage interpretation.",
+      "description": "Monsopiad Heritage Village introduces Kadazandusun heritage through a visitor setting associated with the story of Monsopiad. Traditional architecture and interpretation make it a more focused cultural stop than a general overview of Sabah. Look out for Sabah's indigenous cultures, traditional houses, and local history.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "sabahPeoples",
+          "houses",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-atkinson-clock-tower",
+      "beforeDescription": "Historic Kota Kinabalu landmark.",
+      "description": "Atkinson Clock Tower is a surviving landmark from early Jesselton, the town that became Kota Kinabalu. Its modest timber structure makes the historical story important, offering a point of continuity within the modern city. Look out for architectural details, local history, and city skyline views.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "architecture",
+          "history",
+          "skyline"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-agnes-keith-house",
+      "beforeDescription": "Historic house and Sandakan history.",
+      "description": "Agnes Keith House connects Sandakan with the author whose writing described life in North Borneo. The restored domestic setting gives a personal scale to the region's history and complements a wider heritage walk around the town. Look out for historic interiors, local history, and gardens.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "interiors",
+          "history",
+          "gardens"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-gaya-street-sunday-market",
+      "beforeDescription": "Scheduled street market and browsing.",
+      "description": "Gaya Street's Sunday market brings temporary trading activity into central Kota Kinabalu. Food, goods and browsing create the atmosphere, but its weekly schedule matters: the normal street and the market session are different experiences. Look out for market trading, local crafts, and local food.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "crafts",
+          "food"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-borneo-cultures-museum",
+      "beforeDescription": "Major museum of Borneo's cultures and history.",
+      "description": "Borneo Cultures Museum presents Sarawak's people, environments and cultural history within a major museum setting in Kuching. It offers an overview that can help visitors understand the significance of places encountered elsewhere in the state. Look out for Sarawak's indigenous cultures, historical collections, and interpretive displays.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "sarawakPeoples",
+          "objects",
+          "interactive"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-kuching-cat-museum",
+      "beforeDescription": "Specialist museum and themed collections.",
+      "description": "Kuching's Cat Museum takes an unusual thematic approach, gathering material associated with cats rather than providing a conventional regional-history survey. The playful subject makes it a distinctive stop within the city's broader museum offering. Look out for art displays, historical collections, and local history.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "art",
+          "objects",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-fort-margherita",
+      "beforeDescription": "Historic fort and Kuching history.",
+      "description": "Fort Margherita overlooks the Sarawak River from an elevated position opposite central Kuching. Its defensive form and historical setting help explain the river's importance to the city, while the surrounding views add to the visit. Look out for fort remains, river views, and local history.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "fort",
+          "river",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-old-kuching-courthouse",
+      "beforeDescription": "Historic civic architecture and visitor precinct.",
+      "description": "The old courthouse complex preserves a civic landmark from Kuching's earlier administrative history. Its courtyards and architectural setting invite a slower stop near the waterfront, showing how heritage buildings can remain part of city life. Look out for architectural details, courtyards, and local history.",
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "architecture",
+          "courtyards",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-kubah-national-park",
+      "beforeDescription": "Rainforest trails and biodiversity; use the park entrance.",
+      "description": "Kubah National Park is a forest destination near Kuching, with its landscape and plant diversity central to the experience. Choosing an appropriate permitted trail is more important than treating the whole park as one easily accessible viewpoint. Look out for rainforest habitats, forest trails, and plant collections.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "rainforest",
+          "trails",
+          "plants"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-gunung-gading-national-park",
+      "beforeDescription": "Forest and Rafflesia interpretation; sightings are not guaranteed.",
+      "description": "Gunung Gading is associated with forest conservation and the possibility of seeing rafflesia when flowers are present. The park is worth understanding as a habitat in its own right, rather than promising a bloom on every visit. Look out for rainforest habitats, forest trails, and plant collections.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "rainforest",
+          "trails",
+          "plants"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-sibu-central-market",
+      "beforeDescription": "Regional produce and local-food exploration.",
+      "description": "Sibu Central Market offers a view of the town's everyday trade through produce, local goods and food activity. The appeal is the working market itself, making respectful browsing more appropriate than treating traders as staged displays. Look out for market trading, local food, and local crafts.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "food",
+          "crafts"
+        ]
+      }
+    },
+    {
+      "id": "my-sarawak-kuching-waterfront",
+      "beforeDescription": "Public riverfront walking route.",
+      "description": "Kuching Waterfront provides a public walking setting along the Sarawak River. River views and the relationship between old and new landmarks help visitors orient themselves, making it a natural link between several city-centre stops. Look out for waterfront walks, river views, and city skyline views.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "promenade",
+          "river",
+          "skyline"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-petronas-twin-towers",
+      "beforeDescription": "Landmark towers and observation experience.",
+      "description": "The PETRONAS Twin Towers are a defining element of Kuala Lumpur's modern identity. Their design and scale can be appreciated from surrounding public areas, while the managed visitor experience inside requires separate entry arrangements. Look out for city skyline views, architectural details, and bridge design.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "architecture",
+          "bridges"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-kuala-lumpur-tower",
+      "beforeDescription": "Observation landmark and city views.",
+      "description": "Kuala Lumpur Tower rises above a hill setting in the city and is associated with observation experiences. The elevated perspective can help visitors understand the relationship between central neighbourhoods and the surrounding skyline. Look out for city skyline views, architectural details, and rainforest habitats.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "architecture",
+          "rainforest"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-national-museum-muzium-negara",
+      "beforeDescription": "National history and cultural collections.",
+      "description": "Muzium Negara introduces Malaysia's historical development through a national museum collection. It is a useful orientation stop before visiting specific states, connecting archaeological evidence and later social changes within a wider chronological story. Look out for local history, archaeological heritage, and historical collections.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "archaeology",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-national-textile-museum",
+      "beforeDescription": "Textile traditions and cultural exhibits.",
+      "description": "The National Textile Museum focuses on the techniques and cultural roles behind Malaysia's textile traditions. Its collections encourage visitors to look beyond attractive patterns to the skills and social meanings involved in making and wearing cloth. Look out for traditional textiles, local crafts, and local history.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "textiles",
+          "crafts",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-royal-museum-kuala-lumpur",
+      "beforeDescription": "Former palace and royal history.",
+      "description": "The Royal Museum occupies the former national palace and offers a setting connected with Malaysia's monarchy. Its domestic and ceremonial context provides a different view of royal institutions from simply seeing the outside of a palace gate. Look out for royal history, historic interiors, and architectural details.",
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "interiors",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-jalan-alor-food-street",
+      "beforeDescription": "Established city food destination.",
+      "description": "Jalan Alor is associated with open-air dining in Kuala Lumpur's Bukit Bintang area. Its attraction comes from the range of individual food businesses and street atmosphere, with offerings and operating times changing between vendors. Look out for food stalls, local food, and market trading.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "stalls",
+          "food",
+          "markets"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-titiwangsa-lake-gardens",
+      "beforeDescription": "Public lake gardens and skyline views.",
+      "description": "Titiwangsa Lake Gardens combines a broad water setting with views towards Kuala Lumpur's skyline. It provides a relaxed public-space visit, letting the city be appreciated from a greener and more open perspective. Look out for lakeside scenery, city skyline views, and gardens.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "skyline",
+          "gardens"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-putra-mosque-putrajaya",
+      "beforeDescription": "Lakeside mosque and city landmark.",
+      "description": "Putra Mosque forms part of Putrajaya's ceremonial lakeside setting. Its pink-toned architecture makes it recognisable from outside, while respectful access to the religious spaces follows visitor arrangements separate from the neighbouring public square. Look out for domes, lakeside scenery, and Islamic art and craftsmanship.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "lake",
+          "islamicArt"
+        ]
+      }
+    },
+    {
+      "id": "my-federal-territories-labuan-chimney-museum",
+      "beforeDescription": "Industrial archaeology and island history.",
+      "description": "Labuan's chimney is a surviving industrial landmark whose precise original function has been debated. The museum gives visitors context for the island's coal-mining past without requiring the structure's story to be reduced to an unsupported certainty. Look out for industrial history, local history, and architectural details.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "industry",
+          "history",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-perlis-state-mosque-arau",
+      "beforeDescription": "Royal-town mosque with a prominent dome and an architectural stop near the Arau palace precinct.",
+      "description": "The state mosque at Arau sits within Perlis's royal-town setting. It offers a religious and architectural stop that pairs with understanding the surrounding civic landscape, while worshippers and prayer times take priority over sightseeing. Look out for domes, architectural details, and royal history.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "architecture",
+          "royalty"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-bukit-kubu-recreational-forest",
+      "beforeDescription": "Limestone-hill forest recreation area near Kuala Perlis, suited to a short outdoor stop.",
+      "description": "Bukit Kubu adds a limestone-and-forest setting near Kuala Perlis. Its appeal is the natural landscape close to the town, with any cave or trail access needing to follow the actual visitor arrangements rather than assumed unrestricted entry. Look out for limestone scenery, rainforest habitats, and forest trails.",
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "limestone",
+          "rainforest",
+          "trails"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-kechor-river-recreational-park",
+      "beforeDescription": "Riverside public park for a relaxed walk and a quieter stop in Kangar.",
+      "description": "This riverside recreation stop offers a quieter public-space visit in Perlis. The river and landscaped surroundings make it suitable for a slower break, complementing the state's more prominent viewpoints and religious landmarks. Look out for river views, gardens, and shaded paths.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "river",
+          "gardens",
+          "trees"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-yasmeen-nasi-kandar-arau",
+      "beforeDescription": "Local nasi kandar restaurant for rice-and-curry meals in Arau. Check the current menu and operating times before visiting.",
+      "description": "This Arau food stop offers a chance to try nasi kandar as part of an everyday local dining setting. The experience depends on the dishes prepared by the operator, so current menus and prices should be checked at the venue. Look out for local food, cafes and dining, and local history.",
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "food",
+          "cafes",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-perlis-dato-sheikh-ahmad-square",
+      "beforeDescription": "Central civic square in Kangar, suitable for a short town-centre walking and landmark stop.",
+      "description": "Dato' Sheikh Ahmad Square provides a civic orientation point within Kangar. Its public setting makes it a useful short stop while exploring the town, rather than a ticketed attraction that requires a lengthy dedicated visit. Look out for architectural details, local history, and shopping.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "architecture",
+          "history",
+          "shops"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-dataran-lang-langkawi",
+      "beforeDescription": "Waterfront square in Kuah with Langkawi's large eagle landmark and views over the bay.",
+      "description": "Langkawi's Eagle Square creates a recognisable waterfront landmark near Kuah. The large eagle sculpture and surrounding public space offer an easy orientation stop, linking the island's visitor identity with its harbour setting. Look out for religious statues, marine habitats, and waterfront walks.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "statues",
+          "marine",
+          "promenade"
+        ]
+      }
+    },
+    {
+      "id": "my-kedah-mahsuri-mausoleum",
+      "beforeDescription": "Heritage visitor site associated with the legend of Mahsuri and traditional Langkawi village life.",
+      "description": "The Mahsuri site introduces one of Langkawi's best-known local legends within a heritage visitor setting. Its attraction lies in the cultural story and its place in island identity; folklore should be understood as tradition rather than independently proven historical detail. Look out for local history, traditional houses, and historical collections.",
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "history",
+          "houses",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-arulmigu-sri-rajakaliamman-glass-temple",
+      "beforeDescription": "Hindu temple noted for its glass-covered interior and detailed decorative work.",
+      "description": "This Johor Bahru temple is known for decorative glasswork within its religious setting. The unusual visual treatment makes it a distinctive cultural visit, while the temple's active worship role should remain central to visitor behaviour. Look out for Hindu religious art, prayer halls, and art displays.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "hindu",
+          "prayer",
+          "art"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-johor-bahru-old-chinese-temple",
+      "beforeDescription": "Historic city-centre temple linked to Johor Bahru's Chinese communities.",
+      "description": "Johor Bahru's old Chinese temple is connected with the city's community history. Its continued religious use gives the heritage site a living role, making it meaningful beyond the age of its buildings alone. Look out for clan and community heritage, prayer halls, and local history.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "clan",
+          "prayer",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-johor-kota-tinggi-museum",
+      "beforeDescription": "District museum introducing the history of Kota Tinggi and the Johor Sultanate.",
+      "description": "Kota Tinggi Museum introduces the area's place in Johor's historical development. Its collections provide context for nearby royal and settlement sites, helping visitors connect separate landmarks into a more coherent regional story. Look out for local history, historical collections, and the Melaka Sultanate story.",
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "objects",
+          "sultanate"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-muhammadi-mosque",
+      "beforeDescription": "Historic state mosque in Kota Bharu, close to the city's royal and museum quarter.",
+      "description": "Muhammadi Mosque is an important religious landmark within Kota Bharu. Its architectural presence and continuing community role make it a useful cultural stop, especially when understood alongside the city's nearby royal and museum settings. Look out for architectural details, minarets, and local history.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "architecture",
+          "minarets",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-bank-kerapu-war-museum",
+      "beforeDescription": "Historic former bank building housing exhibits about Kelantan during the Second World War.",
+      "description": "Bank Kerapu gives a former bank building a new role in explaining Kelantan's wartime experiences. The combination of building history and exhibits connects everyday civic space with the wider conflict that affected the region. Look out for military history, local history, and historical collections.",
+      "visitorStory": {
+        "theme": "war",
+        "highlights": [
+          "military",
+          "history",
+          "objects"
+        ]
+      }
+    },
+    {
+      "id": "my-kelantan-wat-mai-suwankhiri",
+      "beforeDescription": "Thai Buddhist temple complex known for its ornate architecture and boat-shaped main building.",
+      "description": "Wat Mai Suwankhiri adds a distinctive Siamese Buddhist stop to the Tumpat area. Its decorated religious setting helps explain a part of Kelantan's cultural diversity that visitors may miss when focusing only on Kota Bharu's centre. Look out for Siamese Buddhist traditions, religious statues, and prayer halls.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "siamese",
+          "statues",
+          "prayer"
+        ]
+      }
+    },
+    {
+      "id": "my-negeri-sembilan-seri-menanti-royal-museum",
+      "beforeDescription": "Former royal palace showcasing traditional timber architecture and Negeri Sembilan royal heritage.",
+      "description": "The former palace at Seri Menanti is associated with Negeri Sembilan's royal traditions and timber architecture. Its form and interior context make it a useful introduction to the relationship between local identity, craftsmanship and court life. Look out for royal history, traditional houses, and decorative carvings.",
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "houses",
+          "carvings"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-chin-swee-caves-temple",
+      "beforeDescription": "Hillside Chinese temple with a pagoda, landscaped grounds and mountain views.",
+      "description": "Chin Swee combines Buddhist religious spaces with a hillside setting below the Genting resort area. The temple structures and changing highland views offer a quieter contrast to the entertainment-focused attractions farther up the hill. Look out for pagoda architecture, religious statues, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "pagoda",
+          "statues",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-colmar-tropicale",
+      "beforeDescription": "French-inspired visitor village in the Berjaya Hills highlands, with themed architecture and walking streets.",
+      "description": "Colmar Tropicale is a themed resort setting inspired by European village architecture in the Berjaya Hills area. It should be understood as a modern visitor development rather than an original historic French settlement in Malaysia. Look out for architectural details, hill and mountain views, and cafes and dining.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "architecture",
+          "mountain",
+          "cafes"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-sultan-ahmad-shah-state-mosque",
+      "beforeDescription": "Large state mosque in central Kuantan, recognised for its domes and blue-toned architecture.",
+      "description": "Kuantan's state mosque forms a prominent religious landmark within the city centre. Its formal architecture gives visitors a cultural orientation point, while actual access to prayer spaces follows the mosque's visitor arrangements. Look out for domes, minarets, and architectural details.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "minarets",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-fraser-s-hill-clock-tower",
+      "beforeDescription": "Stone clock-tower landmark at the centre of Fraser's Hill, a starting point for a highland town walk.",
+      "description": "The clock tower acts as a recognisable orientation point in Fraser's Hill. Its setting reflects the hill station's character, making it a useful starting stop before exploring permitted walks and the surrounding highland landscape. Look out for architectural details, hill and mountain views, and local history.",
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "architecture",
+          "mountain",
+          "history"
+        ]
+      }
+    },
+    {
+      "id": "my-pahang-cameron-lavender-garden",
+      "beforeDescription": "Hillside flower garden in Tringkap with planted terraces and colourful floral displays.",
+      "description": "Cameron Lavender Garden offers a cultivated floral visitor setting within the Cameron Highlands. Its appeal comes from planted displays and photography rather than a claim to be an untouched natural landscape or a historic plantation. Look out for gardens, plant collections, and hill and mountain views.",
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "gardens",
+          "plants",
+          "mountain"
+        ]
+      }
+    },
+    {
+      "id": "my-sabah-kota-kinabalu-city-mosque",
+      "beforeDescription": "Waterfront city mosque in Likas, known for its lagoon setting and reflected domes.",
+      "description": "Kota Kinabalu City Mosque is recognised for its lakeside setting and formal domed architecture. Reflections contribute to its visual appeal, while visitors should distinguish the surrounding viewing areas from the mosque's active religious spaces. Look out for domes, lakeside scenery, and architectural details.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "lake",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-tengku-tengah-zaharah-mosque",
+      "beforeDescription": "Mosque in Kuala Ibai set beside a lagoon, often known as the Floating Mosque.",
+      "description": "Tengku Tengah Zaharah Mosque stands beside the Kuala Ibai lagoon and is commonly called the Floating Mosque. The relationship between architecture and water gives it a distinctive coastal-city setting, alongside its continuing religious purpose. Look out for domes, river views, and architectural details.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "river",
+          "architecture"
+        ]
+      }
+    },
+    {
+      "id": "my-terengganu-abidin-mosque",
+      "beforeDescription": "Historic white mosque near the centre of Kuala Terengganu, also called the State Mosque.",
+      "description": "Abidin Mosque is an established religious landmark in central Kuala Terengganu. Its setting helps connect the visitor with the city's royal and civic history, while the building remains a place for community worship rather than unrestricted sightseeing. Look out for architectural details, minarets, and local history.",
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "architecture",
+          "minarets",
+          "history"
+        ]
+      }
+    }
+  ]
+}

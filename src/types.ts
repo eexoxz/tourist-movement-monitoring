@@ -105,6 +105,7 @@ export type Destination = {
   coordinateSourceUrl?: string;
   address?: string;
   description: string;
+  visitorStory?: { theme: string; highlights: string[] };
   averageVisitMinutes: number;
   openingHours?: string;
   feeNote?: string;

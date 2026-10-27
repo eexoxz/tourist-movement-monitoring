@@ -11,7 +11,11 @@ const projectIndex = args.indexOf("--project");
 const project = projectIndex >= 0 ? args[projectIndex + 1] : "";
 if (!/^[a-z][a-z0-9-]{4,62}$/.test(project)) throw new Error("Specify the Firebase project explicitly using --project.");
 const apply = args.includes("--apply");
-const manifest = JSON.parse(await readFile(new URL("./locations-2026-10.json", import.meta.url), "utf8"));
+const manifestIndex = args.indexOf("--manifest");
+const manifestName = manifestIndex < 0 ? "locations-2026-10.json" : args[manifestIndex + 1];
+if (!/^locations-\d{4}-\d{2}(?:-\d{2})?\.json$/.test(manifestName ?? "")) throw new Error("Use a dated catalogue manifest filename within catalogue/.");
+const manifest = JSON.parse(await readFile(new URL(`./${manifestName}`, import.meta.url), "utf8"));
+const requirePhoto = manifest.photoPolicy !== "verified-venues-may-await-photo";
 
 // Use the existing CLI login; credentials stay in memory and are never exported.
 const auth = require("firebase-tools/lib/auth.js");
@@ -38,8 +42,8 @@ do {
   existing.push(...(result.documents ?? []).map(document => ({ id: document.name.split("/").at(-1), name: decode(document.fields.name) })));
   pageToken = result.nextPageToken ?? "";
 } while (pageToken);
-const plan = planCatalogueImport(manifest.places, existing);
-for (const place of plan.create) {
+const plan = planCatalogueImport(manifest.places, existing, { requirePhoto });
+for (const place of plan.create.filter(place => place.imageUrl)) {
   const asset = await readFile(resolve(root, "public", place.imageUrl.slice(1)));
   const jpeg = asset[0] === 0xff && asset[1] === 0xd8;
   const png = asset.subarray(1, 4).toString() === "PNG";
@@ -51,7 +55,7 @@ if (!apply) {
   console.log("Dry run only. No writes performed.");
 } else {
   // Hosting must contain the photographs before new cloud entries become visible.
-  for (const place of plan.create) {
+  for (const place of plan.create.filter(place => place.imageUrl)) {
     const response = await fetch(`https://${project}.web.app${place.imageUrl}`, { method: "HEAD", signal: AbortSignal.timeout(15000) });
     if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) throw new Error(`Deploy the photo assets before importing: ${place.id}`);
   }

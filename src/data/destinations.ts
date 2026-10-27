@@ -1,4 +1,5 @@
 import type { Destination } from "../types";
+import { baseDestinationStories } from "./destinationStories";
 
 type PracticalDestinationInfo = Partial<Pick<Destination, "openingHours" | "feeNote" | "visitTips" | "imageUrl" | "imageAlt">>;
 
@@ -411,4 +412,5 @@ const baseDestinations: Destination[] = [
 export const destinations: Destination[] = baseDestinations.map((destination) => ({
   ...destination,
   ...practicalDestinationInfo[destination.id],
+  ...baseDestinationStories[destination.id],
 }));

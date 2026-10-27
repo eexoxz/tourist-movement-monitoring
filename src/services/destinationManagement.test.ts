@@ -82,6 +82,8 @@ describe("destination management service", () => {
     expect(result.error).toBeUndefined();
     expect(result.destination?.averageVisitMinutes).toBe(65);
     expect(result.destination?.feeNote).toBe("Public square access is free.");
+    expect(result.destination?.visitorStory).toBeUndefined();
+    expect(updateDestinationRecord(destinations, { ...destinations[0], averageVisitMinutes: 66 }).destination?.visitorStory).toEqual(destinations[0].visitorStory);
     expect(result.destinations?.find((destination) => destination.id === destinations[0].id)?.averageVisitMinutes).toBe(65);
   });
 

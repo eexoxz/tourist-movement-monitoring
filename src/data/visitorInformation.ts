@@ -1,4 +1,4 @@
-export type VisitorLabel = "adult" | "child" | "senior" | "student" | "entry" | "malaysian" | "international" | "sarawakian" | "otherMalaysian" | "standard" | "mykad" | "daily" | "weekdays" | "weekendsHolidays" | "publicAreas" | "exhibition" | "sessions" | "lastEntry" | "lastUp" | "lastDown" | "ramadan" | "normalReturn" | "mainGrounds" | "dayAdmission" | "wott" | "campus" | "museum";
+export type VisitorLabel = "adult" | "child" | "senior" | "student" | "entry" | "malaysian" | "international" | "sarawakian" | "otherMalaysian" | "standard" | "mykad" | "daily" | "weekdays" | "weekendsHolidays" | "publicAreas" | "exhibition" | "sessions" | "lastEntry" | "lastUp" | "lastDown" | "ramadan" | "normalReturn" | "mainGrounds" | "dayAdmission" | "wott" | "campus" | "museum" | "residentPermit";
 export type VisitorNote = "jmmHolidays" | "eidHolidays" | "cnyHolidays" | "extras" | "weatherMaintenance" | "wednesdayHolidayException" | "mondayHolidayException" | "selectedHolidays" | "conditionalAccess" | "firstMondayClosed" | "bookSession";
 export interface VisitorHours { label?: VisitorLabel; days?: number[]; time: string }
 export interface VisitorPrice { audience: VisitorLabel; residency?: VisitorLabel; ages?: string; height?: string; amount: number }
@@ -21,6 +21,15 @@ const jmmFree = (source: string): VisitorInformation => ({ checkedAt, sources: [
 
 // Researched display data only: never written over an administrator's Firestore records.
 export const visitorInformation: Record<string, VisitorInformation> = {
+  "my-perlis-kota-kayang-museum": {
+    checkedAt: "2026-10-27", sources: ["https://www.jmm.gov.my/ms/content/muzium-kota-kayang-0"],
+    hours: daily("09:00 - 17:00"), hoursNotes: ["jmmHolidays"], prices: [price("entry", 0)],
+  },
+  "my-selangor-national-zoo-of-malaysia": {
+    checkedAt: "2026-10-27", sources: ["https://www.zoonegara.my/visitor-guide/tickets"],
+    hours: daily("09:00 - 17:00"), priceNotes: ["extras"],
+    prices: [price("adult", 55, "malaysian"), price("child", 28, "malaysian", "3-12"), price("senior", 33, "malaysian", "60+"), price("adult", 93, "international"), price("child", 48, "international", "3-12"), price("senior", 93, "international", "60+"), price("adult", 60, "residentPermit"), price("child", 35, "residentPermit", "3-12"), price("senior", 60, "residentPermit", "60+"), price("child", 0, undefined, "<3")],
+  },
   "islamic-arts-museum": {
     checkedAt, sources: ["https://iamm.org.my/visit-us"],
     hours: [...daily("09:30 - 18:00"), { label: "ramadan", time: "09:30 - 17:00" }], hoursNotes: ["eidHolidays"],

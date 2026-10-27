@@ -14,7 +14,8 @@ import { AppRecoveryScreen } from "./AppErrorBoundary";
 import { recoveryCopy } from "../services/recoveryCopy";
 
 const catalogue = JSON.parse(readFileSync(new URL("../../catalogue/locations-2026-10.json", import.meta.url), "utf8")).places as Destination[];
-const all = [...destinations, ...catalogue];
+const expansion = JSON.parse(readFileSync(new URL("../../catalogue/locations-2026-10-27.json", import.meta.url), "utf8")).places as Destination[];
+const all = [...destinations, ...catalogue, ...expansion];
 const hill = all.find((destination) => destination.id === "penang-hill")!;
 const render = (destination: Destination, locale: Parameters<typeof visitorText>[0] = "en", now?: number) => renderToStaticMarkup(createElement(PlacePracticalInfo, { destination: localizeDestination(destination, locale), locale, now }));
 

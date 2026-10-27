@@ -10,7 +10,7 @@ const en = {
   checked: "Source checked", source: "Published source", notice: "Published guidance, not live availability. Rates depend on eligibility and may change; bring the required ID.", unknownHours: "Confirmed opening hours are not yet available here.", unknownPrice: "Admission price is not yet confirmed. This does not mean free entry.", closed: "Closed", temporarilyClosed: "Temporarily closed", through: "through", reopeningUnconfirmed: "The published closure period has ended; reopening has not been verified.", years: "years", localTime: "Malaysia time (UTC+8)",
 };
 type Key = VisitorLabel | VisitorNote | "checked" | "source" | "notice" | "unknownHours" | "unknownPrice" | "closed" | "temporarilyClosed" | "through" | "reopeningUnconfirmed" | "years" | "localTime";
-const copy: Record<Locale, Record<Key, string>> = {
+const copy: Record<Locale, Omit<Record<Key, string>, "residentPermit">> = {
   en,
   ms: {
     adult: "Dewasa", child: "Kanak-kanak", senior: "Warga emas", student: "Pelajar (kad diperlukan)", entry: "Kemasukan", malaysian: "Warganegara Malaysia", international: "Antarabangsa", sarawakian: "Warga Sarawak", otherMalaysian: "Warganegara negeri lain", standard: "Standard", mykad: "MyKad / ID pemastautin yang layak",
@@ -62,4 +62,8 @@ const copy: Record<Locale, Record<Key, string>> = {
   },
 };
 
-export function visitorText(locale: Locale, key: Key) { return copy[locale][key]; }
+const residentPermitLabels: Record<Locale, string> = {
+  en: "I-Kad / work permit / dependant pass", ms: "I-Kad / permit kerja / pas tanggungan", zh: "I-Kad／工作准证／家属准证", ja: "I-Kad・就労許可・扶養家族パス", ko: "I-Kad / 취업 허가 / 부양가족 패스", pt: "I-Kad / autorização de trabalho / passe de dependente", ta: "I-Kad / வேலை அனுமதி / சார்ந்திருப்போர் அனுமதி", es: "I-Kad / permiso de trabajo / pase de dependiente", fr: "I-Kad / permis de travail / titre de personne à charge",
+};
+
+export function visitorText(locale: Locale, key: Key) { return key === "residentPermit" ? residentPermitLabels[locale] : copy[locale][key]; }

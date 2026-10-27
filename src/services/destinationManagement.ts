@@ -136,6 +136,7 @@ export function updateDestinationRecord(destinations: Destination[], input: Dest
   }
 
   const destination: Destination = { ...existing, ...validation.value };
+  if (existing.description !== destination.description || existing.category !== destination.category) delete destination.visitorStory;
   if (existing.imageUrl !== destination.imageUrl) delete destination.imageCredit;
   return {
     destination,

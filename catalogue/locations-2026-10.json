@@ -10,7 +10,7 @@
       "state": "Perlis",
       "address": "Gua Kelam Ecotourism Complex, Kaki Bukit, Perlis, Malaysia",
       "category": "nature",
-      "description": "Limestone cave and former mining passage.",
+      "description": "Gua Kelam combines a limestone cave landscape with a former tin-mining passage near Kaki Bukit. Understanding its mining use gives the underground setting a human history as well as a geological attraction. Look out for cave landscapes, limestone scenery, and tin-mining history.",
       "latitude": 6.6442672,
       "longitude": 100.2026603,
       "averageVisitMinutes": 90,
@@ -30,7 +30,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "mining",
+        "highlights": [
+          "caves",
+          "limestone",
+          "tin"
+        ]
+      }
     },
     {
       "id": "my-perlis-wang-kelian-viewpoint",
@@ -39,7 +47,7 @@
       "state": "Perlis",
       "address": "Wang Kelian Viewpoint, Jalan Kaki Bukit-Wang Kelian, Perlis, Malaysia",
       "category": "nature",
-      "description": "Landscape viewpoint near the border hills.",
+      "description": "The hill approach to Wang Kelian offers views across the limestone-and-agricultural landscape of northern Perlis. It is primarily a scenery stop, with visibility and changing light determining the experience on a particular day. Look out for hill and mountain views, agricultural heritage, and rainforest habitats.",
       "latitude": 6.6659228,
       "longitude": 100.2013226,
       "averageVisitMinutes": 90,
@@ -55,7 +63,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "mountain",
+        "highlights": [
+          "mountain",
+          "agriculture",
+          "rainforest"
+        ]
+      }
     },
     {
       "id": "my-perlis-timah-tasoh-lake",
@@ -64,7 +80,7 @@
       "state": "Perlis",
       "address": "Tasik Timah Tasoh, Beseri, Perlis, Malaysia",
       "category": "nature",
-      "description": "Reservoir scenery and lakeside recreation.",
+      "description": "Tasik Timah Tasoh is a reservoir whose wide water surface and surrounding hills form a distinctive Perlis landscape. Lakeside viewpoints suit a slower visit, while the reservoir's role adds context beyond a simple photo stop. Look out for lakeside scenery, birdlife, and hill and mountain views.",
       "latitude": 6.5652,
       "longitude": 100.2177,
       "averageVisitMinutes": 90,
@@ -80,7 +96,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "birds",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-perlis-al-hussain-mosque-kuala-perlis",
@@ -89,7 +113,7 @@
       "state": "Perlis",
       "address": "Masjid Al-Hussain, Persiaran Putra Timur, Kuala Perlis, Perlis, Malaysia",
       "category": "cultural",
-      "description": "Waterfront religious architecture.",
+      "description": "Al-Hussain Mosque is a waterfront landmark at Kuala Perlis, where its position creates the impression of a building beside the sea. The coastal setting is part of its appeal, alongside its active religious role. Look out for domes, sunset views, and waterfront walks.",
       "latitude": 6.397368175,
       "longitude": 100.126982797,
       "averageVisitMinutes": 60,
@@ -109,7 +133,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "sunset",
+          "promenade"
+        ]
+      }
     },
     {
       "id": "my-perlis-alwi-mosque-kangar",
@@ -118,7 +150,7 @@
       "state": "Perlis",
       "address": "Masjid Alwi, Jalan Kangar, Kangar, Perlis, Malaysia",
       "category": "heritage",
-      "description": "Historic mosque in the state capital.",
+      "description": "Masjid Alwi is an important historic mosque in Kangar. Its dome and formal architectural composition provide a cultural landmark within the town, while its continuing use makes respectful visitor behaviour essential. Look out for domes, architectural details, and local history.",
       "latitude": 6.440861111,
       "longitude": 100.197888888,
       "averageVisitMinutes": 60,
@@ -138,7 +170,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "architecture",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-kedah-bujang-valley-archaeology-museum",
@@ -147,7 +187,7 @@
       "state": "Kedah",
       "address": "Muzium Arkeologi Lembah Bujang, Bukit Batu Pahat, Merbok, Kedah, Malaysia",
       "category": "heritage",
-      "description": "Archaeology and ancient settlement history.",
+      "description": "The Bujang Valley museum introduces the archaeology of an early settlement and trading landscape in Kedah. Its setting and collections help explain the region's connections before the growth of modern towns and transport routes. Look out for archaeological heritage, historical collections, and local history.",
       "latitude": 5.736777,
       "longitude": 100.414193,
       "averageVisitMinutes": 60,
@@ -163,7 +203,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "archaeology",
+        "highlights": [
+          "archaeology",
+          "objects",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-kedah-zahir-mosque",
@@ -172,7 +220,7 @@
       "state": "Kedah",
       "address": "Masjid Zahir, Jalan Kampung Perak, Alor Setar, Kedah, Malaysia",
       "category": "cultural",
-      "description": "Landmark mosque and architectural stop.",
+      "description": "Masjid Zahir forms part of Alor Setar's historic civic and royal setting. Its dark domes and repeated arches make it a recognisable landmark, while nearby heritage buildings help place the mosque within the city's wider history. Look out for domes, minarets, and architectural details.",
       "latitude": 6.12028,
       "longitude": 100.365,
       "averageVisitMinutes": 60,
@@ -192,7 +240,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "minarets",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-kedah-alor-setar-tower",
@@ -201,7 +257,7 @@
       "state": "Kedah",
       "address": "Menara Alor Setar, Lebuhraya Darul Aman, Alor Setar, Kedah, Malaysia",
       "category": "urban",
-      "description": "City observation landmark.",
+      "description": "Menara Alor Setar is a prominent modern landmark rising above the Kedah capital. Its visitor viewing facilities offer an overview of the surrounding city and landscape, making it useful for understanding the area before exploring at street level. Look out for city skyline views, architectural details, and hill and mountain views.",
       "latitude": 6.12445,
       "longitude": 100.367261,
       "averageVisitMinutes": 60,
@@ -217,7 +273,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "architecture",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-kedah-laman-padi-langkawi",
@@ -226,7 +290,7 @@
       "state": "Kedah",
       "address": "Laman Padi, Pantai Cenang, Langkawi, Kedah, Malaysia",
       "category": "cultural",
-      "description": "Rice-growing heritage and landscape.",
+      "description": "Laman Padi introduces the rice-growing traditions that helped shape rural life in Langkawi and Kedah. Its agricultural setting provides an alternative to the island's beaches, with the relationship between cultivation and everyday life as its main story. Look out for rice-growing traditions, agricultural heritage, and gardens.",
       "latitude": 6.298208,
       "longitude": 99.722621,
       "averageVisitMinutes": 60,
@@ -242,7 +306,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "rice",
+          "agriculture",
+          "gardens"
+        ]
+      }
     },
     {
       "id": "my-kedah-langkawi-skybridge",
@@ -251,7 +323,7 @@
       "state": "Kedah",
       "address": "Langkawi SkyBridge, Gunung Machinchang, Langkawi, Kedah, Malaysia",
       "category": "urban",
-      "description": "Elevated viewpoint and visitor attraction.",
+      "description": "Langkawi SkyBridge combines an elevated pedestrian structure with mountain scenery above the island. The engineering and changing views are both part of the appeal, while access depends on the attraction's operating arrangements and weather. Look out for bridge design, hill and mountain views, and rainforest habitats.",
       "latitude": 6.386441666,
       "longitude": 99.662405555,
       "averageVisitMinutes": 60,
@@ -271,7 +343,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "mountain",
+        "highlights": [
+          "bridges",
+          "mountain",
+          "rainforest"
+        ]
+      }
     },
     {
       "id": "my-kedah-oriental-village-langkawi",
@@ -280,7 +360,7 @@
       "state": "Kedah",
       "address": "Oriental Village, Burau Bay, Langkawi, Kedah, Malaysia",
       "category": "urban",
-      "description": "Visitor precinct with shops and attractions.",
+      "description": "Oriental Village is a visitor complex at the foot of Langkawi's mountain attractions. Shops, dining and its role as an access area make it a practical stop, rather than a historic village preserved from an earlier period. Look out for shopping, cafes and dining, and hill and mountain views.",
       "latitude": 6.370119,
       "longitude": 99.6713267,
       "averageVisitMinutes": 60,
@@ -296,7 +376,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "shopping",
+        "highlights": [
+          "shops",
+          "cafes",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-kedah-tanjung-rhu-beach",
@@ -305,7 +393,7 @@
       "state": "Kedah",
       "address": "Pantai Tanjung Rhu, Tanjung Rhu, Langkawi, Kedah, Malaysia",
       "category": "coastal",
-      "description": "Beach scenery on northern Langkawi.",
+      "description": "Tanjung Rhu offers a northern Langkawi coastal setting with offshore limestone scenery. The open shore suits a relaxed visit, but tidal changes and local access arrangements should guide how visitors explore the beach area. Look out for beach scenery, limestone scenery, and island views.",
       "latitude": 6.45747,
       "longitude": 99.82444,
       "averageVisitMinutes": 60,
@@ -325,7 +413,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "limestone",
+          "islands"
+        ]
+      }
     },
     {
       "id": "my-kedah-pekan-rabu-alor-setar",
@@ -334,7 +430,7 @@
       "state": "Kedah",
       "address": "Pekan Rabu, Jalan Tunku Ibrahim, Alor Setar, Kedah, Malaysia",
       "category": "food",
-      "description": "Local food products and traditional market shopping.",
+      "description": "Pekan Rabu is associated with Malay trading activity in Alor Setar, with food, local products and small businesses forming its character. Browsing is a way to encounter everyday commerce alongside Kedah's larger monuments. Look out for market trading, local food, and local crafts.",
       "latitude": 6.11707,
       "longitude": 100.367438,
       "averageVisitMinutes": 60,
@@ -354,7 +450,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "food",
+          "crafts"
+        ]
+      }
     },
     {
       "id": "my-penang-armenian-street",
@@ -363,7 +467,7 @@
       "state": "Penang",
       "address": "Lebuh Armenian, George Town, Penang, Malaysia",
       "category": "heritage",
-      "description": "Historic streetscape and public art walking stop.",
+      "description": "Lebuh Armenian sits within George Town's historic street network, linking clan heritage, older shophouses and contemporary street art. A short walk can reveal how visitor activity and long-established community spaces now share the same urban setting. Look out for traditional shophouses, murals, and clan and community heritage.",
       "latitude": 5.41474444,
       "longitude": 100.33811111,
       "averageVisitMinutes": 60,
@@ -379,7 +483,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "shophouses",
+          "murals",
+          "clan"
+        ]
+      }
     },
     {
       "id": "my-penang-pinang-peranakan-mansion",
@@ -388,7 +500,7 @@
       "state": "Penang",
       "address": "Pinang Peranakan Mansion, 29 Church Street, George Town, Penang, Malaysia",
       "category": "cultural",
-      "description": "Peranakan domestic culture and collections.",
+      "description": "This restored George Town mansion presents the domestic world associated with wealthy Peranakan households. Furniture, decorative objects and the house itself work together, making it a useful introduction to the culture behind Penang's heritage streets. Look out for Peranakan domestic heritage, historic interiors, and historical collections.",
       "latitude": 5.417999,
       "longitude": 100.341192,
       "averageVisitMinutes": 60,
@@ -404,7 +516,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "peranakan",
+          "interiors",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-penang-khoo-kongsi",
@@ -413,7 +533,7 @@
       "state": "Penang",
       "address": "Leong San Tong Khoo Kongsi, 18 Cannon Square, George Town, Penang, Malaysia",
       "category": "heritage",
-      "description": "Clan-house architecture and community history.",
+      "description": "Khoo Kongsi is a clan-house complex whose decorated halls express the history and identity of the Khoo community. The craftsmanship rewards close viewing, while its courtyard setting makes the social role of a clan association easier to understand. Look out for clan and community heritage, decorative carvings, and courtyards.",
       "latitude": 5.414438,
       "longitude": 100.337024,
       "averageVisitMinutes": 60,
@@ -429,7 +549,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "clan",
+          "carvings",
+          "courtyards"
+        ]
+      }
     },
     {
       "id": "my-penang-penang-botanic-gardens",
@@ -438,7 +566,7 @@
       "state": "Penang",
       "address": "Penang Botanic Gardens, Jalan Kebun Bunga, George Town, Penang, Malaysia",
       "category": "nature",
-      "description": "Established gardens and walking routes.",
+      "description": "At the foot of Penang's hills, the Botanic Gardens combine landscaped collections with a green valley setting. They offer a calmer alternative to city streets, with established paths allowing visitors to appreciate plants and the surrounding hillside. Look out for plant collections, hill and mountain views, and shaded paths.",
       "latitude": 5.43995833,
       "longitude": 100.28833333,
       "averageVisitMinutes": 90,
@@ -454,7 +582,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "plants",
+          "mountain",
+          "trees"
+        ]
+      }
     },
     {
       "id": "my-penang-tropical-spice-garden",
@@ -463,7 +599,7 @@
       "state": "Penang",
       "address": "Tropical Spice Garden, Lot 595, Mukim 2, Teluk Bahang, Penang, Malaysia",
       "category": "nature",
-      "description": "Tropical planting and spice interpretation.",
+      "description": "This garden near Teluk Bahang places tropical plants and spices within a landscaped visitor setting. It adds a sensory and botanical stop to a coastal itinerary, encouraging visitors to look beyond scenery to the plants used in everyday life. Look out for plant collections, gardens, and forest trails.",
       "latitude": 5.463376,
       "longitude": 100.229248,
       "averageVisitMinutes": 90,
@@ -479,7 +615,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "plants",
+          "gardens",
+          "trails"
+        ]
+      }
     },
     {
       "id": "my-penang-entopia",
@@ -488,7 +632,7 @@
       "state": "Penang",
       "address": "Entopia, 830 Jalan Teluk Bahang, Teluk Bahang, Penang, Malaysia",
       "category": "nature",
-      "description": "Butterfly and insect visitor attraction.",
+      "description": "Entopia develops the butterfly-farm experience into a broader introduction to insects and their environments. Living displays and interpretation make it a nature-learning stop, particularly for visitors interested in the small animals often overlooked outdoors. Look out for butterflies, plant collections, and interpretive displays.",
       "latitude": 5.447587,
       "longitude": 100.21522,
       "averageVisitMinutes": 90,
@@ -508,7 +652,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "butterflies",
+          "plants",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-penang-the-top-penang",
@@ -517,7 +669,7 @@
       "state": "Penang",
       "address": "The TOP, KOMTAR, 1 Jalan Penang, George Town, Penang, Malaysia",
       "category": "urban",
-      "description": "KOMTAR visitor attractions and city views.",
+      "description": "The TOP brings visitor attractions into KOMTAR, a defining landmark of George Town's modern skyline. Observation and entertainment experiences make it a different type of city stop from nearby historic shophouses and religious buildings. Look out for city skyline views, visitor rides and attractions, and interpretive displays.",
       "latitude": 5.4145615,
       "longitude": 100.329814,
       "averageVisitMinutes": 60,
@@ -537,7 +689,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "rides",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-penang-gurney-drive-hawker-centre",
@@ -546,7 +706,7 @@
       "state": "Penang",
       "address": "Gurney Drive Hawker Centre, Persiaran Gurney, George Town, Penang, Malaysia",
       "category": "food",
-      "description": "Established hawker-food destination.",
+      "description": "Gurney Drive's hawker area is associated with Penang's street-food culture. The variety comes from individual vendors rather than one fixed menu, so exploring available stalls can be more useful than expecting every dish to be sold at all times. Look out for food stalls, local food, and waterfront walks.",
       "latitude": 5.4398178,
       "longitude": 100.3090147,
       "averageVisitMinutes": 60,
@@ -566,7 +726,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "stalls",
+          "food",
+          "promenade"
+        ]
+      }
     },
     {
       "id": "my-penang-batu-ferringhi-beach",
@@ -575,7 +743,7 @@
       "state": "Penang",
       "address": "Pantai Batu Ferringhi, Jalan Batu Ferringhi, Penang, Malaysia",
       "category": "coastal",
-      "description": "Beachfront and coastal leisure stop.",
+      "description": "Batu Ferringhi is one of Penang's best-known resort-coast settings. Its beachfront offers a contrast to George Town's historic streets, with the atmosphere changing between daytime activity and evening views along the shore. Look out for beach scenery, sunset views, and island views.",
       "latitude": 5.470833333,
       "longitude": 100.245277777,
       "averageVisitMinutes": 60,
@@ -595,7 +763,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "sunset",
+          "islands"
+        ]
+      }
     },
     {
       "id": "my-perak-taiping-lake-gardens",
@@ -604,7 +780,7 @@
       "state": "Perak",
       "address": "Taiping Lake Gardens, Jalan Pekeliling, Taiping, Perak, Malaysia",
       "category": "nature",
-      "description": "Lakeside gardens and established walking routes.",
+      "description": "Taiping Lake Gardens developed within a landscape associated with the town's mining past. Mature rain trees, reflective water and the surrounding hills make it a distinctive walking stop rather than simply another urban park. Look out for lakeside scenery, shaded paths, and hill and mountain views.",
       "latitude": 4.85389,
       "longitude": 100.733,
       "averageVisitMinutes": 90,
@@ -620,7 +796,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "trees",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-perak-perak-museum-taiping",
@@ -629,7 +813,7 @@
       "state": "Perak",
       "address": "Muzium Perak, Jalan Taming Sari, Taiping, Perak, Malaysia",
       "category": "cultural",
-      "description": "Museum collections and regional history.",
+      "description": "Perak Museum is an early museum institution in Taiping, connecting collections with the development of the town. Its exhibits offer a way to understand the region's people and natural history before exploring the surrounding heritage area. Look out for local history, historical collections, and architectural details.",
       "latitude": 4.860555555,
       "longitude": 100.745,
       "averageVisitMinutes": 60,
@@ -645,7 +829,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "objects",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-perak-han-chin-pet-soo",
@@ -654,7 +846,7 @@
       "state": "Perak",
       "address": "Han Chin Pet Soo, 3 Jalan Bijeh Timah, Ipoh, Perak, Malaysia",
       "category": "heritage",
-      "description": "Ipoh tin-mining and community history.",
+      "description": "Han Chin Pet Soo uses a former miners' club setting to explore Ipoh's tin-mining world and Hakka community connections. The building gives the displays a social context, linking industrial wealth with the lives of people around it. Look out for tin-mining history, historic interiors, and local history.",
       "latitude": 4.596111111,
       "longitude": 101.078888888,
       "averageVisitMinutes": 60,
@@ -674,7 +866,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "mining",
+        "highlights": [
+          "tin",
+          "interiors",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-perak-ipoh-railway-station",
@@ -683,7 +883,7 @@
       "state": "Perak",
       "address": "Ipoh Railway Station, Jalan Panglima Bukit Gantang Wahab, Ipoh, Perak, Malaysia",
       "category": "heritage",
-      "description": "Historic station architecture; public access areas only.",
+      "description": "Ipoh's railway station reflects the importance of transport in the growth of a mining-era town. Its formal facade and public setting make it a useful starting point for exploring nearby civic buildings and the old commercial centre. Look out for railway architecture, architectural details, and gardens.",
       "latitude": 4.597222,
       "longitude": 101.073333,
       "averageVisitMinutes": 60,
@@ -699,7 +899,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "railway",
+          "architecture",
+          "gardens"
+        ]
+      }
     },
     {
       "id": "my-perak-sam-poh-tong-temple",
@@ -708,7 +916,7 @@
       "state": "Perak",
       "address": "Sam Poh Tong Temple, Gunung Rapat, Ipoh, Perak, Malaysia",
       "category": "cultural",
-      "description": "Limestone cave temple and religious landscape.",
+      "description": "Sam Poh Tong uses Ipoh's limestone setting as part of a Buddhist temple landscape. Religious spaces and garden elements sit alongside natural rock, making the relationship between worship and geology a distinctive part of the visit. Look out for cave landscapes, religious statues, and gardens.",
       "latitude": 4.56373028,
       "longitude": 101.11540667,
       "averageVisitMinutes": 60,
@@ -728,7 +936,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "caves",
+          "statues",
+          "gardens"
+        ]
+      }
     },
     {
       "id": "my-perak-lost-world-of-tambun",
@@ -737,7 +953,7 @@
       "state": "Perak",
       "address": "Lost World of Tambun, 1 Persiaran Lagun Sunway, Sunway City Ipoh, Perak, Malaysia",
       "category": "urban",
-      "description": "Family-oriented visitor attraction.",
+      "description": "Lost World of Tambun combines visitor recreation with the limestone landscape around Ipoh. Its attraction areas offer a more activity-focused stop than the city's heritage streets, with the specific experience depending on the ticketed facilities selected. Look out for visitor rides and attractions, hot springs, and limestone scenery.",
       "latitude": 4.62580556,
       "longitude": 101.15516667,
       "averageVisitMinutes": 60,
@@ -757,7 +973,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "hotSprings",
+          "limestone"
+        ]
+      }
     },
     {
       "id": "my-perak-gerbang-malam-ipoh",
@@ -766,7 +990,7 @@
       "state": "Perak",
       "address": "Gerbang Malam, Jalan Dato Tahwil Azar, Ipoh, Perak, Malaysia",
       "category": "urban",
-      "description": "Evening market and urban browsing.",
+      "description": "Gerbang Malam adds an evening-market stop to central Ipoh, with small traders shaping the street atmosphere. It offers a view of local commerce after daytime sightseeing, while the range of stalls depends on the trading session. Look out for market trading, food stalls, and shopping.",
       "latitude": 4.5957018,
       "longitude": 101.0845708,
       "averageVisitMinutes": 60,
@@ -786,7 +1010,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "stalls",
+          "shops"
+        ]
+      }
     },
     {
       "id": "my-perak-teluk-nipah-beach-pangkor",
@@ -795,7 +1027,7 @@
       "state": "Perak",
       "address": "Pantai Teluk Nipah, Pulau Pangkor, Perak, Malaysia",
       "category": "coastal",
-      "description": "Island beach and coastal scenery.",
+      "description": "Teluk Nipah is a beach area on Pangkor with a more relaxed island setting than the mainland towns nearby. Shoreline views and nearby offshore scenery provide its main appeal, with conditions changing with the tide and weather. Look out for beach scenery, island views, and sunset views.",
       "latitude": 4.2302734,
       "longitude": 100.5431265,
       "averageVisitMinutes": 60,
@@ -815,7 +1047,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "islands",
+          "sunset"
+        ]
+      }
     },
     {
       "id": "my-selangor-forest-research-institute-malaysia-kepong",
@@ -824,7 +1064,7 @@
       "state": "Selangor",
       "address": "Forest Research Institute Malaysia, Jalan FRIM, Kepong, Selangor, Malaysia",
       "category": "nature",
-      "description": "Forest recreation and interpretation.",
+      "description": "FRIM is both a research institution and a place associated with forest learning. Visitor access allows selected experiences of its green setting, but research areas, trails and special facilities have their own entry conditions. Look out for rainforest habitats, plant collections, and forest trails.",
       "latitude": 3.2369,
       "longitude": 101.6378,
       "averageVisitMinutes": 90,
@@ -844,7 +1084,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "rainforest",
+          "plants",
+          "trails"
+        ]
+      }
     },
     {
       "id": "my-selangor-sultan-alam-shah-museum",
@@ -853,7 +1101,7 @@
       "state": "Selangor",
       "address": "Muzium Sultan Alam Shah, Persiaran Bandaraya, Seksyen 14, Shah Alam, Selangor, Malaysia",
       "category": "cultural",
-      "description": "Selangor history and cultural collections.",
+      "description": "Sultan Alam Shah Museum introduces Selangor's historical and cultural background from its location in Shah Alam. The collections make a useful companion to visits to the state's royal and civic landmarks, adding context beyond their architecture. Look out for local history, royal history, and historical collections.",
       "latitude": 3.07522222,
       "longitude": 101.52111111,
       "averageVisitMinutes": 60,
@@ -869,7 +1117,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "royalty",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-selangor-sultan-salahuddin-abdul-aziz-shah-mosque",
@@ -878,7 +1134,7 @@
       "state": "Selangor",
       "address": "Masjid Sultan Salahuddin Abdul Aziz Shah, Persiaran Masjid, Seksyen 14, Shah Alam, Selangor, Malaysia",
       "category": "cultural",
-      "description": "Landmark mosque in Shah Alam.",
+      "description": "Shah Alam's Blue Mosque is distinguished by its large blue dome and tall minarets. The building is an important state religious landmark, with architectural scale forming only one part of its continuing role in community worship. Look out for domes, minarets, and Islamic art and craftsmanship.",
       "latitude": 3.07861111,
       "longitude": 101.52055556,
       "averageVisitMinutes": 60,
@@ -898,7 +1154,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "minarets",
+          "islamicArt"
+        ]
+      }
     },
     {
       "id": "my-selangor-sunway-lagoon",
@@ -907,7 +1171,7 @@
       "state": "Selangor",
       "address": "Sunway Lagoon, 3 Jalan PJS 11/11, Bandar Sunway, Selangor, Malaysia",
       "category": "urban",
-      "description": "Established family-oriented theme park.",
+      "description": "Sunway Lagoon is an activity-focused theme-park destination within Bandar Sunway. Its different attraction zones offer a contrast to cultural sightseeing, and the available experience depends on the selected ticket, operating areas and any activity restrictions. Look out for visitor rides and attractions, gardens, and interpretive displays.",
       "latitude": 3.06921,
       "longitude": 101.607,
       "averageVisitMinutes": 60,
@@ -927,7 +1191,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "gardens",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-selangor-i-city-shah-alam",
@@ -936,7 +1208,7 @@
       "state": "Selangor",
       "address": "i-City, Seksyen 7, Shah Alam, Selangor, Malaysia",
       "category": "urban",
-      "description": "Urban leisure and visitor attractions.",
+      "description": "i-City is a modern leisure and commercial destination in Shah Alam, known for visitor attractions and illuminated settings. It suits an entertainment-focused stop, while specific activities and access arrangements vary across the development. Look out for visitor rides and attractions, city skyline views, and shopping.",
       "latitude": 3.065954,
       "longitude": 101.483355,
       "averageVisitMinutes": 60,
@@ -952,7 +1224,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "rides",
+          "skyline",
+          "shops"
+        ]
+      }
     },
     {
       "id": "my-selangor-sky-mirror-kuala-selangor",
@@ -961,7 +1241,7 @@
       "state": "Selangor",
       "address": "Sky Mirror tour departure area, Pasir Penambang, Kuala Selangor, Selangor, Malaysia",
       "category": "coastal",
-      "description": "Guided tidal-sandbank excursion, not a road-access beach.",
+      "description": "Sky Mirror is a tidal sandbank experience rather than a beach that is always exposed. Suitable tide windows and boat arrangements determine access, so the reflective-water photographs depend on conditions rather than a guaranteed appearance. Look out for marine habitats, island views, and sunset views.",
       "latitude": 3.2094,
       "longitude": 101.1865,
       "averageVisitMinutes": 60,
@@ -983,7 +1263,15 @@
       "visitTips": [
         "Boat access is required. Confirm the departure point, weather and return arrangements with the operator.",
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "marine",
+          "islands",
+          "sunset"
+        ]
+      }
     },
     {
       "id": "my-selangor-bukit-melawati",
@@ -992,7 +1280,7 @@
       "state": "Selangor",
       "address": "Bukit Melawati, Kuala Selangor, Selangor, Malaysia",
       "category": "heritage",
-      "description": "Hilltop history and heritage landscape.",
+      "description": "Bukit Melawati combines a hilltop setting with remains linked to Kuala Selangor's defensive history. Looking at the old structures alongside river and coastal views helps explain why the elevated position once mattered strategically. Look out for fort remains, historic cannons, and river views.",
       "latitude": 3.341944444,
       "longitude": 101.246111111,
       "averageVisitMinutes": 60,
@@ -1008,7 +1296,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "fort",
+          "cannons",
+          "river"
+        ]
+      }
     },
     {
       "id": "my-selangor-jugra-lighthouse-viewpoint",
@@ -1017,7 +1313,7 @@
       "state": "Selangor",
       "address": "Bukit Jugra Lighthouse, Jugra, Banting, Selangor, Malaysia",
       "category": "heritage",
-      "description": "Lighthouse surroundings and historic hill setting.",
+      "description": "Jugra's lighthouse viewpoint offers a perspective over the landscape around this historic Selangor locality. The appeal is mainly the elevated setting and outward views, with visitors needing to follow the actual public access arrangements. Look out for hill and mountain views, river views, and architectural details.",
       "latitude": 2.8357776,
       "longitude": 101.4176138,
       "averageVisitMinutes": 60,
@@ -1033,7 +1329,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "mountain",
+          "river",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-selangor-morib-beach",
@@ -1042,7 +1346,7 @@
       "state": "Selangor",
       "address": "Pantai Morib, Morib, Banting, Selangor, Malaysia",
       "category": "coastal",
-      "description": "Public coastal recreation stop.",
+      "description": "Morib is a long-established coastal recreation stop in Kuala Langat. Its shore and public surroundings suit an easy break from inland travel, while the character of the waterfront changes significantly with tidal conditions. Look out for beach scenery, waterfront walks, and sunset views.",
       "latitude": 2.75195,
       "longitude": 101.443,
       "averageVisitMinutes": 60,
@@ -1062,7 +1366,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "promenade",
+          "sunset"
+        ]
+      }
     },
     {
       "id": "my-johor-legoland-malaysia",
@@ -1071,7 +1383,7 @@
       "state": "Johor",
       "address": "LEGOLAND Malaysia, 7 Jalan LEGOLAND, Bandar Medini Iskandar, Iskandar Puteri, Johor, Malaysia",
       "category": "urban",
-      "description": "Established family theme-park destination.",
+      "description": "LEGOLAND Malaysia offers a themed family-attraction experience in Iskandar Puteri. Model-building design and visitor rides give it a different purpose from Johor's historical sites, with entry choices and height restrictions shaping individual activities. Look out for visitor rides and attractions, interpretive displays, and gardens.",
       "latitude": 1.425,
       "longitude": 103.62722222,
       "averageVisitMinutes": 60,
@@ -1091,7 +1403,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "interactive",
+          "gardens"
+        ]
+      }
     },
     {
       "id": "my-johor-johor-zoo",
@@ -1100,7 +1420,7 @@
       "state": "Johor",
       "address": "Zoo Johor, Jalan Gertak Merah, Johor Bahru, Johor, Malaysia",
       "category": "nature",
-      "description": "Wildlife visitor attraction in Johor Bahru.",
+      "description": "Johor Zoo adds an animal-focused stop near Johor Bahru's older landmarks. Its long place in the city's visitor landscape provides historical context, while responsible viewing and the current operating guidance remain central to a visit. Look out for local history, gardens, and rainforest habitats.",
       "latitude": 1.4575,
       "longitude": 103.75225,
       "averageVisitMinutes": 90,
@@ -1116,7 +1436,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "history",
+          "gardens",
+          "rainforest"
+        ]
+      }
     },
     {
       "id": "my-johor-tanjung-piai-national-park",
@@ -1125,7 +1453,7 @@
       "state": "Johor",
       "address": "Taman Negara Johor Tanjung Piai, Tanjung Piai, Pontian, Johor, Malaysia",
       "category": "nature",
-      "description": "Mangrove boardwalks and coastal ecology.",
+      "description": "Tanjung Piai is a mangrove-coast national park associated with the southern end of mainland Asia. Boardwalk access makes the coastal habitat part of the visitor experience, while tides and maintenance can affect which sections are available. Look out for mangroves, boardwalks, and marine habitats.",
       "latitude": 1.2683,
       "longitude": 103.5101,
       "averageVisitMinutes": 90,
@@ -1147,7 +1475,15 @@
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out.",
         "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "mangroves",
+          "boardwalks",
+          "marine"
+        ]
+      }
     },
     {
       "id": "my-johor-sultan-abu-bakar-state-mosque",
@@ -1156,7 +1492,7 @@
       "state": "Johor",
       "address": "Masjid Sultan Abu Bakar, Jalan Skudai, Johor Bahru, Johor, Malaysia",
       "category": "cultural",
-      "description": "Landmark mosque overlooking the strait.",
+      "description": "Sultan Abu Bakar State Mosque is a major religious landmark overlooking the straits at Johor Bahru. Its formal architecture reflects the state's historical development, making the surrounding setting important as well as the building itself. Look out for architectural details, minarets, and marine habitats.",
       "latitude": 1.456955555,
       "longitude": 103.751052777,
       "averageVisitMinutes": 60,
@@ -1176,7 +1512,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "architecture",
+          "minarets",
+          "marine"
+        ]
+      }
     },
     {
       "id": "my-johor-johor-bahru-chinese-heritage-museum",
@@ -1185,7 +1529,7 @@
       "state": "Johor",
       "address": "Johor Bahru Chinese Heritage Museum, 42 Jalan Ibrahim, Johor Bahru, Johor, Malaysia",
       "category": "heritage",
-      "description": "Local community and trading history.",
+      "description": "This museum introduces the history of Johor Bahru's Chinese community and its part in the town's development. The collections add social context to nearby trading streets, showing why heritage is about people as much as surviving buildings. Look out for clan and community heritage, local history, and historical collections.",
       "latitude": 1.45605556,
       "longitude": 103.76319444,
       "averageVisitMinutes": 60,
@@ -1201,7 +1545,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "clan",
+          "history",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-johor-kota-johor-lama-museum",
@@ -1210,7 +1562,7 @@
       "state": "Johor",
       "address": "Muzium Kota Johor Lama, Kampung Johor Lama, Kota Tinggi, Johor, Malaysia",
       "category": "heritage",
-      "description": "History of the old Johor capital.",
+      "description": "Kota Johor Lama's museum setting introduces a historic settlement on the Johor River. Archaeological interpretation helps connect the site's remains with earlier political and trading activity, making it more meaningful than an isolated stop by old earthworks. Look out for archaeological heritage, the Melaka Sultanate story, and river views.",
       "latitude": 1.57994444,
       "longitude": 104.01863889,
       "averageVisitMinutes": 60,
@@ -1226,7 +1578,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "archaeology",
+        "highlights": [
+          "archaeology",
+          "sultanate",
+          "river"
+        ]
+      }
     },
     {
       "id": "my-johor-desaru-beach",
@@ -1235,7 +1595,7 @@
       "state": "Johor",
       "address": "Pantai Desaru, Bandar Penawar, Kota Tinggi, Johor, Malaysia",
       "category": "coastal",
-      "description": "East-coast beach destination.",
+      "description": "Desaru is a well-known east-coast beach destination in Johor, offering an open seafront setting rather than an urban landmark. A visit can be kept simple and scenic, with sea conditions and local access guiding any activities. Look out for beach scenery, marine habitats, and sunset views.",
       "latitude": 1.547194444,
       "longitude": 104.262638888,
       "averageVisitMinutes": 60,
@@ -1255,7 +1615,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "marine",
+          "sunset"
+        ]
+      }
     },
     {
       "id": "my-melaka-a-famosa-porta-de-santiago",
@@ -1264,7 +1632,7 @@
       "state": "Melaka",
       "address": "Porta de Santiago, Jalan Parameswara, Bandar Hilir, Melaka, Malaysia",
       "category": "heritage",
-      "description": "Surviving historic gateway.",
+      "description": "Porta de Santiago is a surviving gateway from Melaka's Portuguese fortifications. Its modest scale today makes the historical context particularly important: the remaining structure represents only a fragment of the much larger defensive complex. Look out for fort remains, architectural details, and local history.",
       "latitude": 2.19161667,
       "longitude": 102.25030556,
       "averageVisitMinutes": 60,
@@ -1280,7 +1648,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "fort",
+          "architecture",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-melaka-st-paul-s-church-ruins",
@@ -1289,7 +1665,7 @@
       "state": "Melaka",
       "address": "St Paul's Hill, Bandar Hilir, Melaka, Malaysia",
       "category": "heritage",
-      "description": "Historic hilltop church remains.",
+      "description": "The church ruins above central Melaka place the city's colonial past within a hilltop setting. The surviving walls and elevated position invite a slower look at how successive periods of rule shaped this compact historic area. Look out for architectural details, local history, and hill and mountain views.",
       "latitude": 2.19278,
       "longitude": 102.249,
       "averageVisitMinutes": 60,
@@ -1305,7 +1681,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "architecture",
+          "history",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-melaka-cheng-hoon-teng-temple",
@@ -1314,7 +1698,7 @@
       "state": "Melaka",
       "address": "Cheng Hoon Teng Temple, 25 Jalan Tokong, Melaka, Malaysia",
       "category": "cultural",
-      "description": "Historic temple and religious architecture.",
+      "description": "Cheng Hoon Teng is a long-established Chinese temple in Melaka's historic quarter. Its decorated halls and craftsmanship reflect community religious traditions, while the surrounding streets connect it with the city's wider multicultural trading past. Look out for decorative carvings, prayer halls, and clan and community heritage.",
       "latitude": 2.19747,
       "longitude": 102.247,
       "averageVisitMinutes": 60,
@@ -1334,7 +1718,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "carvings",
+          "prayer",
+          "clan"
+        ]
+      }
     },
     {
       "id": "my-melaka-baba-nyonya-heritage-museum",
@@ -1343,7 +1735,7 @@
       "state": "Melaka",
       "address": "Baba & Nyonya Heritage Museum, 48-50 Jalan Tun Tan Cheng Lock, Melaka, Malaysia",
       "category": "cultural",
-      "description": "Peranakan home and cultural collections.",
+      "description": "The Baba & Nyonya Heritage Museum uses a historic domestic setting to explain Peranakan life in Melaka. Furniture, room arrangements and family objects make the culture tangible, complementing a walk through the surrounding shophouse streets. Look out for Peranakan domestic heritage, historic interiors, and historical collections.",
       "latitude": 2.19535,
       "longitude": 102.247,
       "averageVisitMinutes": 60,
@@ -1359,7 +1751,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "peranakan",
+          "interiors",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-melaka-melaka-sultanate-palace-museum",
@@ -1368,7 +1768,7 @@
       "state": "Melaka",
       "address": "Muzium Istana Kesultanan Melaka, Jalan Kota, Bandar Hilir, Melaka, Malaysia",
       "category": "heritage",
-      "description": "Interpretation of the sultanate's history.",
+      "description": "This museum is housed in a reconstruction inspired by descriptions of Melaka's earlier royal palace. It introduces the sultanate's cultural world, while the building should be understood as a later interpretation rather than an untouched surviving palace. Look out for the Melaka Sultanate story, traditional houses, and historical collections.",
       "latitude": 2.192878,
       "longitude": 102.250439,
       "averageVisitMinutes": 60,
@@ -1384,7 +1784,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "sultanate",
+          "houses",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-melaka-maritime-museum",
@@ -1393,7 +1801,7 @@
       "state": "Melaka",
       "address": "Maritime Museum, Jalan Merdeka, Bandar Hilir, Melaka, Malaysia",
       "category": "cultural",
-      "description": "Maritime history and the ship-replica landmark.",
+      "description": "Melaka's maritime museum connects the city with seaborne trade and the importance of its harbour. The visitor setting helps explain how shipping brought people, goods and competing powers to the historic trading centre. Look out for maritime traditions, maritime trading history, and the Melaka Sultanate story.",
       "latitude": 2.19181,
       "longitude": 102.246,
       "averageVisitMinutes": 60,
@@ -1409,7 +1817,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "boats",
+          "tradingHistory",
+          "sultanate"
+        ]
+      }
     },
     {
       "id": "my-melaka-zoo-melaka",
@@ -1418,7 +1834,7 @@
       "state": "Melaka",
       "address": "Zoo Melaka, Jalan Tun Abdul Razak, Ayer Keroh, Melaka, Malaysia",
       "category": "nature",
-      "description": "Wildlife visitor attraction in Ayer Keroh.",
+      "description": "Zoo Melaka provides an animal-focused visit within the Ayer Keroh attraction area. It can complement cultural sightseeing with a different kind of learning, while visitors should follow staff guidance and current facility arrangements. Look out for rainforest habitats, gardens, and interpretive displays.",
       "latitude": 2.27777778,
       "longitude": 102.30166667,
       "averageVisitMinutes": 90,
@@ -1438,7 +1854,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "rainforest",
+          "gardens",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-melaka-klebang-beach",
@@ -1447,7 +1871,7 @@
       "state": "Melaka",
       "address": "Pantai Klebang, Klebang, Melaka, Malaysia",
       "category": "coastal",
-      "description": "Beachfront recreation and coastal views.",
+      "description": "Klebang offers a coastal recreation setting outside Melaka's tightly packed historic centre. Its open shoreline provides a change of pace from museums and old streets, with the visit shaped more by scenery and conditions than formal exhibits. Look out for beach scenery, marine habitats, and sunset views.",
       "latitude": 2.216416666,
       "longitude": 102.192222222,
       "averageVisitMinutes": 60,
@@ -1467,7 +1891,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "marine",
+          "sunset"
+        ]
+      }
     },
     {
       "id": "my-melaka-portuguese-settlement-seafood-area",
@@ -1476,7 +1908,7 @@
       "state": "Melaka",
       "address": "Portuguese Square, Portuguese Settlement, Ujong Pasir, Melaka, Malaysia",
       "category": "food",
-      "description": "Food stop in a living cultural neighbourhood.",
+      "description": "The Portuguese Settlement is a living community with cultural roots in Melaka's maritime history. Its dining area offers a food-focused visit, but public visitor spaces should be distinguished from residents' homes and private neighbourhood life. Look out for fishing-community heritage, local food, and traditional houses.",
       "latitude": 2.185833333,
       "longitude": 102.265833333,
       "averageVisitMinutes": 60,
@@ -1496,7 +1928,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "This is a living neighbourhood. Respect residents' privacy and stay on public visitor routes."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "fisheries",
+          "food",
+          "houses"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-army-museum-port-dickson",
@@ -1505,7 +1945,7 @@
       "state": "Negeri Sembilan",
       "address": "Muzium Tentera Darat, Kem Sirusa, Port Dickson, Negeri Sembilan, Malaysia",
       "category": "heritage",
-      "description": "Military history and outdoor exhibits.",
+      "description": "The Army Museum in Port Dickson introduces Malaysia's military history through collections and outdoor displays. It provides background to the people and institutions involved in national defence, rather than functioning only as a photo stop beside equipment. Look out for military history, historical collections, and memorials.",
       "latitude": 2.496621401,
       "longitude": 101.847754057,
       "averageVisitMinutes": 60,
@@ -1521,7 +1961,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "war",
+        "highlights": [
+          "military",
+          "objects",
+          "memorials"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-fort-lukut-and-lukut-museum",
@@ -1530,7 +1978,7 @@
       "state": "Negeri Sembilan",
       "address": "Muzium Lukut, Lot 730, Jalan Besar, Taman PD Jaya, Port Dickson, Negeri Sembilan, Malaysia",
       "category": "heritage",
-      "description": "Historic fort and tin-trade history.",
+      "description": "The Lukut site links fort remains with a museum explaining the area's earlier settlement and trading development. Its connection with the tin economy helps visitors understand why this locality once held greater regional importance. Look out for fort remains, tin-mining history, and local history.",
       "latitude": 2.567,
       "longitude": 101.822,
       "averageVisitMinutes": 60,
@@ -1546,7 +1994,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "archaeology",
+        "highlights": [
+          "fort",
+          "tin",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-negeri-sembilan-state-museum-complex",
@@ -1555,7 +2011,7 @@
       "state": "Negeri Sembilan",
       "address": "Kompleks Muzium Negeri Sembilan, Jalan Sungai Ujong, Seremban, Negeri Sembilan, Malaysia",
       "category": "cultural",
-      "description": "Regional culture and architecture.",
+      "description": "The state museum complex introduces Negeri Sembilan's heritage through collections and traditional architectural forms. It is a useful orientation stop for understanding the state's identity before visiting individual royal or community landmarks. Look out for traditional houses, historical collections, and local history.",
       "latitude": 2.71821194,
       "longitude": 101.92114996,
       "averageVisitMinutes": 60,
@@ -1571,7 +2027,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "houses",
+          "objects",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-custom-museum-kuala-klawang",
@@ -1580,7 +2044,7 @@
       "state": "Negeri Sembilan",
       "address": "Muzium Adat, Jalan Dato Umbi, Kuala Klawang, Negeri Sembilan, Malaysia",
       "category": "cultural",
-      "description": "Local customs and cultural interpretation.",
+      "description": "Muzium Adat focuses on customs and social traditions rather than presenting only a list of historical rulers. Its Kuala Klawang setting makes it a useful stop for visitors interested in how cultural practices shape everyday community life. Look out for historical collections, local history, and traditional houses.",
       "latitude": 2.93763889,
       "longitude": 102.07108333,
       "averageVisitMinutes": 60,
@@ -1596,7 +2060,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "objects",
+          "history",
+          "houses"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-seremban-lake-gardens",
@@ -1605,7 +2077,7 @@
       "state": "Negeri Sembilan",
       "address": "Taman Tasik Seremban, Jalan Taman Bunga, Seremban, Negeri Sembilan, Malaysia",
       "category": "nature",
-      "description": "Urban gardens and lakeside walks.",
+      "description": "Seremban Lake Gardens offers a landscaped break close to the town's civic landmarks. Walking around the water and planted spaces allows a slower view of the city, making it useful between more structured visits. Look out for lakeside scenery, shaded paths, and gardens.",
       "latitude": 2.7224863,
       "longitude": 101.9471893,
       "averageVisitMinutes": 90,
@@ -1621,7 +2093,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "trees",
+          "gardens"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-blue-lagoon-tanjung-biru-beach",
@@ -1630,7 +2110,7 @@
       "state": "Negeri Sembilan",
       "address": "Pantai Tanjung Biru, Jalan Pantai, Port Dickson, Negeri Sembilan, Malaysia",
       "category": "coastal",
-      "description": "Sheltered beach recreation stop.",
+      "description": "Tanjung Biru, also called Blue Lagoon, provides a sheltered-looking coastal setting near Port Dickson's southern beach area. The surrounding vegetation adds to its appeal, but the appearance of calm water should not replace checking local safety advice. Look out for beach scenery, shaded paths, and marine habitats.",
       "latitude": 2.4153769,
       "longitude": 101.8558862,
       "averageVisitMinutes": 60,
@@ -1650,7 +2130,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "trees",
+          "marine"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-teluk-kemang-beach",
@@ -1659,7 +2147,7 @@
       "state": "Negeri Sembilan",
       "address": "Pantai Teluk Kemang, Jalan Pantai, Port Dickson, Negeri Sembilan, Malaysia",
       "category": "coastal",
-      "description": "Established Port Dickson beachfront.",
+      "description": "Teluk Kemang is one of Port Dickson's established public beach destinations. Its combination of open shore and visitor activity makes it a lively coastal stop, with the actual atmosphere varying between quieter periods and busy holidays. Look out for beach scenery, food stalls, and marine habitats.",
       "latitude": 2.454483333,
       "longitude": 101.859311111,
       "averageVisitMinutes": 60,
@@ -1679,7 +2167,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "stalls",
+          "marine"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-palm-mall-seremban",
@@ -1688,7 +2184,7 @@
       "state": "Negeri Sembilan",
       "address": "Palm Mall, Jalan Sungai Ujong, Seremban, Negeri Sembilan, Malaysia",
       "category": "urban",
-      "description": "Indoor shopping and leisure stop.",
+      "description": "Palm Mall provides an indoor shopping and dining stop in Seremban. It is a practical option between outdoor visits or during wet weather, with its appeal coming from current businesses rather than a historic setting. Look out for shopping, cafes and dining, and cinema and entertainment.",
       "latitude": 2.7198503,
       "longitude": 101.9228509,
       "averageVisitMinutes": 60,
@@ -1704,7 +2200,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "shopping",
+        "highlights": [
+          "shops",
+          "cafes",
+          "cinema"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-pasar-besar-seremban-food-area",
@@ -1713,7 +2217,7 @@
       "state": "Negeri Sembilan",
       "address": "Pasar Besar Seremban, Jalan Pasar, Seremban, Negeri Sembilan, Malaysia",
       "category": "food",
-      "description": "Local market food and everyday culinary culture.",
+      "description": "Seremban's main market offers a view of everyday trading alongside its food stalls. Visiting the food area gives a local counterpoint to landmark sightseeing, with vendor schedules determining which dishes are available. Look out for food stalls, market trading, and local food.",
       "latitude": 2.730712,
       "longitude": 101.9366215,
       "averageVisitMinutes": 60,
@@ -1733,7 +2237,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "stalls",
+          "markets",
+          "food"
+        ]
+      }
     },
     {
       "id": "my-pahang-teluk-chempedak",
@@ -1742,7 +2254,7 @@
       "state": "Pahang",
       "address": "Teluk Chempedak, Jalan Teluk Cempedak, Kuantan, Pahang, Malaysia",
       "category": "coastal",
-      "description": "Beach and coastal promenade near Kuantan.",
+      "description": "Teluk Chempedak combines a beach near Kuantan with a recognisable rocky shoreline. The setting works well for an easy scenic stop, with the coast and its public visitor spaces providing a contrast to the city centre. Look out for beach scenery, limestone scenery, and waterfront walks.",
       "latitude": 3.8098087,
       "longitude": 103.3728617,
       "averageVisitMinutes": 60,
@@ -1762,7 +2274,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "limestone",
+          "promenade"
+        ]
+      }
     },
     {
       "id": "my-pahang-sungai-pandan-waterfall",
@@ -1771,7 +2291,7 @@
       "state": "Pahang",
       "address": "Air Terjun Sungai Pandan, Panching, Kuantan, Pahang, Malaysia",
       "category": "nature",
-      "description": "Waterfall and forest recreation.",
+      "description": "Sungai Pandan provides a waterfall-focused outdoor stop near Kuantan. The surrounding forest gives the site much of its atmosphere, while access and any water activity should depend on current weather and local conditions. Look out for waterfalls, forest trails, and rainforest habitats.",
       "latitude": 3.790225,
       "longitude": 103.143555555,
       "averageVisitMinutes": 90,
@@ -1791,7 +2311,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "waterfalls",
+          "trails",
+          "rainforest"
+        ]
+      }
     },
     {
       "id": "my-pahang-sungai-lembing-museum",
@@ -1800,7 +2328,7 @@
       "state": "Pahang",
       "address": "Muzium Sungai Lembing, Sungai Lembing, Kuantan, Pahang, Malaysia",
       "category": "heritage",
-      "description": "Tin-mining history and local industrial heritage.",
+      "description": "Sungai Lembing Museum explains the mining history behind this former industrial town. Its collections make the surrounding settlement easier to understand, connecting the landscape with the work and communities once supported by tin extraction. Look out for tin-mining history, industrial history, and local history.",
       "latitude": 3.9137441,
       "longitude": 103.0324427,
       "averageVisitMinutes": 60,
@@ -1816,7 +2344,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "mining",
+        "highlights": [
+          "tin",
+          "industry",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-pahang-genting-skyworlds",
@@ -1825,7 +2361,7 @@
       "state": "Pahang",
       "address": "Genting SkyWorlds, Resorts World Genting, Genting Highlands, Pahang, Malaysia",
       "category": "urban",
-      "description": "Established highland theme-park destination.",
+      "description": "Genting SkyWorlds is a theme-park experience in the highland resort setting. Its rides and themed areas offer an activity-based visit, with weather, operating arrangements and individual ride restrictions affecting the day. Look out for visitor rides and attractions, hill and mountain views, and interpretive displays.",
       "latitude": 3.422611111,
       "longitude": 101.795666666,
       "averageVisitMinutes": 60,
@@ -1845,7 +2381,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "rides",
+          "mountain",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-pahang-boh-sungai-palas-tea-centre",
@@ -1854,7 +2398,7 @@
       "state": "Pahang",
       "address": "BOH Sungai Palas Tea Centre, Sungai Palas, Brinchang, Cameron Highlands, Pahang, Malaysia",
       "category": "nature",
-      "description": "Tea landscape and visitor centre.",
+      "description": "Sungai Palas Tea Centre places visitors within the tea-growing landscape of the Cameron Highlands. The views are the immediate draw, while the tea-related setting adds context to the cultivated slopes and the area's agricultural identity. Look out for tea-growing scenery, agricultural heritage, and hill and mountain views.",
       "latitude": 4.5161604,
       "longitude": 101.4162142,
       "averageVisitMinutes": 90,
@@ -1870,7 +2414,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "tea",
+          "agriculture",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-kelantan-siti-khadijah-market",
@@ -1879,7 +2431,7 @@
       "state": "Kelantan",
       "address": "Pasar Siti Khadijah, Jalan Buluh Kubu, Kota Bharu, Kelantan, Malaysia",
       "category": "food",
-      "description": "Local produce, prepared food and regional food products.",
+      "description": "Siti Khadijah Market is closely associated with Kota Bharu's trading culture and its women traders. Exploring food, produce and local goods makes it a useful way to encounter everyday Kelantan alongside formal museums and royal buildings. Look out for market trading, local food, and local crafts.",
       "latitude": 6.13011111,
       "longitude": 102.23905556,
       "averageVisitMinutes": 60,
@@ -1899,7 +2451,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "food",
+          "crafts"
+        ]
+      }
     },
     {
       "id": "my-kelantan-istana-jahar-museum",
@@ -1908,7 +2468,7 @@
       "state": "Kelantan",
       "address": "Istana Jahar, Jalan Sultan, Kota Bharu, Kelantan, Malaysia",
       "category": "cultural",
-      "description": "Royal customs and Kelantanese culture.",
+      "description": "Istana Jahar combines a historic royal building with interpretation of Kelantanese court traditions. The building's timber detailing and the cultural material inside make it a useful introduction to ceremonial life rather than only palace architecture. Look out for royal history, decorative carvings, and historical collections.",
       "latitude": 6.13156,
       "longitude": 102.23706,
       "averageVisitMinutes": 60,
@@ -1924,7 +2484,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "carvings",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-kelantan-istana-batu-royal-museum",
@@ -1933,7 +2501,7 @@
       "state": "Kelantan",
       "address": "Muzium Diraja Istana Batu, Jalan Hilir Kota, Kota Bharu, Kelantan, Malaysia",
       "category": "heritage",
-      "description": "Royal history and former palace collections.",
+      "description": "Istana Batu offers a domestic view of Kelantan's royal history through a former palace setting. The interiors and collections help visitors imagine court life more concretely than a brief look at a royal building from outside. Look out for royal history, historic interiors, and historical collections.",
       "latitude": 6.13216667,
       "longitude": 102.23733333,
       "averageVisitMinutes": 60,
@@ -1949,7 +2517,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "interiors",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-kelantan-kelantan-state-museum",
@@ -1958,7 +2534,7 @@
       "state": "Kelantan",
       "address": "Muzium Negeri Kelantan, Jalan Hospital, Kota Bharu, Kelantan, Malaysia",
       "category": "cultural",
-      "description": "State history and cultural exhibits.",
+      "description": "Kelantan State Museum provides an overview of the state's historical and cultural identity. Its collections are a useful starting point before exploring Kota Bharu's more specialised royal, religious and craft-related destinations. Look out for local history, historical collections, and local crafts.",
       "latitude": 6.12497222,
       "longitude": 102.23827778,
       "averageVisitMinutes": 60,
@@ -1974,7 +2550,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "objects",
+          "crafts"
+        ]
+      }
     },
     {
       "id": "my-kelantan-wat-phothivihan",
@@ -1983,7 +2567,7 @@
       "state": "Kelantan",
       "address": "Wat Phothivihan, Kampung Jambu, Tumpat, Kelantan, Malaysia",
       "category": "cultural",
-      "description": "Reclining Buddha and Buddhist temple complex.",
+      "description": "Wat Phothivihan is particularly associated with its reclining Buddha and the Siamese Buddhist traditions of the Tumpat area. The scale of the image is striking, but the temple remains an active religious setting rather than only a monument. Look out for Siamese Buddhist traditions, religious statues, and prayer halls.",
       "latitude": 6.130228888,
       "longitude": 102.137639444,
       "averageVisitMinutes": 60,
@@ -2003,7 +2587,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "siamese",
+          "statues",
+          "prayer"
+        ]
+      }
     },
     {
       "id": "my-kelantan-pantai-irama",
@@ -2012,7 +2604,7 @@
       "state": "Kelantan",
       "address": "Pantai Irama, Bachok, Kelantan, Malaysia",
       "category": "coastal",
-      "description": "Beachfront recreation in Bachok.",
+      "description": "Pantai Irama is a public coastal recreation destination at Bachok. The beach setting and local food activity provide its visitor appeal, while sea conditions and the availability of individual facilities vary over time. Look out for beach scenery, food stalls, and marine habitats.",
       "latitude": 6.071111111,
       "longitude": 102.397777777,
       "averageVisitMinutes": 60,
@@ -2032,7 +2624,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "stalls",
+          "marine"
+        ]
+      }
     },
     {
       "id": "my-kelantan-gunung-stong-state-park",
@@ -2041,7 +2641,7 @@
       "state": "Kelantan",
       "address": "Gunung Stong State Park visitor area, Jelawang, Dabong, Kelantan, Malaysia",
       "category": "nature",
-      "description": "Forest and waterfall recreation; use the visitor trailhead.",
+      "description": "Gunung Stong's mountain and waterfall landscape makes it a distinctive outdoor destination in Kelantan. A visit involves more planning than an urban attraction, with the selected route, guide arrangements and fitness shaping the experience. Look out for hill and mountain views, waterfalls, and rainforest habitats.",
       "latitude": 5.3395228,
       "longitude": 101.9747147,
       "averageVisitMinutes": 90,
@@ -2061,7 +2661,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "mountain",
+        "highlights": [
+          "mountain",
+          "waterfalls",
+          "rainforest"
+        ]
+      }
     },
     {
       "id": "my-terengganu-terengganu-state-museum-complex",
@@ -2070,7 +2678,7 @@
       "state": "Terengganu",
       "address": "Kompleks Muzium Negeri Terengganu, Bukit Losong, Kuala Terengganu, Terengganu, Malaysia",
       "category": "cultural",
-      "description": "Regional culture, history and traditional buildings.",
+      "description": "The Terengganu museum complex combines large traditional-inspired buildings with collections on the state's history and culture. Its scale allows a broader visit than a single gallery, connecting architecture with the region's maritime and community traditions. Look out for traditional houses, historical collections, and maritime traditions.",
       "latitude": 5.3186,
       "longitude": 103.10209,
       "averageVisitMinutes": 60,
@@ -2086,7 +2694,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "houses",
+          "objects",
+          "boats"
+        ]
+      }
     },
     {
       "id": "my-terengganu-crystal-mosque",
@@ -2095,7 +2711,7 @@
       "state": "Terengganu",
       "address": "Masjid Kristal, Pulau Wan Man, Losong, Kuala Terengganu, Terengganu, Malaysia",
       "category": "cultural",
-      "description": "Waterfront mosque and architectural landmark.",
+      "description": "The Crystal Mosque is a modern religious landmark beside the Terengganu River. Reflective materials and its waterside position give it a distinctive appearance, while the mosque's actual visitor access remains separate from neighbouring attractions. Look out for domes, river views, and architectural details.",
       "latitude": 5.322285,
       "longitude": 103.120663,
       "averageVisitMinutes": 60,
@@ -2115,7 +2731,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "river",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-terengganu-islamic-civilisation-park",
@@ -2124,7 +2748,7 @@
       "state": "Terengganu",
       "address": "Taman Tamadun Islam, Pulau Wan Man, Losong, Kuala Terengganu, Terengganu, Malaysia",
       "category": "cultural",
-      "description": "Architectural monuments and cultural interpretation.",
+      "description": "Islamic Civilisation Park presents an interpretive visitor attraction inspired by significant Islamic monuments. It is a place to explore architectural references and cultural themes, rather than a claim that the original buildings themselves are located in Terengganu. Look out for Islamic art and craftsmanship, architectural details, and interpretive displays.",
       "latitude": 5.321867,
       "longitude": 103.116586,
       "averageVisitMinutes": 60,
@@ -2140,7 +2764,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "islamicArt",
+          "architecture",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-terengganu-pasar-payang",
@@ -2149,7 +2781,7 @@
       "state": "Terengganu",
       "address": "Pasar Payang, Jalan Sultan Zainal Abidin, Kuala Terengganu, Terengganu, Malaysia",
       "category": "food",
-      "description": "Food products, local market browsing and crafts.",
+      "description": "Pasar Payang is a major trading stop in Kuala Terengganu, associated with local products, food and traditional goods. Browsing introduces visitors to everyday commerce and regional craft identity alongside the city's larger landmarks. Look out for market trading, local crafts, and local food.",
       "latitude": 5.3358877,
       "longitude": 103.1353224,
       "averageVisitMinutes": 60,
@@ -2169,7 +2801,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "crafts",
+          "food"
+        ]
+      }
     },
     {
       "id": "my-terengganu-kampung-cina-kuala-terengganu",
@@ -2178,7 +2818,7 @@
       "state": "Terengganu",
       "address": "Kampung Cina, Jalan Kampung Cina, Kuala Terengganu, Terengganu, Malaysia",
       "category": "heritage",
-      "description": "Historic streetscape and community heritage.",
+      "description": "Kuala Terengganu's Chinatown preserves a streetscape shaped by a long-established trading community. Shophouses, religious spaces and local businesses make the area a useful walking stop for understanding the city's multicultural riverfront history. Look out for traditional shophouses, clan and community heritage, and local food.",
       "latitude": 5.3332,
       "longitude": 103.1328,
       "averageVisitMinutes": 60,
@@ -2194,7 +2834,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "shophouses",
+          "clan",
+          "food"
+        ]
+      }
     },
     {
       "id": "my-terengganu-setiu-wetlands",
@@ -2203,7 +2851,7 @@
       "state": "Terengganu",
       "address": "Setiu Wetlands visitor boardwalk, Kampung Pengkalan Gelap, Setiu, Terengganu, Malaysia",
       "category": "nature",
-      "description": "Wetland ecology; identify a visitor-access point/operator.",
+      "description": "Setiu's wetland environment brings together coastal habitats and the livelihoods associated with them. The interest lies in understanding this living landscape, with routes and boat arrangements needing to suit the specific visitor site chosen. Look out for mangroves, marine habitats, and birdlife.",
       "latitude": 5.671977777,
       "longitude": 102.717766666,
       "averageVisitMinutes": 90,
@@ -2219,7 +2867,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "mangroves",
+          "marine",
+          "birds"
+        ]
+      }
     },
     {
       "id": "my-terengganu-sekayu-waterfall",
@@ -2228,7 +2884,7 @@
       "state": "Terengganu",
       "address": "Hutan Lipur Sekayu, Kuala Berang, Hulu Terengganu, Terengganu, Malaysia",
       "category": "nature",
-      "description": "Forest recreation and waterfall scenery.",
+      "description": "Sekayu offers a waterfall landscape within Terengganu's forested interior. It provides a change from coastal sightseeing, with the surrounding vegetation and water features best appreciated through permitted visitor routes and current access guidance. Look out for waterfalls, rainforest habitats, and forest trails.",
       "latitude": 4.9626,
       "longitude": 102.95048,
       "averageVisitMinutes": 90,
@@ -2248,7 +2904,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "waterfalls",
+          "rainforest",
+          "trails"
+        ]
+      }
     },
     {
       "id": "my-terengganu-batu-buruk-beach",
@@ -2257,7 +2921,7 @@
       "state": "Terengganu",
       "address": "Pantai Batu Buruk, Kuala Terengganu, Terengganu, Malaysia",
       "category": "coastal",
-      "description": "Coastal promenade and beach scenery, not a swimming recommendation.",
+      "description": "Batu Buruk provides an accessible beachfront setting close to Kuala Terengganu. It is suited to enjoying the shore and local visitor atmosphere, while the open sea requires attention to warnings rather than an assumption that swimming is safe. Look out for beach scenery, food stalls, and waterfront walks.",
       "latitude": 5.3125699,
       "longitude": 103.1615953,
       "averageVisitMinutes": 60,
@@ -2277,7 +2941,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Coastal conditions change. Follow local warnings; a beach listing does not mean swimming is safe."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "coastal",
+        "highlights": [
+          "beach",
+          "stalls",
+          "promenade"
+        ]
+      }
     },
     {
       "id": "my-sabah-sepilok-orangutan-rehabilitation-centre",
@@ -2286,7 +2958,7 @@
       "state": "Sabah",
       "address": "Sepilok Orangutan Rehabilitation Centre, Jalan Sepilok, Sandakan, Sabah, Malaysia",
       "category": "nature",
-      "description": "Conservation-oriented wildlife viewing.",
+      "description": "Sepilok introduces visitors to orangutan rehabilitation within a forest reserve near Sandakan. The conservation purpose gives meaning to the viewing experience, while semi-wild animals and seasonal food availability mean encounters cannot be promised. Look out for orangutan conservation, rainforest habitats, and interpretive displays.",
       "latitude": 5.864978,
       "longitude": 117.949086,
       "averageVisitMinutes": 90,
@@ -2306,7 +2978,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "orangutans",
+          "rainforest",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-sabah-bornean-sun-bear-conservation-centre",
@@ -2315,7 +2995,7 @@
       "state": "Sabah",
       "address": "Bornean Sun Bear Conservation Centre, Sepilok, Sandakan, Sabah, Malaysia",
       "category": "nature",
-      "description": "Wildlife conservation visitor centre.",
+      "description": "This Sepilok centre focuses on the conservation of Bornean sun bears. Viewing areas and interpretation connect the animals with their natural habitat and welfare, making it an educational companion to nearby wildlife attractions. Look out for sun bear conservation, rainforest habitats, and interpretive displays.",
       "latitude": 5.86376,
       "longitude": 117.950016,
       "averageVisitMinutes": 90,
@@ -2335,7 +3015,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "wildlife",
+        "highlights": [
+          "bears",
+          "rainforest",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-sabah-sabah-state-museum-and-heritage-village",
@@ -2344,7 +3032,7 @@
       "state": "Sabah",
       "address": "Sabah State Museum, Jalan Muzium, Kota Kinabalu, Sabah, Malaysia",
       "category": "cultural",
-      "description": "Regional collections and traditional houses.",
+      "description": "Sabah Museum combines historical and cultural collections with a heritage-village setting. It helps visitors place the state's diverse communities within a broader story, offering context before visits to individual districts and cultural sites. Look out for Sabah's indigenous cultures, traditional houses, and historical collections.",
       "latitude": 5.960555555,
       "longitude": 116.071666666,
       "averageVisitMinutes": 60,
@@ -2360,7 +3048,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "sabahPeoples",
+          "houses",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-sabah-monsopiad-heritage-village",
@@ -2369,7 +3065,7 @@
       "state": "Sabah",
       "address": "Monsopiad Heritage Village, Kampung Kuai Kandazon, Penampang, Sabah, Malaysia",
       "category": "cultural",
-      "description": "Kadazandusun heritage interpretation.",
+      "description": "Monsopiad Heritage Village introduces Kadazandusun heritage through a visitor setting associated with the story of Monsopiad. Traditional architecture and interpretation make it a more focused cultural stop than a general overview of Sabah. Look out for Sabah's indigenous cultures, traditional houses, and local history.",
       "latitude": 5.889145833,
       "longitude": 116.079190833,
       "averageVisitMinutes": 60,
@@ -2385,7 +3081,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "sabahPeoples",
+          "houses",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-sabah-atkinson-clock-tower",
@@ -2394,7 +3098,7 @@
       "state": "Sabah",
       "address": "Atkinson Clock Tower, Jalan Istana, Kota Kinabalu, Sabah, Malaysia",
       "category": "heritage",
-      "description": "Historic Kota Kinabalu landmark.",
+      "description": "Atkinson Clock Tower is a surviving landmark from early Jesselton, the town that became Kota Kinabalu. Its modest timber structure makes the historical story important, offering a point of continuity within the modern city. Look out for architectural details, local history, and city skyline views.",
       "latitude": 5.982186,
       "longitude": 116.077333,
       "averageVisitMinutes": 60,
@@ -2410,7 +3114,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "architecture",
+          "history",
+          "skyline"
+        ]
+      }
     },
     {
       "id": "my-sabah-agnes-keith-house",
@@ -2419,7 +3131,7 @@
       "state": "Sabah",
       "address": "Agnes Keith House, Jalan Istana, Sandakan, Sabah, Malaysia",
       "category": "heritage",
-      "description": "Historic house and Sandakan history.",
+      "description": "Agnes Keith House connects Sandakan with the author whose writing described life in North Borneo. The restored domestic setting gives a personal scale to the region's history and complements a wider heritage walk around the town. Look out for historic interiors, local history, and gardens.",
       "latitude": 5.842713888,
       "longitude": 118.116338888,
       "averageVisitMinutes": 60,
@@ -2435,7 +3147,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "interiors",
+          "history",
+          "gardens"
+        ]
+      }
     },
     {
       "id": "my-sabah-gaya-street-sunday-market",
@@ -2444,7 +3164,7 @@
       "state": "Sabah",
       "address": "Gaya Street Sunday Market, Jalan Gaya, Kota Kinabalu, Sabah, Malaysia",
       "category": "urban",
-      "description": "Scheduled street market and browsing.",
+      "description": "Gaya Street's Sunday market brings temporary trading activity into central Kota Kinabalu. Food, goods and browsing create the atmosphere, but its weekly schedule matters: the normal street and the market session are different experiences. Look out for market trading, local crafts, and local food.",
       "latitude": 5.98431,
       "longitude": 116.07742,
       "averageVisitMinutes": 60,
@@ -2464,7 +3184,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "crafts",
+          "food"
+        ]
+      }
     },
     {
       "id": "my-sarawak-borneo-cultures-museum",
@@ -2473,7 +3201,7 @@
       "state": "Sarawak",
       "address": "Borneo Cultures Museum, Jalan Tun Abang Haji Openg, Kuching, Sarawak, Malaysia",
       "category": "cultural",
-      "description": "Major museum of Borneo's cultures and history.",
+      "description": "Borneo Cultures Museum presents Sarawak's people, environments and cultural history within a major museum setting in Kuching. It offers an overview that can help visitors understand the significance of places encountered elsewhere in the state. Look out for Sarawak's indigenous cultures, historical collections, and interpretive displays.",
       "latitude": 1.5556,
       "longitude": 110.3427,
       "averageVisitMinutes": 60,
@@ -2489,7 +3217,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "sarawakPeoples",
+          "objects",
+          "interactive"
+        ]
+      }
     },
     {
       "id": "my-sarawak-kuching-cat-museum",
@@ -2498,7 +3234,7 @@
       "state": "Sarawak",
       "address": "DBKU Cat Museum, Bukit Siol, Jalan Semariang, Petra Jaya, Kuching, Sarawak, Malaysia",
       "category": "cultural",
-      "description": "Specialist museum and themed collections.",
+      "description": "Kuching's Cat Museum takes an unusual thematic approach, gathering material associated with cats rather than providing a conventional regional-history survey. The playful subject makes it a distinctive stop within the city's broader museum offering. Look out for art displays, historical collections, and local history.",
       "latitude": 1.58661,
       "longitude": 110.334,
       "averageVisitMinutes": 60,
@@ -2514,7 +3250,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "art",
+          "objects",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-sarawak-fort-margherita",
@@ -2523,7 +3267,7 @@
       "state": "Sarawak",
       "address": "Fort Margherita, Petra Jaya, Kuching, Sarawak, Malaysia",
       "category": "heritage",
-      "description": "Historic fort and Kuching history.",
+      "description": "Fort Margherita overlooks the Sarawak River from an elevated position opposite central Kuching. Its defensive form and historical setting help explain the river's importance to the city, while the surrounding views add to the visit. Look out for fort remains, river views, and local history.",
       "latitude": 1.56055556,
       "longitude": 110.34944444,
       "averageVisitMinutes": 60,
@@ -2539,7 +3283,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "fort",
+          "river",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-sarawak-old-kuching-courthouse",
@@ -2548,7 +3300,7 @@
       "state": "Sarawak",
       "address": "Old Courthouse, Jalan Tun Abang Haji Openg, Kuching, Sarawak, Malaysia",
       "category": "heritage",
-      "description": "Historic civic architecture and visitor precinct.",
+      "description": "The old courthouse complex preserves a civic landmark from Kuching's earlier administrative history. Its courtyards and architectural setting invite a slower stop near the waterfront, showing how heritage buildings can remain part of city life. Look out for architectural details, courtyards, and local history.",
       "latitude": 1.5594459,
       "longitude": 110.3448088,
       "averageVisitMinutes": 60,
@@ -2564,7 +3316,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "colonial",
+        "highlights": [
+          "architecture",
+          "courtyards",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-sarawak-kubah-national-park",
@@ -2573,7 +3333,7 @@
       "state": "Sarawak",
       "address": "Kubah National Park Headquarters, Jalan Lundu-Sampadi, Matang, Kuching, Sarawak, Malaysia",
       "category": "nature",
-      "description": "Rainforest trails and biodiversity; use the park entrance.",
+      "description": "Kubah National Park is a forest destination near Kuching, with its landscape and plant diversity central to the experience. Choosing an appropriate permitted trail is more important than treating the whole park as one easily accessible viewpoint. Look out for rainforest habitats, forest trails, and plant collections.",
       "latitude": 1.6125826,
       "longitude": 110.1966225,
       "averageVisitMinutes": 90,
@@ -2595,7 +3355,15 @@
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out.",
         "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "rainforest",
+          "trails",
+          "plants"
+        ]
+      }
     },
     {
       "id": "my-sarawak-gunung-gading-national-park",
@@ -2604,7 +3372,7 @@
       "state": "Sarawak",
       "address": "Gunung Gading National Park Headquarters, Lundu, Sarawak, Malaysia",
       "category": "nature",
-      "description": "Forest and Rafflesia interpretation; sightings are not guaranteed.",
+      "description": "Gunung Gading is associated with forest conservation and the possibility of seeing rafflesia when flowers are present. The park is worth understanding as a habitat in its own right, rather than promising a bloom on every visit. Look out for rainforest habitats, forest trails, and plant collections.",
       "latitude": 1.690549,
       "longitude": 109.84583,
       "averageVisitMinutes": 90,
@@ -2626,7 +3394,15 @@
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out.",
         "Wildlife sightings are not guaranteed. Keep your distance and follow staff guidance."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "rainforest",
+          "trails",
+          "plants"
+        ]
+      }
     },
     {
       "id": "my-sarawak-sibu-central-market",
@@ -2635,7 +3411,7 @@
       "state": "Sarawak",
       "address": "Sibu Central Market, Jalan Channel, Sibu, Sarawak, Malaysia",
       "category": "food",
-      "description": "Regional produce and local-food exploration.",
+      "description": "Sibu Central Market offers a view of the town's everyday trade through produce, local goods and food activity. The appeal is the working market itself, making respectful browsing more appropriate than treating traders as staged displays. Look out for market trading, local food, and local crafts.",
       "latitude": 2.28707,
       "longitude": 111.82867,
       "averageVisitMinutes": 60,
@@ -2655,7 +3431,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "markets",
+          "food",
+          "crafts"
+        ]
+      }
     },
     {
       "id": "my-sarawak-kuching-waterfront",
@@ -2664,7 +3448,7 @@
       "state": "Sarawak",
       "address": "Kuching Waterfront, Jalan Main Bazaar, Kuching, Sarawak, Malaysia",
       "category": "urban",
-      "description": "Public riverfront walking route.",
+      "description": "Kuching Waterfront provides a public walking setting along the Sarawak River. River views and the relationship between old and new landmarks help visitors orient themselves, making it a natural link between several city-centre stops. Look out for waterfront walks, river views, and city skyline views.",
       "latitude": 1.560469444,
       "longitude": 110.343130555,
       "averageVisitMinutes": 60,
@@ -2680,7 +3464,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "promenade",
+          "river",
+          "skyline"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-petronas-twin-towers",
@@ -2689,7 +3481,7 @@
       "state": "Federal Territories",
       "address": "PETRONAS Twin Towers, Kuala Lumpur City Centre, Kuala Lumpur, Malaysia",
       "category": "urban",
-      "description": "Landmark towers and observation experience.",
+      "description": "The PETRONAS Twin Towers are a defining element of Kuala Lumpur's modern identity. Their design and scale can be appreciated from surrounding public areas, while the managed visitor experience inside requires separate entry arrangements. Look out for city skyline views, architectural details, and bridge design.",
       "latitude": 3.157777777,
       "longitude": 101.711666666,
       "averageVisitMinutes": 60,
@@ -2705,7 +3497,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "architecture",
+          "bridges"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-kuala-lumpur-tower",
@@ -2714,7 +3514,7 @@
       "state": "Federal Territories",
       "address": "Kuala Lumpur Tower, Jalan Puncak, Kuala Lumpur, Malaysia",
       "category": "urban",
-      "description": "Observation landmark and city views.",
+      "description": "Kuala Lumpur Tower rises above a hill setting in the city and is associated with observation experiences. The elevated perspective can help visitors understand the relationship between central neighbourhoods and the surrounding skyline. Look out for city skyline views, architectural details, and rainforest habitats.",
       "latitude": 3.15282771,
       "longitude": 101.703748809,
       "averageVisitMinutes": 60,
@@ -2730,7 +3530,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "skyline",
+          "architecture",
+          "rainforest"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-national-museum-muzium-negara",
@@ -2739,7 +3547,7 @@
       "state": "Federal Territories",
       "address": "Muzium Negara, Jalan Damansara, Kuala Lumpur, Malaysia",
       "category": "cultural",
-      "description": "National history and cultural collections.",
+      "description": "Muzium Negara introduces Malaysia's historical development through a national museum collection. It is a useful orientation stop before visiting specific states, connecting archaeological evidence and later social changes within a wider chronological story. Look out for local history, archaeological heritage, and historical collections.",
       "latitude": 3.13758,
       "longitude": 101.68739,
       "averageVisitMinutes": 60,
@@ -2755,7 +3563,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "archaeology",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-national-textile-museum",
@@ -2764,7 +3580,7 @@
       "state": "Federal Territories",
       "address": "National Textile Museum, 26 Jalan Sultan Hishamuddin, Kuala Lumpur, Malaysia",
       "category": "cultural",
-      "description": "Textile traditions and cultural exhibits.",
+      "description": "The National Textile Museum focuses on the techniques and cultural roles behind Malaysia's textile traditions. Its collections encourage visitors to look beyond attractive patterns to the skills and social meanings involved in making and wearing cloth. Look out for traditional textiles, local crafts, and local history.",
       "latitude": 3.14675,
       "longitude": 101.694,
       "averageVisitMinutes": 60,
@@ -2780,7 +3596,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "textiles",
+          "crafts",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-royal-museum-kuala-lumpur",
@@ -2789,7 +3613,7 @@
       "state": "Federal Territories",
       "address": "Royal Museum, Jalan Istana, Kuala Lumpur, Malaysia",
       "category": "heritage",
-      "description": "Former palace and royal history.",
+      "description": "The Royal Museum occupies the former national palace and offers a setting connected with Malaysia's monarchy. Its domestic and ceremonial context provides a different view of royal institutions from simply seeing the outside of a palace gate. Look out for royal history, historic interiors, and architectural details.",
       "latitude": 3.132486111,
       "longitude": 101.695702777,
       "averageVisitMinutes": 60,
@@ -2805,7 +3629,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "interiors",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-jalan-alor-food-street",
@@ -2814,7 +3646,7 @@
       "state": "Federal Territories",
       "address": "Jalan Alor, Bukit Bintang, Kuala Lumpur, Malaysia",
       "category": "food",
-      "description": "Established city food destination.",
+      "description": "Jalan Alor is associated with open-air dining in Kuala Lumpur's Bukit Bintang area. Its attraction comes from the range of individual food businesses and street atmosphere, with offerings and operating times changing between vendors. Look out for food stalls, local food, and market trading.",
       "latitude": 3.1456933,
       "longitude": 101.7086665,
       "averageVisitMinutes": 60,
@@ -2834,7 +3666,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Market activity and food stalls operate on different days and hours; check before visiting."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "stalls",
+          "food",
+          "markets"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-titiwangsa-lake-gardens",
@@ -2843,7 +3683,7 @@
       "state": "Federal Territories",
       "address": "Taman Tasik Titiwangsa, Jalan Kuantan, Kuala Lumpur, Malaysia",
       "category": "nature",
-      "description": "Public lake gardens and skyline views.",
+      "description": "Titiwangsa Lake Gardens combines a broad water setting with views towards Kuala Lumpur's skyline. It provides a relaxed public-space visit, letting the city be appreciated from a greener and more open perspective. Look out for lakeside scenery, city skyline views, and gardens.",
       "latitude": 3.17808333,
       "longitude": 101.70769444,
       "averageVisitMinutes": 90,
@@ -2859,7 +3699,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "lake",
+          "skyline",
+          "gardens"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-putra-mosque-putrajaya",
@@ -2868,7 +3716,7 @@
       "state": "Federal Territories",
       "address": "Putra Mosque, Persiaran Persekutuan, Precinct 1, Putrajaya, Malaysia",
       "category": "cultural",
-      "description": "Lakeside mosque and city landmark.",
+      "description": "Putra Mosque forms part of Putrajaya's ceremonial lakeside setting. Its pink-toned architecture makes it recognisable from outside, while respectful access to the religious spaces follows visitor arrangements separate from the neighbouring public square. Look out for domes, lakeside scenery, and Islamic art and craftsmanship.",
       "latitude": 2.936066666,
       "longitude": 101.68905,
       "averageVisitMinutes": 60,
@@ -2888,7 +3736,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "lake",
+          "islamicArt"
+        ]
+      }
     },
     {
       "id": "my-federal-territories-labuan-chimney-museum",
@@ -2897,7 +3753,7 @@
       "state": "Federal Territories",
       "address": "Chimney Museum, Jalan Tanjung Kubong, Labuan, Malaysia",
       "category": "heritage",
-      "description": "Industrial archaeology and island history.",
+      "description": "Labuan's chimney is a surviving industrial landmark whose precise original function has been debated. The museum gives visitors context for the island's coal-mining past without requiring the structure's story to be reduced to an unsupported certainty. Look out for industrial history, local history, and architectural details.",
       "latitude": 5.380555555,
       "longitude": 115.248888888,
       "averageVisitMinutes": 60,
@@ -2913,7 +3769,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "industry",
+          "history",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-perlis-perlis-state-mosque-arau",
@@ -2922,7 +3786,7 @@
       "state": "Perlis",
       "address": "Masjid Negeri Perlis, Jalan Besar, Arau, Perlis, Malaysia",
       "category": "cultural",
-      "description": "Royal-town mosque with a prominent dome and an architectural stop near the Arau palace precinct.",
+      "description": "The state mosque at Arau sits within Perlis's royal-town setting. It offers a religious and architectural stop that pairs with understanding the surrounding civic landscape, while worshippers and prayer times take priority over sightseeing. Look out for domes, architectural details, and royal history.",
       "latitude": 6.43003,
       "longitude": 100.27,
       "averageVisitMinutes": 60,
@@ -2942,7 +3806,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "architecture",
+          "royalty"
+        ]
+      }
     },
     {
       "id": "my-perlis-bukit-kubu-recreational-forest",
@@ -2951,7 +3823,7 @@
       "state": "Perlis",
       "address": "Hutan Lipur Bukit Kubu, Jalan Bukit Kubu, Kuala Perlis, Perlis, Malaysia",
       "category": "nature",
-      "description": "Limestone-hill forest recreation area near Kuala Perlis, suited to a short outdoor stop.",
+      "description": "Bukit Kubu adds a limestone-and-forest setting near Kuala Perlis. Its appeal is the natural landscape close to the town, with any cave or trail access needing to follow the actual visitor arrangements rather than assumed unrestricted entry. Look out for limestone scenery, rainforest habitats, and forest trails.",
       "latitude": 6.407522,
       "longitude": 100.142618,
       "averageVisitMinutes": 90,
@@ -2971,7 +3843,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Use the visitor entrance or trailhead. Check permits, trail conditions and suitable equipment before setting out."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "forest",
+        "highlights": [
+          "limestone",
+          "rainforest",
+          "trails"
+        ]
+      }
     },
     {
       "id": "my-perlis-kechor-river-recreational-park",
@@ -2980,7 +3860,7 @@
       "state": "Perlis",
       "address": "Taman Rekreasi Sungai Kechor, Kangar, Perlis, Malaysia",
       "category": "nature",
-      "description": "Riverside public park for a relaxed walk and a quieter stop in Kangar.",
+      "description": "This riverside recreation stop offers a quieter public-space visit in Perlis. The river and landscaped surroundings make it suitable for a slower break, complementing the state's more prominent viewpoints and religious landmarks. Look out for river views, gardens, and shaded paths.",
       "latitude": 6.4383591,
       "longitude": 100.1895867,
       "averageVisitMinutes": 90,
@@ -2996,7 +3876,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "river",
+          "gardens",
+          "trees"
+        ]
+      }
     },
     {
       "id": "my-perlis-yasmeen-nasi-kandar-arau",
@@ -3005,7 +3893,7 @@
       "state": "Perlis",
       "address": "Restoran Nasi Kandar Yasmeen, Jalan Satu, Arau, Perlis, Malaysia",
       "category": "food",
-      "description": "Local nasi kandar restaurant for rice-and-curry meals in Arau. Check the current menu and operating times before visiting.",
+      "description": "This Arau food stop offers a chance to try nasi kandar as part of an everyday local dining setting. The experience depends on the dishes prepared by the operator, so current menus and prices should be checked at the venue. Look out for local food, cafes and dining, and local history.",
       "latitude": 6.427633041,
       "longitude": 100.272298831,
       "averageVisitMinutes": 60,
@@ -3021,7 +3909,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "food",
+        "highlights": [
+          "food",
+          "cafes",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-perlis-dato-sheikh-ahmad-square",
@@ -3030,7 +3926,7 @@
       "state": "Perlis",
       "address": "Dataran Dato' Sheikh Ahmad, Jalan Home Guard, Kangar, Perlis, Malaysia",
       "category": "urban",
-      "description": "Central civic square in Kangar, suitable for a short town-centre walking and landmark stop.",
+      "description": "Dato' Sheikh Ahmad Square provides a civic orientation point within Kangar. Its public setting makes it a useful short stop while exploring the town, rather than a ticketed attraction that requires a lengthy dedicated visit. Look out for architectural details, local history, and shopping.",
       "latitude": 6.438497286,
       "longitude": 100.190277059,
       "averageVisitMinutes": 60,
@@ -3046,7 +3942,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "architecture",
+          "history",
+          "shops"
+        ]
+      }
     },
     {
       "id": "my-kedah-dataran-lang-langkawi",
@@ -3055,7 +3959,7 @@
       "state": "Kedah",
       "address": "Dataran Lang, Persiaran Putera, Kuah, Langkawi, Kedah, Malaysia",
       "category": "urban",
-      "description": "Waterfront square in Kuah with Langkawi's large eagle landmark and views over the bay.",
+      "description": "Langkawi's Eagle Square creates a recognisable waterfront landmark near Kuah. The large eagle sculpture and surrounding public space offer an easy orientation stop, linking the island's visitor identity with its harbour setting. Look out for religious statues, marine habitats, and waterfront walks.",
       "latitude": 6.3084571,
       "longitude": 99.8519597,
       "averageVisitMinutes": 60,
@@ -3071,7 +3975,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "statues",
+          "marine",
+          "promenade"
+        ]
+      }
     },
     {
       "id": "my-kedah-mahsuri-mausoleum",
@@ -3080,7 +3992,7 @@
       "state": "Kedah",
       "address": "Makam Mahsuri, Kampung Mawat, Ulu Melaka, Langkawi, Kedah, Malaysia",
       "category": "heritage",
-      "description": "Heritage visitor site associated with the legend of Mahsuri and traditional Langkawi village life.",
+      "description": "The Mahsuri site introduces one of Langkawi's best-known local legends within a heritage visitor setting. Its attraction lies in the cultural story and its place in island identity; folklore should be understood as tradition rather than independently proven historical detail. Look out for local history, traditional houses, and historical collections.",
       "latitude": 6.3388131,
       "longitude": 99.7841479,
       "averageVisitMinutes": 60,
@@ -3096,7 +4008,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "community",
+        "highlights": [
+          "history",
+          "houses",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-johor-arulmigu-sri-rajakaliamman-glass-temple",
@@ -3105,7 +4025,7 @@
       "state": "Johor",
       "address": "Arulmigu Sri Rajakaliamman Glass Temple, Lorong Satu, Jalan Tebrau, Johor Bahru, Johor, Malaysia",
       "category": "cultural",
-      "description": "Hindu temple noted for its glass-covered interior and detailed decorative work.",
+      "description": "This Johor Bahru temple is known for decorative glasswork within its religious setting. The unusual visual treatment makes it a distinctive cultural visit, while the temple's active worship role should remain central to visitor behaviour. Look out for Hindu religious art, prayer halls, and art displays.",
       "latitude": 1.46861111,
       "longitude": 103.75972222,
       "averageVisitMinutes": 60,
@@ -3125,7 +4045,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "hindu",
+          "prayer",
+          "art"
+        ]
+      }
     },
     {
       "id": "my-johor-johor-bahru-old-chinese-temple",
@@ -3134,7 +4062,7 @@
       "state": "Johor",
       "address": "Johor Bahru Old Chinese Temple, Jalan Trus, Johor Bahru, Johor, Malaysia",
       "category": "heritage",
-      "description": "Historic city-centre temple linked to Johor Bahru's Chinese communities.",
+      "description": "Johor Bahru's old Chinese temple is connected with the city's community history. Its continued religious use gives the heritage site a living role, making it meaningful beyond the age of its buildings alone. Look out for clan and community heritage, prayer halls, and local history.",
       "latitude": 1.46055556,
       "longitude": 103.76305556,
       "averageVisitMinutes": 60,
@@ -3154,7 +4082,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "clan",
+          "prayer",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-johor-kota-tinggi-museum",
@@ -3163,7 +4099,7 @@
       "state": "Johor",
       "address": "Muzium Kota Tinggi, Jalan Laksamana, Kota Tinggi, Johor, Malaysia",
       "category": "heritage",
-      "description": "District museum introducing the history of Kota Tinggi and the Johor Sultanate.",
+      "description": "Kota Tinggi Museum introduces the area's place in Johor's historical development. Its collections provide context for nearby royal and settlement sites, helping visitors connect separate landmarks into a more coherent regional story. Look out for local history, historical collections, and the Melaka Sultanate story.",
       "latitude": 1.73722222,
       "longitude": 103.91211111,
       "averageVisitMinutes": 60,
@@ -3179,7 +4115,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "museum",
+        "highlights": [
+          "history",
+          "objects",
+          "sultanate"
+        ]
+      }
     },
     {
       "id": "my-kelantan-muhammadi-mosque",
@@ -3188,7 +4132,7 @@
       "state": "Kelantan",
       "address": "Masjid Muhammadi, Jalan Sultanah Zainab, Kota Bharu, Kelantan, Malaysia",
       "category": "heritage",
-      "description": "Historic state mosque in Kota Bharu, close to the city's royal and museum quarter.",
+      "description": "Muhammadi Mosque is an important religious landmark within Kota Bharu. Its architectural presence and continuing community role make it a useful cultural stop, especially when understood alongside the city's nearby royal and museum settings. Look out for architectural details, minarets, and local history.",
       "latitude": 6.1322164,
       "longitude": 102.2363003,
       "averageVisitMinutes": 60,
@@ -3208,7 +4152,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "architecture",
+          "minarets",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-kelantan-bank-kerapu-war-museum",
@@ -3217,7 +4169,7 @@
       "state": "Kelantan",
       "address": "Bank Kerapu, Jalan Sultan, Kota Bharu, Kelantan, Malaysia",
       "category": "heritage",
-      "description": "Historic former bank building housing exhibits about Kelantan during the Second World War.",
+      "description": "Bank Kerapu gives a former bank building a new role in explaining Kelantan's wartime experiences. The combination of building history and exhibits connects everyday civic space with the wider conflict that affected the region. Look out for military history, local history, and historical collections.",
       "latitude": 6.1318655,
       "longitude": 102.2354708,
       "averageVisitMinutes": 60,
@@ -3233,7 +4185,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "war",
+        "highlights": [
+          "military",
+          "history",
+          "objects"
+        ]
+      }
     },
     {
       "id": "my-kelantan-wat-mai-suwankhiri",
@@ -3242,7 +4202,7 @@
       "state": "Kelantan",
       "address": "Wat Mai Suwankhiri, Kampung Bukit Tanah, Tumpat, Kelantan, Malaysia",
       "category": "cultural",
-      "description": "Thai Buddhist temple complex known for its ornate architecture and boat-shaped main building.",
+      "description": "Wat Mai Suwankhiri adds a distinctive Siamese Buddhist stop to the Tumpat area. Its decorated religious setting helps explain a part of Kelantan's cultural diversity that visitors may miss when focusing only on Kota Bharu's centre. Look out for Siamese Buddhist traditions, religious statues, and prayer halls.",
       "latitude": 6.1781806,
       "longitude": 102.1881694,
       "averageVisitMinutes": 60,
@@ -3262,7 +4222,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "siamese",
+          "statues",
+          "prayer"
+        ]
+      }
     },
     {
       "id": "my-negeri-sembilan-seri-menanti-royal-museum",
@@ -3271,7 +4239,7 @@
       "state": "Negeri Sembilan",
       "address": "Muzium Diraja Seri Menanti, Istana Lama Seri Menanti, Kuala Pilah, Negeri Sembilan, Malaysia",
       "category": "heritage",
-      "description": "Former royal palace showcasing traditional timber architecture and Negeri Sembilan royal heritage.",
+      "description": "The former palace at Seri Menanti is associated with Negeri Sembilan's royal traditions and timber architecture. Its form and interior context make it a useful introduction to the relationship between local identity, craftsmanship and court life. Look out for royal history, traditional houses, and decorative carvings.",
       "latitude": 2.69833333,
       "longitude": 102.15916667,
       "averageVisitMinutes": 60,
@@ -3287,7 +4255,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "royal",
+        "highlights": [
+          "royalty",
+          "houses",
+          "carvings"
+        ]
+      }
     },
     {
       "id": "my-pahang-chin-swee-caves-temple",
@@ -3296,7 +4272,7 @@
       "state": "Pahang",
       "address": "Chin Swee Caves Temple, Genting Highlands, Pahang, Malaysia",
       "category": "cultural",
-      "description": "Hillside Chinese temple with a pagoda, landscaped grounds and mountain views.",
+      "description": "Chin Swee combines Buddhist religious spaces with a hillside setting below the Genting resort area. The temple structures and changing highland views offer a quieter contrast to the entertainment-focused attractions farther up the hill. Look out for pagoda architecture, religious statues, and hill and mountain views.",
       "latitude": 3.413204,
       "longitude": 101.788373,
       "averageVisitMinutes": 60,
@@ -3316,7 +4292,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "pagoda",
+          "statues",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-pahang-colmar-tropicale",
@@ -3325,7 +4309,7 @@
       "state": "Pahang",
       "address": "Colmar Tropicale, Berjaya Hills, Bukit Tinggi, Bentong, Pahang, Malaysia",
       "category": "urban",
-      "description": "French-inspired visitor village in the Berjaya Hills highlands, with themed architecture and walking streets.",
+      "description": "Colmar Tropicale is a themed resort setting inspired by European village architecture in the Berjaya Hills area. It should be understood as a modern visitor development rather than an original historic French settlement in Malaysia. Look out for architectural details, hill and mountain views, and cafes and dining.",
       "latitude": 3.400811,
       "longitude": 101.83963,
       "averageVisitMinutes": 60,
@@ -3345,7 +4329,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Check whether advance booking or a timed entry is required before travelling."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "architecture",
+          "mountain",
+          "cafes"
+        ]
+      }
     },
     {
       "id": "my-pahang-sultan-ahmad-shah-state-mosque",
@@ -3354,7 +4346,7 @@
       "state": "Pahang",
       "address": "Masjid Negeri Sultan Ahmad Shah, Jalan Mahkota, Kuantan, Pahang, Malaysia",
       "category": "cultural",
-      "description": "Large state mosque in central Kuantan, recognised for its domes and blue-toned architecture.",
+      "description": "Kuantan's state mosque forms a prominent religious landmark within the city centre. Its formal architecture gives visitors a cultural orientation point, while actual access to prayer spaces follows the mosque's visitor arrangements. Look out for domes, minarets, and architectural details.",
       "latitude": 3.808,
       "longitude": 103.3278,
       "averageVisitMinutes": 60,
@@ -3374,7 +4366,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "minarets",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-pahang-fraser-s-hill-clock-tower",
@@ -3383,7 +4383,7 @@
       "state": "Pahang",
       "address": "Clock Tower, Jalan Genting, Bukit Fraser, Raub, Pahang, Malaysia",
       "category": "heritage",
-      "description": "Stone clock-tower landmark at the centre of Fraser's Hill, a starting point for a highland town walk.",
+      "description": "The clock tower acts as a recognisable orientation point in Fraser's Hill. Its setting reflects the hill station's character, making it a useful starting stop before exploring permitted walks and the surrounding highland landscape. Look out for architectural details, hill and mountain views, and local history.",
       "latitude": 3.7118746,
       "longitude": 101.7363895,
       "averageVisitMinutes": 60,
@@ -3399,7 +4399,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "landmark",
+        "highlights": [
+          "architecture",
+          "mountain",
+          "history"
+        ]
+      }
     },
     {
       "id": "my-pahang-cameron-lavender-garden",
@@ -3408,7 +4416,7 @@
       "state": "Pahang",
       "address": "Cameron Lavender Garden, Tringkap, Cameron Highlands, Pahang, Malaysia",
       "category": "nature",
-      "description": "Hillside flower garden in Tringkap with planted terraces and colourful floral displays.",
+      "description": "Cameron Lavender Garden offers a cultivated floral visitor setting within the Cameron Highlands. Its appeal comes from planted displays and photography rather than a claim to be an untouched natural landscape or a historic plantation. Look out for gardens, plant collections, and hill and mountain views.",
       "latitude": 4.5268438,
       "longitude": 101.4265498,
       "averageVisitMinutes": 90,
@@ -3424,7 +4432,15 @@
       "visitorGuidance": [],
       "openingHours": "Check the latest visitor access and opening hours with the venue before travelling.",
       "feeNote": "Check current admission charges and any activity fees with the venue.",
-      "visitTips": []
+      "visitTips": [],
+      "visitorStory": {
+        "theme": "park",
+        "highlights": [
+          "gardens",
+          "plants",
+          "mountain"
+        ]
+      }
     },
     {
       "id": "my-sabah-kota-kinabalu-city-mosque",
@@ -3433,7 +4449,7 @@
       "state": "Sabah",
       "address": "Masjid Bandaraya Kota Kinabalu, Jalan Pasir, Likas, Kota Kinabalu, Sabah, Malaysia",
       "category": "cultural",
-      "description": "Waterfront city mosque in Likas, known for its lagoon setting and reflected domes.",
+      "description": "Kota Kinabalu City Mosque is recognised for its lakeside setting and formal domed architecture. Reflections contribute to its visual appeal, while visitors should distinguish the surrounding viewing areas from the mosque's active religious spaces. Look out for domes, lakeside scenery, and architectural details.",
       "latitude": 5.995858,
       "longitude": 116.10775,
       "averageVisitMinutes": 60,
@@ -3453,7 +4469,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "lake",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-terengganu-tengku-tengah-zaharah-mosque",
@@ -3462,7 +4486,7 @@
       "state": "Terengganu",
       "address": "Masjid Tengku Tengah Zaharah, Kuala Ibai, Kuala Terengganu, Terengganu, Malaysia",
       "category": "cultural",
-      "description": "Mosque in Kuala Ibai set beside a lagoon, often known as the Floating Mosque.",
+      "description": "Tengku Tengah Zaharah Mosque stands beside the Kuala Ibai lagoon and is commonly called the Floating Mosque. The relationship between architecture and water gives it a distinctive coastal-city setting, alongside its continuing religious purpose. Look out for domes, river views, and architectural details.",
       "latitude": 5.283838,
       "longitude": 103.170626,
       "averageVisitMinutes": 60,
@@ -3482,7 +4506,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "domes",
+          "river",
+          "architecture"
+        ]
+      }
     },
     {
       "id": "my-terengganu-abidin-mosque",
@@ -3491,7 +4523,7 @@
       "state": "Terengganu",
       "address": "Masjid Abidin, Jalan Masjid Abidin, Kuala Terengganu, Terengganu, Malaysia",
       "category": "heritage",
-      "description": "Historic white mosque near the centre of Kuala Terengganu, also called the State Mosque.",
+      "description": "Abidin Mosque is an established religious landmark in central Kuala Terengganu. Its setting helps connect the visitor with the city's royal and civic history, while the building remains a place for community worship rather than unrestricted sightseeing. Look out for architectural details, minarets, and local history.",
       "latitude": 5.334552777,
       "longitude": 103.137875,
       "averageVisitMinutes": 60,
@@ -3511,7 +4543,15 @@
       "feeNote": "Check current admission charges and any activity fees with the venue.",
       "visitTips": [
         "Respect worshippers, dress requirements and any areas closed to visitors."
-      ]
+      ],
+      "visitorStory": {
+        "theme": "worship",
+        "highlights": [
+          "architecture",
+          "minarets",
+          "history"
+        ]
+      }
     }
   ]
 }

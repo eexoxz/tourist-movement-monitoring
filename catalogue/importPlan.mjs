@@ -15,7 +15,7 @@ export function normalizeVenueName(name) {
   return name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-export function validateCatalogue(places) {
+export function validateCatalogue(places, { requirePhoto = true } = {}) {
   if (!Array.isArray(places) || !places.length) throw new Error("Catalogue must contain places.");
   const ids = new Set();
   const names = new Set();
@@ -23,15 +23,20 @@ export function validateCatalogue(places) {
     if (!/^my-[a-z0-9-]+$/.test(place.id) || ids.has(place.id)) throw new Error(`Invalid or duplicate ID: ${place.id}`);
     ids.add(place.id);
     if (!states.has(place.state) || !categories.has(place.category)) throw new Error(`Invalid state or category: ${place.id}`);
-    for (const field of ["name", "city", "address", "description", "imageAlt"]) {
+    for (const field of ["name", "city", "address", "description"]) {
       if (typeof place[field] !== "string" || place[field].trim().length < 3) throw new Error(`Missing ${field}: ${place.id}`);
     }
     if (!place.address.endsWith(", Malaysia") || place.address.length < 20) throw new Error(`Incomplete address: ${place.id}`);
     if (!Number.isFinite(place.latitude) || place.latitude < .8 || place.latitude > 7.5 || !Number.isFinite(place.longitude) || place.longitude < 99.5 || place.longitude > 119.5) throw new Error(`Invalid Malaysian coordinates: ${place.id}`);
     if (!Number.isInteger(place.averageVisitMinutes) || place.averageVisitMinutes < 5 || place.averageVisitMinutes > 480) throw new Error(`Invalid suggested visit duration: ${place.id}`);
-    if (!/^\/images\/catalogue\/my-[a-z0-9-]+\.(jpg|jpeg|png|webp)$/.test(place.imageUrl)) throw new Error(`Missing local photograph: ${place.id}`);
-    const credit = place.imageCredit;
-    if (!credit?.author?.trim() || !/^(CC BY(?:-SA)? [1234]\.[05](?: de)?|CC0|Public domain)$/.test(credit.license ?? "") || !isHttpsUrl(credit.sourceUrl) || !/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(credit.sourceUrl)) throw new Error(`Missing photo credit: ${place.id}`);
+    if (requirePhoto || place.imageUrl !== undefined) {
+      if (!/^\/images\/catalogue\/my-[a-z0-9-]+\.(jpg|jpeg|png|webp)$/.test(place.imageUrl)) throw new Error(`Missing local photograph: ${place.id}`);
+      if (typeof place.imageAlt !== "string" || place.imageAlt.trim().length < 3) throw new Error(`Missing imageAlt: ${place.id}`);
+      const credit = place.imageCredit;
+      if (!credit?.author?.trim() || !/^(CC BY(?:-SA)? [1234]\.[05](?: de)?|CC0|Public domain)$/.test(credit.license ?? "") || !isHttpsUrl(credit.sourceUrl) || !/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(credit.sourceUrl)) throw new Error(`Missing photo credit: ${place.id}`);
+    } else if (place.imageCredit !== undefined) {
+      throw new Error(`Photo credit without a photograph: ${place.id}`);
+    }
     if (!isHttpsUrl(place.sourceUrl)) throw new Error(`Missing reference source: ${place.id}`);
     if (place.coordinateSourceUrl && !isHttpsUrl(place.coordinateSourceUrl)) throw new Error(`Invalid coordinate source: ${place.id}`);
     if (place.visitorGuidance && (!Array.isArray(place.visitorGuidance) || place.visitorGuidance.some(code => !guidanceCodes.has(code)))) throw new Error(`Invalid visitor guidance: ${place.id}`);
@@ -42,8 +47,8 @@ export function validateCatalogue(places) {
   }
 }
 
-export function planCatalogueImport(places, existing) {
-  validateCatalogue(places);
+export function planCatalogueImport(places, existing, options) {
+  validateCatalogue(places, options);
   const ids = new Set(existing.map(place => place.id));
   const names = new Set(existing.map(place => normalizeVenueName(place.name)));
   const create = [];
