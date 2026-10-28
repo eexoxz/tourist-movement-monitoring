@@ -31,15 +31,62 @@ export function projectMovementPoints(points: MovementPoint[], zoom: number, pre
 }
 
 export type DestinationMapGroup = { key: string; places: Destination[]; latitude: number; longitude: number };
+export const destinationGroupSpacing = 56;
+
+// Neighbouring grid cells can have centroids on the same edge. Merge touching
+// groups until their actual screen positions leave room for a 44px circle/halo.
+function separateDestinationGroups(initial: DestinationMapGroup[], zoom: number) {
+  let groups = initial;
+  while (groups.length > 1) {
+    const parents = groups.map((_, index) => index);
+    const root = (index: number): number => {
+      while (parents[index] !== index) { parents[index] = parents[parents[index]]; index = parents[index]; }
+      return index;
+    };
+    const cells = new Map<string, Array<{ index: number; x: number; y: number }>>();
+    let merged = false;
+    groups.forEach((group, index) => {
+      const [x, y] = projectMapCoordinate(group.latitude, group.longitude, zoom);
+      const cellX = Math.floor(x / destinationGroupSpacing), cellY = Math.floor(y / destinationGroupSpacing);
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+        for (const other of cells.get(`${cellX + dx}:${cellY + dy}`) ?? []) {
+          if ((x - other.x) ** 2 + (y - other.y) ** 2 >= destinationGroupSpacing ** 2) continue;
+          const a = root(index), b = root(other.index);
+          if (a !== b) { parents[b] = a; merged = true; }
+        }
+      }
+      const key = `${cellX}:${cellY}`, cell = cells.get(key) ?? [];
+      cell.push({ index, x, y }); cells.set(key, cell);
+    });
+    if (!merged) break;
+    const combined = new Map<number, DestinationMapGroup>();
+    groups.forEach((group, index) => {
+      const key = root(index), previous = combined.get(key), count = group.places.length;
+      if (!previous) combined.set(key, { ...group, places: [...group.places], latitude: group.latitude * count, longitude: group.longitude * count });
+      else {
+        previous.places.push(...group.places);
+        previous.latitude += group.latitude * count; previous.longitude += group.longitude * count;
+        if (group.key < previous.key) previous.key = group.key;
+      }
+    });
+    groups = [...combined.values()].map((group) => ({ ...group, latitude: group.latitude / group.places.length, longitude: group.longitude / group.places.length }));
+  }
+  return groups;
+}
+
 export function groupMapDestinations(destinations: Destination[], zoom: number, cellPixels = 66): DestinationMapGroup[] {
   const cells = new Map<string, DestinationMapGroup>();
   for (const place of destinations) {
     const [x, y] = projectMapCoordinate(place.latitude, place.longitude, zoom);
     if (!Number.isFinite(x + y)) continue;
-    const key = `${Math.floor(x / cellPixels)}:${Math.floor(y / cellPixels)}`;
+    const region = place.longitude < 106 ? "peninsula" : "borneo";
+    const key = `${region}:${Math.floor(x / cellPixels)}:${Math.floor(y / cellPixels)}`;
     const group = cells.get(key);
     if (group) { group.places.push(place); group.latitude += place.latitude; group.longitude += place.longitude; }
     else cells.set(key, { key, places: [place], latitude: place.latitude, longitude: place.longitude });
   }
-  return [...cells.values()].map((group) => ({ ...group, key: group.places.length === 1 ? group.places[0].id : `cluster:${zoom}:${group.key}`, latitude: group.latitude / group.places.length, longitude: group.longitude / group.places.length }));
+  const normalized = [...cells.values()].map((group) => ({ ...group, latitude: group.latitude / group.places.length, longitude: group.longitude / group.places.length }));
+  // Do not combine the two land regions into an offshore centroid at phone zoom.
+  const groups = ["peninsula:", "borneo:"].flatMap((region) => separateDestinationGroups(normalized.filter((group) => group.key.startsWith(region)), zoom));
+  return groups.map((group) => ({ ...group, key: group.places.length === 1 ? group.places[0].id : `cluster:${zoom}:${group.key}` }));
 }

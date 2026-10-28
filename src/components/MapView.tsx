@@ -13,6 +13,7 @@ import { activityText } from "../services/activityCopy";
 import { MovementCanvasLayer } from "./MovementCanvasLayer";
 import { groupMapDestinations } from "../services/movementMapGeometry";
 import { mapDisplayText } from "../services/mapDisplayCopy";
+import { bindMalaysiaMapLimits, malaysiaMapOptions, malaysiaViewBounds } from "../services/malaysiaMap";
 import { uiText } from "../services/uiText";
 import { categoryIconMarkup, type CategoryIconSize } from "../generated/mapIconMarkup";
 
@@ -140,17 +141,25 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       return;
     }
 
+    let releaseLimits: (() => void) | undefined;
+    let resizeObserver: ResizeObserver | undefined;
     try {
       mapRef.current = L.map(containerRef.current, {
+        ...malaysiaMapOptions,
         // Zoom transition timers can outlive a map removed by page navigation.
         zoomAnimation: false,
         dragging: true,
         zoomControl: false,
         attributionControl: true,
-        scrollWheelZoom: false,
+        scrollWheelZoom: "center",
+        wheelPxPerZoomLevel: 100,
         touchZoom: true,
         preferCanvas: true,
       }).setView([3.1478, 101.6937], 13);
+      const map = mapRef.current;
+      releaseLimits = bindMalaysiaMapLimits(map);
+      resizeObserver = new ResizeObserver(() => map.invalidateSize({ animate: false, pan: false }));
+      resizeObserver.observe(containerRef.current);
       mapRef.current.on("dragstart", () => { manualBrowseRef.current = true; });
       mapRef.current.on("zoomstart", () => { if (!automaticViewRef.current) manualBrowseRef.current = true; });
       mapRef.current.on("popupopen", () => setRoutePopupOpen(true));
@@ -159,6 +168,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
+        noWrap: true,
         updateWhenZooming: false,
         updateWhenIdle: true,
         attribution: "&copy; OpenStreetMap contributors",
@@ -171,6 +181,8 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     }
 
     return () => {
+      resizeObserver?.disconnect();
+      releaseLimits?.();
       mapRef.current?.stop();
       mapRef.current?.remove();
       mapRef.current = null;
@@ -226,7 +238,14 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           manualBrowseRef.current = true; map.closePopup();
           const placeBounds = L.latLngBounds(group.places.map((place) => [place.latitude, place.longitude] as [number, number]));
           if (map.getZoom() >= 17 || placeBounds.getNorthEast().distanceTo(placeBounds.getSouthWest()) < 5) setPlaceGroup(group.places);
-          else { setPlaceGroup(null); map.fitBounds(placeBounds, { padding: [48, 48], maxZoom: Math.min(18, map.getZoom() + 3), animate: false }); }
+          else {
+            setPlaceGroup(null);
+            const previousZoom = map.getZoom();
+            map.fitBounds(placeBounds, { padding: [48, 48], maxZoom: Math.min(18, previousZoom + 3), animate: false });
+            // A broad cluster on a narrow screen may already fill its bounds.
+            // Always make progress towards individual places when it is tapped.
+            if (map.getZoom() <= previousZoom) map.setView([group.latitude, group.longitude], Math.min(18, previousZoom + 1), { animate: false });
+          }
         });
         marker.addTo(layer); markers.set(group.key, { marker, signature });
       }
@@ -305,7 +324,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           } else if (displayMode === "signals" && visibleDestinations.length > 1) {
             const signalBoundDestinations = visibleDestinations.filter((destination) => (destinationSignals.get(destination.id)?.nearbyPointCount ?? 0) > 0);
             const boundsDestinations = mode === "admin" ? visibleDestinations : signalBoundDestinations.length > 1 ? signalBoundDestinations : visibleDestinations;
-            const destinationBounds = L.latLngBounds(boundsDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
+            const destinationBounds = mode === "admin" ? L.latLngBounds(malaysiaViewBounds) : L.latLngBounds(boundsDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
             map.fitBounds(destinationBounds, { padding: [42, 42], maxZoom: 8, animate: false });
           } else if (activePoint) {
             map.setView([activePoint.latitude, activePoint.longitude], 15, { animate: false });
@@ -334,9 +353,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   }, [points]);
   const showMalaysia = () => {
     const map = mapRef.current;
-    if (!map || !visibleDestinations.length) return;
-    manualBrowseRef.current = true; setPlaceGroup(null);
-    map.fitBounds(L.latLngBounds(visibleDestinations.map((place) => [place.latitude, place.longitude] as [number, number])), { padding: [40, 40], maxZoom: 8, animate: false });
+    if (!map) return;
+    manualBrowseRef.current = true; setPlaceGroup(null); setSelectedDestinationId(null); setExpandedDestinationId(null);
+    map.closePopup();
+    map.fitBounds(malaysiaViewBounds, { padding: [16, 16], maxZoom: 8, animate: false });
   };
   const visibleCategories = useMemo(() => Array.from(new Set(visibleDestinations.map((destination) => destination.category))), [visibleDestinations]);
   const topSignals = useMemo(

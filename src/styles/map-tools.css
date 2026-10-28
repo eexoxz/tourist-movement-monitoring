@@ -198,7 +198,8 @@
 .destination-marker-compact { width: 28px; height: 28px; box-shadow: 0 2px 5px #0f172a30; transition: none; }
 .destination-marker-compact::after { width: 7px; height: 7px; bottom: -4px; }
 .destination-marker-compact:hover { transform: none; box-shadow: 0 2px 7px #0f172a55; }
-.destination-cluster { display: grid; place-items: center; border: 3px solid white; border-radius: 50%; background: #0f766e; color: white; box-shadow: 0 0 0 4px #0f766e25; font: 700 14px/1 system-ui,sans-serif; }
+.map-view .destination-cluster { display: grid; place-items: center; box-sizing: border-box; padding: 0; border: 3px solid white; border-radius: 50%; background: #0f766e; color: white; box-shadow: 0 0 0 4px #0f766e25; font: 700 14px/1 system-ui,sans-serif; }
+.map-view .destination-cluster > strong { display: block; margin: 0; padding: 0; font: inherit; line-height: 1; font-variant-numeric: tabular-nums; text-align: center; }
 .destination-cluster:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
 .movement-point-canvas { position: absolute; }
 .map-data-summary { position: absolute; z-index: 450; top: 12px; left: 12px; display: grid; gap: 3px; width: min(285px,calc(100% - 78px)); padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fffffff2; color: #334155; font-size: .78rem; pointer-events: none; }

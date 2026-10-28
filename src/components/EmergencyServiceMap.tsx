@@ -3,16 +3,19 @@ import L from "leaflet";
 import { emergencyIconMarkup } from "../generated/mapIconMarkup";
 import "leaflet/dist/leaflet.css";
 import type { EmergencyService } from "../data/emergencyServices";
+import { bindMalaysiaMapLimits, malaysiaMapOptions } from "../services/malaysiaMap";
 
 export default function EmergencyServiceMap({ service }: { service: EmergencyService }) {
   const elementRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!elementRef.current) return;
-    const map = L.map(elementRef.current, { zoomAnimation: false, scrollWheelZoom: false, dragging: !L.Browser.mobile, tapHold: false })
+    const map = L.map(elementRef.current, { ...malaysiaMapOptions, zoomAnimation: false, scrollWheelZoom: false, dragging: !L.Browser.mobile, tapHold: false })
       .setView([service.latitude, service.longitude], 16);
+    const releaseLimits = bindMalaysiaMapLimits(map);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
+      noWrap: true,
     }).addTo(map);
     L.marker([service.latitude, service.longitude], {
       icon: L.divIcon({ className: "police-help-marker", html: emergencyIconMarkup, iconSize: [32, 32], iconAnchor: [16, 16] }),
@@ -20,7 +23,7 @@ export default function EmergencyServiceMap({ service }: { service: EmergencySer
     }).addTo(map);
     const observer = new ResizeObserver(() => map.invalidateSize());
     observer.observe(elementRef.current);
-    return () => { observer.disconnect(); map.stop(); map.remove(); };
+    return () => { observer.disconnect(); releaseLimits(); map.stop(); map.remove(); };
   }, [service.id, service.name, service.latitude, service.longitude]);
   return <div className="police-help-map" ref={elementRef} role="region" aria-label={service.name} />;
 }
