@@ -115,6 +115,21 @@ const highlights: Record<string, string[]> = {
   hotSprings: ["hot springs", "kolam air panas", "温泉", "温泉", "온천", "fontes termais", "வெந்நீர் ஊற்றுகள்", "aguas termales", "sources chaudes"],
   rainforest: ["rainforest habitats", "habitat hutan hujan", "雨林栖息地", "熱帯雨林の生息環境", "열대우림 서식지", "habitats de floresta tropical", "மழைக்காட்டு வாழிடங்கள்", "hábitats de selva tropical", "habitats de forêt tropicale"],
   cinema: ["cinema and entertainment", "pawagam dan hiburan", "电影与娱乐", "映画館や娯楽", "영화와 오락", "cinema e entretenimento", "திரைப்படமும் பொழுதுபோக்கும்", "cine y entretenimiento", "cinéma et divertissement"],
+  animalExhibits: ["animal exhibits", "pameran haiwan", "动物展区", "動物の展示", "동물 전시", "exposições de animais", "விலங்குக் காட்சிகள்", "exhibiciones de animales", "les espaces consacrés aux animaux"],
+  animalCare: ["respectful animal watching", "pemerhatian haiwan secara berhemah", "尊重动物的观赏方式", "動物に配慮した見学", "동물을 배려하는 관람", "a observação respeitosa dos animais", "விலங்குகளை மதித்து பார்வையிடுதல்", "la observación respetuosa de los animales", "l'observation respectueuse des animaux"],
+  dining: ["a stop for a meal", "persinggahan untuk menjamu selera", "用餐歇脚", "食事のひと休み", "식사를 위한 휴식", "uma pausa para uma refeição", "உணவுக்கான ஓய்வு", "una parada para comer", "une pause pour un repas"],
+  refreshments: ["food and drink", "makanan dan minuman", "餐饮选择", "料理や飲み物", "음식과 음료", "comida e bebidas", "உணவும் பானங்களும்", "comida y bebida", "les plats et les boissons"],
+  coffee: ["coffee", "kopi", "咖啡", "コーヒー", "커피", "café", "காபி", "café", "le café"],
+  seafood: ["seafood dishes", "hidangan makanan laut", "海鲜菜肴", "シーフード料理", "해산물 요리", "pratos de marisco e peixe", "கடல் உணவு வகைகள்", "platos de marisco y pescado", "les plats de fruits de mer et de poisson"],
+  noodles: ["noodle dishes", "hidangan mi", "面食", "麺料理", "면 요리", "pratos de massa asiática", "நூடுல்ஸ் உணவுகள்", "platos de fideos", "les plats de nouilles"],
+  breads: ["breads and baked goods", "roti dan hasil bakeri", "面包与烘焙食品", "パンや焼き菓子", "빵과 제과류", "pão e produtos de padaria", "ரொட்டியும் பேக்கரி உணவுகளும்", "pan y productos de panadería", "le pain et les produits de boulangerie"],
+  malayFood: ["Malay and Malaysian dishes", "hidangan Melayu dan Malaysia", "马来及马来西亚菜肴", "マレー料理やマレーシア料理", "말레이 및 말레이시아 요리", "pratos malaios e malaiosianos", "மலாய் மற்றும் மலேசிய உணவுகள்", "platos malayos y malasios", "les plats malais et malaisiens"],
+  chineseFood: ["Chinese dishes", "hidangan Cina", "中式菜肴", "中華料理", "중국 요리", "pratos chineses", "சீன உணவுகள்", "platos chinos", "les plats chinois"],
+  indianFood: ["Indian dishes", "hidangan India", "印度菜肴", "インド料理", "인도 요리", "pratos indianos", "இந்திய உணவுகள்", "platos indios", "les plats indiens"],
+  thaiFood: ["Thai dishes", "hidangan Thai", "泰式菜肴", "タイ料理", "태국 요리", "pratos tailandeses", "தாய் உணவுகள்", "platos tailandeses", "les plats thaïlandais"],
+  japaneseFood: ["Japanese dishes", "hidangan Jepun", "日式菜肴", "日本料理", "일본 요리", "pratos japoneses", "ஜப்பானிய உணவுகள்", "platos japoneses", "les plats japonais"],
+  vegetarianFood: ["vegetarian dishes", "hidangan vegetarian", "素食菜肴", "ベジタリアン料理", "채식 요리", "pratos vegetarianos", "சைவ உணவுகள்", "platos vegetarianos", "les plats végétariens"],
+  seaViews: ["coastal scenery", "pemandangan pesisir", "海岸风光", "海岸の景色", "해안 경관", "a paisagem costeira", "கடற்கரைக் காட்சிகள்", "paisajes costeros", "les paysages côtiers"],
 };
 
 const highlightIntro = ["Look out for", "Antara tarikan untuk diperhatikan ialah", "值得留意的看点包括", "注目したいのは", "주요 볼거리는", "Destaques a observar:", "கவனிக்க வேண்டிய சிறப்புகள்:", "Fíjate en", "À découvrir :"];

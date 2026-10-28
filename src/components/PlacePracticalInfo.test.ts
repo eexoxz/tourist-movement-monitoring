@@ -6,7 +6,7 @@ import { destinations } from "../data/destinations";
 import { visitorInformation } from "../data/visitorInformation";
 import type { Destination } from "../types";
 import { localeOptions } from "../services/i18n";
-import { localizeDestination } from "../services/destinationLocale";
+import { hasCustomDestinationFact, localizeDestination } from "../services/destinationLocale";
 import { visitorText } from "../services/visitorInformationCopy";
 import { groupVisitorPrices, visitorDays, visitorPriceLabel } from "../services/visitorInformation";
 import { PlacePracticalInfo } from "./PlacePracticalInfo";
@@ -15,7 +15,8 @@ import { recoveryCopy } from "../services/recoveryCopy";
 
 const catalogue = JSON.parse(readFileSync(new URL("../../catalogue/locations-2026-10.json", import.meta.url), "utf8")).places as Destination[];
 const expansion = JSON.parse(readFileSync(new URL("../../catalogue/locations-2026-10-27.json", import.meta.url), "utf8")).places as Destination[];
-const all = [...destinations, ...catalogue, ...expansion];
+const latestExpansion = JSON.parse(readFileSync(new URL("../../catalogue/locations-2026-10-28.json", import.meta.url), "utf8")).places as Destination[];
+const all = [...destinations, ...catalogue, ...expansion, ...latestExpansion];
 const hill = all.find((destination) => destination.id === "penang-hill")!;
 const render = (destination: Destination, locale: Parameters<typeof visitorText>[0] = "en", now?: number) => renderToStaticMarkup(createElement(PlacePracticalInfo, { destination: localizeDestination(destination, locale), locale, now }));
 
@@ -29,6 +30,11 @@ describe("researched attraction practical information", () => {
       for (const url of info.sources) expect(new URL(url).protocol).toBe("https:");
       for (const row of info.prices ?? []) expect(Number.isFinite(row.amount) && row.amount >= 0).toBe(true);
       for (const row of info.hours ?? []) expect(row.time).toMatch(/\d{2}:\d{2}/);
+    }
+    for (const destination of latestExpansion) {
+      // Placeholder text must use the translated unknown-fact path, never override researched rates.
+      expect(hasCustomDestinationFact(destination, "openingHours"), destination.id).toBe(false);
+      expect(hasCustomDestinationFact(destination, "feeNote"), destination.id).toBe(false);
     }
   });
 

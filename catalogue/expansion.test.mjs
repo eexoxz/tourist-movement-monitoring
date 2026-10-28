@@ -3,9 +3,11 @@ import {expect,test} from "vitest";
 import {validateCatalogue,planCatalogueImport} from "./importPlan.mjs";
 
 const release=JSON.parse(readFileSync(new URL("./locations-2026-10-27.json",import.meta.url),"utf8"));
+const latest=JSON.parse(readFileSync(new URL("./locations-2026-10-28.json",import.meta.url),"utf8"));
 test("the expansion explicitly allows missing photos without accepting false photo credits",()=>{
- const {places}=release;
+ const places=[...release.places,...latest.places];
  expect(release.photoPolicy).toBe("verified-venues-may-await-photo");
+ expect(latest.photoPolicy).toBe("verified-venues-may-await-photo");
  expect(()=>validateCatalogue(places,{requirePhoto:false})).not.toThrow();
  expect(planCatalogueImport(places,places,{requirePhoto:false}).create).toEqual([]);
  const without=places.find(p=>!p.imageUrl);

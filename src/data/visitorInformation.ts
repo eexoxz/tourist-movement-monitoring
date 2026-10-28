@@ -21,6 +21,10 @@ const jmmFree = (source: string): VisitorInformation => ({ checkedAt, sources: [
 
 // Researched display data only: never written over an administrator's Firestore records.
 export const visitorInformation: Record<string, VisitorInformation> = {
+  "my-melaka-bukit-batu-lebah-forest-eco-park": {
+    checkedAt: "2026-10-28", sources: ["https://www.forestry.gov.my/my/melaka/taman-eko-rimba-bukit-batu-lebah"],
+    hours: daily("07:00 - 18:00"), prices: [price("entry", 0)], priceNotes: ["extras"],
+  },
   "my-perlis-kota-kayang-museum": {
     checkedAt: "2026-10-27", sources: ["https://www.jmm.gov.my/ms/content/muzium-kota-kayang-0"],
     hours: daily("09:00 - 17:00"), hoursNotes: ["jmmHolidays"], prices: [price("entry", 0)],

@@ -10,12 +10,13 @@ import {getDestinationState} from "./destinationState";
 const readRelease=(file:string)=>JSON.parse(readFileSync(new URL(`../../catalogue/${file}`,import.meta.url),"utf8")).places as Destination[];
 const oldRelease=readRelease("locations-2026-10.json");
 const added=readRelease("locations-2026-10-27.json");
-const places=[...destinations,...oldRelease,...added];
+const latest=readRelease("locations-2026-10-28.json");
+const places=[...destinations,...oldRelease,...added,...latest];
 const languages:Locale[]=["en","ms","zh","ja","ko","pt","ta","es","fr"];
 
 describe("researched place descriptions",()=>{
  it("retains distinct venues, valid source facts and safe descriptions across the expanded catalogue",()=>{
-  expect(places).toHaveLength(350);
+  expect(places).toHaveLength(814);
   expect(new Set(places.map(p=>p.id)).size).toBe(places.length);
   const key=(p:Destination)=>`${getDestinationState(p)}:${p.name.toLowerCase().replace(/[^a-z0-9]/g,"")}`;
   expect(new Set(places.map(key)).size).toBe(places.length);
