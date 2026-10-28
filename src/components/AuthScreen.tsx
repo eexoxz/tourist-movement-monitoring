@@ -177,7 +177,7 @@ export function AuthScreen({
     }
 
     if (mode === "register" && !hasTouristIdentity({ nationality, passportNumber })) {
-      setError(reviewText(locale, "identityInvalid"));
+      setError(reviewText("en", "identityInvalid"));
       setMessage(null);
       notify({ tone: "error", title: reviewText(locale, "identity"), message: reviewText(locale, "identityInvalid") });
       return;

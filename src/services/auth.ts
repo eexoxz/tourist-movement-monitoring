@@ -1,6 +1,7 @@
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
 import type { User as FirebaseUser } from "firebase/auth";
 import type { User } from "../types";
+import { shareServerRead } from "./serverRead";
 
 async function ensurePersistence(rememberSession: boolean) {
   const services = getFirebaseServices();
@@ -73,7 +74,7 @@ export async function getConfiguredUserRecord(uid: string): Promise<User | null>
   }
 
   const { doc, getDocFromServer: getDoc } = await import("firebase/firestore");
-  const snapshot = await getDoc(doc(services.db, "users", uid));
+  const snapshot = await shareServerRead(services.db, services.auth.currentUser?.uid ?? uid, `doc:users/${uid}`, () => getDoc(doc(services.db, "users", uid)));
   if (!snapshot.exists()) {
     return null;
   }

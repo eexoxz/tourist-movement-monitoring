@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 import type { VisitorLabel, VisitorNote } from "../data/visitorInformation";
 
@@ -67,3 +68,5 @@ const residentPermitLabels: Record<Locale, string> = {
 };
 
 export function visitorText(locale: Locale, key: Key) { return key === "residentPermit" ? residentPermitLabels[locale] : copy[locale][key]; }
+
+registerFeatureCopy([...Object.keys(en), "residentPermit"] as Key[], visitorText);

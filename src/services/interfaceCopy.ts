@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = { tools: "Data tools", guide: "Plan your visit", details: "Event details", filters: "Filter events", attention: "Needs your attention", recording: "Recording", locationAttention: "Location needs attention", more: "More about this place" };
@@ -15,3 +16,5 @@ const copy: Record<Locale, Record<Key, string>> = {
 };
 export const interfaceKeys = Object.keys(en) as Key[];
 export const interfaceText = (locale: Locale, key: Key) => copy[locale][key];
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], interfaceText);

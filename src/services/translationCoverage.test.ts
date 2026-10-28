@@ -48,9 +48,10 @@ for (const file of sourceFiles) {
       }
       if (name === "text" && /DestinationManager|TourismAdvisoryPanel/.test(file) && node.arguments[0]) collect(node.arguments[0]);
       if (["setSyncStatus", "setTrackingMessage", "setError", "setMessage"].includes(name) && node.arguments[0]) collect(node.arguments[0]);
+      if (name === "friendlyAuthError" && node.arguments[1]) collect(node.arguments[1]);
       if (name === "showTrackingNotice") { if (node.arguments[1]) collect(node.arguments[1]); if (node.arguments[2]) collect(node.arguments[2]); }
     }
-    if (ts.isPropertyAssignment(node) && ["title", "message"].includes(node.name.getText(source))) collect(node.initializer);
+    if (ts.isPropertyAssignment(node) && ["title", "message", "error"].includes(node.name.getText(source))) collect(node.initializer);
     ts.forEachChild(node, visit);
   };
   visit(source);

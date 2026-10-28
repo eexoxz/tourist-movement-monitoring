@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 const words: Record<Locale, string[]> = {
   en: ["{count} movement records loaded", "{real} GPS · {sample} sample", "{count} places", "View all Malaysia", "Numbered circles group places; dots show movement records.", "Nearby activity counts may overlap between places.", "Places in this group", "Close place group"],
@@ -14,3 +15,5 @@ const keys = ["loaded", "sources", "places", "national", "help", "overlap", "gro
 export function mapDisplayText(locale: Locale, key: typeof keys[number], values: Record<string, number> = {}) {
   return words[locale][keys.indexOf(key)].replace(/\{(\w+)\}/g, (placeholder, name: string) => values[name] === undefined ? placeholder : new Intl.NumberFormat(locale).format(values[name]));
 }
+
+registerFeatureCopy(keys, mapDisplayText);

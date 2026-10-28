@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -39,3 +40,5 @@ export function reviewText(locale: Locale, key: Key) {
 }
 export const reviewCopyLength = Object.keys(en).length;
 export const reviewTranslations = rows;
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], reviewText);

@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -71,3 +72,5 @@ export const demoDatasetControlKeys = Object.keys(en) as (keyof typeof en)[];
 export function demoControlsText(locale: Locale, key: keyof typeof en, values: Record<string, number> = {}) {
   return copy[locale][key].replace(/\{(\w+)\}/g, (placeholder, name: string) => name in values ? new Intl.NumberFormat(locale).format(values[name]) : placeholder);
 }
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], demoControlsText);

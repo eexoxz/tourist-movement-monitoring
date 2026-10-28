@@ -11,7 +11,7 @@ import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 import type { NotifyFn } from "./ToastViewport";
 import { translate, type Locale } from "../services/i18n";
-import { uiText } from "../services/uiText";
+import { notificationSource, uiText } from "../services/uiText";
 import { localizeCity, localizeDestination } from "../services/destinationLocale";
 import { UnlistedPlaceReview } from "./UnlistedPlaceReview";
 import type { PlaceSubmissionGroup } from "../services/unlistedPlaces";
@@ -157,7 +157,7 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
     try {
       if (candidate) {
         const error = onCreateReviewedPlace ? await onCreateReviewedPlace(destination, candidate.reports.slice(0, 100).map((report) => report.id), photo) : placeText(locale, "admin");
-        if (error) { setMessage(error); setSavingAction(null); return; }
+        if (error) { setMessage(notificationSource(locale, error)); setSavingAction(null); return; }
       } else if (!await onSave(destination, destinations.find((record) => record.id === editingId), photo)) throw new Error("Destination save was not confirmed");
     } catch {
       setSaveFailed(true);

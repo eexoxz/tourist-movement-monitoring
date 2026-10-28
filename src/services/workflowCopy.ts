@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const copy = {
@@ -13,3 +14,5 @@ const copy = {
 } satisfies Record<Locale, { emailFailed: string; profilePending: string }>;
 
 export const workflowText = (locale: Locale, key: keyof typeof copy.en) => copy[locale][key];
+
+registerFeatureCopy(Object.keys(copy.en) as (keyof typeof copy.en)[], workflowText);

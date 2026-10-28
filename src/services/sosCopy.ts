@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -91,3 +92,5 @@ export function translatedSosSource(locale: Locale, source: string) {
   const key = (Object.keys(en) as SosCopyKey[]).find((key) => en[key] === source);
   return key ? copy[locale][key] : undefined;
 }
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], sosText);

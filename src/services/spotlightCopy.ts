@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = { title: "Discover Malaysia", previous: "Previous spotlight", next: "Next spotlight", pause: "Pause slideshow", play: "Play slideshow", slide: "Slide", national: "Across Malaysia" };
@@ -15,3 +16,5 @@ const copy: Record<Locale, Record<SpotlightKey, string>> = {
 };
 
 export function spotlightText(locale: Locale, key: SpotlightKey) { return copy[locale][key]; }
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], spotlightText);

@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -97,3 +98,5 @@ const copy: Record<Locale, Record<DeletionCopyKey, string>> = {
 };
 export const deletionCopyKeys = Object.keys(en) as DeletionCopyKey[];
 export const deletionText = (locale: Locale, key: DeletionCopyKey) => copy[locale][key];
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], deletionText);

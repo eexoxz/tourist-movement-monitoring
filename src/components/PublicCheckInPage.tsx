@@ -5,7 +5,7 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import type { AttractionCheckIn, Destination } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 import { LanguageSelector } from "./AuthScreen";
-import { uiText } from "../services/uiText";
+import { notificationSource, uiText } from "../services/uiText";
 import { checkInSyncText } from "../services/checkInSyncCopy";
 import type { CheckInSyncState } from "../services/checkInSync";
 import { getPathForView } from "../services/access";
@@ -44,7 +44,8 @@ export function PublicCheckInPage({ destination, locale, missingReason, passId, 
     confirming.current = true;
     setSaving(true);
     try {
-      setResult(await onConfirm());
+      const outcome = await onConfirm();
+      setResult({ ...outcome, title: notificationSource(locale, outcome.title), message: notificationSource(locale, outcome.message) });
     } catch {
       setResult({ tone: "error", title: t("publicCheckin.saveErrorTitle"), message: t("publicCheckin.saveErrorMessage"), titleKey: "publicCheckin.saveErrorTitle", messageKey: "publicCheckin.saveErrorMessage" });
     } finally {

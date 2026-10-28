@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = { filters: "More filters", source: "Profile source", allSources: "All sources", activity: "Trip activity", allActivity: "Any trip activity", hasTrips: "Has saved trips", noTrips: "No saved trips", consent: "Location consent", anyConsent: "Any consent status", allSafety: "Any safety status", noSafety: "No open safety cases", interest: "Travel interest", anyInterest: "All interests", rows: "Rows per page", range: "{from}-{to} of {total}", page: "Page {page} of {pages}", previous: "Previous page", next: "Next page", details: "View tourist details", close: "Close tourist details", sort: "Sort by", recent: "Latest activity", ascending: "Ascending", descending: "Descending" };
@@ -16,3 +17,5 @@ const copy: Record<Locale, Copy> = {
 export function directoryText(locale: Locale, key: keyof typeof en, values: Record<string, number> = {}) {
   return copy[locale][key].replace(/\{(\w+)\}/g, (placeholder, name: string) => name in values ? new Intl.NumberFormat(locale).format(values[name]) : placeholder);
 }
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], directoryText);

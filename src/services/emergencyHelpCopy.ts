@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const english = {
@@ -125,3 +126,5 @@ export function translatedEmergencySource(locale: Locale, source: string) {
   const key = (Object.keys(english) as EmergencyHelpCopyKey[]).find((key) => english[key] === source);
   return key ? copy[locale][key] : undefined;
 }
+
+registerFeatureCopy(Object.keys(english) as (keyof typeof english)[], emergencyHelpText);

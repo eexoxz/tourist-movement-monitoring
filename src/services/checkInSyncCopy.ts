@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -19,3 +20,5 @@ const copy: Record<Locale, Record<Key, string>> = {
   fr: { back: "Retour à l'application", saving: "Enregistrement de la visite…", retry: "Réessayer la synchronisation", pendingTitle: "Synchronisation en attente", pending: "Enregistré sur cet appareil. La synchronisation n'a pas été confirmée. Vérifiez la connexion et réessayez ; la même visite sera réutilisée.", synced: "Enregistré en ligne. Vos autres appareils connectés peuvent maintenant recevoir cette visite.", localTitle: "Enregistré sur cet appareil", local: "Mode de démonstration local uniquement. Cette visite n'est pas partagée avec un autre appareil." },
 };
 export const checkInSyncText = (locale: Locale, key: Key) => copy[locale][key];
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], checkInSyncText);

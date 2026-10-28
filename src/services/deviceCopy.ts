@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -79,3 +80,5 @@ const copy: Record<Locale, Record<Key, string>> = {
 
 export const deviceText = (locale: Locale, key: Key) => copy[locale][key];
 export const deviceCopyKeys = Object.keys(en) as Key[];
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], deviceText);

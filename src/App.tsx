@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { BarChart3, BellRing, CalendarDays, Compass, Download, LogOut, MapPinned, RotateCcw, Sparkles, UserRound } from "lucide-react";
 import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
@@ -38,6 +38,7 @@ import { deviceText } from "./services/deviceCopy";
 import { AccountDeletionPanel } from "./components/AccountDeletionPanel";
 import { deletionText, type DeletionCopyKey } from "./services/accountDeletionCopy";
 import type { DeletionPhase } from "./services/accountDeletion";
+import { isCloudQuotaError } from "./services/serverRead";
 
 const TouristWorkspace = lazy(() => import("./workspaces/TouristWorkspace").then((module) => ({ default: module.TouristWorkspace })));
 const AdminWorkspace = lazy(() => import("./workspaces/AdminWorkspace").then((module) => ({ default: module.AdminWorkspace })));
@@ -115,9 +116,9 @@ function App() {
     }
   };
 
-  const dismissNotification = (id: string) => {
+  const dismissNotification = useCallback((id: string) => {
     setNotifications((current) => current.filter((notification) => notification.id !== id));
-  };
+  }, []);
 
   const notifySyncIssue = (title: string, message: string) => {
     const now = Date.now();
@@ -231,10 +232,10 @@ function App() {
           setSessionUserId(firebaseUser.uid);
         }
         setSyncStatus("Loaded from Firebase Firestore");
-      } catch {
+      } catch (error) {
         if (isCurrent()) {
-          setSyncStatus("Local mode; Firebase sync unavailable");
-          notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
+          setSyncStatus(isCloudQuotaError(error) ? "Cloud service temporarily limited" : "Local mode; Firebase sync unavailable");
+          notifySyncIssue(isCloudQuotaError(error) ? "Cloud service temporarily limited" : "Firebase sync unavailable", isCloudQuotaError(error) ? "Cloud data cannot be refreshed right now. Please try again later." : "The app is still usable, but data is currently saved on this device.");
         }
       } finally {
         if (isCurrent()) setCloudAuthReady(true);
@@ -342,7 +343,7 @@ function App() {
     const previousData = loadData();
     if (options.checkIn?.submittedPlace && hasConfiguredAuth()) {
       const checkIn = options.checkIn;
-      setSyncStatus(t("sync.retrying"));
+      setSyncStatus(translate("en", "sync.retrying"));
       return saveCheckInRecord(checkIn, actor).then((synced) => {
         if (!synced) throw new Error("Check-in was not accepted");
         setData((current) => {
@@ -353,13 +354,13 @@ function App() {
         setSyncStatus("Saved to Firestore collections");
         return true;
       }).catch(() => {
-        setSyncStatus(unlistedLocationText(locale, "saveFailed"));
+        setSyncStatus(unlistedLocationText("en", "saveFailed"));
         return false;
       });
     }
     if (options.placeReview && hasConfiguredAuth()) {
       const review = options.placeReview;
-      setSyncStatus(t("sync.retrying"));
+      setSyncStatus(translate("en", "sync.retrying"));
       return savePlaceReview(review, actor, options.destinationPhoto).then((synced) => {
         if (!synced) throw new Error("Place review was not accepted");
         setData((current) => {
@@ -386,7 +387,7 @@ function App() {
 
     if (options.sosAlert || options.checkIn || options.placeReview) {
       cacheLocalData(nextData);
-      if (options.sosAlert) setSyncStatus(sosText(locale, "syncPending"));
+      if (options.sosAlert) setSyncStatus(sosText("en", "syncPending"));
     }
     if (hasConfiguredAuth() && !options.sosAlert) setSyncStatus("Saving");
     void (options.sosAlert ? saveSosAlertChange(options.sosAlert, actor) : options.placeReview ? savePlaceReview(options.placeReview, actor) : saveData(nextData, actor, previousData))
@@ -508,7 +509,7 @@ function App() {
       };
     }
 
-    if (!hasTouristIdentity(publicCheckInTourist)) return { tone: "error", title: reviewText(locale, "identity"), message: reviewText(locale, "identityRequired") };
+    if (!hasTouristIdentity(publicCheckInTourist)) return { tone: "error", title: reviewText("en", "identity"), message: reviewText("en", "identityRequired") };
     const activeCheckIn = getActiveCheckIn(data, publicCheckInTourist.id);
     if (activeCheckIn && activeCheckIn.destinationId !== publicCheckInDestination.id) {
       return {
@@ -721,8 +722,8 @@ function App() {
       setData(created.data);
       const synced = await saveData(created.data, user).catch(() => false);
       await signOutConfiguredProvider().catch(() => undefined);
-      const message = verificationSent ? uiText(locale, "Account created. Check your email for the Firebase verification link, then log in after verifying.") : workflowText(locale, "emailFailed");
-      return { message: synced ? message : `${message} ${workflowText(locale, "profilePending")}` };
+      const message = verificationSent ? "Account created. Check your email for the Firebase verification link, then log in after verifying." : workflowText("en", "emailFailed");
+      return { message: synced ? message : `${message}\n${workflowText("en", "profilePending")}` };
     }
 
     commitData(created.data, user);

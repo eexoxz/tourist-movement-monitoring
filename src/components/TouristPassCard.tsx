@@ -1,4 +1,5 @@
 import { BadgeCheck, ShieldCheck } from "lucide-react";
+import { useMemo } from "react";
 import { createTouristCheckInUrl, createTouristPassId, createTouristPassUrl, isLocalOnlyQrOrigin } from "../services/checkInDeepLink";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createQrSvgDataUri } from "../services/qrCode";
@@ -41,7 +42,7 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
   const t = (key: TranslationKey) => translate(locale, key);
   const passId = createTouristPassId(user);
   const qrPayload = createPassPayload(passId, destination);
-  const qrSource = createQrSvgDataUri(qrPayload);
+  const qrSource = useMemo(() => createQrSvgDataUri(qrPayload), [qrPayload]);
   const localOnlyQr = isLocalOnlyQrOrigin();
   const passport = maskPassport(user.passportNumber) || t("tourist.profile.notSetYet");
   const nationality = user.nationality || t("tourist.profile.notSetYet");

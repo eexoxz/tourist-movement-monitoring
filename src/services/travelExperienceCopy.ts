@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -140,3 +141,5 @@ export const travelExperienceKeys = Object.keys(en) as TravelExperienceKey[];
 export function travelText(locale: Locale, key: TravelExperienceKey) {
   return copy[locale][key];
 }
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], travelText);

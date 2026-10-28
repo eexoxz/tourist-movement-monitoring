@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const english = {
@@ -131,3 +132,5 @@ export function discoveryText(locale: Locale, key: DiscoveryCopyKey) {
   if (stateKey >= 0) return stateWords[locale][stateKey];
   return copy[locale][key];
 }
+
+registerFeatureCopy(Object.keys(english) as (keyof typeof english)[], discoveryText);

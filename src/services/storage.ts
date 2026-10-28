@@ -28,6 +28,7 @@ import { flushCloudChanges } from "./cloudSync";
 import { applyDemoDatasetSelection } from "./demoDatasetSelection";
 import { validDestinationPhoto, type DestinationPhotoUpload } from "./destinationPhotoUpload";
 import { destinationPhotoReference } from "./destinationPhoto";
+import { shareServerRead } from "./serverRead";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
@@ -142,7 +143,7 @@ export async function loadSharedDestinations(): Promise<Destination[] | null> {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
     const snapshot = await Promise.race([
-      getDocsFromServer(collection(services.db, FIRESTORE_COLLECTIONS.destinations)),
+      shareServerRead(services.db, services.auth.currentUser.uid, `collection:${FIRESTORE_COLLECTIONS.destinations}`, () => getDocsFromServer(collection(services.db, FIRESTORE_COLLECTIONS.destinations))),
       new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error("Place refresh timed out")), 10000); }),
     ]);
     return snapshot.docs.map((document) => normalizeDestination({ ...document.data(), id: document.id } as Destination));
@@ -390,17 +391,17 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
   if (cachedActor) await saveCloudData(loadData(), cachedActor);
 
   const readDocument = async <T>(name: string, id: string) => {
-      const snapshot = await getDoc(doc(services.db, name, id));
+      const snapshot = await shareServerRead(services.db, authUid, `doc:${name}/${id}`, () => getDoc(doc(services.db, name, id)));
       return snapshot.exists() ? ({ id: snapshot.id, ...snapshot.data() } as T) : null;
   };
 
   const readCollection = async <T>(name: string) => {
-      const snapshot = await getDocs(collection(services.db, name));
+      const snapshot = await shareServerRead(services.db, authUid, `collection:${name}`, () => getDocs(collection(services.db, name)));
       return snapshot.docs.map((document) => ({ id: document.id, ...document.data() }) as T);
   };
 
   const readOwnedCollection = async <T>(name: string) => {
-      const snapshot = await getDocs(query(collection(services.db, name), where("userId", "==", authUid)));
+      const snapshot = await shareServerRead(services.db, authUid, `owned:${name}`, () => getDocs(query(collection(services.db, name), where("userId", "==", authUid))));
       return snapshot.docs.map((document) => ({ id: document.id, ...document.data() }) as T);
   };
 

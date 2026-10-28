@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const en = {
@@ -102,3 +103,5 @@ export function translatedActivitySource(locale: Locale, source: string) {
   const key = (Object.keys(en) as ActivityCopyKey[]).find((key) => en[key] === source);
   return key ? copy[locale][key] : undefined;
 }
+
+registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], activityText);

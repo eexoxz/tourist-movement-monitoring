@@ -1,3 +1,4 @@
+import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
 const english = {
@@ -23,3 +24,5 @@ export function destinationAdminText(locale: Locale, key: Key, values: Record<st
   const text = locale === "en" ? english[key] : languages[locale][keys.indexOf(key)] ?? english[key];
   return text.replace(/\{(\w+)\}/g, (placeholder, name: string) => String(values[name] ?? placeholder));
 }
+
+registerFeatureCopy(Object.keys(english) as (keyof typeof english)[], destinationAdminText);

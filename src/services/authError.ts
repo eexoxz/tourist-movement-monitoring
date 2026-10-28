@@ -1,7 +1,8 @@
-
-
+import { isCloudQuotaError } from "./serverRead";
 export function friendlyAuthError(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : "";
+  if (isCloudQuotaError(error)) return "Cloud data cannot be refreshed right now. Please try again later.";
+  if (message.includes("auth/network-request-failed")) return "Connection failed. Check your internet connection and try again.";
 
   if (message.includes("auth/invalid-email")) {
     return "Enter a valid email address.";
@@ -23,5 +24,5 @@ export function friendlyAuthError(error: unknown, fallback: string) {
     return "Password must be at least 6 characters.";
   }
 
-  return message || fallback;
+  return fallback;
 }
