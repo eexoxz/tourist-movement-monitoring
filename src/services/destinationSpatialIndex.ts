@@ -13,6 +13,7 @@ export type DestinationDistance = {
 export type DestinationSpatialIndex = {
   destinations: Destination[];
   nearby(point: GeoPoint, radiusKm: number): DestinationDistance[];
+  forEachNearby(point: GeoPoint, radiusKm: number, visit: (destination: Destination, distance: number) => void): void;
   nearest(point: GeoPoint, maxDistanceKm?: number): DestinationDistance | undefined;
   candidatesBetween(previous: GeoPoint, current: GeoPoint, radiusKm: number): Destination[];
 };
@@ -64,8 +65,20 @@ export function createDestinationSpatialIndex(destinations: Destination[], cellD
     });
   };
 
+  const forEachNearby: DestinationSpatialIndex["forEachNearby"] = (point, radiusKm, visit) => {
+      const latRadius = radiusKm / kmPerLatitudeDegree, lngRadius = longitudeRadiusDegrees(radiusKm, point.latitude);
+      for (let lat = Math.floor((point.latitude - latRadius) / cellDegrees); lat <= Math.floor((point.latitude + latRadius) / cellDegrees); lat++) {
+        for (let lng = Math.floor((point.longitude - lngRadius) / cellDegrees); lng <= Math.floor((point.longitude + lngRadius) / cellDegrees); lng++) {
+          for (const destination of grid.get(`${lat}:${lng}`) ?? []) {
+            const distance = distanceKm(point, destination);
+            if (distance <= radiusKm) visit(destination, distance);
+          }
+        }
+      }
+  };
+
   return {
-    destinations,
+    destinations, forEachNearby,
     nearby(point, radiusKm) {
       return candidatesNear(point, radiusKm)
         .map((destination) => ({ destination, distance: distanceKm(point, destination) }))
@@ -73,9 +86,14 @@ export function createDestinationSpatialIndex(destinations: Destination[], cellD
         .sort((a, b) => a.distance - b.distance);
     },
     nearest(point, maxDistanceKm) {
-      const candidates = maxDistanceKm ? candidatesNear(point, maxDistanceKm) : destinations;
       let nearest: DestinationDistance | undefined;
-      for (const destination of candidates) {
+      if (maxDistanceKm !== undefined) {
+        forEachNearby(point, maxDistanceKm, (destination, distance) => {
+          if (!nearest || distance < nearest.distance) nearest = { destination, distance };
+        });
+        return nearest;
+      }
+      for (const destination of destinations) {
         const distance = distanceKm(point, destination);
         if ((maxDistanceKm === undefined || distance <= maxDistanceKm) && (!nearest || distance < nearest.distance)) {
           nearest = { destination, distance };

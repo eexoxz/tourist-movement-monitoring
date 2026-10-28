@@ -32,7 +32,7 @@ import { destinationPhotoReference } from "./destinationPhoto";
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
 const demoUserIds = new Set(initialData.users.map((user) => user.id));
-let localDataCache: { storage: Storage; raw: string; data: AppData } | undefined;
+let localDataCache: { storage: Storage; raw: string | null; data: AppData; sessionOnly?: boolean } | undefined;
 let privateCacheCleared = false;
 
 export const FIRESTORE_COLLECTIONS = {
@@ -119,6 +119,14 @@ export function cacheLocalData(data: AppData) {
   const selected = applyDemoDatasetSelection(data);
   saveLocalData(selected);
   return selected;
+}
+
+// Large downloaded histories may exceed the browser's synchronous storage quota.
+// Keep the full working snapshot available; genuine edits use the separate cloud-job queue.
+export function cacheSessionData(data: AppData) {
+  if (privateCacheCleared) return data;
+  localDataCache = { storage: localStorage, raw: localStorage.getItem(DATA_KEY), data, sessionOnly: true };
+  return data;
 }
 
 export function clearLocalDownloadCache() {
@@ -363,7 +371,7 @@ export function resetData() {
 }
 
 export function getStorageMode() {
-  return isFirebaseConfigured() ? "Firestore collections + local backup" : "Local browser storage";
+  return isFirebaseConfigured() ? localDataCache?.sessionOnly ? "Firestore collections" : "Firestore collections + local backup" : "Local browser storage";
 }
 
 export async function loadCloudData(fallbackActor?: User | null, isCurrent = () => true) {
@@ -647,9 +655,21 @@ function buildDestinationCategoryRows(destinations: Destination[]): DestinationC
 
 function saveLocalData(data: AppData) {
   if (privateCacheCleared) return;
+  if (isFirebaseConfigured() && localDataCache?.storage === localStorage && localDataCache.sessionOnly && data.points.length >= localDataCache.data.points.length) {
+    cacheSessionData(data);
+    return;
+  }
   const raw = JSON.stringify(data);
-  localStorage.setItem(DATA_KEY, raw);
-  localDataCache = { storage: localStorage, raw, data };
+  try {
+    localStorage.setItem(DATA_KEY, raw);
+    localDataCache = { storage: localStorage, raw, data };
+  } catch (error) {
+    if (!isFirebaseConfigured() || !(error instanceof DOMException) || !["QuotaExceededError", "NS_ERROR_DOM_QUOTA_REACHED"].includes(error.name)) throw error;
+    // Evict only the replaceable snapshot, never pending jobs, consent or drafts.
+    // This also frees room for new edits to enter their durable sync queue.
+    localStorage.removeItem(DATA_KEY);
+    cacheSessionData(data);
+  }
 }
 
 function asArray<T>(value: unknown): T[] {

@@ -39,14 +39,14 @@ describe("workspace integration guardrails", () => {
     expect(map).toContain('on("popupopen", () => setRoutePopupOpen(true))');
     expect(map).toContain('on("popupclose", () => setRoutePopupOpen(false))');
     expect(map).toContain("!routePopupOpen && !previewDismissed");
-    expect(map).toMatch(/const selectDestination = \(\) => \{\s*map.closePopup\(\)/);
+    expect(map).toMatch(/const selectDestination = \([^)]*\) => \{\s*map.closePopup\(\)/);
   });
 
   it("requires an explicit action to expand details and lets tourists collapse or dismiss them", () => {
     expect(map).not.toContain("setSelectedDestinationId(visibleDestinations[0].id)");
     expect(map).toContain("detailsExpanded && selectedDestination && selectedSignal");
     expect(map).toContain("setExpandedDestinationId(previewDestination.id)");
-    expect(map).toMatch(/const selectDestination = \(\) => \{[^}]*setExpandedDestinationId\(null\)/);
+    expect(map).toMatch(/const selectDestination = \([^)]*\) => \{[^}]*setExpandedDestinationId\(null\)/);
     expect(map).toContain("onClick={() => setExpandedDestinationId(null)}");
     expect(map).toContain("setDismissedPreviewId(previewDestination.id)");
   });
@@ -119,10 +119,10 @@ describe("workspace integration guardrails", () => {
   });
 
   it("keeps aggregate demand separate from individual trip routes", () => {
-    expect(map).toContain('displayMode === "route" && route.length > 0');
+    expect(map).toContain('displayMode === "route" && points.length > 0');
     expect(map).toContain('displayMode === "signals"');
-    expect(map).toContain("splitRouteSegments");
-    expect(map).toContain("maxRenderedRoutePointMarkers");
+    expect(map).toContain("MovementCanvasLayer");
+    expect(map).not.toContain("maxRenderedRoutePointMarkers");
     expect(admin).toContain('displayMode="signals"');
     expect(trip).toContain('displayMode={activeTrip ? "route" : "signals"}');
     expect(admin).toContain('displayMode={selectedRecord?.points.length ? "route" : "signals"}');

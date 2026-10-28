@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Destination, DestinationDemand, MovementPoint } from "../types";
-import { calculateDestinationSignals } from "./mapSignals";
+import { calculateDestinationSignals, createDestinationSignalCalculator } from "./mapSignals";
 
 const destination: Destination = {
   id: "george-town",
@@ -38,6 +38,28 @@ function point(id: string, latitude: number, longitude: number, userId: string, 
 }
 
 describe("map signal service", () => {
+  it("matches a fresh calculation after append, reorder, deletion, coordinate edits and catalogue changes", () => {
+    const calculate = createDestinationSignalCalculator(), places = [destination, farDestination];
+    let points = [point("a", 5.4141, 100.3288, "a", "2026-09-01T10:00:00Z")];
+    const check = () => expect(calculate(places, points)).toEqual(calculateDestinationSignals(places, points));
+    check(); points = [...points, point("b", 5.4142, 100.3288, "b", "2026-09-01T10:02:00Z")]; check();
+    points = [...points, point("earlier", 3.1587, 101.7131, "c", "2026-09-01T09:00:00Z")]; check();
+    points = [...points].reverse(); check(); points = points.slice(0, 1); check();
+    points = [{ ...points[0], latitude: 0 }]; check();
+    expect(calculate([destination], points)).toEqual(calculateDestinationSignals([destination], points));
+  });
+  it("rechecks future GPS timestamps when they become eligible and rejects out-of-order appended GPS jumps", () => {
+    const calculate = createDestinationSignalCalculator(), places = [destination];
+    const now = Date.parse("2026-09-01T10:00:00Z");
+    const future = { ...point("future", 5.4141, 100.3288, "a", "2026-09-01T10:02:00Z"), source: "browser" as const };
+    const records = [future];
+    expect(calculate(places, records, undefined, undefined, now).get(destination.id)?.nearbyPointCount).toBe(0);
+    expect(calculate(places, records, undefined, undefined, now + 120000).get(destination.id)?.nearbyPointCount).toBe(1);
+    const early = { ...future, id: "early", recordedAt: "2026-09-01T10:01:00Z" };
+    const late = { ...future, id: "late", recordedAt: "2026-09-01T10:03:00Z" };
+    const appended = [...records, late, early];
+    expect(calculate(places, appended, undefined, undefined, now + 240000)).toEqual(createDestinationSignalCalculator()(places, appended, undefined, undefined, now + 240000));
+  });
   it("shows a shared activity band without inventing visitor or GPS counts", () => {
     const demand: DestinationDemand = { destinationId: destination.id, popularityScore: 80, tier: "high", movementPointCount: 0, uniqueTouristCount: 0, recentPointCount: 0, approachSignalCount: 0, approachingTouristCount: 0 };
     expect(calculateDestinationSignals([destination], [], undefined, [demand]).get(destination.id)).toMatchObject({ tier: "high", activityScore: 80, nearbyPointCount: 0, uniqueTouristCount: 0 });

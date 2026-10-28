@@ -51,7 +51,8 @@ export function recordedMovementMinutes(points: readonly QualityPoint[]) {
 
 export function filterQualityMovementPoints(points: MovementPoint[], now = Date.now()) {
   const previousByTrip = new Map<string, MovementPoint>();
-  return [...points].sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt)).filter((point) => {
+  // Parse each timestamp once for sorting, rather than on both sides of every comparison.
+  return points.map((point) => ({ point, time: Date.parse(point.recordedAt) })).sort((a, b) => a.time - b.time).map(({ point }) => point).filter((point) => {
     if (!Number.isFinite(point.latitude) || !Number.isFinite(point.longitude) || Math.abs(point.latitude) > 90 || Math.abs(point.longitude) > 180) return false;
     const previous = previousByTrip.get(point.tripId);
     if (getMovementQualityIssue(point, previous, now)) return false;

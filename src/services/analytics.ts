@@ -537,10 +537,12 @@ export function calculateDestinationDemand(data: AppData, options: { includeDemo
     points.slice(1).forEach((point, index) => {
       const previous = points[index];
       if (!isContinuousMovementSegment(previous, point) || (point.userId && point.userId !== trip.userId) || (previous.userId && previous.userId !== trip.userId)) return;
+      // Both ends must lie within this radius of the same destination. By the triangle
+      // inequality, a longer segment cannot contribute an approach signal.
+      if (distanceKm(previous, point) > 2 * approachSignalRadiusKm) return;
 
-      destinationIndex.candidatesBetween(previous, point, approachSignalRadiusKm).forEach((destination) => {
+      destinationIndex.forEachNearby(point, approachSignalRadiusKm, (destination, currentDistance) => {
         const previousDistance = distanceKm(previous, destination);
-        const currentDistance = distanceKm(point, destination);
         const movedCloserBy = previousDistance - currentDistance;
 
         if (previousDistance <= approachSignalRadiusKm && currentDistance <= approachSignalRadiusKm && movedCloserBy >= approachSignalMinimumGainKm) {

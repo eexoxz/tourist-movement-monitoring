@@ -439,7 +439,7 @@
   }
 
   .map-legend {
-    right: 10px;
+    right: 60px;
     bottom: 10px;
     left: 10px;
     max-width: none;
@@ -447,7 +447,7 @@
   }
 
   .tourist-map-mode .map-legend {
-    right: 10px;
+    right: 60px;
     bottom: 10px;
     left: 10px;
     max-width: none;

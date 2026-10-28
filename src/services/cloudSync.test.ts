@@ -65,6 +65,26 @@ beforeEach(() => {
 afterEach(() => { for (const job of pendingCloudJobs(alice)) acknowledgeCloudJob(job); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe("scoped cloud workflow persistence", () => {
+  it("keeps a quota-exceeding cloud history in session and still queues genuine changes durably", async () => {
+    const before = base();
+    const originalWrite = localStorage.setItem;
+    const write = vi.spyOn(localStorage, "setItem").mockImplementation((key, value) => {
+      if (key === "tourist-movement-monitoring:data") throw new DOMException("Cache full", "QuotaExceededError");
+      originalWrite(key, value);
+    });
+    try {
+      const next = { ...before, points: [{ id: "new-point", tripId: "trip", userId: "alice", latitude: 5.4, longitude: 100.3, accuracyMeters: 20, source: "browser" as const, recordedAt: "2026-10-28T00:00:00Z" }] };
+      cacheLocalData(next);
+      expect(loadData().points).toEqual(next.points);
+      expect(localStorage.getItem("tourist-movement-monitoring:data")).toBeNull();
+      mock.fail = true;
+      await expect(saveData(next, alice, before)).rejects.toThrow("offline");
+      expect(pendingCloudJobs(alice).some((job) => job.changes.some((change) => change.id === "new-point"))).toBe(true);
+      expect(Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).some((key) => key?.startsWith("tourist-movement-monitoring:cloud-job:"))).toBe(true);
+      expect(loadData().points).toEqual(next.points);
+      expect(write.mock.calls.filter(([key]) => key === "tourist-movement-monitoring:data")).toHaveLength(1);
+    } finally { write.mockRestore(); }
+  });
   it("never uploads selected samples or deletes genuine cloud history during sample replacement", async () => {
     const admin = { ...alice, id: "admin", authUid: "admin", role: "admin" as const };
     mock.currentUser = { uid: admin.id };

@@ -2,7 +2,7 @@ import type { AnalysisResult, AppData, DestinationCategory, MovementPoint, Touri
 import { demoDatasetMetadata } from "../data/demoData";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
-import { compareTimeAsc, compareTimeDesc } from "./time";
+import { compareTimeAsc, compareTimeDesc, timeValue } from "./time";
 import { isContinuousMovementSegment, recordedMovementMinutes } from "./movementQuality";
 
 export type MovementRecordView = {
@@ -319,6 +319,13 @@ function tripMatchesDateRange(trip: TripSession, points: MovementPoint[], filter
 
 function buildDashboardIndexes(data: AppData) {
   const pointsByTrip = new Map<string, MovementPoint[]>();
+  const pointTimes = new Map(data.points.map((point) => [point, timeValue(point.recordedAt)]));
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
+  const nearestByPoint = new Map<MovementPoint, ReturnType<DestinationSpatialIndex["nearest"]>>();
+  const nearestPlace = (point: MovementPoint) => {
+    if (!nearestByPoint.has(point)) nearestByPoint.set(point, destinationIndex.nearest(point, 1.2));
+    return nearestByPoint.get(point);
+  };
 
   data.points.forEach((point) => {
     const tripPoints = pointsByTrip.get(point.tripId) ?? [];
@@ -327,21 +334,21 @@ function buildDashboardIndexes(data: AppData) {
   });
 
   pointsByTrip.forEach((points) => {
-    points.sort((a, b) => compareTimeAsc(a.recordedAt, b.recordedAt));
+    points.sort((a, b) => pointTimes.get(a)! - pointTimes.get(b)!);
   });
 
   return {
     tripById: new Map(data.trips.map((trip) => [trip.id, trip])),
     userById: new Map(data.users.map((user) => [user.id, user])),
     analysisByTripId: new Map(data.analyses.map((analysis) => [analysis.tripId, analysis])),
-    destinationIndex: createDestinationSpatialIndex(data.destinations),
+    destinationIndex, nearestPlace, pointTimes,
     pointsByTrip,
   };
 }
 
 type DashboardIndexes = ReturnType<typeof buildDashboardIndexes>;
 
-function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destinationIndex: DestinationSpatialIndex): { summary: TripSummary; destinationNames: string[] } {
+function summarizeTripPoints(trip: TripSession, points: MovementPoint[], nearestPlace: DashboardIndexes["nearestPlace"]): { summary: TripSummary; destinationNames: string[] } {
   const visitedDestinationIds = new Set<string>();
   const destinationNames = new Set<string>();
   let distance = 0;
@@ -355,7 +362,7 @@ function summarizeTripPoints(trip: TripSession, points: MovementPoint[], destina
       distance += distanceKm(points[index - 1], point);
     }
 
-    const nearest = destinationIndex.nearest(point, 1.2);
+    const nearest = nearestPlace(point);
     if (nearest) {
       visitedDestinationIds.add(nearest.destination.id);
       destinationNames.add(nearest.destination.name);
@@ -394,7 +401,7 @@ function getMovementRecordsWithIndexes(data: AppData, filters: MovementRecordFil
     .map((point) => {
       const trip = indexes.tripById.get(point.tripId) ?? null;
       const tourist = trip ? indexes.userById.get(trip.userId) ?? null : null;
-      const nearest = indexes.destinationIndex.nearest(point, 1.2);
+      const nearest = indexes.nearestPlace(point);
 
       return {
         point,
@@ -404,7 +411,7 @@ function getMovementRecordsWithIndexes(data: AppData, filters: MovementRecordFil
         nearestDestinationCategory: nearest?.destination.category ?? null,
       };
     })
-    .sort((a, b) => compareTimeDesc(a.point.recordedAt, b.point.recordedAt));
+    .sort((a, b) => indexes.pointTimes.get(b.point)! - indexes.pointTimes.get(a.point)!);
 }
 
 export function getMovementRecords(data: AppData, filters: MovementRecordFilters | string = {}): MovementRecordView[] {
@@ -424,7 +431,7 @@ function getMovementTripRecordsWithIndexes(data: AppData, filters: MovementRecor
     .filter((trip) => !filters.tripId || filters.tripId === "all" || trip.id === filters.tripId)
     .map((trip) => {
       const points = indexes.pointsByTrip.get(trip.id) ?? [];
-      const evidence = summarizeTripPoints(trip, points, indexes.destinationIndex);
+      const evidence = summarizeTripPoints(trip, points, indexes.nearestPlace);
 
       return {
         trip,

@@ -5,12 +5,14 @@ import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, DestinationDemand, MovementPoint } from "../types";
 import { distanceKm, formatDateTime } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
-import { calculateDestinationSignals, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
+import { createDestinationSignalCalculator, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
 import { DestinationVisual } from "./DestinationVisual";
 import { PlacePracticalInfo } from "./PlacePracticalInfo";
 import { discoveryText } from "../services/discoveryCopy";
 import { activityText } from "../services/activityCopy";
-import { isContinuousMovementSegment } from "../services/movementQuality";
+import { MovementCanvasLayer } from "./MovementCanvasLayer";
+import { groupMapDestinations } from "../services/movementMapGeometry";
+import { mapDisplayText } from "../services/mapDisplayCopy";
 import { uiText } from "../services/uiText";
 import { categoryIconMarkup, type CategoryIconSize } from "../generated/mapIconMarkup";
 
@@ -33,8 +35,6 @@ const categoryMeta: Record<DestinationCategory, { labelKey: TranslationKey }> = 
   food: { labelKey: "category.food" },
   coastal: { labelKey: "category.coastal" },
 };
-const routeJumpLimitKm = 120;
-const maxRenderedRoutePointMarkers = 80;
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (character) => {
@@ -74,20 +74,9 @@ function crowdLabelKey(signal: DestinationSignal): TranslationKey {
   return "map.crowd.quiet";
 }
 
-function destinationIcon(category: DestinationCategory, signal: DestinationSignal, locale: Locale, showCounts = true) {
-  const meta = categoryMeta[category];
-  const size = signal.tier === "high" ? 46 : signal.tier === "medium" ? 42 : signal.tier === "emerging" ? 38 : 34;
-  const iconSize = signal.tier === "high" ? 20 : signal.tier === "medium" ? 18 : signal.tier === "emerging" ? 17 : 15;
-  const badgeLabel = signal.nearbyPointCount > 999 ? "999+" : signal.nearbyPointCount.toString();
-  const badge = showCounts && signal.nearbyPointCount > 0 ? `<b>${badgeLabel}</b>` : "";
-
-  return L.divIcon({
-    className: `destination-marker destination-marker-${category} destination-marker-${signal.tier}`,
-    html: `<span>${categoryIconHtml(category, iconSize)}</span>${badge}<small>${escapeHtml(translate(locale, meta.labelKey)).toUpperCase()}</small>`,
-    iconSize: [size, size + 8],
-    iconAnchor: [size / 2, size + 2],
-    popupAnchor: [0, -size],
-  });
+function destinationIcon(category: DestinationCategory, signal: DestinationSignal, showCounts: boolean) {
+  const badge = showCounts && signal.nearbyPointCount > 0 ? `<b>${signal.nearbyPointCount > 999 ? "999+" : signal.nearbyPointCount}</b>` : "";
+  return L.divIcon({ className: `destination-marker destination-marker-${category} destination-marker-compact`, html: `<span>${categoryIconHtml(category, 15)}</span>${badge}`, iconSize: [28, 34], iconAnchor: [14, 32] });
 }
 
 function routeIcon(type: "start" | "end" | "current") {
@@ -100,52 +89,13 @@ function routeIcon(type: "start" | "end" | "current") {
   });
 }
 
-function signalRank(tier: DestinationSignal["tier"]) {
-  return tier === "high" ? 4 : tier === "medium" ? 3 : tier === "emerging" ? 2 : 1;
-}
-
-function demandHaloRadius(signal: DestinationSignal) {
-  return signal.tier === "high" ? 620 : signal.tier === "medium" ? 520 : signal.tier === "emerging" ? 430 : 320;
-}
-
-function shouldDrawDemandHalo(signal: DestinationSignal, displayMode: MapViewProps["displayMode"], hasActivePoint: boolean) {
-  if (signal.nearbyPointCount > 0) {
-    return true;
-  }
-
-  return displayMode === "route" && hasActivePoint;
-}
-
-function markerZIndex(signal: DestinationSignal) {
-  return 200 + signalRank(signal.tier) * 100 + Math.min(signal.nearbyPointCount, 99);
-}
-
-function splitRouteSegments(points: MovementPoint[]) {
-  return points.reduce<Array<Array<[number, number]>>>((segments, point, index) => {
-    const coordinate: [number, number] = [point.latitude, point.longitude];
-    const previous = points[index - 1];
-
-    if (!previous || !isContinuousMovementSegment(previous, point) || distanceKm(previous, point) > routeJumpLimitKm) {
-      segments.push([coordinate]);
-      return segments;
-    }
-
-    segments[segments.length - 1].push(coordinate);
-    return segments;
-  }, []);
-}
-
-function shouldRenderPointMarker(index: number, totalPoints: number) {
-  if (index === 0 || index === totalPoints - 1) {
-    return true;
-  }
-
-  return index % Math.max(1, Math.ceil(totalPoints / maxRenderedRoutePointMarkers)) === 0;
-}
-
 export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const movementLayerRef = useRef<MovementCanvasLayer | null>(null);
+  const renderDestinationsRef = useRef<(() => void) | null>(null);
+  const signalsRef = useRef<Map<string, DestinationSignal>>(new Map());
+  const [placeGroup, setPlaceGroup] = useState<Destination[] | null>(null);
   const lastAutoFocusKeyRef = useRef("");
   const manualBrowseRef = useRef(false);
   const automaticViewRef = useRef(false);
@@ -169,7 +119,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
     return rankedDestinations.slice(0, limit);
   }, [activePoint, destinations, mode, points.length]);
-  const destinationSignals = useMemo(() => calculateDestinationSignals(visibleDestinations, points, activePoint, activityDemand), [activePoint, points, visibleDestinations, activityDemand]);
+  const calculateSignals = useMemo(() => createDestinationSignalCalculator(), []);
+  const destinationSignals = useMemo(() => calculateSignals(visibleDestinations, points, activePoint, activityDemand), [activePoint, points, visibleDestinations, activityDemand]);
+  signalsRef.current = destinationSignals;
   const selectedDestination = visibleDestinations.find((destination) => destination.id === selectedDestinationId) ?? null;
   const selectedSignal = selectedDestination ? destinationSignals.get(selectedDestination.id) : null;
   const t = (key: TranslationKey) => translate(locale, key);
@@ -197,6 +149,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         attributionControl: true,
         scrollWheelZoom: false,
         touchZoom: true,
+        preferCanvas: true,
       }).setView([3.1478, 101.6937], 13);
       mapRef.current.on("dragstart", () => { manualBrowseRef.current = true; });
       mapRef.current.on("zoomstart", () => { if (!automaticViewRef.current) manualBrowseRef.current = true; });
@@ -238,103 +191,96 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     lastAutoFocusKeyRef.current = "";
   }, [points[0]?.tripId, isBrowsingArea ? activePoint?.id : undefined]);
 
+  // Destination geometry survives GPS updates. Reconcile only the marker groups that
+  // enter/leave the viewport; zooming reveals smaller groups without discarding places.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-
+    if (!map) return;
     const layer = L.layerGroup().addTo(map);
-    const route = points.map((point) => [point.latitude, point.longitude] as [number, number]);
-    const routeSegments = splitRouteSegments(points).filter((segment) => segment.length > 1);
-
-    visibleDestinations.forEach((destination) => {
-      const signal = destinationSignals.get(destination.id) ?? emptyDestinationSignal(activePoint, destination);
-      const drawDemandHalo = shouldDrawDemandHalo(signal, displayMode, Boolean(activePoint));
-      const selectDestination = () => {
-        map.closePopup();
-        setSelectedDestinationId(destination.id);
-        setExpandedDestinationId(null);
-        setDismissedPreviewId(null);
-        manualBrowseRef.current = true;
-        map.panTo([destination.latitude, destination.longitude], { animate: false });
-      };
-
-      if (drawDemandHalo) {
-        L.circle([destination.latitude, destination.longitude], {
-          radius: demandHaloRadius(signal),
-          color: signal.nearbyPointCount > 0 ? "rgba(15, 118, 110, 0.34)" : "rgba(15, 118, 110, 0.2)",
-          fillColor: "rgba(15, 118, 110, 0.11)",
-          fillOpacity: signal.nearbyPointCount > 0 ? 0.12 : 0.05,
-          weight: signal.nearbyPointCount > 0 ? 2 : 1,
-          interactive: true,
-        })
-          .on("click", selectDestination)
-          .bindTooltip(destination.name, { direction: "top", opacity: 0.92 })
-          .addTo(layer);
+    const markers = new Map<string, { marker: L.Marker; signature: string }>();
+    let zoom = NaN;
+    let groups: ReturnType<typeof groupMapDestinations> = [];
+    const selectDestination = (destination: Destination) => {
+      map.closePopup(); setSelectedDestinationId(destination.id); setExpandedDestinationId(null);
+      setDismissedPreviewId(null); setPlaceGroup(null); manualBrowseRef.current = true;
+      map.panTo([destination.latitude, destination.longitude], { animate: false });
+    };
+    const render = () => {
+      const currentZoom = map.getZoom();
+      if (currentZoom !== zoom) { zoom = currentZoom; groups = groupMapDestinations(visibleDestinations, zoom); }
+      const bounds = map.getBounds().pad(.2), wanted = new Set<string>();
+      for (const group of groups) {
+        if (!bounds.contains([group.latitude, group.longitude])) continue;
+        wanted.add(group.key);
+        const single = group.places.length === 1 ? group.places[0] : null;
+        const signal = single ? signalsRef.current.get(single.id) ?? emptyDestinationSignal() : null;
+        const signature = single ? `${single.category}:${zoom >= 11 ? signal!.nearbyPointCount : ""}` : String(group.places.length);
+        const previous = markers.get(group.key);
+        if (previous && previous.signature === signature) continue;
+        const title = single ? single.name : mapDisplayText(locale, "places", { count: group.places.length });
+        const icon = single ? destinationIcon(single.category, signal!, mode !== "tourist" && zoom >= 11) : L.divIcon({ className: "destination-cluster", html: `<strong>${new Intl.NumberFormat(locale).format(group.places.length)}</strong>`, iconSize: [44, 44], iconAnchor: [22, 22] });
+        if (previous) { previous.marker.setIcon(icon); previous.signature = signature; continue; }
+        const marker = L.marker([group.latitude, group.longitude], { icon, title, alt: title, zIndexOffset: single ? 200 : 300 });
+        marker.on("click", () => {
+          if (single) { selectDestination(single); return; }
+          manualBrowseRef.current = true; map.closePopup();
+          const placeBounds = L.latLngBounds(group.places.map((place) => [place.latitude, place.longitude] as [number, number]));
+          if (map.getZoom() >= 17 || placeBounds.getNorthEast().distanceTo(placeBounds.getSouthWest()) < 5) setPlaceGroup(group.places);
+          else { setPlaceGroup(null); map.fitBounds(placeBounds, { padding: [48, 48], maxZoom: Math.min(18, map.getZoom() + 3), animate: false }); }
+        });
+        marker.addTo(layer); markers.set(group.key, { marker, signature });
       }
+      for (const [key, value] of markers) if (!wanted.has(key)) { layer.removeLayer(value.marker); markers.delete(key); }
+    };
+    renderDestinationsRef.current = render;
+    map.on("moveend zoomend", render); render();
+    return () => { map.off("moveend zoomend", render); layer.remove(); markers.clear(); renderDestinationsRef.current = null; };
+  }, [visibleDestinations, locale, mode]);
 
-      const marker = L.marker([destination.latitude, destination.longitude], {
-        icon: destinationIcon(destination.category, signal, locale, mode !== "tourist"),
-        title: destination.name,
-        zIndexOffset: markerZIndex(signal),
-      }).on("click", selectDestination);
+  useEffect(() => { renderDestinationsRef.current?.(); }, [destinationSignals]);
 
-      marker.addTo(layer);
-    });
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const layer = new MovementCanvasLayer().addTo(map);
+    movementLayerRef.current = layer;
+    return () => { layer.remove(); movementLayerRef.current = null; };
+  }, []);
 
-    if (displayMode === "route" && route.length > 0) {
-      routeSegments.forEach((segment) => {
-        L.polyline(segment, {
-          color: "#ffffff",
-          weight: 9,
-          opacity: 0.95,
-          lineCap: "round",
-          lineJoin: "round",
-        }).addTo(layer);
+  useEffect(() => {
+    const map = mapRef.current, layer = movementLayerRef.current;
+    if (!map || !layer) return;
+    layer.onSelect = (point, index) => {
+      setPlaceGroup(null);
+      L.popup().setLatLng([point.latitude, point.longitude]).setContent(`<section class="map-popup"><strong>${escapeHtml(t("map.movementPoint"))} ${index + 1}</strong><span>${formatDateTime(point.recordedAt, locale)}</span><dl><div><dt>${escapeHtml(t("map.accuracy"))}</dt><dd>${point.accuracyMeters}m</dd></div><div><dt>${escapeHtml(t("map.source"))}</dt><dd>${escapeHtml(point.source)}</dd></div></dl></section>`).openOn(map);
+    };
+    layer.setData(points, displayMode === "route");
+  }, [points, displayMode, locale]);
 
-        L.polyline(segment, {
-          color: "#0f766e",
-          weight: 5,
-          opacity: 0.88,
-          lineCap: "round",
-          lineJoin: "round",
-        }).addTo(layer);
-      });
-
-      points.forEach((point, index) => {
-        if (!shouldRenderPointMarker(index, points.length)) {
-          return;
-        }
-
-        L.circleMarker([point.latitude, point.longitude], {
-          radius: index === points.length - 1 ? 6 : 4,
-          color: "#ffffff",
-          fillColor: index === points.length - 1 ? "#e85d75" : "#14b8a6",
-          fillOpacity: 0.95,
-          weight: 2,
-        })
-          .bindPopup(
-            `<section class="map-popup"><strong>${escapeHtml(t("map.movementPoint"))} ${index + 1}</strong><span>${formatDateTime(point.recordedAt, locale)}</span><dl><div><dt>${escapeHtml(t("map.accuracy"))}</dt><dd>${point.accuracyMeters}m</dd></div><div><dt>${escapeHtml(t("map.source"))}</dt><dd>${escapeHtml(point.source)}</dd></div></dl></section>`
-          )
-          .addTo(layer);
-      });
-
-      L.marker(route[0], { icon: routeIcon("start"), title: t("map.tripStart") }).bindPopup(`<strong>${escapeHtml(t("map.tripStart"))}</strong><br>${formatDateTime(points[0].recordedAt, locale)}`).addTo(layer);
-      L.marker(route[route.length - 1], { icon: routeIcon("end"), title: t("map.tripEnd") })
-        .bindPopup(`<strong>${escapeHtml(t("map.tripEnd"))}</strong><br>${formatDateTime(points.at(-1)!.recordedAt, locale)}`)
-        .addTo(layer);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const layer = L.layerGroup().addTo(map);
+    if (displayMode === "route" && points.length > 0) {
+      for (const [type, point] of [["start", points[0]], ["end", points.at(-1)!]] as const) {
+        const title = t(type === "start" ? "map.tripStart" : "map.tripEnd");
+        L.marker([point.latitude, point.longitude], { icon: routeIcon(type), title }).bindPopup(`<strong>${escapeHtml(title)}</strong><br>${formatDateTime(point.recordedAt, locale)}`).addTo(layer);
+      }
     }
+    return () => { layer.remove(); };
+  }, [displayMode, points[0], points.at(-1), locale]);
 
-    if (activePoint) {
-      L.marker([activePoint.latitude, activePoint.longitude], {
-        icon: routeIcon("current"),
-        title: isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"),
-      })
-        .bindPopup(`<strong>${escapeHtml(isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"))}</strong>${isBrowsingArea ? "" : `<br>${formatDateTime(activePoint.recordedAt, locale)}`}`)
-        .addTo(layer);
-    }
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !activePoint) return;
+    const marker = L.marker([activePoint.latitude, activePoint.longitude], { icon: routeIcon("current"), title: isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation") })
+      .bindPopup(`<strong>${escapeHtml(isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"))}</strong>${isBrowsingArea ? "" : `<br>${formatDateTime(activePoint.recordedAt, locale)}`}`).addTo(map);
+    return () => { marker.remove(); };
+  }, [activePoint, isBrowsingArea, locale]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
     const latestRoutePoint = points.at(-1);
     const autoFocusKey = activePoint && mode === "tourist"
       ? `active:${activePoint.latitude}:${activePoint.longitude}`
@@ -354,11 +300,11 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
             map.fitBounds(L.latLngBounds(visibleDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number])), { padding: [36, 36], maxZoom: 12, animate: false });
           } else if (activePoint && mode === "tourist") {
             map.setView([activePoint.latitude, activePoint.longitude], hadFocus ? map.getZoom() : 15, { animate: false });
-          } else if (displayMode === "route" && route.length > 0) {
-            map.fitBounds(L.latLngBounds(route), { padding: [36, 36], maxZoom: 15, animate: false });
+          } else if (displayMode === "route" && points.length > 0) {
+            map.fitBounds(L.latLngBounds(points.map((point) => [point.latitude, point.longitude] as [number, number])), { padding: [36, 36], maxZoom: 15, animate: false });
           } else if (displayMode === "signals" && visibleDestinations.length > 1) {
             const signalBoundDestinations = visibleDestinations.filter((destination) => (destinationSignals.get(destination.id)?.nearbyPointCount ?? 0) > 0);
-            const boundsDestinations = signalBoundDestinations.length > 1 ? signalBoundDestinations : visibleDestinations;
+            const boundsDestinations = mode === "admin" ? visibleDestinations : signalBoundDestinations.length > 1 ? signalBoundDestinations : visibleDestinations;
             const destinationBounds = L.latLngBounds(boundsDestinations.map((destination) => [destination.latitude, destination.longitude] as [number, number]));
             map.fitBounds(destinationBounds, { padding: [42, 42], maxZoom: 8, animate: false });
           } else if (activePoint) {
@@ -368,10 +314,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       }
     }
 
-    return () => {
-      layer.remove();
-    };
-  }, [points, visibleDestinations, activePoint, destinationSignals, locale, mode, displayMode, isBrowsingArea]);
+  }, [points, visibleDestinations, activePoint, destinationSignals, mode, displayMode, isBrowsingArea]);
 
   const centerOnActivePoint = () => {
     if (!activePoint) {
@@ -384,6 +327,17 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     finally { automaticViewRef.current = false; }
   };
 
+  const sourceCounts = useMemo(() => {
+    const counts = { real: 0, sample: 0 };
+    for (const point of points) if (point.source === "browser") counts.real++; else if (point.source === "demo") counts.sample++;
+    return counts;
+  }, [points]);
+  const showMalaysia = () => {
+    const map = mapRef.current;
+    if (!map || !visibleDestinations.length) return;
+    manualBrowseRef.current = true; setPlaceGroup(null);
+    map.fitBounds(L.latLngBounds(visibleDestinations.map((place) => [place.latitude, place.longitude] as [number, number])), { padding: [40, 40], maxZoom: 8, animate: false });
+  };
   const visibleCategories = useMemo(() => Array.from(new Set(visibleDestinations.map((destination) => destination.category))), [visibleDestinations]);
   const topSignals = useMemo(
     () =>
@@ -403,9 +357,14 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const previewDismissed = !selectedDestination && previewDestination?.id === dismissedPreviewId;
 
   return (
-    <div className={mode === "tourist" ? "map-frame tourist-map-mode" : "map-frame"}>
+    <div className={`map-frame${mode === "tourist" ? " tourist-map-mode" : ""}${activePoint ? " map-has-location" : ""}`}>
       <div ref={containerRef} className="map-view" aria-label={t("map.aria")} />
       {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? t("map.loading") : t("map.error")}</div>}
+      {mode === "admin" && <>
+        <div className="map-data-summary" title={mapDisplayText(locale, "overlap")}><strong>{mapDisplayText(locale, "loaded", { count: points.length })}</strong><span>{mapDisplayText(locale, "sources", sourceCounts)}</span><small>{mapDisplayText(locale, "help")}</small></div>
+        <button type="button" className="map-national-button" onClick={showMalaysia} title={mapDisplayText(locale, "national")} aria-label={mapDisplayText(locale, "national")}><MapPinned size={18} /><span>{mapDisplayText(locale, "national")}</span></button>
+      </>}
+      {placeGroup && <section className="map-cluster-list" aria-label={mapDisplayText(locale, "group")}><button className="map-detail-close" type="button" aria-label={mapDisplayText(locale, "close")} onClick={() => setPlaceGroup(null)}><X size={16} /></button><strong>{mapDisplayText(locale, "places", { count: placeGroup.length })}</strong>{placeGroup.map((place) => <button key={place.id} className="secondary-action compact-action" type="button" onClick={() => { setSelectedDestinationId(place.id); setExpandedDestinationId(place.id); setDismissedPreviewId(null); setPlaceGroup(null); }}>{place.name}</button>)}</section>}
       {mode === "tourist" && <div className="map-mode-label">{t("map.touristMap")}</div>}
       {activePoint && (
         <button className="map-current-button" type="button" onClick={centerOnActivePoint} title={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")} aria-label={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}>
@@ -423,7 +382,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           </span>
         ))}
       </div>
-      {!routePopupOpen && !previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
+      {!placeGroup && !routePopupOpen && !previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
         {detailsExpanded && selectedDestination && selectedSignal ? (
           <>
             <button
