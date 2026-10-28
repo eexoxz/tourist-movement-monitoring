@@ -84,7 +84,6 @@ export function AdminWorkspace({
   const pendingPlaceCount = useMemo(() => groupUnlistedCheckIns(data.checkIns.filter((record) => !record.isDemo)).length, [data.checkIns]);
   const summary = useMemo(() => summarizeDashboard(data), [data.users, data.consents, data.trips, data.points, data.destinations]);
   const calendarDay = useCalendarDay();
-  const movementTrend = useMemo(() => getDailyMovementTrend(data), [data.points, calendarDay]);
   const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data.points]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
   const [selectedTripId, setSelectedTripId] = useState<string>("all");
@@ -116,6 +115,11 @@ export function AdminWorkspace({
   const recordsActive = view === "dashboard" && adminTab === "records";
   const aiActive = view === "dashboard" && adminTab === "ai";
   const touristsActive = view === "dashboard" && adminTab === "tourists";
+  const overviewActive = view === "dashboard" && adminTab === "overview";
+  // The attention strip needs demand on dashboard tabs, but not on the
+  // destination editor or tourist directory. Overview-only work stays there.
+  const demandActive = view === "dashboard" && adminTab !== "tourists";
+  const movementTrend = useMemo(() => overviewActive ? getDailyMovementTrend(data) : {}, [overviewActive, data.points, calendarDay]);
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data.trips, selectedTouristId]);
   const movementViews = useMemo(
     () =>
@@ -131,23 +135,23 @@ export function AdminWorkspace({
   const movementTripRecords = movementViews.tripRecords;
   const filteredPoints = useMemo(() => movementRecords.map((record) => record.point), [movementRecords]);
   const allDashboardPoints = data.points;
-  const destinationDemand = useMemo(() => calculateDestinationDemand(data), [data.trips, data.points, data.destinations]);
-  const movementAlerts = useMemo(() => calculateMovementAlerts(data, destinationDemand), [data.destinations, destinationDemand]);
+  const destinationDemand = useMemo(() => demandActive ? calculateDestinationDemand(data) : [], [demandActive, data.trips, data.points, data.destinations]);
+  const movementAlerts = useMemo(() => demandActive ? calculateMovementAlerts(data, destinationDemand) : [], [demandActive, data.destinations, destinationDemand]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
-  const geofenceActivity = useMemo(() => calculateGeofenceActivity(data), [data.geofences, data.points]);
+  const geofenceActivity = useMemo(() => overviewActive ? calculateGeofenceActivity(data) : [], [overviewActive, data.geofences, data.points]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
   const demoTouristCount = getPreparedDemoTouristCount(data);
   const touristManagementRows = useMemo(() => touristsActive ? getTouristManagementRows(data) : [], [touristsActive, data]);
   const travelPlan = useMemo(
     () =>
-      createMovementBasedTravelPlan(data, {
+      overviewActive ? createMovementBasedTravelPlan(data, {
         audience: planAudience,
         city: planCity,
         maxStops: planMaxStops,
         minimumTier: planMinimumTier,
         diversifyCategories: planDiversifyCategories,
-      }, destinationDemand),
-    [data.destinations, destinationDemand, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
+      }, destinationDemand) : null,
+    [overviewActive, data.destinations, destinationDemand, planAudience, planCity, planMaxStops, planMinimumTier, planDiversifyCategories]
   );
   const cityOptions = useMemo(() => Array.from(new Set(data.destinations.map((destination) => destination.city))).sort(), [data.destinations]);
   const filteredTouristCount = new Set(movementTripRecords.map((record) => record.trip.userId)).size;
@@ -316,6 +320,7 @@ export function AdminWorkspace({
   };
 
   const exportTravelPlan = () => {
+    if (!travelPlan) return;
     const blob = new Blob([buildTravelPlanCsv(travelPlan, data)], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -804,7 +809,7 @@ export function AdminWorkspace({
         </button>
       </div>
 
-      {adminTab === "overview" && (
+      {adminTab === "overview" && travelPlan && (
         <div className="admin-tab-panel">
           <DeferredDetails className="admin-planning-disclosure" summary={<><ChartNoAxesCombined size={19} />{adminText("overview.travelPlanSignal")}</>}><MovementPulseHero
             mode="admin"

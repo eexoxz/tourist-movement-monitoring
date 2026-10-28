@@ -8,7 +8,11 @@ import { installModuleRecovery, withStartupTimeout } from "./services/screenReco
 import { recoveryCopy } from "./services/recoveryCopy";
 
 installModuleRecovery();
-const App = React.lazy(() => import("./App"));
+// Fetch the app while the saved language loads, rather than starting a second
+// download waterfall afterwards. Suspense still receives any import failure.
+const appModule = import("./App");
+void appModule.catch(() => undefined);
+const App = React.lazy(() => appModule);
 
 async function startApp() {
   try {

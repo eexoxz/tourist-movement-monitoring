@@ -37,4 +37,19 @@ describe("destination localization", () => {
 
     expect(localized.name).toBe("极乐寺");
   });
+
+  it("shares cached translations across lists but refreshes edited records without mixing languages", () => {
+    const places = [destination];
+    const chinese = localizeDestinations(places, "zh");
+    expect(localizeDestinations(places, "zh")).toBe(chinese);
+    expect(localizeDestinations([...places], "zh")[0]).toBe(chinese[0]);
+    expect(localizeDestination(destination, "ja")).not.toBe(chinese[0]);
+    const edited = { ...destination, imageUrl: "https://example.com/new-photo.jpg", openingHours: "Updated venue hours" };
+    const refreshed = localizeDestinations([edited], "zh")[0];
+    expect(refreshed).not.toBe(chinese[0]);
+    expect(refreshed.imageUrl).toBe(edited.imageUrl);
+    expect(refreshed.openingHours).toBe(edited.openingHours);
+    expect(localizeDestinations(places, "en")).toBe(places);
+    expect(destination.imageUrl).not.toBe(edited.imageUrl);
+  });
 });

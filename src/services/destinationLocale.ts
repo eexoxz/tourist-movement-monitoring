@@ -241,15 +241,22 @@ function interpolate(template: string, values: Record<string, string>) {
   return Object.entries(values).reduce((current, [key, value]) => current.replaceAll(`{${key}}`, value), template);
 }
 
+// Catalogue edits replace records/arrays. Weak keys let discarded catalogue
+// versions be collected while sharing translated copy across mounted views.
+const localizedRecords = new WeakMap<Destination, Map<Locale, Destination>>();
+const localizedLists = new WeakMap<Destination[], Map<Locale, Destination[]>>();
+
 export function localizeDestination(destination: Destination, locale: Locale): Destination {
   if (locale === "en") return destination;
+  const cached = localizedRecords.get(destination)?.get(locale);
+  if (cached) return cached;
   const guidance = catalogueGuidance(destination, locale);
 
   const city = localizeCity(destination.city, locale);
   const copy = practicalCopy[locale] ?? practicalCopy.en;
   const descriptionTemplate = categoryDescriptions[locale]?.[destination.category] ?? categoryDescriptions.en[destination.category];
 
-  return {
+  const localized: Destination = {
     ...destination,
     name: locale === "zh" ? chineseDestinationNames[destination.id] ?? destination.name : destination.name,
     city,
@@ -259,8 +266,19 @@ export function localizeDestination(destination: Destination, locale: Locale): D
     visitTips: [...guidance, ...(copy.visitTips ?? [])],
     imageAlt: `${locale === "zh" ? chineseDestinationNames[destination.id] ?? destination.name : destination.name}`,
   };
+  const translations = localizedRecords.get(destination) ?? new Map<Locale, Destination>();
+  translations.set(locale, localized);
+  localizedRecords.set(destination, translations);
+  return localized;
 }
 
 export function localizeDestinations(destinations: Destination[], locale: Locale) {
-  return locale === "en" ? destinations : destinations.map((destination) => localizeDestination(destination, locale));
+  if (locale === "en") return destinations;
+  const cached = localizedLists.get(destinations)?.get(locale);
+  if (cached) return cached;
+  const localized = destinations.map((destination) => localizeDestination(destination, locale));
+  const translations = localizedLists.get(destinations) ?? new Map<Locale, Destination[]>();
+  translations.set(locale, localized);
+  localizedLists.set(destinations, translations);
+  return localized;
 }
