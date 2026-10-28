@@ -187,6 +187,21 @@ service cloud.firestore {
       allow create, update: if isAdmin()
         && isValidCoordinate(request.resource.data.latitude, request.resource.data.longitude);
       allow delete: if isAdmin();
+
+      match /photos/{photoId} {
+        // Fetch just one visible photo, never a collection of image payloads.
+        allow get: if signedIn() && exists(/databases/$(database)/documents/destinations/$(destinationId));
+        allow list: if false;
+        allow create, update: if isAdmin() && photoId == "current"
+          && request.resource.data.keys().hasOnly(["version", "dataUrl", "width", "height"])
+          && request.resource.data.version is string && request.resource.data.version.matches("[a-zA-Z0-9_-]{1,48}")
+          && request.resource.data.dataUrl is string && request.resource.data.dataUrl.size() <= 180000
+          && request.resource.data.dataUrl.matches("data:image/jpeg;base64,/9j/[A-Za-z0-9+/=]+")
+          && request.resource.data.width is int && request.resource.data.width > 0 && request.resource.data.width <= 1280
+          && request.resource.data.height is int && request.resource.data.height > 0 && request.resource.data.height <= 1280
+          && getAfter(/databases/$(database)/documents/destinations/$(destinationId)).data.imageUrl == "stored-photo:" + destinationId + ":" + request.resource.data.version;
+        allow delete: if isAdmin();
+      }
     }
 
     match /ai_analyses/{analysisId} {

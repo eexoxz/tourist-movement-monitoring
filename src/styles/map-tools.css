@@ -815,7 +815,7 @@
 
 .destination-filter-toolbar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px) auto;
+  grid-template-columns: minmax(200px, 1fr) repeat(2, minmax(160px, 220px)) auto;
   gap: 12px;
   align-items: end;
   padding: 14px;
@@ -836,6 +836,16 @@
 .destination-filter-toolbar select {
   width: 100%;
 }
+
+.destination-filter-count { color: var(--muted); font-size: .875rem; margin: 12px 0; }
+.destination-form-fields { display: grid; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.destination-photo-editor { display: grid; gap: 12px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #f5faf9; }
+.destination-photo-editor label > span { display: flex; align-items: center; gap: 8px; }
+.destination-photo-editor p { margin: 0; color: var(--muted); font-size: .85rem; line-height: 1.5; }
+.destination-photo-editor input[type="file"] { max-width: 100%; font-size: .875rem; }
+.destination-photo-editor .destination-visual.compact { height: 180px; }
+.destination-photo-editor .destination-visual.compact img { height: 180px; object-fit: contain; }
+.destination-photo-retry { border: 0; background: transparent; color: var(--teal-dark); text-decoration: underline; cursor: pointer; font-size: .8rem; }
 
 .destination-admin-grid {
   display: grid;

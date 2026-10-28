@@ -4,11 +4,24 @@ import {
   addDestinationRecord,
   deleteDestinationRecord,
   destinationCategories,
+  filterAdminDestinations,
   updateDestinationRecord,
   validateDestination,
 } from "./destinationManagement";
 
 describe("destination management service", () => {
+  it("combines state, category and search, including legacy city-based state records", () => {
+    const records = [
+      { ...destinations[0], id: "a", state: "Penang" as const, city: "George Town", category: "food" as const, name: "Local cafe" },
+      { ...destinations[0], id: "b", state: undefined, city: "Ipoh", category: "food" as const, name: "Local cafe" },
+      { ...destinations[0], id: "c", state: "Penang" as const, city: "George Town", category: "heritage" as const, name: "Heritage museum" },
+    ];
+    expect(filterAdminDestinations(records, "", "all", "Penang").map((place) => place.id)).toEqual(["a", "c"]);
+    expect(filterAdminDestinations(records, " CAFE ", "food", "Penang").map((place) => place.id)).toEqual(["a"]);
+    expect(filterAdminDestinations(records, "Perak", "all", "all").map((place) => place.id)).toEqual(["b"]);
+    expect(filterAdminDestinations(records, "cafe", "heritage", "Penang")).toEqual([]);
+    expect(filterAdminDestinations(records, "", "all", "all")).toHaveLength(3);
+  });
   it("validates destination category and coordinates", () => {
     expect(destinationCategories).toContain("heritage");
     expect(

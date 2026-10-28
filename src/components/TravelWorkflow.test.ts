@@ -136,7 +136,7 @@ describe("tourist travel workflow boundaries", () => {
     expect(html).toContain("Show full 12-month calendar");
   });
   it("keeps the admin catalogue compact and removes decorative visit badges", () => {
-    const html = renderToStaticMarkup(createElement(DestinationManager, { destinations: initialData.destinations, locale: "en", notify: noop, onChange: noop }));
+    const html = renderToStaticMarkup(createElement(DestinationManager, { destinations: initialData.destinations, locale: "en", notify: noop, onChange: noop, onSave: async () => true }));
     expect(html.match(/class="destination-card editable"/g)).toHaveLength(6);
     expect(html).toContain("Show more");
     expect(html).not.toContain("visit info");

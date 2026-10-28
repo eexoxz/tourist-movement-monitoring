@@ -1,8 +1,16 @@
 import type { Destination, DestinationCategory, MalaysianState } from "../types";
 import { discoveryStates } from "../data/discoveryAreas";
 import { createId } from "./storage";
+import { getDestinationState } from "./destinationState";
 
 export const destinationCategories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
+
+export function filterAdminDestinations(destinations: Destination[], search: string, category: DestinationCategory | "all", state: MalaysianState | "all") {
+  const query = search.trim().toLocaleLowerCase();
+  return destinations.filter((destination) => (category === "all" || destination.category === category)
+    && (state === "all" || getDestinationState(destination) === state)
+    && (!query || [destination.name, destination.city, destination.address, destination.description, destination.category, getDestinationState(destination)].some((value) => value?.toLocaleLowerCase().includes(query))));
+}
 
 type DestinationInput = {
   name: string;
@@ -96,7 +104,7 @@ export function validateDestination(input: DestinationInput) {
       openingHours: openingHours || "Check locally before visiting, especially during public holidays.",
       feeNote: feeNote || "Fee information may vary; check the official counter or venue notice before entry.",
       visitTips,
-      imageUrl: imageUrl || undefined,
+      imageUrl,
       imageAlt: imageAlt || undefined,
     },
   };

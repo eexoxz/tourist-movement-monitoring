@@ -45,6 +45,8 @@ import { reviewUnlistedCheckIns, mergePlaceReviewRecords, sampleUnlistedCheckIns
 import { unlistedLocationText } from "../services/unlistedLocationCopy";
 import { placeText } from "../services/placeSubmissionCopy";
 import { uiText } from "../services/uiText";
+import { saveDestinationEdit, storeLocalDestinationPhoto } from "../services/destinationPhotoUpload";
+import { isFirebaseConfigured } from "../services/firebaseClient";
 import { clusterText, decisionStepText, profileLabel } from "../services/planningText";
 import { FestivalCalendarPanel } from "../components/FestivalCalendarPanel";
 import { MovementMap } from "../components/MovementMap";
@@ -472,6 +474,14 @@ export function AdminWorkspace({
           notify({ tone: "info", title: activityText(locale, "title"), message: activityText(locale, destinations.some((destination) => ((source === "browser" ? destination.activitySummary : destination.demoActivitySummary)?.popularityScore ?? 0) > 0) ? "saved" : "noEvidence") });
         }} />
         <DestinationManager destinations={data.destinations} checkIns={data.checkIns} onChange={(destinations) => onDataChange(refreshAllRecommendations({ ...data, destinations }))} notify={notify} locale={locale}
+          onSave={async (destination, original, photo) => {
+            const saved = await saveDestinationEdit(destination, original, photo, actor);
+            if (!saved) return false;
+            const current = loadData();
+            const destinations = current.destinations.some((place) => place.id === destination.id) ? current.destinations.map((place) => place.id === destination.id ? destination : place) : [...current.destinations, destination];
+            onDataChange(refreshAllRecommendations({ ...current, destinations }), actor);
+            return true;
+          }}
           placeQueueState={placeQueueState}
           onToggleSamples={() => {
             const current = loadData();
@@ -498,10 +508,11 @@ export function AdminWorkspace({
             const synced = await onDataChange(result.data, actor, { placeReview: result.review });
             if (synced !== false) notify({ tone: "success", title: placeText(locale, "reviewed") });
           }}
-          onCreateReviewedPlace={async (destination: Destination, ids) => {
+          onCreateReviewedPlace={async (destination: Destination, ids, photo) => {
             const result = reviewUnlistedCheckIns(data, actor, ids, destination.id, destination);
             if (result.error || !result.data) return placeText(locale, result.error ?? "missing");
-            const synced = await onDataChange(result.data, actor, { placeReview: result.review });
+            if (photo && !isFirebaseConfigured()) await storeLocalDestinationPhoto(destination, photo);
+            const synced = await onDataChange(result.data, actor, { placeReview: result.review, destinationPhoto: photo });
             return synced === false ? placeText(locale, "saveFailed") : null;
           }} />
       </Page>

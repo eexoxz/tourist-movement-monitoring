@@ -26,6 +26,8 @@ import { mergeCheckInRecords } from "./checkInSync";
 import { acknowledgeCloudJob, buildCloudChanges, queueCloudChanges, type CloudTables } from "./cloudChanges";
 import { flushCloudChanges } from "./cloudSync";
 import { applyDemoDatasetSelection } from "./demoDatasetSelection";
+import { validDestinationPhoto, type DestinationPhotoUpload } from "./destinationPhotoUpload";
+import { destinationPhotoReference } from "./destinationPhoto";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
@@ -166,10 +168,11 @@ export async function saveCheckInRecord(checkIn: AttractionCheckIn, actor?: User
   return true;
 }
 
-export async function savePlaceReview(review: PlaceReview, actor?: User | null) {
+export async function savePlaceReview(review: PlaceReview, actor?: User | null, photo?: DestinationPhotoUpload) {
   const services = getFirebaseServices();
   const uid = services?.auth.currentUser?.uid;
   if (!services || !uid || !actor || actor.role !== "admin" || (actor.id !== uid && actor.authUid !== uid) || review.reviewedBy !== actor.id || !review.checkInIds.length || review.checkInIds.length > 100 || (review.destination && review.destination.id !== review.destinationId) || (review.status === "linked" && !review.destinationId) || (review.status === "dismissed" && Boolean(review.destinationId || review.destination))) return false;
+  if (photo && (!validDestinationPhoto(photo) || review.destination?.imageUrl !== destinationPhotoReference(review.destinationId, photo.version))) return false;
   const { doc, runTransaction } = await import("firebase/firestore");
   await runTransaction(services.db, async (transaction) => {
     const references = review.checkInIds.map((id) => doc(services.db, FIRESTORE_COLLECTIONS.checkIns, id));
@@ -183,6 +186,7 @@ export async function savePlaceReview(review: PlaceReview, actor?: User | null) 
       if (review.destination && place.exists()) throw new Error("Catalogue place already exists");
     }
     if (review.destination) transaction.set(doc(services.db, FIRESTORE_COLLECTIONS.destinations, review.destination.id), cleanFirestoreData(review.destination) as Record<string, unknown>);
+    if (photo) transaction.set(doc(services.db, FIRESTORE_COLLECTIONS.destinations, review.destinationId, "photos", "current"), photo);
     references.forEach((reference) => transaction.update(reference, { destinationId: review.destinationId, reviewStatus: review.status, reviewedBy: actor.id, reviewedAt: review.reviewedAt }));
   });
   return true;

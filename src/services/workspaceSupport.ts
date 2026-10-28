@@ -1,5 +1,6 @@
 import type { AnalysisResult, AppData, AttractionCheckIn, IncidentType, PlaceReview, SosAlert, TravelPlanOptions, User } from "../types";
 import type { TranslationKey } from "./i18n";
+import type { DestinationPhotoUpload } from "./destinationPhotoUpload";
 
 export type PlanAudience = NonNullable<TravelPlanOptions["audience"]>;
 
@@ -12,6 +13,7 @@ export type CommitDataOptions = {
   sosAlert?: SosAlert;
   checkIn?: AttractionCheckIn;
   placeReview?: PlaceReview;
+  destinationPhoto?: DestinationPhotoUpload;
 };
 
 export const PROFILE_SKIP_KEY_PREFIX = "tourist-movement-monitoring:profile-skip:";

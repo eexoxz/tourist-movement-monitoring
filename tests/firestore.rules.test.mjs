@@ -133,6 +133,34 @@ beforeEach(async () => {
 after(async () => { await environment?.cleanup(); });
 
 describe("action-scoped cloud workflows", () => {
+  it("publishes a destination photo atomically for admin edits and lets signed-in tourists fetch just that photo", async () => {
+    const store = db("admin"), reference = doc(store, "destinations", "photo-venue");
+    const photo = { version: "version-1", dataUrl: "data:image/jpeg;base64,/9j/AAAA/9k=", width: 640, height: 480 };
+    const batch = writeBatch(store);
+    batch.set(reference, { latitude: 5.4, longitude: 100.3, imageUrl: "stored-photo:photo-venue:version-1" });
+    batch.set(doc(store, "destinations/photo-venue/photos/current"), photo);
+    await assertSucceeds(batch.commit());
+    await assertSucceeds(getDoc(doc(db("alice"), "destinations/photo-venue/photos/current")));
+    await assertFails(getDoc(doc(db(), "destinations/photo-venue/photos/current")));
+    await assertFails(getDocs(collection(db("alice"), "destinations/photo-venue/photos")));
+    await assertFails(setDoc(doc(db("alice"), "destinations/photo-venue/photos/current"), photo));
+    await assertFails(deleteDoc(doc(db("alice"), "destinations/photo-venue/photos/current")));
+  });
+  it("rejects oversized, mismatched or misplaced photo writes without applying a partial destination edit", async () => {
+    const store = db("admin"), photo = { version: "version-1", dataUrl: "data:image/jpeg;base64,/9j/AAAA/9k=", width: 640, height: 480 };
+    await assertSucceeds(setDoc(doc(store, "destinations/photo-venue"), { latitude: 5.4, longitude: 100.3, imageUrl: "stored-photo:photo-venue:version-1" }));
+    for (const invalid of [{ ...photo, version: "different-version" }, { ...photo, dataUrl: "data:image/jpeg;base64,/9j/" + "A".repeat(180000) }, { ...photo, dataUrl: "data:image/svg+xml,unsafe" }, { ...photo, width: 1281 }, { ...photo, privateField: "unexpected" }]) {
+      const batch = writeBatch(store);
+      batch.update(doc(store, "destinations/photo-venue"), { name: "Must not save partially" });
+      batch.set(doc(store, "destinations/photo-venue/photos/current"), invalid);
+      await assertFails(batch.commit());
+    }
+    assert.equal((await getDoc(doc(store, "destinations/photo-venue"))).data().name, undefined);
+    await assertFails(setDoc(doc(store, "destinations/photo-venue/photos/other"), photo));
+    await assertFails(setDoc(doc(store, "destinations/missing/photos/current"), photo));
+    await assertSucceeds(setDoc(doc(store, "destinations/photo-venue/photos/current"), photo));
+    await assertSucceeds(deleteDoc(doc(store, "destinations/photo-venue/photos/current")));
+  });
   it("keeps archived modern and legacy trips readable by admins without deleting movement", async () => {
     for (const name of ["trip_sessions", "trips"]) {
       await assertSucceeds(updateDoc(doc(db("alice"), name, "alice-record"), { hiddenFromHistoryAt: "2026-10-22T01:00:00Z", status: "completed" }));

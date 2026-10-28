@@ -360,7 +360,7 @@ function App() {
     if (options.placeReview && hasConfiguredAuth()) {
       const review = options.placeReview;
       setSyncStatus(t("sync.retrying"));
-      return savePlaceReview(review, actor).then((synced) => {
+      return savePlaceReview(review, actor, options.destinationPhoto).then((synced) => {
         if (!synced) throw new Error("Place review was not accepted");
         setData((current) => {
           const missing = nextData.checkIns.filter((record) => review.checkInIds.includes(record.id) && !current.checkIns.some((saved) => saved.id === record.id));

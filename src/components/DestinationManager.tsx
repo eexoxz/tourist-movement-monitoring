@@ -1,9 +1,12 @@
-import { useMemo, useState, type FormEvent } from "react";
-import { MapPin, MapPinned, Pencil, RotateCcw, Save, Tag, Trash2, X } from "lucide-react";
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { ImagePlus, MapPin, MapPinned, Pencil, RotateCcw, Save, Tag, Trash2, X } from "lucide-react";
 import type { AttractionCheckIn, Destination, DestinationCategory, MalaysianState } from "../types";
 import { discoveryStates } from "../data/discoveryAreas";
 import { getDestinationState } from "../services/destinationState";
-import { addDestinationRecord, deleteDestinationRecord, destinationCategories, updateDestinationRecord } from "../services/destinationManagement";
+import { addDestinationRecord, deleteDestinationRecord, destinationCategories, filterAdminDestinations, updateDestinationRecord } from "../services/destinationManagement";
+import { destinationAdminText } from "../services/destinationAdminCopy";
+import { destinationPhotoReference, storedDestinationPhoto } from "../services/destinationPhoto";
+import { prepareDestinationPhoto, type DestinationPhotoUpload } from "../services/destinationPhotoUpload";
 import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 import type { NotifyFn } from "./ToastViewport";
@@ -50,7 +53,7 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
   };
 }
 
-export function DestinationManager({ destinations, onChange, notify, locale, checkIns = [], onReview, onCreateReviewedPlace, onRefreshReports, refreshingReports, onToggleSamples, placeQueueState }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; notify: NotifyFn; locale: Locale; checkIns?: AttractionCheckIn[]; onReview?: (ids: string[], destinationId: string) => void | Promise<void>; onCreateReviewedPlace?: (destination: Destination, ids: string[]) => string | null | Promise<string | null>; onRefreshReports?: () => void; refreshingReports?: boolean; onToggleSamples?: () => void; placeQueueState?: "loading" | "live" | "offline" }) {
+export function DestinationManager({ destinations, onChange, onSave, notify, locale, checkIns = [], onReview, onCreateReviewedPlace, onRefreshReports, refreshingReports, onToggleSamples, placeQueueState }: { destinations: Destination[]; onChange: (destinations: Destination[]) => void; onSave: (destination: Destination, original: Destination | undefined, photo?: DestinationPhotoUpload) => Promise<boolean>; notify: NotifyFn; locale: Locale; checkIns?: AttractionCheckIn[]; onReview?: (ids: string[], destinationId: string) => void | Promise<void>; onCreateReviewedPlace?: (destination: Destination, ids: string[], photo?: DestinationPhotoUpload) => string | null | Promise<string | null>; onRefreshReports?: () => void; refreshingReports?: boolean; onToggleSamples?: () => void; placeQueueState?: "loading" | "live" | "offline" }) {
   const text = (source: string, values?: Record<string, string | number>) => uiText(locale, source, values);
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -60,28 +63,40 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
   const [message, setMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
+  const [stateFilter, setStateFilter] = useState<MalaysianState | "all">("all");
   const [candidate, setCandidate] = useState<PlaceSubmissionGroup | null>(null);
-  const [showAllDestinations, setShowAllDestinations] = useState(false);
+  const [visibleLimit, setVisibleLimit] = useState(6);
+  const [photo, setPhoto] = useState<DestinationPhotoUpload>();
+  const [preparingPhoto, setPreparingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState<"format" | "size" | "prepareFailed">();
+  const [saveFailed, setSaveFailed] = useState(false);
+  const photoRevision = useRef(0);
+  const copy = (key: Parameters<typeof destinationAdminText>[1], values?: Record<string, number>) => destinationAdminText(locale, key, values);
+  const resetPhoto = () => { photoRevision.current++; setPhoto(undefined); setPreparingPhoto(false); setPhotoError(undefined); setSaveFailed(false); };
+  const choosePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    const revision = ++photoRevision.current;
+    setPreparingPhoto(true); setPhotoError(undefined);
+    const result = await prepareDestinationPhoto(file);
+    if (revision !== photoRevision.current) return;
+    setPreparingPhoto(false);
+    if (result.error) setPhotoError(result.error);
+    else { setPhoto(result.photo); setForm((current) => ({ ...current, imageUrl: "" })); }
+  };
 
-  const filteredDestinations = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-
-    return destinations.filter((destination) => {
-      const matchesCategory = categoryFilter === "all" || destination.category === categoryFilter;
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        [destination.name, destination.city, destination.address ?? "", destination.description, destination.category].some((value) => value.toLowerCase().includes(normalizedSearch));
-
-      return matchesCategory && matchesSearch;
-    });
-  }, [categoryFilter, destinations, searchTerm]);
+  const filteredDestinations = useMemo(() => filterAdminDestinations(destinations, searchTerm, categoryFilter, stateFilter), [categoryFilter, destinations, searchTerm, stateFilter]);
 
   const resetDestinationFilters = () => {
     setSearchTerm("");
     setCategoryFilter("all");
+    setStateFilter("all");
+    setVisibleLimit(6);
   };
 
   const openAddModal = () => {
+    resetPhoto();
     setCandidate(null);
     setForm(createDestinationForm());
     setEditingId(null);
@@ -90,6 +105,7 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
   };
 
   const startEdit = (destination: Destination) => {
+    resetPhoto();
     setCandidate(null);
     setEditingId(destination.id);
     setForm(createDestinationForm(destination));
@@ -103,6 +119,7 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
     }
 
     setModalMode(null);
+    resetPhoto();
     setCandidate(null);
     setEditingId(null);
     setForm(createDestinationForm());
@@ -112,11 +129,12 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
     event.preventDefault();
 
     const action = modalMode;
-    if (!action) {
+    if (!action || savingAction || preparingPhoto) {
       return;
     }
 
     setSavingAction(action);
+    setSaveFailed(false);
     const result =
       action === "add"
         ? addDestinationRecord(destinations, form)
@@ -133,20 +151,30 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
       return;
     }
 
-    if (candidate && result.destination) {
-      const error = onCreateReviewedPlace ? await onCreateReviewedPlace(result.destination, candidate.reports.slice(0, 100).map((report) => report.id)) : placeText(locale, "admin");
-      if (error) { setMessage(error); setSavingAction(null); return; }
-    } else onChange(result.destinations);
+    const destination = result.destination!;
+    if (photo) destination.imageUrl = destinationPhotoReference(destination.id, photo.version);
+    if (photo) delete destination.imageCredit;
+    try {
+      if (candidate) {
+        const error = onCreateReviewedPlace ? await onCreateReviewedPlace(destination, candidate.reports.slice(0, 100).map((report) => report.id), photo) : placeText(locale, "admin");
+        if (error) { setMessage(error); setSavingAction(null); return; }
+      } else if (!await onSave(destination, destinations.find((record) => record.id === editingId), photo)) throw new Error("Destination save was not confirmed");
+    } catch {
+      setSaveFailed(true);
+      setSavingAction(null);
+      return;
+    }
     setMessage(action === "add" ? "Destination saved." : "Destination updated.");
     setSavingAction(null);
     setModalMode(null);
     setCandidate(null);
     setEditingId(null);
     setForm(createDestinationForm());
+    resetPhoto();
     notify({
       tone: "success",
       title: action === "add" ? "Destination saved" : "Destination updated",
-      message: `${form.name.trim()} was ${action === "add" ? "added to" : "updated in"} the destination list.`,
+      message: photo ? copy("photoSaved") : `${form.name.trim()} was ${action === "add" ? "added to" : "updated in"} the destination list.`,
     });
   };
 
@@ -179,6 +207,7 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
   return (
     <>
       {onReview && <UnlistedPlaceReview checkIns={checkIns} destinations={destinations} locale={locale} onReview={onReview} onRefresh={onRefreshReports} refreshing={refreshingReports} onToggleSamples={onToggleSamples} placeQueueState={placeQueueState} onCreate={(group) => {
+        resetPhoto();
         setCandidate(group); setEditingId(null); setModalMode("add"); setMessage(null);
         setForm({ ...createDestinationForm(), name: group.place.name, city: group.place.city, state: group.place.state ?? "", address: group.place.address, category: group.place.category, latitude: group.latitude === undefined ? "" : String(group.latitude), longitude: group.longitude === undefined ? "" : String(group.longitude) });
       }} />}
@@ -199,11 +228,17 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
         <div className="destination-filter-toolbar">
           <label>
             {text("Find destination")}
-            <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder={text("Search name, city or category")} />
+            <input value={searchTerm} onChange={(event) => { setSearchTerm(event.target.value); setVisibleLimit(6); }} placeholder={text("Search name, city or category")} />
+          </label>
+          <label>{translate(locale, "tourist.events.state")}
+            <select value={stateFilter} onChange={(event) => { setStateFilter(event.target.value as MalaysianState | "all"); setVisibleLimit(6); }}>
+              <option value="all">{copy("allStates")}</option>
+              {discoveryStates.map((state) => <option key={state} value={state}>{localizeCity(state, locale)}</option>)}
+            </select>
           </label>
           <label>
             {translate(locale, "common.category")}
-            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value as DestinationCategory | "all")}>
+            <select value={categoryFilter} onChange={(event) => { setCategoryFilter(event.target.value as DestinationCategory | "all"); setVisibleLimit(6); }}>
               <option value="all">{text("All categories")}</option>
               {destinationCategories.map((category) => (
                 <option key={category} value={category}>
@@ -212,19 +247,20 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
               ))}
             </select>
           </label>
-          <button className="secondary-action compact-action" type="button" onClick={resetDestinationFilters} disabled={!searchTerm && categoryFilter === "all"}>
+          <button className="secondary-action compact-action" type="button" onClick={resetDestinationFilters} disabled={!searchTerm && categoryFilter === "all" && stateFilter === "all"}>
             <RotateCcw size={16} />
             {text("Reset")}
           </button>
         </div>
+        <p className="destination-filter-count" role="status">{copy("results", { count: filteredDestinations.length, total: destinations.length })}</p>
 
         <section className="destination-admin-grid">
-          {(showAllDestinations ? filteredDestinations : filteredDestinations.slice(0, 6)).map((destination) => (
+          {filteredDestinations.slice(0, visibleLimit).map((destination) => (
             <article className="destination-card editable" key={destination.id}>
               <DestinationVisual destination={destination} compact locale={locale} />
               <div className="destination-admin-title">
                 <strong>{destination.name}</strong>
-                <span>{localizeCity(destination.city, locale)}</span>
+                <span>{localizeCity(getDestinationState(destination) ?? destination.city, locale)}</span>
               </div>
               <p className="destination-admin-description">{localizeDestination(destination, locale).description}</p>
               {destination.address && <p className="destination-admin-address"><MapPin size={16} aria-hidden="true" /><span>{destination.address}</span></p>}
@@ -247,14 +283,14 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
               </div>
             </article>
           ))}
-          {filteredDestinations.length === 0 && <EmptyState text={text("No destination records match the current search and category filter.")} />}
+          {filteredDestinations.length === 0 && <EmptyState text={copy("empty")} />}
         </section>
-        {filteredDestinations.length > 6 && <div className="list-limit-footer"><span>{showAllDestinations ? filteredDestinations.length : 6} / {filteredDestinations.length}</span><button className="secondary-action compact-action" type="button" onClick={() => setShowAllDestinations(!showAllDestinations)}>{text(showAllDestinations ? "Show fewer" : "Show more")}</button></div>}
+        {filteredDestinations.length > 6 && <div className="list-limit-footer"><span>{Math.min(visibleLimit, filteredDestinations.length)} / {filteredDestinations.length}</span>{visibleLimit > 6 && <button className="secondary-action compact-action" type="button" onClick={() => setVisibleLimit(6)}>{text("Show fewer")}</button>}{visibleLimit < filteredDestinations.length && <button className="secondary-action compact-action" type="button" onClick={() => setVisibleLimit((limit) => limit + 6)}>{text("Show more")}</button>}</div>}
       </section>
 
       {modalMode && (
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={text(modalMode === "add" ? "Add destination" : "Edit destination")}>
-          <form className="modal-card destination-modal destination-form-modal" onSubmit={saveDestination}>
+          <form className="modal-card destination-modal destination-form-modal" onSubmit={saveDestination} aria-busy={Boolean(savingAction)}>
             <div className="modal-heading">
               <div>
                 <span>{text("Destination Management")}</span>
@@ -267,7 +303,9 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
 
             {candidate && <p className="status-message">{placeText(locale, "publishNote")}</p>}
             {message && <p className="status-message" role="alert">{text(message)}</p>}
+            {saveFailed && <p className="status-message" role="alert">{copy("saveFailed")}</p>}
 
+            <fieldset className="destination-form-fields" disabled={Boolean(savingAction)}>
             <label>
               {text("Name")}
               <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
@@ -276,7 +314,7 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
               {text("City")}
               <input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
             </label>
-            <label>{translate(locale, "tourist.events.state")}<select required value={form.state} onChange={(event) => setForm({ ...form, state: event.target.value as MalaysianState | "" })}><option value="">{translate(locale, "tourist.events.state")}</option>{discoveryStates.map((state) => <option key={state} value={state}>{state}</option>)}</select></label>
+            <label>{translate(locale, "tourist.events.state")}<select required value={form.state} onChange={(event) => setForm({ ...form, state: event.target.value as MalaysianState | "" })}><option value="">{translate(locale, "tourist.events.state")}</option>{discoveryStates.map((state) => <option key={state} value={state}>{localizeCity(state, locale)}</option>)}</select></label>
             <label>
               {translate(locale, "common.address")}
               <input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder="Concubine Lane, Lorong Panglima, 30000 Ipoh, Perak" />
@@ -313,10 +351,16 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
               {translate(locale, "common.feeNote")}
               <input value={form.feeNote} onChange={(event) => setForm({ ...form, feeNote: event.target.value })} placeholder={text("Example: Entry is normally free; activities may vary")} />
             </label>
-            <label>
-              {text("Image URL")}
-              <input value={form.imageUrl} onChange={(event) => setForm({ ...form, imageUrl: event.target.value })} placeholder={text("Optional licensed image URL")} />
-            </label>
+            <section className="destination-photo-editor" aria-label={text("Location photo")}>
+              <label><span><ImagePlus size={18} aria-hidden="true" /> {copy("upload")}</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void choosePhoto(event); }} disabled={preparingPhoto || Boolean(savingAction)} aria-describedby="destination-photo-help" /></label>
+              <p id="destination-photo-help">{copy("photoHelp")}</p>
+              {preparingPhoto && <p role="status">{copy("preparing")}</p>}
+              {photoError && <p role="alert">{copy(photoError)}</p>}
+              {(photo || form.imageUrl) && <><DestinationVisual destination={{ ...destinations.find((record) => record.id === editingId), ...form, id: editingId ?? "preview", latitude: Number(form.latitude), longitude: Number(form.longitude), averageVisitMinutes: Number(form.averageVisitMinutes), visitTips: [], state: form.state || undefined, imageUrl: photo?.dataUrl ?? form.imageUrl, imageCredit: undefined }} locale={locale} compact />{photo && <p role="status">{copy("ready")}</p>}<button type="button" className="secondary-action compact-action" onClick={() => { resetPhoto(); setForm((current) => ({ ...current, imageUrl: "" })); }}>{text("Remove photo")}</button></>}
+              <label>{text("Image URL")}
+                <input value={storedDestinationPhoto(form.imageUrl) ? "" : form.imageUrl} onChange={(event) => { resetPhoto(); setForm({ ...form, imageUrl: event.target.value }); }} placeholder={storedDestinationPhoto(form.imageUrl) ? copy("stored") : text("Optional licensed image URL")} disabled={preparingPhoto} />
+              </label>
+            </section>
             <label>
               {text("Image description")}
               <input value={form.imageAlt} onChange={(event) => setForm({ ...form, imageAlt: event.target.value })} placeholder={text("Example: Front view of Batu Caves temple steps")} />
@@ -329,10 +373,11 @@ export function DestinationManager({ destinations, onChange, notify, locale, che
               {text("Description")}
               <textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} required />
             </label>
-            <button className="primary-action" type="submit" disabled={Boolean(savingAction)}>
+            <button className="primary-action" type="submit" disabled={Boolean(savingAction) || preparingPhoto}>
               <Save size={18} />
               {text(savingAction ? "Saving" : modalMode === "add" ? "Save destination" : "Save changes")}
             </button>
+            </fieldset>
           </form>
         </div>
       )}
