@@ -5,6 +5,7 @@ import { initialData } from "../data/demoData";
 import { createItinerary, addItineraryStop } from "../services/itineraries";
 import { cacheItineraries } from "../services/itineraryStorage";
 import { localeOptions } from "../services/i18n";
+import { destinationAdminText } from "../services/destinationAdminCopy";
 import { itineraryText } from "../services/itineraryCopy";
 import { ItineraryPage } from "./ItineraryPage";
 
@@ -24,5 +25,8 @@ describe("itinerary editor presentation", () => {
     expect(html.match(/class="itinerary-stop"/g)).toHaveLength(1);
     expect(html).toContain(itineraryText(locale, "travelNotice").replace(/'/g, "&#x27;"));
     expect(html).toContain('max="720"');
+    expect(html).toContain(destinationAdminText(locale, "allStates"));
+    expect(html).not.toContain(itineraryText(locale, "allAreas"));
+    expect(html).toContain('<option value="Penang">Penang</option>');
   });
 });

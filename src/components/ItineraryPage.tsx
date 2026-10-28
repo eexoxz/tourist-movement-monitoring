@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowUp, CalendarDays, Check, Clock3, Copy, MapPinned, Plus, RotateCcw, Save, Search, Trash2, X } from "lucide-react";
-import type { Destination, Itinerary, User } from "../types";
+import type { Destination, Itinerary, MalaysianState, User } from "../types";
 import type { Locale } from "../services/i18n";
 import { translate } from "../services/i18n";
 import { addItineraryStop, itineraryDayDate, itineraryLimits, moveItineraryStop, validItinerary } from "../services/itineraries";
 import { itineraryText } from "../services/itineraryCopy";
 import { useItineraries } from "../services/useItineraries";
+import { discoveryStates } from "../data/discoveryAreas";
+import { getDestinationState } from "../services/destinationState";
+import { destinationAdminText } from "../services/destinationAdminCopy";
 import { DestinationVisual } from "./DestinationVisual";
 import { Page } from "./Page";
 
@@ -50,7 +53,7 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], locale, o
   const [selectedId, setSelectedId] = useState("");
   const [selectedDay, setSelectedDay] = useState(1);
   const [query, setQuery] = useState("");
-  const [area, setArea] = useState("");
+  const [state, setState] = useState<MalaysianState | "">("");
   const [visibleCount, setVisibleCount] = useState(6);
   const [confirmation, setConfirmation] = useState<{ kind: "delete" | "discard"; plan: Itinerary } | null>(null);
   const text = (key: Parameters<typeof itineraryText>[1]) => itineraryText(locale, key);
@@ -60,13 +63,13 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], locale, o
   const number = new Intl.NumberFormat(locale);
   const dateFormat = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" });
   const byId = useMemo(() => new Map(destinations.map((place) => [place.id, place])), [destinations]);
-  const areas = useMemo(() => [...new Set(destinations.map((place) => place.city))].sort(), [destinations]);
+  const stateById = useMemo(() => new Map(destinations.map((place) => [place.id, getDestinationState(place)])), [destinations]);
   const suggestions = useMemo(() => new Set(suggestedIds), [suggestedIds]);
   const matches = useMemo(() => {
     const search = query.trim().toLocaleLowerCase(locale);
-    return destinations.filter((place) => (!area || place.city === area) && (!search || `${place.name} ${place.city} ${place.description}`.toLocaleLowerCase(locale).includes(search)))
+    return destinations.filter((place) => (!state || stateById.get(place.id) === state) && (!search || `${place.name} ${place.city} ${stateById.get(place.id) ?? ""} ${place.description}`.toLocaleLowerCase(locale).includes(search)))
       .sort((a, b) => Number(suggestions.has(b.id)) - Number(suggestions.has(a.id)) || a.name.localeCompare(b.name, locale));
-  }, [destinations, area, query, suggestions, locale]);
+  }, [destinations, state, stateById, query, suggestions, locale]);
   const stops = plan?.stops.filter((stop) => stop.day === day) ?? [];
   const remote = store.remote.find((candidate) => candidate.id === plan?.id);
   const conflict = Boolean(plan && entry.dirty && ((remote && (remote.deletedAt || remote.revision !== plan.revision)) || (store.connection === "live" && plan.revision > 0 && !remote)));
@@ -126,7 +129,7 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], locale, o
 
           <section className="itinerary-catalogue" aria-labelledby="itinerary-add-title">
             <h2 id="itinerary-add-title"><Plus size={20} />{text("addPlace")}</h2>
-            <div className="itinerary-catalogue-filters"><label><span><Search size={16} />{text("search")}</span><input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(6); }} /></label><label>{text("area")}<select value={area} onChange={(event) => { setArea(event.target.value); setVisibleCount(6); }}><option value="">{text("allAreas")}</option>{areas.map((value) => <option key={value} value={value}>{value}</option>)}</select></label></div>
+            <div className="itinerary-catalogue-filters"><label><span><Search size={16} />{text("search")}</span><input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(6); }} /></label><label>{translate(locale, "tourist.events.state")}<select value={state} onChange={(event) => { setState(event.target.value as MalaysianState | ""); setVisibleCount(6); }}><option value="">{destinationAdminText(locale, "allStates")}</option>{discoveryStates.map((value) => <option key={value} value={value}>{value}</option>)}</select></label></div>
             <ul className="itinerary-place-results">{matches.slice(0, visibleCount).map((place) => {
               const added = plan.stops.some((stop) => stop.destinationId === place.id && stop.day === day);
               return <li key={place.id}><DestinationVisual destination={place} locale={locale} compact /><div><strong>{place.name}</strong><span>{place.city}</span>{suggestions.has(place.id) && <small>{text("suggested")}</small>}</div><button className="secondary-action icon-action" type="button" title={text(added ? "added" : "add")} aria-label={`${text(added ? "added" : "add")}: ${place.name}`} disabled={added || plan.stops.length >= itineraryLimits.stops} onClick={() => store.change(addItineraryStop(plan, place, day))}>{added ? <Check size={18} /> : <Plus size={18} />}</button></li>;
