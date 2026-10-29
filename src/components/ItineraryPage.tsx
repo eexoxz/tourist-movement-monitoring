@@ -14,6 +14,8 @@ import { destinationAdminText } from "../services/destinationAdminCopy";
 import { prepareItineraryCatalogue, searchItineraryCatalogue } from "../services/itineraryCatalogue";
 import { DestinationVisual } from "./DestinationVisual";
 import { Page } from "./Page";
+import { ItineraryLibrary } from "./ItineraryLibrary";
+import { ItineraryTimeField } from "./ItineraryTimeField";
 
 function ItineraryPhoto({ place, locale }: { place: Destination; locale: Locale }) {
   return <span className="itinerary-thumbnail" aria-hidden="true"><DestinationVisual destination={place} locale={locale} compact /><MapPinned className="itinerary-photo-fallback" size={22} /></span>;
@@ -53,6 +55,13 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], initialSt
   const [state, setState] = useState<MalaysianState | "">(() => initialState ?? getDiscoveryState(user.discoveryAreaId) ?? "");
   const [visibleCount, setVisibleCount] = useState(6);
   const [confirmation, setConfirmation] = useState<{ kind: "delete" | "discard"; plan: Itinerary } | null>(null);
+  const editorStart = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!selectedId) return;
+    // An explicit plan selection reveals the editor, rather than leaving it below a long list.
+    const frame = window.requestAnimationFrame(() => editorStart.current?.scrollIntoView({ block: "start", behavior: "smooth" }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedId]);
   const text = (key: Parameters<typeof itineraryText>[1]) => itineraryText(locale, key);
   const entry = store.entries.find((candidate) => candidate.plan.id === selectedId);
   const plan = entry?.plan;
@@ -81,20 +90,17 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], initialSt
   const minimumDays = Math.max(1, ...(plan?.stops.map((stop) => stop.day) ?? []));
 
   return <Page title={text("title")} eyebrow={translate(locale, "nav.trips")} actions={<button className="secondary-action" type="button" onClick={onBack}><ArrowLeft size={18} />{text("back")}</button>}>
-    <section className="itinerary-library" aria-label={text("plans")}>
-      <div className="section-heading"><div><h2>{text("plans")}</h2><p>{schedule("libraryHelp")}</p></div><button className="primary-action" type="button" onClick={() => newPlan()} disabled={store.busy}><Plus size={18} />{text("newPlan")}</button></div>
-      <div className="itinerary-plan-list">{store.entries.map(({ plan: item, dirty }) => <button type="button" className={item.id === selectedId ? "itinerary-plan-card selected" : "itinerary-plan-card"} key={item.id} aria-pressed={item.id === selectedId} disabled={store.busy} onClick={() => { store.clearNotice(); setSelectedId(item.id); setSelectedDay(1); setVisibleCount(6); setState(item.stops[0] ? stateById.get(item.stops[0].destinationId) ?? "" : initialState ?? getDiscoveryState(user.discoveryAreaId) ?? ""); }}><strong>{item.title || text("newPlan")}</strong><span>{text("days")}: {number.format(item.days)} · {text("stops")}: {number.format(item.stops.length)}</span><small>{text(dirty ? "unsaved" : store.cloud ? "saved" : "local")}</small></button>)}</div>
-    </section>
+    <ItineraryLibrary entries={store.entries} selectedId={selectedId} cloud={store.cloud} busy={store.busy} locale={locale} onCreate={() => newPlan()} onSelect={(id) => { const item = store.entries.find((candidate) => candidate.plan.id === id)?.plan; if (!item) return; store.clearNotice(); setSelectedId(id); setSelectedDay(1); setVisibleCount(6); setState(item.stops[0] ? stateById.get(item.stops[0].destinationId) ?? "" : initialState ?? getDiscoveryState(user.discoveryAreaId) ?? ""); }} />
 
     {(store.notice || store.connection !== "live") && <div className={`itinerary-notice ${store.notice === "conflict" || store.notice === "unavailable" || store.connection === "unavailable" ? "warning" : ""}`} role="status">
       <span>{text(store.notice ?? (store.connection === "live" ? "saved" : store.connection === "local" ? "local" : store.connection === "loading" ? "loading" : "unavailable"))}</span>
       {store.connection === "unavailable" && <button className="secondary-action compact" type="button" onClick={store.reconnect} disabled={store.busy}><RotateCcw size={16} />{text("reconnect")}</button>}
     </div>}
 
-    {!plan ? <section className="itinerary-empty"><MapPinned size={40} aria-hidden="true" /><h2>{store.entries.length ? schedule("choosePlan") : text("noPlans")}</h2><button className="primary-action" type="button" onClick={() => newPlan()}><Plus size={18} />{text("newPlan")}</button></section> : <>
+    {!plan ? <section className="itinerary-empty"><MapPinned size={40} aria-hidden="true" /><h2>{store.entries.length ? schedule("choosePlan") : text("noPlans")}</h2></section> : <>
       {(conflict || store.notice === "conflict") && <aside className="itinerary-notice warning" role="alert"><p>{text("conflict")}</p><div className="itinerary-inline-actions"><button className="secondary-action" type="button" onClick={() => newPlan(plan)} disabled={store.busy}><Copy size={18} />{text("saveCopy")}</button>{remote && <button className="secondary-action" type="button" onClick={() => setConfirmation({ kind: "discard", plan })} disabled={store.busy}><RotateCcw size={18} />{text("loadLatest")}</button>}</div></aside>}
 
-      <footer className="itinerary-save-bar"><div role="status">{(entry.dirty || store.connection === "live") && <span>{text(entry.dirty ? "unsaved" : "saved")}</span>}<small>{text("stops")}: {number.format(plan.stops.length)} · {schedule("scheduled")}: {number.format(scheduledCount(plan.stops))}</small></div><div className="itinerary-inline-actions">
+      <footer ref={editorStart} className="itinerary-save-bar"><div role="status">{(entry.dirty || store.connection === "live") && <span>{text(entry.dirty ? "unsaved" : "saved")}</span>}<small>{text("stops")}: {number.format(plan.stops.length)} · {schedule("scheduled")}: {number.format(scheduledCount(plan.stops))}</small></div><div className="itinerary-inline-actions">
         <button className="secondary-action icon-action" type="button" aria-label={text("saveCopy")} title={text("saveCopy")} disabled={store.busy} onClick={() => newPlan(plan)}><Copy size={18} /></button>
         {entry.dirty && remote && !remote.deletedAt && <button className="secondary-action" type="button" disabled={store.busy} onClick={() => setConfirmation({ kind: "discard", plan })}><RotateCcw size={18} />{text("discard")}</button>}
         <button className="secondary-action icon-action danger" type="button" aria-label={text("delete")} title={text("delete")} disabled={store.busy} onClick={() => setConfirmation({ kind: "delete", plan })}><Trash2 size={18} /></button>
@@ -122,7 +128,7 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], initialSt
               const issue = scheduleIssues.find((candidate) => candidate.stopId === stop.id);
               return <li key={stop.id} className="itinerary-stop">
                 <div className="itinerary-stop-heading"><span className="itinerary-stop-order">{number.format(index + 1)}</span>{place && <ItineraryPhoto place={place} locale={locale} />}<div><h3>{place?.name ?? text("missingPlace")}</h3>{place && <span>{place.city}</span>}</div><button className="secondary-action icon-action" type="button" aria-label={`${text("remove")}: ${place?.name ?? index + 1}`} title={text("remove")} onClick={() => update({ stops: plan.stops.filter((item) => item.id !== stop.id) })}><X size={18} /></button></div>
-                <div className="itinerary-stop-fields">{(["arrivalTime", "departureTime"] as const).map((field) => <label key={field}>{schedule(field === "arrivalTime" ? "arrival" : "departure")}<input type="time" value={stop[field] ?? ""} aria-invalid={Boolean(issue)} onChange={(event) => update({ stops: plan.stops.map((item) => item.id === stop.id ? { ...item, [field]: event.target.value } : item) })} /></label>)}</div>
+                <div className="itinerary-stop-fields">{(["arrivalTime", "departureTime"] as const).map((field) => <ItineraryTimeField key={field} label={schedule(field === "arrivalTime" ? "arrival" : "departure")} value={stop[field]} locale={locale} invalid={Boolean(issue)} onChange={(value) => update({ stops: plan.stops.map((item) => item.id === stop.id ? { ...item, [field]: value } : item) })} />)}</div>
                 {issue ? <p className="itinerary-time-warning" role="status">{schedule(issue.code)}</p> : !stop.arrivalTime && !stop.departureTime && <small className="itinerary-time-unset">{schedule("unscheduled")}</small>}
                 <details><summary>{text("stopNote")}</summary><label><span className="visually-hidden">{text("stopNote")}</span><textarea rows={2} maxLength={itineraryLimits.stopNote} value={stop.note} onChange={(event) => update({ stops: plan.stops.map((item) => item.id === stop.id ? { ...item, note: event.target.value } : item) })} /></label></details>
                 <div className="itinerary-stop-actions"><button className="secondary-action icon-action" type="button" aria-label={`${text("up")}: ${place?.name ?? index + 1}`} title={text("up")} disabled={index === 0} onClick={() => store.change(moveItineraryStop(plan, stop.id, -1))}><ArrowUp size={18} /></button><button className="secondary-action icon-action" type="button" aria-label={`${text("down")}: ${place?.name ?? index + 1}`} title={text("down")} disabled={index === stops.length - 1} onClick={() => store.change(moveItineraryStop(plan, stop.id, 1))}><ArrowDown size={18} /></button>{place && <button className="secondary-action compact" type="button" onClick={() => onOpenPlace(place.id)}><MapPinned size={16} />{text("viewPlace")}</button>}</div>
