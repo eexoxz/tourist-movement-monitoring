@@ -78,9 +78,9 @@ function crowdLabelKey(signal: DestinationSignal): TranslationKey {
   return "map.crowd.quiet";
 }
 
-function destinationIcon(category: DestinationCategory, signal: DestinationSignal, showCounts: boolean) {
+function destinationIcon(category: DestinationCategory, signal: DestinationSignal, showCounts: boolean, selected = false) {
   const badge = showCounts && signal.nearbyPointCount > 0 ? `<b>${signal.nearbyPointCount > 999 ? "999+" : signal.nearbyPointCount}</b>` : "";
-  return L.divIcon({ className: `destination-marker destination-marker-${category} destination-marker-compact`, html: `<span>${categoryIconHtml(category, 15)}</span>${badge}`, iconSize: [28, 34], iconAnchor: [14, 32] });
+  return L.divIcon({ className: `destination-marker destination-marker-${category} destination-marker-compact${selected ? " destination-marker-selected" : ""}`, html: `<span>${categoryIconHtml(category, selected ? 18 : 15)}</span>${badge}`, iconSize: selected ? [36, 42] : [28, 34], iconAnchor: selected ? [18, 40] : [14, 32] });
 }
 
 function routeIcon(type: "start" | "end" | "current") {
@@ -236,12 +236,13 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         wanted.add(group.key);
         const single = group.places.length === 1 ? group.places[0] : null;
         const signal = single ? signalsRef.current.get(single.id) ?? emptyDestinationSignal() : null;
-        const signature = single ? `${single.category}:${zoom >= 11 ? signal!.nearbyPointCount : ""}` : String(group.places.length);
+        const isSelected = Boolean(single && single.id === selectedDestinationId);
+        const signature = single ? `${single.category}:${isSelected}:${zoom >= 11 ? signal!.nearbyPointCount : ""}` : String(group.places.length);
         const previous = markers.get(group.key);
         if (previous && previous.signature === signature) continue;
         const title = single ? single.name : mapDisplayText(locale, "places", { count: group.places.length });
-        const icon = single ? destinationIcon(single.category, signal!, mode !== "tourist" && zoom >= 11) : L.divIcon({ className: "destination-cluster", html: `<strong>${new Intl.NumberFormat(locale).format(group.places.length)}</strong>`, iconSize: [44, 44], iconAnchor: [22, 22] });
-        if (previous) { previous.marker.setIcon(icon); previous.signature = signature; continue; }
+        const icon = single ? destinationIcon(single.category, signal!, mode !== "tourist" && zoom >= 11, isSelected) : L.divIcon({ className: "destination-cluster", html: `<strong>${new Intl.NumberFormat(locale).format(group.places.length)}</strong>`, iconSize: [44, 44], iconAnchor: [22, 22] });
+        if (previous) { previous.marker.setIcon(icon); previous.marker.getElement()?.setAttribute("aria-pressed", String(isSelected)); previous.signature = signature; continue; }
         const marker = L.marker([group.latitude, group.longitude], { icon, title, alt: title, zIndexOffset: single?.id === selectedDestinationId ? 500 : single ? 200 : 300 });
         marker.on("click", () => {
           if (single) { selectDestination(single); return; }
@@ -257,7 +258,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
             if (map.getZoom() <= previousZoom) map.setView([group.latitude, group.longitude], Math.min(18, previousZoom + 1), { animate: false });
           }
         });
-        marker.addTo(layer); markers.set(group.key, { marker, signature });
+        if (isSelected) marker.bindTooltip(escapeHtml(title), { permanent: true, direction: "top", offset: [0, -44], className: "map-selected-label", opacity: 1 });
+        marker.addTo(layer);
+        if (single) marker.getElement()?.setAttribute("aria-pressed", String(isSelected));
+        markers.set(group.key, { marker, signature });
       }
       for (const [key, value] of markers) if (!wanted.has(key)) { layer.removeLayer(value.marker); markers.delete(key); }
     };

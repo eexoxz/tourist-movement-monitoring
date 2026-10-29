@@ -38,8 +38,10 @@ export function MovementDemandList({
           <article className="demand-card" key={row.destinationId}>
             <span className="rank-badge">{index + 1}</span>
             <div>
-              <strong>{destination.name}</strong>
-              {onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
+              <div className="planning-place-heading">
+                <strong>{destination.name}</strong>
+                {onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
+              </div>
               <p>
                 {uiText(locale, "{tourists} tourist profiles, {points} nearby points, {approaches} approach signals", { tourists: row.uniqueTouristCount, points: row.movementPointCount, approaches: row.approachSignalCount })}
               </p>
@@ -75,8 +77,10 @@ export function MovementAlertList({ alerts, destinations, onExport, locale, onLo
           <article className={`alert-card ${alert.severity}`} key={alert.id}>
             <span>{uiText(locale, alert.severity)}</span>
             <div>
-              <strong>{destination?.name ?? alert.title}</strong>
-              {destination && onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
+              <div className="planning-place-heading">
+                <strong>{destination?.name ?? alert.title}</strong>
+                {destination && onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
+              </div>
               <p>{uiText(locale, alert.message)}</p>
               <small>{uiText(locale, alert.recommendedAction)}</small>
             </div>
@@ -110,8 +114,10 @@ export function TravelPlanPanel({ plan, destinations, locale, onLocate }: { onLo
           <article className="plan-stop" key={stop.destinationId}>
             <span>{stop.order}</span>
             <div>
-              <strong>{destination.name}</strong>
-              {onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
+              <div className="planning-place-heading">
+                <strong>{destination.name}</strong>
+                {onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
+              </div>
               <p>{planningStopReason(locale, stop.reason)}</p>
             </div>
             <small>{stop.suggestedMinutes} {translate(locale, "common.minutes")}</small>

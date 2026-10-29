@@ -56,3 +56,11 @@
  .admin-map-place-content { padding: 14px; }
  .safety-case-filters button { flex: 1 1 auto; padding: 10px 12px; }
 }
+
+.planning-place-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; min-width: 0; }
+.planning-place-heading > strong { min-width: 0; overflow-wrap: anywhere; }
+.planning-place-heading > .map-locate-action { flex-shrink: 0; margin: 0; }
+.map-view .destination-marker-selected { outline: 3px solid #172033; outline-offset: 3px; box-shadow: 0 0 0 6px #fff, 0 4px 12px #17203355; }
+.map-view .map-selected-label { width: max-content; max-width: min(240px, calc(100vw - 72px)); padding: 7px 11px; border: 2px solid #fff; border-radius: 8px; background: #172033; color: #fff; font: 600 13px/1.4 system-ui, sans-serif; white-space: normal; overflow-wrap: anywhere; box-shadow: 0 3px 10px #17203335; }
+.map-view .leaflet-tooltip-top.map-selected-label::before { border-top-color: #172033; }
+@media (max-width: 520px) { .planning-place-heading { flex-direction: column; align-items: flex-start; gap: 10px; } }
