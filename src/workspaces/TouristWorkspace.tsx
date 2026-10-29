@@ -20,7 +20,7 @@ import { sosText } from "../services/sosCopy";
 import { createTouristWorkspaceSelector } from "../services/touristWorkspace";
 import { formatTripTitle } from "../services/tripPresentation";
 import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "../services/incidentAttachments";
-import { getLiveNearbySuggestion, type LiveNearbySuggestion } from "../services/liveSuggestions";
+import { useNearbySuggestions } from "../services/useNearbySuggestions";
 import { discoveryRadiusKm, getDiscoveryDestinations, getDiscoveryReference, getLatestDiscoveryPoint, getLocalEventAnnouncement } from "../services/discovery";
 import { discoveryAreas, getDiscoveryState } from "../data/discoveryAreas";
 import { discoveryText } from "../services/discoveryCopy";
@@ -102,6 +102,7 @@ export function TouristWorkspace({
   const [selectedTripId, setSelectedTripId] = useState<string>("");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [placeGuideId, setPlaceGuideId] = useState<string | null>(null);
+  const [guideFromGps, setGuideFromGps] = useState(false);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>(() => loadLastBrowserLocation(user.id));
   const [checkInDestinationId, setCheckInDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
@@ -121,10 +122,7 @@ export function TouristWorkspace({
   const [tripDialog, setTripDialog] = useState<{ kind: "rename"; trip: TripSession } | { kind: "stop" } | null>(null);
   const [tripLabelDraft, setTripLabelDraft] = useState("");
   const geofenceNoticeKey = useRef("");
-  const liveSuggestionDestinationIds = useRef(new Set<string>());
-  const lastSuggestionAt = useRef(0);
   const browserPositionHandler = useRef<((position: GeolocationPosition) => void) | null>(null);
-  const [liveSuggestion, setLiveSuggestion] = useState<LiveNearbySuggestion | null>(null);
   const [eventAnnouncementsDismissed, setEventAnnouncementsDismissed] = useState(false);
   const localizedDestinations = useMemo(() => localizeDestinations(data.destinations, locale), [data.destinations, locale]);
   const localizedData = useMemo(() => ({ ...data, destinations: localizedDestinations }), [data, localizedDestinations]);
@@ -179,8 +177,8 @@ export function TouristWorkspace({
     [data.destinations, discoveryReference, calendarDay]
   );
   const recommendations = useMemo(
-    () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking" || view === "itinerary") ? recommendForUser(user.id, { ...localizedData, destinations: discoveryDestinations }, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: user.discoveryLocationMode === "area" ? Infinity : discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
-    [destinationDemand, latestAnalysis, discoveryReference, discoveryDestinations, localizedData, user.id, user.discoveryLocationMode, view]
+    () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking" || view === "itinerary") && (view !== "tracking" || !activeTrip || user.discoveryLocationMode !== "area") ? recommendForUser(user.id, { ...localizedData, destinations: discoveryDestinations }, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: user.discoveryLocationMode === "area" ? Infinity : discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
+    [destinationDemand, latestAnalysis, discoveryReference, discoveryDestinations, localizedData, user.id, user.discoveryLocationMode, activeTrip?.id, view]
   );
   const suggestedDestinationIds = useMemo(() => recommendations.map((item) => item.destinationId), [recommendations]);
   const activeSamplePoint = activeTrip && activePoints.at(-1)?.source === "demo" ? activePoints.at(-1) : undefined;
@@ -205,6 +203,10 @@ export function TouristWorkspace({
   const nearestCheckIn = useMemo(() => discoveryGpsPoint ? nearestDestination(discoveryGpsPoint, localizedDestinations) : null, [discoveryGpsPoint, localizedDestinations]);
   const recommendedCheckIn = nearestCheckIn && nearestCheckIn.distance <= 1.2 ? nearestCheckIn.destination : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(tripReference, data.geofences), [data.geofences, tripReference]);
+  const { suggestion: liveSuggestion, dismiss: dismissLiveSuggestion } = useNearbySuggestions({
+    point: latestGpsPoint, destinations: localizedDestinations, demand: destinationDemand, user,
+    activeTripId: activeTrip?.id, listening: isLiveTracking, consent: Boolean(currentConsent), attention: Boolean(trackingQualityIssue),
+  });
   const displayName = getDisplayName(user);
   const trackingFeedback = trackingQualityIssue ? activityText(locale, trackingQualityIssue) : trackingMessage;
   const t = (key: TranslationKey) => translate(locale, key);
@@ -220,46 +222,6 @@ export function TouristWorkspace({
     setTrackingMessage(message);
     notify({ tone, title, message });
   };
-
-  useEffect(() => {
-    liveSuggestionDestinationIds.current.clear();
-    lastSuggestionAt.current = 0;
-    setLiveSuggestion(null);
-  }, [activeTrip?.id, user.id, user.discoveryLocationMode]);
-
-  useEffect(() => {
-    if (user.trackingSuggestionMode === "off" || user.discoveryLocationMode === "area" || !currentConsent) {
-      setLiveSuggestion(null);
-      return;
-    }
-    const point = discoveryGpsPoint;
-    if (!point || point.accuracyMeters > 200 || Date.now() - new Date(point.recordedAt).getTime() > 5 * 60 * 1000) {
-      setLiveSuggestion(null);
-      return;
-    }
-    if (liveSuggestion) {
-      const stillNearby = getLiveNearbySuggestion({ point, destinations: [liveSuggestion.destination], demand: destinationDemand, user });
-      if (!stillNearby) setLiveSuggestion(null);
-      else if (stillNearby.distanceKm !== liveSuggestion.distanceKm || stillNearby.destination.description !== liveSuggestion.destination.description) setLiveSuggestion(stillNearby);
-      return;
-    }
-    if (Date.now() - lastSuggestionAt.current < 2 * 60 * 1000) return;
-    const suggestion = getLiveNearbySuggestion({
-      point,
-      destinations: localizedDestinations,
-      demand: destinationDemand,
-      user,
-      excludeDestinationIds: liveSuggestionDestinationIds.current,
-    });
-
-    if (!suggestion) {
-      return;
-    }
-
-    liveSuggestionDestinationIds.current.add(suggestion.destination.id);
-    lastSuggestionAt.current = Date.now();
-    setLiveSuggestion(suggestion);
-  }, [currentConsent, discoveryGpsPoint, destinationDemand, localizedDestinations, user, liveSuggestion]);
 
   const saveDiscoveryPreferences = (preferences: Partial<User>) => {
     const current = loadData();
@@ -281,19 +243,19 @@ export function TouristWorkspace({
   };
 
   const changeDiscoveryLocation = (mode: "current" | "area", areaId?: string) => {
-    setLiveSuggestion(null);
+    dismissLiveSuggestion();
     saveDiscoveryPreferences({ discoveryLocationMode: mode, discoveryAreaId: areaId });
   };
 
   const hideDestination = (destinationId: string) => {
     const savedUser = loadData().users.find((candidate) => candidate.id === user.id) ?? user;
     saveDiscoveryPreferences({ hiddenDestinationIds: [...new Set([...(savedUser.hiddenDestinationIds ?? []), destinationId])] });
-    setLiveSuggestion(null);
+    dismissLiveSuggestion();
   };
 
   const openSuggestedPlace = () => {
-    if (liveSuggestion) setPlaceGuideId(liveSuggestion.destination.id);
-    setLiveSuggestion(null);
+    if (liveSuggestion) { setGuideFromGps(true); setPlaceGuideId(liveSuggestion.destination.id); }
+    dismissLiveSuggestion();
   };
 
   useEffect(() => {
@@ -885,7 +847,7 @@ export function TouristWorkspace({
     const area = discoveryAreas.reduce((nearest, candidate) => distanceKm(location, candidate) < distanceKm(location, nearest) ? candidate : nearest);
     changeDiscoveryLocation("area", `state:${"city" in location ? getDestinationState(location) ?? area.state : area.state}`);
   };
-  const openPlace = (destinationId: string) => { setPlaceGuideId(destinationId); };
+  const openPlace = (destinationId: string) => { setGuideFromGps(false); setPlaceGuideId(destinationId); };
   const openTripCheckIn = (destinationId: string) => { setCheckInDestinationId(destinationId); setShowCheckInPanel(true); onViewChange("overview"); };
   const changeTripReminders = (enabled: boolean) => {
     if (!activeTrip) return;
@@ -907,10 +869,10 @@ export function TouristWorkspace({
     suggestion={liveSuggestion}
     event={view === "tracking" || liveSuggestion ? null : eventAnnouncement}
     locale={locale}
-    onClose={() => { if (liveSuggestion) setLiveSuggestion(null); else setEventAnnouncementsDismissed(true); }}
+    onClose={() => { if (liveSuggestion) dismissLiveSuggestion(); else setEventAnnouncementsDismissed(true); }}
     onView={() => { if (liveSuggestion) openSuggestedPlace(); else { setEventAnnouncementsDismissed(true); onViewChange("events"); } }}
     onHide={() => { if (liveSuggestion) hideDestination(liveSuggestion.destination.id); }}
-    onSettings={() => { setLiveSuggestion(null); onViewChange("profile"); }}
+    onSettings={() => { dismissLiveSuggestion(); onViewChange("profile"); }}
   /> : null;
   const tripActionDialog = tripDialog ? <TripActionDialog kind={tripDialog.kind} label={tripLabelDraft} locale={locale} onLabelChange={setTripLabelDraft} onCancel={() => setTripDialog(null)} onConfirm={() => {
     if (tripDialog.kind === "rename") saveTripName(tripDialog.trip);
@@ -918,7 +880,7 @@ export function TouristWorkspace({
   }} /> : null;
 
   const guidePlace = placeGuideId ? localizedDestinations.find((place) => place.id === placeGuideId) : undefined;
-  const guideReference = view === "tracking" ? tripReference ?? discoveryReference : discoveryReference;
+  const guideReference = guideFromGps ? discoveryGpsPoint : view === "tracking" ? tripReference ?? discoveryReference : discoveryReference;
   const renderView = () => {
   if (view === "profile") {
     return (
@@ -1119,7 +1081,7 @@ export function TouristWorkspace({
   const loadingTitle = view === "profile" ? t("tourist.profile.pageTitle") : view === "recommendations" ? t("tourist.recommendations.pageTitle") : view === "events" ? t("tourist.events.pageTitle") : view === "history" ? travelText(locale, "manage") : t("nav.home");
   return <><Suspense fallback={<p role="status" aria-busy="true">{loadingTitle}…</p>}>{renderView()}</Suspense>{activeTrip && validTripItinerary(activeTrip.itinerary) && activeTrip.itinerary.reminders && <Suspense fallback={null}><TripItineraryReminder key={activeTrip.id} trip={activeTrip} points={activePoints} checkIns={data.checkIns} destinations={localizedDestinations} locale={locale} onOpenPlace={openPlace} onDisable={() => changeTripReminders(false)} /></Suspense>}{guidePlace && <PlaceGuideDialog title={guidePlace.name} locale={locale} onClose={() => setPlaceGuideId(null)}><PlaceGuide destination={guidePlace} locale={locale}
     distance={formatDistanceLabel(guideReference ? distanceKm(guideReference, guidePlace) : undefined, t)}
-    distanceLabel={user.discoveryLocationMode === "area" ? discoveryText(locale, "fromArea") : t("common.distance")}
+    distanceLabel={!guideFromGps && user.discoveryLocationMode === "area" && guideReference === discoveryReference ? discoveryText(locale, "fromArea") : t("common.distance")}
     demand={formatDemandLabel(destinationDemand.find((row) => row.destinationId === guidePlace.id), locale, t)}
     preference={t(user.travelPreferences?.includes(guidePlace.category) ? "tourist.places.matchesProfile" : "tourist.places.differentStyle")}
     eventRelevance={t(upcomingFestivals.some((event) => event.destinationIds.includes(guidePlace.id)) ? "tourist.places.linkedUpcoming" : "tourist.places.noCurrentEvent")}

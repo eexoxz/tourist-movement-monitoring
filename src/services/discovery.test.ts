@@ -32,11 +32,13 @@ describe("privacy-aware local discovery", () => {
     }
   });
   it("uses fresh stationary GPS readings instead of the last saved route point", () => {
-    const routePoint = { ...initialData.points[0], recordedAt: new Date(Date.now() - 6 * 60 * 1000).toISOString() };
+    const routePoint = { ...initialData.points[0], source: "browser" as const, recordedAt: new Date(Date.now() - 6 * 60 * 1000).toISOString() };
     const gpsPoint = { ...routePoint, recordedAt: new Date().toISOString() };
     expect(getLatestDiscoveryPoint(routePoint, gpsPoint)).toBe(gpsPoint);
     expect(getDiscoveryReference(user, getLatestDiscoveryPoint(routePoint, gpsPoint))).toBe(gpsPoint);
     expect(getLatestDiscoveryPoint(gpsPoint, routePoint)).toBe(gpsPoint);
+    expect(getLatestDiscoveryPoint({ ...gpsPoint, source: "demo", recordedAt: new Date(Date.now() + 1000).toISOString() }, gpsPoint)).toBe(gpsPoint);
+    expect(getLatestDiscoveryPoint({ ...gpsPoint, source: "demo" })).toBeUndefined();
     expect(getLatestDiscoveryPoint(undefined, { ...routePoint, recordedAt: "invalid" })).toBeUndefined();
     expect(getLatestDiscoveryPoint(gpsPoint, { ...routePoint, recordedAt: new Date(Date.now() + 10 * 60000).toISOString() })).toBe(gpsPoint);
   });

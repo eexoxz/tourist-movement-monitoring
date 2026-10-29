@@ -92,6 +92,8 @@ describe("workspace integration guardrails", () => {
     expect(tourist).toContain("getNearbyEmergencyServices(discoveryGpsPoint)");
     expect(tourist).toContain("createSosAlert(loadData(), user.id, discoveryGpsPoint)");
     expect(tourist).not.toContain("location: latestKnownPoint");
+    expect(tourist).toContain("guideFromGps ? discoveryGpsPoint");
+    expect(tourist).toContain('!guideFromGps && user.discoveryLocationMode === "area" && guideReference === discoveryReference');
   });
 
   it("connects browser alerts to localized notifications and the in-app toast fallback", () => {
