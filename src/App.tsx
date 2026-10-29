@@ -38,6 +38,8 @@ import { deviceText } from "./services/deviceCopy";
 import { AccountDeletionPanel } from "./components/AccountDeletionPanel";
 import { deletionText, type DeletionCopyKey } from "./services/accountDeletionCopy";
 import type { DeletionPhase } from "./services/accountDeletion";
+import { restoreCloudConnection } from "./services/cloudRecovery";
+import { cloudRecoveryText } from "./services/cloudRecoveryCopy";
 import { isCloudQuotaError } from "./services/serverRead";
 
 const TouristWorkspace = lazy(() => import("./workspaces/TouristWorkspace").then((module) => ({ default: module.TouristWorkspace })));
@@ -57,6 +59,9 @@ function App() {
   const [syncStatus, setSyncStatus] = useState(getStorageMode());
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [cloudAuthReady, setCloudAuthReady] = useState(false);
+  const [cloudReadsAvailable, setCloudReadsAvailable] = useState(true);
+  const latestData = useRef(data);
+  latestData.current = data;
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [browserNotificationPermission, setBrowserNotificationPermission] = useState(() => getBrowserNotificationPermission());
   const [pendingCheckInDestinationId, setPendingCheckInDestinationId] = useState<string | null>(() => getTouristCheckInDestinationIdFromUrl());
@@ -128,6 +133,14 @@ function App() {
 
     lastSyncWarningAt.current = now;
     notify({ tone: "warning", title, message });
+  };
+
+  const reportCloudReadFailure = (error?: unknown) => {
+    if (isCloudQuotaError(error)) {
+      setCloudReadsAvailable(false);
+      setSyncStatus(cloudRecoveryText("en", "quota"));
+      notifySyncIssue(cloudRecoveryText("en", "quota"), cloudRecoveryText("en", "quotaDetail"));
+    } else notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
   };
 
   const changeLocale = (nextLocale: Locale) => {
@@ -234,8 +247,8 @@ function App() {
         setSyncStatus("Loaded from Firebase Firestore");
       } catch (error) {
         if (isCurrent()) {
-          setSyncStatus(isCloudQuotaError(error) ? "Cloud service temporarily limited" : "Local mode; Firebase sync unavailable");
-          notifySyncIssue(isCloudQuotaError(error) ? "Cloud service temporarily limited" : "Firebase sync unavailable", isCloudQuotaError(error) ? "Cloud data cannot be refreshed right now. Please try again later." : "The app is still usable, but data is currently saved on this device.");
+          if (!isCloudQuotaError(error)) setSyncStatus("Local mode; Firebase sync unavailable");
+          reportCloudReadFailure(error);
         }
       } finally {
         if (isCurrent()) setCloudAuthReady(true);
@@ -401,11 +414,11 @@ function App() {
   };
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== "admin" || !hasConfiguredAuth()) { setPlaceQueueState(undefined); return; }
+    if (!currentUser || currentUser.role !== "admin" || !hasConfiguredAuth() || !cloudAuthReady || !cloudReadsAvailable) { setPlaceQueueState(undefined); return; }
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
     setPlaceQueueState("loading");
-    const fail = () => { if (!stopped) setPlaceQueueState("offline"); };
+    const fail = (error?: unknown) => { if (!stopped) { setPlaceQueueState("offline"); reportCloudReadFailure(error); } };
     void subscribePlaceReviewRecords(currentUser, (pending, reviewed) => {
       if (stopped) return;
       setPlaceQueueState("live");
@@ -417,15 +430,13 @@ function App() {
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
-  }, [currentUser?.id, currentUser?.role, placeQueueRevision]);
+  }, [currentUser?.id, currentUser?.role, placeQueueRevision, cloudAuthReady, cloudReadsAvailable]);
 
   useEffect(() => {
-    if (!currentUser || !cloudAuthReady || !hasConfiguredAuth()) return;
+    if (!currentUser || !cloudAuthReady || !cloudReadsAvailable || !hasConfiguredAuth()) return;
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
-    const fail = () => {
-      if (!stopped) notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device.");
-    };
+    const fail = (error?: unknown) => { if (!stopped) reportCloudReadFailure(error); };
     void subscribeCheckInRecords(currentUser, (records) => {
       if (stopped) return;
       setData((current) => {
@@ -436,10 +447,10 @@ function App() {
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
-  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady]);
+  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 
   useEffect(() => {
-    if (!currentUser || !cloudAuthReady) return;
+    if (!currentUser || !cloudAuthReady || !cloudReadsAvailable) return;
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
     void subscribeSosAlerts(currentUser, (alerts) => {
@@ -448,19 +459,17 @@ function App() {
         const next = { ...current, sosAlerts: mergeSosAlerts(current.sosAlerts, alerts) };
         return cacheLocalData(next);
       });
-    }, () => {
-      if (!stopped) notifySyncIssue(sosText(locale, "syncUnavailable"), sosText(locale, "syncDetail"));
-    }).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(() => {
-      if (!stopped) notifySyncIssue(sosText(locale, "syncUnavailable"), sosText(locale, "syncDetail"));
-    });
+    }, (error?: unknown) => {
+      if (!stopped) reportCloudReadFailure(error);
+    }).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch((error) => { if (!stopped) reportCloudReadFailure(error); });
     return () => { stopped = true; unsubscribe?.(); };
-  }, [currentUser?.id, currentUser?.role, locale, cloudAuthReady]);
+  }, [currentUser?.id, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 
   useEffect(() => {
-    if (!currentUser || !cloudAuthReady || !hasConfiguredAuth()) return;
+    if (!currentUser || !cloudAuthReady || !cloudReadsAvailable || !hasConfiguredAuth()) return;
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
-    const fail = () => { if (!stopped) notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device."); };
+    const fail = (error?: unknown) => { if (!stopped) reportCloudReadFailure(error); };
     void subscribeIncidentReports(currentUser, (reports) => {
       if (stopped) return;
       setData((current) => {
@@ -471,13 +480,13 @@ function App() {
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
-  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady]);
+  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== "admin" || !cloudAuthReady || !hasConfiguredAuth()) return;
+    if (!currentUser || currentUser.role !== "admin" || !cloudAuthReady || !cloudReadsAvailable || !hasConfiguredAuth()) return;
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
-    const fail = () => { if (!stopped) notifySyncIssue("Firebase sync unavailable", "The app is still usable, but data is currently saved on this device."); };
+    const fail = (error?: unknown) => { if (!stopped) reportCloudReadFailure(error); };
     void subscribeAdminMonitoring(currentUser, (snapshots, pending) => {
       if (stopped) return;
       setData((current) => {
@@ -486,7 +495,7 @@ function App() {
       });
     }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
-  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady]);
+  }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 
   const confirmPublicCheckIn = async (): Promise<PublicCheckInResult> => {
     if (!publicCheckInRequest?.destinationId || !publicCheckInDestination) {
@@ -559,24 +568,37 @@ function App() {
   };
 
   const retryCloudSync = async () => {
-    if (!currentUser) {
-      return;
-    }
-
+    if (!currentUser || isRetryingSync) return;
+    const revision = sessionRevision.current;
+    const isCurrent = () => sessionRevision.current === revision;
+    const before = latestData.current;
     setIsRetryingSync(true);
+    setCloudAuthReady(false);
+    setCloudReadsAvailable(false);
     try {
-      const synced = await saveCloudData(data, currentUser);
-      if (synced) {
-        setSyncStatus("Saved to Firestore collections");
-        notify({ tone: "success", title: "Cloud sync restored", message: "The latest local data was saved to Firestore." });
-      } else {
-        setSyncStatus("Saved on this device; cloud retry pending");
+      const cloudData = await restoreCloudConnection(currentUser, isCurrent);
+      if (!isCurrent() || !cloudData) return;
+      // A form or trip may have changed while the request was in flight. Its
+      // newer local edits and durable jobs take precedence over this refresh.
+      const freshActor = cloudData.users.find((user) => user.id === currentUser.id || Boolean(currentUser.authUid && user.authUid === currentUser.authUid))!;
+      const next = latestData.current === before ? refreshAllRecommendations(cloudData) : {
+        ...latestData.current,
+        users: latestData.current.users.map((user) => user.id === freshActor.id ? { ...user, role: freshActor.role } : user),
+      };
+      cacheLocalData(next);
+      setData(next);
+      setCloudReadsAvailable(true);
+      setSyncStatus("Loaded from Firebase Firestore");
+      notify({ tone: "success", title: "Cloud sync restored", message: "Loaded from Firebase Firestore" });
+    } catch (error) {
+      if (!isCurrent()) return;
+      if (isCloudQuotaError(error)) reportCloudReadFailure(error);
+      else {
+        setSyncStatus("Signed in; cloud refresh needs retry");
         notify({ tone: "warning", title: "Cloud sync still unavailable", message: "The app is still keeping changes locally on this device." });
       }
-    } catch {
-      setSyncStatus("Saved on this device; cloud retry pending");
-      notify({ tone: "warning", title: "Cloud sync still unavailable", message: "Firestore did not accept the retry. Check Firebase rules and connection." });
     } finally {
+      if (isCurrent()) setCloudAuthReady(true);
       setIsRetryingSync(false);
     }
   };
@@ -641,6 +663,7 @@ function App() {
       saveSession(authUid, rememberSession);
       setSessionUserId(authUid);
       setCloudAuthReady(false);
+      setCloudReadsAvailable(true);
       setView(defaultView);
       if (!isPublicCheckInFlow) {
         replaceBrowserPath(getPathForView(user.role, defaultView));
@@ -659,8 +682,8 @@ function App() {
           setData(refreshed);
           setSyncStatus("Loaded from Firebase Firestore");
         })
-        .catch(() => {
-          if (sessionRevision.current === revision) setSyncStatus("Signed in; cloud refresh needs retry");
+        .catch((error) => {
+          if (sessionRevision.current === revision) { setSyncStatus("Signed in; cloud refresh needs retry"); reportCloudReadFailure(error); }
         }).finally(() => { if (sessionRevision.current === revision) setCloudAuthReady(true); });
 
       return {};
@@ -1041,7 +1064,7 @@ function App() {
         </div>}
         <Suspense fallback={<div role="status" aria-busy="true">{t(currentUser.role === "admin" ? "nav.dashboard" : "nav.home")}...</div>}>
           {currentUser.role === "admin" ? (
-            <AdminWorkspace data={data} actor={currentUser} view={safeView} locale={locale} onDataChange={commitData} onViewChange={goToView} placeQueueState={placeQueueState} onRetryPlaceQueue={() => setPlaceQueueRevision((current) => current + 1)} notify={notify} />
+            <AdminWorkspace data={data} actor={currentUser} view={safeView} locale={locale} onDataChange={commitData} onViewChange={goToView} placeQueueState={placeQueueState} onRetryPlaceQueue={() => { if (!cloudReadsAvailable) void retryCloudSync(); else setPlaceQueueRevision((current) => current + 1); }} notify={notify} />
           ) : (
             <TouristWorkspace
               data={data}

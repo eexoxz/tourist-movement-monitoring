@@ -28,6 +28,7 @@ import { flushCloudChanges } from "./cloudSync";
 import { applyDemoDatasetSelection } from "./demoDatasetSelection";
 import { validDestinationPhoto, type DestinationPhotoUpload } from "./destinationPhotoUpload";
 import { destinationPhotoReference } from "./destinationPhoto";
+import { clearDestinationCatalogueCache, readDestinationCatalogue } from "./catalogueCache";
 import { shareServerRead } from "./serverRead";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
@@ -131,6 +132,7 @@ export function cacheSessionData(data: AppData) {
 }
 
 export function clearLocalDownloadCache() {
+  clearDestinationCatalogueCache();
   localStorage.removeItem(DATA_KEY);
   privateCacheCleared = true;
   localDataCache = undefined;
@@ -146,7 +148,7 @@ export async function loadSharedDestinations(): Promise<Destination[] | null> {
       shareServerRead(services.db, services.auth.currentUser.uid, `collection:${FIRESTORE_COLLECTIONS.destinations}`, () => getDocsFromServer(collection(services.db, FIRESTORE_COLLECTIONS.destinations))),
       new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error("Place refresh timed out")), 10000); }),
     ]);
-    return snapshot.docs.map((document) => normalizeDestination({ ...document.data(), id: document.id } as Destination));
+    return readDestinationCatalogue(services.app?.options.projectId ?? "configured", async () => snapshot.docs.map((document) => normalizeDestination({ ...document.data(), id: document.id } as Destination)), true);
   } finally {
     clearTimeout(timeout);
   }
@@ -375,7 +377,7 @@ export function getStorageMode() {
   return isFirebaseConfigured() ? localDataCache?.sessionOnly ? "Firestore collections" : "Firestore collections + local backup" : "Local browser storage";
 }
 
-export async function loadCloudData(fallbackActor?: User | null, isCurrent = () => true) {
+export async function loadCloudData(fallbackActor?: User | null, isCurrent = () => true, options: { forceCatalogue?: boolean } = {}) {
   const services = getFirebaseServices();
   if (!services) {
     return null;
@@ -444,7 +446,7 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
     readScopedPreferredCollection<LocationConsent>(FIRESTORE_COLLECTIONS.locationConsents, LEGACY_FIRESTORE_COLLECTIONS.consents),
     readTripHistory<TripSession>(FIRESTORE_COLLECTIONS.tripSessions, LEGACY_FIRESTORE_COLLECTIONS.trips),
     readTripHistory<MovementPoint>(FIRESTORE_COLLECTIONS.movementRecords, LEGACY_FIRESTORE_COLLECTIONS.movementPoints),
-    readCollection<Destination>(FIRESTORE_COLLECTIONS.destinations),
+    readDestinationCatalogue(services.app?.options.projectId ?? "configured", () => readCollection<Destination>(FIRESTORE_COLLECTIONS.destinations), options.forceCatalogue),
     readScopedPreferredCollection<AnalysisResult>(FIRESTORE_COLLECTIONS.aiAnalyses, LEGACY_FIRESTORE_COLLECTIONS.analyses),
     readScopedCollection<Recommendation>(FIRESTORE_COLLECTIONS.recommendations),
     readScopedCollection<SosAlert>(FIRESTORE_COLLECTIONS.sosAlerts),
@@ -505,6 +507,7 @@ export async function saveCloudData(data: AppData, actor?: User | null, previous
       ...(currentActor.role === "admin" ? [FIRESTORE_COLLECTIONS.destinations, FIRESTORE_COLLECTIONS.destinationCategories, FIRESTORE_COLLECTIONS.geofences] : []),
     ]));
     const lifecycleCollections: string[] = [FIRESTORE_COLLECTIONS.sosAlerts, FIRESTORE_COLLECTIONS.checkIns];
+    if (changes.some((change) => change.collection === FIRESTORE_COLLECTIONS.destinations)) clearDestinationCatalogueCache();
     queueCloudChanges(currentActor.id, changes.map((change) => lifecycleCollections.includes(change.collection)
       ? { ...change, data: cleanFirestoreData(after[change.collection].find((row) => row.id === change.id)!.data), remove: [] }
       : change));

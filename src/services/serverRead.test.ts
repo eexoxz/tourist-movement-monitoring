@@ -16,7 +16,7 @@ describe("simultaneous server reads", () => {
   it("isolates accounts, databases and query paths and permits retry after failure", async () => {
     expect(isCloudQuotaError({ code: "firestore/resource-exhausted" })).toBe(true);
     expect(isCloudQuotaError({ code: "permission-denied" })).toBe(false);
-    expect(friendlyAuthError({ code: "resource-exhausted" }, "Login failed")).toBe("Cloud data cannot be refreshed right now. Please try again later.");
+    expect(friendlyAuthError({ code: "resource-exhausted" }, "Login failed")).toBe("The cloud service has reached a usage limit. Try again after its quota resets.");
     expect(friendlyAuthError(new Error("Internal provider detail"), "Login failed")).toBe("Login failed");
     const database = {}, read = vi.fn(async () => "record");
     await Promise.all([

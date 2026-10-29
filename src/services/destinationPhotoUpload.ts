@@ -1,3 +1,4 @@
+import { clearDestinationCatalogueCache } from "./catalogueCache";
 import type { Destination, User } from "../types";
 import { getFirebaseServices } from "./firebaseClient";
 import { destinationPhotoReference, storedDestinationPhoto } from "./destinationPhoto";
@@ -122,5 +123,6 @@ export async function saveDestinationEdit(destination: Destination, original: De
     else if (storedDestinationPhoto(original?.imageUrl) && !storedDestinationPhoto(destination.imageUrl)) transaction.delete(doc(services.db, "destinations", destination.id, "photos", "current"));
   });
   if (photo) remember(destination.imageUrl!, photo.dataUrl);
+  clearDestinationCatalogueCache();
   return true;
 }

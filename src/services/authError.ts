@@ -1,7 +1,8 @@
+import { cloudRecoveryText } from "./cloudRecoveryCopy";
 import { isCloudQuotaError } from "./serverRead";
 export function friendlyAuthError(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : "";
-  if (isCloudQuotaError(error)) return "Cloud data cannot be refreshed right now. Please try again later.";
+  if (isCloudQuotaError(error)) return cloudRecoveryText("en", "quotaDetail");
   if (message.includes("auth/network-request-failed")) return "Connection failed. Check your internet connection and try again.";
 
   if (message.includes("auth/invalid-email")) {

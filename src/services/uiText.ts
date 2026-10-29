@@ -6,6 +6,7 @@ import { translatedSosSource, englishSosSource } from "./sosCopy";
 import { translatedEmergencySource, englishEmergencySource } from "./emergencyHelpCopy";
 import { featureTranslation, featureTranslationSource } from "./featureTranslations";
 import "./syncStatusCopy";
+import "./cloudRecoveryCopy";
 import "./authMessageCopy";
 
 // Only use for app-authored copy, never for names, addresses or user reports.
