@@ -11,6 +11,7 @@ import { useItineraries } from "../services/useItineraries";
 import { discoveryStates } from "../data/discoveryAreas";
 import { getDestinationState } from "../services/destinationState";
 import { destinationAdminText } from "../services/destinationAdminCopy";
+import { prepareItineraryCatalogue, searchItineraryCatalogue } from "../services/itineraryCatalogue";
 import { DestinationVisual } from "./DestinationVisual";
 import { Page } from "./Page";
 
@@ -56,19 +57,16 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], initialSt
   const entry = store.entries.find((candidate) => candidate.plan.id === selectedId);
   const plan = entry?.plan;
   const day = plan ? Math.min(selectedDay, plan.days) : 1;
-  const number = new Intl.NumberFormat(locale);
+  const number = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const schedule = (key: Parameters<typeof scheduleText>[1]) => scheduleText(locale, key);
   const scheduleIssues = plan ? itineraryScheduleIssues(plan) : [];
   const scheduledCount = (stopsForPlan: Itinerary["stops"]) => stopsForPlan.filter((stop) => stop.arrivalTime && stop.departureTime).length;
-  const dateFormat = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" });
+  const dateFormat = useMemo(() => new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" }), [locale]);
   const byId = useMemo(() => new Map(destinations.map((place) => [place.id, place])), [destinations]);
   const stateById = useMemo(() => new Map(destinations.map((place) => [place.id, getDestinationState(place)])), [destinations]);
   const suggestions = useMemo(() => new Set(suggestedIds), [suggestedIds]);
-  const matches = useMemo(() => {
-    const search = query.trim().toLocaleLowerCase(locale);
-    return destinations.filter((place) => (!state || stateById.get(place.id) === state) && (!search || `${place.name} ${place.city} ${stateById.get(place.id) ?? ""} ${place.description}`.toLocaleLowerCase(locale).includes(search)))
-      .sort((a, b) => Number(suggestions.has(b.id)) - Number(suggestions.has(a.id)) || a.name.localeCompare(b.name, locale));
-  }, [destinations, state, stateById, query, suggestions, locale]);
+  const catalogue = useMemo(() => prepareItineraryCatalogue(destinations, locale, suggestions), [destinations, locale, suggestions]);
+  const matches = useMemo(() => searchItineraryCatalogue(catalogue, query, state, locale), [catalogue, query, state, locale]);
   const stops = plan?.stops.filter((stop) => stop.day === day) ?? [];
   const remote = store.remote.find((candidate) => candidate.id === plan?.id);
   const conflict = Boolean(plan && entry.dirty && ((remote && (remote.deletedAt || remote.revision !== plan.revision)) || (store.connection === "live" && plan.revision > 0 && !remote)));

@@ -34,16 +34,13 @@ import { emergencyHelpText } from "../services/emergencyHelpCopy";
 import { localizeDestinations } from "../services/destinationLocale";
 import { type NotificationTone, type NotifyFn } from "../components/ToastViewport";
 import { uiText } from "../services/uiText";
-import { FestivalCalendarPanel } from "../components/FestivalCalendarPanel";
 import { Page } from "../components/Page";
 import { PlaceGuide } from "../components/PlaceGuide";
 import { PlaceGuideDialog } from "../components/PlaceGuideDialog";
-import { PlaceDiscovery, formatDistanceLabel, formatDemandLabel } from "../components/PlaceDiscovery";
+import { formatDistanceLabel, formatDemandLabel } from "../services/placeLabels";
 import { DiscoveryAreaPicker } from "../components/DiscoveryAreaPicker";
 import { TouristHome } from "../components/TouristHome";
 import { TouristPassCard } from "../components/TouristPassCard";
-import { TouristProfileForm } from "../components/TouristProfileForm";
-import { TripDiary } from "../components/TripDiary";
 import { TripExperience } from "../components/TripExperience";
 import { TripActionDialog } from "../components/TripActionDialog";
 import { TrackingStatus } from "../components/TrackingStatus";
@@ -56,6 +53,10 @@ import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWat
 import { type CommitDataOptions, incidentTypeOptions, loadProfileSetupSkipped, saveProfileSetupSkipped } from "../services/workspaceSupport";
 
 const ItineraryPage = lazy(() => import("../components/ItineraryPage").then((module) => ({ default: module.ItineraryPage })));
+const PlaceDiscovery = lazy(() => import("../components/PlaceDiscovery").then((module) => ({ default: module.PlaceDiscovery })));
+const FestivalCalendarPanel = lazy(() => import("../components/FestivalCalendarPanel").then((module) => ({ default: module.FestivalCalendarPanel })));
+const TouristProfileForm = lazy(() => import("../components/TouristProfileForm").then((module) => ({ default: module.TouristProfileForm })));
+const TripDiary = lazy(() => import("../components/TripDiary").then((module) => ({ default: module.TripDiary })));
 
 export function TouristWorkspace({
   data,
@@ -149,8 +150,10 @@ export function TouristWorkspace({
   const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));
   const latestGpsPoint = currentConsent ? getLatestDiscoveryPoint(activePoints.at(-1), lastBrowserLocation) : undefined;
   const discoveryGpsPoint = getDiscoveryReference({ ...user, discoveryLocationMode: "current" }, latestGpsPoint);
-  const discoveryReference = useMemo(() => getDiscoveryReference(user, discoveryGpsPoint), [user, discoveryGpsPoint]);
-  const canonicalDiscoveryDestinations = useMemo(() => getDiscoveryDestinations(data.destinations, user, discoveryReference), [data.destinations, user, discoveryReference]);
+  // Recheck GPS freshness above; unrelated edits must not replace the selected state's reference.
+  const browsingGpsPoint = user.discoveryLocationMode === "area" ? undefined : discoveryGpsPoint;
+  const discoveryReference = useMemo(() => getDiscoveryReference(user, browsingGpsPoint), [user.discoveryLocationMode, user.discoveryAreaId, browsingGpsPoint]);
+  const canonicalDiscoveryDestinations = useMemo(() => getDiscoveryDestinations(data.destinations, user, discoveryReference), [data.destinations, user.discoveryLocationMode, user.discoveryAreaId, user.hiddenDestinationIds, discoveryReference]);
   const discoveryDestinations = useMemo(() => localizeDestinations(canonicalDiscoveryDestinations, locale), [canonicalDiscoveryDestinations, locale]);
   const spotlightContext = useMemo(() => ({
     localDestinationIds: discoveryReference ? canonicalDiscoveryDestinations.map((place) => place.id) : undefined,
@@ -170,6 +173,7 @@ export function TouristWorkspace({
     () => discoveryReference && (view === "overview" || view === "recommendations" || view === "tracking" || view === "itinerary") ? recommendForUser(user.id, { ...localizedData, destinations: discoveryDestinations }, latestAnalysis, destinationDemand, discoveryReference, { localOnly: true, radiusKm: user.discoveryLocationMode === "area" ? Infinity : discoveryRadiusKm, ignoreHistoryLocation: true }) : [],
     [destinationDemand, latestAnalysis, discoveryReference, discoveryDestinations, localizedData, user.id, user.discoveryLocationMode, view]
   );
+  const suggestedDestinationIds = useMemo(() => recommendations.map((item) => item.destinationId), [recommendations]);
   const activeSamplePoint = activeTrip && activePoints.at(-1)?.source === "demo" ? activePoints.at(-1) : undefined;
   const tripReference = activeSamplePoint ?? discoveryGpsPoint;
   const tripBrowsingReference = tripReference ?? (!activeTrip ? discoveryReference : undefined);
@@ -179,17 +183,17 @@ export function TouristWorkspace({
     if (tripBrowsingReference === discoveryReference) return recommendations;
     return recommendForUser(user.id, localizedData, latestAnalysis, destinationDemand, tripBrowsingReference, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true });
   }, [destinationDemand, discoveryReference, latestAnalysis, localizedData, recommendations, tripBrowsingReference, user.id, view]);
-  const nearbyTripPlaces = tripRecommendations.flatMap((recommendation) => {
+  const nearbyTripPlaces = useMemo(() => tripRecommendations.flatMap((recommendation) => {
     const destination = tripDestinations.find((candidate) => candidate.id === recommendation.destinationId);
     return destination ? [destination] : [];
-  });
+  }), [tripRecommendations, tripDestinations]);
   const selectedRoutePoint = selectedTripPoints.at(-1);
   const selectedRouteRecommendations = useMemo(() => view === "history" && selectedRoutePoint
     ? recommendForUser(user.id, localizedData, selectedTripAnalysis ?? undefined, destinationDemand, selectedRoutePoint, { localOnly: true, radiusKm: discoveryRadiusKm, ignoreHistoryLocation: true })
     : [], [destinationDemand, localizedData, selectedRoutePoint, selectedTripAnalysis, user.id, view]);
   const activeCheckIn = getActiveCheckIn(data, user.id);
   const activeCheckInDestination = activeCheckIn ? localizedDestinations.find((destination) => destination.id === activeCheckIn.destinationId) ?? null : null;
-  const nearestCheckIn = discoveryGpsPoint ? nearestDestination(discoveryGpsPoint, localizedDestinations) : null;
+  const nearestCheckIn = useMemo(() => discoveryGpsPoint ? nearestDestination(discoveryGpsPoint, localizedDestinations) : null, [discoveryGpsPoint, localizedDestinations]);
   const recommendedCheckIn = nearestCheckIn && nearestCheckIn.distance <= 1.2 ? nearestCheckIn.destination : null;
   const geofenceWarnings = useMemo(() => getActiveGeofenceWarnings(tripReference, data.geofences), [data.geofences, tripReference]);
   const displayName = getDisplayName(user);
@@ -932,7 +936,7 @@ export function TouristWorkspace({
   }
 
   if (view === "itinerary") {
-    return <Suspense fallback={<p role="status">{travelText(locale, "itinerary")}…</p>}><ItineraryPage key={user.id} user={user} destinations={localizedDestinations} suggestedIds={recommendations.map((item) => item.destinationId)} initialState={getDiscoveryState(user.discoveryAreaId) ?? (discoveryReference && discoveryDestinations[0] ? getDestinationState(discoveryDestinations[0]) : undefined)} locale={locale} onBack={() => onViewChange("tracking")} onOpenPlace={openPlace} /></Suspense>;
+    return <Suspense fallback={<p role="status">{travelText(locale, "itinerary")}…</p>}><ItineraryPage key={user.id} user={user} destinations={localizedDestinations} suggestedIds={suggestedDestinationIds} initialState={getDiscoveryState(user.discoveryAreaId) ?? (discoveryReference && discoveryDestinations[0] ? getDestinationState(discoveryDestinations[0]) : undefined)} locale={locale} onBack={() => onViewChange("tracking")} onOpenPlace={openPlace} /></Suspense>;
   }
 
   if (view === "history") {
@@ -1086,7 +1090,8 @@ export function TouristWorkspace({
     </>
   );
   };
-  return <>{renderView()}{guidePlace && <PlaceGuideDialog title={guidePlace.name} locale={locale} onClose={() => setPlaceGuideId(null)}><PlaceGuide destination={guidePlace} locale={locale}
+  const loadingTitle = view === "profile" ? t("tourist.profile.pageTitle") : view === "recommendations" ? t("tourist.recommendations.pageTitle") : view === "events" ? t("tourist.events.pageTitle") : view === "history" ? travelText(locale, "manage") : t("nav.home");
+  return <><Suspense fallback={<p role="status" aria-busy="true">{loadingTitle}…</p>}>{renderView()}</Suspense>{guidePlace && <PlaceGuideDialog title={guidePlace.name} locale={locale} onClose={() => setPlaceGuideId(null)}><PlaceGuide destination={guidePlace} locale={locale}
     distance={formatDistanceLabel(guideReference ? distanceKm(guideReference, guidePlace) : undefined, t)}
     distanceLabel={user.discoveryLocationMode === "area" ? discoveryText(locale, "fromArea") : t("common.distance")}
     demand={formatDemandLabel(destinationDemand.find((row) => row.destinationId === guidePlace.id), locale, t)}

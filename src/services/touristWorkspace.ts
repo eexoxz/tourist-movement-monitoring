@@ -198,6 +198,7 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
 }
 
 // Keep route selection cheap without retaining earlier datasets or other users' data.
+const workspaceInputs = ["destinations", "trips", "points", "analyses", "recommendations", "sosAlerts", "incidentReports", "checkIns", "consents"] as const;
 export function createTouristWorkspaceSelector() {
   let lastData: AppData | undefined;
   let lastUserId = "";
@@ -207,7 +208,7 @@ export function createTouristWorkspaceSelector() {
   let namesByTrip: Map<string, string[]>;
 
   return (data: AppData, userId: string, selectedTripId: string): TouristWorkspaceData => {
-    if (data !== lastData || userId !== lastUserId) {
+    if (!lastData || userId !== lastUserId || workspaceInputs.some((key) => data[key] !== lastData![key])) {
       workspace = getTouristWorkspaceData(data, userId, "");
       destinationIndex = createDestinationSpatialIndex(data.destinations);
       pointsByTrip = new Map();
@@ -217,9 +218,9 @@ export function createTouristWorkspaceSelector() {
         points.push(point);
         pointsByTrip.set(point.tripId, points);
       });
-      lastData = data;
       lastUserId = userId;
     }
+    lastData = data;
 
     const selectedTrip = workspace.userTrips.find((trip) => trip.id === selectedTripId) ?? workspace.recentTrips[0];
     if (selectedTrip?.id === workspace.selectedTrip?.id) return workspace;

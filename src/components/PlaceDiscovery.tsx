@@ -13,6 +13,7 @@ import { PlaceGuide } from "./PlaceGuide";
 import { PlaceGuideDialog } from "./PlaceGuideDialog";
 import { travelerStatusText } from "../services/travelerStatusCopy";
 import { activityText } from "../services/activityCopy";
+import { formatDistanceLabel, formatDemandLabel } from "../services/placeLabels";
 
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";
 
@@ -59,22 +60,6 @@ type PlaceDiscoveryProps = {
 
 function getCategoryLabel(category: DestinationCategory, t: (key: TranslationKey) => string) {
   return t(categoryLabelKeys[category]);
-}
-
-export function formatDistanceLabel(distance: number | undefined, t: (key: TranslationKey) => string) {
-  if (distance === undefined) {
-    return t("tourist.places.locationNotActive");
-  }
-
-  return distance < 1 ? `${Math.round(distance * 1000)} ${t("tourist.places.mAway")}` : `${distance.toFixed(1)} ${t("tourist.places.kmAway")}`;
-}
-
-export function formatDemandLabel(row: DestinationDemand | undefined, locale: Locale, t: (key: TranslationKey) => string) {
-  if (!row || row.popularityScore <= 0) {
-    return activityText(locale, "noEvidence");
-  }
-
-  return `${t(`map.tier.${row.tier}` as TranslationKey)} ${t("common.demand").toLowerCase()}`;
 }
 
 function formatPlaceFitLabel(score: number, t: (key: TranslationKey) => string) {

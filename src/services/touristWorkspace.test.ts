@@ -73,4 +73,17 @@ describe("tourist workspace selector", () => {
     expect(otherUser).toEqual(getTouristWorkspaceData(renamed, "tourist-nature-demo", "trip-demo-1"));
     expect(select(renamed, "no-trips-user", "trip-demo-1").selectedTrip).toBeUndefined();
   });
+
+  it("reuses history for profile-only updates but refreshes safety, consent and check-in changes", () => {
+    const select = createTouristWorkspaceSelector();
+    const before = select(initialData, "tourist-demo", "trip-demo-1");
+    const profileOnly = { ...initialData, users: initialData.users.map((user) => ({ ...user, name: `${user.name} changed` })) };
+    expect(select(profileOnly, "tourist-demo", "trip-demo-1")).toBe(before);
+    const changed = { ...profileOnly, consents: [], checkIns: [], sosAlerts: [], incidentReports: [] };
+    const refreshed = select(changed, "tourist-demo", "trip-demo-1");
+    expect(refreshed).not.toBe(before);
+    expect(refreshed.currentConsent).toBeNull();
+    expect(refreshed.openSafetyCount).toBe(0);
+    expect(refreshed).toEqual(getTouristWorkspaceData(changed, "tourist-demo", "trip-demo-1"));
+  });
 });
