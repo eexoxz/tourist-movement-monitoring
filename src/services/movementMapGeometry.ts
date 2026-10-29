@@ -74,7 +74,9 @@ function separateDestinationGroups(initial: DestinationMapGroup[], zoom: number)
   return groups;
 }
 
-export function groupMapDestinations(destinations: Destination[], zoom: number, cellPixels = 66): DestinationMapGroup[] {
+export function groupMapDestinations(destinations: Destination[], zoom: number, cellPixels = 66, selectedId?: string | null): DestinationMapGroup[] {
+  const selected = selectedId ? destinations.find((place) => place.id === selectedId) : undefined;
+  if (selected) return [{ key: selected.id, places: [selected], latitude: selected.latitude, longitude: selected.longitude }, ...groupMapDestinations(destinations.filter((place) => place.id !== selected.id), zoom, cellPixels)];
   const cells = new Map<string, DestinationMapGroup>();
   for (const place of destinations) {
     const [x, y] = projectMapCoordinate(place.latitude, place.longitude, zoom);

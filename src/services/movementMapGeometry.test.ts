@@ -37,6 +37,10 @@ describe("large movement-map geometry", () => {
     }
     const same = { ...catalogue[0], id: "same-coordinate" };
     expect(groupMapDestinations([catalogue[0], same], 18)[0].places).toHaveLength(2);
+    const selected = groupMapDestinations([catalogue[0], same], 18, 66, catalogue[0].id);
+    expect(selected.find((group) => group.key === catalogue[0].id)?.places).toEqual([catalogue[0]]);
+    expect(selected.flatMap((group) => group.places.map((place) => place.id)).sort()).toEqual([catalogue[0].id, same.id].sort());
+    expect(groupMapDestinations([catalogue[0], same], 18, 66, "missing")).toEqual(groupMapDestinations([catalogue[0], same], 18));
   });
   it("never joins different trips, tourists, reversed timestamps, stale GPS segments or implausible jumps", () => {
     const next = { ...point, longitude: 100.301, recordedAt: "2026-10-28T00:01:00Z" };

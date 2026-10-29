@@ -2,6 +2,11 @@ import type { AppData, IncidentReport, IncidentType, MovementPoint, SafetyStatus
 import { createId } from "./storage";
 
 export type SafetyLocation = Pick<MovementPoint, "latitude" | "longitude"> | null | undefined;
+export type SafetyCaseView = "active" | "history" | "all";
+
+export function filterSafetyCases<T extends { status: SafetyStatus }>(records: T[], view: SafetyCaseView) {
+  return view === "all" ? records : records.filter((record) => (record.status === "resolved") === (view === "history"));
+}
 
 export function createSosAlert(data: AppData, userId: string, location?: SafetyLocation) {
   const existing = data.sosAlerts.find((alert) => alert.userId === userId && alert.status !== "resolved");

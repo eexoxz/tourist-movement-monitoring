@@ -8,6 +8,7 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createDestinationSignalCalculator, emptyDestinationSignal, type DestinationSignal } from "../services/mapSignals";
 import { DestinationVisual } from "./DestinationVisual";
 import { PlacePracticalInfo } from "./PlacePracticalInfo";
+import { PlaceGuideDialog } from "./PlaceGuideDialog";
 import { discoveryText } from "../services/discoveryCopy";
 import { activityText } from "../services/activityCopy";
 import { MovementCanvasLayer } from "./MovementCanvasLayer";
@@ -228,7 +229,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     };
     const render = () => {
       const currentZoom = map.getZoom();
-      if (currentZoom !== zoom) { zoom = currentZoom; groups = groupMapDestinations(visibleDestinations, zoom); }
+      if (currentZoom !== zoom) { zoom = currentZoom; groups = groupMapDestinations(visibleDestinations, zoom, 66, mode === "admin" ? selectedDestinationId : null); }
       const bounds = map.getBounds().pad(.2), wanted = new Set<string>();
       for (const group of groups) {
         if (!bounds.contains([group.latitude, group.longitude])) continue;
@@ -241,7 +242,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         const title = single ? single.name : mapDisplayText(locale, "places", { count: group.places.length });
         const icon = single ? destinationIcon(single.category, signal!, mode !== "tourist" && zoom >= 11) : L.divIcon({ className: "destination-cluster", html: `<strong>${new Intl.NumberFormat(locale).format(group.places.length)}</strong>`, iconSize: [44, 44], iconAnchor: [22, 22] });
         if (previous) { previous.marker.setIcon(icon); previous.signature = signature; continue; }
-        const marker = L.marker([group.latitude, group.longitude], { icon, title, alt: title, zIndexOffset: single ? 200 : 300 });
+        const marker = L.marker([group.latitude, group.longitude], { icon, title, alt: title, zIndexOffset: single?.id === selectedDestinationId ? 500 : single ? 200 : 300 });
         marker.on("click", () => {
           if (single) { selectDestination(single); return; }
           manualBrowseRef.current = true; map.closePopup();
@@ -263,7 +264,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     renderDestinationsRef.current = render;
     map.on("moveend zoomend", render); render();
     return () => { map.off("moveend zoomend", render); layer.remove(); markers.clear(); renderDestinationsRef.current = null; };
-  }, [visibleDestinations, locale, mode]);
+  }, [visibleDestinations, locale, mode, selectedDestinationId]);
 
   useEffect(() => { renderDestinationsRef.current?.(); }, [destinationSignals]);
 
@@ -354,13 +355,17 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     focusLayerRef.current?.remove();
     const layer = L.layerGroup().addTo(map);
     focusLayerRef.current = layer;
-    const circle = L.circle([focusTarget.latitude, focusTarget.longitude], {
-      radius: focusTarget.radiusMeters ?? 80, color: "#0f766e", weight: 3, fillOpacity: .1,
-    }).addTo(layer);
-    focusCircleRef.current = circle;
-    circle.bindTooltip(escapeHtml(uiText(locale, focusTarget.label)), { permanent: true, direction: "top" });
-    if (focusTarget.radiusMeters) map.fitBounds(circle.getBounds(), { padding: [48, 48], maxZoom: 15, animate: false });
-    else map.setView([focusTarget.latitude, focusTarget.longitude], 15, { animate: false });
+    if (focusTarget.radiusMeters) {
+      const circle = L.circle([focusTarget.latitude, focusTarget.longitude], {
+        radius: focusTarget.radiusMeters, color: "#0f766e", weight: 3, fillOpacity: .1,
+      }).addTo(layer);
+      focusCircleRef.current = circle;
+      circle.bindTooltip(escapeHtml(uiText(locale, focusTarget.label)), { permanent: true, direction: "top" });
+      map.fitBounds(circle.getBounds(), { padding: [48, 48], maxZoom: 15, animate: false });
+    } else {
+      focusCircleRef.current = null;
+      map.setView([focusTarget.latitude, focusTarget.longitude], 15, { animate: false });
+    }
     return () => { layer.remove(); focusCircleRef.current = null; };
   }, [focusTarget]);
 
@@ -420,44 +425,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const detailsExpanded = Boolean(selectedDestination && expandedDestinationId === selectedDestination.id);
   const previewDismissed = !selectedDestination && previewDestination?.id === dismissedPreviewId;
 
-  return (
-    <div className={`map-frame${mode === "tourist" ? " tourist-map-mode" : ""}${activePoint ? " map-has-location" : ""}`}>
-      <div ref={containerRef} className="map-view" aria-label={t("map.aria")} />
-      {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? t("map.loading") : t("map.error")}</div>}
-      {mode === "admin" && <>
-        <div className="map-data-summary" title={mapDisplayText(locale, "overlap")}><strong>{mapDisplayText(locale, "loaded", { count: points.length })}</strong><span>{mapDisplayText(locale, "sources", sourceCounts)}</span><small>{mapDisplayText(locale, "help")}</small></div>
-        <button type="button" className="map-national-button" onClick={showMalaysia} title={mapDisplayText(locale, "national")} aria-label={mapDisplayText(locale, "national")}><MapPinned size={18} /><span>{mapDisplayText(locale, "national")}</span></button>
-      </>}
-      {placeGroup && <section className="map-cluster-list" aria-label={mapDisplayText(locale, "group")}><button className="map-detail-close" type="button" aria-label={mapDisplayText(locale, "close")} onClick={() => setPlaceGroup(null)}><X size={16} /></button><strong>{mapDisplayText(locale, "places", { count: placeGroup.length })}</strong>{placeGroup.map((place) => <button key={place.id} className="secondary-action compact-action" type="button" onClick={() => { setSelectedDestinationId(place.id); setExpandedDestinationId(place.id); setDismissedPreviewId(null); setPlaceGroup(null); }}>{place.name}</button>)}</section>}
-      {mode === "tourist" && <div className="map-mode-label">{t("map.touristMap")}</div>}
-      {activePoint && (
-        <button className="map-current-button" type="button" onClick={centerOnActivePoint} title={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")} aria-label={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}>
-          <LocateFixed size={18} aria-hidden="true" />
-          <span>{isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}</span>
-        </button>
-      )}
-      <div className="map-legend" aria-label={t("map.legendAria")}>
-        {visibleCategories.map((category) => (
-          <span key={category}>
-            <i className={`legend-marker destination-marker-${category}`}>
-              <span dangerouslySetInnerHTML={{ __html: categoryIconHtml(category, 13) }} />
-            </i>
-            {categoryLabel(category)}
-          </span>
-        ))}
-      </div>
-      {(mode === "tourist" || selectedDestination) && !placeGroup && !routePopupOpen && !previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
-        {detailsExpanded && selectedDestination && selectedSignal ? (
-          <>
-            <button
-              className="map-detail-close"
-              type="button"
-              onClick={() => setExpandedDestinationId(null)}
-              title={t("map.closePlaceDetails")}
-              aria-label={t("map.closePlaceDetails")}
-            >
-              <X size={16} aria-hidden="true" />
-            </button>
+  const placeDetails = selectedDestination && selectedSignal ? <>
             <DestinationVisual destination={selectedDestination} compact locale={locale} />
             <div className="map-detail-heading">
               <span>{categoryLabel(selectedDestination.category)} {t("map.destination")}</span>
@@ -499,6 +467,49 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
               )}
             </section>
             {selectedSignal.latestRecordedAt && <small>{t("map.visitorMovementUpdated")} {formatDateTime(selectedSignal.latestRecordedAt, locale)}</small>}
+  </> : null;
+  const legend = (<div className="map-legend" aria-label={t("map.legendAria")}>
+        {visibleCategories.map((category) => (
+          <span key={category}>
+            <i className={`legend-marker destination-marker-${category}`}>
+              <span dangerouslySetInnerHTML={{ __html: categoryIconHtml(category, 13) }} />
+            </i>
+            {categoryLabel(category)}
+          </span>
+        ))}
+      </div>);
+
+  return (
+    <div className={`map-frame${mode === "tourist" ? " tourist-map-mode" : ""}${activePoint ? " map-has-location" : ""}`}>
+      <div className="map-surface">
+      <div ref={containerRef} className="map-view" aria-label={t("map.aria")} />
+      {mapStatus !== "ready" && <div className="map-status">{mapStatus === "loading" ? t("map.loading") : t("map.error")}</div>}
+      {mode === "admin" && <>
+        <div className="map-data-summary" title={mapDisplayText(locale, "overlap")}><strong>{mapDisplayText(locale, "loaded", { count: points.length })}</strong><span>{mapDisplayText(locale, "sources", sourceCounts)}</span><small>{mapDisplayText(locale, "help")}</small></div>
+        <button type="button" className="map-national-button" onClick={showMalaysia} title={mapDisplayText(locale, "national")} aria-label={mapDisplayText(locale, "national")}><MapPinned size={18} /><span>{mapDisplayText(locale, "national")}</span></button>
+      </>}
+      {placeGroup && <section className="map-cluster-list" aria-label={mapDisplayText(locale, "group")}><button className="map-detail-close" type="button" aria-label={mapDisplayText(locale, "close")} onClick={() => setPlaceGroup(null)}><X size={16} /></button><strong>{mapDisplayText(locale, "places", { count: placeGroup.length })}</strong>{placeGroup.map((place) => <button key={place.id} className="secondary-action compact-action" type="button" onClick={() => { setSelectedDestinationId(place.id); setExpandedDestinationId(place.id); setDismissedPreviewId(null); setPlaceGroup(null); }}>{place.name}</button>)}</section>}
+      {mode === "tourist" && <div className="map-mode-label">{t("map.touristMap")}</div>}
+      {activePoint && (
+        <button className="map-current-button" type="button" onClick={centerOnActivePoint} title={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")} aria-label={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}>
+          <LocateFixed size={18} aria-hidden="true" />
+          <span>{isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}</span>
+        </button>
+      )}
+      {mode === "tourist" && legend}
+      {mode === "tourist" && !placeGroup && !routePopupOpen && !previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
+        {detailsExpanded && selectedDestination && selectedSignal ? (
+          <>
+            <button
+              className="map-detail-close"
+              type="button"
+              onClick={() => setExpandedDestinationId(null)}
+              title={t("map.closePlaceDetails")}
+              aria-label={t("map.closePlaceDetails")}
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+            {placeDetails}
           </>
         ) : previewDestination && previewSignal ? (
           <>
@@ -530,6 +541,16 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           </>
         )}
       </section>}
+      {mode === "admin" && selectedDestination && selectedSignal && !placeGroup && !routePopupOpen && <section className="admin-map-selection" aria-live="polite">
+        <button type="button" className="map-detail-close" aria-label={discoveryText(locale, "dismiss")} onClick={() => { setSelectedDestinationId(null); setExpandedDestinationId(null); }}><X size={16} /></button>
+        <span>{categoryLabel(selectedDestination.category)} · {selectedDestination.city}</span>
+        <strong>{selectedDestination.name}</strong>
+        <div className="map-preview-actions"><small>{t("map.movementPoints")}: {new Intl.NumberFormat(locale).format(selectedSignal.nearbyPointCount)}</small><button type="button" className="secondary-action compact-action" onClick={() => setExpandedDestinationId(selectedDestination.id)}><MapPinned size={17} />{discoveryText(locale, "view")}</button></div>
+      </section>}
+      </div>
+      {mode === "admin" && legend}
+      {mode === "admin" && detailsExpanded && selectedDestination && <PlaceGuideDialog title={selectedDestination.name} locale={locale} onClose={() => setExpandedDestinationId(null)} className="admin-map-place-dialog"><div className="admin-map-place-content">{placeDetails}</div></PlaceGuideDialog>}
+
     </div>
   );
 }

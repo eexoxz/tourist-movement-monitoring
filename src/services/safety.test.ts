@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { adminSafetyText } from "./adminSafetyCopy";
 import { initialData } from "../data/demoData";
-import { closeOwnSosAlert, createIncidentReport, createSosAlert, getOpenSafetyCount, mergeSosAlerts, preferredSosAlert, updateIncidentStatus, updateSosStatus } from "./safety";
+import { closeOwnSosAlert, createIncidentReport, createSosAlert, filterSafetyCases, getOpenSafetyCount, mergeSosAlerts, preferredSosAlert, updateIncidentStatus, updateSosStatus } from "./safety";
 
 describe("safety service", () => {
   it("creates an SOS alert with optional tourist location", () => {
@@ -93,6 +94,22 @@ describe("safety service", () => {
 
     expect(result.report?.photoName).toBe("backpack.jpg");
     expect(result.data?.incidentReports[0].photoDataUrl).toContain("data:image/jpeg");
+  });
+
+  it("separates active work from resolved history as SOS and incident statuses change", () => {
+    const rows = (data: typeof initialData) => [...data.sosAlerts, ...data.incidentReports];
+    const reviewing = updateIncidentStatus(initialData, "incident-demo-lost-bag", "reviewing");
+    expect(filterSafetyCases(rows(reviewing), "active").some((record) => record.id === "incident-demo-lost-bag")).toBe(true);
+    const resolved = updateSosStatus(updateIncidentStatus(reviewing, "incident-demo-lost-bag", "resolved"), "sos-demo-open", "resolved");
+    for (const id of ["sos-demo-open", "incident-demo-lost-bag"]) {
+      expect(filterSafetyCases(rows(resolved), "active").some((record) => record.id === id)).toBe(false);
+      expect(filterSafetyCases(rows(resolved), "history").some((record) => record.id === id)).toBe(true);
+    }
+    expect(filterSafetyCases(rows(resolved), "active")).toHaveLength(getOpenSafetyCount(resolved));
+    expect(filterSafetyCases(rows(resolved), "all")).toHaveLength(rows(initialData).length);
+    expect(filterSafetyCases([], "active")).toEqual([]);
+    for (const locale of ["ms", "zh", "ja", "ko", "pt", "ta", "es", "fr"] as const) for (const key of ["active", "history", "all", "filter", "emptyActive", "emptyHistory", "description"] as const) expect(adminSafetyText(locale, key)).not.toBe(adminSafetyText("en", key));
+    expect(filterSafetyCases(filterSafetyCases(rows(resolved), "history"), "active")).toEqual([]);
   });
 
   it("updates safety record statuses", () => {

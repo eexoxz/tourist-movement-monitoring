@@ -18,7 +18,8 @@ import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
 import { buildMovementRecordsCsv, getDailyMovementTrend, getMovementDashboardViews, getMovementDataStatus, getTourists, getTripFilterOptions, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
 import { calculateGeofenceActivity } from "../services/geofencing";
-import { getOpenSafetyCount, updateIncidentStatus, updateSosStatus } from "../services/safety";
+import { filterSafetyCases, getOpenSafetyCount, updateIncidentStatus, updateSosStatus, type SafetyCaseView } from "../services/safety";
+import { adminSafetyText } from "../services/adminSafetyCopy";
 import { sosText } from "../services/sosCopy";
 import { SosRequestActions } from "../components/SosRequestActions";
 import { getTouristManagementRows } from "../services/touristManagement";
@@ -99,6 +100,7 @@ export function AdminWorkspace({
   const [movementPage, setMovementPage] = useState(1);
   const [movementPageSize, setMovementPageSize] = useState(25);
   const [showAllSafetyCases, setShowAllSafetyCases] = useState(false);
+  const [safetyCaseView, setSafetyCaseView] = useState<SafetyCaseView>("active");
   const [analysisPage, setAnalysisPage] = useState(1);
   const [analysisPageSize, setAnalysisPageSize] = useState(25);
   const movementScroller = useRef<HTMLDivElement>(null);
@@ -234,8 +236,9 @@ export function AdminWorkspace({
   const openSafetyRecordCount = getOpenSafetyCount(data);
   const resolvedSafetyRecordCount = safetyRecords.filter((record) => record.status === "resolved").length;
   const movementPageResult = directoryPage(movementTripRecords, movementPage, movementPageSize);
-  const visibleSafetyRecords = showAllSafetyCases ? safetyRecords : safetyRecords.slice(0, adminSafetyPreviewLimit);
-  const hiddenSafetyRecordCount = safetyRecords.length - visibleSafetyRecords.length;
+  const filteredSafetyRecords = useMemo(() => filterSafetyCases(safetyRecords, safetyCaseView), [safetyRecords, safetyCaseView]);
+  const visibleSafetyRecords = showAllSafetyCases ? filteredSafetyRecords : filteredSafetyRecords.slice(0, adminSafetyPreviewLimit);
+  const hiddenSafetyRecordCount = filteredSafetyRecords.length - visibleSafetyRecords.length;
   const analysisPageResult = directoryPage(analysisRows, analysisPage, analysisPageSize);
   const selectedKValue = Math.min(3, analysisRows.length);
   const selectedClusterSize = selectedAnalysis ? aiInsights?.clusters.find((summary) => summary.cluster === selectedAnalysis.cluster)?.size ?? 0 : 0;
@@ -349,7 +352,7 @@ export function AdminWorkspace({
   };
 
   const updateSafetyCase = (kind: "sos" | "incident", recordId: string, status: SafetyStatus, adminNote?: string, closureReason?: SosClosureReason) => {
-    const current = loadData();
+    const current = latestDataset.current;
     const nextData = kind === "sos" ? updateSosStatus(current, recordId, status, adminNote, closureReason, actor.id) : updateIncidentStatus(current, recordId, status, adminNote);
     onDataChange(nextData, actor, kind === "sos" ? { sosAlert: nextData.sosAlerts.find((alert) => alert.id === recordId) } : undefined);
     notify({
@@ -538,7 +541,7 @@ export function AdminWorkspace({
       <div className="admin-tab-heading">
         <div>
           <h2>{adminText("safety.title")}</h2>
-          <p>{adminText("safety.description")}</p>
+          <p>{adminSafetyText(locale, "description")}</p>
         </div>
         <strong>{adminText("safety.openCases", { count: openSafetyRecordCount })}</strong>
       </div>
@@ -550,6 +553,9 @@ export function AdminWorkspace({
           [adminText("safety.emergencyContacts"), tourists.filter((tourist) => tourist.emergencyContactPhone).length.toString()],
         ]}
       />
+      <div className="safety-case-filters" role="group" aria-label={adminSafetyText(locale, "filter")}>
+        {(["active", "history", "all"] as const).map((value) => <button key={value} type="button" aria-pressed={safetyCaseView === value} onClick={() => { setSafetyCaseView(value); setShowAllSafetyCases(false); }}>{adminSafetyText(locale, value)}<span>{value === "active" ? openSafetyRecordCount : value === "history" ? resolvedSafetyRecordCount : safetyRecords.length}</span></button>)}
+      </div>
       <section className="safety-admin-list">
         {visibleSafetyRecords.map((record) => {
           const tourist = userById.get(record.userId);
@@ -625,7 +631,7 @@ export function AdminWorkspace({
           );
         })}
         <ListLimitFooter hiddenCount={hiddenSafetyRecordCount} isExpanded={showAllSafetyCases} itemLabel="safety case" pluralLabel="safety cases" onToggle={() => setShowAllSafetyCases((value) => !value)} locale={locale} />
-        {safetyRecords.length === 0 && <EmptyState text={adminText("safety.empty")} />}
+        {filteredSafetyRecords.length === 0 && <EmptyState text={safetyCaseView === "all" ? adminText("safety.empty") : adminSafetyText(locale, safetyCaseView === "active" ? "emptyActive" : "emptyHistory")} />}
       </section>
     </div>
   );
