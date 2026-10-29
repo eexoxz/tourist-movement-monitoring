@@ -1,0 +1,36 @@
+/* Admin tools open independent views without expanding the dashboard. */
+.admin-insight-link { display: grid; grid-template-columns: 28px minmax(0, 1fr) 20px; align-items: center; gap: 12px; width: 100%; min-height: 76px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); text-align: left; }
+.admin-insight-link > svg:first-child { color: var(--teal-dark); }
+.admin-insight-link > span { display: grid; gap: 5px; font-weight: 600; }
+.admin-insight-link small { color: var(--muted); font-weight: 400; }
+.admin-insight-link:hover { border-color: #0f766e; background: #f0fdfa; }
+.admin-insight-link:focus-visible, .admin-overview-map:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
+.admin-insight-dialog { width: min(820px, calc(100% - 28px)); }
+.admin-insight-dialog .admin-overview-section-body { gap: 20px; padding: 20px; }
+.admin-insight-dialog .admin-overview-section-body > * { min-width: 0; }
+.admin-insight-dialog .plan-builder { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.admin-insight-dialog .alert-card, .admin-insight-dialog .demand-card, .admin-insight-dialog .plan-stop { align-items: start; }
+.map-locate-action { margin: 8px 0; }
+.admin-overview-map { scroll-margin-top: 20px; }
+/* The legend and requested selection belong to the map, without obscuring it. */
+.map-frame:not(.tourist-map-mode) .map-legend { position: static; max-width: none; margin: 10px 0 0; padding: 6px 0; border: 0; background: transparent; backdrop-filter: none; box-shadow: none; justify-content: flex-start; }
+.map-frame:not(.tourist-map-mode) .map-detail-panel { position: relative; inset: auto; width: auto; max-height: none; margin-top: 10px; box-shadow: none; backdrop-filter: none; }
+.map-frame:not(.tourist-map-mode) .map-data-summary { width: min(220px, calc(100% - 78px)); }
+@media (max-width: 760px) {
+ .admin-insight-dialog .plan-builder { grid-template-columns: minmax(0, 1fr); }
+ .admin-insight-dialog .admin-overview-section-body { padding: 14px; }
+ .admin-insight-link { min-height: 64px; padding: 12px; }
+}
+
+.map-frame:not(.tourist-map-mode) { container-type: inline-size; }
+@container (max-width: 520px) {
+ .map-national-button > span { display: none; }
+ .map-national-button { padding: 10px; }
+}
+
+.admin-overview-layout { overflow-anchor: none; }
+
+.admin-overview-map .map-view { scroll-margin-top: 20px; }
+
+.admin-insight-dialog .section-heading { flex-wrap: wrap; }
+.admin-insight-dialog .section-heading > button { flex-shrink: 0; white-space: nowrap; }

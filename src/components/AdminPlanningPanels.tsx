@@ -1,8 +1,9 @@
-import { Download } from "lucide-react";
+import { Download, MapPinned } from "lucide-react";
 import { useMemo } from "react";
 import type { Destination, DestinationDemand, MovementAlert, TravelPlan } from "../types";
 import { EmptyState } from "./SummaryCards";
 import { translate, type Locale } from "../services/i18n";
+import { adminMapText } from "../services/adminNavigationCopy";
 import { uiText } from "../services/uiText";
 import { demandTierText, planSummary, planningStopReason, profileLabel } from "../services/planningText";
 
@@ -12,7 +13,9 @@ export function MovementDemandList({
   destinations,
   compact = false,
   locale,
+  onLocate,
 }: {
+  onLocate?: (destination: Destination) => void;
   title: string;
   demand: DestinationDemand[];
   destinations: Destination[];
@@ -36,6 +39,7 @@ export function MovementDemandList({
             <span className="rank-badge">{index + 1}</span>
             <div>
               <strong>{destination.name}</strong>
+              {onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
               <p>
                 {uiText(locale, "{tourists} tourist profiles, {points} nearby points, {approaches} approach signals", { tourists: row.uniqueTouristCount, points: row.movementPointCount, approaches: row.approachSignalCount })}
               </p>
@@ -52,13 +56,13 @@ export function MovementDemandList({
   );
 }
 
-export function MovementAlertList({ alerts, destinations, onExport, locale }: { alerts: MovementAlert[]; destinations: Destination[]; onExport: () => void; locale: Locale }) {
+export function MovementAlertList({ alerts, destinations, onExport, locale, onLocate, hideHeading = false }: { hideHeading?: boolean; onLocate?: (destination: Destination) => void; alerts: MovementAlert[]; destinations: Destination[]; onExport: () => void; locale: Locale }) {
   const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
 
   return (
     <section className="movement-alerts">
       <div className="section-heading">
-        <h2>{uiText(locale, "Movement Alerts")}</h2>
+        {!hideHeading && <h2>{uiText(locale, "Movement Alerts")}</h2>}
         <button className="secondary-action compact-action" onClick={onExport} disabled={alerts.length === 0}>
           <Download size={18} />
           CSV
@@ -72,6 +76,7 @@ export function MovementAlertList({ alerts, destinations, onExport, locale }: { 
             <span>{uiText(locale, alert.severity)}</span>
             <div>
               <strong>{destination?.name ?? alert.title}</strong>
+              {destination && onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
               <p>{uiText(locale, alert.message)}</p>
               <small>{uiText(locale, alert.recommendedAction)}</small>
             </div>
@@ -83,7 +88,7 @@ export function MovementAlertList({ alerts, destinations, onExport, locale }: { 
   );
 }
 
-export function TravelPlanPanel({ plan, destinations, locale }: { plan: TravelPlan; destinations: Destination[]; locale: Locale }) {
+export function TravelPlanPanel({ plan, destinations, locale, onLocate }: { onLocate?: (destination: Destination) => void; plan: TravelPlan; destinations: Destination[]; locale: Locale }) {
   const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
 
   return (
@@ -106,6 +111,7 @@ export function TravelPlanPanel({ plan, destinations, locale }: { plan: TravelPl
             <span>{stop.order}</span>
             <div>
               <strong>{destination.name}</strong>
+              {onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
               <p>{planningStopReason(locale, stop.reason)}</p>
             </div>
             <small>{stop.suggestedMinutes} {translate(locale, "common.minutes")}</small>

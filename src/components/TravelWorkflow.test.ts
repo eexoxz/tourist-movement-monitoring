@@ -76,7 +76,9 @@ describe("tourist travel workflow boundaries", () => {
     expect(html).toContain("Needs your attention");
     expect(html).toContain("Unlisted places to review");
     expect(html).toContain('id="admin-movement-alerts"');
-    expect(html).toContain('class="admin-planning-disclosure"');
+    expect(html).toContain('class="admin-insight-link"');
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(html).not.toContain('class="admin-overview-section"');
     expect(html).toContain('aria-pressed="true"');
   });
   for (const { value: locale } of localeOptions) it(`keeps redesigned Places data and dialog labels in ${locale}`, () => {

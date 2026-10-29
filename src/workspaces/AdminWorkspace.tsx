@@ -38,7 +38,7 @@ import { summarizeAiResults } from "../services/aiInsights";
 import { aiText } from "../services/aiInsightsCopy";
 import { EmptyState, MetricGrid } from "../components/SummaryCards";
 import { ListLimitFooter } from "../components/ListLimitFooter";
-import { DeferredDetails } from "../components/DeferredDetails";
+import { adminMapText, adminPanelCloseText } from "../services/adminNavigationCopy";
 import { type NotifyFn } from "../components/ToastViewport";
 import { DestinationManager } from "../components/DestinationManager";
 import { reviewUnlistedCheckIns, mergePlaceReviewRecords, sampleUnlistedCheckIns, groupUnlistedCheckIns } from "../services/unlistedPlaces";
@@ -49,8 +49,7 @@ import { saveDestinationEdit, storeLocalDestinationPhoto } from "../services/des
 import { isFirebaseConfigured } from "../services/firebaseClient";
 import { clusterText, decisionStepText, profileLabel } from "../services/planningText";
 import { FestivalCalendarPanel } from "../components/FestivalCalendarPanel";
-import { MovementMap } from "../components/MovementMap";
-import { MovementPulseHero } from "../components/MovementPulseHero";
+import { MovementMap, type MapFocusTarget } from "../components/MovementMap";
 import { Page } from "../components/Page";
 import { RecommendationList } from "../components/RecommendationList";
 import { type PlanAudience, type PlanTier, type AdminDashboardTab, type CommitDataOptions, DEMO_DATASET_LOCAL_ONLY_STATUS, adminSafetyPreviewLimit, analysisKey, getIncidentTypeLabel } from "../services/workspaceSupport";
@@ -111,6 +110,15 @@ export function AdminWorkspace({
   latestDataset.current = data;
   useEffect(() => () => { if (demoDatasetTask.current !== null) window.clearTimeout(demoDatasetTask.current); }, []);
   const [refreshingReports, setRefreshingReports] = useState(false);
+  const [insight, setInsight] = useState<"alerts" | "geofences" | "demand" | "plan" | "recommendations" | null>(null);
+  const [mapFocus, setMapFocus] = useState<MapFocusTarget>();
+  const focusSequence = useRef(0);
+  const locateOnMap = (target: Omit<MapFocusTarget, "key">) => {
+    setInsight(null);
+    setMapFocus({ ...target, key: ++focusSequence.current });
+  };
+  const locateDestination = (destination: Destination) => locateOnMap({ ...destination, label: destination.name, destinationId: destination.id });
+  useEffect(() => { if (adminTab !== "overview" || view !== "dashboard") { setInsight(null); setMapFocus(undefined); } }, [adminTab, view]);
 
   const recordsActive = view === "dashboard" && adminTab === "records";
   const aiActive = view === "dashboard" && adminTab === "ai";
@@ -354,6 +362,7 @@ export function AdminWorkspace({
   const touristManagementPanel = <TouristDirectory rows={touristManagementRows} locale={locale} onViewMovement={(userId) => {
     setSelectedTouristId(userId);
     setSelectedTripId("all");
+    setSelectedRecordTripId(null);
     setAdminTab("records");
   }} onViewSafety={() => setAdminTab("safety")} />;
 
@@ -788,7 +797,7 @@ export function AdminWorkspace({
       {adminTab !== "tourists" && <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
         <button type="button" className={openSafetyRecordCount ? "needs-action safety" : "safety"} onClick={() => setAdminTab("safety")}><Siren size={22} /><span>{adminText("overview.safetyCases")}</span><strong>{openSafetyRecordCount}</strong><ArrowRight size={17} /></button>
         {onViewChange && <button type="button" className={pendingPlaceCount ? "needs-action reviews" : "reviews"} onClick={() => onViewChange("destinations")}><MapPin size={22} /><span>{placeText(locale, "queue")}</span><strong>{pendingPlaceCount}</strong><ArrowRight size={17} /></button>}
-        <button type="button" onClick={() => { setAdminTab("overview"); window.requestAnimationFrame(() => { const panel = document.getElementById("admin-movement-alerts") as HTMLDetailsElement | null; if (panel) { panel.open = true; panel.querySelector("summary")?.focus({ preventScroll: true }); panel.scrollIntoView({ block: "start", behavior: "instant" }); } }); }}><Route size={22} /><span>{adminText("overview.movementAlerts")}</span><strong>{movementAlerts.length}</strong><ArrowRight size={17} /></button>
+        <button type="button" onClick={() => { setAdminTab("overview"); setInsight("alerts"); }}><Route size={22} /><span>{adminText("overview.movementAlerts")}</span><strong>{movementAlerts.length}</strong><ArrowRight size={17} /></button>
       </div></section>}
       {placeQueueState === "offline" && <p role="alert">{unlistedLocationText(locale, "queueOffline")}</p>}
       <div className="segmented-control admin-tabs" aria-label={t("admin.dashboard.tabsLabel")}>
@@ -811,14 +820,6 @@ export function AdminWorkspace({
 
       {adminTab === "overview" && travelPlan && (
         <div className="admin-tab-panel">
-          <DeferredDetails className="admin-planning-disclosure" summary={<><ChartNoAxesCombined size={19} />{adminText("overview.travelPlanSignal")}</>}><MovementPulseHero
-            mode="admin"
-            demand={destinationDemand}
-            destinations={data.destinations}
-            profile={`${tourists.length} ${adminText("overview.touristProfiles")}`}
-            pointCount={summary.movementPointCount}
-            plan={travelPlan}
-          locale={locale} /></DeferredDetails>
           <MetricGrid
             items={[
               [t("common.tourist"), tourists.length.toString()],
@@ -830,35 +831,33 @@ export function AdminWorkspace({
             ]}
           />
           <section className="admin-overview-layout">
-            <div className="admin-overview-map">
-              <MovementMap points={allDashboardPoints} destinations={data.destinations} displayMode="signals" locale={locale} />
+            <div className="admin-overview-map" aria-label={t("map.aria")}>
+              <MovementMap points={allDashboardPoints} destinations={data.destinations} displayMode="signals" locale={locale} focusTarget={mapFocus} />
             </div>
             <aside className="admin-command-panel">
               {!movementDataStatus.hasMovementData && <EmptyState text={movementDataStatus.message} />}
-
-              <details className="admin-overview-section" id="admin-movement-alerts" open>
-                <summary>
-                  <span>{adminText("overview.movementAlertsTitle")}</span>
-                  <strong>{adminText("overview.alertCount", { count: movementAlerts.length })}</strong>
-                </summary>
-                <div className="admin-overview-section-body">
-                  <MovementAlertList alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} locale={locale} />
-                </div>
-              </details>
-
-              <DeferredDetails className="admin-overview-section" summary={<>
-                  <span>{adminText("overview.geofenceActivity")}</span>
-                  <strong>{adminText("overview.activeCount", { count: activeGeofenceCount })}</strong>
-                </>}>
-                <div className="admin-overview-section-body">
+              {([
+                ["alerts", "overview.movementAlertsTitle", "overview.alertCount", movementAlerts.length, Route],
+                ["geofences", "overview.geofenceActivity", "overview.activeCount", activeGeofenceCount, ShieldCheck],
+                ["demand", "overview.demandEvents", "overview.eventCount", upcomingFestivals.length, ChartNoAxesCombined],
+                ["plan", "overview.travelPlanSignal", "overview.stopCount", travelPlan.stops.length, MapPin],
+                ["recommendations", "overview.recentRecommendations", "overview.resultCount", data.recommendations.length, ArrowRight],
+              ] as const).map(([key, title, countLabel, count, Icon]) => <button key={key} id={key === "alerts" ? "admin-movement-alerts" : undefined} type="button" className="admin-insight-link" aria-haspopup="dialog" onClick={() => setInsight(key)}><Icon size={21} /><span>{adminText(title)}<small>{adminText(countLabel, { count })}</small></span><ArrowRight size={18} /></button>)}
+            </aside>
+          </section>
+          {insight === "alerts" && <PlaceGuideDialog className="admin-insight-dialog" title={adminText("overview.movementAlertsTitle")} locale={locale} closeLabel={adminPanelCloseText(locale)} onClose={() => setInsight(null)}><div className="admin-overview-section-body">
+                  <MovementAlertList hideHeading alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} locale={locale} onLocate={locateDestination} />
+                </div></PlaceGuideDialog>}
+          {insight === "geofences" && <PlaceGuideDialog className="admin-insight-dialog" title={adminText("overview.geofenceActivity")} locale={locale} closeLabel={adminPanelCloseText(locale)} onClose={() => setInsight(null)}><div className="admin-overview-section-body">
                   <div className="geofence-admin-list">
-                    {geofenceActivity.slice(0, 5).map((row) => (
+                    {geofenceActivity.map((row) => (
                       <article className={`geofence-admin-card ${row.geofence.type}`} key={row.geofence.id}>
                         <div>
                           <strong>{uiText(locale, row.geofence.name)}</strong>
                           <span>{uiText(locale, row.geofence.type)}</span>
                         </div>
                         <p>{uiText(locale, row.geofence.message)}</p>
+                        <button type="button" className="secondary-action compact-action" onClick={() => locateOnMap({ ...row.geofence, label: row.geofence.name })}><MapPin size={16} />{adminMapText(locale)}</button>
                         <small>
                           {row.pointCount} {uiText(locale, "movement point(s),")} {row.touristCount} {uiText(locale, "tourist(s)")}
                           {row.latestRecordedAt ? ` · ${uiText(locale, "Latest {date}", { date: formatDateTime(row.latestRecordedAt, locale) })}` : ""}
@@ -866,28 +865,15 @@ export function AdminWorkspace({
                       </article>
                     ))}
                   </div>
-                </div>
-              </DeferredDetails>
-
-              <DeferredDetails className="admin-overview-section" summary={<>
-                  <span>{adminText("overview.demandEvents")}</span>
-                  <strong>{adminText("overview.eventCount", { count: upcomingFestivals.length })}</strong>
-                </>}>
-                <div className="admin-overview-section-body">
+                </div></PlaceGuideDialog>}
+          {insight === "demand" && <PlaceGuideDialog className="admin-insight-dialog" title={adminText("overview.demandEvents")} locale={locale} closeLabel={adminPanelCloseText(locale)} onClose={() => setInsight(null)}><div className="admin-overview-section-body">
                   <h2>{adminText("overview.movementTrend")}</h2>
                   <CategoryBars values={movementTrend} locale={locale} />
-                  <MovementDemandList title={adminText("overview.topTouristFlow")} demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact locale={locale} />
+                  <MovementDemandList title={adminText("overview.topTouristFlow")} demand={destinationDemand.slice(0, 4)} destinations={data.destinations} compact locale={locale} onLocate={locateDestination} />
                   <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} compact locale={locale} />
-                </div>
-              </DeferredDetails>
-
-              <DeferredDetails className="admin-overview-section" summary={<>
-                  <span>{adminText("overview.travelPlanSignal")}</span>
-                  <strong>{adminText("overview.stopCount", { count: travelPlan.stops.length })}</strong>
-                </>}>
-                <div className="admin-overview-section-body">
+                </div></PlaceGuideDialog>}
+          {insight === "plan" && <PlaceGuideDialog className="admin-insight-dialog" title={adminText("overview.travelPlanSignal")} locale={locale} closeLabel={adminPanelCloseText(locale)} onClose={() => setInsight(null)}><div className="admin-overview-section-body">
                   <div className="section-heading">
-                    <h2>{adminText("overview.travelPlanSignal")}</h2>
                     <button className="secondary-action compact-action" onClick={exportTravelPlan} disabled={travelPlan.stops.length === 0}>
                       <Download size={18} />
                       {adminText("common.csv")}
@@ -933,20 +919,11 @@ export function AdminWorkspace({
                       {adminText("overview.diverseCategories")}
                     </label>
                   </div>
-                  <TravelPlanPanel plan={travelPlan} destinations={data.destinations} locale={locale} />
-                </div>
-              </DeferredDetails>
-
-              <DeferredDetails className="admin-overview-section" summary={<>
-                  <span>{adminText("overview.recentRecommendations")}</span>
-                  <strong>{adminText("overview.resultCount", { count: data.recommendations.length })}</strong>
-                </>}>
-                <div className="admin-overview-section-body">
-                  <RecommendationList recommendations={data.recommendations.slice(0, 3)} destinations={data.destinations} compact locale={locale} />
-                </div>
-              </DeferredDetails>
-            </aside>
-          </section>
+                  <TravelPlanPanel plan={travelPlan} destinations={data.destinations} locale={locale} onLocate={locateDestination} />
+                </div></PlaceGuideDialog>}
+          {insight === "recommendations" && <PlaceGuideDialog className="admin-insight-dialog" title={adminText("overview.recentRecommendations")} locale={locale} closeLabel={adminPanelCloseText(locale)} onClose={() => setInsight(null)}><div className="admin-overview-section-body">
+                  <RecommendationList recommendations={data.recommendations.slice(0, 12)} destinations={data.destinations} compact locale={locale} onSelect={(id) => { const recommendation = data.recommendations.find((row) => row.id === id); const destination = recommendation && destinationById.get(recommendation.destinationId); if (destination) locateDestination(destination); }} />
+                </div></PlaceGuideDialog>}
         </div>
       )}
       <div hidden={adminTab !== "tourists"}>{touristManagementPanel}</div>

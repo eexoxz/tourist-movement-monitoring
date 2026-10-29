@@ -6,7 +6,12 @@ import { LoaderCircle } from "lucide-react";
 
 const MapView = lazy(() => import("./MapView").then((module) => ({ default: module.MapView })));
 
+export type MapFocusTarget = {
+  key: number; latitude: number; longitude: number; label: string; destinationId?: string; radiusMeters?: number;
+};
+
 type MovementMapProps = {
+  focusTarget?: MapFocusTarget;
   points: MovementPoint[];
   destinations: Destination[];
   activePoint?: MovementPoint;
@@ -17,7 +22,7 @@ type MovementMapProps = {
   activityDemand?: DestinationDemand[];
 };
 
-export function MovementMap({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand }: MovementMapProps) {
+export function MovementMap({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand, focusTarget }: MovementMapProps) {
   const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
   return (
     <Suspense
@@ -28,7 +33,7 @@ export function MovementMap({ points, destinations, activePoint, mode = "admin",
         </div>
       }
     >
-      <MapView points={points} destinations={localizedDestinations} activePoint={activePoint} mode={mode} displayMode={displayMode} locale={locale} isBrowsingArea={isBrowsingArea} activityDemand={activityDemand} />
+      <MapView points={points} destinations={localizedDestinations} activePoint={activePoint} mode={mode} displayMode={displayMode} locale={locale} isBrowsingArea={isBrowsingArea} activityDemand={activityDemand} focusTarget={focusTarget} />
     </Suspense>
   );
 }

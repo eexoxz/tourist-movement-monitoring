@@ -31,7 +31,9 @@ describe("workspace integration guardrails", () => {
     expect(admin).toContain("aiActive ? [...analyzeAllTrips(data)]");
     expect(admin).toContain("evaluateAiOutput(data, analysisRows)");
     expect(admin).toContain("touristsActive ? getTouristManagementRows(data) : []");
-    expect(admin.match(/<DeferredDetails /g)).toHaveLength(5);
+    expect(admin).toContain('className="admin-insight-dialog"');
+    expect(admin).toContain("focusTarget={mapFocus}");
+    expect(admin).not.toContain("panel.scrollIntoView");
   });
 
   it("shows one map preview and hides it while a route-point popup is open", () => {

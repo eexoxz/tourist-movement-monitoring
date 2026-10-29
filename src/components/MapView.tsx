@@ -14,10 +14,12 @@ import { MovementCanvasLayer } from "./MovementCanvasLayer";
 import { groupMapDestinations } from "../services/movementMapGeometry";
 import { mapDisplayText } from "../services/mapDisplayCopy";
 import { bindMalaysiaMapLimits, malaysiaMapOptions, malaysiaViewBounds } from "../services/malaysiaMap";
+import type { MapFocusTarget } from "./MovementMap";
 import { uiText } from "../services/uiText";
 import { categoryIconMarkup, type CategoryIconSize } from "../generated/mapIconMarkup";
 
 type MapViewProps = {
+  focusTarget?: MapFocusTarget;
   points: MovementPoint[];
   destinations: Destination[];
   activePoint?: MovementPoint;
@@ -90,10 +92,14 @@ function routeIcon(type: "start" | "end" | "current") {
   });
 }
 
-export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand }: MapViewProps) {
+export function MapView({ points, destinations, activePoint, mode = "admin", displayMode = "route", locale = "en", isBrowsingArea = false, activityDemand, focusTarget }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const movementLayerRef = useRef<MovementCanvasLayer | null>(null);
+  const focusLayerRef = useRef<L.LayerGroup | null>(null);
+  const focusCircleRef = useRef<L.Circle | null>(null);
+  const lastRequestedFocus = useRef<number | null>(null);
+  const lastRevealedFocus = useRef<number | null>(null);
   const renderDestinationsRef = useRef<(() => void) | null>(null);
   const signalsRef = useRef<Map<string, DestinationSignal>>(new Map());
   const [placeGroup, setPlaceGroup] = useState<Destination[] | null>(null);
@@ -201,6 +207,9 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   useEffect(() => {
     manualBrowseRef.current = false;
     lastAutoFocusKeyRef.current = "";
+    mapRef.current?.closePopup();
+    setSelectedDestinationId(null); setExpandedDestinationId(null); setPlaceGroup(null);
+    focusLayerRef.current?.remove();
   }, [points[0]?.tripId, isBrowsingArea ? activePoint?.id : undefined]);
 
   // Destination geometry survives GPS updates. Reconcile only the marker groups that
@@ -335,6 +344,40 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
   }, [points, visibleDestinations, activePoint, destinationSignals, mode, displayMode, isBrowsingArea]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focusTarget || lastRequestedFocus.current === focusTarget.key) return;
+    lastRequestedFocus.current = focusTarget.key;
+    manualBrowseRef.current = true;
+    map.closePopup(); setPlaceGroup(null); setExpandedDestinationId(null); setDismissedPreviewId(null);
+    setSelectedDestinationId(focusTarget.destinationId ?? null);
+    focusLayerRef.current?.remove();
+    const layer = L.layerGroup().addTo(map);
+    focusLayerRef.current = layer;
+    const circle = L.circle([focusTarget.latitude, focusTarget.longitude], {
+      radius: focusTarget.radiusMeters ?? 80, color: "#0f766e", weight: 3, fillOpacity: .1,
+    }).addTo(layer);
+    focusCircleRef.current = circle;
+    circle.bindTooltip(escapeHtml(uiText(locale, focusTarget.label)), { permanent: true, direction: "top" });
+    if (focusTarget.radiusMeters) map.fitBounds(circle.getBounds(), { padding: [48, 48], maxZoom: 15, animate: false });
+    else map.setView([focusTarget.latitude, focusTarget.longitude], 15, { animate: false });
+    return () => { layer.remove(); focusCircleRef.current = null; };
+  }, [focusTarget]);
+
+  useEffect(() => {
+    // Reveal only after React has committed the requested selection/footer.
+    if (!focusTarget || lastRevealedFocus.current === focusTarget.key || selectedDestinationId !== (focusTarget.destinationId ?? null)) return;
+    const surface = containerRef.current;
+    if (!surface) return;
+    lastRevealedFocus.current = focusTarget.key;
+    surface.focus({ preventScroll: true });
+    window.scrollTo({ top: Math.max(0, window.scrollY + surface.getBoundingClientRect().top - 20), behavior: "instant" });
+  }, [focusTarget, selectedDestinationId]);
+
+  useEffect(() => {
+    if (focusTarget) focusCircleRef.current?.setTooltipContent(escapeHtml(uiText(locale, focusTarget.label)));
+  }, [locale, focusTarget]);
+
   const centerOnActivePoint = () => {
     if (!activePoint) {
       return;
@@ -355,6 +398,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     const map = mapRef.current;
     if (!map) return;
     manualBrowseRef.current = true; setPlaceGroup(null); setSelectedDestinationId(null); setExpandedDestinationId(null);
+    focusLayerRef.current?.remove();
     map.closePopup();
     map.fitBounds(malaysiaViewBounds, { padding: [16, 16], maxZoom: 8, animate: false });
   };
@@ -371,7 +415,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         .slice(0, 3),
     [activePoint, destinationSignals, visibleDestinations]
   );
-  const previewDestination = selectedDestination ?? topSignals[0]?.destination;
+  const previewDestination = selectedDestination ?? (mode === "tourist" ? topSignals[0]?.destination : undefined);
   const previewSignal = selectedSignal ?? topSignals[0]?.signal;
   const detailsExpanded = Boolean(selectedDestination && expandedDestinationId === selectedDestination.id);
   const previewDismissed = !selectedDestination && previewDestination?.id === dismissedPreviewId;
@@ -402,7 +446,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
           </span>
         ))}
       </div>
-      {!placeGroup && !routePopupOpen && !previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
+      {(mode === "tourist" || selectedDestination) && !placeGroup && !routePopupOpen && !previewDismissed && <section className={`map-detail-panel${selectedDestination ? " visible" : ""}${detailsExpanded ? "" : " map-place-preview"}`} aria-live="polite">
         {detailsExpanded && selectedDestination && selectedSignal ? (
           <>
             <button
