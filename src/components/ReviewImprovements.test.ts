@@ -24,7 +24,7 @@ describe("review fixes", () => {
     expect(translate(locale, "auth.firebaseMode")).not.toContain("Firebase");
   });
   it("prioritizes an active journey before the billboard, but leaves idle Home discovery-first", () => {
-    const props = { destinations: initialData.destinations.slice(0, 3), locale: "en" as const, nextFestival: null, isLocal: true, needsLocationConsent: false, onOpenPlace: noop, onViewChange: noop, onAllowLocation: noop, onSafety: noop };
+    const props = { destinations: initialData.destinations.slice(0, 3), locale: "en" as const, isLocal: true, needsLocationConsent: false, onOpenPlace: noop, onViewChange: noop, onAllowLocation: noop, onSafety: noop };
     const active = renderToStaticMarkup(createElement(HomeDiscovery, { ...props, activeTrip: true }));
     expect(active.indexOf('class="home-journey-invitation"')).toBeLessThan(active.indexOf('class="home-spotlight"'));
     expect(active).not.toContain("Stop Trip");

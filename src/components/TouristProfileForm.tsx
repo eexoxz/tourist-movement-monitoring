@@ -40,9 +40,6 @@ export function TouristProfileForm({
   const [passportNumber, setPassportNumber] = useState(user.passportNumber ?? "");
   const [identityError, setIdentityError] = useState(false);
   const [preferences, setPreferences] = useState<DestinationCategory[]>(user.travelPreferences ?? []);
-  const [tripPace, setTripPace] = useState<User["tripPace"]>(user.tripPace ?? "balanced");
-  const [travelGroup, setTravelGroup] = useState<User["travelGroup"]>(user.travelGroup ?? "solo");
-  const [accessibilityPreference, setAccessibilityPreference] = useState<User["accessibilityPreference"]>(user.accessibilityPreference ?? "none");
   const [trackingSuggestionMode, setTrackingSuggestionMode] = useState<User["trackingSuggestionMode"]>(user.trackingSuggestionMode ?? "balanced");
   const [trackingSuggestionRadiusKm, setTrackingSuggestionRadiusKm] = useState(user.trackingSuggestionRadiusKm ?? 2);
   const [eventAnnouncementsEnabled, setEventAnnouncementsEnabled] = useState(user.eventAnnouncementsEnabled ?? true);
@@ -69,9 +66,6 @@ export function TouristProfileForm({
       passportNumber: normalizeIdentity(passportNumber),
       expectedProfile: inferExpectedProfileFromPreferences(preferences),
       travelPreferences: preferences,
-      tripPace,
-      travelGroup,
-      accessibilityPreference,
       trackingSuggestionMode,
       trackingSuggestionRadiusKm,
       eventAnnouncementsEnabled,
@@ -123,35 +117,6 @@ export function TouristProfileForm({
               })}
             </div>
           </fieldset>
-
-          <div className="field-pair">
-            <label>
-              {t("tourist.profile.travelPace")}
-              <select value={tripPace} onChange={(event) => setTripPace(event.target.value as User["tripPace"])}>
-                <option value="relaxed">{t("profile.option.relaxed")}</option>
-                <option value="balanced">{t("profile.option.balanced")}</option>
-                <option value="packed">{t("profile.option.packed")}</option>
-              </select>
-            </label>
-            <label>
-              {t("tourist.profile.travellingWith")}
-              <select value={travelGroup} onChange={(event) => setTravelGroup(event.target.value as User["travelGroup"])}>
-                <option value="solo">{t("profile.option.solo")}</option>
-                <option value="couple">{t("profile.option.partner")}</option>
-                <option value="family">{t("profile.option.family")}</option>
-                <option value="friends">{t("profile.option.friends")}</option>
-              </select>
-            </label>
-          </div>
-
-          <label>
-            {t("tourist.profile.walkingPreference")}
-            <select value={accessibilityPreference} onChange={(event) => setAccessibilityPreference(event.target.value as User["accessibilityPreference"])}>
-              <option value="none">{t("profile.option.noPreference")}</option>
-              <option value="low-walking">{t("profile.option.lowWalking")}</option>
-              <option value="wheelchair-friendly">{t("profile.option.wheelchair")}</option>
-            </select>
-          </label>
 
           <section className="profile-emergency-fields">
             <div>

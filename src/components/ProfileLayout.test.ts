@@ -16,6 +16,7 @@ describe("clean profile presentation", () => {
       primaryLabel: t("tourist.profile.saveProfile"), onSave: () => {},
     }));
     expect(form).not.toContain("<img");
+    for (const key of ["tourist.profile.travelPace", "tourist.profile.travellingWith", "tourist.profile.walkingPreference"] as const) expect(form).not.toContain(renderToStaticMarkup(t(key)));
     expect(form.match(/class="preference-chip/g)).toHaveLength(6);
     expect(form).toContain(`<h3>`);
     for (const key of ["tourist.profile.preferredName", "tourist.profile.trackingSettings", "tourist.profile.emergencyContact", "tourist.profile.saveProfile"] as const) expect(form).toContain(renderToStaticMarkup(t(key)));

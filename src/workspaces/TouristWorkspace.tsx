@@ -194,9 +194,7 @@ export function TouristWorkspace({
   const trackingFeedback = trackingQualityIssue ? activityText(locale, trackingQualityIssue) : trackingMessage;
   const t = (key: TranslationKey) => translate(locale, key);
   const showProfileSetup = !user.profileCompletedAt && !profileSetupSkipped;
-  const topRecommendationDestination = recommendations[0]
-    ? localizedDestinations.find((destination) => destination.id === recommendations[0].destinationId)
-    : null;
+
   const nearbyEmergencyServices = useMemo(() => getNearbyEmergencyServices(discoveryGpsPoint), [discoveryGpsPoint]);
 
   useEffect(() => () => clearBrowserLocationWatch(watchId), [user.id, watchId]);
@@ -1071,8 +1069,6 @@ export function TouristWorkspace({
       nearbyEmergencyServices={nearbyEmergencyServices}
       safetyReferencePoint={discoveryGpsPoint ?? discoveryReference}
       isSafetyAreaReference={!discoveryGpsPoint && user.discoveryLocationMode === "area"}
-      topRecommendationDestination={topRecommendationDestination ?? (discoveryReference ? discoveryDestinations[0] : localizedDestinations[0])}
-      nextFestival={nextFestival}
       spotlightEvents={upcomingFestivals}
       spotlightContext={spotlightContext}
       onOpenSpotlightEvent={(id) => { setSpotlightEventId(id); onViewChange("events"); }}

@@ -197,76 +197,34 @@
 }
 
 .advisory-panel {
-  border-color: #bfdbfe;
-  background:
-    linear-gradient(135deg, rgba(219, 234, 254, 0.62), rgba(255, 253, 248, 0.96) 58%),
-    #ffffff;
-}
-
-.advisory-panel .section-heading span {
-  display: inline-flex;
-  gap: 7px;
-  align-items: center;
-}
-
-.advisory-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  padding: 14px 16px;
+  border-color: #dbe4ee;
+  background: var(--surface);
 }
-
-.advisory-card {
-  display: grid;
-  gap: 8px;
-  padding: 13px;
-  border: 1px solid #dbeafe;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.advisory-card.high {
-  border-color: #fecaca;
-  background: #fef2f2;
-}
-
-.advisory-card.medium {
-  border-color: #fde68a;
-  background: #fffbeb;
-}
-
-.advisory-card.low {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-}
-
-.advisory-card div {
-  display: inline-flex;
-  gap: 7px;
-  align-items: center;
-  color: #0f766e;
-  font-size: 0.72rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.advisory-card strong {
-  color: #102033;
-  line-height: 1.25;
-}
-
-.advisory-card p,
-.advisory-card small,
-.advisory-card time {
-  margin: 0;
-  color: #596575;
-  line-height: 1.4;
-}
-
-.advisory-card small,
-.advisory-card time {
-  font-size: 0.8rem;
-  font-weight: 800;
-}
+.advisory-heading { display: flex; align-items: center; gap: 8px; color: #335cad; }
+.advisory-heading h2 { flex: 1; margin: 0; color: var(--ink); font-size: .9rem; font-weight: 600; }
+.advisory-heading > span { padding: 2px 7px; border-radius: 6px; background: #edf2fc; font-size: .75rem; }
+.advisory-heading > svg { flex-shrink: 0; }
+.advisory-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.advisory-card { min-width: 0; border: 1px solid #dbeafe; border-radius: 8px; background: #fff; overflow-anchor: none; }
+.advisory-card.high { border-color: #fecaca; background: #fef2f2; }
+.advisory-card.medium { border-color: #fde68a; background: #fffbeb; }
+.advisory-card.low { border-color: #bfdbfe; background: #eff6ff; }
+.advisory-card > summary { display: grid; grid-template-columns: 20px minmax(0, 1fr) 18px; align-items: start; gap: 10px; min-height: 44px; padding: 12px; cursor: pointer; list-style: none; }
+.advisory-card > summary::-webkit-details-marker { display: none; }
+.advisory-card > summary:focus-visible { outline: 3px solid #335cad; outline-offset: 2px; border-radius: 8px; }
+.advisory-card > summary > svg:first-child { margin-top: 2px; color: #0f766e; }
+.advisory-card.high > summary > svg:first-child { color: #b3344f; }
+.advisory-preview { display: grid; gap: 4px; min-width: 0; }
+.advisory-preview > strong { color: var(--ink); font-size: .86rem; line-height: 1.4; overflow-wrap: anywhere; }
+.advisory-message { color: var(--muted); font-size: .83rem; line-height: 1.45; }
+.advisory-card:not([open]):not(.high) .advisory-message { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.advisory-toggle { margin-top: 2px; color: var(--muted); }
+.advisory-card[open] .advisory-toggle { transform: rotate(180deg); }
+.advisory-details { display: grid; gap: 7px; padding: 0 40px 12px 42px; }
+.advisory-details p { margin: 0; color: var(--ink); font-size: .84rem; line-height: 1.5; }
+.advisory-details time { color: var(--muted); font-size: .76rem; line-height: 1.4; }
 
 .geofence-warning-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));

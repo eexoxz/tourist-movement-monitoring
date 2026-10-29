@@ -129,8 +129,7 @@ body:has(.home-spotlight) { touch-action: auto; }
   background: #ffffff;
 }
 
-.home-journey-invitation,
-.home-event-invitation {
+.home-journey-invitation {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -143,34 +142,16 @@ body:has(.home-spotlight) { touch-action: auto; }
   color: #0f766e;
 }
 
-.home-journey-invitation h2,
-.home-event-invitation h2 {
+.home-journey-invitation h2 {
   margin: 0;
   font-size: 1.2rem;
   line-height: 1.4;
 }
 
-.home-journey-invitation p,
-.home-event-invitation p {
+.home-journey-invitation p {
   margin: 4px 0 0;
   color: #596575;
   font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.home-event-invitation {
-  color: #912649;
-  border-color: #ead4dd;
-}
-
-.home-event-invitation > div {
-  display: grid;
-  gap: 5px;
-}
-
-.home-event-invitation span,
-.home-event-invitation time {
-  font-size: 0.82rem;
   line-height: 1.5;
 }
 
@@ -507,14 +488,12 @@ body:has(.home-spotlight) { touch-action: auto; }
     font-size: 1.2rem;
   }
 
-  .home-journey-invitation,
-  .home-event-invitation {
+  .home-journey-invitation {
     grid-template-columns: auto minmax(0, 1fr);
     gap: 12px;
   }
 
-  .home-journey-invitation > button,
-  .home-event-invitation > button {
+  .home-journey-invitation > button {
     grid-column: 1 / -1;
     justify-self: start;
   }
@@ -537,10 +516,6 @@ body:has(.home-spotlight) { touch-action: auto; }
   .travel-place-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-  }
-
-  .home-place-gallery .travel-place-tile:nth-child(n + 3) {
-    display: none;
   }
 
   .travel-place-tile .destination-visual.compact {

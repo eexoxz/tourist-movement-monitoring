@@ -2,6 +2,8 @@ import { createElement, type ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
+import { TourismAdvisoryPanel } from "./TourismAdvisoryPanel";
+import { buildTourismAdvisories } from "../services/advisories";
 import { HomeDiscovery } from "./HomeDiscovery";
 import { TripExperience } from "./TripExperience";
 import { TripDiary } from "./TripDiary";
@@ -27,7 +29,7 @@ vi.mock("./MovementMap", () => ({
 
 const noop = () => undefined;
 const homeProps: ComponentProps<typeof HomeDiscovery> = {
-  featured: initialData.destinations[0], destinations: initialData.destinations.slice(0, 4), nextFestival: null,
+  destinations: initialData.destinations.slice(0, 4),
   activeTrip: false, isLocal: false, needsLocationConsent: false, locale: "en",
   onOpenPlace: noop, onViewChange: noop, onAllowLocation: noop, onSafety: noop,
 };
@@ -196,19 +198,32 @@ describe("tourist travel workflow boundaries", () => {
     expect(html).not.toContain("data-map-mode");
   });
 
-  it("distinguishes regional discovery from actual nearby location context", () => {
-    const global = renderToStaticMarkup(createElement(HomeDiscovery, homeProps));
-    expect(global).not.toContain("Around you");
-    const local = renderToStaticMarkup(createElement(HomeDiscovery, { ...homeProps, isLocal: true }));
-    expect(local).toContain("Around you");
+  it("keeps one Places and Events shortcut without duplicating the banner below them", () => {
+    for (const isLocal of [true, false]) {
+      const html = renderToStaticMarkup(createElement(HomeDiscovery, { ...homeProps, isLocal }));
+      expect(html).not.toContain('class="home-place-gallery"');
+      expect(html).not.toContain('class="home-event-invitation"');
+      expect(html).toContain('class="home-discovery-shortcuts"');
+      expect(html).not.toContain("Around you");
+      expect(html).toContain("Discover places");
+      expect(html).toContain("Event Calendar");
+      expect(html.includes('class="home-location-invitation"')).toBe(!isLocal);
+    }
   });
 
-  it("shows a dated event only when an event is provided", () => {
-    const html = renderToStaticMarkup(createElement(HomeDiscovery, { ...homeProps, nextFestival: {
-      id: "test-event", name: "Deepavali", date: "2026-11-08", scope: "national", states: [], category: "religious", description: "", destinationIds: [],
-    } }));
-    expect(html).toContain('dateTime="2026-11-08"');
-    expect(html).toContain("Deepavali");
+  it("keeps routine advisories compact and important actions expanded in every language", () => {
+    const advisories = buildTourismAdvisories();
+    const routine = advisories.find((notice) => notice.severity !== "high")!;
+    const important = { ...routine, id: "high-priority-test", severity: "high" as const };
+    for (const { value: locale } of localeOptions) {
+      expect(renderToStaticMarkup(createElement(TourismAdvisoryPanel, { advisories: [], locale }))).toBe("");
+      const html = renderToStaticMarkup(createElement(TourismAdvisoryPanel, { advisories: [routine, important], locale }));
+      expect(html.match(/<details /g)).toHaveLength(2);
+      expect(html.match(/ open=""/g)).toHaveLength(1);
+      expect(html).toContain(`advisory-card ${important.severity}`);
+      expect(html).toContain("advisory-details");
+      expect(html).toContain(`dateTime="${important.endsAt}"`);
+    }
   });
 
   it("never presents old trips as the current idle journey", () => {

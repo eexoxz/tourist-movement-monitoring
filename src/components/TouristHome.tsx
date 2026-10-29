@@ -64,8 +64,6 @@ type TouristHomeProps = {
   nearbyEmergencyServices: NearbyEmergencyService[];
   safetyReferencePoint?: MovementPoint;
   isSafetyAreaReference?: boolean;
-  topRecommendationDestination: Destination | null | undefined;
-  nextFestival: FestivalEvent | null;
   spotlightEvents?: FestivalEvent[];
   spotlightContext?: HomeSpotlightContext;
   onOpenSpotlightEvent?: (id: string) => void;
@@ -152,8 +150,6 @@ export function TouristHome({
   nearbyEmergencyServices,
   safetyReferencePoint,
   isSafetyAreaReference = false,
-  topRecommendationDestination,
-  nextFestival,
   spotlightEvents,
   spotlightContext,
   onOpenSpotlightEvent,
@@ -281,7 +277,7 @@ export function TouristHome({
         )}
 
         {!showCheckInPanel && discoveryControl}
-        {!showCheckInPanel && <HomeDiscovery featured={topRecommendationDestination} destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} spotlightContext={spotlightContext} onOpenSpotlightEvent={onOpenSpotlightEvent} nextFestival={nextFestival} activeTrip={Boolean(activeTrip)} trackingStatus={trackingStatus} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
+        {!showCheckInPanel && <HomeDiscovery destinations={destinations} spotlightDestinations={checkInDestinations} spotlightEvents={spotlightEvents} spotlightContext={spotlightContext} onOpenSpotlightEvent={onOpenSpotlightEvent} activeTrip={Boolean(activeTrip)} trackingStatus={trackingStatus} isLocal={hasLocalReference} needsLocationConsent={!currentConsent} locale={locale} onOpenPlace={onOpenPlace} onViewChange={onViewChange} onAllowLocation={onGrantConsent} onSafety={() => {
           if (safetyPanelRef.current) {
             revealSafetyPanel(safetyPanelRef.current);
           }

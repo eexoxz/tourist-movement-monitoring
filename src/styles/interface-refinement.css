@@ -94,11 +94,6 @@ a.secondary-action { text-decoration: none; }
 .home-event-shortcut .home-shortcut-symbol { color: #335cad; background: #edf2fc; }
 .home-safety-shortcut .home-shortcut-symbol { color: #b23954; background: #fff0f2; }
 .home-active-trip { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 6px; color: var(--teal); font-size: 0.78rem; font-weight: 600; }
-.home-event-date { display: grid; justify-items: center; align-content: center; gap: 2px; min-width: 68px; min-height: 76px; padding: 10px; color: #335cad; background: #edf2fc; border-radius: 6px; }
-.home-event-date strong { font-size: 1.7rem; line-height: 1.15; }
-.home-event-date > span { font-size: 0.78rem; }
-.home-event-invitation { color: var(--ink); border-color: var(--line); }
-.home-event-invitation > div > span { color: #335cad; font-weight: 600; }
 .home-disclosure .home-tool-label { font-size: 0.82rem; text-transform: none; font-weight: 600; }
 .home-disclosure .home-tool-text strong { font-size: 0.98rem; }
 .safety-panel > .home-tool-summary { background: #fff4f5; }
