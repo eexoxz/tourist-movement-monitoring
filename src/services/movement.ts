@@ -1,4 +1,5 @@
-import type { AppData, Destination, LocationConsent, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
+import type { AppData, Destination, Itinerary, LocationConsent, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
+import { snapshotItineraryDay } from "./tripItinerary";
 import { createId } from "./storage";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
@@ -273,7 +274,7 @@ export function addLocalTestRouteToActiveTrip(data: AppData, userId: string, ref
   };
 }
 
-export function startTripSession(data: AppData, userId: string) {
+export function startTripSession(data: AppData, userId: string, planChoice?: { plan: Itinerary; day: number; reminders: boolean }) {
   const consent = getGrantedConsent(data, userId);
   if (!consent) {
     return { error: "Location consent is required before trip tracking starts." };
@@ -283,12 +284,16 @@ export function startTripSession(data: AppData, userId: string) {
     return { error: "A trip is already being recorded." };
   }
 
+  const startedAt = new Date().toISOString();
+  const itinerary = planChoice ? snapshotItineraryDay(planChoice.plan, userId, planChoice.day, startedAt, planChoice.reminders) : null;
+  if (planChoice && !itinerary) return { error: "Save a valid itinerary day before using it for a trip.", itineraryError: true };
   const trip: TripSession = {
     id: createId("trip"),
     userId,
     status: "active",
-    startedAt: new Date().toISOString(),
+    startedAt,
     consentId: consent.id,
+    ...(itinerary ? { itinerary } : {}),
   };
 
   return {
@@ -304,9 +309,9 @@ export function isValidCoordinate(latitude: number, longitude: number) {
   return Number.isFinite(latitude) && Number.isFinite(longitude) && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180;
 }
 
-export function startFreshTripSession(data: AppData, userId: string) {
+export function startFreshTripSession(data: AppData, userId: string, planChoice?: { plan: Itinerary; day: number; reminders: boolean }) {
   const previous = getActiveTrip(data, userId) ? stopActiveTrip(data, userId).data : data;
-  return startTripSession(previous ?? data, userId);
+  return startTripSession(previous ?? data, userId, planChoice);
 }
 
 export function appendMovementPoint(data: AppData, input: MovementInput) {

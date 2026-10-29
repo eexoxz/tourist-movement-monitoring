@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { doc, getDocFromServer, setDoc, type Firestore } from "firebase/firestore";
+import { doc, getDocFromServer, setDoc, updateDoc, type Firestore } from "firebase/firestore";
 import type { Itinerary, User } from "../src/types";
 
 if (process.env.FIRESTORE_EMULATOR_HOST !== "127.0.0.1:8088") throw new Error("Itinerary checks require the isolated local Firestore emulator");
@@ -10,6 +10,7 @@ vi.mock("../src/services/firebaseClient", () => ({ isFirebaseConfigured: () => t
 import { addItineraryStop, createItinerary } from "../src/services/itineraries";
 import { saveItinerary, subscribeItineraries, deleteItinerary } from "../src/services/itineraryStorage";
 import { initialData } from "../src/data/demoData";
+import { startTripSession } from "../src/services/movement";
 
 let environment: RulesTestEnvironment;
 const alice = { id: "alice", role: "tourist" } as User;
@@ -59,5 +60,21 @@ describe("saved itinerary workflows with real Firebase SDK clients", () => {
     }
     const bob = environment.authenticatedContext("bob", { email_verified: true }).firestore() as unknown as Firestore;
     await expect(getDocFromServer(doc(bob, "tourist_itineraries", saved.id))).rejects.toMatchObject({ code: "permission-denied" });
+  });
+  it("syncs a linked trip snapshot without changing it when the original itinerary changes", async () => {
+    useDevice(firstDevice);
+    const plan = await saveItinerary(addItineraryStop(createItinerary("alice", "Original day plan"), initialData.destinations[0], 1), alice);
+    const started = startTripSession({ ...initialData, trips: [], consents: [{ id: "consent", userId: "alice", granted: true }] }, "alice", { plan, day: 1, reminders: true });
+    expect(started.trip?.itinerary?.title).toBe("Original day plan");
+    const trip = started.trip!;
+    await setDoc(doc(firstDevice, "trip_sessions", trip.id), trip);
+    expect((await getDocFromServer(doc(secondDevice, "trip_sessions", trip.id))).data()?.itinerary).toEqual(trip.itinerary);
+    await saveItinerary({ ...plan, title: "Edited source plan", stops: [] }, alice);
+    expect((await getDocFromServer(doc(secondDevice, "trip_sessions", trip.id))).data()?.itinerary.title).toBe("Original day plan");
+    await updateDoc(doc(secondDevice, "trip_sessions", trip.id), { "itinerary.reminders": false });
+    expect((await getDocFromServer(doc(firstDevice, "trip_sessions", trip.id))).data()?.itinerary.reminders).toBe(false);
+    const bob = environment.authenticatedContext("bob", { email_verified: true }).firestore() as unknown as Firestore;
+    await expect(getDocFromServer(doc(bob, "trip_sessions", trip.id))).rejects.toMatchObject({ code: "permission-denied" });
+    await expect(updateDoc(doc(bob, "trip_sessions", trip.id), { "itinerary.reminders": true })).rejects.toMatchObject({ code: "permission-denied" });
   });
 });

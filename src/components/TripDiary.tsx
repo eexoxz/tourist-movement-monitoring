@@ -1,6 +1,6 @@
 import { Archive, Pencil, Sparkles } from "lucide-react";
 import { reviewText } from "../services/reviewUpdateCopy";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { formatDateTime } from "../services/geo";
 import { uiText } from "../services/uiText";
 import { formatTripTitle, getRecognizedDestinationNames } from "../services/tripPresentation";
@@ -34,6 +34,7 @@ type TripDiaryProps = {
   onOpenPlace: (destinationId: string) => void;
   onRenameTrip: (trip: TripSession, fallbackTitle: string) => void;
   onDeleteTrip: (trip: TripSession, fallbackTitle: string) => void;
+  itineraryComparison?: ReactNode;
 };
 
 export function TripDiary({
@@ -58,6 +59,7 @@ export function TripDiary({
   onOpenPlace,
   onRenameTrip,
   onDeleteTrip,
+  itineraryComparison,
 }: TripDiaryProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const completedTripCount = trips.filter((trip) => trip.status === "completed").length;
@@ -202,6 +204,7 @@ export function TripDiary({
                   <p>{travelText(locale, "noNextPlaces")}</p>
                 )}
               </div>
+              {itineraryComparison}
             </section>
           ) : (
             <section className="trip-story-panel">

@@ -1,0 +1,45 @@
+.trip-experience { overflow-anchor: none; }
+.trip-plan-setup { border-top: 1px solid var(--line); padding-top: 16px; margin: 16px 0; max-width: 760px; }
+.trip-plan-choice { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 180px); gap: 12px; }
+.trip-plan-choice > label:only-child { grid-column: 1 / -1; }
+.trip-plan-choice label { display: grid; gap: 6px; min-width: 0; font-size: .85rem; font-weight: 600; }
+.trip-plan-choice select { min-height: 44px; width: 100%; min-width: 0; }
+.trip-plan-setup p, .trip-plan-setup-note { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+.trip-plan-setup small, .trip-plan-progress-body > small { display: block; color: var(--muted); font-size: .78rem; line-height: 1.5; margin-top: 6px; }
+.trip-plan-reminder-toggle { display: flex; align-items: center; gap: 9px; font-size: .85rem; line-height: 1.45; cursor: pointer; }
+.trip-plan-reminder-toggle input { width: 18px; height: 18px; flex: 0 0 18px; accent-color: var(--teal-dark); }
+.trip-plan-progress { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow-anchor: none; }
+.trip-plan-progress > summary { display: flex; align-items: center; gap: 12px; list-style: none; padding: 16px; cursor: pointer; color: var(--ink); }
+.trip-plan-progress > summary::-webkit-details-marker { display: none; }
+.trip-plan-progress > summary > svg:first-child { flex: 0 0 20px; color: var(--teal-dark); }
+.trip-plan-progress > summary > span { display: grid; gap: 5px; min-width: 0; flex: 1; }
+.trip-plan-progress strong { overflow-wrap: anywhere; }
+.trip-plan-progress > summary small { font-size: .8rem; color: var(--muted); }
+.trip-plan-disclosure { flex: 0 0 18px; color: var(--muted); }
+.trip-plan-progress[open] .trip-plan-disclosure { transform: rotate(180deg); }
+.trip-plan-progress-body { padding: 0 16px 16px; }
+.trip-plan-intent { color: var(--muted); font-size: .78rem; line-height: 1.5; margin: 0 0 12px; }
+.trip-plan-progress-body > ol { padding: 0; margin: 0 0 12px; list-style: none; }
+.trip-plan-progress-body li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; border-top: 1px solid var(--line); padding: 12px 0; }
+.trip-plan-visit-state { display: grid; place-items: center; height: 28px; border-radius: 50%; background: #f0f4f5; color: #607783; }
+.trip-plan-visit-state.checkIn, .trip-plan-visit-state.gps { background: #e3f5ee; color: #08735d; }
+.trip-plan-visit-state.sample { background: #fff4d9; color: #8c651c; }
+.trip-plan-stop-description > strong { display: block; font-size: .93rem; }
+.trip-plan-stop-description > small { display: block; font-size: .78rem; color: var(--muted); margin-top: 4px; }
+.trip-plan-stop-description > p { margin: 6px 0; font-size: .83rem; overflow-wrap: anywhere; }
+.trip-plan-stop-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 7px; }
+.trip-plan-stop-actions a, .trip-plan-stop-actions .text-action, .trip-plan-other .text-action, .trip-plan-reminder .text-action { display: inline-flex; align-items: center; gap: 5px; min-height: 36px; border: 0; padding: 0; background: transparent; color: var(--teal-dark); font: inherit; font-size: .8rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+.trip-plan-other { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; border-top: 1px solid var(--line); margin: 8px 0 14px; padding-top: 10px; }
+.trip-plan-other > strong { flex-basis: 100%; font-size: .83rem; }
+.trip-plan-reminder { position: fixed; right: 24px; bottom: 24px; z-index: 80; display: grid; grid-template-columns: 21px minmax(0, 1fr) 36px; gap: 12px; width: 420px; max-width: calc(100vw - 24px); padding: 16px; border: 1px solid #dccb95; border-radius: 10px; background: #fffaf0; box-shadow: 0 8px 30px #1720331f; color: var(--ink); box-sizing: border-box; }
+.trip-plan-reminder > svg { color: #8b6724; margin-top: 2px; }
+.trip-plan-reminder p { margin: 6px 0 10px; font-size: .85rem; line-height: 1.5; overflow-wrap: anywhere; }
+.trip-plan-reminder > div > div { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; }
+.trip-plan-reminder > .icon-action { width: 36px; min-width: 36px; height: 40px; padding: 0; }
+.trip-story-panel > .trip-plan-progress { margin-top: 20px; }
+@media (max-width: 600px) {
+  .trip-plan-choice { grid-template-columns: minmax(0, 1fr); }
+  .trip-plan-progress > summary { padding: 14px; }
+  .trip-plan-progress-body { padding-inline: 14px; }
+  .trip-plan-reminder { right: 12px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); padding: 14px; gap: 9px; }
+}

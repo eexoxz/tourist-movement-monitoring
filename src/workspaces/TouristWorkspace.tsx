@@ -51,12 +51,19 @@ import { placeText } from "../services/placeSubmissionCopy";
 import { getDisplayName } from "../services/profile";
 import { geolocationErrorMessage, hasBrowserGeolocation, clearBrowserLocationWatch, createBrowserLocationWatchGuard, loadLastBrowserLocation, saveLastBrowserLocation, movementPointFromBrowserPosition } from "../services/browserLocation";
 import { type CommitDataOptions, incidentTypeOptions, loadProfileSetupSkipped, saveProfileSetupSkipped } from "../services/workspaceSupport";
+import { useItineraries } from "../services/useItineraries";
+import { setTripItineraryReminders, validTripItinerary } from "../services/tripItinerary";
+import { tripPlanText } from "../services/tripItineraryCopy";
+import type { TripPlanSelection } from "../components/TripItineraryTools";
 
 const ItineraryPage = lazy(() => import("../components/ItineraryPage").then((module) => ({ default: module.ItineraryPage })));
 const PlaceDiscovery = lazy(() => import("../components/PlaceDiscovery").then((module) => ({ default: module.PlaceDiscovery })));
 const FestivalCalendarPanel = lazy(() => import("../components/FestivalCalendarPanel").then((module) => ({ default: module.FestivalCalendarPanel })));
 const TouristProfileForm = lazy(() => import("../components/TouristProfileForm").then((module) => ({ default: module.TouristProfileForm })));
 const TripDiary = lazy(() => import("../components/TripDiary").then((module) => ({ default: module.TripDiary })));
+const ItineraryTripSetup = lazy(() => import("../components/TripItineraryTools").then((module) => ({ default: module.ItineraryTripSetup })));
+const TripItineraryProgress = lazy(() => import("../components/TripItineraryTools").then((module) => ({ default: module.TripItineraryProgress })));
+const TripItineraryReminder = lazy(() => import("../components/TripItineraryTools").then((module) => ({ default: module.TripItineraryReminder })));
 
 export function TouristWorkspace({
   data,
@@ -85,6 +92,8 @@ export function TouristWorkspace({
   hasNotifications: boolean;
   syncStatus?: string;
 }) {
+  const itineraryStore = useItineraries(user, view === "tracking" || view === "itinerary");
+  const [tripPlanSelection, setTripPlanSelection] = useState<TripPlanSelection>({ planId: "", day: 1, reminders: false });
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
   const [trackingQualityIssue, setTrackingQualityIssue] = useState<MovementQualityIssue | null>(null);
   const [isLiveTracking, setIsLiveTracking] = useState(false);
@@ -490,13 +499,20 @@ export function TouristWorkspace({
   }, [activeTrip?.id, currentConsent?.id, isLiveTracking, watchId]);
 
   const beginTrip = (fresh: boolean) => {
-    const result = fresh ? startFreshTripSession(loadData(), user.id) : startTripSession(loadData(), user.id);
+    const selectedPlan = itineraryStore.entries.find((entry) => entry.plan.id === tripPlanSelection.planId && entry.plan.userId === user.id);
+    if (tripPlanSelection.planId && (!selectedPlan || selectedPlan.dirty)) {
+      notify({ tone: "warning", title: travelText(locale, "itinerary"), message: tripPlanText(locale, "unavailable") });
+      return;
+    }
+    const choice = selectedPlan ? { plan: selectedPlan.plan, day: tripPlanSelection.day, reminders: tripPlanSelection.reminders } : undefined;
+    const result = fresh ? startFreshTripSession(loadData(), user.id, choice) : startTripSession(loadData(), user.id, choice);
     if (result.error || !result.trip || !result.data) {
-      showTrackingNotice("error", "Trip could not start", result.error ?? "Trip could not be started.");
+      showTrackingNotice("error", "Trip could not start", result.itineraryError ? tripPlanText(locale, "unavailable") : result.error ?? "Trip could not be started.");
       return;
     }
 
     onDataChange(result.data);
+    setTripPlanSelection({ planId: "", day: 1, reminders: false });
     startLocationWatch(result.trip.id, "Trip started and live browser tracking is active.");
   };
   const startTrip = () => beginTrip(false);
@@ -870,6 +886,17 @@ export function TouristWorkspace({
     changeDiscoveryLocation("area", `state:${"city" in location ? getDestinationState(location) ?? area.state : area.state}`);
   };
   const openPlace = (destinationId: string) => { setPlaceGuideId(destinationId); };
+  const openTripCheckIn = (destinationId: string) => { setCheckInDestinationId(destinationId); setShowCheckInPanel(true); onViewChange("overview"); };
+  const changeTripReminders = (enabled: boolean) => {
+    if (!activeTrip) return;
+    const next = setTripItineraryReminders(loadData(), user.id, activeTrip.id, enabled);
+    if (next) void onDataChange(next);
+  };
+  const useItineraryDay = (planId: string, day: number) => {
+    if (activeTrip) { notify({ tone: "info", title: travelText(locale, "itinerary"), message: tripPlanText(locale, "finishFirst") }); onViewChange("tracking"); return; }
+    setTripPlanSelection({ planId, day, reminders: false });
+    onViewChange("tracking");
+  };
   const openSafety = () => {
     setIdentitySafetyAccess(true);
     setShowCheckInPanel(false);
@@ -931,12 +958,15 @@ export function TouristWorkspace({
 
   if (view === "tracking") {
     return <><Page title={travelText(locale, "tripTitle")} eyebrow={t("common.tourist")}>
-      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} gpsFix={activeGpsFix} gpsAttention={Boolean(trackingQualityIssue)} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus} onAllowLocation={grantConsent} onStart={startTrip} onStartNew={startNewTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
+      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} gpsFix={activeGpsFix} gpsAttention={Boolean(trackingQualityIssue)} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus}
+        tripPlanControl={!activeTrip ? <Suspense fallback={<p role="status">{tripPlanText(locale, "loading")}</p>}><ItineraryTripSetup entries={itineraryStore.entries} selection={tripPlanSelection} connection={itineraryStore.connection} locale={locale} onChange={setTripPlanSelection} /></Suspense> : undefined}
+        itineraryContent={activeTrip?.itinerary ? <Suspense fallback={null}><TripItineraryProgress key={activeTrip.id} trip={activeTrip} points={activePoints} checkIns={data.checkIns} destinations={localizedDestinations} locale={locale} onOpenPlace={openPlace} onCheckIn={openTripCheckIn} onRemindersChange={changeTripReminders} /></Suspense> : undefined}
+        onAllowLocation={grantConsent} onStart={startTrip} onStartNew={startNewTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
     </Page>{discoveryPrompt}{tripActionDialog}</>;
   }
 
   if (view === "itinerary") {
-    return <Suspense fallback={<p role="status">{travelText(locale, "itinerary")}…</p>}><ItineraryPage key={user.id} user={user} destinations={localizedDestinations} suggestedIds={suggestedDestinationIds} initialState={getDiscoveryState(user.discoveryAreaId) ?? (discoveryReference && discoveryDestinations[0] ? getDestinationState(discoveryDestinations[0]) : undefined)} locale={locale} onBack={() => onViewChange("tracking")} onOpenPlace={openPlace} /></Suspense>;
+    return <Suspense fallback={<p role="status">{travelText(locale, "itinerary")}…</p>}><ItineraryPage key={user.id} user={user} destinations={localizedDestinations} store={itineraryStore} onUseDay={useItineraryDay} suggestedIds={suggestedDestinationIds} initialState={getDiscoveryState(user.discoveryAreaId) ?? (discoveryReference && discoveryDestinations[0] ? getDestinationState(discoveryDestinations[0]) : undefined)} locale={locale} onBack={() => onViewChange("tracking")} onOpenPlace={openPlace} /></Suspense>;
   }
 
   if (view === "history") {
@@ -975,6 +1005,7 @@ export function TouristWorkspace({
           onOpenPlace={openPlace}
           onRenameTrip={renameTrip}
           onDeleteTrip={deleteSelectedTrip}
+          itineraryComparison={selectedTrip?.itinerary ? <Suspense fallback={null}><TripItineraryProgress key={selectedTrip.id} trip={selectedTrip} points={selectedTripPoints} checkIns={data.checkIns} destinations={localizedDestinations} locale={locale} onOpenPlace={openPlace} /></Suspense> : undefined}
         />
         {tripActionDialog}
       </Page>
@@ -1091,7 +1122,7 @@ export function TouristWorkspace({
   );
   };
   const loadingTitle = view === "profile" ? t("tourist.profile.pageTitle") : view === "recommendations" ? t("tourist.recommendations.pageTitle") : view === "events" ? t("tourist.events.pageTitle") : view === "history" ? travelText(locale, "manage") : t("nav.home");
-  return <><Suspense fallback={<p role="status" aria-busy="true">{loadingTitle}…</p>}>{renderView()}</Suspense>{guidePlace && <PlaceGuideDialog title={guidePlace.name} locale={locale} onClose={() => setPlaceGuideId(null)}><PlaceGuide destination={guidePlace} locale={locale}
+  return <><Suspense fallback={<p role="status" aria-busy="true">{loadingTitle}…</p>}>{renderView()}</Suspense>{activeTrip && validTripItinerary(activeTrip.itinerary) && activeTrip.itinerary.reminders && <Suspense fallback={null}><TripItineraryReminder key={activeTrip.id} trip={activeTrip} points={activePoints} checkIns={data.checkIns} destinations={localizedDestinations} locale={locale} onOpenPlace={openPlace} onDisable={() => changeTripReminders(false)} /></Suspense>}{guidePlace && <PlaceGuideDialog title={guidePlace.name} locale={locale} onClose={() => setPlaceGuideId(null)}><PlaceGuide destination={guidePlace} locale={locale}
     distance={formatDistanceLabel(guideReference ? distanceKm(guideReference, guidePlace) : undefined, t)}
     distanceLabel={user.discoveryLocationMode === "area" ? discoveryText(locale, "fromArea") : t("common.distance")}
     demand={formatDemandLabel(destinationDemand.find((row) => row.destinationId === guidePlace.id), locale, t)}

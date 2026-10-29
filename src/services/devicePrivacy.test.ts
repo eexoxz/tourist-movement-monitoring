@@ -22,7 +22,7 @@ describe("explicit shared-device cleanup", () => {
   it("clears only downloaded private copies and prevents late cache writes before reload", () => {
     cacheLocalData(initialData);
     saved.set(planKey, JSON.stringify([{ dirty: false, plan: createItinerary("other-owner", "Saved plan") }]));
-    const privateKeys = ["tourist-movement-monitoring:remember-login", "tourist-movement-monitoring:last-location:alice", "tourist-movement-monitoring:profile-skip:alice"];
+    const privateKeys = ["tourist-movement-monitoring:remember-login", "tourist-movement-monitoring:last-location:alice", "tourist-movement-monitoring:profile-skip:alice", "tourist-movement-monitoring:itinerary-reminders:alice"];
     privateKeys.forEach((key) => saved.set(key, "private"));
     saved.set("tourist-movement-monitoring:locale", "ja");
     saved.set("unrelated", "keep");

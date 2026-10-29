@@ -5,7 +5,7 @@ import { isFirebaseConfigured } from "./firebaseClient";
 import { createItinerary, reconcileItineraries, sameItineraryContent, type ItineraryEntry } from "./itineraries";
 import { cacheItineraries, deleteItinerary, itineraryDeadline, ItineraryError, loadItineraryCache, registerItineraryDrafts, saveItinerary, subscribeItineraries } from "./itineraryStorage";
 
-export function useItineraries(user: User) {
+export function useItineraries(user: User, enabled = true) {
   const cloud = isFirebaseConfigured();
   const [entries, setEntries] = useState(() => loadItineraryCache(user.id));
   const [remote, setRemote] = useState<Itinerary[]>([]);
@@ -16,22 +16,24 @@ export function useItineraries(user: User) {
   const locked = useRef(false);
   const latest = useRef(entries);
   latest.current = entries;
-  useEffect(() => registerItineraryDrafts(user.id, () => latest.current), [user.id]);
+  useEffect(() => { if (enabled) return registerItineraryDrafts(user.id, () => latest.current); }, [user.id, enabled]);
 
   useEffect(() => {
+    if (!enabled) return;
     const timer = window.setTimeout(() => { if (!cacheItineraries(user.id, entries)) setNotice("storageFull"); }, 250);
     return () => window.clearTimeout(timer);
-  }, [entries, user.id]);
+  }, [entries, user.id, enabled]);
   useEffect(() => {
+    if (!enabled) return;
     const persist = () => { cacheItineraries(user.id, latest.current); };
     const hide = () => { if (document.visibilityState === "hidden") persist(); };
     window.addEventListener("pagehide", persist);
     document.addEventListener("visibilitychange", hide);
     return () => { persist(); window.removeEventListener("pagehide", persist); document.removeEventListener("visibilitychange", hide); };
-  }, [user.id]);
+  }, [user.id, enabled]);
 
   useEffect(() => {
-    if (!cloud) return;
+    if (!cloud || !enabled) return;
     let stopped = false;
     let unsubscribe: (() => void) | undefined;
     const fail = () => { if (!stopped) setConnection("unavailable"); };
@@ -43,7 +45,7 @@ export function useItineraries(user: User) {
       setEntries((current) => reconcileItineraries(current, plans));
     }, fail)).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
-  }, [cloud, user.id, retry]);
+  }, [cloud, user.id, retry, enabled]);
 
   const create = (title: string, source?: Itinerary) => {
     const plan = { ...createItinerary(user.id, title), ...(source ? { startDate: source.startDate, days: source.days, notes: source.notes, stops: source.stops.map((stop) => ({ ...stop, id: crypto.randomUUID() })) } : {}) };
@@ -86,3 +88,4 @@ export function useItineraries(user: User) {
   };
   return { clearNotice: () => setNotice(null), entries, remote, connection, notice, busy, cloud, create, change, restore, commit, reconnect: () => setRetry((value) => value + 1) };
 }
+export type ItineraryStore = ReturnType<typeof useItineraries>;

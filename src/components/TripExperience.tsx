@@ -9,8 +9,9 @@ import type { Destination, DestinationDemand, LocationConsent, MovementPoint, Tr
 import { DestinationTeaser } from "./DestinationTeaser";
 import { MovementMap } from "./MovementMap";
 import { TrackingStatus } from "./TrackingStatus";
+import type { ReactNode } from "react";
 
-export function TripExperience({ activeTrip, consent, points, reference, gpsFix, gpsAttention, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, onAllowLocation, onStart, onStartNew, onStop, onResume, onManage, onPlan, onOpenPlace, onSafety }: {
+export function TripExperience({ activeTrip, consent, points, reference, gpsFix, gpsAttention, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, tripPlanControl, itineraryContent, onAllowLocation, onStart, onStartNew, onStop, onResume, onManage, onPlan, onOpenPlace, onSafety }: {
   activeTrip?: TripSession | null;
   consent?: LocationConsent | null;
   points: MovementPoint[];
@@ -28,6 +29,8 @@ export function TripExperience({ activeTrip, consent, points, reference, gpsFix,
   geofenceWarnings: GeoFenceWarning[];
   locale: Locale;
   syncStatus?: string;
+  tripPlanControl?: ReactNode;
+  itineraryContent?: ReactNode;
   onAllowLocation: () => void;
   onStart: () => void;
   onStartNew?: () => void;
@@ -45,6 +48,7 @@ export function TripExperience({ activeTrip, consent, points, reference, gpsFix,
     <section className={`trip-recorder ${activeTrip ? isLiveTracking ? "is-recording" : "needs-location" : "is-idle"}`}>
       {activeTrip && <div className="trip-recording-state" role="status"><span aria-hidden="true" />{isLiveTracking ? interfaceText(locale, "recording") : text("pausedStatus")}</div>}
       <div className="trip-recorder-heading"><span className={isLiveTracking ? "trip-live-indicator active" : "trip-live-indicator"} aria-hidden="true"><Navigation size={24} /></span><div><h2>{text(activeTrip ? isLiveTracking ? "activeTitle" : "pausedTitle" : "idleTitle")}</h2><p>{text(activeTrip ? isLiveTracking ? "activeDescription" : "pausedDescription" : "idleDescription")}</p></div></div>
+      {tripPlanControl}
       <div className="trip-recorder-actions">
         {!consent ? <button className="primary-action" type="button" onClick={onAllowLocation}><ShieldCheck size={18} />{uiText(locale, "Allow location")}</button>
           : !activeTrip ? <button className="primary-action" type="button" onClick={onStart}><Play size={18} />{t("tourist.home.startTrip")}</button>
@@ -58,6 +62,8 @@ export function TripExperience({ activeTrip, consent, points, reference, gpsFix,
       {activeTrip && summary && <dl className="trip-current-summary"><div><dt><Navigation size={16} />{t("common.distance")}</dt><dd>{number.format(summary.distanceKm)} <small>km</small></dd></div><div><dt><Clock3 size={16} />{text("recordedTime")}</dt><dd>{number.format(summary.durationMinutes)} <small>{t("common.minutes")}</small></dd></div><div><dt><CircleCheck size={16} />{t("tourist.completed.recognisedStops")}</dt><dd>{number.format(summary.visitedDestinationCount)}</dd></div></dl>}
       {activeTrip && points.some((point) => point.source === "demo") && <small className="trip-sample-notice">{text("sampleNote")}</small>}
     </section>
+
+    {itineraryContent}
 
     <div className="trip-live-map"><MovementMap points={activeTrip ? points : []} destinations={destinations} activePoint={reference} isBrowsingArea={isBrowsingArea} mode="tourist" displayMode={activeTrip ? "route" : "signals"} locale={locale} activityDemand={demand} /></div>
 

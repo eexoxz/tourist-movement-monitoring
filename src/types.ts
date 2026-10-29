@@ -185,6 +185,17 @@ export type TripSession = {
   endedAt?: string;
   hiddenFromHistoryAt?: string;
   consentId: string;
+  itinerary?: TripItinerarySnapshot;
+};
+
+export type TripItinerarySnapshot = {
+  planId: string;
+  revision: number;
+  title: string;
+  day: number;
+  date: string;
+  reminders: boolean;
+  stops: ItineraryStop[];
 };
 
 export type TripSummary = {

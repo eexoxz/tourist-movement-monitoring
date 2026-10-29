@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowUp, CalendarDays, Check, Clock3, Copy, MapPinned, Plus, RotateCcw, Save, Search, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, CalendarDays, Check, Clock3, Copy, MapPinned, Play, Plus, RotateCcw, Save, Search, Trash2, X } from "lucide-react";
 import type { Destination, Itinerary, MalaysianState, User } from "../types";
 import type { Locale } from "../services/i18n";
 import { translate } from "../services/i18n";
@@ -7,7 +7,8 @@ import { addItineraryStop, itineraryDayDate, itineraryLimits, itineraryScheduleI
 import { scheduleText } from "../services/itineraryScheduleCopy";
 import { getDiscoveryState } from "../data/discoveryAreas";
 import { itineraryText } from "../services/itineraryCopy";
-import { useItineraries } from "../services/useItineraries";
+import { useItineraries, type ItineraryStore } from "../services/useItineraries";
+import { tripPlanText } from "../services/tripItineraryCopy";
 import { discoveryStates } from "../data/discoveryAreas";
 import { getDestinationState } from "../services/destinationState";
 import { destinationAdminText } from "../services/destinationAdminCopy";
@@ -45,10 +46,19 @@ function ConfirmItineraryDialog({ locale, busy, kind, planName, onCancel, onConf
   </div>;
 }
 
-export function ItineraryPage({ user, destinations, suggestedIds = [], initialState, locale, onBack, onOpenPlace }: {
+type ItineraryPageProps = {
   user: User; destinations: Destination[]; suggestedIds?: string[]; initialState?: MalaysianState; locale: Locale; onBack: () => void; onOpenPlace: (id: string) => void;
-}) {
-  const store = useItineraries(user);
+  store?: ItineraryStore; onUseDay?: (planId: string, day: number) => void;
+};
+const emptySuggestedIds: string[] = [];
+export function ItineraryPage(props: ItineraryPageProps) {
+  return props.store ? <ItineraryEditor {...props} store={props.store} /> : <StandaloneItineraryPage {...props} />;
+}
+function StandaloneItineraryPage(props: ItineraryPageProps) {
+  const store = useItineraries(props.user);
+  return <ItineraryEditor {...props} store={store} />;
+}
+function ItineraryEditor({ user, destinations, suggestedIds = emptySuggestedIds, initialState, locale, onBack, onOpenPlace, store, onUseDay }: ItineraryPageProps & { store: ItineraryStore }) {
   const [selectedId, setSelectedId] = useState("");
   const [selectedDay, setSelectedDay] = useState(1);
   const [query, setQuery] = useState("");
@@ -101,6 +111,7 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], initialSt
       {(conflict || store.notice === "conflict") && <aside className="itinerary-notice warning" role="alert"><p>{text("conflict")}</p><div className="itinerary-inline-actions"><button className="secondary-action" type="button" onClick={() => newPlan(plan)} disabled={store.busy}><Copy size={18} />{text("saveCopy")}</button>{remote && <button className="secondary-action" type="button" onClick={() => setConfirmation({ kind: "discard", plan })} disabled={store.busy}><RotateCcw size={18} />{text("loadLatest")}</button>}</div></aside>}
 
       <footer ref={editorStart} className="itinerary-save-bar"><div role="status">{(entry.dirty || store.connection === "live") && <span>{text(entry.dirty ? "unsaved" : "saved")}</span>}<small>{text("stops")}: {number.format(plan.stops.length)} · {schedule("scheduled")}: {number.format(scheduledCount(plan.stops))}</small></div><div className="itinerary-inline-actions">
+        {onUseDay && <button className="secondary-action" type="button" disabled={store.busy || entry.dirty || !stops.length || !validItinerary(plan) || scheduleIssues.length > 0 || conflict} title={entry.dirty ? tripPlanText(locale, "saveFirst") : !stops.length ? tripPlanText(locale, "emptyDay") : undefined} onClick={() => onUseDay(plan.id, day)}><Play size={18} />{tripPlanText(locale, "useDay")}</button>}
         <button className="secondary-action icon-action" type="button" aria-label={text("saveCopy")} title={text("saveCopy")} disabled={store.busy} onClick={() => newPlan(plan)}><Copy size={18} /></button>
         {entry.dirty && remote && !remote.deletedAt && <button className="secondary-action" type="button" disabled={store.busy} onClick={() => setConfirmation({ kind: "discard", plan })}><RotateCcw size={18} />{text("discard")}</button>}
         <button className="secondary-action icon-action danger" type="button" aria-label={text("delete")} title={text("delete")} disabled={store.busy} onClick={() => setConfirmation({ kind: "delete", plan })}><Trash2 size={18} /></button>

@@ -5,6 +5,7 @@ import { hasPendingCheckInChanges, pendingCheckInsKey } from "./pendingCheckIns"
 import { clearLocalDownloadCache } from "./storage";
 import { PROFILE_SKIP_KEY_PREFIX } from "./workspaceSupport";
 import { validItinerary } from "./itineraries";
+import { ITINERARY_REMINDERS_KEY_PREFIX } from "./itineraryReminderState";
 
 const itineraryPrefix = "tourist-movement-monitoring:itineraries:";
 const keys = () => Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).filter((key): key is string => key !== null);
@@ -24,7 +25,7 @@ export class UnsyncedDeviceWork extends Error {}
 export function clearDownloadedDeviceData() {
   // Check every owner before removing anything; queued changes and drafts are never cleanup targets.
   if (hasUnsyncedDeviceWork()) throw new UnsyncedDeviceWork();
-  const downloaded = keys().filter((key) => key === rememberedLoginKey || key.startsWith(itineraryPrefix) || key.startsWith(LAST_BROWSER_LOCATION_KEY_PREFIX) || key.startsWith(PROFILE_SKIP_KEY_PREFIX));
+  const downloaded = keys().filter((key) => key === rememberedLoginKey || key.startsWith(itineraryPrefix) || key.startsWith(LAST_BROWSER_LOCATION_KEY_PREFIX) || key.startsWith(PROFILE_SKIP_KEY_PREFIX) || key.startsWith(ITINERARY_REMINDERS_KEY_PREFIX));
   clearLocalDownloadCache();
   downloaded.forEach((key) => localStorage.removeItem(key));
 }
