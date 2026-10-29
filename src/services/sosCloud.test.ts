@@ -11,6 +11,7 @@ vi.mock("./firebaseClient", () => ({
   getFirebaseServices: () => ({ auth: { currentUser: mock.currentUser }, db: {} }),
 }));
 vi.mock("firebase/firestore", () => ({
+  documentId: () => "__name__", or: (...clauses: unknown[]) => ({ clauses }),
   doc: (_db: unknown, name: string, id: string) => ({ name, id }),
   collection: (_db: unknown, name: string) => ({ name }),
   where: (field: string, op: string, value: string) => ({ field, op, value }),
@@ -76,7 +77,7 @@ describe("SOS cloud lifecycle", () => {
   it("lets authenticated administrators review all cases, not other tourists", async () => {
     mock.currentUser = { uid: "admin" };
     await subscribeSosAlerts({ ...actor, id: "admin", role: "admin" }, vi.fn(), vi.fn());
-    expect(mock.listener.mock.calls[0][0]).toEqual({ name: "sos_alerts" });
+    expect(mock.listener.mock.calls[0][0]).toMatchObject({ source: { name: "sos_alerts" }, filter: { clauses: expect.any(Array) } });
     vi.clearAllMocks();
     await subscribeSosAlerts(actor, vi.fn(), vi.fn());
     expect(mock.listener).not.toHaveBeenCalled();

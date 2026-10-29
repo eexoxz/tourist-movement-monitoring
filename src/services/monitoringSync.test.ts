@@ -4,7 +4,7 @@ import { normalizeAppData } from "./storage";
 
 const mock = vi.hoisted(() => ({ uid: "admin", listen: vi.fn(), stops: [vi.fn(), vi.fn(), vi.fn()] }));
 vi.mock("./firebaseClient", () => ({ isFirebaseConfigured: () => true, getFirebaseServices: () => ({ auth: { get currentUser() { return { uid: mock.uid }; } }, db: {} }) }));
-vi.mock("firebase/firestore", () => ({ collection: (_db: unknown, name: string) => ({ name }), onSnapshot: mock.listen }));
+vi.mock("firebase/firestore", () => ({ collection: (_db: unknown, name: string) => ({ name }), documentId: () => "__name__", or: (...clauses: unknown[]) => ({ clauses }), where: (field: string, op: string, value: string) => ({ field, op, value }), query: (source: object, filter: unknown) => ({ ...source, filter }), onSnapshot: mock.listen }));
 import { mergeMonitoringSnapshot, subscribeAdminMonitoring } from "./monitoringSync";
 
 describe("live admin movement monitoring", () => {
@@ -14,6 +14,7 @@ describe("live admin movement monitoring", () => {
     const change = vi.fn();
     const stop = await subscribeAdminMonitoring({ id: "admin", role: "admin" } as User, change, vi.fn());
     expect(mock.listen.mock.calls.map(([source]) => source.name)).toEqual(["users", "trip_sessions", "movement_records"]);
+    expect(mock.listen.mock.calls[2][0].filter.clauses).toEqual([{ field: "userId", op: "<", value: "tourist-seed-" }, { field: "userId", op: ">=", value: "tourist-seed." }]);
     const receive = mock.listen.mock.calls[2][2];
     const changes = [{ type: "added", doc: { id: "point", data: () => ({ userId: "alice", tripId: "trip", latitude: 5.4, longitude: 100.3 }) } }];
     receive({ metadata: { fromCache: true }, docChanges: () => changes });

@@ -10,7 +10,15 @@ const mock = vi.hoisted(() => ({
 vi.mock("./firebaseClient", () => ({ isFirebaseConfigured: () => true, getFirebaseServices: () => ({ auth: { get currentUser() { return mock.currentUser; } }, db: {} }) }));
 vi.mock("firebase/firestore", () => {
   const snapshot = (path: string) => ({ id: path.split("/").at(-1), exists: () => mock.documents.has(path), data: () => structuredClone(mock.documents.get(path)) });
+  type Filter = { field?: string; op?: string; value?: string; clauses?: Filter[] };
+  const matches = (filter: Filter, path: string, data: Record<string, unknown>): boolean => {
+    if (filter.clauses) return filter.clauses.some((part) => matches(part, path, data));
+    const value = filter.field === "__name__" ? path.split("/").at(-1) : data[filter.field!];
+    if (typeof value !== "string") return false;
+    return filter.op === "<" ? value < filter.value! : filter.op === ">=" ? value >= filter.value! : value === filter.value;
+  };
   return {
+    documentId: () => "__name__", or: (...clauses: Filter[]) => ({ clauses }),
     doc: (_db: unknown, name: string, id: string) => `${name}/${id}`,
     collection: (_db: unknown, name: string) => ({ name }), where: (field: string, op: string, value: string) => ({ field, op, value }),
     query: (source: { name: string }, filter: unknown) => ({ ...source, filter }),
@@ -32,11 +40,11 @@ vi.mock("firebase/firestore", () => {
       writes.forEach((write) => write());
     },
     getDocFromServer: async (path: string) => { if (mock.failRead) throw new Error("read denied"); return snapshot(path); },
-    getDocsFromServer: async (source: { name: string; filter?: { value: string } }) => {
+    getDocsFromServer: async (source: { name: string; filter?: Filter }) => {
       mock.queryReads(source);
       if (mock.failRead) throw new Error("read denied");
       if (mock.changeSessionOnRead) mock.currentUser = null;
-      return { docs: [...mock.documents.entries()].filter(([path, data]) => path.startsWith(`${source.name}/`) && (!source.filter || data.userId === source.filter.value)).map(([path]) => snapshot(path)) };
+      return { docs: [...mock.documents.entries()].filter(([path, data]) => path.startsWith(`${source.name}/`) && (!source.filter || matches(source.filter, path, data))).map(([path]) => snapshot(path)) };
     },
     onSnapshot: mock.listener,
   };
@@ -120,6 +128,24 @@ describe("scoped cloud workflow persistence", () => {
     expect(loaded!.trips.some((row) => row.userId === alice.id)).toBe(true);
     rememberDemoDatasetSelection(mergePreparedDemoDataset(cleaned));
     expect(getPreparedDemoTouristCount((await loadCloudData(admin))!)).toBe(20);
+    expect([...mock.documents]).toEqual(before);
+  });
+  it("applies server-side sample filtering only after discovering genuine account exceptions", async () => {
+    const admin = { ...alice, id: "admin", authUid: "admin", role: "admin" as const };
+    const protectedUser = { ...alice, id: "tourist-seed-002", authUid: "tourist-seed-002" };
+    mock.currentUser = { uid: admin.id };
+    mock.documents.set("users/admin", admin);
+    mock.documents.set("users/tourist-seed-001", { ...alice, id: "tourist-seed-001", authUid: undefined });
+    mock.documents.set(`users/${protectedUser.id}`, protectedUser);
+    for (const [id, userId] of [["sample", "tourist-seed-001"], ["protected", protectedUser.id], ["real", alice.id]]) {
+      mock.documents.set(`movement_records/${id}`, { id, userId, tripId: "trip", latitude: 5.4, longitude: 100.3, recordedAt: "2026-10-29T00:00:00Z", source: "browser" });
+    }
+    rememberDemoDatasetSelection(removeGeneratedDemoDataset(initialData));
+    const before = structuredClone([...mock.documents]);
+    const loaded = await loadCloudData(admin);
+    expect(loaded!.points.map((point) => point.id).sort()).toEqual(["protected", "real"]);
+    expect(mock.queryReads.mock.calls.find(([source]) => source.name === "movement_records")![0].filter.clauses).toContainEqual({ field: "userId", op: "==", value: protectedUser.id });
+    expect(mock.queryReads.mock.calls.find(([source]) => source.name === "users")![0].filter).toBeUndefined();
     expect([...mock.documents]).toEqual(before);
   });
   it("does not reopen or unhide an archived trip when another device sends a stale rename", async () => {

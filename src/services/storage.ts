@@ -30,6 +30,7 @@ import { validDestinationPhoto, type DestinationPhotoUpload } from "./destinatio
 import { destinationPhotoReference } from "./destinationPhoto";
 import { clearDestinationCatalogueCache, readDestinationCatalogue } from "./catalogueCache";
 import { shareServerRead } from "./serverRead";
+import { adminCloudSource, protectedCloudOwnerIds } from "./cloudReadScope";
 
 const DATA_KEY = "tourist-movement-monitoring:data";
 const SESSION_KEY = "tourist-movement-monitoring:session";
@@ -212,13 +213,14 @@ export async function loadPlaceReviewRecords(actor: User) {
   return snapshot.docs.map((record) => normalizeCheckIn({ ...record.data(), id: record.id }));
 }
 
-export async function subscribeCheckInRecords(actor: User, onChange: (records: AttractionCheckIn[]) => void, onError: () => void) {
+export async function subscribeCheckInRecords(actor: User, onChange: (records: AttractionCheckIn[]) => void, onError: () => void, protectedIds: string[] = []) {
   const services = getFirebaseServices();
   const uid = services?.auth.currentUser?.uid;
   if (!services || !uid || (actor.id !== uid && actor.authUid !== uid)) return () => {};
-  const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+  const firestore = await import("firebase/firestore");
+  const { collection, query, where, onSnapshot } = firestore;
   const source = collection(services.db, FIRESTORE_COLLECTIONS.checkIns);
-  const scoped = actor.role === "admin" ? source : query(source, where("userId", "==", actor.id));
+  const scoped = actor.role === "admin" ? adminCloudSource(firestore, services.db, FIRESTORE_COLLECTIONS.checkIns, protectedIds) : query(source, where("userId", "==", actor.id));
   return onSnapshot(scoped, { includeMetadataChanges: true }, (snapshot) => {
     if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return;
     const records = snapshot.docs.map((record) => normalizeCheckIn({ ...record.data(), id: record.id }));
@@ -274,26 +276,28 @@ export async function saveSosAlertChange(alert: SosAlert, actor?: User | null) {
   return synced;
 }
 
-export async function subscribeSosAlerts(actor: User, onChange: (alerts: SosAlert[]) => void, onError: () => void) {
+export async function subscribeSosAlerts(actor: User, onChange: (alerts: SosAlert[]) => void, onError: () => void, protectedIds: string[] = []) {
   const services = getFirebaseServices();
   if (!services?.auth.currentUser) return () => {};
   const uid = services.auth.currentUser.uid;
   if (actor.id !== uid && actor.authUid !== uid) return () => {};
-  const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+  const firestore = await import("firebase/firestore");
+  const { collection, query, where, onSnapshot } = firestore;
   const source = collection(services.db, FIRESTORE_COLLECTIONS.sosAlerts);
-  const scoped = actor.role === "admin" ? source : query(source, where("userId", "==", actor.id));
+  const scoped = actor.role === "admin" ? adminCloudSource(firestore, services.db, FIRESTORE_COLLECTIONS.sosAlerts, protectedIds) : query(source, where("userId", "==", actor.id));
   return onSnapshot(scoped, (snapshot) => {
     onChange(snapshot.docs.map((record) => normalizeSosAlert({ ...record.data(), id: record.id })));
   }, onError);
 }
 
-export async function subscribeIncidentReports(actor: User, onChange: (reports: IncidentReport[]) => void, onError: () => void) {
+export async function subscribeIncidentReports(actor: User, onChange: (reports: IncidentReport[]) => void, onError: () => void, protectedIds: string[] = []) {
   const services = getFirebaseServices();
   const uid = services?.auth.currentUser?.uid;
   if (!services || !uid || (actor.id !== uid && actor.authUid !== uid)) return () => {};
-  const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+  const firestore = await import("firebase/firestore");
+  const { collection, query, where, onSnapshot } = firestore;
   const source = collection(services.db, FIRESTORE_COLLECTIONS.incidentReports);
-  const scoped = actor.role === "admin" ? source : query(source, where("userId", "==", actor.id));
+  const scoped = actor.role === "admin" ? adminCloudSource(firestore, services.db, FIRESTORE_COLLECTIONS.incidentReports, protectedIds) : query(source, where("userId", "==", actor.id));
   return onSnapshot(scoped, { includeMetadataChanges: true }, (snapshot) => {
     if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return;
     onChange(snapshot.docs.map((record) => normalizeIncidentReport({ ...record.data(), id: record.id })));
@@ -387,7 +391,8 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
     return null;
   }
 
-  const { collection, doc, getDocFromServer: getDoc, getDocsFromServer: getDocs, query, where } = await import("firebase/firestore");
+  const firestore = await import("firebase/firestore");
+  const { collection, doc, getDocFromServer: getDoc, getDocsFromServer: getDocs, query, where } = firestore;
   const authUid = services.auth.currentUser.uid;
   const cachedActor = fallbackActor ?? loadData().users.find((user) => user.id === authUid || user.authUid === authUid);
   if (cachedActor) await saveCloudData(loadData(), cachedActor);
@@ -397,8 +402,9 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
       return snapshot.exists() ? ({ id: snapshot.id, ...snapshot.data() } as T) : null;
   };
 
+  let adminScope: string[] | undefined;
   const readCollection = async <T>(name: string) => {
-      const snapshot = await shareServerRead(services.db, authUid, `collection:${name}`, () => getDocs(collection(services.db, name)));
+      const snapshot = await shareServerRead(services.db, authUid, `collection:${name}:${adminScope?.join(",") ?? "all"}`, async () => getDocs(adminScope ? adminCloudSource(firestore, services.db, name, adminScope) : collection(services.db, name)));
       return snapshot.docs.map((document) => ({ id: document.id, ...document.data() }) as T);
   };
 
@@ -431,7 +437,9 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
     const [current, older] = await Promise.all([readScopedCollection<T>(modern), readScopedCollection<T>(legacy)]);
     return [...new Map([...older, ...current].map((record) => [record.id, record])).values()];
   };
-  const userRows = isAdminUser ? readCollection<Omit<User, "password">>(FIRESTORE_COLLECTIONS.users) : Promise.resolve(currentUserRecord ? [currentUserRecord] : []);
+  const users = isAdminUser ? await readCollection<Omit<User, "password">>(FIRESTORE_COLLECTIONS.users) : currentUserRecord ? [currentUserRecord] : [];
+  if (services.auth.currentUser?.uid !== authUid || !isCurrent()) return null;
+  if (isAdminUser) adminScope = protectedCloudOwnerIds(users);
   const profileRows = isAdminUser
     ? readCollection<TouristProfileDocument>(FIRESTORE_COLLECTIONS.touristProfiles)
     : readDocument<TouristProfileDocument>(FIRESTORE_COLLECTIONS.touristProfiles, authUid).then((profile) => (profile ? [profile] : []));
@@ -439,8 +447,7 @@ export async function loadCloudData(fallbackActor?: User | null, isCurrent = () 
     ? readCollection<TouristPreferenceDocument>(FIRESTORE_COLLECTIONS.touristPreferences)
     : readDocument<TouristPreferenceDocument>(FIRESTORE_COLLECTIONS.touristPreferences, authUid).then((preference) => (preference ? [preference] : []));
 
-  const [users, touristProfiles, touristPreferences, consents, trips, points, destinations, analyses, recommendations, sosAlerts, incidentReports, checkIns, geofences] = await Promise.all([
-    userRows,
+  const [touristProfiles, touristPreferences, consents, trips, points, destinations, analyses, recommendations, sosAlerts, incidentReports, checkIns, geofences] = await Promise.all([
     profileRows,
     preferenceRows,
     readScopedPreferredCollection<LocationConsent>(FIRESTORE_COLLECTIONS.locationConsents, LEGACY_FIRESTORE_COLLECTIONS.consents),

@@ -1,6 +1,7 @@
 import type { AppData, MovementPoint, TripSession, User } from "../types";
 import { pendingCloudJobs, type CloudChange } from "./cloudChanges";
 import { getFirebaseServices } from "./firebaseClient";
+import { adminCloudSource } from "./cloudReadScope";
 
 export type MonitoringSnapshot =
   | { key: "users"; collection: "users"; records: User[]; removed: string[] }
@@ -30,11 +31,12 @@ export function mergeMonitoringSnapshot(data: AppData, snapshot: MonitoringSnaps
   return { ...data, [snapshot.key]: [...records.values()] };
 }
 
-export async function subscribeAdminMonitoring(actor: User, onChange: (snapshots: MonitoringSnapshot[], pending: CloudChange[]) => void, onError: () => void) {
+export async function subscribeAdminMonitoring(actor: User, onChange: (snapshots: MonitoringSnapshot[], pending: CloudChange[]) => void, onError: () => void, protectedIds: string[] = []) {
   const services = getFirebaseServices();
   const uid = services?.auth.currentUser?.uid;
   if (!services || !uid || actor.role !== "admin" || (actor.id !== uid && actor.authUid !== uid)) return () => {};
-  const { collection, onSnapshot } = await import("firebase/firestore");
+  const firestore = await import("firebase/firestore");
+  const { onSnapshot } = firestore;
   const sources = [{ key: "users", collection: "users" }, { key: "trips", collection: "trip_sessions" }, { key: "points", collection: "movement_records" }] as const;
   let stopped = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -49,7 +51,8 @@ export async function subscribeAdminMonitoring(actor: User, onChange: (snapshots
     queued.clear();
     if (snapshots.length) onChange(snapshots, pendingCloudJobs(actor).flatMap((job) => job.changes));
   };
-  const stops = sources.map((source) => onSnapshot(collection(services.db, source.collection), { includeMetadataChanges: true }, (snapshot) => {
+  const references = sources.map((source) => adminCloudSource(firestore, services.db, source.collection, protectedIds));
+  const stops = sources.map((source, index) => onSnapshot(references[index], { includeMetadataChanges: true }, (snapshot) => {
     if (stopped || snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return;
     const changes = snapshot.docChanges();
     if (!changes.length) return;

@@ -12,6 +12,7 @@
     "preview:mobile": "vite preview --host 0.0.0.0 --port 4175 --strictPort --configLoader runner",
     "start": "npm run preview",
     "test": "vitest run --config vitest.config.ts --configLoader runner",
+    "test:cloud-reads": "firebase emulators:exec --config firebase.emulators.json --only firestore --project demo-tourist-read-budget \"vitest run --config vitest.cloudReads.config.ts --configLoader runner\"",
     "test:rules": "firebase emulators:exec --config firebase.emulators.json --only firestore --project demo-tourist-security \"node --test --test-concurrency=1 tests/firestore.rules.test.mjs\"",
     "test:account-deletion": "firebase emulators:exec --config firebase.emulators.json --only auth,firestore --project demo-tourist-security \"vitest run --config vitest.accountDeletion.config.ts --configLoader runner\"",
     "typecheck": "tsc --noEmit"

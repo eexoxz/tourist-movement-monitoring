@@ -32,6 +32,7 @@ import { loadRememberedLogin } from "./services/loginPreferences";
 import { buildDataExport } from "./services/dataExport";
 import { workflowText } from "./services/workflowCopy";
 import { mergeIncidentReports } from "./services/incidentSync";
+import { protectedCloudOwnerIds } from "./services/cloudReadScope";
 import { mergeMonitoringSnapshot, subscribeAdminMonitoring } from "./services/monitoringSync";
 import { DevicePrivacyPanel } from "./components/DevicePrivacyPanel";
 import { deviceText } from "./services/deviceCopy";
@@ -445,7 +446,7 @@ function App() {
         const next = { ...current, checkIns };
         return cacheLocalData(next);
       });
-    }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
+    }, fail, protectedCloudOwnerIds(latestData.current.users)).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
   }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 
@@ -461,7 +462,7 @@ function App() {
       });
     }, (error?: unknown) => {
       if (!stopped) reportCloudReadFailure(error);
-    }).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch((error) => { if (!stopped) reportCloudReadFailure(error); });
+    }, protectedCloudOwnerIds(latestData.current.users)).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch((error) => { if (!stopped) reportCloudReadFailure(error); });
     return () => { stopped = true; unsubscribe?.(); };
   }, [currentUser?.id, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 
@@ -478,7 +479,7 @@ function App() {
         const next = { ...current, incidentReports };
         return cacheLocalData(next);
       });
-    }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
+    }, fail, protectedCloudOwnerIds(latestData.current.users)).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
   }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 
@@ -493,7 +494,7 @@ function App() {
         const next = snapshots.reduce((value, snapshot) => mergeMonitoringSnapshot(value, snapshot, pending), current);
         return next === current ? current : cacheLocalData(next);
       });
-    }, fail).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
+    }, fail, protectedCloudOwnerIds(latestData.current.users)).then((cleanup) => { if (stopped) cleanup(); else unsubscribe = cleanup; }).catch(fail);
     return () => { stopped = true; unsubscribe?.(); };
   }, [currentUser?.id, currentUser?.authUid, currentUser?.role, cloudAuthReady, cloudReadsAvailable]);
 

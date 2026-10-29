@@ -5,6 +5,7 @@ import { initialData } from "../data/demoData";
 const mock = vi.hoisted(() => ({ uid: "admin", reports: new Map<string, unknown>(), set: vi.fn(), update: vi.fn(), subscribe: vi.fn(), unsubscribe: vi.fn() }));
 vi.mock("./firebaseClient", () => ({ isFirebaseConfigured: () => true, getFirebaseServices: () => ({ auth: { currentUser: { uid: mock.uid } }, db: {} }) }));
 vi.mock("firebase/firestore", () => ({
+  documentId: () => "__name__", or: (...clauses: unknown[]) => ({ clauses }),
   collection: (_db: unknown, name: string) => ({ name }),
   where: (field: string, operator: string, value: unknown) => ({ field, operator, value }),
   query: (collection: unknown, filter: unknown) => ({ collection, filter }),
@@ -75,7 +76,7 @@ describe("place review cloud writes", () => {
   });
   it("allows admin live visits but refuses a listener for a mismatched account", async () => {
     await subscribeCheckInRecords(actor, vi.fn(), vi.fn());
-    expect(mock.subscribe.mock.calls[0][0]).toEqual({ name: "attraction_checkins" });
+    expect(mock.subscribe.mock.calls[0][0]).toMatchObject({ collection: { name: "attraction_checkins" }, filter: { clauses: expect.any(Array) } });
     mock.subscribe.mockClear();
     await subscribeCheckInRecords({ ...actor, id: "other" }, vi.fn(), vi.fn());
     expect(mock.subscribe).not.toHaveBeenCalled();
