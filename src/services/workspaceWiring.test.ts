@@ -83,7 +83,7 @@ describe("workspace integration guardrails", () => {
   it("cleans up GPS watches and map motion when a workspace is removed", () => {
     expect(tourist).toContain("useEffect(() => () => clearBrowserLocationWatch(watchId), [user.id, watchId])");
     expect(map).toContain("mapRef.current?.stop()");
-    expect(readSource("src/components/EmergencyServiceMap.tsx")).toContain("observer.disconnect(); releaseLimits(); map.stop(); map.remove()");
+    expect(readSource("src/components/EmergencyServiceMap.tsx")).toContain("observer.disconnect(); removeReset(); releaseLimits(); map.stop(); map.remove()");
   });
 
   it("uses the current discovery fix rather than historical routes for safety and nearest check-in", () => {
@@ -127,7 +127,9 @@ describe("workspace integration guardrails", () => {
     expect(map).not.toContain("maxRenderedRoutePointMarkers");
     expect(admin).toContain('displayMode="signals"');
     expect(trip).toContain('displayMode={activeTrip ? "route" : "signals"}');
-    expect(admin).toContain('displayMode={selectedRecord?.points.length ? "route" : "signals"}');
+    expect(admin).not.toContain("?? movementTripRecords[0]");
+    expect(admin).toContain('{selectedRecord && <section className="admin-trip-detail-page">');
+    expect(admin).toContain('points={selectedRecord.points} destinations={data.destinations} displayMode="route"');
     expect(readSource("src/components/TripDiary.tsx")).toContain('displayMode={selectedTripPoints.length ? "route" : "signals"}');
   });
 

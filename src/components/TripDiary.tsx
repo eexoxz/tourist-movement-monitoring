@@ -1,4 +1,5 @@
-import { Archive, Pencil, Sparkles } from "lucide-react";
+import { Archive, ArrowRight, Clock3, MapPin, MoreHorizontal, Pencil, Route } from "lucide-react";
+import { tripLayoutText } from "../services/tripLayoutCopy";
 import { reviewText } from "../services/reviewUpdateCopy";
 import { useMemo, type ReactNode } from "react";
 import { formatDateTime } from "../services/geo";
@@ -20,14 +21,11 @@ type TripDiaryProps = {
   selectedTripPoints: MovementPoint[];
   selectedTripSummary: TripSummary | null;
   selectedTripTitle: string;
-  selectedTripInsight: string;
-  selectedTripSuggestionStatus: string;
   selectedTripDestinationNames: string[];
   selectedTripRecommendations: Recommendation[];
   fallbackPoints: MovementPoint[];
   destinations: Destination[];
   activityDemand?: DestinationDemand[];
-  hasPersonalizedRecommendations: boolean;
   locale?: Locale;
   onSelectTrip: (tripId: string) => void;
   onViewRecommendations: () => void;
@@ -45,14 +43,11 @@ export function TripDiary({
   selectedTripPoints,
   selectedTripSummary,
   selectedTripTitle,
-  selectedTripInsight,
-  selectedTripSuggestionStatus,
   selectedTripDestinationNames,
   selectedTripRecommendations,
   fallbackPoints,
   destinations,
   activityDemand,
-  hasPersonalizedRecommendations,
   locale = "en",
   onSelectTrip,
   onViewRecommendations,
@@ -127,84 +122,29 @@ export function TripDiary({
 
           {selectedTrip && selectedTripSummary ? (
             <section className="trip-story-panel">
-              <div className="section-heading">
-                <div>
-                  <span>{t("tourist.trips.selectedRoute")}</span>
-                  <h2>{selectedTripTitle}</h2>
-                  <p>{formatDateTime(selectedTrip.startedAt, locale)}</p>
-                </div>
-                <div className="trip-story-actions">
-                  <strong className="trip-status-badge">{selectedTrip.status === "completed" ? t("common.completed") : t("common.active")}</strong>
-                  <button className="secondary-action compact" type="button" onClick={() => onRenameTrip(selectedTrip, selectedTripTitle)}>
-                    <Pencil size={16} />
-                    {t("tourist.trips.renameTrip")}
-                  </button>
-                  <button className="secondary-action compact danger" type="button" onClick={() => onDeleteTrip(selectedTrip, selectedTripTitle)}>
-                    <Archive size={16} />
-                    {reviewText(locale, "remove")}
-                  </button>
-                </div>
-              </div>
-
-              <div className="trip-story-metrics">
-                <span>
-                  <strong>{selectedTripSummary.distanceKm}</strong>
-                  {t("tourist.trips.kmTravelled")}
-                </span>
-                <span>
-                  <strong>{selectedTripSummary.durationMinutes}</strong>
-                  {t("tourist.trips.minSpent")}
-                </span>
-                <span>
-                  <strong>{selectedTripSummary.visitedDestinationCount}</strong>
-                  {t("tourist.trips.placesNoticed")}
-                </span>
-                <span>
-                  <strong>{selectedTripSuggestionStatus}</strong>
-                  {t("tourist.trips.suggestions")}
-                </span>
-              </div>
-
-              <p className="trip-insight">{selectedTripInsight}</p>
-
-              <div className="trip-stop-strip" aria-label={uiText(locale, "Recognised trip stops")}>
-                {selectedTripDestinationNames.length > 0 ? (
-                  selectedTripDestinationNames.map((name) => <span key={name}>{name}</span>)
-                ) : (
-                  <small>{t("tourist.trips.noSavedDestination")}</small>
-                )}
-              </div>
-
-              <section className="trip-guidance-panel">
-                <div>
-                  <strong>{t("tourist.trips.guidanceTitle")}</strong>
-                  <p>{t("tourist.trips.guidanceText")}</p>
-                </div>
-                <button className="secondary-action" type="button" onClick={onViewRecommendations}>
-                  <Sparkles size={18} />
-                  {t("tourist.trips.findPlaces")}
-                </button>
-              </section>
-
-              <div className="trip-detail-recommendations">
-                <strong>{hasPersonalizedRecommendations ? t("tourist.trips.personalizedNext") : t("tourist.trips.basicNext")}</strong>
-                {selectedTripRecommendations.length > 0 ? (
-                  selectedTripRecommendations.map((recommendation) => {
-                    const destination = destinationById.get(recommendation.destinationId);
-
-                    return destination ? (
-                      <button className="trip-recommendation-link" type="button" key={recommendation.id} onClick={() => onOpenPlace(destination.id)}>
-                        <span>
-                          {destination.name} <small>{destination.city}</small>
-                        </span>
-                      </button>
-                    ) : null;
-                  })
-                ) : (
-                  <p>{travelText(locale, "noNextPlaces")}</p>
-                )}
-              </div>
+              <header className="trip-review-heading">
+                <div><span className="trip-status-badge">{selectedTrip.status === "completed" ? t("common.completed") : t("common.active")}</span><h2>{selectedTripTitle}</h2><time dateTime={selectedTrip.startedAt}>{formatDateTime(selectedTrip.startedAt, locale)}</time></div>
+                <details className="trip-options" key={selectedTrip.id}><summary aria-label={tripLayoutText(locale, "options")} title={tripLayoutText(locale, "options")}><MoreHorizontal size={22} /></summary><div>
+                  <button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onRenameTrip(selectedTrip, selectedTripTitle); }}><Pencil size={16} />{t("tourist.trips.renameTrip")}</button>
+                  <button type="button" className="danger" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onDeleteTrip(selectedTrip, selectedTripTitle); }}><Archive size={16} />{reviewText(locale, "remove")}</button>
+                </div></details>
+              </header>
+              <dl className="trip-review-metrics">
+                <div><Route size={18} aria-hidden="true" /><dt>{t("tourist.trips.kmTravelled")}</dt><dd>{new Intl.NumberFormat(locale).format(selectedTripSummary.distanceKm)}</dd></div>
+                <div><Clock3 size={18} aria-hidden="true" /><dt>{t("tourist.trips.minSpent")}</dt><dd>{new Intl.NumberFormat(locale).format(selectedTripSummary.durationMinutes)}</dd></div>
+                <div><MapPin size={18} aria-hidden="true" /><dt>{t("tourist.trips.placesNoticed")}</dt><dd>{new Intl.NumberFormat(locale).format(selectedTripSummary.visitedDestinationCount)}</dd></div>
+              </dl>
+              <section className="trip-visited-places"><h3>{tripLayoutText(locale, "visited")}</h3><div>
+                {selectedTripDestinationNames.length ? selectedTripDestinationNames.map((name) => {
+                  const place = destinations.find((item) => item.name === name);
+                  return place ? <button key={name} type="button" onClick={() => onOpenPlace(place.id)}><MapPin size={15} aria-hidden="true" />{name}<ArrowRight size={14} aria-hidden="true" /></button> : <span key={name}>{name}</span>;
+                }) : <p>{t("tourist.trips.noSavedDestination")}</p>}
+              </div></section>
               {itineraryComparison}
+              <section className="trip-similar-places"><div className="trip-similar-heading"><h3>{tripLayoutText(locale, "similar")}</h3><button className="text-action" type="button" onClick={onViewRecommendations}>{t("tourist.trips.findPlaces")}<ArrowRight size={16} aria-hidden="true" /></button></div>
+                <div>{selectedTripRecommendations.slice(0, 3).map((recommendation) => { const place = destinationById.get(recommendation.destinationId); return place ? <button key={recommendation.id} type="button" onClick={() => onOpenPlace(place.id)}><strong>{place.name}</strong><small>{place.city}</small><ArrowRight size={16} aria-hidden="true" /></button> : null; })}</div>
+                {!selectedTripRecommendations.length && <p>{travelText(locale, "noNextPlaces")}</p>}
+              </section>
             </section>
           ) : (
             <section className="trip-story-panel">

@@ -179,9 +179,9 @@ describe("tourist travel workflow boundaries", () => {
     const summary = { tripId: trip.id, pointCount: 1, distanceKm: 0, durationMinutes: 0, visitedDestinationCount: 0, averageAccuracyMeters: 20 };
     const props: ComponentProps<typeof TripDiary> = {
       trips: [trip], recentTrips: [trip], tripSummaries: [summary], selectedTrip: trip, selectedTripPoints: [], selectedTripSummary: summary,
-      selectedTripTitle: "Nearby but not visited", selectedTripInsight: "", selectedTripSuggestionStatus: "Waiting", selectedTripDestinationNames: [], selectedTripRecommendations: [],
+      selectedTripTitle: "Nearby but not visited", selectedTripDestinationNames: [], selectedTripRecommendations: [],
       fallbackPoints: [{ id: "nearby-only", tripId: trip.id, latitude: place.latitude, longitude: place.longitude, accuracyMeters: 20, recordedAt: new Date().toISOString(), source: "browser" }],
-      destinations: initialData.destinations, hasPersonalizedRecommendations: false, locale: "en",
+      destinations: initialData.destinations, locale: "en",
       onSelectTrip: noop, onViewRecommendations: noop, onOpenPlace: noop, onRenameTrip: noop, onDeleteTrip: noop,
     };
     const text = renderToStaticMarkup(createElement(TripDiary, props)).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");

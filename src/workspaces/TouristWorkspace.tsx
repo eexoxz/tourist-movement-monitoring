@@ -18,7 +18,7 @@ import { getActiveGeofenceWarnings } from "../services/geofencing";
 import { closeOwnSosAlert, createIncidentReport, createSosAlert } from "../services/safety";
 import { sosText } from "../services/sosCopy";
 import { createTouristWorkspaceSelector } from "../services/touristWorkspace";
-import { formatTripTitle, getTripDiaryInsight, getTripSuggestionStatus } from "../services/tripPresentation";
+import { formatTripTitle } from "../services/tripPresentation";
 import { prepareIncidentPhotoAttachment, type IncidentPhotoAttachment } from "../services/incidentAttachments";
 import { getLiveNearbySuggestion, type LiveNearbySuggestion } from "../services/liveSuggestions";
 import { discoveryRadiusKm, getDiscoveryDestinations, getDiscoveryReference, getLatestDiscoveryPoint, getLocalEventAnnouncement } from "../services/discovery";
@@ -971,8 +971,6 @@ export function TouristWorkspace({
 
   if (view === "history") {
     const selectedTripTitle = selectedTrip ? formatTripTitle(selectedTrip, selectedTripDestinationNames, t) : t("tourist.trips.noTripSelected");
-    const selectedTripInsight = selectedTripSummary ? getTripDiaryInsight(selectedTripSummary, selectedTripDestinationNames, t) : "";
-    const selectedTripSuggestionStatus = selectedTripSummary ? getTripSuggestionStatus(selectedTripSummary, selectedTripAnalysis, t) : t("common.waiting");
 
     return (
       <Page title={travelText(locale, "manage")} eyebrow={t("nav.trips")} actions={<button className="secondary-action" type="button" onClick={() => onViewChange("tracking")}><Navigation size={18} />{travelText(locale, "back")}</button>}>
@@ -991,14 +989,11 @@ export function TouristWorkspace({
           selectedTripPoints={selectedTripPoints}
           selectedTripSummary={selectedTripSummary}
           selectedTripTitle={selectedTripTitle}
-          selectedTripInsight={selectedTripInsight}
-          selectedTripSuggestionStatus={selectedTripSuggestionStatus}
           selectedTripDestinationNames={selectedTripDestinationNames}
           selectedTripRecommendations={selectedRouteRecommendations}
           fallbackPoints={tripPoints}
           destinations={localizedDestinations}
           activityDemand={destinationDemand}
-          hasPersonalizedRecommendations={Boolean(selectedTripAnalysis)}
           locale={locale}
           onSelectTrip={setSelectedTripId}
           onViewRecommendations={() => { if (selectedRoutePoint) browseAreaNear(selectedRoutePoint); onViewChange("recommendations"); }}

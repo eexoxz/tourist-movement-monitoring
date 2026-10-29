@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
-import { ArrowRight, ChartNoAxesCombined, ChevronDown, Download, FlaskConical, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChartNoAxesCombined, ChevronDown, Download, FlaskConical, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Users } from "lucide-react";
+import { tripLayoutText } from "../services/tripLayoutCopy";
 import { interfaceText } from "../services/interfaceCopy";
 import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
@@ -124,11 +125,11 @@ export function AdminWorkspace({
 
   const recordsActive = view === "dashboard" && adminTab === "records";
   const aiActive = view === "dashboard" && adminTab === "ai";
-  const touristsActive = view === "dashboard" && adminTab === "tourists";
+  const touristsActive = view === "dashboard" && (adminTab === "tourists" || adminTab === "records");
   const overviewActive = view === "dashboard" && adminTab === "overview";
   // The attention strip needs demand on dashboard tabs, but not on the
   // destination editor or tourist directory. Overview-only work stays there.
-  const demandActive = view === "dashboard" && adminTab !== "tourists";
+  const demandActive = view === "dashboard" && !touristsActive;
   const movementTrend = useMemo(() => overviewActive ? getDailyMovementTrend(data) : {}, [overviewActive, data.points, calendarDay]);
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data.trips, selectedTouristId]);
   const movementViews = useMemo(
@@ -143,7 +144,6 @@ export function AdminWorkspace({
   );
   const movementRecords = movementViews.records;
   const movementTripRecords = movementViews.tripRecords;
-  const filteredPoints = useMemo(() => movementRecords.map((record) => record.point), [movementRecords]);
   const allDashboardPoints = data.points;
   const destinationDemand = useMemo(() => demandActive ? calculateDestinationDemand(data) : [], [demandActive, data.trips, data.points, data.destinations]);
   const movementAlerts = useMemo(() => demandActive ? calculateMovementAlerts(data, destinationDemand) : [], [demandActive, data.destinations, destinationDemand]);
@@ -168,7 +168,10 @@ export function AdminWorkspace({
   const filteredTripCount = movementTripRecords.length;
   const hasRecordFilters = selectedTouristId !== "all" || selectedTripId !== "all" || Boolean(fromDate) || Boolean(toDate);
   const [selectedRecordTripId, setSelectedRecordTripId] = useState<string | null>(null);
-  const selectedRecord = movementTripRecords.find((record) => record.trip.id === selectedRecordTripId) ?? movementTripRecords[0] ?? null;
+  const recordReturn = useRef({ top: 0, tripId: "" });
+  const openRecord = (id: string) => { recordReturn.current = { top: window.scrollY, tripId: id }; setSelectedRecordTripId(id); window.scrollTo({ top: 0, behavior: "instant" }); };
+  const closeRecord = () => { setSelectedRecordTripId(null); window.requestAnimationFrame(() => { window.scrollTo({ top: recordReturn.current.top, behavior: "instant" }); document.getElementById(`record-${recordReturn.current.tripId}`)?.focus({ preventScroll: true }); }); };
+  const selectedRecord = movementTripRecords.find((record) => record.trip.id === selectedRecordTripId) ?? null;
   const analysisRows = useMemo(
     () => aiActive ? [...analyzeAllTrips(data)].sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()) : [],
     [aiActive, data.trips, data.points, data.destinations]
@@ -367,10 +370,12 @@ export function AdminWorkspace({
     setSelectedTripId("all");
     setSelectedRecordTripId(null);
     setAdminTab("records");
+    window.scrollTo({ top: 0, behavior: "instant" });
   }} onViewSafety={() => setAdminTab("safety")} />;
 
   const movementRecordsPanel = (
-    <div className="admin-tab-panel">
+    <div className="admin-tab-panel movement-records-page">
+      {!selectedRecord && <>
       <div className="filter-toolbar admin-filter-toolbar">
         <label><span>{t("admin.tabs.tourists")}</span>
         <select
@@ -416,30 +421,33 @@ export function AdminWorkspace({
           [adminText("records.dateRange"), fromDate || toDate ? adminText("records.custom") : adminText("records.all")],
         ]}
       />
-      <div className="admin-records-layout">
+      <div className="admin-records-layout records-list-only">
         <section className="admin-record-list">
           <div className="directory-heading"><h2>{t("admin.tabs.records")}</h2><span>{directoryText(locale, "range", { from: movementPageResult.from, to: movementPageResult.to, total: movementPageResult.total })}</span></div>
           <div className="directory-table-scroll" ref={movementScroller} tabIndex={0} aria-label={t("admin.tabs.records")}>
             <table className="directory-table record-table movement-record-table">
               <caption className="sr-only">{t("admin.tabs.records")}</caption>
-              <thead><tr><th scope="col">{t("auth.name")}</th><th scope="col" className="record-wide-column">{adminText("records.destinationsVisited")}</th><th scope="col" className="directory-numeric">{adminText("records.duration")}</th><th scope="col" className="directory-numeric">{adminText("common.points")}</th></tr></thead>
-              <tbody>{movementPageResult.rows.map((record) => <tr key={record.trip.id} className={selectedRecord?.trip.id === record.trip.id ? "record-selected" : undefined}>
-                <th scope="row"><button className="directory-person" type="button" aria-pressed={selectedRecord?.trip.id === record.trip.id} onClick={() => setSelectedRecordTripId(record.trip.id)}><strong>{record.tourist?.name ?? adminText("common.unknownTourist")}</strong><time dateTime={record.trip.startedAt}>{formatDateTime(record.trip.startedAt, locale)}</time><small>{t(record.trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}</small></button></th>
+              <thead><tr><th scope="col">{t("auth.name")}</th><th scope="col" className="record-wide-column">{adminText("records.destinationsVisited")}</th><th scope="col" className="directory-numeric">{adminText("records.duration")}</th><th scope="col" className="directory-numeric">{adminText("common.points")}</th><th scope="col"><span className="sr-only">{tripLayoutText(locale, "viewTrip")}</span></th></tr></thead>
+              <tbody>{movementPageResult.rows.map((record) => <tr key={record.trip.id}>
+                <th scope="row"><button className="directory-person" type="button" id={`record-${record.trip.id}`} onClick={() => openRecord(record.trip.id)}><strong>{record.tourist?.name ?? adminText("common.unknownTourist")}</strong><time dateTime={record.trip.startedAt}>{formatDateTime(record.trip.startedAt, locale)}</time><small>{t(record.trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}</small><small className="movement-mobile-summary">{new Intl.NumberFormat(locale).format(record.summary.durationMinutes)} {adminText("common.minutes")} · {new Intl.NumberFormat(locale).format(record.summary.pointCount)} {adminText("common.points")}</small></button></th>
                 <td className="record-wide-column">{record.destinationNames.join(", ") || adminText("records.noRecognised")}</td>
                 <td className="directory-numeric">{new Intl.NumberFormat(locale).format(record.summary.durationMinutes)} <small>{adminText("common.minutes")}</small></td>
-                <td className="directory-numeric">{new Intl.NumberFormat(locale).format(record.summary.pointCount)}</td>
+                <td className="directory-numeric">{new Intl.NumberFormat(locale).format(record.summary.pointCount)}</td><td className="record-open-cell"><button type="button" className="secondary-action compact" onClick={() => openRecord(record.trip.id)} aria-label={`${tripLayoutText(locale, "viewTrip")}: ${record.tourist?.name ?? adminText("common.unknownTourist")} · ${formatDateTime(record.trip.startedAt, locale)}`}>{tripLayoutText(locale, "viewTrip")}<ArrowRight size={15} aria-hidden="true" /></button></td>
               </tr>)}</tbody>
             </table>
             {!movementTripRecords.length && <EmptyState text={adminText("records.empty")} />}
           </div>
           <RecordPagination page={movementPageResult.page} pages={movementPageResult.pages} pageSize={movementPageSize} locale={locale} scrollTarget={movementScroller} onPageChange={setMovementPage} onPageSizeChange={(size) => { setMovementPageSize(size); setMovementPage(1); }} />
         </section>
-        <div className="admin-movement-detail">
-          <MovementMap points={selectedRecord?.points.length ? selectedRecord.points : filteredPoints} destinations={data.destinations} displayMode={selectedRecord?.points.length ? "route" : "signals"} locale={locale} />
-          {selectedRecord && (
+      </div></>}
+      {selectedRecord && <section className="admin-trip-detail-page">
+        <header className="admin-trip-detail-heading"><button className="secondary-action" type="button" onClick={closeRecord}><ArrowLeft size={17} />{tripLayoutText(locale, "backRecords")}</button><div><h2>{selectedRecord.tourist?.name ?? adminText("common.unknownTourist")}</h2><p>{formatDateTime(selectedRecord.trip.startedAt, locale)} · {t(selectedRecord.trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}</p></div></header>
+        <div className="admin-trip-detail-layout"><div className="admin-movement-detail">
+          {selectedRecord.points.length ? <MovementMap key={selectedRecord.trip.id} points={selectedRecord.points} destinations={data.destinations} displayMode="route" locale={locale} /> : <EmptyState text={adminText("records.empty")} />}
+        </div>
+          {(
             <aside className="record-detail-panel">
               <span>{adminText("records.selected")}</span>
-              <h2>{selectedRecord.tourist?.name ?? adminText("common.unknownTourist")}</h2>
               <dl>
                 <div>
                   <dt>{adminText("records.tripId")}</dt>
@@ -471,14 +479,14 @@ export function AdminWorkspace({
                 </div>
                 <div>
                   <dt>{adminText("records.analysisStatus")}</dt>
-                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.classifier} generated ${formatDateTime(selectedRecord.analysis.generatedAt, locale)}` : adminText("common.pending")}</dd>
+                  <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.classifier} · ${formatDateTime(selectedRecord.analysis.generatedAt, locale)}` : adminText("common.pending")}</dd>
                 </div>
               </dl>
               <p>{adminText("records.readOnly")}</p>
             </aside>
           )}
         </div>
-      </div>
+      </section>}
     </div>
   );
 
@@ -800,7 +808,7 @@ export function AdminWorkspace({
     >
       {showDemoDataset && <DemoDatasetManager data={data} locale={locale} action={demoDatasetAction} onApply={changeDemoDataset} onRemove={() => changeDemoDataset(new Set())} onClose={() => { if (!demoDatasetAction) setShowDemoDataset(false); }} />}
       {demoTouristCount > 0 && <p className="admin-dataset-note">{demoDatasetText(locale, "progress", { count: demoTouristCount, max: demoDatasetMetadata.generatedTouristCount })} · {t("admin.demo.localOnlyNote")} {demoDatasetText(locale, "dataNote")}</p>}
-      {adminTab !== "tourists" && <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
+      {!touristsActive && <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
         <button type="button" className={openSafetyRecordCount ? "needs-action safety" : "safety"} onClick={() => setAdminTab("safety")}><Siren size={22} /><span>{adminText("overview.safetyCases")}</span><strong>{openSafetyRecordCount}</strong><ArrowRight size={17} /></button>
         {onViewChange && <button type="button" className={pendingPlaceCount ? "needs-action reviews" : "reviews"} onClick={() => onViewChange("destinations")}><MapPin size={22} /><span>{placeText(locale, "queue")}</span><strong>{pendingPlaceCount}</strong><ArrowRight size={17} /></button>}
         <button type="button" onClick={() => { setAdminTab("overview"); setInsight("alerts"); }}><Route size={22} /><span>{adminText("overview.movementAlerts")}</span><strong>{movementAlerts.length}</strong><ArrowRight size={17} /></button>
@@ -810,11 +818,8 @@ export function AdminWorkspace({
         <button className={adminTab === "overview" ? "active" : ""} aria-pressed={adminTab === "overview"} type="button" onClick={() => setAdminTab("overview")}>
           <LayoutDashboard size={18} />{t("admin.tabs.overview")}
         </button>
-        <button className={adminTab === "tourists" ? "active" : ""} aria-pressed={adminTab === "tourists"} type="button" onClick={() => setAdminTab("tourists")}>
+        <button className={touristsActive ? "active" : ""} aria-pressed={touristsActive} type="button" onClick={() => setAdminTab("tourists")}>
           <Users size={18} />{t("admin.tabs.tourists")}
-        </button>
-        <button className={adminTab === "records" ? "active" : ""} aria-pressed={adminTab === "records"} type="button" onClick={() => setAdminTab("records")}>
-          <Route size={18} />{t("admin.tabs.records")}
         </button>
         <button className={adminTab === "safety" ? "active" : ""} aria-pressed={adminTab === "safety"} type="button" onClick={() => setAdminTab("safety")}>
           <ShieldCheck size={18} />{t("admin.tabs.safety")}
@@ -932,6 +937,10 @@ export function AdminWorkspace({
                 </div></PlaceGuideDialog>}
         </div>
       )}
+      {touristsActive && <nav className="admin-tourist-sections" aria-label={t("admin.tabs.tourists")}>
+        <button type="button" aria-pressed={adminTab === "tourists"} className={adminTab === "tourists" ? "active" : ""} onClick={() => setAdminTab("tourists")}><Users size={17} />{tripLayoutText(locale, "directory")}</button>
+        <button type="button" aria-pressed={adminTab === "records"} className={adminTab === "records" ? "active" : ""} onClick={() => { setSelectedRecordTripId(null); setAdminTab("records"); }}><Route size={17} />{t("admin.tabs.records")}</button>
+      </nav>}
       <div hidden={adminTab !== "tourists"}>{touristManagementPanel}</div>
       {adminTab === "records" && movementRecordsPanel}
       {adminTab === "safety" && safetyPanel}

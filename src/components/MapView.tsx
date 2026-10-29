@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
+import { addMapResetControl } from "../services/mapResetControl";
 import { LocateFixed, MapPinned, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import type { Destination, DestinationCategory, DestinationDemand, MovementPoint } from "../types";
@@ -403,6 +404,24 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     for (const point of points) if (point.source === "browser") counts.real++; else if (point.source === "demo") counts.sample++;
     return counts;
   }, [points]);
+  const resetView = useRef<() => void>(() => {});
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map) return addMapResetControl(map, locale, () => resetView.current());
+  }, [locale]);
+  resetView.current = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    manualBrowseRef.current = true;
+    setPlaceGroup(null); setSelectedDestinationId(null); setExpandedDestinationId(null);
+    focusLayerRef.current?.remove(); map.closePopup();
+    if (displayMode === "route" && points.length) map.fitBounds(L.latLngBounds(points.map((point) => [point.latitude, point.longitude] as [number, number])), { padding: [36, 36], maxZoom: 15, animate: false });
+    else if (mode === "admin") map.fitBounds(malaysiaViewBounds, { padding: [16, 16], maxZoom: 8, animate: false });
+    else if (isBrowsingArea && visibleDestinations.length) map.fitBounds(L.latLngBounds(visibleDestinations.map((place) => [place.latitude, place.longitude] as [number, number])), { padding: [36, 36], maxZoom: 12, animate: false });
+    else if (activePoint) map.setView([activePoint.latitude, activePoint.longitude], 15, { animate: false });
+    else if (visibleDestinations.length === 1) map.setView([visibleDestinations[0].latitude, visibleDestinations[0].longitude], 15, { animate: false });
+    else map.fitBounds(malaysiaViewBounds, { padding: [16, 16], maxZoom: 8, animate: false });
+  };
   const showMalaysia = () => {
     const map = mapRef.current;
     if (!map) return;

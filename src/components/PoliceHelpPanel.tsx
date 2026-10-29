@@ -30,7 +30,7 @@ export function PoliceHelpPanel({ alert, fallbackPoint, fallbackIsArea = false, 
         <small>{t(hasAttachedPoint ? "requestLocation" : fallbackIsArea ? "areaLocation" : "currentLocation")}</small>
         <p>{station.distanceKm} {translate(locale, "tourist.safety.kmAway")}. {t("distance")}</p>
         <Suspense fallback={<p>{translate(locale, "map.loading")}</p>}>
-          <EmergencyServiceMap service={station} />
+          <EmergencyServiceMap service={station} locale={locale} />
         </Suspense>
         <div className="police-help-actions">
           <a className="secondary-action" href={getEmergencyMapUrl(station)} target="_blank" rel="noopener noreferrer"><MapPinned size={18} />{t("viewMap")}</a>
