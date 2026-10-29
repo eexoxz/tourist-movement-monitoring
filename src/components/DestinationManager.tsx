@@ -340,10 +340,6 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
               </label>
             </div>
             <label>
-              {text("Average visit minutes")}
-              <input type="number" min="1" value={form.averageVisitMinutes} onChange={(event) => setForm({ ...form, averageVisitMinutes: event.target.value })} required />
-            </label>
-            <label>
               {translate(locale, "common.openingHours")}
               <input value={form.openingHours} onChange={(event) => setForm({ ...form, openingHours: event.target.value })} placeholder={text("Example: Usually daily; check public holiday hours")} />
             </label>

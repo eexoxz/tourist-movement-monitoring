@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useCalendarDay } from "../services/useCalendarDay";
-import { CalendarDays, Compass, Navigation, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
+import { Compass, Navigation, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
 import type { AppData, AppView, Destination, IncidentType, MovementPoint, SosClosureReason, TripSession, User } from "../types";
 import { loadData, loadSharedDestinations } from "../services/storage";
 import { distanceKm, nearestDestination } from "../services/geo";
@@ -36,7 +36,9 @@ import { type NotificationTone, type NotifyFn } from "../components/ToastViewpor
 import { uiText } from "../services/uiText";
 import { FestivalCalendarPanel } from "../components/FestivalCalendarPanel";
 import { Page } from "../components/Page";
-import { PlaceDiscovery } from "../components/PlaceDiscovery";
+import { PlaceGuide } from "../components/PlaceGuide";
+import { PlaceGuideDialog } from "../components/PlaceGuideDialog";
+import { PlaceDiscovery, formatDistanceLabel, formatDemandLabel } from "../components/PlaceDiscovery";
 import { DiscoveryAreaPicker } from "../components/DiscoveryAreaPicker";
 import { TouristHome } from "../components/TouristHome";
 import { TouristPassCard } from "../components/TouristPassCard";
@@ -89,7 +91,7 @@ export function TouristWorkspace({
   const [refreshingActivities, setRefreshingActivities] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>("");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
-  const [placeGuideRequested, setPlaceGuideRequested] = useState(false);
+  const [placeGuideId, setPlaceGuideId] = useState<string | null>(null);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>(() => loadLastBrowserLocation(user.id));
   const [checkInDestinationId, setCheckInDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
@@ -277,10 +279,8 @@ export function TouristWorkspace({
   };
 
   const openSuggestedPlace = () => {
-    if (liveSuggestion) { setSelectedDestinationId(liveSuggestion.destination.id); setPlaceGuideRequested(true); }
+    if (liveSuggestion) setPlaceGuideId(liveSuggestion.destination.id);
     setLiveSuggestion(null);
-    onViewChange("recommendations");
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -865,16 +865,7 @@ export function TouristWorkspace({
     const area = discoveryAreas.reduce((nearest, candidate) => distanceKm(location, candidate) < distanceKm(location, nearest) ? candidate : nearest);
     changeDiscoveryLocation("area", `state:${"city" in location ? getDestinationState(location) ?? area.state : area.state}`);
   };
-  const openPlace = (destinationId: string) => {
-    const destination = data.destinations.find((candidate) => candidate.id === destinationId);
-    if (destination && !canonicalDiscoveryDestinations.some((candidate) => candidate.id === destinationId)) {
-      if (view === "tracking" && tripReference?.source === "browser") changeDiscoveryLocation("current");
-      else browseAreaNear(destination);
-    }
-    setSelectedDestinationId(destinationId);
-    setPlaceGuideRequested(true);
-    onViewChange("recommendations");
-  };
+  const openPlace = (destinationId: string) => { setPlaceGuideId(destinationId); };
   const openSafety = () => {
     setIdentitySafetyAccess(true);
     setShowCheckInPanel(false);
@@ -895,6 +886,9 @@ export function TouristWorkspace({
     else { setTripDialog(null); stopTrip(); }
   }} /> : null;
 
+  const guidePlace = placeGuideId ? localizedDestinations.find((place) => place.id === placeGuideId) : undefined;
+  const guideReference = view === "tracking" ? tripReference ?? discoveryReference : discoveryReference;
+  const renderView = () => {
   if (view === "profile") {
     return (
       <Page title={t("tourist.profile.pageTitle")} eyebrow={t("common.tourist")}>
@@ -938,7 +932,7 @@ export function TouristWorkspace({
   }
 
   if (view === "itinerary") {
-    return <Suspense fallback={<p role="status">{travelText(locale, "itinerary")}…</p>}><ItineraryPage key={user.id} user={user} destinations={localizedDestinations} suggestedIds={recommendations.map((item) => item.destinationId)} locale={locale} onBack={() => onViewChange("tracking")} onOpenPlace={openPlace} /></Suspense>;
+    return <Suspense fallback={<p role="status">{travelText(locale, "itinerary")}…</p>}><ItineraryPage key={user.id} user={user} destinations={localizedDestinations} suggestedIds={recommendations.map((item) => item.destinationId)} initialState={getDiscoveryState(user.discoveryAreaId) ?? (discoveryReference && discoveryDestinations[0] ? getDestinationState(discoveryDestinations[0]) : undefined)} locale={locale} onBack={() => onViewChange("tracking")} onOpenPlace={openPlace} /></Suspense>;
   }
 
   if (view === "history") {
@@ -1009,9 +1003,6 @@ export function TouristWorkspace({
           selectedDestinationId={selectedDestinationId}
           locale={locale}
           onSelectDestination={setSelectedDestinationId}
-          guideRequested={placeGuideRequested}
-          requestedDestination={data.destinations.find((destination) => destination.id === selectedDestinationId)}
-          onGuideRequestConsumed={() => setPlaceGuideRequested(false)}
           onCheckIn={(id) => { setCheckInDestinationId(id); setShowCheckInPanel(true); onViewChange("overview"); }}
           onOpenEvents={() => onViewChange("events")}
           onHideDestination={hideDestination}
@@ -1025,7 +1016,6 @@ export function TouristWorkspace({
     return (
       <Page title={t("tourist.events.pageTitle")} eyebrow={t("common.tourist")}>
         <section className="event-calendar-page">
-          <section className="calendar-window"><CalendarDays size={22} aria-hidden="true" /><strong>{t("tourist.events.next12Months")}</strong><span>{upcomingFestivals.length} {t("tourist.events.eventSignals")}</span></section>
           <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
           <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} initialEventId={spotlightEventId} referencePoint={discoveryReference} referenceState={user.discoveryLocationMode === "area" ? getDiscoveryState(user.discoveryAreaId) : undefined} />
         </section>
@@ -1095,4 +1085,15 @@ export function TouristWorkspace({
     {discoveryPrompt}
     </>
   );
+  };
+  return <>{renderView()}{guidePlace && <PlaceGuideDialog title={guidePlace.name} locale={locale} onClose={() => setPlaceGuideId(null)}><PlaceGuide destination={guidePlace} locale={locale}
+    distance={formatDistanceLabel(guideReference ? distanceKm(guideReference, guidePlace) : undefined, t)}
+    distanceLabel={user.discoveryLocationMode === "area" ? discoveryText(locale, "fromArea") : t("common.distance")}
+    demand={formatDemandLabel(destinationDemand.find((row) => row.destinationId === guidePlace.id), locale, t)}
+    preference={t(user.travelPreferences?.includes(guidePlace.category) ? "tourist.places.matchesProfile" : "tourist.places.differentStyle")}
+    eventRelevance={t(upcomingFestivals.some((event) => event.destinationIds.includes(guidePlace.id)) ? "tourist.places.linkedUpcoming" : "tourist.places.noCurrentEvent")}
+    onCheckIn={() => { setPlaceGuideId(null); setCheckInDestinationId(guidePlace.id); setShowCheckInPanel(true); onViewChange("overview"); }}
+    onOpenEvents={() => { setPlaceGuideId(null); onViewChange("events"); }}
+    onHide={() => { hideDestination(guidePlace.id); setPlaceGuideId(null); }} /></PlaceGuideDialog>}</>;
+
 }

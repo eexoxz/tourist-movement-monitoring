@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, ExternalLink, MapPin, Navigation, QrCode, Sparkles, ThumbsDown, Users } from "lucide-react";
+import { CalendarDays, ExternalLink, MapPin, Navigation, QrCode, Sparkles, ThumbsDown, Users } from "lucide-react";
 import type { Destination } from "../types";
 import { translate, type Locale } from "../services/i18n";
 import { discoveryText } from "../services/discoveryCopy";
@@ -26,7 +26,6 @@ export function PlaceGuide({ destination, locale, distance, distanceLabel, deman
       </div>
       <section className="place-guide-section"><h3>{interfaceText(locale, "guide")}</h3><dl className="place-guide-facts">
         <div><dt><Navigation size={16} />{distanceLabel}</dt><dd>{distance}</dd></div>
-        <div><dt><Clock3 size={16} />{t("common.averageVisit")}</dt><dd>{destination.averageVisitMinutes} {t("common.minutes")}</dd></div>
       </dl><p className="distance-basis-note">{travelerStatusText(locale, "distance")}</p></section>
       <PlacePracticalInfo destination={destination} locale={locale} />
       {Boolean(destination.visitTips?.length) && <section className="place-guide-section"><h3>{t("tourist.places.beforeYouGo")}</h3><ul className="place-guide-tips">{destination.visitTips!.map((tip) => <li key={tip}>{tip}</li>)}</ul></section>}

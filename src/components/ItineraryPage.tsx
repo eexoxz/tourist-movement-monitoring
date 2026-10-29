@@ -3,7 +3,9 @@ import { ArrowDown, ArrowLeft, ArrowUp, CalendarDays, Check, Clock3, Copy, MapPi
 import type { Destination, Itinerary, MalaysianState, User } from "../types";
 import type { Locale } from "../services/i18n";
 import { translate } from "../services/i18n";
-import { addItineraryStop, itineraryDayDate, itineraryLimits, moveItineraryStop, validItinerary } from "../services/itineraries";
+import { addItineraryStop, itineraryDayDate, itineraryLimits, itineraryScheduleIssues, moveItineraryStop, validItinerary } from "../services/itineraries";
+import { scheduleText } from "../services/itineraryScheduleCopy";
+import { getDiscoveryState } from "../data/discoveryAreas";
 import { itineraryText } from "../services/itineraryCopy";
 import { useItineraries } from "../services/useItineraries";
 import { discoveryStates } from "../data/discoveryAreas";
@@ -12,14 +14,8 @@ import { destinationAdminText } from "../services/destinationAdminCopy";
 import { DestinationVisual } from "./DestinationVisual";
 import { Page } from "./Page";
 
-function VisitMinutes({ value, label, onChange }: { value: number; label: string; onChange: (minutes: number) => void }) {
-  const [draft, setDraft] = useState(String(value));
-  useEffect(() => setDraft(String(value)), [value]);
-  return <label>{label}<input type="number" inputMode="numeric" min={5} max={itineraryLimits.minutes} step={5} value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={() => {
-    const next = draft.trim() && Number.isFinite(Number(draft)) ? Math.max(5, Math.min(itineraryLimits.minutes, Math.round(Number(draft)))) : value;
-    setDraft(String(next));
-    if (next !== value) onChange(next);
-  }} /></label>;
+function ItineraryPhoto({ place, locale }: { place: Destination; locale: Locale }) {
+  return <span className="itinerary-thumbnail" aria-hidden="true"><DestinationVisual destination={place} locale={locale} compact /><MapPinned className="itinerary-photo-fallback" size={22} /></span>;
 }
 
 function ConfirmItineraryDialog({ locale, busy, kind, planName, onCancel, onConfirm }: { locale: Locale; busy: boolean; kind: "delete" | "discard"; planName: string; onCancel: () => void; onConfirm: () => void }) {
@@ -46,21 +42,24 @@ function ConfirmItineraryDialog({ locale, busy, kind, planName, onCancel, onConf
   </div>;
 }
 
-export function ItineraryPage({ user, destinations, suggestedIds = [], locale, onBack, onOpenPlace }: {
-  user: User; destinations: Destination[]; suggestedIds?: string[]; locale: Locale; onBack: () => void; onOpenPlace: (id: string) => void;
+export function ItineraryPage({ user, destinations, suggestedIds = [], initialState, locale, onBack, onOpenPlace }: {
+  user: User; destinations: Destination[]; suggestedIds?: string[]; initialState?: MalaysianState; locale: Locale; onBack: () => void; onOpenPlace: (id: string) => void;
 }) {
   const store = useItineraries(user);
   const [selectedId, setSelectedId] = useState("");
   const [selectedDay, setSelectedDay] = useState(1);
   const [query, setQuery] = useState("");
-  const [state, setState] = useState<MalaysianState | "">("");
+  const [state, setState] = useState<MalaysianState | "">(() => initialState ?? getDiscoveryState(user.discoveryAreaId) ?? "");
   const [visibleCount, setVisibleCount] = useState(6);
   const [confirmation, setConfirmation] = useState<{ kind: "delete" | "discard"; plan: Itinerary } | null>(null);
   const text = (key: Parameters<typeof itineraryText>[1]) => itineraryText(locale, key);
-  const entry = store.entries.find((candidate) => candidate.plan.id === selectedId) ?? store.entries[0];
+  const entry = store.entries.find((candidate) => candidate.plan.id === selectedId);
   const plan = entry?.plan;
   const day = plan ? Math.min(selectedDay, plan.days) : 1;
   const number = new Intl.NumberFormat(locale);
+  const schedule = (key: Parameters<typeof scheduleText>[1]) => scheduleText(locale, key);
+  const scheduleIssues = plan ? itineraryScheduleIssues(plan) : [];
+  const scheduledCount = (stopsForPlan: Itinerary["stops"]) => stopsForPlan.filter((stop) => stop.arrivalTime && stop.departureTime).length;
   const dateFormat = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" });
   const byId = useMemo(() => new Map(destinations.map((place) => [place.id, place])), [destinations]);
   const stateById = useMemo(() => new Map(destinations.map((place) => [place.id, getDestinationState(place)])), [destinations]);
@@ -78,27 +77,31 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], locale, o
     setSelectedId(store.create(source ? `${source.title.slice(0, 60)} (${text("copyName")})` : text("newPlan"), source));
     if (source && remote?.id === source.id) store.restore(remote);
     setSelectedDay(1);
+    setState(source?.stops[0] ? stateById.get(source.stops[0].destinationId) ?? "" : initialState ?? getDiscoveryState(user.discoveryAreaId) ?? "");
   };
-  const changeDay = (nextDay: number) => { setSelectedDay(nextDay); setVisibleCount(6); };
+  const changeDay = (nextDay: number) => { setSelectedDay(nextDay); setVisibleCount(6); const first = plan?.stops.find((stop) => stop.day === nextDay); if (first) setState(stateById.get(first.destinationId) ?? ""); };
   const minimumDays = Math.max(1, ...(plan?.stops.map((stop) => stop.day) ?? []));
 
   return <Page title={text("title")} eyebrow={translate(locale, "nav.trips")} actions={<button className="secondary-action" type="button" onClick={onBack}><ArrowLeft size={18} />{text("back")}</button>}>
-    <div className="itinerary-toolbar">
-      <label>{text("plans")}<select value={plan?.id ?? ""} onChange={(event) => { setSelectedId(event.target.value); changeDay(1); }} disabled={store.busy || !plan}>
-        {!plan && <option value="">{text("noPlans")}</option>}
-        {store.entries.map(({ plan: item }) => <option key={item.id} value={item.id}>{item.title || text("newPlan")}</option>)}
-      </select></label>
-      <button className="secondary-action" type="button" onClick={() => newPlan()} disabled={store.busy}><Plus size={18} />{text("newPlan")}</button>
-      {plan && <button className="secondary-action icon-action" type="button" title={text("saveCopy")} aria-label={text("saveCopy")} onClick={() => newPlan(plan)} disabled={store.busy}><Copy size={18} /></button>}
-    </div>
+    <section className="itinerary-library" aria-label={text("plans")}>
+      <div className="section-heading"><div><h2>{text("plans")}</h2><p>{schedule("libraryHelp")}</p></div><button className="primary-action" type="button" onClick={() => newPlan()} disabled={store.busy}><Plus size={18} />{text("newPlan")}</button></div>
+      <div className="itinerary-plan-list">{store.entries.map(({ plan: item, dirty }) => <button type="button" className={item.id === selectedId ? "itinerary-plan-card selected" : "itinerary-plan-card"} key={item.id} aria-pressed={item.id === selectedId} disabled={store.busy} onClick={() => { store.clearNotice(); setSelectedId(item.id); setSelectedDay(1); setVisibleCount(6); setState(item.stops[0] ? stateById.get(item.stops[0].destinationId) ?? "" : initialState ?? getDiscoveryState(user.discoveryAreaId) ?? ""); }}><strong>{item.title || text("newPlan")}</strong><span>{text("days")}: {number.format(item.days)} · {text("stops")}: {number.format(item.stops.length)}</span><small>{text(dirty ? "unsaved" : store.cloud ? "saved" : "local")}</small></button>)}</div>
+    </section>
 
     {(store.notice || store.connection !== "live") && <div className={`itinerary-notice ${store.notice === "conflict" || store.notice === "unavailable" || store.connection === "unavailable" ? "warning" : ""}`} role="status">
       <span>{text(store.notice ?? (store.connection === "live" ? "saved" : store.connection === "local" ? "local" : store.connection === "loading" ? "loading" : "unavailable"))}</span>
       {store.connection === "unavailable" && <button className="secondary-action compact" type="button" onClick={store.reconnect} disabled={store.busy}><RotateCcw size={16} />{text("reconnect")}</button>}
     </div>}
 
-    {!plan ? <section className="itinerary-empty"><MapPinned size={40} aria-hidden="true" /><h2>{text("noPlans")}</h2><button className="primary-action" type="button" onClick={() => newPlan()}><Plus size={18} />{text("newPlan")}</button></section> : <>
+    {!plan ? <section className="itinerary-empty"><MapPinned size={40} aria-hidden="true" /><h2>{store.entries.length ? schedule("choosePlan") : text("noPlans")}</h2><button className="primary-action" type="button" onClick={() => newPlan()}><Plus size={18} />{text("newPlan")}</button></section> : <>
       {(conflict || store.notice === "conflict") && <aside className="itinerary-notice warning" role="alert"><p>{text("conflict")}</p><div className="itinerary-inline-actions"><button className="secondary-action" type="button" onClick={() => newPlan(plan)} disabled={store.busy}><Copy size={18} />{text("saveCopy")}</button>{remote && <button className="secondary-action" type="button" onClick={() => setConfirmation({ kind: "discard", plan })} disabled={store.busy}><RotateCcw size={18} />{text("loadLatest")}</button>}</div></aside>}
+
+      <footer className="itinerary-save-bar"><div role="status">{(entry.dirty || store.connection === "live") && <span>{text(entry.dirty ? "unsaved" : "saved")}</span>}<small>{text("stops")}: {number.format(plan.stops.length)} · {schedule("scheduled")}: {number.format(scheduledCount(plan.stops))}</small></div><div className="itinerary-inline-actions">
+        <button className="secondary-action icon-action" type="button" aria-label={text("saveCopy")} title={text("saveCopy")} disabled={store.busy} onClick={() => newPlan(plan)}><Copy size={18} /></button>
+        {entry.dirty && remote && !remote.deletedAt && <button className="secondary-action" type="button" disabled={store.busy} onClick={() => setConfirmation({ kind: "discard", plan })}><RotateCcw size={18} />{text("discard")}</button>}
+        <button className="secondary-action icon-action danger" type="button" aria-label={text("delete")} title={text("delete")} disabled={store.busy} onClick={() => setConfirmation({ kind: "delete", plan })}><Trash2 size={18} /></button>
+        <button className="primary-action" type="button" disabled={store.busy || !entry.dirty || !plan.title.trim() || !validItinerary(plan) || scheduleIssues.length > 0 || conflict} onClick={() => void store.commit(plan)} aria-busy={store.busy}><Save size={18} />{text(store.busy ? "saving" : "save")}</button>
+      </div></footer>
 
       <fieldset className="itinerary-editor" disabled={store.busy}>
         <legend className="visually-hidden">{text("title")}</legend>
@@ -114,13 +117,15 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], locale, o
         <div className="itinerary-layout">
           <section className="itinerary-day-plan" aria-labelledby="itinerary-day-title">
             <header className="itinerary-day-heading"><h2 id="itinerary-day-title">{text("day")} {number.format(day)}</h2>{itineraryDayDate(plan.startDate, day) && <time>{dateFormat.format(itineraryDayDate(plan.startDate, day))}</time>}</header>
-            <div className="itinerary-day-summary"><span><MapPinned size={16} />{text("stops")}: {number.format(stops.length)}</span><span><Clock3 size={16} />{number.format(stops.reduce((sum, stop) => sum + stop.minutes, 0))} {translate(locale, "common.minutes")}</span></div>
+            <div className="itinerary-day-summary"><span><MapPinned size={16} />{text("stops")}: {number.format(stops.length)}</span><span><Clock3 size={16} />{schedule("scheduled")}: {number.format(scheduledCount(stops))}</span></div>
             {!stops.length && <p className="itinerary-day-empty">{text("empty")}</p>}
             <ol className="itinerary-stops">{stops.map((stop, index) => {
               const place = byId.get(stop.destinationId);
+              const issue = scheduleIssues.find((candidate) => candidate.stopId === stop.id);
               return <li key={stop.id} className="itinerary-stop">
-                <div className="itinerary-stop-heading"><span className="itinerary-stop-order">{number.format(index + 1)}</span>{place && <DestinationVisual destination={place} locale={locale} compact />}<div><h3>{place?.name ?? text("missingPlace")}</h3>{place && <span>{place.city}</span>}</div><button className="secondary-action icon-action" type="button" aria-label={`${text("remove")}: ${place?.name ?? index + 1}`} title={text("remove")} onClick={() => update({ stops: plan.stops.filter((item) => item.id !== stop.id) })}><X size={18} /></button></div>
-                <div className="itinerary-stop-fields"><VisitMinutes value={stop.minutes} label={text("minutes")} onChange={(minutes) => update({ stops: plan.stops.map((item) => item.id === stop.id ? { ...item, minutes } : item) })} /><label>{text("moveDay")}<select value={stop.day} onChange={(event) => update({ stops: plan.stops.map((item) => item.id === stop.id ? { ...item, day: Number(event.target.value) } : item) })}>{Array.from({ length: plan.days }, (_, i) => i + 1).map((value) => <option key={value} value={value} disabled={plan.stops.some((item) => item.id !== stop.id && item.destinationId === stop.destinationId && item.day === value)}>{text("day")} {number.format(value)}</option>)}</select></label></div>
+                <div className="itinerary-stop-heading"><span className="itinerary-stop-order">{number.format(index + 1)}</span>{place && <ItineraryPhoto place={place} locale={locale} />}<div><h3>{place?.name ?? text("missingPlace")}</h3>{place && <span>{place.city}</span>}</div><button className="secondary-action icon-action" type="button" aria-label={`${text("remove")}: ${place?.name ?? index + 1}`} title={text("remove")} onClick={() => update({ stops: plan.stops.filter((item) => item.id !== stop.id) })}><X size={18} /></button></div>
+                <div className="itinerary-stop-fields">{(["arrivalTime", "departureTime"] as const).map((field) => <label key={field}>{schedule(field === "arrivalTime" ? "arrival" : "departure")}<input type="time" value={stop[field] ?? ""} aria-invalid={Boolean(issue)} onChange={(event) => update({ stops: plan.stops.map((item) => item.id === stop.id ? { ...item, [field]: event.target.value } : item) })} /></label>)}</div>
+                {issue ? <p className="itinerary-time-warning" role="status">{schedule(issue.code)}</p> : !stop.arrivalTime && !stop.departureTime && <small className="itinerary-time-unset">{schedule("unscheduled")}</small>}
                 <details><summary>{text("stopNote")}</summary><label><span className="visually-hidden">{text("stopNote")}</span><textarea rows={2} maxLength={itineraryLimits.stopNote} value={stop.note} onChange={(event) => update({ stops: plan.stops.map((item) => item.id === stop.id ? { ...item, note: event.target.value } : item) })} /></label></details>
                 <div className="itinerary-stop-actions"><button className="secondary-action icon-action" type="button" aria-label={`${text("up")}: ${place?.name ?? index + 1}`} title={text("up")} disabled={index === 0} onClick={() => store.change(moveItineraryStop(plan, stop.id, -1))}><ArrowUp size={18} /></button><button className="secondary-action icon-action" type="button" aria-label={`${text("down")}: ${place?.name ?? index + 1}`} title={text("down")} disabled={index === stops.length - 1} onClick={() => store.change(moveItineraryStop(plan, stop.id, 1))}><ArrowDown size={18} /></button>{place && <button className="secondary-action compact" type="button" onClick={() => onOpenPlace(place.id)}><MapPinned size={16} />{text("viewPlace")}</button>}</div>
               </li>;
@@ -132,7 +137,7 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], locale, o
             <div className="itinerary-catalogue-filters"><label><span><Search size={16} />{text("search")}</span><input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setVisibleCount(6); }} /></label><label>{translate(locale, "tourist.events.state")}<select value={state} onChange={(event) => { setState(event.target.value as MalaysianState | ""); setVisibleCount(6); }}><option value="">{destinationAdminText(locale, "allStates")}</option>{discoveryStates.map((value) => <option key={value} value={value}>{value}</option>)}</select></label></div>
             <ul className="itinerary-place-results">{matches.slice(0, visibleCount).map((place) => {
               const added = plan.stops.some((stop) => stop.destinationId === place.id && stop.day === day);
-              return <li key={place.id}><DestinationVisual destination={place} locale={locale} compact /><div><strong>{place.name}</strong><span>{place.city}</span>{suggestions.has(place.id) && <small>{text("suggested")}</small>}</div><button className="secondary-action icon-action" type="button" title={text(added ? "added" : "add")} aria-label={`${text(added ? "added" : "add")}: ${place.name}`} disabled={added || plan.stops.length >= itineraryLimits.stops} onClick={() => store.change(addItineraryStop(plan, place, day))}>{added ? <Check size={18} /> : <Plus size={18} />}</button></li>;
+              return <li key={place.id}><ItineraryPhoto place={place} locale={locale} /><div><strong>{place.name}</strong><span>{place.city}</span>{suggestions.has(place.id) && <small>{text("suggested")}</small>}</div><button className="secondary-action icon-action" type="button" title={text(added ? "added" : "add")} aria-label={`${text(added ? "added" : "add")}: ${place.name}`} disabled={added || plan.stops.length >= itineraryLimits.stops} onClick={() => store.change(addItineraryStop(plan, place, day))}>{added ? <Check size={18} /> : <Plus size={18} />}</button></li>;
             })}</ul>
             {!matches.length && <p>{text("noMatches")}</p>}
             {visibleCount < matches.length && <button className="secondary-action wide" type="button" onClick={() => setVisibleCount((value) => value + 6)}><Plus size={16} />{text("showMore")}</button>}
@@ -142,11 +147,7 @@ export function ItineraryPage({ user, destinations, suggestedIds = [], locale, o
       </fieldset>
 
       <p className="itinerary-planning-note">{text("travelNotice")}</p>
-      <footer className="itinerary-save-bar"><div role="status">{(entry.dirty || store.connection === "live") && <span>{text(entry.dirty ? "unsaved" : "saved")}</span>}<small>{text("stops")}: {number.format(plan.stops.length)} · {text("total")}: {number.format(plan.stops.reduce((sum, stop) => sum + stop.minutes, 0))} {translate(locale, "common.minutes")}</small></div><div className="itinerary-inline-actions">
-        {entry.dirty && remote && !remote.deletedAt && <button className="secondary-action" type="button" disabled={store.busy} onClick={() => setConfirmation({ kind: "discard", plan })}><RotateCcw size={18} />{text("discard")}</button>}
-        <button className="secondary-action icon-action danger" type="button" aria-label={text("delete")} title={text("delete")} disabled={store.busy} onClick={() => setConfirmation({ kind: "delete", plan })}><Trash2 size={18} /></button>
-        <button className="primary-action" type="button" disabled={store.busy || !entry.dirty || !plan.title.trim() || !validItinerary(plan) || conflict} onClick={() => void store.commit(plan)} aria-busy={store.busy}><Save size={18} />{text(store.busy ? "saving" : "save")}</button>
-      </div></footer>
+
     </>}
     {confirmation && <ConfirmItineraryDialog locale={locale} busy={store.busy} kind={confirmation.kind} planName={confirmation.plan.title} onCancel={() => setConfirmation(null)} onConfirm={() => {
       if (confirmation.kind === "discard") {

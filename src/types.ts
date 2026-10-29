@@ -6,7 +6,9 @@ export type ItineraryStop = {
   id: string;
   destinationId: string;
   day: number;
-  minutes: number;
+  minutes: number; // Retained for older saved plans; the editor uses clock times.
+  arrivalTime?: string;
+  departureTime?: string;
   note: string;
 };
 
@@ -52,7 +54,7 @@ export type MalaysianState =
 
 export type FestivalScope = "national" | "state";
 
-export type FestivalCategory = "national" | "religious" | "cultural" | "heritage" | "royal" | "harvest";
+export type FestivalCategory = "national" | "religious" | "cultural" | "heritage" | "royal" | "harvest" | "sports";
 
 export type KMeansFeatureVector = {
   culturalProportion: number;
@@ -153,6 +155,9 @@ export type FestivalEvent = {
   endDate?: string;
   venue?: string;
   recursAnnually?: boolean;
+  sourceUrl?: string;
+  sourceCheckedAt?: string;
+  descriptions?: Partial<Record<string, string>>;
   scope: FestivalScope;
   states: MalaysianState[];
   category: FestivalCategory;

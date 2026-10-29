@@ -120,7 +120,6 @@ export function TravelPlanPanel({ plan, destinations, locale, onLocate }: { onLo
               </div>
               <p>{planningStopReason(locale, stop.reason)}</p>
             </div>
-            <small>{stop.suggestedMinutes} {translate(locale, "common.minutes")}</small>
           </article>
         );
       })}

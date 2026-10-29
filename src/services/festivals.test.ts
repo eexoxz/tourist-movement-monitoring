@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { announcedEvents } from "../data/announcedEvents";
+import { localeOptions } from "./i18n";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { destinations } from "../data/destinations";
 import { formatFestivalDate, formatFestivalScope, formatFestivalStateSummaryLabel, getFestivalDestinationMatches, getFestivalPlanningSummary, getFestivalsForState, getUpcomingFestivals } from "./festivals";
@@ -14,6 +16,16 @@ describe("festival planning service", () => {
     expect(eventIds).not.toContain("merdeka-2027");
   });
 
+  it("includes sourced announced events with public dates and complete descriptions", () => {
+    const upcoming = getUpcomingFestivals(malaysiaFestivalEvents, new Date("2026-10-29T12:00:00"));
+    for (const event of announcedEvents) {
+      expect(upcoming.some((item) => item.id === event.id)).toBe(true);
+      expect(event.sourceUrl).toMatch(/^https:\/\//);
+      expect(event.sourceCheckedAt).toBe("2026-10-29");
+      for (const { value } of localeOptions) expect(event.descriptions?.[value]?.length).toBeGreaterThan(15);
+    }
+    expect(announcedEvents.find((event) => event.id === "ahlfah-melaka-art-fair-2026")?.date).toBe("2026-11-06");
+  });
   it("formats multi-day events and resolves related destinations", () => {
     const event = malaysiaFestivalEvents.find((candidate) => candidate.id === "gawai-2027")!;
     const matches = getFestivalDestinationMatches(event, destinations);

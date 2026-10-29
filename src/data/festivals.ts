@@ -1,3 +1,4 @@
+import { announcedEvents } from "./announcedEvents";
 import type { FestivalEvent, MalaysianState } from "../types";
 
 export const allMalaysianStates: MalaysianState[] = [
@@ -20,6 +21,7 @@ export const allMalaysianStates: MalaysianState[] = [
 const allExcept = (excludedStates: MalaysianState[]) => allMalaysianStates.filter((state) => !excludedStates.includes(state));
 
 export const malaysiaFestivalEvents: FestivalEvent[] = [
+  ...announcedEvents,
   {
     id: "maha-2026",
     name: "MAHA 2026",

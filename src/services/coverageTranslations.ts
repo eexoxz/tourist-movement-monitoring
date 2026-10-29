@@ -42,7 +42,7 @@ const templates = Object.keys(englishCatalog.coverage).filter((source) => /\{\w+
 export const supplementalSources = [...Object.keys(englishCatalog.coverage), ...Object.keys(aliases)];
 
 export function coverageText(locale: Locale, source: string): string | undefined {
-  if (locale === "en") return source;
+  if (locale === "en") return englishCatalog.coverage[source] ?? source;
   const copy = getLocaleCatalog(locale)?.coverage;
   if (!copy) return undefined;
   const direct = copy[aliases[source] ?? source];

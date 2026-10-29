@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { initialData } from "../data/demoData";
 import type { User } from "../types";
-import { createItinerary } from "./itineraries";
+import { createItinerary, addItineraryStop } from "./itineraries";
 
 const mock = vi.hoisted(() => ({ uid: "alice", cloud: true, records: new Map<string, Record<string, unknown>>(), listen: vi.fn(), stop: vi.fn() }));
 vi.mock("./firebaseClient", () => ({ isFirebaseConfigured: () => mock.cloud, getFirebaseServices: () => ({ auth: { currentUser: { uid: mock.uid } }, db: {} }) }));
@@ -90,6 +91,14 @@ describe("itinerary persistence", () => {
     vi.stubGlobal("localStorage", { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("full"); } });
     expect(loadItineraryCache("alice")).toEqual([]);
     expect(cacheItineraries("alice", [])).toBe(false);
+  });
+  it("restores incomplete timed drafts without losing the stop but blocks saving them", async () => {
+    const plan = addItineraryStop(createItinerary("alice", "Timed draft"), initialData.destinations[0], 1);
+    plan.stops[0] = { ...plan.stops[0], arrivalTime: "09:00", departureTime: "" };
+    expect(cacheItineraries("alice", [{ plan, dirty: true }])).toBe(true);
+    expect(loadItineraryCache("alice")[0].plan.stops[0].arrivalTime).toBe("09:00");
+    await expect(saveItinerary(plan, user)).rejects.toMatchObject({ code: "invalid" });
+    expect(mock.records.size).toBe(0);
   });
   it("supports local-only plans without claiming a cloud write", async () => {
     mock.cloud = false;

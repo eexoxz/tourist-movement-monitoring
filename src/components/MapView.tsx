@@ -448,10 +448,6 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
                 </div>
               )}
               <div>
-                <dt>{t("map.suggestedVisit")}</dt>
-                <dd>{selectedDestination.averageVisitMinutes} {t("common.minutes")}</dd>
-              </div>
-              <div>
                 <dt>{t("common.demand")}</dt>
                 <dd>{mode === "tourist" && selectedSignal.activityScore === 0 ? activityText(locale, "noEvidence") : t(crowdLabelKey(selectedSignal))}</dd>
               </div>

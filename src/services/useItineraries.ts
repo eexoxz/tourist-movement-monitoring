@@ -84,5 +84,5 @@ export function useItineraries(user: User) {
       setBusy(false);
     }
   };
-  return { entries, remote, connection, notice, busy, cloud, create, change, restore, commit, reconnect: () => setRetry((value) => value + 1) };
+  return { clearNotice: () => setNotice(null), entries, remote, connection, notice, busy, cloud, create, change, restore, commit, reconnect: () => setRetry((value) => value + 1) };
 }

@@ -4,6 +4,7 @@ import { englishCatalog, getLocaleCatalog } from "./localeCatalog";
 export type Locale = "en" | "ms" | "zh" | "ja" | "ko" | "pt" | "ta" | "es" | "fr";
 
 export type TranslationKey =
+  | "tourist.events.category.sports"
   | "language.label"
   | "language.english"
   | "language.malay"

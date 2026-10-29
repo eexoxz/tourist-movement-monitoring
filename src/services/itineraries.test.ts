@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
-import { addItineraryStop, createItinerary, itineraryDayDate, moveItineraryStop, reconcileItineraries, validItinerary, validPlanDate } from "./itineraries";
+import { addItineraryStop, itineraryScheduleIssues, validItineraryTime, createItinerary, itineraryDayDate, moveItineraryStop, reconcileItineraries, validItinerary, validPlanDate } from "./itineraries";
 import { itineraryCopyKeys, itineraryText } from "./itineraryCopy";
 import { localeOptions } from "./i18n";
 import { travelText } from "./travelExperienceCopy";
@@ -23,6 +23,18 @@ describe("editable itinerary domain", () => {
     expect(addItineraryStop(plan, place, 2).stops).toHaveLength(2);
     expect(addItineraryStop(plan, second, 3)).toBe(plan);
     expect(addItineraryStop(make(), { ...place, averageVisitMinutes: 10000 }, 1).stops[0].minutes).toBe(720);
+  });
+  it("keeps legacy and incomplete drafts but rejects conflicting scheduled visits", () => {
+    const original = addItineraryStop(addItineraryStop(make(), place, 1), second, 1);
+    expect(itineraryScheduleIssues(original)).toEqual([]);
+    const plan = { ...original, stops: original.stops.map((stop, i) => ({ ...stop, arrivalTime: i ? "10:00" : "09:00", departureTime: i ? "11:00" : "10:00" })) };
+    expect(validItinerary(plan)).toBe(true);
+    expect(itineraryScheduleIssues(plan)).toEqual([]);
+    for (const [patch, code] of [[{ departureTime: "" }, "incomplete"], [{ departureTime: "08:00" }, "invalidRange"]] as const) expect(itineraryScheduleIssues({ ...plan, stops: [{ ...plan.stops[0], ...patch }] })[0].code).toBe(code);
+    expect(itineraryScheduleIssues({ ...plan, stops: [plan.stops[0], { ...plan.stops[1], arrivalTime: "09:30" }] })[0].code).toBe("overlap");
+    expect(itineraryScheduleIssues({ ...plan, stops: [...plan.stops].reverse() })[0].code).toBe("sequence");
+    expect(validItinerary({ ...plan, stops: [{ ...plan.stops[0], departureTime: "" }] })).toBe(true);
+    for (const time of ["24:00", "9:00", "12:60", 900]) expect(validItineraryTime(time)).toBe(false);
   });
   it("reorders only within the same day and respects both ends", () => {
     const plan = addItineraryStop(addItineraryStop({ ...make(), days: 2 }, place, 1), second, 1);

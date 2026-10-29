@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from "react";
-import { CalendarDays, ChevronDown } from "lucide-react";
+import { visitorText } from "../services/visitorInformationCopy";
+import { CalendarDays, ChevronDown, ExternalLink } from "lucide-react";
 import type { Destination, FestivalEvent } from "../types";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { interfaceText } from "../services/interfaceCopy";
@@ -8,6 +9,7 @@ import { formatFestivalStateSummaryLabel } from "../services/festivals";
 import { DestinationVisual } from "./DestinationVisual";
 
 function eventDescription(event: FestivalEvent, locale: Locale) {
+  if (event.descriptions?.[locale]) return event.descriptions[locale]!;
   if (locale === "en") return event.description;
   const t = (key: TranslationKey) => translate(locale, key);
   const category = t(`tourist.events.category.${event.category}`);
@@ -47,6 +49,7 @@ function FestivalEventDetailsComponent({ event, destinationById, locale, initial
     <summary><CalendarDays size={16} />{interfaceText(locale, "details")}<ChevronDown size={16} /></summary>
     {open && <>
       <p>{eventDescription(event, locale)}</p>
+      {event.sourceUrl?.startsWith("https://") && <p className="festival-event-source"><a className="secondary-action compact-action" href={event.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} />{visitorText(locale, "source")}</a>{event.sourceCheckedAt && <small>{visitorText(locale, "checked")}: <time dateTime={event.sourceCheckedAt}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(new Date(`${event.sourceCheckedAt}T12:00:00Z`))}</time></small>}</p>}
       <div className="festival-insight-row">
         <small className="festival-planning-note">{uiText(locale, planningSummary)}</small>
         {destinations.length > 0 && <div className="festival-destinations">

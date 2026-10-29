@@ -617,7 +617,7 @@ function App() {
         const firebaseUser = await signInWithConfiguredProvider(email, password, rememberSession);
         authUid = firebaseUser?.uid;
         if (!authUid) {
-          return { error: "Firebase login could not return a user account." };
+          return { error: "Your account could not be loaded. Try signing in again." };
         }
 
         const { hasAccountDeletion } = await import("./services/accountDeletion");
@@ -632,14 +632,14 @@ function App() {
         }
       } catch (error) {
         await signOutConfiguredProvider().catch(() => undefined);
-        return { error: friendlyAuthError(error, "Firebase login failed.") };
+        return { error: friendlyAuthError(error, "Sign-in failed. Please try again.") };
       }
 
       if (localEmailUser?.role === "admin" && firebaseStoredUser?.role !== "admin") {
         await signOutConfiguredProvider().catch(() => undefined);
         return {
           error:
-            "This Firebase account is not linked as an admin in Firestore yet. Add a users document using this Firebase UID with role set to admin, then log in again.",
+            "This account does not have administrator access. Contact the system administrator.",
         };
       }
 

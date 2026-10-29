@@ -137,7 +137,7 @@ describe("tourist travel workflow boundaries", () => {
     expect(html).toContain("Festival 7");
     expect(html.indexOf("Festival 7")).toBeLessThan(html.indexOf("Festival 0"));
     expect(html).not.toContain("Festival 6");
-    expect(html).toContain("Show full 12-month calendar");
+    expect(html).toContain("Show more events");
   });
   it("keeps the admin catalogue compact and removes decorative visit badges", () => {
     const html = renderToStaticMarkup(createElement(DestinationManager, { destinations: initialData.destinations, locale: "en", notify: noop, onChange: noop, onSave: async () => true }));

@@ -1,6 +1,6 @@
 import type { Itinerary, User } from "../types";
 import { getFirebaseServices, isFirebaseConfigured } from "./firebaseClient";
-import { validItinerary, type ItineraryEntry } from "./itineraries";
+import { validItinerary, itineraryScheduleIssues, type ItineraryEntry } from "./itineraries";
 
 export class ItineraryError extends Error {
   constructor(public code: "conflict" | "unavailable" | "invalid") { super(code); }
@@ -41,7 +41,7 @@ function requireOwner(actor: User) {
 }
 
 export async function saveItinerary(plan: Itinerary, actor: User): Promise<Itinerary> {
-  if (!validItinerary(plan) || !plan.title.trim() || plan.deletedAt || plan.userId !== actor.id) throw new ItineraryError("invalid");
+  if (!validItinerary(plan) || itineraryScheduleIssues(plan).length || !plan.title.trim() || plan.deletedAt || plan.userId !== actor.id) throw new ItineraryError("invalid");
   const next = { ...plan, title: plan.title.trim(), revision: plan.revision + 1, updatedAt: new Date().toISOString() };
   if (!isFirebaseConfigured()) return next;
   const services = requireOwner(actor);

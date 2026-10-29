@@ -20,7 +20,7 @@ import { getDestinationState } from "../services/destinationState";
 
 const compactCalendarPreviewLimit = 5;
 const fullCalendarPreviewLimit = 6;
-const categoryFilters: Array<FestivalCategory | "all"> = ["all", "national", "cultural", "religious", "heritage", "royal", "harvest"];
+const categoryFilters: Array<FestivalCategory | "all"> = ["all", "national", "cultural", "religious", "heritage", "royal", "harvest", "sports"];
 
 type FestivalCalendarPanelProps = {
   events: FestivalEvent[];

@@ -1,3 +1,4 @@
+import { scheduleText } from "./itineraryScheduleCopy";
 import { registerFeatureCopy } from "./featureTranslations";
 import type { Locale } from "./i18n";
 
@@ -185,7 +186,7 @@ const copy: Record<Locale, Record<ItineraryCopyKey, string>> = {
     reconnect: "Reconnecter", total: "Temps de visite prévu", stops: "Étapes", discard: "Annuler les modifications", deleteTitle: "Supprimer ce plan ?",
   },
 };
-export const itineraryText = (locale: Locale, key: ItineraryCopyKey) => copy[locale][key];
+export const itineraryText = (locale: Locale, key: ItineraryCopyKey) => key === "travelNotice" || key === "suggested" || key === "local" ? scheduleText(locale, key) : copy[locale][key];
 export const itineraryCopyKeys = Object.keys(en) as ItineraryCopyKey[];
 
 registerFeatureCopy(Object.keys(en) as (keyof typeof en)[], itineraryText);

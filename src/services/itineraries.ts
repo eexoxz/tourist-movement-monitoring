@@ -29,6 +29,8 @@ export function validItinerary(value: unknown): value is Itinerary {
       && typeof stop.destinationId === "string" && Boolean(stop.destinationId)
       && Number.isInteger(stop.day) && stop.day >= 1 && stop.day <= plan.days
       && Number.isInteger(stop.minutes) && stop.minutes >= 5 && stop.minutes <= itineraryLimits.minutes
+      && (stop.arrivalTime === undefined || validItineraryTime(stop.arrivalTime))
+      && (stop.departureTime === undefined || validItineraryTime(stop.departureTime))
       && typeof stop.note === "string" && stop.note.length <= itineraryLimits.stopNote);
 }
 
@@ -73,4 +75,25 @@ export function itineraryDayDate(startDate: string, day: number) {
   const date = new Date(`${startDate}T12:00:00Z`);
   date.setUTCDate(date.getUTCDate() + day - 1);
   return date;
+}
+
+export function validItineraryTime(value: unknown): value is string {
+  return typeof value === "string" && (value === "" || /^([01]\d|2[0-3]):[0-5]\d$/.test(value));
+}
+export type ItineraryScheduleIssue = { stopId: string; code: "incomplete" | "invalidRange" | "overlap" | "sequence" };
+export function itineraryScheduleIssues(plan: Itinerary): ItineraryScheduleIssue[] {
+  const issues: ItineraryScheduleIssue[] = [];
+  for (let day = 1; day <= plan.days; day++) {
+    const scheduled = plan.stops.filter((stop) => stop.day === day && (stop.arrivalTime || stop.departureTime));
+    let previous: ItineraryStop | undefined;
+    for (const stop of scheduled) {
+      const start = stop.arrivalTime ?? "", end = stop.departureTime ?? "";
+      if (!start || !end) { issues.push({ stopId: stop.id, code: "incomplete" }); continue; }
+      if (!validItineraryTime(start) || !validItineraryTime(end) || end <= start) { issues.push({ stopId: stop.id, code: "invalidRange" }); continue; }
+      if (previous && start < previous.arrivalTime!) issues.push({ stopId: stop.id, code: "sequence" });
+      else if (previous && start < previous.departureTime!) issues.push({ stopId: stop.id, code: "overlap" });
+      if (!previous || end > previous.departureTime!) previous = stop;
+    }
+  }
+  return issues;
 }

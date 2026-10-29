@@ -61,7 +61,7 @@ function getCategoryLabel(category: DestinationCategory, t: (key: TranslationKey
   return t(categoryLabelKeys[category]);
 }
 
-function formatDistanceLabel(distance: number | undefined, t: (key: TranslationKey) => string) {
+export function formatDistanceLabel(distance: number | undefined, t: (key: TranslationKey) => string) {
   if (distance === undefined) {
     return t("tourist.places.locationNotActive");
   }
@@ -69,7 +69,7 @@ function formatDistanceLabel(distance: number | undefined, t: (key: TranslationK
   return distance < 1 ? `${Math.round(distance * 1000)} ${t("tourist.places.mAway")}` : `${distance.toFixed(1)} ${t("tourist.places.kmAway")}`;
 }
 
-function formatDemandLabel(row: DestinationDemand | undefined, locale: Locale, t: (key: TranslationKey) => string) {
+export function formatDemandLabel(row: DestinationDemand | undefined, locale: Locale, t: (key: TranslationKey) => string) {
   if (!row || row.popularityScore <= 0) {
     return activityText(locale, "noEvidence");
   }
