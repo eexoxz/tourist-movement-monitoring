@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { CheckCircle2, Circle, Eye, EyeOff, KeyRound, MapPinned, RotateCcw, ShieldCheck } from "lucide-react";
 import { nationalityOptions } from "../data/nationalities";
 import { hasTouristIdentity, normalizeIdentity } from "../services/touristIdentity";
@@ -13,8 +13,9 @@ import type { NotifyFn } from "./ToastViewport";
 import { uiText } from "../services/uiText";
 import { clearRememberedLogin, loadRememberedLogin, saveRememberedLogin } from "../services/loginPreferences";
 import { IdentityNumberField } from "./IdentityNumberField";
+import type { AuthErrorField } from "../services/authError";
 
-export type AuthResult = { error?: string; message?: string };
+export type AuthResult = { error?: string; message?: string; field?: AuthErrorField };
 
 export type TouristRegistrationDraft = {
   name: string;
@@ -94,6 +95,11 @@ export function AuthScreen({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberLogin, setRememberLogin] = useState(Boolean(rememberedLogin));
   const [error, setError] = useState<string | null>(null);
+  const [errorField, setErrorField] = useState<AuthErrorField>();
+  const errorId = useId();
+  const emailInput = useRef<HTMLInputElement>(null);
+  const passwordInput = useRef<HTMLInputElement>(null);
+  const clearFeedback = () => { setError(null); setErrorField(undefined); setMessage(null); };
   const [message, setMessage] = useState<string | null>(initialNotice ?? null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firebaseMode = hasConfiguredAuth();
@@ -131,9 +137,12 @@ export function AuthScreen({
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const normalizedEmail = email.trim().toLowerCase();
+    setErrorField(undefined);
 
     if (!isValidEmail(normalizedEmail)) {
       setError("Enter a valid email address.");
+      setErrorField("email");
+      emailInput.current?.focus();
       setMessage(null);
       notify({ tone: "error", title: "Email does not look right", message: "Use a real email address, for example name@example.com." });
       return;
@@ -157,6 +166,8 @@ export function AuthScreen({
 
     if (mode === "login" && password.length < 6) {
       setError("Password must be at least 6 characters.");
+      setErrorField("password");
+      passwordInput.current?.focus();
       setMessage(null);
       notify({ tone: "error", title: "Password is too short", message: "Use at least 6 characters before continuing." });
       return;
@@ -193,8 +204,9 @@ export function AuthScreen({
     setIsSubmitting(true);
     setError(null);
     setMessage(null);
-    const result =
-      mode === "login"
+    let result: AuthResult;
+    try {
+      result = mode === "login"
         ? await onLogin(normalizedEmail, password, rememberLogin)
         : await onRegister({
             name,
@@ -204,7 +216,13 @@ export function AuthScreen({
             passportNumber: normalizeIdentity(passportNumber),
             termsAccepted,
           });
+    } catch {
+      result = { error: mode === "login" ? "Sign-in failed. Please try again." : "Firebase registration failed." };
+    }
     setError(result.error ?? null);
+    setErrorField(result.error ? result.field : undefined);
+    if (result.error && result.field === "email") emailInput.current?.focus();
+    if (result.error && result.field === "password") passwordInput.current?.focus();
     setMessage(result.message ?? null);
     if (result.error) {
       notify({ tone: "error", title: mode === "login" ? "Login failed" : "Registration failed", message: result.error });
@@ -224,16 +242,18 @@ export function AuthScreen({
   };
 
   const switchAuthMode = (nextMode: AuthMode) => {
-    setError(null);
-    setMessage(null);
+    clearFeedback();
     onModeChange(nextMode);
   };
 
   const resendVerification = async () => {
     const normalizedEmail = email.trim().toLowerCase();
+    setErrorField(undefined);
 
     if (!isValidEmail(normalizedEmail)) {
       setError("Enter a valid email address before resending verification.");
+      setErrorField("email");
+      emailInput.current?.focus();
       setMessage(null);
       notify({ tone: "error", title: "Email does not look right", message: "Enter the email address used for this Firebase account." });
       return;
@@ -241,6 +261,8 @@ export function AuthScreen({
 
     if (password.length < 6) {
       setError("Enter the password for this account before resending verification.");
+      setErrorField("password");
+      passwordInput.current?.focus();
       setMessage(null);
       notify({ tone: "error", title: "Password required", message: "Enter this account password before requesting another verification email." });
       return;
@@ -251,6 +273,9 @@ export function AuthScreen({
     setMessage(null);
     const result = await onResendVerification(normalizedEmail, password);
     setError(result.error ?? null);
+    setErrorField(result.error ? result.field : undefined);
+    if (result.error && result.field === "email") emailInput.current?.focus();
+    if (result.error && result.field === "password") passwordInput.current?.focus();
     setMessage(result.message ?? null);
     notify({
       tone: result.error ? "error" : "success",
@@ -262,9 +287,12 @@ export function AuthScreen({
 
   const requestPasswordReset = async () => {
     const normalizedEmail = email.trim().toLowerCase();
+    setErrorField(undefined);
 
     if (!isValidEmail(normalizedEmail)) {
       setError("Enter a valid email address before requesting a password reset.");
+      setErrorField("email");
+      emailInput.current?.focus();
       setMessage(null);
       notify({ tone: "error", title: "Email does not look right", message: "Enter the email address for the Firebase account." });
       return;
@@ -275,6 +303,9 @@ export function AuthScreen({
     setMessage(null);
     const result = await onPasswordReset(normalizedEmail);
     setError(result.error ?? null);
+    setErrorField(result.error ? result.field : undefined);
+    if (result.error && result.field === "email") emailInput.current?.focus();
+    if (result.error && result.field === "password") passwordInput.current?.focus();
     setMessage(result.message ?? null);
     notify({
       tone: result.error ? "error" : "success",
@@ -335,7 +366,8 @@ export function AuthScreen({
 
           <label>
             {t("auth.email")}
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
+            <input ref={emailInput} aria-label={t("auth.email")} type="email" value={email} onChange={(event) => { setEmail(event.target.value); clearFeedback(); }} onBlur={() => { if (email.trim() && !isValidEmail(email.trim())) { setError("Enter a valid email address."); setErrorField("email"); setMessage(null); } }} aria-invalid={Boolean(error && (errorField === "email" || errorField === "credentials"))} aria-describedby={error && (errorField === "email" || errorField === "credentials") ? `${errorId}-${errorField}` : undefined} autoComplete="email" required />
+            {error && errorField === "email" && <span className="form-error auth-field-error" id={`${errorId}-email`} role="alert">{uiText(locale, error)}</span>}
           </label>
 
           <label>
@@ -344,7 +376,11 @@ export function AuthScreen({
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                ref={passwordInput}
+                aria-label={t("auth.password")}
+                onChange={(event) => { setPassword(event.target.value); clearFeedback(); }}
+                aria-invalid={Boolean(error && (errorField === "password" || errorField === "credentials"))}
+                aria-describedby={error && (errorField === "password" || errorField === "credentials") ? `${errorId}-${errorField}` : undefined}
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 required
                 minLength={mode === "register" ? 8 : 6}
@@ -354,6 +390,7 @@ export function AuthScreen({
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </span>
+            {error && errorField === "password" && <span className="form-error auth-field-error" id={`${errorId}-password`} role="alert">{uiText(locale, error)}</span>}
           </label>
 
           {mode === "register" && (
@@ -438,7 +475,7 @@ export function AuthScreen({
             {t("auth.rememberLogin")}
           </label>
 
-          {error && <p className="form-error">{uiText(locale, error)}</p>}
+          {error && (!errorField || errorField === "credentials") && <p className="form-error" id={`${errorId}-credentials`} role="alert">{uiText(locale, error)}</p>}
           {message && <p className="form-success">{uiText(locale, message)}</p>}
 
           <button className="primary-action" type="submit" disabled={isSubmitting}>

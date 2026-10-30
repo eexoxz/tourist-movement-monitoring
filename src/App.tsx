@@ -23,7 +23,7 @@ import { notificationSource, uiText } from "./services/uiText";
 import { PublicCheckInPage, type PublicCheckInResult } from "./components/PublicCheckInPage";
 import { clearBrowserLocationWatch } from "./services/browserLocation";
 import { getCurrentPathname, replaceBrowserPath, pushBrowserPath } from "./services/browserRouting";
-import { friendlyAuthError } from "./services/authError";
+import { authErrorField, friendlyAuthError } from "./services/authError";
 import { type CommitDataOptions, mergeUserRecord } from "./services/workspaceSupport";
 import { applyPlaceReview, mergePlaceReviewRecords } from "./services/unlistedPlaces";
 import { unlistedLocationText } from "./services/unlistedLocationCopy";
@@ -632,7 +632,7 @@ function App() {
         }
       } catch (error) {
         await signOutConfiguredProvider().catch(() => undefined);
-        return { error: friendlyAuthError(error, "Sign-in failed. Please try again.") };
+        return { error: friendlyAuthError(error, "Sign-in failed. Please try again."), field: authErrorField(error) };
       }
 
       if (localEmailUser?.role === "admin" && firebaseStoredUser?.role !== "admin") {
@@ -692,7 +692,9 @@ function App() {
 
     const localUser = authenticateLocalUser(data, email, password);
     if (!localUser) {
-      return { error: "Invalid email or password." };
+      return localEmailUser
+        ? { error: "Incorrect password. Try again or reset your password.", field: "password" }
+        : { error: "This email address is not registered. Create an account to continue.", field: "email" };
     }
     saveSession(localUser.id, rememberSession);
     setSessionUserId(localUser.id);
@@ -725,7 +727,7 @@ function App() {
       authUid = registration?.user.uid;
       verificationSent = registration?.verificationSent ?? false;
     } catch (error) {
-      return { error: friendlyAuthError(error, "Firebase registration failed.") };
+      return { error: friendlyAuthError(error, "Firebase registration failed."), field: authErrorField(error) };
     }
 
     const created = createTouristAccount(registrationSnapshot, {
@@ -779,7 +781,7 @@ function App() {
       await sendVerificationEmail(firebaseUser);
       return { message: "Verification email sent again. Check your inbox or spam folder." };
     } catch (error) {
-      return { error: friendlyAuthError(error, "Verification email could not be sent.") };
+      return { error: friendlyAuthError(error, "Verification email could not be sent."), field: authErrorField(error) };
     } finally {
       await signOutConfiguredProvider().catch(() => undefined);
     }
@@ -794,7 +796,7 @@ function App() {
       const sent = await sendPasswordResetToConfiguredProvider(email);
       return sent ? { message: "Password reset email sent. Check your inbox or spam folder." } : { error: "Firebase password reset is not configured." };
     } catch (error) {
-      return { error: friendlyAuthError(error, "Password reset email could not be sent.") };
+      return { error: friendlyAuthError(error, "Password reset email could not be sent."), field: authErrorField(error) };
     }
   };
 

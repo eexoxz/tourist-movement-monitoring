@@ -821,3 +821,6 @@ textarea {
   .tourist-country-report .action-row { display: grid; width: 100%; }
   .tourist-country-report .secondary-action { white-space: normal; text-align: left; justify-content: flex-start; }
 }
+
+.auth-form input[aria-invalid="true"], .auth-form .password-field:has(input[aria-invalid="true"]) { border-color: #b43a46; }
+.auth-field-error { display: block; margin: 0; font-size: .8rem; line-height: 1.5; font-weight: 400; }
