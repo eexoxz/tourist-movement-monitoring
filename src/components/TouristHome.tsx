@@ -177,17 +177,26 @@ export function TouristHome({
   const selectedCheckInDestination = checkInDestinations.find((destination) => destination.id === checkInDestinationId) ?? checkInDestinations[0] ?? null;
   const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
   const safetyPanelRef = useRef<HTMLDetailsElement | null>(null);
-  const reportToolVisibility = () => onToolPanelOpenChange?.(Boolean(checkInPanelRef.current?.open || safetyPanelRef.current?.open));
+  const [checkInReady, setCheckInReady] = useState(Boolean(showCheckInPanel || activeCheckIn));
+  const [checkInExpanded, setCheckInExpanded] = useState(Boolean(showCheckInPanel || activeCheckIn));
+  const [safetyReady, setSafetyReady] = useState(Boolean(openSafetyPanel || openSafetyCount));
+  const reportToolVisibility = () => {
+    const checkInOpen = Boolean(checkInPanelRef.current?.open);
+    if (checkInOpen) setCheckInReady(true);
+    if (safetyPanelRef.current?.open) setSafetyReady(true);
+    setCheckInExpanded(checkInOpen);
+    onToolPanelOpenChange?.(Boolean(checkInOpen || safetyPanelRef.current?.open));
+  };
   const [isConfirmingSos, setIsConfirmingSos] = useState(false);
   const [checkInMode, setCheckInMode] = useState<"known" | "unlisted">("known");
   const activePlaceName = activeCheckInDestination?.name ?? activeCheckIn?.submittedPlace?.name;
-  const checkInEntry = !activeCheckIn && <>
+  const checkInEntry = (checkInReady || showCheckInPanel) && !activeCheckIn && <>
     <div className="check-in-mode-switch" role="group" aria-label={t("tourist.checkin.checkIn")}>
       {(["known", "unlisted"] as const).map((mode) => <button key={mode} type="button" aria-pressed={checkInMode === mode} onClick={() => setCheckInMode(mode)}>{placeText(locale, mode)}</button>)}
     </div>
     {checkInMode === "unlisted" ? <UnlistedCheckInForm locale={locale} onLocate={onLocateUnlistedPlace} onSubmit={onUnlistedCheckIn} /> : <div className="check-in-stack">
       <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
-      <QrCheckInPanel destinations={checkInDestinations} selectedDestination={selectedCheckInDestination} locale={locale} onDestinationChange={onCheckInDestinationChange} onConfirm={onStartAttractionCheckIn} />
+      <QrCheckInPanel cameraEnabled={checkInExpanded} destinations={checkInDestinations} selectedDestination={selectedCheckInDestination} locale={locale} onDestinationChange={onCheckInDestinationChange} onConfirm={onStartAttractionCheckIn} />
     </div>}
   </>;
   const checkInTitle = activePlaceName
@@ -212,9 +221,10 @@ export function TouristHome({
       return;
     }
 
-    window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       checkInPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
     }, 120);
+    return () => window.clearTimeout(timer);
   }, [showCheckInPanel, checkInDestinationId]);
 
   useEffect(() => {
@@ -358,6 +368,7 @@ export function TouristHome({
 
           <details className="tourist-section home-disclosure safety-panel" id="tourist-safety" ref={safetyPanelRef} open={openSafetyCount > 0} onToggle={reportToolVisibility}>
             <HomeToolSummary icon={<ShieldCheck size={24} />} label={t("tourist.safety.eyebrow")} status={`${openSafetyCount} ${t("tourist.safety.open")}`} />
+            {(safetyReady || openSafetyCount > 0) && <>
             <div className="section-heading">
               <div>
                 <span>{t("tourist.safety.eyebrow")}</span>
@@ -488,6 +499,7 @@ export function TouristHome({
               ))}
               {userSosAlerts.length === 0 && userIncidentReports.length === 0 && <small>{t("tourist.safety.noRequests")}</small>}
             </div>
+            </>}
           </details>
         </section>
       </section>

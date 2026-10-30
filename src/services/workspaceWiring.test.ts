@@ -26,7 +26,9 @@ describe("workspace integration guardrails", () => {
       expect(readSource(`src/components/${file}.tsx`)).not.toContain("react-dom/server");
     }
     expect(admin).toContain('view === "dashboard" && adminTab === "records"');
-    expect(admin).toContain("recordsActive ? getMovementDashboardViews");
+    expect(admin).toContain("recordsActive ? selectMovementViews");
+    expect(admin).toContain("useMemo(createMovementDashboardSelector, [])");
+    expect(admin).toContain("{touristsActive && touristManagementPanel}");
     expect(admin).toContain("if (recordsActive && selectedRecordTripId");
     expect(admin).toContain("aiActive ? [...analyzeAllTrips(data)]");
     expect(admin).toContain("evaluateAiOutput(data, analysisRows)");
@@ -110,6 +112,13 @@ describe("workspace integration guardrails", () => {
     expect(scanner).toContain("getUserMedia");
     expect(scanner).toContain('t("tourist.checkin.useCode")');
     expect(home).toContain("QrCheckInPanel");
+    expect(home).toContain("(checkInReady || showCheckInPanel) && !activeCheckIn");
+    expect(home).toContain("cameraEnabled={checkInExpanded}");
+    expect(scanner).toContain("if (!cameraEnabled) stopCamera()");
+    expect(scanner).toContain('document.addEventListener("visibilitychange", pause)');
+    expect(scanner).toContain("cancelled || !cameraEnabled || !video.srcObject");
+    expect(scanner).toContain("window.clearTimeout(scanTimer)");
+    expect(home).toContain("(safetyReady || openSafetyCount > 0)");
     expect(tourist).toContain("destinationIdOverride");
   });
 

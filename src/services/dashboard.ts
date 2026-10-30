@@ -343,6 +343,7 @@ function buildDashboardIndexes(data: AppData) {
     analysisByTripId: new Map(data.analyses.map((analysis) => [analysis.tripId, analysis])),
     destinationIndex, nearestPlace, pointTimes,
     pointsByTrip,
+    tripEvidence: new Map<string, { summary: TripSummary; destinationNames: string[] }>(),
   };
 }
 
@@ -429,9 +430,14 @@ function getMovementTripRecordsWithIndexes(data: AppData, filters: MovementRecor
   return data.trips
     .filter((trip) => !filters.touristId || filters.touristId === "all" || trip.userId === filters.touristId)
     .filter((trip) => !filters.tripId || filters.tripId === "all" || trip.id === filters.tripId)
+    .filter((trip) => tripMatchesDateRange(trip, indexes.pointsByTrip.get(trip.id) ?? [], filters))
     .map((trip) => {
       const points = indexes.pointsByTrip.get(trip.id) ?? [];
-      const evidence = summarizeTripPoints(trip, points, indexes.nearestPlace);
+      let evidence = indexes.tripEvidence.get(trip.id);
+      if (!evidence) {
+        evidence = summarizeTripPoints(trip, points, indexes.nearestPlace);
+        indexes.tripEvidence.set(trip.id, evidence);
+      }
 
       return {
         trip,
@@ -442,7 +448,6 @@ function getMovementTripRecordsWithIndexes(data: AppData, filters: MovementRecor
         analysis: indexes.analysisByTripId.get(trip.id) ?? null,
       };
     })
-    .filter((record) => tripMatchesDateRange(record.trip, record.points, filters))
     .sort((a, b) => compareTimeDesc(a.trip.startedAt, b.trip.startedAt));
 }
 
@@ -458,6 +463,23 @@ export function getMovementDashboardViews(data: AppData, filters: MovementRecord
   return {
     records: getMovementRecordsWithIndexes(data, normalized, indexes),
     tripRecords: getMovementTripRecordsWithIndexes(data, normalized, indexes),
+  };
+}
+
+// Keep one snapshot per workspace. Filters reuse point grouping, place matches and
+// trip summaries; immutable table changes replace the snapshot and release the old one.
+export function createMovementDashboardSelector() {
+  let previous: AppData | undefined;
+  let indexes: DashboardIndexes;
+  const inputs = ["points", "trips", "users", "analyses", "destinations"] as const;
+  return (data: AppData, filters: MovementRecordFilters | string = {}): MovementDashboardViews => {
+    if (!previous || inputs.some((key) => data[key] !== previous![key])) indexes = buildDashboardIndexes(data);
+    previous = data;
+    const normalized = normalizeMovementFilters(filters);
+    return {
+      records: getMovementRecordsWithIndexes(data, normalized, indexes),
+      tripRecords: getMovementTripRecordsWithIndexes(data, normalized, indexes),
+    };
   };
 }
 

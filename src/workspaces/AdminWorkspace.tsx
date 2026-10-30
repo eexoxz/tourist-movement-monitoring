@@ -17,7 +17,7 @@ import { DemoDatasetManager } from "../components/DemoDatasetManager";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
-import { buildMovementRecordsCsv, getDailyMovementTrend, getMovementDashboardViews, getMovementDataStatus, getTourists, getTripFilterOptions, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
+import { buildMovementRecordsCsv, getDailyMovementTrend, createMovementDashboardSelector, getMovementDataStatus, getTourists, getTripFilterOptions, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
 import { calculateGeofenceActivity } from "../services/geofencing";
 import { filterSafetyCases, getOpenSafetyCount, updateIncidentStatus, updateSosStatus, type SafetyCaseView } from "../services/safety";
 import { adminSafetyText } from "../services/adminSafetyCopy";
@@ -132,15 +132,16 @@ export function AdminWorkspace({
   const demandActive = view === "dashboard" && !touristsActive;
   const movementTrend = useMemo(() => overviewActive ? getDailyMovementTrend(data) : {}, [overviewActive, data.points, calendarDay]);
   const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data.trips, selectedTouristId]);
+  const selectMovementViews = useMemo(createMovementDashboardSelector, []);
   const movementViews = useMemo(
     () =>
-      recordsActive ? getMovementDashboardViews(data, {
+      recordsActive ? selectMovementViews(data, {
         touristId: selectedTouristId,
         tripId: selectedTripId,
         fromDate,
         toDate,
       }) : emptyMovementViews,
-    [data.trips, data.points, data.destinations, data.users, data.analyses, recordsActive, selectedTouristId, selectedTripId, fromDate, toDate]
+    [data.trips, data.points, data.destinations, data.users, data.analyses, selectMovementViews, recordsActive, selectedTouristId, selectedTripId, fromDate, toDate]
   );
   const movementRecords = movementViews.records;
   const movementTripRecords = movementViews.tripRecords;
@@ -151,7 +152,7 @@ export function AdminWorkspace({
   const geofenceActivity = useMemo(() => overviewActive ? calculateGeofenceActivity(data) : [], [overviewActive, data.geofences, data.points]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
   const demoTouristCount = getPreparedDemoTouristCount(data);
-  const touristManagementRows = useMemo(() => touristsActive ? getTouristManagementRows(data) : [], [touristsActive, data]);
+  const touristManagementRows = useMemo(() => touristsActive ? getTouristManagementRows(data) : [], [touristsActive, data.users, data.consents, data.trips, data.points, data.destinations, data.analyses, data.checkIns, data.sosAlerts, data.incidentReports, data.recommendations]);
   const travelPlan = useMemo(
     () =>
       overviewActive ? createMovementBasedTravelPlan(data, {
@@ -365,13 +366,13 @@ export function AdminWorkspace({
     });
   };
 
-  const touristManagementPanel = <TouristDirectory rows={touristManagementRows} locale={locale} onViewMovement={(userId) => {
+  const touristManagementPanel = useMemo(() => <TouristDirectory rows={touristManagementRows} locale={locale} onViewMovement={(userId) => {
     setSelectedTouristId(userId);
     setSelectedTripId("all");
     setSelectedRecordTripId(null);
     setAdminTab("records");
     window.scrollTo({ top: 0, behavior: "instant" });
-  }} onViewSafety={() => setAdminTab("safety")} />;
+  }} onViewSafety={() => setAdminTab("safety")} />, [touristManagementRows, locale]);
 
   const movementRecordsPanel = (
     <div className="admin-tab-panel movement-records-page">
@@ -937,7 +938,7 @@ export function AdminWorkspace({
         <button type="button" aria-pressed={adminTab === "tourists"} className={adminTab === "tourists" ? "active" : ""} onClick={() => setAdminTab("tourists")}><Users size={17} />{tripLayoutText(locale, "directory")}</button>
         <button type="button" aria-pressed={adminTab === "records"} className={adminTab === "records" ? "active" : ""} onClick={() => { setSelectedRecordTripId(null); setAdminTab("records"); }}><Route size={17} />{t("admin.tabs.records")}</button>
       </nav>}
-      <div hidden={adminTab !== "tourists"}>{touristManagementPanel}</div>
+      <div hidden={adminTab !== "tourists"}>{touristsActive && touristManagementPanel}</div>
       {adminTab === "records" && movementRecordsPanel}
       {adminTab === "safety" && safetyPanel}
       {adminTab === "ai" && aiResultsPanel}

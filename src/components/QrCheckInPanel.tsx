@@ -1,10 +1,11 @@
 import { Camera, Keyboard, ScanLine, Square } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { createDestinationCheckInCode, parseDestinationCheckInCode } from "../services/qrCheckIn";
 import type { Destination } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 import { uiText } from "../services/uiText";
+import { createQrCameraSession } from "../services/qrCamera";
 
 type BarcodeDetectorShape = {
   detect: (source: CanvasImageSource) => Promise<Array<{ rawValue?: string }>>;
@@ -16,6 +17,7 @@ type QrCheckInPanelProps = {
   destinations: Destination[];
   selectedDestination: Destination | null;
   locale?: Locale;
+  cameraEnabled?: boolean;
   onDestinationChange: (destinationId: string) => void;
   onConfirm: (destinationId?: string) => void;
 };
@@ -28,22 +30,24 @@ function getBarcodeDetector() {
   return (window as Window & { BarcodeDetector?: BarcodeDetectorConstructor }).BarcodeDetector ?? null;
 }
 
-export function QrCheckInPanel({ destinations, selectedDestination, locale = "en", onDestinationChange, onConfirm }: QrCheckInPanelProps) {
+export function QrCheckInPanel({ destinations, selectedDestination, locale = "en", cameraEnabled = true, onDestinationChange, onConfirm }: QrCheckInPanelProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [manualCode, setManualCode] = useState("");
   const [message, setMessage] = useState(() => translate("en", "tourist.checkin.qrHelp"));
   const [isScanning, setIsScanning] = useState(false);
   const detectorRef = useRef<BarcodeDetectorShape | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const camera = useMemo(createQrCameraSession, []);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const selectedCode = selectedDestination ? createDestinationCheckInCode(selectedDestination.id) : "";
   const canUseCamera = Boolean(getBarcodeDetector() && navigator.mediaDevices?.getUserMedia);
 
   const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
+    camera.stop();
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setIsStartingCamera(false);
     setIsScanning(false);
-  }, []);
+  }, [camera]);
 
   const useCode = useCallback(
     (rawCode: string) => {
@@ -64,6 +68,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
   );
 
   const startCamera = async () => {
+    if (!cameraEnabled || isStartingCamera || isScanning || document.visibilityState === "hidden") return;
     const BarcodeDetector = getBarcodeDetector();
 
     if (!BarcodeDetector || !navigator.mediaDevices?.getUserMedia) {
@@ -71,19 +76,24 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       return;
     }
 
+    setIsStartingCamera(true);
+    let stream: MediaStream | null = null;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+      stream = await camera.start(() => navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false }));
+      if (!stream) return;
       detectorRef.current = new BarcodeDetector({ formats: ["qr_code"] });
-      streamRef.current = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
 
+      if (!camera.isCurrent(stream)) return;
+      setIsStartingCamera(false);
       setIsScanning(true);
       setMessage(translate("en", "tourist.checkin.cameraReady"));
     } catch {
+      if (stream && !camera.isCurrent(stream)) return;
       setMessage(translate("en", "tourist.checkin.cameraDenied"));
       stopCamera();
     }
@@ -94,7 +104,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       return undefined;
     }
 
-    let animationFrame = 0;
+    let scanTimer: number | undefined;
     let cancelled = false;
 
     const scan = async () => {
@@ -104,6 +114,7 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       if (!cancelled && video && detector && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
         try {
           const codes = await detector.detect(video);
+          if (cancelled || !cameraEnabled || !video.srcObject || !camera.isCurrent(video.srcObject as MediaStream)) return;
           const rawValue = codes.find((code) => code.rawValue)?.rawValue;
 
           if (rawValue) {
@@ -111,24 +122,31 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
             return;
           }
         } catch {
-          setMessage(translate("en", "tourist.checkin.cameraPaused"));
+          if (!cancelled) setMessage(translate("en", "tourist.checkin.cameraPaused"));
         }
       }
 
       if (!cancelled) {
-        animationFrame = requestAnimationFrame(scan);
+        scanTimer = window.setTimeout(() => void scan(), 150);
       }
     };
 
-    animationFrame = requestAnimationFrame(scan);
+    scanTimer = window.setTimeout(() => void scan(), 0);
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(animationFrame);
+      window.clearTimeout(scanTimer);
     };
-  }, [isScanning, useCode]);
+  }, [camera, cameraEnabled, isScanning, useCode]);
 
-  useEffect(() => stopCamera, [stopCamera]);
+  useEffect(() => {
+    if (!cameraEnabled) stopCamera();
+  }, [cameraEnabled, stopCamera]);
+  useEffect(() => {
+    const pause = () => { if (document.visibilityState === "hidden") stopCamera(); };
+    document.addEventListener("visibilitychange", pause);
+    return () => { document.removeEventListener("visibilitychange", pause); stopCamera(); };
+  }, [stopCamera]);
 
   return (
     <div className="qr-checkin-panel">
@@ -162,11 +180,11 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       </div>
 
       <div className="qr-camera-actions">
-        <button className="secondary-action" type="button" onClick={startCamera} disabled={!canUseCamera || isScanning}>
+        <button className="secondary-action" type="button" onClick={startCamera} disabled={!canUseCamera || !cameraEnabled || isStartingCamera || isScanning}>
           <Camera size={18} />
           {t("tourist.checkin.scanQr")}
         </button>
-        <button className="secondary-action" type="button" onClick={stopCamera} disabled={!isScanning}>
+        <button className="secondary-action" type="button" onClick={stopCamera} disabled={!isScanning && !isStartingCamera}>
           <Square size={18} />
           {t("tourist.checkin.stopScan")}
         </button>

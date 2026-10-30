@@ -3,6 +3,8 @@ import { initialData, mergePreparedDemoDataset } from "../data/demoData";
 import { refreshAllRecommendations } from "./analytics";
 import {
   buildMovementRecordsCsv,
+  createMovementDashboardSelector,
+  getMovementDashboardViews,
   getDailyMovementTrend,
   getDemoReadiness,
   getDestinationCategoryCoverage,
@@ -122,6 +124,28 @@ describe("dashboard service", () => {
       expect(tourist).toBeDefined();
       expect(refreshed.recommendations.filter((recommendation) => recommendation.userId === tourist!.id)).toHaveLength(3);
     });
+  });
+
+  it("reuses movement summaries across filters and invalidates every relevant table", () => {
+    const select = createMovementDashboardSelector();
+    const all = select(initialData);
+    const first = all.tripRecords[0];
+    const filtered = select(initialData, { tripId: first.trip.id });
+    expect(filtered).toEqual(getMovementDashboardViews(initialData, { tripId: first.trip.id }));
+    expect(filtered.tripRecords[0].summary).toBe(first.summary);
+    expect(select({ ...initialData, geofences: [] }, { tripId: first.trip.id }).tripRecords[0].summary).toBe(first.summary);
+    const inputs = ["points", "trips", "users", "analyses", "destinations"] as const;
+    for (const key of inputs) {
+      const next = { ...initialData, [key]: [...initialData[key]] };
+      const result = select(next, { tripId: first.trip.id });
+      expect(result).toEqual(getMovementDashboardViews(next, { tripId: first.trip.id }));
+      expect(result.tripRecords[0].summary).not.toBe(first.summary);
+    }
+    const extra = { ...first.points[0], id: "new-live-reading", recordedAt: first.points[0].recordedAt };
+    const updated = { ...initialData, points: [...initialData.points, extra] };
+    expect(select(updated, { tripId: first.trip.id }).tripRecords[0].summary.pointCount).toBe(first.summary.pointCount + 1);
+    const removed = { ...initialData, points: [], trips: [] };
+    expect(select(removed)).toEqual({ records: [], tripRecords: [] });
   });
 
   it("filters movement records by selected tourist and enriches each point", () => {
