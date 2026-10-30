@@ -20,7 +20,14 @@
 .directory-totals .has-open-cases, .directory-totals .has-open-cases strong { color: #ad303b; }
 .directory-report { margin-block: 0 14px; padding-block: 10px; }
 .directory-report .admin-tab-heading { align-items: flex-start; gap: 16px; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.directory-country-breakdown { flex: 1; min-width: 0; }
+.directory-country-breakdown { min-width: 0; margin-bottom: 10px; }
+.directory-country-breakdown > summary { width: fit-content; max-width: 100%; flex-wrap: wrap; gap: 8px; padding: 7px 10px; border: 1px solid #d7e2e5; border-radius: 7px; background: #fff; list-style: none; }
+.directory-country-breakdown > summary::-webkit-details-marker { display: none; }
+.directory-country-breakdown > summary:hover { border-color: #74b8b0; background: #f4fbfa; }
+.directory-country-breakdown > summary > span { min-width: 0; overflow-wrap: anywhere; }
+.country-filter-cue { display: inline-flex; align-items: center; gap: 5px; padding: 3px 6px; border-radius: 4px; background: #eaf5f2; color: #006b65; font-size: .72rem; font-weight: 500; }
+.country-filter-cue svg, .country-disclosure-chevron { flex-shrink: 0; }
+.directory-country-breakdown[open] .country-disclosure-chevron { transform: rotate(180deg); }
 .directory-report .action-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .directory-report .secondary-action { min-height: 40px; padding: 7px 10px; font-size: 0.8rem; font-weight: 550; }
 .directory-report .report-identity-option { margin-top: 8px; font-size: 0.75rem; }
