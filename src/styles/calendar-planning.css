@@ -469,16 +469,18 @@
 }
 
 .recommendation-mode-notice {
-  display: grid;
-  gap: 5px;
-  padding: 14px;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  background: #fffbeb;
+  display: inline-flex;
+  justify-self: start;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f7faf9;
 }
 
 .recommendation-mode-notice strong {
-  color: #92400e;
+  color: var(--muted);
+  font-size: .8rem;
+  font-weight: 500;
 }
 
 .recommendation-mode-notice p {

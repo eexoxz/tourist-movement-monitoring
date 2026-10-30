@@ -88,8 +88,6 @@ export function TripDiary({
         <div>
           <span>{t("tourist.trips.routeHistory")}</span>
           <h2>{t("tourist.trips.savedTrips")}</h2>
-          <p>{travelText(locale, "historyNote")}</p>
-          <p className="trip-retention-note">{reviewText(locale, "retention")}</p>
         </div>
         <div className="trip-diary-stats" aria-label={uiText(locale, "Trip diary totals")}>
           <span>
@@ -158,7 +156,6 @@ export function TripDiary({
             <div>
               <span>{t("tourist.trips.savedTrips")}</span>
               <h2>{t("tourist.trips.pickRoute")}</h2>
-              <p>{t("tourist.trips.pickRouteDescription")}</p>
             </div>
           </div>
 

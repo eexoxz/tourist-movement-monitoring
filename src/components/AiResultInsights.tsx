@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, Database, Route } from "lucide-react";
+import { ChartNoAxesCombined, ChevronDown, Database, Route } from "lucide-react";
 import type { KMeansFeatureVector } from "../types";
 import { aiProfiles, type AiInsights } from "../services/aiInsights";
 import { aiText } from "../services/aiInsightsCopy";
@@ -16,7 +16,6 @@ export function AiCoverage({ insights, locale }: { insights: AiInsights; locale:
     <dl className="ai-coverage-totals">{totals.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{number(value)}</dd></div>)}</dl>
     <div className="ai-source-heading"><Database size={16} aria-hidden="true" /><h4>{aiText(locale, "sources")}</h4></div>
     <dl className="ai-source-counts">{(["browser", "sample", "mixed", "none"] as const).map((source) => <div key={source} data-source={source}><dt><i aria-hidden="true" />{aiText(locale, source)}</dt><dd>{number(insights.sources[source])}</dd></div>)}</dl>
-    <p className="ai-method-note">{aiText(locale, "coverageNote")}</p>
   </section>;
 }
 
@@ -25,7 +24,6 @@ export function ClusterComposition({ clusters, locale }: { clusters: AiInsights[
   const max = Math.max(1, ...clusters.map((cluster) => cluster.size));
   return <section className="ai-composition" aria-label={aiText(locale, "composition")}>
     <h3><ChartNoAxesCombined size={18} aria-hidden="true" />{aiText(locale, "composition")}</h3>
-    <p className="ai-method-note">{aiText(locale, "compositionNote")}</p>
     {!clusters.length && <p>{translateAdmin(locale, "ai.noClusters")}</p>}
     {clusters.length > 0 && <div className="ai-composition-axis" aria-hidden="true"><span>0</span><span>{translateAdmin(locale, "ai.tripCount", { count: max })}</span></div>}
     {clusters.map((cluster) => <figure className="ai-composition-row" key={cluster.cluster}>
@@ -54,6 +52,13 @@ export function TripClusterComparison({ trip, centroid, locale }: { trip: KMeans
         return <div className="ai-comparison-bar" data-series={kind} key={kind}><span>{aiText(locale, label)}</span><div aria-hidden="true"><i style={{ width: `${value / row.max * 100}%` }} /></div><strong>{new Intl.NumberFormat(locale, row.percent ? { style: "percent", maximumFractionDigits: 1 } : { maximumFractionDigits: 1 }).format(row.percent ? value / 100 : value)}</strong></div>;
       })}
     </div>)}
-    <p className="ai-method-note">{aiText(locale, "capNote", { count: uniqueDestinationScale })}</p>
   </section>;
+}
+
+export function AiMethodDetails({ locale }: { locale: Locale }) {
+  return <details className="ai-technical-details ai-method-help">
+    <summary><ChevronDown size={16} aria-hidden="true" />{aiText(locale, "technical")}</summary>
+    <p>{translateAdmin(locale, "ai.description")}</p>
+    {(["coverageNote", "compositionNote", "capNote", "evaluationNote", "ruleNote"] as const).map((key) => <p key={key}>{aiText(locale, key, { count: uniqueDestinationScale })}</p>)}
+  </details>;
 }

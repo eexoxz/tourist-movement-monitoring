@@ -282,7 +282,6 @@ export function PlaceDiscovery({
         <div>
           <span>{t("tourist.places.discoveryMode")}</span>
           <h2>{t("tourist.places.heroTitle")}</h2>
-          <p>{t("tourist.places.heroDescription")}</p>
         </div>
         <div className="places-hero-stats">
           <span>
@@ -303,7 +302,6 @@ export function PlaceDiscovery({
       {!personalized && (
         <section className="recommendation-mode-notice">
           <strong>{t("tourist.places.basicModeTitle")}</strong>
-          <p>{t("tourist.places.basicModeDescription")}</p>
         </section>
       )}
 

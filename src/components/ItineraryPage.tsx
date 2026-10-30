@@ -161,7 +161,6 @@ function ItineraryEditor({ user, destinations, suggestedIds = emptySuggestedIds,
         </div>
       </fieldset>
 
-      <p className="itinerary-planning-note">{text("travelNotice")}</p>
 
     </>}
     {confirmation && <ConfirmItineraryDialog locale={locale} busy={store.busy} kind={confirmation.kind} planName={confirmation.plan.title} onCancel={() => setConfirmation(null)} onConfirm={() => {

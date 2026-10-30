@@ -145,6 +145,8 @@ describe("bounded and anonymous place activity", () => {
       for (const key of ["accuracy", "jump", "timestamp", "title", "hint", "publish", "publishSample", "previewSample", "refresh", "refreshFailed", "saved", "noEvidence", "demoBasis", "observedBasis", "localBasis"] as const) {
         expect(activityText(value, key).length).toBeGreaterThan(0);
       }
+      expect(activityText(value, "hint")).not.toContain("·");
+      expect(activityText(value, "demoBasis")).not.toContain("·");
     }
   });
 });

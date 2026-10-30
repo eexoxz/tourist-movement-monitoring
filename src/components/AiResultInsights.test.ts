@@ -6,14 +6,18 @@ import { analyzeAllTrips } from "../services/analytics";
 import { summarizeAiResults } from "../services/aiInsights";
 import { aiText } from "../services/aiInsightsCopy";
 import { localeOptions } from "../services/i18n";
-import { AiCoverage, ClusterComposition, TripClusterComparison } from "./AiResultInsights";
+import { AiCoverage, AiMethodDetails, ClusterComposition, TripClusterComparison } from "./AiResultInsights";
 
 describe("AI result charts", () => {
   it("renders source and cluster counts in every language with trip-based labels", () => {
     const insights = summarizeAiResults(initialData, analyzeAllTrips(initialData));
     for (const { value: locale } of localeOptions) {
       const html = renderToStaticMarkup(createElement("div", null, createElement(AiCoverage, { insights, locale }), createElement(ClusterComposition, { clusters: insights.clusters, locale })));
-      expect(html).toContain(renderToStaticMarkup(createElement("p", { className: "ai-method-note" }, aiText(locale, "compositionNote"))));
+      expect(html).not.toContain('class="ai-method-note"');
+      const help = renderToStaticMarkup(createElement(AiMethodDetails, { locale }));
+      expect(help).toContain('<details class="ai-technical-details ai-method-help">');
+      expect(help).not.toContain(" open");
+      expect(help).toContain(renderToStaticMarkup(createElement("p", null, aiText(locale, "coverageNote"))));
       expect(html).toContain('data-source="sample"');
       expect(html).toContain('data-profile="cultural"');
       expect(html).not.toMatch(/NaN|Infinity|\{\w+\}/);
@@ -27,7 +31,7 @@ describe("AI result charts", () => {
     expect(html.match(/width:0%/g)).toHaveLength(4);
     expect(html.match(/width:50%/g)).toHaveLength(2);
     expect(html.match(/width:100%/g)).toHaveLength(2);
-    expect(html).toContain("Destination counts are capped at 10");
+    expect(html).not.toContain("Destination counts are capped at 10");
     expect(html).not.toMatch(/NaN|Infinity|>50<|width:-/);
   });
 });

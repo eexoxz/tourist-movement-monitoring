@@ -290,7 +290,6 @@ export function TouristHome({
               <div>
                 <span>{t("tourist.geofence.eyebrow")}</span>
                 <h2>{t("tourist.geofence.title")}</h2>
-                <p>{t("tourist.geofence.description")}</p>
               </div>
             </div>
             <div className="geofence-warning-list">
@@ -426,7 +425,7 @@ export function TouristHome({
                     <div>
                       <strong>{service.name}</strong>
                       <span>{service.address}</span>
-                      <small>{service.distanceKm} {t("tourist.safety.kmAway")} · {uiText(locale, { police: "Police contact in the prepared directory.", hospital: "Hospital in the prepared directory.", fire: "Fire and rescue contact in the prepared directory." }[service.kind])}</small>
+                      <small>{service.distanceKm} {t("tourist.safety.kmAway")}</small>
                     </div>
                     <a className="secondary-action compact-action" href={`tel:${service.phone}`}>
                       {t("tourist.safety.call")} {service.phone}

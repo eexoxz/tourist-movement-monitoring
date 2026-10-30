@@ -35,7 +35,7 @@ import { activityText } from "../services/activityCopy";
 import { buildDestinationActivitySummaries } from "../services/activitySummary";
 import { MovementAlertList, MovementDemandList, TravelPlanPanel } from "../components/AdminPlanningPanels";
 import { CategoryBars, ConfusionMatrix } from "../components/AdminAnalyticsWidgets";
-import { AiCoverage, ClusterComposition, TripClusterComparison } from "../components/AiResultInsights";
+import { AiCoverage, AiMethodDetails, ClusterComposition, TripClusterComparison } from "../components/AiResultInsights";
 import { summarizeAiResults } from "../services/aiInsights";
 import { aiText } from "../services/aiInsightsCopy";
 import { EmptyState, MetricGrid } from "../components/SummaryCards";
@@ -482,7 +482,6 @@ export function AdminWorkspace({
                   <dd>{selectedRecord.analysis ? `${selectedRecord.analysis.classifier} · ${formatDateTime(selectedRecord.analysis.generatedAt, locale)}` : adminText("common.pending")}</dd>
                 </div>
               </dl>
-              <p>{adminText("records.readOnly")}</p>
             </aside>
           )}
         </div>
@@ -549,7 +548,6 @@ export function AdminWorkspace({
       <div className="admin-tab-heading">
         <div>
           <h2>{adminText("safety.title")}</h2>
-          <p>{adminSafetyText(locale, "description")}</p>
         </div>
         <strong>{adminText("safety.openCases", { count: openSafetyRecordCount })}</strong>
       </div>
@@ -649,7 +647,6 @@ export function AdminWorkspace({
       <div className="admin-tab-heading">
         <div>
           <h2>{adminText("ai.title")}</h2>
-          <p>{adminText("ai.description")}</p>
         </div>
         <button className="secondary-action" onClick={recomputeAi}>
           <RotateCcw size={18} />
@@ -694,7 +691,6 @@ export function AdminWorkspace({
             <h2>{selectedAnalysisUser?.name ?? adminText("common.unknownTourist")}</h2>
             <p className="ai-recording-source">{aiText(locale, "source")}: <strong>{aiText(locale, aiInsights.sourceByTrip.get(selectedAnalysis.tripId) ?? "none")}</strong></p>
             <p className="ai-decision-summary"><strong>{profileLabel(locale, selectedAnalysis.profile)}</strong><span>{new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(selectedAnalysis.classificationConfidence)} {adminText("ai.confidence")}</span></p>
-            <p className="ai-method-note">{aiText(locale, "ruleNote")}</p>
             <TripClusterComparison trip={selectedAnalysis.kMeansInput} centroid={selectedAnalysis.kMeansCentroid} locale={locale} />
             <details className="ai-technical-details"><summary><ChevronDown size={16} aria-hidden="true" />{aiText(locale, "technical")}</summary>
             <dl>
@@ -779,10 +775,10 @@ export function AdminWorkspace({
       </div>
       <section className="ai-evaluation-basis" aria-label={aiText(locale, "agreement")}>
         <h3>{aiText(locale, "agreement")}</h3>
-        <p className="ai-method-note">{aiText(locale, "evaluationNote")}</p>
         <dl className="ai-source-counts"><div><dt>{aiText(locale, "labelledSamples")}</dt><dd>{new Intl.NumberFormat(locale).format(aiInsights.labelledSamples)}</dd></div><div><dt>{aiText(locale, "labelledOther")}</dt><dd>{new Intl.NumberFormat(locale).format(aiInsights.labelledOther)}</dd></div></dl>
         {aiEvaluation.labelledRecordCount > 0 ? <ConfusionMatrix values={aiEvaluation.confusionMatrix} locale={locale} /> : <p>{aiText(locale, "noLabels")}</p>}
       </section>
+      <AiMethodDetails locale={locale} />
     </div>
   );
 
@@ -807,7 +803,7 @@ export function AdminWorkspace({
       }
     >
       {showDemoDataset && <DemoDatasetManager data={data} locale={locale} action={demoDatasetAction} onApply={changeDemoDataset} onRemove={() => changeDemoDataset(new Set())} onClose={() => { if (!demoDatasetAction) setShowDemoDataset(false); }} />}
-      {demoTouristCount > 0 && <p className="admin-dataset-note">{demoDatasetText(locale, "progress", { count: demoTouristCount, max: demoDatasetMetadata.generatedTouristCount })} · {t("admin.demo.localOnlyNote")} {demoDatasetText(locale, "dataNote")}</p>}
+      {demoTouristCount > 0 && <p className="admin-dataset-note">{demoDatasetText(locale, "progress", { count: demoTouristCount, max: demoDatasetMetadata.generatedTouristCount })}</p>}
       {!touristsActive && <section className="admin-priorities" aria-label={interfaceText(locale, "attention")}><h2>{interfaceText(locale, "attention")}</h2><div>
         <button type="button" className={openSafetyRecordCount ? "needs-action safety" : "safety"} onClick={() => setAdminTab("safety")}><Siren size={22} /><span>{adminText("overview.safetyCases")}</span><strong>{openSafetyRecordCount}</strong><ArrowRight size={17} /></button>
         {onViewChange && <button type="button" className={pendingPlaceCount ? "needs-action reviews" : "reviews"} onClick={() => onViewChange("destinations")}><MapPin size={22} /><span>{placeText(locale, "queue")}</span><strong>{pendingPlaceCount}</strong><ArrowRight size={17} /></button>}

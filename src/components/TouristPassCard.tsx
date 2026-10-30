@@ -72,10 +72,10 @@ export function TouristPassCard({ user, destination, locale = "en", compact = fa
           <img alt={t("tourist.pass.qrLabel")} src={qrSource} />
         </div>
         <strong>{destination ? t("tourist.pass.scanReady") : t("tourist.pass.verified")}</strong>
-        <small>
+        {localOnlyQr && <small>
           <ShieldCheck size={14} />
-          {localOnlyQr ? t("tourist.pass.localQrNote") : t("tourist.pass.qrNote")}
-        </small>
+          {t("tourist.pass.localQrNote")}
+        </small>}
       </div>
       {!compact && details}
     </article>

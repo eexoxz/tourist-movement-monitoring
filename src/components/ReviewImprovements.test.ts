@@ -20,7 +20,8 @@ describe("review fixes", () => {
     expect(html).toContain(travelerStatusText(locale, "latest"));
     expect(html).toContain(travelerStatusText(locale, "cloud"));
     const basis = renderToStaticMarkup(createElement(ActivityBasis, { destinations: [], user: { ...user, authUid: "test", sampleActivityEnabled: false }, locale }));
-    expect(basis).toContain(travelerStatusText(locale, "basis").replace(/'/g, "&#x27;"));
+    expect(basis).toContain(activityText(locale, "localBasis").replace(/'/g, "&#x27;"));
+    expect(basis).not.toContain("activity-basis-explanation");
     expect(translate(locale, "auth.firebaseMode")).not.toContain("Firebase");
   });
   it("prioritizes an active journey before the billboard, but leaves idle Home discovery-first", () => {

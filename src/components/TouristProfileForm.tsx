@@ -160,7 +160,6 @@ export function TouristProfileForm({
           <section className="profile-emergency-fields">
             <div>
               <h3><HeartHandshake size={19} aria-hidden="true" />{t("tourist.profile.emergencyContact")}</h3>
-              <p>{t("tourist.profile.emergencyDescription")}</p>
             </div>
             <div className="field-pair">
               <label>

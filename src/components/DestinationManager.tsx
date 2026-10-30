@@ -215,7 +215,6 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
         <div className="section-heading">
           <div>
             <h2>{text("Destinations")}</h2>
-            <p>{text("{count} Malaysian tourist destination records available for recommendation and movement analysis.", { count: destinations.length })}</p>
           </div>
           <button className="primary-action compact-action" type="button" onClick={openAddModal}>
             <MapPinned size={17} />

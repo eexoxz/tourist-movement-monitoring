@@ -19,7 +19,7 @@ describe("trip itinerary presentation", () => {
       expect(setup).toContain(tripPlanText(locale, "reminders"));
       const progress = renderToStaticMarkup(createElement(TripItineraryProgress, { trip, points: [], checkIns: [], destinations: initialData.destinations, locale, onOpenPlace: () => {} }));
       expect(progress).toContain(tripPlanText(locale, "planned"));
-      expect(progress).toContain(tripPlanText(locale, "intent"));
+      expect(progress).not.toContain(tripPlanText(locale, "intent"));
       expect(progress).toContain("User-written plan");
     }
   });
