@@ -824,3 +824,8 @@ textarea {
 
 .auth-form input[aria-invalid="true"], .auth-form .password-field:has(input[aria-invalid="true"]) { border-color: #b43a46; }
 .auth-field-error { display: block; margin: 0; font-size: .8rem; line-height: 1.5; font-weight: 400; }
+
+.auth-email-suggestion { display: grid; gap: 7px; min-width: 0; margin-top: -7px; padding: 10px 12px; border: 1px solid #e3cd98; border-radius: 7px; color: #79520b; background: #fff9eb; font-size: .8rem; line-height: 1.5; overflow-wrap: anywhere; }
+.auth-email-suggestion button { justify-self: start; min-height: 36px; padding: 6px 10px; border: 1px solid #d9bd7a; border-radius: 5px; color: #654408; background: #fff; font: inherit; font-weight: 550; cursor: pointer; }
+.auth-email-suggestion button:hover { background: #fff2ce; }
+.auth-email-suggestion button:focus-visible { outline: 2px solid #087c77; outline-offset: 3px; }

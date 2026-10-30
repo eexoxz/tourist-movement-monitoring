@@ -5,6 +5,7 @@ import { hasTouristIdentity, normalizeIdentity } from "../services/touristIdenti
 import { reviewText } from "../services/reviewUpdateCopy";
 import { type AuthMode } from "../services/access";
 import { isValidEmail } from "../services/accounts";
+import { getEmailDomainSuggestion } from "../services/emailDomainSuggestion";
 import { hasConfiguredAuth } from "../services/auth";
 import { isLocale, localeOptions, translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getPasswordStrength, passwordRequirementMessage } from "../services/passwordStrength";
@@ -104,6 +105,7 @@ export function AuthScreen({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firebaseMode = hasConfiguredAuth();
   const t = (key: TranslationKey) => translate(locale, key);
+  const emailSuggestion = useMemo(() => getEmailDomainSuggestion(email), [email]);
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
   const passwordStrengthLabel =
     passwordStrength.level === "strong"
@@ -366,9 +368,13 @@ export function AuthScreen({
 
           <label>
             {t("auth.email")}
-            <input ref={emailInput} aria-label={t("auth.email")} type="email" value={email} onChange={(event) => { setEmail(event.target.value); clearFeedback(); }} onBlur={() => { if (email.trim() && !isValidEmail(email.trim())) { setError("Enter a valid email address."); setErrorField("email"); setMessage(null); } }} aria-invalid={Boolean(error && (errorField === "email" || errorField === "credentials"))} aria-describedby={error && (errorField === "email" || errorField === "credentials") ? `${errorId}-${errorField}` : undefined} autoComplete="email" required />
+            <input ref={emailInput} aria-label={t("auth.email")} type="email" value={email} onChange={(event) => { setEmail(event.target.value); clearFeedback(); }} onBlur={() => { if (email.trim() && !isValidEmail(email.trim())) { setError("Enter a valid email address."); setErrorField("email"); setMessage(null); } }} aria-invalid={Boolean(error && (errorField === "email" || errorField === "credentials"))} aria-describedby={[error && (errorField === "email" || errorField === "credentials") ? `${errorId}-${errorField}` : null, emailSuggestion ? `${errorId}-email-suggestion` : null].filter(Boolean).join(" ") || undefined} autoComplete="email" required />
             {error && errorField === "email" && <span className="form-error auth-field-error" id={`${errorId}-email`} role="alert">{uiText(locale, error)}</span>}
           </label>
+          {emailSuggestion && <div className="auth-email-suggestion" id={`${errorId}-email-suggestion`} role="status">
+            <span>{uiText(locale, "Possible typo: did you mean @{domain}?", { domain: emailSuggestion.domain })}</span>
+            <button type="button" disabled={isSubmitting} onClick={() => { setEmail(emailSuggestion.email); clearFeedback(); emailInput.current?.focus(); }}>{uiText(locale, "Use @{domain}", { domain: emailSuggestion.domain })}</button>
+          </div>}
 
           <label>
             {t("auth.password")}
