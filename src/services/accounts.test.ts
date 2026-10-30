@@ -81,6 +81,7 @@ describe("accounts service", () => {
     expect(result.user?.nationality).toBe("Malaysia");
     expect(result.user?.passportNumber).toBe("A12345678");
     expect(result.user?.termsAcceptedAt).toBeTruthy();
+    for (const key of ["consents", "trips", "points"] as const) expect(result.data?.[key]).toBe(initialData[key]);
     expect(result.user?.privacyAcceptedAt).toBeTruthy();
     expect(result.user?.travelPreferences).toEqual(["nature", "coastal"]);
     expect(result.user?.expectedProfile).toBe("nature");
