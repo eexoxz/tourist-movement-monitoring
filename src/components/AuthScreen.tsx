@@ -100,12 +100,12 @@ export function AuthScreen({
   const errorId = useId();
   const emailInput = useRef<HTMLInputElement>(null);
   const passwordInput = useRef<HTMLInputElement>(null);
-  const clearFeedback = () => { setError(null); setErrorField(undefined); setMessage(null); };
+  const [emailSuggestion, setEmailSuggestion] = useState<ReturnType<typeof getEmailDomainSuggestion>>(null);
+  const clearFeedback = () => { setError(null); setErrorField(undefined); setEmailSuggestion(null); setMessage(null); };
   const [message, setMessage] = useState<string | null>(initialNotice ?? null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firebaseMode = hasConfiguredAuth();
   const t = (key: TranslationKey) => translate(locale, key);
-  const emailSuggestion = useMemo(() => getEmailDomainSuggestion(email), [email]);
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
   const passwordStrengthLabel =
     passwordStrength.level === "strong"
@@ -139,6 +139,7 @@ export function AuthScreen({
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const normalizedEmail = email.trim().toLowerCase();
+    setEmailSuggestion(getEmailDomainSuggestion(email));
     setErrorField(undefined);
 
     if (!isValidEmail(normalizedEmail)) {
@@ -250,6 +251,7 @@ export function AuthScreen({
 
   const resendVerification = async () => {
     const normalizedEmail = email.trim().toLowerCase();
+    setEmailSuggestion(getEmailDomainSuggestion(email));
     setErrorField(undefined);
 
     if (!isValidEmail(normalizedEmail)) {
@@ -289,6 +291,7 @@ export function AuthScreen({
 
   const requestPasswordReset = async () => {
     const normalizedEmail = email.trim().toLowerCase();
+    setEmailSuggestion(getEmailDomainSuggestion(email));
     setErrorField(undefined);
 
     if (!isValidEmail(normalizedEmail)) {
@@ -368,7 +371,7 @@ export function AuthScreen({
 
           <label>
             {t("auth.email")}
-            <input ref={emailInput} aria-label={t("auth.email")} type="email" value={email} onChange={(event) => { setEmail(event.target.value); clearFeedback(); }} onBlur={() => { if (email.trim() && !isValidEmail(email.trim())) { setError("Enter a valid email address."); setErrorField("email"); setMessage(null); } }} aria-invalid={Boolean(error && (errorField === "email" || errorField === "credentials"))} aria-describedby={[error && (errorField === "email" || errorField === "credentials") ? `${errorId}-${errorField}` : null, emailSuggestion ? `${errorId}-email-suggestion` : null].filter(Boolean).join(" ") || undefined} autoComplete="email" required />
+            <input ref={emailInput} aria-label={t("auth.email")} type="email" value={email} onChange={(event) => { setEmail(event.target.value); clearFeedback(); }} aria-invalid={Boolean(error && (errorField === "email" || errorField === "credentials"))} aria-describedby={[error && (errorField === "email" || errorField === "credentials") ? `${errorId}-${errorField}` : null, emailSuggestion ? `${errorId}-email-suggestion` : null].filter(Boolean).join(" ") || undefined} autoComplete="email" required />
             {error && errorField === "email" && <span className="form-error auth-field-error" id={`${errorId}-email`} role="alert">{uiText(locale, error)}</span>}
           </label>
           {emailSuggestion && <div className="auth-email-suggestion" id={`${errorId}-email-suggestion`} role="status">
