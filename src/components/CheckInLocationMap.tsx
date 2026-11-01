@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
+import { mapTileOptions, mapTileUrl } from "../services/mapTiles";
 import { addMapResetControl } from "../services/mapResetControl";
 import { checkInIconMarkup } from "../generated/mapIconMarkup";
 import "leaflet/dist/leaflet.css";
@@ -21,7 +22,7 @@ export default function CheckInLocationMap({ points, label, locale }: { points: 
       button?.setAttribute("title", uiText(locale, source));
       button?.setAttribute("aria-label", uiText(locale, source));
     }
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19, noWrap: true }).addTo(map);
+    L.tileLayer(mapTileUrl, mapTileOptions).addTo(map);
     const icon = L.divIcon({ className: "check-in-location-marker", html: checkInIconMarkup, iconSize: [34, 34], iconAnchor: [17, 17] });
     const bounds = L.latLngBounds(points.map((point) => [point.latitude, point.longitude] as [number, number]));
     points.forEach((point) => { L.marker([point.latitude, point.longitude], { icon, title: label }).addTo(map); });

@@ -24,6 +24,7 @@ import { PublicCheckInPage, type PublicCheckInResult } from "./components/Public
 import { clearBrowserLocationWatch } from "./services/browserLocation";
 import { getCurrentPathname, replaceBrowserPath, pushBrowserPath } from "./services/browserRouting";
 import { authErrorField, friendlyAuthError } from "./services/authError";
+import { readSignInAccount } from "./services/signInAccount";
 import { type CommitDataOptions, mergeUserRecord } from "./services/workspaceSupport";
 import { applyPlaceReview, mergePlaceReviewRecords } from "./services/unlistedPlaces";
 import { unlistedLocationText } from "./services/unlistedLocationCopy";
@@ -620,10 +621,13 @@ function App() {
           return { error: "Your account could not be loaded. Try signing in again." };
         }
 
-        const { hasAccountDeletion } = await import("./services/accountDeletion");
-        if (await hasAccountDeletion(authUid)) { lockForDeletion(authUid, firebaseUser?.email); return {}; }
-
-        firebaseStoredUser = await getConfiguredUserRecord(authUid);
+        const uid = authUid;
+        const account = await readSignInAccount(
+          async () => { const { hasAccountDeletion } = await import("./services/accountDeletion"); return hasAccountDeletion(uid); },
+          () => getConfiguredUserRecord(uid)
+        );
+        if (account.deleting) { lockForDeletion(uid, firebaseUser?.email); return {}; }
+        firebaseStoredUser = account.record;
         const loginRole = firebaseStoredUser?.role ?? "tourist";
         if (firebaseUser && !firebaseUser.emailVerified && loginRole !== "admin") {
           const sent = await sendVerificationEmail(firebaseUser).catch(() => false);

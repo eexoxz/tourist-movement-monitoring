@@ -22,6 +22,8 @@ describe("workspace integration guardrails", () => {
   it("loads role workspaces lazily and prepares movement details only on the records tab", () => {
     expect(app).toContain('lazy(() => import("./workspaces/AdminWorkspace")');
     expect(app).toContain('lazy(() => import("./workspaces/TouristWorkspace")');
+    expect(app).toContain("const account = await readSignInAccount(");
+    expect(app).toContain("firebaseStoredUser = account.record");
     for (const file of ["MapView", "EmergencyServiceMap", "CheckInLocationMap"]) {
       expect(readSource(`src/components/${file}.tsx`)).not.toContain("react-dom/server");
     }
@@ -135,6 +137,7 @@ describe("workspace integration guardrails", () => {
     expect(map).toContain('displayMode === "route" && points.length > 0');
     expect(map).toContain('displayMode === "signals"');
     expect(map).toContain("MovementCanvasLayer");
+    for (const file of ["MapView", "CheckInLocationMap", "EmergencyServiceMap"]) expect(readSource(`src/components/${file}.tsx`)).toContain("L.tileLayer(mapTileUrl, mapTileOptions)");
     expect(map).not.toContain("maxRenderedRoutePointMarkers");
     expect(admin).toContain('displayMode="signals"');
     expect(trip).toContain('displayMode={activeTrip ? "route" : "signals"}');

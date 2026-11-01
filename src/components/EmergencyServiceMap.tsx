@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
+import { mapTileOptions, mapTileUrl } from "../services/mapTiles";
 import { addMapResetControl } from "../services/mapResetControl";
 import { uiText } from "../services/uiText";
 import type { Locale } from "../services/i18n";
@@ -21,11 +22,7 @@ export default function EmergencyServiceMap({ service, locale = "en" }: { servic
       button?.setAttribute("title", uiText(locale, source)); button?.setAttribute("aria-label", uiText(locale, source));
     }
     const removeReset = addMapResetControl(map, locale, () => map.setView([service.latitude, service.longitude], 16, { animate: false }));
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19,
-      noWrap: true,
-    }).addTo(map);
+    L.tileLayer(mapTileUrl, mapTileOptions).addTo(map);
     L.marker([service.latitude, service.longitude], {
       icon: L.divIcon({ className: "police-help-marker", html: emergencyIconMarkup, iconSize: [32, 32], iconAnchor: [16, 16] }),
       title: service.name,

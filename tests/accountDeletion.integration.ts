@@ -9,6 +9,8 @@ if (process.env.FIRESTORE_EMULATOR_HOST !== "127.0.0.1:8088" || process.env.FIRE
 const state = vi.hoisted(() => ({ services: null as unknown }));
 vi.mock("../src/services/firebaseClient", () => ({ getFirebaseServices: () => state.services }));
 import { deleteOwnAccount, hasAccountDeletion, privateAccountCollections } from "../src/services/accountDeletion";
+import { getConfiguredUserRecord } from "../src/services/auth";
+import { readSignInAccount } from "../src/services/signInAccount";
 
 const projectId = "demo-tourist-security";
 const app = initializeApp({ projectId, apiKey: "local-emulator-only", authDomain: `${projectId}.firebaseapp.com` }, "account-removal-test");
@@ -74,6 +76,7 @@ describe("real SDK account removal in local emulators", () => {
     expect(auth.currentUser?.uid).toBe(user.uid); expect(await hasAccountDeletion(user.uid)).toBe(true);
     await signOut(auth); await signInWithEmailAndPassword(auth, email, password);
     expect(await hasAccountDeletion(user.uid)).toBe(true);
+    expect(await readSignInAccount(() => hasAccountDeletion(user.uid), () => getConfiguredUserRecord(user.uid))).toEqual({ deleting: true, record: null });
     await deleteOwnAccount(user.uid, password, callbacks());
     expect(auth.currentUser).toBeNull();
   });

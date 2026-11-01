@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
+import { mapTileOptions, mapTileUrl } from "../services/mapTiles";
 import { addMapResetControl } from "../services/mapResetControl";
 import { LocateFixed, MapPinned, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
@@ -174,13 +175,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       mapRef.current.on("popupclose", () => setRoutePopupOpen(false));
 
       L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        noWrap: true,
-        updateWhenZooming: false,
-        updateWhenIdle: true,
-        attribution: "&copy; OpenStreetMap contributors",
-      })
+      L.tileLayer(mapTileUrl, mapTileOptions)
         .on("load", () => setMapStatus("ready"))
         .on("tileerror", () => setMapStatus("error"))
         .addTo(mapRef.current);
