@@ -1,4 +1,5 @@
-import type { AnalysisResult, AppData, DestinationCategory, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
+import type { AnalysisResult, AppData, DestinationCategory, MalaysianState, MovementPoint, TouristProfile, TripSession, TripSummary, User } from "../types";
+import { getDestinationState } from "./destinationState";
 import { demoDatasetMetadata } from "../data/demoData";
 import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex, type DestinationSpatialIndex } from "./destinationSpatialIndex";
@@ -67,6 +68,7 @@ export type DemoCoverage = {
 export type MovementRecordFilters = {
   touristId?: string;
   tripId?: string;
+  state?: MalaysianState | "all" | "unmatched";
   fromDate?: string;
   toDate?: string;
 };
@@ -327,6 +329,17 @@ function buildDashboardIndexes(data: AppData) {
     return nearestByPoint.get(point);
   };
 
+  const statesByPoint = new Map<MovementPoint, MalaysianState | undefined>();
+  const pointMatchesState = (point: MovementPoint, state: MovementRecordFilters["state"]) => {
+    if (!state || state === "all") return true;
+    if (!statesByPoint.has(point)) {
+      const nearest = nearestPlace(point);
+      statesByPoint.set(point, nearest ? getDestinationState(nearest.destination) : undefined);
+    }
+    const matchedState = statesByPoint.get(point);
+    return state === "unmatched" ? !matchedState : matchedState === state;
+  };
+
   data.points.forEach((point) => {
     const tripPoints = pointsByTrip.get(point.tripId) ?? [];
     tripPoints.push(point);
@@ -341,7 +354,7 @@ function buildDashboardIndexes(data: AppData) {
     tripById: new Map(data.trips.map((trip) => [trip.id, trip])),
     userById: new Map(data.users.map((user) => [user.id, user])),
     analysisByTripId: new Map(data.analyses.map((analysis) => [analysis.tripId, analysis])),
-    destinationIndex, nearestPlace, pointTimes,
+    destinationIndex, nearestPlace, pointMatchesState, pointTimes,
     pointsByTrip,
     tripEvidence: new Map<string, { summary: TripSummary; destinationNames: string[] }>(),
   };
@@ -398,7 +411,7 @@ function getMovementRecordsWithIndexes(data: AppData, filters: MovementRecordFil
   return data.points
     .filter((point) => visibleTripIds.has(point.tripId))
     .filter((point) => !filters.tripId || filters.tripId === "all" || point.tripId === filters.tripId)
-    .filter((point) => isWithinDateRange(point.recordedAt, filters))
+    .filter((point) => isWithinDateRange(point.recordedAt, filters) && indexes.pointMatchesState(point, filters.state))
     .map((point) => {
       const trip = indexes.tripById.get(point.tripId) ?? null;
       const tourist = trip ? indexes.userById.get(trip.userId) ?? null : null;
@@ -420,17 +433,18 @@ export function getMovementRecords(data: AppData, filters: MovementRecordFilters
   return getMovementRecordsWithIndexes(data, normalized, buildDashboardIndexes(data));
 }
 
-export function getTripFilterOptions(data: AppData, touristId = "all") {
-  return data.trips
-    .filter((trip) => touristId === "all" || trip.userId === touristId)
-    .sort((a, b) => compareTimeDesc(a.startedAt, b.startedAt));
-}
-
 function getMovementTripRecordsWithIndexes(data: AppData, filters: MovementRecordFilters, indexes: DashboardIndexes): MovementTripRecordView[] {
   return data.trips
     .filter((trip) => !filters.touristId || filters.touristId === "all" || trip.userId === filters.touristId)
     .filter((trip) => !filters.tripId || filters.tripId === "all" || trip.id === filters.tripId)
     .filter((trip) => tripMatchesDateRange(trip, indexes.pointsByTrip.get(trip.id) ?? [], filters))
+    .filter((trip) => {
+      if (!filters.state || filters.state === "all") return true;
+      const points = indexes.pointsByTrip.get(trip.id) ?? [];
+      // State and date must match the same reading. Detail still shows the full route.
+      return points.length === 0 ? filters.state === "unmatched" : points.some((point) =>
+        isWithinDateRange(point.recordedAt, filters) && indexes.pointMatchesState(point, filters.state));
+    })
     .map((trip) => {
       const points = indexes.pointsByTrip.get(trip.id) ?? [];
       let evidence = indexes.tripEvidence.get(trip.id);

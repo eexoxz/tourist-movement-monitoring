@@ -3,7 +3,7 @@ import { useCalendarDay } from "../services/useCalendarDay";
 import { ArrowLeft, ArrowRight, ChartNoAxesCombined, ChevronDown, Download, FlaskConical, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Users } from "lucide-react";
 import { tripLayoutText } from "../services/tripLayoutCopy";
 import { interfaceText } from "../services/interfaceCopy";
-import type { AppData, AppView, Destination, SafetyStatus, SosClosureReason, User } from "../types";
+import type { AppData, AppView, Destination, MalaysianState, SafetyStatus, SosClosureReason, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
 import { analyzeAllTrips, buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
@@ -17,7 +17,7 @@ import { DemoDatasetManager } from "../components/DemoDatasetManager";
 import { malaysiaFestivalEvents } from "../data/festivals";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { getUpcomingFestivals } from "../services/festivals";
-import { buildMovementRecordsCsv, getDailyMovementTrend, createMovementDashboardSelector, getMovementDataStatus, getTourists, getTripFilterOptions, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
+import { buildMovementRecordsCsv, getDailyMovementTrend, createMovementDashboardSelector, getMovementDataStatus, getTourists, summarizeDashboard, type MovementDashboardViews } from "../services/dashboard";
 import { calculateGeofenceActivity } from "../services/geofencing";
 import { filterSafetyCases, getOpenSafetyCount, updateIncidentStatus, updateSosStatus, type SafetyCaseView } from "../services/safety";
 import { adminSafetyText } from "../services/adminSafetyCopy";
@@ -56,6 +56,8 @@ import { Page } from "../components/Page";
 import { RecommendationList } from "../components/RecommendationList";
 import { type PlanAudience, type PlanTier, type AdminDashboardTab, type CommitDataOptions, DEMO_DATASET_LOCAL_ONLY_STATUS, adminSafetyPreviewLimit, analysisKey, getIncidentTypeLabel } from "../services/workspaceSupport";
 
+import { discoveryStates } from "../data/discoveryAreas";
+
 const emptyMovementViews: MovementDashboardViews = { records: [], tripRecords: [] };
 
 export function AdminWorkspace({
@@ -87,7 +89,7 @@ export function AdminWorkspace({
   const calendarDay = useCalendarDay();
   const movementDataStatus = useMemo(() => getMovementDataStatus(data), [data.points]);
   const [selectedTouristId, setSelectedTouristId] = useState<string>("all");
-  const [selectedTripId, setSelectedTripId] = useState<string>("all");
+  const [selectedMovementState, setSelectedMovementState] = useState<MalaysianState | "all" | "unmatched">("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [adminTab, setAdminTab] = useState<AdminDashboardTab>("overview");
@@ -131,17 +133,16 @@ export function AdminWorkspace({
   // destination editor or tourist directory. Overview-only work stays there.
   const demandActive = view === "dashboard" && !touristsActive;
   const movementTrend = useMemo(() => overviewActive ? getDailyMovementTrend(data) : {}, [overviewActive, data.points, calendarDay]);
-  const tripOptions = useMemo(() => getTripFilterOptions(data, selectedTouristId), [data.trips, selectedTouristId]);
   const selectMovementViews = useMemo(createMovementDashboardSelector, []);
   const movementViews = useMemo(
     () =>
       recordsActive ? selectMovementViews(data, {
         touristId: selectedTouristId,
-        tripId: selectedTripId,
+        state: selectedMovementState,
         fromDate,
         toDate,
       }) : emptyMovementViews,
-    [data.trips, data.points, data.destinations, data.users, data.analyses, selectMovementViews, recordsActive, selectedTouristId, selectedTripId, fromDate, toDate]
+    [data.trips, data.points, data.destinations, data.users, data.analyses, selectMovementViews, recordsActive, selectedTouristId, selectedMovementState, fromDate, toDate]
   );
   const movementRecords = movementViews.records;
   const movementTripRecords = movementViews.tripRecords;
@@ -167,7 +168,7 @@ export function AdminWorkspace({
   const cityOptions = useMemo(() => Array.from(new Set(data.destinations.map((destination) => destination.city))).sort(), [data.destinations]);
   const filteredTouristCount = new Set(movementTripRecords.map((record) => record.trip.userId)).size;
   const filteredTripCount = movementTripRecords.length;
-  const hasRecordFilters = selectedTouristId !== "all" || selectedTripId !== "all" || Boolean(fromDate) || Boolean(toDate);
+  const hasRecordFilters = selectedTouristId !== "all" || selectedMovementState !== "all" || Boolean(fromDate) || Boolean(toDate);
   const [selectedRecordTripId, setSelectedRecordTripId] = useState<string | null>(null);
   const recordReturn = useRef({ top: 0, tripId: "" });
   const openRecord = (id: string) => { recordReturn.current = { top: window.scrollY, tripId: id }; setSelectedRecordTripId(id); window.scrollTo({ top: 0, behavior: "instant" }); };
@@ -248,14 +249,8 @@ export function AdminWorkspace({
   const selectedClusterSize = selectedAnalysis ? aiInsights?.clusters.find((summary) => summary.cluster === selectedAnalysis.cluster)?.size ?? 0 : 0;
 
   useEffect(() => {
-    if (selectedTripId !== "all" && !tripOptions.some((trip) => trip.id === selectedTripId)) {
-      setSelectedTripId("all");
-    }
-  }, [selectedTripId, tripOptions]);
-
-  useEffect(() => {
     setMovementPage(1);
-  }, [fromDate, selectedTouristId, selectedTripId, toDate]);
+  }, [fromDate, selectedTouristId, selectedMovementState, toDate]);
 
 
   useEffect(() => {
@@ -319,7 +314,7 @@ export function AdminWorkspace({
 
   const resetRecordFilters = () => {
     setSelectedTouristId("all");
-    setSelectedTripId("all");
+    setSelectedMovementState("all");
     setFromDate("");
     setToDate("");
   };
@@ -368,7 +363,7 @@ export function AdminWorkspace({
 
   const touristManagementPanel = useMemo(() => <TouristDirectory rows={touristManagementRows} locale={locale} onViewMovement={(userId) => {
     setSelectedTouristId(userId);
-    setSelectedTripId("all");
+    setSelectedMovementState("all");
     setSelectedRecordTripId(null);
     setAdminTab("records");
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -385,7 +380,6 @@ export function AdminWorkspace({
           value={selectedTouristId}
           onChange={(event) => {
             setSelectedTouristId(event.target.value);
-            setSelectedTripId("all");
           }}
         >
           <option value="all">{adminText("records.allTourists")}</option>
@@ -395,13 +389,10 @@ export function AdminWorkspace({
             </option>
           ))}
         </select></label>
-        <label><span>{adminText("records.allTrips")}</span><select className="toolbar-select" aria-label={adminText("records.allTrips")} value={selectedTripId} onChange={(event) => setSelectedTripId(event.target.value)}>
-          <option value="all">{adminText("records.allTrips")}</option>
-          {tripOptions.map((trip) => (
-            <option key={trip.id} value={trip.id}>
-              {formatDateTime(trip.startedAt, locale)} - {t(trip.status === "active" ? "tourist.trips.activeTrip" : "tourist.trips.completedTrip")}
-            </option>
-          ))}
+        <label><span>{adminText("records.placeState")}</span><select className="toolbar-select" aria-label={adminText("records.placeState")} value={selectedMovementState} onChange={(event) => setSelectedMovementState(event.target.value as MalaysianState | "all" | "unmatched")}>
+          <option value="all">{adminText("records.allStates")}</option>
+          {discoveryStates.map((state) => <option key={state} value={state}>{state}</option>)}
+          <option value="unmatched">{adminText("records.unmatchedState")}</option>
         </select></label>
         <label><span>{t("tourist.events.fromDate")}</span><input className="toolbar-input" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} /></label>
         <label><span>{t("tourist.events.toDate")}</span><input className="toolbar-input" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} /></label>

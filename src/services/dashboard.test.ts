@@ -15,7 +15,6 @@ import {
   getProfileDistribution,
   getRequiredDemoFlowCoverage,
   getTourists,
-  getTripFilterOptions,
   summarizeDashboard,
 } from "./dashboard";
 import { summarizeTrip } from "./movement";
@@ -148,6 +147,43 @@ describe("dashboard service", () => {
     expect(select(removed)).toEqual({ records: [], tripRecords: [] });
   });
 
+  it("filters cross-state routes and exports by the same state, tourist and reading date", () => {
+    const trip = { ...initialData.trips[0], id: "cross-state", userId: "tourist-demo", startedAt: "2026-10-01T08:00:00Z", endedAt: "2026-10-02T12:00:00Z" };
+    const destinations = [
+      { ...initialData.destinations[0], id: "penang-place", name: "Penang test place", state: "Penang" as const, latitude: 5.4, longitude: 100.3 },
+      { ...initialData.destinations[0], id: "kedah-place", name: "Kedah test place", state: "Kedah" as const, latitude: 6.1, longitude: 100.4 },
+    ];
+    const points = [
+      { ...initialData.points[0], id: "penang-reading", tripId: trip.id, latitude: 5.4, longitude: 100.3, recordedAt: "2026-10-01T09:00:00Z" },
+      { ...initialData.points[0], id: "kedah-reading", tripId: trip.id, latitude: 6.1, longitude: 100.4, recordedAt: "2026-10-02T09:00:00Z" },
+      { ...initialData.points[0], id: "unknown-reading", tripId: trip.id, latitude: 0, longitude: 0, recordedAt: "2026-10-02T10:00:00Z" },
+      { ...initialData.points[0], id: "other-tourist-reading", tripId: "other-tourist", latitude: 5.4, longitude: 100.3, recordedAt: "2026-10-01T09:00:00Z" },
+    ];
+    const data = { ...initialData, destinations, points, trips: [trip, { ...trip, id: "other-tourist", userId: "someone-else" }, { ...trip, id: "no-readings" }] };
+    const select = createMovementDashboardSelector();
+    const all = select(data);
+    const filters = { state: "Penang" as const, touristId: trip.userId, fromDate: "2026-10-01", toDate: "2026-10-01" };
+    const filtered = select(data, filters);
+    expect(filtered.records.map(row => row.point.id)).toEqual(["penang-reading"]);
+    expect(filtered.tripRecords.map(row => row.trip.id)).toEqual([trip.id]);
+    expect(filtered.tripRecords[0].points).toHaveLength(3); // Full route stays available in detail.
+    expect(filtered.tripRecords[0].summary).toBe(all.tripRecords[0].summary);
+    const csv = buildMovementRecordsCsv(filtered.records);
+    expect(csv).toContain('"Penang test place"');
+    expect(csv).not.toContain('"Kedah test place"');
+    expect(select(data, { ...filters, state: "Kedah" })).toEqual({ records: [], tripRecords: [] });
+    expect(select(data, { ...filters, state: "Kedah", fromDate: "2026-10-02", toDate: "2026-10-02" }).records.map(row => row.point.id)).toEqual(["kedah-reading"]);
+    const unmatched = select(data, { state: "unmatched" });
+    expect(unmatched.records.map(row => row.point.id)).toEqual(["unknown-reading"]);
+    expect(unmatched.tripRecords.map(row => row.trip.id)).toEqual([trip.id, "no-readings"]);
+    expect(select(data, { state: "Sabah" })).toEqual({ records: [], tripRecords: [] });
+    expect(select(data, { state: "all" })).toEqual(all);
+    const changed = { ...data, destinations: destinations.map(place => ({ ...place, state: "Perak" as const })) };
+    expect(select(changed, filters)).toEqual({ records: [], tripRecords: [] });
+    expect(select(changed, { ...filters, state: "Perak" }).records).toHaveLength(1);
+    expect(select({ ...data, points: [] }, filters)).toEqual({ records: [], tripRecords: [] });
+  });
+
   it("filters movement records by selected tourist and enriches each point", () => {
     const records = getMovementRecords(initialData, "tourist-demo");
 
@@ -176,13 +212,6 @@ describe("dashboard service", () => {
     expect(records).toHaveLength(expectedCount);
     expect(records.every((record) => record.point.tripId === "trip-demo-2")).toBe(true);
     expect(records.every((record) => record.point.recordedAt.startsWith(dateKey))).toBe(true);
-  });
-
-  it("returns trip filter options for a selected tourist", () => {
-    const trips = getTripFilterOptions(initialData, "tourist-demo");
-
-    expect(trips).toHaveLength(1);
-    expect(trips[0].id).toBe("trip-demo-1");
   });
 
   it("summarizes movement records by trip for administrator review", () => {
