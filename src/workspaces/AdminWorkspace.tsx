@@ -245,7 +245,7 @@ export function AdminWorkspace({
   const visibleSafetyRecords = showAllSafetyCases ? filteredSafetyRecords : filteredSafetyRecords.slice(0, adminSafetyPreviewLimit);
   const hiddenSafetyRecordCount = filteredSafetyRecords.length - visibleSafetyRecords.length;
   const analysisPageResult = directoryPage(analysisRows, analysisPage, analysisPageSize);
-  const selectedKValue = Math.min(3, analysisRows.length);
+  const selectedKValue = new Set(analysisRows.map((analysis) => analysis.cluster)).size;
   const selectedClusterSize = selectedAnalysis ? aiInsights?.clusters.find((summary) => summary.cluster === selectedAnalysis.cluster)?.size ?? 0 : 0;
 
   useEffect(() => {

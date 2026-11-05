@@ -93,6 +93,52 @@ describe("analytics service", () => {
     ).toBe(true);
   });
 
+  it("uses recovered groups through trip analysis and keeps silhouette out of ranking", () => {
+    const categories = ["cultural", "nature", "urban"] as const;
+    const destinations = categories.map((category, index) => ({
+      ...initialData.destinations[0], id: category, name: category, category,
+      latitude: 0, longitude: 10 + index * 10,
+    }));
+    const trips = categories.flatMap((category) => Array.from({ length: 4 }, (_, index) => ({
+      ...initialData.trips[0], id: `${category}-${index}`,
+      userId: "tourist-demo", status: "completed" as const,
+    })));
+    const points = trips.flatMap((trip) => {
+      const dominant = categories.find((category) => trip.id.startsWith(category))!;
+      const places = destinations.flatMap((place) => Array.from({ length: place.category === dominant ? 18 : 1 }, () => place));
+      return places.map((place, index) => ({
+        ...initialData.points[0], id: `${trip.id}-${index}`, tripId: trip.id,
+        userId: trip.userId, latitude: place.latitude, longitude: place.longitude,
+        source: "demo" as const,
+        recordedAt: new Date(Date.UTC(2026, 9, 1, 0, index)).toISOString(),
+      }));
+    });
+    const data = { ...initialData, trips, points, destinations };
+    const analyses = analyzeAllTrips(data);
+    expect(new Set(analyses.map((analysis) => analysis.cluster)).size).toBe(3);
+    expect(analyses.every((analysis) => analysis.silhouetteScore === 1)).toBe(true);
+    const reversed = analyzeAllTrips({ ...data, trips: [...trips].reverse() });
+    for (const analysis of analyses) {
+      const repeat = reversed.find((row) => row.tripId === analysis.tripId)!;
+      expect(repeat.profile).toBe(analysis.profile);
+      expect(repeat.kMeansCentroid).toEqual(analysis.kMeansInput);
+    }
+    const recommendationData = {
+      ...data,
+      destinations: [...destinations, { ...destinations[0], id: "unvisited-place", longitude: 40 }],
+    };
+    const ranking = (silhouetteScore: number) => recommendForUser(
+      "tourist-demo", recommendationData, { ...analyses[0], silhouetteScore }
+    ).map(({ destinationId, scoreBreakdown }) => ({ destinationId, scoreBreakdown }));
+    expect(ranking(0).length).toBeGreaterThan(0);
+    expect(ranking(0)).toEqual(ranking(1));
+    const onlyTrip = trips[0];
+    const only = analyzeAllTrips({ ...data, trips: [onlyTrip], points: points.filter((point) => point.tripId === onlyTrip.id) });
+    expect(only).toHaveLength(1);
+    expect(only[0].silhouetteScore).toBe(0);
+    expect(only[0].cluster).toBe(0);
+  });
+
   it("reports AI evaluation evidence for labelled demo records", () => {
     const evaluation = evaluateAiOutput(initialData);
 

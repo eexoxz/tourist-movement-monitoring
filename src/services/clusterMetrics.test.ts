@@ -6,7 +6,8 @@ function referenceScores(vectors: number[][], assignments: number[], k: number) 
     if (k <= 1 || vectors.length <= 1) return 0;
     const distances = vectors.map((other) => Math.sqrt(vector.reduce((sum, value, dimension) => sum + (value - other[dimension]) ** 2, 0)));
     const own = distances.filter((_, other) => other !== index && assignments[other] === assignments[index]);
-    const a = own.length ? own.reduce((sum, value) => sum + value, 0) / own.length : 0;
+    if (own.length === 0) return 0;
+    const a = own.reduce((sum, value) => sum + value, 0) / own.length;
     const b = Math.min(...Array.from({ length: k }, (_, cluster) => {
       const candidates = distances.filter((_, other) => assignments[other] === cluster);
       return cluster !== assignments[index] && candidates.length ? candidates.reduce((sum, value) => sum + value, 0) / candidates.length : Infinity;
@@ -22,7 +23,14 @@ describe("grouped silhouette calculation", () => {
     expect(silhouetteScores(vectors, assignments, 3)).toEqual(referenceScores(vectors, assignments, 3));
   });
 
-  it("preserves single cluster, singleton and empty cluster behavior", () => {
+  it("matches reference singleton and ordinary Euclidean scores", () => {
+    // Expected results independently checked with scikit-learn 1.7.2 silhouette_samples.
+    expect(silhouetteScores([[1, 0], [0, 1], [0, 0.9]], [0, 1, 1], 2)).toEqual([0, 0.93, 0.93]);
+    expect(silhouetteScores([[0], [1], [9], [10]], [0, 0, 1, 1], 2)).toEqual([0.89, 0.88, 0.88, 0.89]);
+    expect(silhouetteScores([[1], [1], [1], [1]], [0, 0, 1, 1], 2)).toEqual([0, 0, 0, 0]);
+  });
+
+  it("returns zero for degenerate inputs and handles unoccupied cluster slots", () => {
     for (const [vectors, assignments, k] of [
       [[], [], 0], [[[1]], [0], 1], [[[1], [2]], [0, 0], 1],
       [[[1], [1], [2]], [0, 0, 1], 3], [[[1], [1]], [0, 1], 2],

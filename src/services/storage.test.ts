@@ -187,6 +187,7 @@ describe("storage service", () => {
     expect(normalized.recommendations[0].scoreBreakdown.unvisited).toBe(0);
     expect(normalized.analyses[0].clusterLabel).toBe("Unlabelled movement cluster");
     expect(normalized.analyses[0].decisionTreeDepth).toBe(0);
+    expect(normalized.analyses[0].silhouetteScore).toBe(0.5);
     expect(normalized.analyses[0].clusterCentroid.urban).toBe(0);
     expect(normalized.analyses[0].kMeansInput.uniqueDestinations).toBe(0);
     expect(normalized.analyses[0].kMeansCentroid.urbanProportion).toBe(0);

@@ -19,6 +19,7 @@ import { distanceKm } from "./geo";
 import { createDestinationSpatialIndex } from "./destinationSpatialIndex";
 import { filterQualityMovementPoints, isContinuousMovementSegment } from "./movementQuality";
 import { silhouetteScores } from "./clusterMetrics";
+import { clusterVectors } from "./kMeans";
 import { getRecommendationEvidence } from "./recommendationEvidence";
 
 const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
@@ -311,14 +312,6 @@ function euclidean(a: number[], b: number[]) {
   return Math.sqrt(a.reduce((sum, value, index) => sum + Math.pow(value - b[index], 2), 0));
 }
 
-function averageVector(vectors: number[][], fallback: number[]) {
-  if (vectors.length === 0) {
-    return fallback;
-  }
-
-  return fallback.map((_, index) => vectors.reduce((sum, vector) => sum + vector[index], 0) / vectors.length);
-}
-
 function createTripFeatures(data: AppData): TripFeature[] {
   const pointsByTrip = movementPointsByTrip(data.points);
   const destinationIndex = createDestinationSpatialIndex(data.destinations);
@@ -351,25 +344,9 @@ function runKMeans(features: TripFeature[]) {
     return new Map<string, ClusterAssignment>();
   }
 
-  const k = Math.min(3, features.length);
-  let centroids = features.slice(0, k).map((feature) => feature.vector);
-  let assignments = features.map((_, index) => index % k);
-
-  for (let iteration = 0; iteration < 12; iteration += 1) {
-    assignments = features.map((feature) => {
-      const distances = centroids.map((centroid) => euclidean(feature.vector, centroid));
-      return distances.indexOf(Math.min(...distances));
-    });
-
-    centroids = centroids.map((centroid, clusterIndex) =>
-      averageVector(
-        features.filter((_, featureIndex) => assignments[featureIndex] === clusterIndex).map((feature) => feature.vector),
-        centroid
-      )
-    );
-  }
-
-  const silhouettes = silhouetteScores(features.map((feature) => feature.vector), assignments, k);
+  const vectors = features.map((feature) => feature.vector);
+  const { assignments, centroids } = clusterVectors(vectors);
+  const silhouettes = silhouetteScores(vectors, assignments, centroids.length);
   return new Map(
     features.map((feature, index) => [
       feature.trip.id,

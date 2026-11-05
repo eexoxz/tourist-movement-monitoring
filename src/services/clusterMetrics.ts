@@ -24,8 +24,10 @@ export function silhouetteScores(vectors: number[][], assignments: number[], clu
 
   return keys.map((key, index) => {
     const cluster = assignments[index];
+    // A singleton has no within-cluster comparison, so its silhouette is zero.
+    if (totals[cluster] <= 1) return 0;
     const sums = sumsByVector.get(key)!;
-    const a = totals[cluster] > 1 ? sums[cluster] / (totals[cluster] - 1) : 0;
+    const a = sums[cluster] / (totals[cluster] - 1);
     const b = Math.min(...totals.map((count, other) => other !== cluster && count > 0 ? sums[other] / count : Infinity));
     return Number.isFinite(b) && Math.max(a, b) > 0 ? Number(((b - a) / Math.max(a, b)).toFixed(2)) : 0;
   });
