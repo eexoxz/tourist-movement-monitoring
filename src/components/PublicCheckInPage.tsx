@@ -8,6 +8,7 @@ import { LanguageSelector } from "./AuthScreen";
 import { notificationSource, uiText } from "../services/uiText";
 import { checkInSyncText } from "../services/checkInSyncCopy";
 import type { CheckInSyncState } from "../services/checkInSync";
+import { getDestinationState } from "../services/destinationState";
 import { getPathForView } from "../services/access";
 
 export type PublicCheckInResult = {
@@ -33,6 +34,7 @@ type PublicCheckInPageProps = {
 };
 
 export function PublicCheckInPage({ destination, locale, missingReason, passId, passVerified, syncStatus, initializing = false, onConfirm, onLocaleChange }: PublicCheckInPageProps) {
+  const state = destination ? getDestinationState(destination) : undefined;
   const [result, setResult] = useState<PublicCheckInResult | null>(null);
   const [saving, setSaving] = useState(false);
   const confirming = useRef(false);
@@ -100,8 +102,8 @@ export function PublicCheckInPage({ destination, locale, missingReason, passId, 
             <dd>{passVerified ? t("publicCheckin.verified") : t("publicCheckin.notRecognised")}</dd>
           </div>
           <div>
-            <dt>{t("publicCheckin.area")}</dt>
-            <dd>{destination?.city ?? t("publicCheckin.unknown")}</dd>
+            <dt>{t("tourist.events.state")}</dt>
+            <dd>{state ? uiText(locale, state) : t("publicCheckin.unknown")}</dd>
           </div>
           <div>
             <dt>{t("publicCheckin.syncMode")}</dt>

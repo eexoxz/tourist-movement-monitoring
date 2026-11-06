@@ -1,5 +1,6 @@
 import type { Destination, DestinationCategory } from "../types";
 import type { Locale } from "./i18n";
+import { getDestinationState } from "./destinationState";
 import { catalogueGuidance } from "./catalogueGuidance";
 import { destinationNarrative } from "./destinationNarrative";
 import { destinations as sourceDestinations } from "../data/destinations";
@@ -260,6 +261,7 @@ export function localizeDestination(destination: Destination, locale: Locale): D
     ...destination,
     name: locale === "zh" ? chineseDestinationNames[destination.id] ?? destination.name : destination.name,
     city,
+    state: getDestinationState(destination),
     description: destinationNarrative({ ...destination, city }, locale) ?? interpolate(descriptionTemplate, { city }),
     openingHours: hasCustomDestinationFact(destination, "openingHours") ? destination.openingHours : copy.openingHours,
     feeNote: hasCustomDestinationFact(destination, "feeNote") ? destination.feeNote : copy.feeNote,

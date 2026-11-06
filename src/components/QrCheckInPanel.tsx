@@ -5,6 +5,7 @@ import { createDestinationCheckInCode, parseDestinationCheckInCode } from "../se
 import type { Destination } from "../types";
 import { DestinationVisual } from "./DestinationVisual";
 import { uiText } from "../services/uiText";
+import { getDestinationState } from "../services/destinationState";
 import { createQrCameraSession } from "../services/qrCamera";
 
 type BarcodeDetectorShape = {
@@ -153,11 +154,14 @@ export function QrCheckInPanel({ destinations, selectedDestination, locale = "en
       <label>
         {t("tourist.checkin.attraction")}
         <select value={selectedDestination?.id ?? ""} onChange={(event) => onDestinationChange(event.target.value)}>
-          {destinations.map((destination) => (
-            <option key={destination.id} value={destination.id}>
-              {destination.name} - {destination.city}
-            </option>
-          ))}
+          {destinations.map((destination) => {
+            const state = getDestinationState(destination);
+            return (
+              <option key={destination.id} value={destination.id}>
+                {destination.name} · {state ? uiText(locale, state) : t("publicCheckin.unknown")}
+              </option>
+            );
+          })}
         </select>
       </label>
 
