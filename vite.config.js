@@ -45,11 +45,7 @@ export default defineConfig({
             return "tourism-data";
           }
 
-          if (
-            normalizedId.includes("/src/services/analytics.ts") ||
-            normalizedId.includes("/src/services/dashboard.ts") ||
-            normalizedId.includes("/src/services/touristManagement.ts")
-          ) {
+          if (normalizedId.includes("/src/services/analytics.ts")) {
             return "analysis-core";
           }
         },

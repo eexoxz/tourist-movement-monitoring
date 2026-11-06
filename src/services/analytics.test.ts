@@ -306,6 +306,23 @@ describe("analytics service", () => {
     expect(recommendations.every((recommendation) => data.destinations.find((place) => place.id === recommendation.destinationId)?.city === "Penang")).toBe(true);
   });
 
+  it("uses distance for local score ties and catalogue order for nationwide ties", () => {
+    const point = { latitude: 5.4141, longitude: 100.3288, recordedAt: "2026-10-30T12:00:00Z" };
+    const base = initialData.destinations[0];
+    const destinations = [
+      { ...base, id: "furthest", latitude: point.latitude + 0.020, longitude: point.longitude },
+      { ...base, id: "near-fallback", latitude: point.latitude + 0.015, longitude: point.longitude },
+      { ...base, id: "local-b", latitude: point.latitude + 0.005, longitude: point.longitude },
+      { ...base, id: "local-a", latitude: point.latitude + 0.003, longitude: point.longitude },
+    ];
+    const data = { ...initialData, destinations, trips: [], points: [], checkIns: [] };
+    const ids = (radiusKm: number) => recommendForUser("new-tourist", data, undefined, [], point, { radiusKm })
+      .map((recommendation) => recommendation.destinationId);
+
+    expect(ids(1)).toEqual(["local-a", "local-b", "near-fallback"]);
+    expect(ids(0)).toEqual(["furthest", "near-fallback", "local-b"]);
+  });
+
   it("keeps fallback recommendations nearest-first when only one local destination is available", () => {
     const penangPoint = {
       latitude: 5.4141,

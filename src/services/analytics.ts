@@ -691,100 +691,118 @@ export function analyzeAllTrips(data: AppData): AnalysisResult[] {
   return results;
 }
 
+type RecommendationOptions = { localOnly?: boolean; radiusKm?: number; ignoreHistoryLocation?: boolean };
+type RecommendationReference = Pick<MovementPoint, "latitude" | "longitude" | "recordedAt">;
+
+function retainBest<T>(rows: T[], candidate: T, compare: (a: T, b: T) => number, limit: number) {
+  const index = rows.findIndex((row) => compare(candidate, row) < 0);
+  if (index < 0) {
+    if (rows.length < limit) rows.push(candidate);
+    return;
+  }
+  rows.splice(index, 0, candidate);
+  if (rows.length > limit) rows.pop();
+}
+
+function indexRecommendationDemand(rows: DestinationDemand[]) {
+  return new Map(rows.map((row) => [row.destinationId, row]));
+}
+
 export function recommendForUser(
   userId: string,
   data: AppData,
   analysis?: AnalysisResult,
   destinationDemand?: DestinationDemand[],
-  referencePoint?: Pick<MovementPoint, "latitude" | "longitude" | "recordedAt">,
-  options: { localOnly?: boolean; radiusKm?: number; ignoreHistoryLocation?: boolean } = {}
+  referencePoint?: RecommendationReference,
+  options: RecommendationOptions = {}
+): Recommendation[] {
+  return rankRecommendations(userId, data, analysis, indexRecommendationDemand(destinationDemand ?? calculateDestinationDemand(data)), referencePoint, options);
+}
+
+function rankRecommendations(
+  userId: string,
+  data: AppData,
+  analysis: AnalysisResult | undefined,
+  demandByDestination: ReadonlyMap<string, DestinationDemand>,
+  referencePoint?: RecommendationReference,
+  options: RecommendationOptions = {}
 ): Recommendation[] {
   const { visited, latestPoint: lastRecordedPoint } = getRecommendationEvidence(data, userId);
-  const historyLocation = options.ignoreHistoryLocation ? undefined : lastRecordedPoint;
-  const latestPoint = referencePoint ?? historyLocation;
-  if (options.localOnly && !latestPoint) {
-    return [];
-  }
+  const latestPoint = referencePoint ?? (options.ignoreHistoryLocation ? undefined : lastRecordedPoint);
+  if (options.localOnly && !latestPoint) return [];
+
   const profile = analysis?.profile ?? "mixed";
-  const hasPersonalizedAnalysis = Boolean(analysis);
-  const demandByDestination = new Map((destinationDemand ?? calculateDestinationDemand(data)).map((demand) => [demand.destinationId, demand]));
   const hidden = new Set(data.users.find((user) => user.id === userId)?.hiddenDestinationIds ?? []);
-  const availableDestinations = data.destinations.filter((destination) => !visited.has(destination.id) && !hidden.has(destination.id));
-  const destinationDistances = new Map<string, number>();
-  const rankedAvailableDestinations = latestPoint
-    ? availableDestinations
-        .map((destination) => {
-          const distance = distanceKm(latestPoint, destination);
-          destinationDistances.set(destination.id, distance);
-          return { destination, distance };
-        })
-        .sort((a, b) => a.distance - b.distance)
-        .map((row) => row.destination)
-    : availableDestinations;
-  const localDestinations = rankedAvailableDestinations.filter((destination) => (destinationDistances.get(destination.id) ?? Number.POSITIVE_INFINITY) <= (options.radiusKm ?? localRecommendationRadiusKm));
-  const localDestinationIds = new Set(localDestinations.map((destination) => destination.id));
-  const recommendationPool = options.localOnly
-    ? localDestinations
-    : localDestinations.length > 0
-      ? [
-          ...localDestinations,
-          ...rankedAvailableDestinations
-            .filter((destination) => !localDestinationIds.has(destination.id))
-            .slice(0, Math.max(0, 3 - localDestinations.length)),
-        ]
-      : availableDestinations;
-
-  return recommendationPool
+  const radius = options.radiusKm ?? localRecommendationRadiusKm;
+  const available = data.destinations
+    .filter((destination) => !visited.has(destination.id) && !hidden.has(destination.id))
     .map((destination) => {
-      const demand = demandByDestination.get(destination.id);
-      const profileScore = profileMatchesCategory(profile, destination.category) ? 28 : 8;
-      const clusterFeature = categoryToKMeansFeature(destination.category);
-      const clusterScore = analysis ? Math.round((analysis.kMeansCentroid[clusterFeature] / 100) * 24) : 0;
-      const unvisitedScore = 20;
-      const distance = latestPoint ? destinationDistances.get(destination.id) : undefined;
-      const distanceScore =
-        distance === undefined
-          ? 12
-          : distance <= 3
-            ? 42
-            : distance <= 15
-              ? 35
-              : distance <= 45
-                ? 24
-                : Math.max(0, 18 - distance * 0.35);
-      const movementScore = demand ? Math.round(demand.popularityScore * 0.2) : 0;
-      const scoreBreakdown = {
-        profileFit: profileScore,
-        clusterPattern: clusterScore,
-        movementDemand: movementScore,
-        proximity: Math.round(distanceScore),
-        unvisited: unvisitedScore,
-      };
-      const score = Math.min(
-        100,
-        scoreBreakdown.profileFit + scoreBreakdown.clusterPattern + scoreBreakdown.unvisited + scoreBreakdown.proximity + scoreBreakdown.movementDemand
-      );
-      const reason =
-        !hasPersonalizedAnalysis
-          ? "Basic suggestion shown until enough movement history is available for AI analysis."
-          : clusterScore >= 12
-          ? `Matches the ${profile} travel profile and the strongest K-Means cluster pattern from the tourist route.`
-          : demand && demand.tier !== "low"
-          ? `Matches the ${profile} travel profile and has strong movement demand from recorded tourist routes.`
-          : profile === "mixed"
-          ? "Matches a balanced movement profile and has not been visited in the current history."
-          : `Matches the ${profile} travel profile and has not been visited in the current history.`;
+      const distance = latestPoint ? distanceKm(latestPoint, destination) : undefined;
+      return { destination, distance, local: (distance ?? Infinity) <= radius };
+    });
+  const local = available.filter((row) => row.local);
+  const byDistance = (a: { distance?: number }, b: { distance?: number }) => (a.distance ?? Infinity) - (b.distance ?? Infinity);
+  let pool = options.localOnly || local.length ? local : available;
+  if (!options.localOnly && local.length > 0 && local.length < 3) {
+    const nearestOutside: typeof available = [];
+    for (const row of available) {
+      if (!row.local) retainBest(nearestOutside, row, byDistance, 3 - local.length);
+    }
+    pool = [...local, ...nearestOutside];
+  }
 
-      return {
-        destinationId: destination.id,
-        score,
-        scoreBreakdown,
-        reason,
-      };
-    })
-    .sort((a, b) => Number(localDestinationIds.has(b.destinationId)) - Number(localDestinationIds.has(a.destinationId)) || b.score - a.score)
-    .slice(0, 3)
-    .map((recommendation) => ({ ...recommendation, id: createId("recommendation"), userId, generatedAt: new Date().toISOString() }));
+  type Ranked = (typeof available)[number] & { score: number; scoreBreakdown: NonNullable<Recommendation["scoreBreakdown"]> };
+  const best: Ranked[] = [];
+  // With local options, distance breaks score ties. Nationwide fallback keeps catalogue order.
+  const byRank = (a: Ranked, b: Ranked) => Number(b.local) - Number(a.local) || b.score - a.score || (local.length ? byDistance(a, b) : 0);
+  for (const row of pool) {
+    const { destination, distance } = row;
+    const demand = demandByDestination.get(destination.id);
+    const profileScore = profileMatchesCategory(profile, destination.category) ? 28 : 8;
+    const clusterFeature = categoryToKMeansFeature(destination.category);
+    const clusterScore = analysis ? Math.round((analysis.kMeansCentroid[clusterFeature] / 100) * 24) : 0;
+    const unvisitedScore = 20;
+    const distanceScore =
+      distance === undefined
+        ? 12
+        : distance <= 3
+          ? 42
+          : distance <= 15
+            ? 35
+            : distance <= 45
+              ? 24
+              : Math.max(0, 18 - distance * 0.35);
+    const movementScore = demand ? Math.round(demand.popularityScore * 0.2) : 0;
+    const scoreBreakdown = {
+      profileFit: profileScore,
+      clusterPattern: clusterScore,
+      movementDemand: movementScore,
+      proximity: Math.round(distanceScore),
+      unvisited: unvisitedScore,
+    };
+    const score = Math.min(
+      100,
+      scoreBreakdown.profileFit + scoreBreakdown.clusterPattern + scoreBreakdown.unvisited + scoreBreakdown.proximity + scoreBreakdown.movementDemand
+    );
+    retainBest(best, { ...row, score, scoreBreakdown }, byRank, 3);
+  }
+
+  return best.map(({ destination, score, scoreBreakdown }) => {
+    const demand = demandByDestination.get(destination.id);
+    const clusterScore = scoreBreakdown.clusterPattern;
+    const reason =
+      !analysis
+        ? "Basic suggestion shown until enough movement history is available for AI analysis."
+        : clusterScore >= 12
+        ? `Matches the ${profile} travel profile and the strongest K-Means cluster pattern from the tourist route.`
+        : demand && demand.tier !== "low"
+        ? `Matches the ${profile} travel profile and has strong movement demand from recorded tourist routes.`
+        : profile === "mixed"
+        ? "Matches a balanced movement profile and has not been visited in the current history."
+        : `Matches the ${profile} travel profile and has not been visited in the current history.`;
+
+    return { destinationId: destination.id, score, scoreBreakdown, reason, id: createId("recommendation"), userId, generatedAt: new Date().toISOString() };
+  });
 }
 
 export function refreshAnalysis(data: AppData, userId: string): AppData {
@@ -807,7 +825,8 @@ export function refreshAllRecommendations(data: AppData): AppData {
   const withAnalyses = { ...data, analyses };
   const destinationDemand = calculateDestinationDemand(withAnalyses);
   const latestAnalysisByUser = getLatestAnalysisByUser(analyses);
-  const recommendations = users.flatMap((user) => recommendForUser(user.id, withAnalyses, latestAnalysisByUser.get(user.id), destinationDemand));
+  const demandByDestination = indexRecommendationDemand(destinationDemand);
+  const recommendations = users.flatMap((user) => rankRecommendations(user.id, withAnalyses, latestAnalysisByUser.get(user.id), demandByDestination));
 
   return { ...withAnalyses, recommendations };
 }
