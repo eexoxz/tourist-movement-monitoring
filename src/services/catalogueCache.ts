@@ -12,10 +12,10 @@ export async function readDestinationCatalogue(project: string, read: () => Prom
       const cached = JSON.parse(localStorage.getItem(key) ?? "null");
       const age = Date.now() - cached?.savedAt;
       if (cached?.version === 1 && Number.isFinite(age) && age >= 0 && age < catalogueCacheLifetimeMs && Array.isArray(cached.records) && cached.records.every((row: Destination) => row && typeof row.id === "string" && typeof row.name === "string" && Number.isFinite(row.latitude) && Number.isFinite(row.longitude))) return cached.records as Destination[];
-    } catch { /* Blocked, malformed or full browser storage must not block a cloud read. */ }
+    } catch {}
   }
   const records = await read();
-  try { localStorage.setItem(key, JSON.stringify({ version: 1, savedAt: Date.now(), records })); } catch { /* Caching is optional. */ }
+  try { localStorage.setItem(key, JSON.stringify({ version: 1, savedAt: Date.now(), records })); } catch {}
   return records;
 }
 
@@ -23,5 +23,5 @@ export function clearDestinationCatalogueCache() {
   try {
     const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index));
     for (const key of keys) if (key?.startsWith(prefix)) localStorage.removeItem(key);
-  } catch { /* No persistent cache is available. */ }
+  } catch {}
 }

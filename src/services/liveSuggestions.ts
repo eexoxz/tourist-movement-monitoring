@@ -39,7 +39,6 @@ function trackingMode(user: User) {
   return user.trackingSuggestionMode ?? "balanced";
 }
 
-// GPS readings change much more often than the catalogue or activity bands.
 export function createLiveNearbySuggestionSelector() {
   let places: Destination[] | undefined;
   let activity: DestinationDemand[] | undefined;

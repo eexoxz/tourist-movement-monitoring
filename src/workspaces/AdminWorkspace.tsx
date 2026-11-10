@@ -129,8 +129,6 @@ export function AdminWorkspace({
   const aiActive = view === "dashboard" && adminTab === "ai";
   const touristsActive = view === "dashboard" && (adminTab === "tourists" || adminTab === "records");
   const overviewActive = view === "dashboard" && adminTab === "overview";
-  // The attention strip needs demand on dashboard tabs, but not on the
-  // destination editor or tourist directory. Overview-only work stays there.
   const demandActive = view === "dashboard" && !touristsActive;
   const movementTrend = useMemo(() => overviewActive ? getDailyMovementTrend(data) : {}, [overviewActive, data.points, calendarDay]);
   const selectMovementViews = useMemo(createMovementDashboardSelector, []);

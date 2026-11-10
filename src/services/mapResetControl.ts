@@ -2,7 +2,6 @@ import L from "leaflet";
 import type { Locale } from "./i18n";
 import { tripLayoutText } from "./tripLayoutCopy";
 
-// Use the same keyboard-accessible control on the movement and small location maps.
 export function addMapResetControl(map: L.Map, locale: Locale, reset: () => void) {
   const control = new L.Control({ position: "bottomright" });
   control.onAdd = () => {

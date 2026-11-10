@@ -47,9 +47,9 @@ export function pendingCloudJobs(actor: Pick<User, "id">) {
       try {
         const job = JSON.parse(localStorage.getItem(key) ?? "null") as CloudJob | null;
         if (job && job.userId === actor.id && typeof job.id === "string" && key === keyFor(job) && Array.isArray(job.changes) && job.changes.every((change) => typeof change.collection === "string" && typeof change.id === "string" && ["create", "update", "delete"].includes(change.kind) && change.data && Array.isArray(change.remove) && change.remove.every((field) => typeof field === "string"))) jobs.set(key, job);
-      } catch { /* A malformed local entry must not stop valid jobs. */ }
+      } catch {}
     }
-  } catch { /* Browser storage can be blocked. */ }
+  } catch {}
   return [...jobs.values()].filter((job) => job.userId === actor.id).sort((a, b) => a.id.localeCompare(b.id));
 }
 

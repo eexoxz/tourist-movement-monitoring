@@ -24,7 +24,6 @@ export function buildDestinationActivitySummaries(data: AppData, now = Date.now(
     const enoughVisitors = row && row.uniqueTouristCount >= 3;
     return {
       ...destination,
-      // Publish only an activity band: no identity, coordinates, routes or exact visitor counts.
       [source === "browser" ? "activitySummary" : "demoActivitySummary"]: {
         version: 1,
         windowDays: 7,

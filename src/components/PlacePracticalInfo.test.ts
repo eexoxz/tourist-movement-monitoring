@@ -32,7 +32,6 @@ describe("researched attraction practical information", () => {
       for (const row of info.hours ?? []) expect(row.time).toMatch(/\d{2}:\d{2}/);
     }
     for (const destination of latestExpansion) {
-      // Placeholder text must use the translated unknown-fact path, never override researched rates.
       expect(hasCustomDestinationFact(destination, "openingHours"), destination.id).toBe(false);
       expect(hasCustomDestinationFact(destination, "feeNote"), destination.id).toBe(false);
     }

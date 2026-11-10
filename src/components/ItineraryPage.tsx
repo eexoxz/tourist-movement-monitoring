@@ -68,7 +68,6 @@ function ItineraryEditor({ user, destinations, suggestedIds = emptySuggestedIds,
   const editorStart = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!selectedId) return;
-    // An explicit plan selection reveals the editor, rather than leaving it below a long list.
     const frame = window.requestAnimationFrame(() => editorStart.current?.scrollIntoView({ block: "start", behavior: "smooth" }));
     return () => window.cancelAnimationFrame(frame);
   }, [selectedId]);

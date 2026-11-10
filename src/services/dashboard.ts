@@ -480,8 +480,6 @@ export function getMovementDashboardViews(data: AppData, filters: MovementRecord
   };
 }
 
-// Keep one snapshot per workspace. Filters reuse point grouping, place matches and
-// trip summaries; immutable table changes replace the snapshot and release the old one.
 export function createMovementDashboardSelector() {
   let previous: AppData | undefined;
   let indexes: DashboardIndexes;

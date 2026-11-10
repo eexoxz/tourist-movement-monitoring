@@ -17,7 +17,6 @@ if (!/^locations-\d{4}-\d{2}(?:-\d{2})?\.json$/.test(manifestName ?? "")) throw 
 const manifest = JSON.parse(await readFile(new URL(`./${manifestName}`, import.meta.url), "utf8"));
 const requirePhoto = manifest.photoPolicy !== "verified-venues-may-await-photo";
 
-// Use the existing CLI login; credentials stay in memory and are never exported.
 const auth = require("firebase-tools/lib/auth.js");
 const account = auth.getProjectDefaultAccount(root);
 if (!account) throw new Error("An existing Firebase CLI login is required.");

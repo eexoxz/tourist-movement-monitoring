@@ -4,7 +4,6 @@ function validStory(value) {
     && value.highlights.every(key => typeof key === "string" && /^[a-zA-Z]+$/.test(key));
 }
 
-// An editorial patch may only change these two fields, never IDs, positions or visitor data.
 export function planDescriptionUpdates(updates, existing) {
   const rows = new Map(existing.map(row => [row.id, row]));
   const seen = new Set();

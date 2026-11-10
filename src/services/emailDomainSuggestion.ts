@@ -1,7 +1,5 @@
 import { isValidEmail } from "./accounts";
 
-// Advisory only: these are common provider misspellings, not a domain allow-list.
-// Unfamiliar and country-specific domains remain valid and usable.
 const providerSpellings: Record<string, readonly string[]> = {
   gmail: ["gmail", "gmai", "gmal", "gmil", "gail", "gamil", "gmial", "gnail", "gmaill"],
   outlook: ["outlook", "outlok", "otlook", "outllook", "outloook"],

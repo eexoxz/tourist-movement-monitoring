@@ -10,7 +10,6 @@ const map = readSource("src/components/MapView.tsx");
 const home = readSource("src/components/TouristHome.tsx");
 const trip = readSource("src/components/TripExperience.tsx");
 
-// Focused suites test behaviour; these checks guard browser and map wiring they cannot mount.
 describe("workspace integration guardrails", () => {
   it("paginates admin records and opens analysis details only on request", () => {
     expect(admin).not.toContain("?? analysisRows[0]");

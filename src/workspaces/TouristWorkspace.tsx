@@ -157,7 +157,6 @@ export function TouristWorkspace({
   const latestKnownPoint = activePoints.at(-1) ?? lastBrowserLocation ?? (activeTrip ? undefined : tripPoints.at(-1));
   const latestGpsPoint = currentConsent ? getLatestDiscoveryPoint(activePoints.at(-1), lastBrowserLocation) : undefined;
   const discoveryGpsPoint = getDiscoveryReference({ ...user, discoveryLocationMode: "current" }, latestGpsPoint);
-  // Recheck GPS freshness above; unrelated edits must not replace the selected state's reference.
   const browsingGpsPoint = user.discoveryLocationMode === "area" ? undefined : discoveryGpsPoint;
   const discoveryReference = useMemo(() => getDiscoveryReference(user, browsingGpsPoint), [user.discoveryLocationMode, user.discoveryAreaId, browsingGpsPoint]);
   const canonicalDiscoveryDestinations = useMemo(() => getDiscoveryDestinations(data.destinations, user, discoveryReference), [data.destinations, user.discoveryLocationMode, user.discoveryAreaId, user.hiddenDestinationIds, discoveryReference]);

@@ -42,7 +42,6 @@ export function HomeSpotlight({ destinations, events = [], context, locale, onOp
   }, []);
 
   useEffect(() => {
-    // Do not advance during a swipe, but never leave autoplay paused after a click.
     const finishGesture = () => setInteracting(false);
     window.addEventListener("pointerup", finishGesture);
     window.addEventListener("pointercancel", finishGesture);

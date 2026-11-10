@@ -36,7 +36,6 @@ function FestivalEventDetailsComponent({ event, destinationById, locale, initial
 }) {
   const [open, setOpen] = useState(initiallyOpen);
   useEffect(() => setOpen(initiallyOpen), [initiallyOpen]);
-  // Closed disclosures do not mount photo components or prepare visiting details.
   const destinations = open ? event.destinationIds.flatMap((id) => {
     const destination = destinationById.get(id);
     return destination ? [destination] : [];

@@ -39,7 +39,6 @@ export function loadLocaleCatalog(locale: Locale): Promise<void> {
   return request;
 }
 
-// Keep the previous language visible until a complete catalogue is ready.
 export function createLocaleSelection(load = loadLocaleCatalog) {
   let revision = 0;
   return async (locale: Locale, apply: (locale: Locale) => void) => {

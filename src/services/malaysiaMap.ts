@@ -1,8 +1,6 @@
 import type { Map as LeafletMap, MapOptions } from "leaflet";
 import { projectMapCoordinate } from "./movementMapGeometry";
 
-// Include the peninsula, Sabah, Sarawak, Labuan and Malaysia's coastal islands.
-// The navigation envelope leaves room around the country for edge destinations.
 export const malaysiaViewBounds: [[number, number], [number, number]] = [[0.75, 99.5], [7.6, 119.55]];
 export const malaysiaNavigationBounds: [[number, number], [number, number]] = [[-0.5, 98], [9, 121.5]];
 export const malaysiaMapOptions: MapOptions = {

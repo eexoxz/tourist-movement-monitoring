@@ -24,7 +24,6 @@ export function ItineraryLibrary({ entries, selectedId, cloud, busy, locale, onS
   }, [entries, query, locale]);
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, pages - 1);
-  // Copies/new plans can be created from the editor as well as the library.
   useEffect(() => {
     if (selectedId === previousSelection.current) return;
     previousSelection.current = selectedId;

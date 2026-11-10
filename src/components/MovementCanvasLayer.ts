@@ -119,7 +119,6 @@ export class MovementCanvasLayer extends L.Layer {
         context.strokeStyle = "#be123c"; context.lineWidth = 2; context.stroke();
       }
     }
-    // Counts permit an accessible UI and regression checks without exposing location data.
     canvas.dataset.loadedPoints = String(this.points.length);
     canvas.dataset.drawnPoints = String(visible);
     canvas.dataset.paintedDots = String(painted);

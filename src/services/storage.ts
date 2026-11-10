@@ -308,7 +308,7 @@ export function loadSession(): string | null {
   try {
     const session = sessionStorage.getItem(SESSION_KEY);
     if (session) return session;
-  } catch { /* Session storage may be blocked. */ }
+  } catch {}
   try { return localStorage.getItem(SESSION_KEY); } catch { return null; }
 }
 
@@ -320,8 +320,8 @@ export function saveSession(userId: string, rememberSession = true) {
 }
 
 export function clearSession() {
-  try { localStorage.removeItem(SESSION_KEY); } catch { /* Storage can be blocked. */ }
-  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* Storage can be blocked. */ }
+  try { localStorage.removeItem(SESSION_KEY); } catch {}
+  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
 }
 
 export function createId(prefix: string) {

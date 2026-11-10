@@ -6,7 +6,6 @@ import { destinationAdminText } from "./destinationAdminCopy";
 import { demoControlsText } from "./demoDatasetControlsCopy";
 import { deviceText } from "./deviceCopy";
 
-// Exercise every standalone feature dictionary, including lazy itinerary screens.
 import.meta.glob("./*Copy.ts", { eager: true });
 const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort();
 

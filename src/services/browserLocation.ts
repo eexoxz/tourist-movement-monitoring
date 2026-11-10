@@ -100,7 +100,6 @@ export function saveLastBrowserLocation(userId: string, point: MovementPoint) {
   try {
     localStorage.setItem(getLastBrowserLocationKey(userId), JSON.stringify(point));
   } catch {
-    // Location still works for this session when browser storage is unavailable.
   }
 }
 

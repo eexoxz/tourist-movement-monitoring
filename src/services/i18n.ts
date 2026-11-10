@@ -567,7 +567,6 @@ export function saveLocale(locale: Locale) {
   try {
     localStorage.setItem(STORAGE_KEY, locale);
   } catch {
-    // The selected language still works when browser storage is blocked.
   }
 }
 

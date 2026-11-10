@@ -197,7 +197,6 @@ export function getTouristWorkspaceData(data: AppData, userId: string, selectedT
   };
 }
 
-// Keep route selection cheap without retaining earlier datasets or other users' data.
 const workspaceInputs = ["destinations", "trips", "points", "analyses", "recommendations", "sosAlerts", "incidentReports", "checkIns", "consents"] as const;
 export function createTouristWorkspaceSelector() {
   let lastData: AppData | undefined;

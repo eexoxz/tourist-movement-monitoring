@@ -1,4 +1,3 @@
-// Authored descriptions and structured multilingual highlights. Source references remain on each destination.
 import type { Destination } from "../types";
 
 export const baseDestinationStories: Record<string, Pick<Destination, "description" | "visitorStory">> = {

@@ -60,7 +60,6 @@ export function findUserByEmail(data: AppData, email: string) {
 }
 
 export function registrationData(data: AppData, email: string, cloud: boolean): AppData {
-  // Firebase, not a potentially stale cache, decides whether an online email is registered.
   return cloud ? { ...data, users: data.users.filter((user) => normalizeEmail(user.email) !== normalizeEmail(email)) } : data;
 }
 

@@ -39,7 +39,6 @@ function identityForExport(user: User, full: boolean) {
 function reportTable(rows: TouristManagementRow[], locale: Locale, full: boolean) {
   const label = (key: Parameters<typeof reviewText>[1]) => reviewText(locale, key);
   const header = [label("touristId"), translate(locale, "auth.name"), translateAdmin(locale, "tourists.email"), label("country"), label("identity"), label("registered"), translate(locale, "map.source")];
-  // Reuse existing translated field labels for both export formats.
   return [header, ...rows.map(({ tourist: user }) => [user.id, user.name, user.email, user.nationality?.trim() || label("missing"), identityForExport(user, full) || label("missing"), user.createdAt.slice(0, 10), demoDatasetText(locale, isSampleTourist(user) ? "sampleRecord" : "realRecord")])];
 }
 

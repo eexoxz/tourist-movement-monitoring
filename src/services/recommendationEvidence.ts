@@ -52,7 +52,6 @@ let cache: {
 
 export function getRecommendationEvidence(data: AppData, userId: string): RecommendationEvidence {
   const now = Date.now();
-  // Bound both retained history and time-sensitive GPS quality checks to one short-lived index.
   if (!cache || cache.trips !== data.trips || cache.points !== data.points || cache.checkIns !== data.checkIns || cache.destinations !== data.destinations || now < cache.computedAt || now - cache.computedAt >= 5000) {
     cache = { trips: data.trips, points: data.points, checkIns: data.checkIns, destinations: data.destinations, computedAt: now, select: prepareEvidence(data) };
   }

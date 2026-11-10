@@ -25,7 +25,6 @@ function writePending(records: unknown[]) {
     else localStorage.removeItem(pendingCheckInsKey);
     return true;
   } catch {
-    // Storage restrictions must not prevent an online check-in.
     return false;
   }
 }

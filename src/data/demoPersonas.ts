@@ -1,4 +1,3 @@
-// Fictional identities only; contact addresses use a reserved example domain.
 const origins = [
   ["Malaysia", ["Aina", "Farah", "Amir", "Hakim", "Nadia"], ["Rahman", "Ismail", "Hassan", "Aziz", "Yusof"]],
   ["Indonesia", ["Dewi", "Aditya", "Intan", "Bayu", "Sari"], ["Pratama", "Wijaya", "Santoso", "Saputra", "Putri"]],

@@ -1,6 +1,5 @@
 import type { FestivalEvent } from "../types";
 
-// Curated from the linked organiser pages; these are not a live external feed.
 export const announcedEvents: FestivalEvent[] = [
   {
     "id": "penang-bridge-marathon-2026",

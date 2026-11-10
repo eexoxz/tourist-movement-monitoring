@@ -114,7 +114,6 @@ export async function saveDestinationEdit(destination: Destination, original: De
     const snapshot = await transaction.get(reference);
     if (snapshot.exists() !== Boolean(original)) throw new Error("Destination changed; refresh the catalogue");
     if (original) {
-      // Send only this form's edits; concurrent activity summaries remain untouched.
       const fields = new Set([...Object.keys(original), ...Object.keys(destination)]);
       const changes = Object.fromEntries([...fields].filter((key) => key !== "id" && JSON.stringify(original[key as keyof Destination]) !== JSON.stringify(destination[key as keyof Destination])).map((key) => [key, destination[key as keyof Destination] ?? deleteField()]));
       if (Object.keys(changes).length) transaction.update(reference, changes);

@@ -32,11 +32,9 @@ export function buildHomeSpotlights(destinations: Destination[], events: Festiva
     const slides: HomeSpotlight[] = picks.map((destination) => ({ id: destination.id, destination, scope: "local" }));
     if (event && eventPlace) slides.push({ id: `event:${event.id}`, destination: eventPlace, event, scope: "local" });
     if (national) slides.push({ id: national.id, destination: national, scope: "national" });
-    // Never pad a sparse region with unrelated places disguised as nearby suggestions.
     return slides;
   }
 
-  // Without a chosen state or usable GPS, retain honest nationwide editorial suggestions.
   const picks = featuredPlaceIds.flatMap((id) => byId.has(id) ? [byId.get(id)!] : []);
   for (const place of byId.values()) {
     if (picks.length >= 3) break;

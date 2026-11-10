@@ -2,7 +2,7 @@ export const rememberedLoginKey = "tourist-movement-monitoring:remember-login";
 const demoEmails = new Set(["tourist@example.com", "nature@example.com", "culture@example.com", "urban@example.com", "admin@tourism.local"]);
 
 export function clearRememberedLogin() {
-  try { localStorage.removeItem(rememberedLoginKey); } catch { /* Storage can be unavailable in private browsing. */ }
+  try { localStorage.removeItem(rememberedLoginKey); } catch {}
 }
 
 export function loadRememberedLogin(): { email: string } | null {
@@ -30,5 +30,5 @@ export function loadRememberedLogin(): { email: string } | null {
 export function saveRememberedLogin(email: string) {
   try {
     localStorage.setItem(rememberedLoginKey, JSON.stringify({ email: email.trim().toLowerCase() }));
-  } catch { /* A storage failure must not turn successful authentication into an error. */ }
+  } catch {}
 }

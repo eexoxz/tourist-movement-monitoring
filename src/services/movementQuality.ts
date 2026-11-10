@@ -26,7 +26,6 @@ export function getMovementQualityIssue(point: QualityPoint, previous?: QualityP
   if (elapsedMs < 0) return "timestamp";
   if (elapsedMs > movementQualityLimits.continuousGapMs) return null;
   const distance = distanceKm(previous, point);
-  // Allow measured GPS uncertainty before judging a rapid jump as travel.
   const uncertaintyKm = (point.accuracyMeters + previous.accuracyMeters) / 1000 + 0.05;
   const adjustedDistance = Math.max(0, distance - uncertaintyKm);
   if (adjustedDistance > 0.2 && adjustedDistance / Math.max(elapsedMs / 3600000, 1 / 3600) > movementQualityLimits.speedKmPerHour) {
@@ -51,7 +50,6 @@ export function recordedMovementMinutes(points: readonly QualityPoint[]) {
 
 export function filterQualityMovementPoints(points: MovementPoint[], now = Date.now()) {
   const previousByTrip = new Map<string, MovementPoint>();
-  // Parse each timestamp once for sorting, rather than on both sides of every comparison.
   return points.map((point) => ({ point, time: Date.parse(point.recordedAt) })).sort((a, b) => a.time - b.time).map(({ point }) => point).filter((point) => {
     if (!Number.isFinite(point.latitude) || !Number.isFinite(point.longitude) || Math.abs(point.latitude) > 90 || Math.abs(point.longitude) > 180) return false;
     const previous = previousByTrip.get(point.tripId);

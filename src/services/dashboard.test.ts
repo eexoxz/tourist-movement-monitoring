@@ -166,7 +166,7 @@ describe("dashboard service", () => {
     const filtered = select(data, filters);
     expect(filtered.records.map(row => row.point.id)).toEqual(["penang-reading"]);
     expect(filtered.tripRecords.map(row => row.trip.id)).toEqual([trip.id]);
-    expect(filtered.tripRecords[0].points).toHaveLength(3); // Full route stays available in detail.
+    expect(filtered.tripRecords[0].points).toHaveLength(3);
     expect(filtered.tripRecords[0].summary).toBe(all.tripRecords[0].summary);
     const csv = buildMovementRecordsCsv(filtered.records);
     expect(csv).toContain('"Penang test place"');

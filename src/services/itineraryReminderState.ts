@@ -9,5 +9,5 @@ export function loadItineraryDismissals(userId: string, tripId: string): Set<str
 }
 
 export function saveItineraryDismissals(userId: string, tripId: string, stops: ReadonlySet<string>) {
-  try { localStorage.setItem(`${ITINERARY_REMINDERS_KEY_PREFIX}${userId}`, JSON.stringify({ tripId, stops: [...stops].slice(-40) })); } catch { /* Keep the mounted reminder dismissed even if device storage is blocked. */ }
+  try { localStorage.setItem(`${ITINERARY_REMINDERS_KEY_PREFIX}${userId}`, JSON.stringify({ tripId, stops: [...stops].slice(-40) })); } catch {}
 }

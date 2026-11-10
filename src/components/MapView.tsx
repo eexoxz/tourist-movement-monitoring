@@ -209,8 +209,6 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     focusLayerRef.current?.remove();
   }, [points[0]?.tripId, isBrowsingArea ? activePoint?.id : undefined]);
 
-  // Destination geometry survives GPS updates. Reconcile only the marker groups that
-  // enter/leave the viewport; zooming reveals smaller groups without discarding places.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;

@@ -2,7 +2,6 @@ import type { Destination, MalaysianState } from "../types";
 import type { Locale } from "./i18n";
 import { getDestinationState } from "./destinationState";
 
-// Sort and normalize once per catalogue/locale, rather than on every search keystroke.
 export function prepareItineraryCatalogue(destinations: Destination[], locale: Locale, suggestions: ReadonlySet<string>) {
   const compare = new Intl.Collator(locale).compare;
   return destinations.map((place) => {

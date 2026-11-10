@@ -63,7 +63,6 @@ export function saveProfileSetupSkipped(userId: string, skipped: boolean) {
 
     localStorage.removeItem(getProfileSkipKey(userId));
   } catch {
-    // Profile setup can still continue in the current session if storage is unavailable.
   }
 }
 
