@@ -1,6 +1,6 @@
 # Firebase Schema
 
-This schema supports the DPP prototype with Firebase Authentication and Firestore while keeping the local browser-storage mode available for development.
+This schema supports the app with Firebase Authentication and Firestore while keeping the local browser-storage mode available for development.
 
 ## Collections
 
@@ -29,7 +29,7 @@ New Firebase tourist accounts use the Firebase Auth UID as the `users` document 
 
 ## Migration Notes
 
-The app still works without Firebase credentials by using local browser storage. When Firebase is configured, the storage adapter writes the same app data into structured Firestore collections. If an older `prototype/appData` document exists, the adapter reads it once and migrates it into the collection layout. Older collection names from early development (`consents`, `trips`, `movementPoints`, `analyses`) are still read as fallback collections, but new saves use the DPP-aligned names above.
+The app still works without Firebase credentials by using local browser storage. When Firebase is configured, the storage adapter writes the same app data into structured Firestore collections. If an older `prototype/appData` document exists, the adapter reads it once and migrates it into the collection layout. Older collection names from early development (`consents`, `trips`, `movementPoints`, `analyses`) are still read as fallback collections, but new saves use the collection names above.
 
 The local demo account passwords are never written into Firestore. Firebase-backed user records store `authUid`, `name`, `email`, `role`, and `createdAt`. Tourist profile and preference records are split into `tourist_profiles` and `tourist_preferences` so the Firestore database view matches the project data model.
 
