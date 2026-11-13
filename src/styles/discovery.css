@@ -60,6 +60,9 @@
   white-space: nowrap;
 }
 
+.destination-visual.compact .destination-area-caption { display: none; }
+.place-discovery-card .destination-visual.compact .destination-area-caption { display: block; }
+
 .destination-visual.compact img {
   height: 82px;
   aspect-ratio: auto;

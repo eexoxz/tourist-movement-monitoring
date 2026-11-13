@@ -706,6 +706,7 @@ const catalog: LocaleCatalog = {
     "Application notifications": "Notificações da aplicação",
     "Dismiss notification": "Fechar notificação",
     "Photo not added": "Fotografia não adicionada",
+    "Nearby area photo": "Foto da área próxima",
     "Location photo": "Fotografia do local",
     "Destinations": "Destinos",
     "{count} Malaysian tourist destination records available for recommendation and movement analysis.": "Há {count} destinos turísticos da Malásia disponíveis para recomendações e análise de movimentos.",

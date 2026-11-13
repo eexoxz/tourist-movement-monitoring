@@ -729,6 +729,7 @@ const catalog: LocaleCatalog = {
     "Application notifications": "アプリの通知",
     "Dismiss notification": "通知を閉じる",
     "Photo not added": "写真は未登録です",
+    "Nearby area photo": "周辺エリアの写真",
     "Location photo": "場所の写真",
     "Destinations": "目的地",
     "{count} Malaysian tourist destination records available for recommendation and movement analysis.": "おすすめと移動分析に使えるマレーシアの目的地が{count}件あります。",

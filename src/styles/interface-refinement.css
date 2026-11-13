@@ -19,7 +19,7 @@ a.secondary-action { text-decoration: none; }
 .place-guide { min-width: 0; }
 .place-guide > .destination-visual { aspect-ratio: 16 / 10; border: 0; border-radius: 0; }
 .place-guide > .destination-visual img { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; }
-.place-guide > .destination-visual figcaption { display: none; }
+.place-guide > .destination-visual figcaption:not(.destination-area-caption) { display: none; }
 .place-guide-body { display: grid; gap: 18px; padding: 20px; }
 .place-guide-category { font-size: 0.76rem; color: var(--teal); font-weight: 600; }
 .place-guide h2 { margin: 6px 0 10px; font-size: 1.35rem; line-height: 1.35; overflow-wrap: anywhere; }

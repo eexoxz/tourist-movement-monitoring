@@ -729,6 +729,7 @@ const catalog: LocaleCatalog = {
     "Application notifications": "앱 알림",
     "Dismiss notification": "알림 닫기",
     "Photo not added": "사진이 추가되지 않았습니다",
+    "Nearby area photo": "주변 지역 사진",
     "Location photo": "장소 사진",
     "Destinations": "목적지",
     "{count} Malaysian tourist destination records available for recommendation and movement analysis.": "추천 및 이동 분석에 사용할 수 있는 말레이시아 목적지 {count}개가 있습니다.",

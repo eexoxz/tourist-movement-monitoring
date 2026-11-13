@@ -36,7 +36,9 @@ function DestinationVisualComponent({ destination, compact = false, locale, prio
   const figure = useRef<HTMLElement>(null);
   const displaySrc = useMemo(() => stored ? loadedPhoto?.source === src ? loadedPhoto?.dataUrl ?? "" : "" : src ? resizeCommonsImageUrl(src, compact ? 360 : 760) : "", [compact, src, stored, loadedPhoto]);
   const [imageFailed, setImageFailed] = useState(() => Boolean(displaySrc && failedImageUrls.has(displaySrc)));
-  const alt = destination.imageAlt?.trim() || `${destination.name} · ${uiText(locale, "Location photo")}`;
+  const areaCaption = destination.imageCredit?.areaCaption?.trim();
+  const caption = areaCaption ? uiText(locale, "Nearby area photo") + " · " + areaCaption : undefined;
+  const alt = caption || destination.imageAlt?.trim() || `${destination.name} · ${uiText(locale, "Location photo")}`;
   const credit = destinationPhotoCredit(destination);
 
   useEffect(() => {
@@ -78,7 +80,7 @@ function DestinationVisualComponent({ destination, compact = false, locale, prio
       <img
         src={displaySrc}
         alt={alt}
-        title={credit ? `${credit.label} · ${credit.href}` : undefined}
+        title={areaCaption || (credit ? `${credit.label} · ${credit.href}` : undefined)}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         fetchPriority={priority ? "high" : compact ? "low" : "auto"}
@@ -89,7 +91,7 @@ function DestinationVisualComponent({ destination, compact = false, locale, prio
           setImageFailed(true);
         }}
       />
-      {!compact && <figcaption>{destination.name}</figcaption>}
+      {areaCaption ? <figcaption className="destination-area-caption">{caption}</figcaption> : !compact && <figcaption>{destination.name}</figcaption>}
       {credit && !compact && <a className="destination-photo-credit" href={credit.href} target="_blank" rel="noopener noreferrer" title={credit.label} aria-label={`${uiText(locale, "Location photo")}: ${credit.label}`}><span aria-hidden="true">©</span><span>{credit.label}</span></a>}
     </figure>
   );

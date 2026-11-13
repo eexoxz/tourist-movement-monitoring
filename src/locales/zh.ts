@@ -729,6 +729,7 @@ const catalog: LocaleCatalog = {
     "Application notifications": "应用通知",
     "Dismiss notification": "关闭通知",
     "Photo not added": "尚未添加照片",
+    "Nearby area photo": "附近区域照片",
     "Location photo": "地点照片",
     "Destinations": "目的地",
     "{count} Malaysian tourist destination records available for recommendation and movement analysis.": "共有 {count} 个马来西亚旅游目的地，可用于推荐和活动分析。",

@@ -119,6 +119,7 @@ export type Destination = {
     author: string;
     license: string;
     sourceUrl: string;
+    areaCaption?: string;
   };
   activitySummary?: DestinationActivitySummary;
   demoActivitySummary?: DestinationActivitySummary;
