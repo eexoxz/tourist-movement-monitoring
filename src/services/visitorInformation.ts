@@ -1,9 +1,26 @@
-import { visitorInformation, type VisitorHours, type VisitorPrice } from "../data/visitorInformation";
+import { visitorInformation, type VisitorHours, type VisitorInformation, type VisitorPrice, type VisitorValue } from "../data/visitorInformation";
+import type { Destination } from "../types";
+import { hasCustomDestinationFact } from "./destinationLocale";
 import type { Locale } from "./i18n";
 import { visitorText } from "./visitorInformationCopy";
 
-export function getVisitorInformation(id: string) {
-  return Object.hasOwn(visitorInformation, id) ? visitorInformation[id] : undefined;
+export function getDestinationVisitDetails(destination: Destination): VisitorInformation {
+  if (destination.visitDetails) return destination.visitDetails;
+  const info = Object.hasOwn(visitorInformation, destination.id) ? visitorInformation[destination.id] : undefined;
+  const customHours = hasCustomDestinationFact(destination, "openingHours");
+  const customFee = hasCustomDestinationFact(destination, "feeNote");
+  const showEvidence = info && (info.closure || (!customHours && (info.hours?.length || info.hoursNotes?.length)) || (!customFee && info.prices?.length));
+  return {
+    ...info,
+    checkedAt: showEvidence ? info.checkedAt : undefined,
+    sources: showEvidence ? info.sources : [],
+    ...(customHours ? { hours: [], closedDays: [], hoursNotes: [{ text: destination.openingHours! }] } : {}),
+    ...(customFee ? { prices: [], priceScope: undefined, priceNotes: [{ text: destination.feeNote! }] } : {}),
+  };
+}
+
+export function visitorValue(value: VisitorValue, locale: Locale) {
+  return typeof value === "string" ? visitorText(locale, value) : value.text;
 }
 
 export function visitorDate(value: string, locale: Locale) {
@@ -16,19 +33,20 @@ export function visitorDays(days: number[], locale: Locale) {
 }
 
 export function visitorHoursLabel(row: VisitorHours, locale: Locale) {
-  return [row.label && visitorText(locale, row.label), row.days && visitorDays(row.days, locale)].filter(Boolean).join(" · ");
+  return [row.label && visitorValue(row.label, locale), row.days && visitorDays(row.days, locale)].filter(Boolean).join(" · ");
 }
 
 export function visitorPriceLabel(row: VisitorPrice, locale: Locale) {
-  return [row.residency && visitorText(locale, row.residency), visitorText(locale, row.audience), row.ages && `${row.ages} ${visitorText(locale, "years")}`, row.height && `${row.height} cm`].filter(Boolean).join(" · ");
+  return [row.residency && visitorValue(row.residency, locale), visitorValue(row.audience, locale), row.ages && `${row.ages} ${visitorText(locale, "years")}`, row.height && `${row.height} cm`].filter(Boolean).join(" · ");
 }
 
 export function groupVisitorPrices(prices: VisitorPrice[]) {
-  const groups = new Map<VisitorPrice["residency"], VisitorPrice[]>();
+  const groups = new Map<string, { residency: VisitorPrice["residency"]; rows: VisitorPrice[] }>();
   for (const row of prices) {
-    const group = groups.get(row.residency) ?? [];
-    group.push(row);
-    groups.set(row.residency, group);
+    const key = JSON.stringify(row.residency) ?? "";
+    const group = groups.get(key) ?? { residency: row.residency, rows: [] };
+    group.rows.push(row);
+    groups.set(key, group);
   }
-  return [...groups].map(([residency, rows]) => ({ residency, rows }));
+  return [...groups.values()];
 }

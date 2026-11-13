@@ -230,6 +230,8 @@ const defaultHours = new Set(sourceDestinations.map((destination) => destination
 const defaultFees = new Set(sourceDestinations.map((destination) => destination.feeNote));
 defaultHours.add("Check the latest visitor access and opening hours with the venue before travelling.");
 defaultFees.add("Check current admission charges and any activity fees with the venue.");
+defaultHours.add("Check locally before visiting, especially during public holidays.");
+defaultFees.add("Fee information may vary; check the official counter or venue notice before entry.");
 
 export function hasCustomDestinationFact(destination: Destination, field: "openingHours" | "feeNote") {
   const value = destination[field]?.trim();

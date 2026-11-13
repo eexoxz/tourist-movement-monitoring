@@ -7,6 +7,7 @@ import { interfaceText } from "../services/interfaceCopy";
 import { DestinationVisual } from "./DestinationVisual";
 import { travelerStatusText } from "../services/travelerStatusCopy";
 import { PlacePracticalInfo } from "./PlacePracticalInfo";
+import { getDestinationVisitDetails } from "../services/visitorInformation";
 import { visitorText } from "../services/visitorInformationCopy";
 
 export function PlaceGuide({ destination, locale, distance, distanceLabel, demand, preference, eventRelevance, onCheckIn, onOpenEvents, onHide }: {
@@ -14,6 +15,7 @@ export function PlaceGuide({ destination, locale, distance, distanceLabel, deman
   onCheckIn?: () => void; onOpenEvents: () => void; onHide?: () => void;
 }) {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  const showSource = destination.sourceUrl?.startsWith("https://") && !getDestinationVisitDetails(destination).sources.includes(destination.sourceUrl);
   const directions = `https://www.openstreetmap.org/directions?to=${encodeURIComponent(`${destination.latitude},${destination.longitude}`)}#map=16/${destination.latitude}/${destination.longitude}`;
   return <div className="place-guide">
     <DestinationVisual destination={destination} locale={locale} />
@@ -29,8 +31,8 @@ export function PlaceGuide({ destination, locale, distance, distanceLabel, deman
       </dl><p className="distance-basis-note">{travelerStatusText(locale, "distance")}</p></section>
       <PlacePracticalInfo destination={destination} locale={locale} />
       {Boolean(destination.visitTips?.length) && <section className="place-guide-section"><h3>{t("tourist.places.beforeYouGo")}</h3><ul className="place-guide-tips">{destination.visitTips!.map((tip) => <li key={tip}>{tip}</li>)}</ul></section>}
-      {(destination.sourceUrl || destination.coordinateSourceUrl) && <div className="place-guide-secondary">
-        {destination.sourceUrl?.startsWith("https://") && <a className="secondary-action compact-action" href={destination.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} />{visitorText(locale, "source")}</a>}
+      {(showSource || destination.coordinateSourceUrl) && <div className="place-guide-secondary">
+        {showSource && <a className="secondary-action compact-action" href={destination.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={16} />{visitorText(locale, "source")}</a>}
         {destination.coordinateSourceUrl?.startsWith("https://www.openstreetmap.org/") && <a className="secondary-action compact-action" href={destination.coordinateSourceUrl} target="_blank" rel="noopener noreferrer"><MapPin size={16} />OpenStreetMap</a>}
       </div>}
       <details className="place-guide-context"><summary>{interfaceText(locale, "more")}</summary><dl className="place-guide-facts">

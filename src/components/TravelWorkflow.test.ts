@@ -46,7 +46,7 @@ describe("tourist travel workflow boundaries", () => {
     const html = renderToStaticMarkup(createElement(PlaceGuide, { destination, locale: "en", distance: "1.2 km away", distanceLabel: "Distance", demand: "Low demand", preference: "Matches your profile", eventRelevance: "Upcoming event", onCheckIn: noop, onOpenEvents: noop, onHide: noop }));
     expect(html).toContain("Plan your visit");
     expect(html).toContain("Opening hours");
-    expect(html).toContain("Fee note");
+    expect(html).toContain(">Fees</dt>");
     expect(html).toContain("Check in");
     expect(html).toContain("Directions");
     expect(html).toContain("1.2 km away");

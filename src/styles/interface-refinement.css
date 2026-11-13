@@ -42,9 +42,9 @@ a.secondary-action { text-decoration: none; }
 .place-practical-info p { margin: 6px 0; overflow-wrap: anywhere; }
 .place-practical-info small { color: var(--muted); font-size: 0.75rem; }
 .place-fact-rows { list-style: none; margin: 0; padding: 0; }
-.place-fact-rows li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 6px 12px; padding-block: 7px; border-bottom: 1px solid var(--line); }
+.place-fact-rows li { display: grid; grid-template-columns: minmax(0, 1fr) fit-content(55%); align-items: baseline; gap: 6px 12px; padding-block: 7px; border-bottom: 1px solid var(--line); }
 .place-fact-rows span { min-width: 0; overflow-wrap: anywhere; color: var(--muted); }
-.place-fact-rows strong { font-size: 0.86rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.place-fact-rows strong { font-size: 0.86rem; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; text-align: end; }
 .place-price-scope { font-weight: 600; }
 .place-rate-group + .place-rate-group { margin-top: 14px; }
 .place-rate-group h4 { margin: 10px 0 2px; color: var(--teal); font-size: 0.8rem; line-height: 1.5; font-weight: 600; }

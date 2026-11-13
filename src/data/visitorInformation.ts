@@ -1,16 +1,17 @@
 export type VisitorLabel = "adult" | "child" | "senior" | "student" | "entry" | "malaysian" | "international" | "sarawakian" | "otherMalaysian" | "standard" | "mykad" | "daily" | "weekdays" | "weekendsHolidays" | "publicAreas" | "exhibition" | "sessions" | "lastEntry" | "lastUp" | "lastDown" | "ramadan" | "normalReturn" | "mainGrounds" | "dayAdmission" | "wott" | "campus" | "museum" | "residentPermit";
 export type VisitorNote = "jmmHolidays" | "eidHolidays" | "cnyHolidays" | "extras" | "weatherMaintenance" | "wednesdayHolidayException" | "mondayHolidayException" | "selectedHolidays" | "conditionalAccess" | "firstMondayClosed" | "bookSession";
-export interface VisitorHours { label?: VisitorLabel; days?: number[]; time: string }
-export interface VisitorPrice { audience: VisitorLabel; residency?: VisitorLabel; ages?: string; height?: string; amount: number }
+export type VisitorValue<Key extends string = VisitorLabel | VisitorNote> = Key | { text: string };
+export interface VisitorHours { label?: VisitorValue<VisitorLabel>; days?: number[]; time: string }
+export interface VisitorPrice { audience: VisitorValue<VisitorLabel>; residency?: VisitorValue<VisitorLabel>; ages?: string; height?: string; amount: number }
 export interface VisitorInformation {
-  checkedAt: string;
+  checkedAt?: string;
   sources: string[];
   hours?: VisitorHours[];
   closedDays?: number[];
-  hoursNotes?: VisitorNote[];
+  hoursNotes?: VisitorValue<VisitorNote>[];
   prices?: VisitorPrice[];
-  priceScope?: VisitorLabel;
-  priceNotes?: VisitorNote[];
+  priceScope?: VisitorValue<VisitorLabel>;
+  priceNotes?: VisitorValue<VisitorNote>[];
   closure?: { from: string; through: string };
 }
 

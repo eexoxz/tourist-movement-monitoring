@@ -7,6 +7,9 @@ import { addDestinationRecord, deleteDestinationRecord, destinationCategories, f
 import { destinationAdminText } from "../services/destinationAdminCopy";
 import { destinationPhotoReference, storedDestinationPhoto } from "../services/destinationPhoto";
 import { prepareDestinationPhoto, type DestinationPhotoUpload } from "../services/destinationPhotoUpload";
+import { getDestinationVisitDetails } from "../services/visitorInformation";
+import { validVisitDetails } from "../services/visitDetails";
+import { DestinationVisitEditor } from "./DestinationVisitEditor";
 import { DestinationVisual } from "./DestinationVisual";
 import { EmptyState } from "./SummaryCards";
 import type { NotifyFn } from "./ToastViewport";
@@ -28,6 +31,7 @@ type DestinationFormState = {
   averageVisitMinutes: string;
   openingHours: string;
   feeNote: string;
+  visitDetails: NonNullable<Destination["visitDetails"]>;
   visitTips: string;
   imageUrl: string;
   imageAlt: string;
@@ -46,6 +50,7 @@ function createDestinationForm(destination?: Destination): DestinationFormState 
     averageVisitMinutes: destination ? String(destination.averageVisitMinutes) : "60",
     openingHours: destination?.openingHours ?? "",
     feeNote: destination?.feeNote ?? "",
+    visitDetails: destination ? getDestinationVisitDetails(destination) : { sources: [] },
     visitTips: destination?.visitTips?.join("\n") ?? "",
     imageUrl: destination?.imageUrl ?? "",
     imageAlt: destination?.imageAlt ?? "",
@@ -69,9 +74,12 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
   const [photo, setPhoto] = useState<DestinationPhotoUpload>();
   const [preparingPhoto, setPreparingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState<"format" | "size" | "prepareFailed">();
+  const [visitDetailsInvalid, setVisitDetailsInvalid] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
   const photoRevision = useRef(0);
   const copy = (key: Parameters<typeof destinationAdminText>[1], values?: Record<string, number>) => destinationAdminText(locale, key, values);
+  const editBase = useRef<Destination | undefined>(undefined);
+  const visitDetailsChanged = useRef(false);
   const resetPhoto = () => { photoRevision.current++; setPhoto(undefined); setPreparingPhoto(false); setPhotoError(undefined); setSaveFailed(false); };
   const choosePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -97,6 +105,7 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
 
   const openAddModal = () => {
     resetPhoto();
+    setVisitDetailsInvalid(false);
     setCandidate(null);
     setForm(createDestinationForm());
     setEditingId(null);
@@ -106,6 +115,9 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
 
   const startEdit = (destination: Destination) => {
     resetPhoto();
+    editBase.current = destination;
+    visitDetailsChanged.current = false;
+    setVisitDetailsInvalid(false);
     setCandidate(null);
     setEditingId(destination.id);
     setForm(createDestinationForm(destination));
@@ -133,13 +145,23 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
       return;
     }
 
+    if (!validVisitDetails(form.visitDetails)) {
+      setVisitDetailsInvalid(true);
+      return;
+    }
     setSavingAction(action);
     setSaveFailed(false);
+    const current = destinations.find((record) => record.id === editingId);
+    const original = current && visitDetailsChanged.current ? { ...current, visitDetails: editBase.current?.visitDetails } : current;
+    const input = {
+      ...form,
+      visitDetails: action === "add" || visitDetailsChanged.current ? form.visitDetails : undefined,
+    };
     const result =
       action === "add"
-        ? addDestinationRecord(destinations, form)
+        ? addDestinationRecord(destinations, input)
         : updateDestinationRecord(destinations, {
-            ...form,
+            ...input,
             id: editingId ?? "",
           });
 
@@ -158,7 +180,7 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
       if (candidate) {
         const error = onCreateReviewedPlace ? await onCreateReviewedPlace(destination, candidate.reports.slice(0, 100).map((report) => report.id), photo) : placeText(locale, "admin");
         if (error) { setMessage(notificationSource(locale, error)); setSavingAction(null); return; }
-      } else if (!await onSave(destination, destinations.find((record) => record.id === editingId), photo)) throw new Error("Destination save was not confirmed");
+      } else if (!await onSave(destination, original, photo)) throw new Error("Destination save was not confirmed");
     } catch {
       setSaveFailed(true);
       setSavingAction(null);
@@ -208,6 +230,7 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
     <>
       {onReview && <UnlistedPlaceReview checkIns={checkIns} destinations={destinations} locale={locale} onReview={onReview} onRefresh={onRefreshReports} refreshing={refreshingReports} onToggleSamples={onToggleSamples} placeQueueState={placeQueueState} onCreate={(group) => {
         resetPhoto();
+        setVisitDetailsInvalid(false);
         setCandidate(group); setEditingId(null); setModalMode("add"); setMessage(null);
         setForm({ ...createDestinationForm(), name: group.place.name, city: group.place.city, state: group.place.state ?? "", address: group.place.address, category: group.place.category, latitude: group.latitude === undefined ? "" : String(group.latitude), longitude: group.longitude === undefined ? "" : String(group.longitude) });
       }} />}
@@ -338,14 +361,12 @@ export function DestinationManager({ destinations, onChange, onSave, notify, loc
                 <input type="number" step="any" value={form.longitude} onChange={(event) => setForm({ ...form, longitude: event.target.value })} required />
               </label>
             </div>
-            <label>
-              {translate(locale, "common.openingHours")}
-              <input value={form.openingHours} onChange={(event) => setForm({ ...form, openingHours: event.target.value })} placeholder={text("Example: Usually daily; check public holiday hours")} />
-            </label>
-            <label>
-              {translate(locale, "common.feeNote")}
-              <input value={form.feeNote} onChange={(event) => setForm({ ...form, feeNote: event.target.value })} placeholder={text("Example: Entry is normally free; activities may vary")} />
-            </label>
+            <DestinationVisitEditor value={form.visitDetails} locale={locale} invalid={visitDetailsInvalid}
+              onChange={(visitDetails) => {
+                visitDetailsChanged.current = true;
+                setForm((current) => ({ ...current, visitDetails }));
+                if (visitDetailsInvalid) setVisitDetailsInvalid(!validVisitDetails(visitDetails));
+              }} />
             <section className="destination-photo-editor" aria-label={text("Location photo")}>
               <label><span><ImagePlus size={18} aria-hidden="true" /> {copy("upload")}</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void choosePhoto(event); }} disabled={preparingPhoto || Boolean(savingAction)} aria-describedby="destination-photo-help" /></label>
               <p id="destination-photo-help">{copy("photoHelp")}</p>

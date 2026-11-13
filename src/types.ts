@@ -1,3 +1,5 @@
+import type { VisitorInformation } from "./data/visitorInformation";
+
 export type UserRole = "tourist" | "admin";
 
 export type AppView = "overview" | "tracking" | "history" | "itinerary" | "recommendations" | "events" | "profile" | "dashboard" | "records" | "destinations" | "ai";
@@ -111,6 +113,7 @@ export type Destination = {
   averageVisitMinutes: number;
   openingHours?: string;
   feeNote?: string;
+  visitDetails?: VisitorInformation;
   visitTips?: string[];
   visitorGuidance?: Array<"boat" | "trail" | "worship" | "residential" | "booking" | "market" | "wildlife" | "beach">;
   imageUrl?: string;

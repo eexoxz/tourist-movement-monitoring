@@ -1,6 +1,7 @@
 import type { Destination, DestinationCategory, MalaysianState } from "../types";
 import { discoveryStates } from "../data/discoveryAreas";
 import { createId } from "./storage";
+import { cleanVisitDetails, validVisitDetails } from "./visitDetails";
 import { getDestinationState } from "./destinationState";
 
 export const destinationCategories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
@@ -24,6 +25,7 @@ type DestinationInput = {
   averageVisitMinutes?: number | string;
   openingHours?: string;
   feeNote?: string;
+  visitDetails?: Destination["visitDetails"];
   visitTips?: string[] | string;
   imageUrl?: string;
   imageAlt?: string;
@@ -61,6 +63,10 @@ export function validateDestination(input: DestinationInput) {
   const latitude = toNumber(input.latitude);
   const longitude = toNumber(input.longitude);
   const averageVisitMinutes = toNumber(input.averageVisitMinutes ?? 60);
+
+  if (input.visitDetails && !validVisitDetails(input.visitDetails)) {
+    return { error: "Check the hours, fee amounts, HTTPS links and closure dates." };
+  }
 
   if (name.length < 2) {
     return { error: "Destination name must be at least 2 characters." };
@@ -103,6 +109,7 @@ export function validateDestination(input: DestinationInput) {
       averageVisitMinutes,
       openingHours: openingHours || "Check locally before visiting, especially during public holidays.",
       feeNote: feeNote || "Fee information may vary; check the official counter or venue notice before entry.",
+      ...(input.visitDetails ? { visitDetails: cleanVisitDetails(input.visitDetails) } : {}),
       visitTips,
       imageUrl,
       imageAlt: imageAlt || undefined,

@@ -8,7 +8,8 @@ import type { Destination } from "../types";
 import { localeOptions } from "../services/i18n";
 import { hasCustomDestinationFact, localizeDestination } from "../services/destinationLocale";
 import { visitorText } from "../services/visitorInformationCopy";
-import { groupVisitorPrices, visitorDays, visitorPriceLabel } from "../services/visitorInformation";
+import { cleanVisitDetails, validVisitDetails, visitDetailsFingerprint } from "../services/visitDetails";
+import { getDestinationVisitDetails, groupVisitorPrices, visitorDays, visitorPriceLabel, visitorValue } from "../services/visitorInformation";
 import { PlacePracticalInfo } from "./PlacePracticalInfo";
 import { AppRecoveryScreen } from "./AppErrorBoundary";
 import { recoveryCopy } from "../services/recoveryCopy";
@@ -47,9 +48,9 @@ describe("researched attraction practical information", () => {
     expect(html).toMatch(/datetime="2026-10-23"/i);
     expect(html).not.toContain("undefined");
     for (const info of Object.values(visitorInformation)) {
-      for (const row of info.hours ?? []) if (row.label) expect(visitorText(locale, row.label)).toBeTruthy();
+      for (const row of info.hours ?? []) if (row.label) expect(visitorValue(row.label, locale)).toBeTruthy();
       for (const row of info.prices ?? []) expect(visitorPriceLabel(row, locale)).not.toContain("undefined");
-      for (const note of [...info.hoursNotes ?? [], ...info.priceNotes ?? []]) expect(visitorText(locale, note)).toBeTruthy();
+      for (const note of [...info.hoursNotes ?? [], ...info.priceNotes ?? []]) expect(visitorValue(note, locale)).toBeTruthy();
     }
   });
 
@@ -85,6 +86,33 @@ describe("researched attraction practical information", () => {
     expect(render(royal, "en", Date.parse("2026-10-23"))).toContain(visitorText("en", "temporarilyClosed"));
     expect(render(royal, "en", Date.parse("2027-02-02"))).toContain(visitorText("en", "reopeningUnconfirmed"));
     expect(render(royal)).not.toContain("RM 0");
+  });
+
+  it("renders saved visitor details in the same layout and keeps explicit zero fees distinct from missing prices", () => {
+    const current = getDestinationVisitDetails(hill);
+    const visitDetails = cleanVisitDetails({
+      ...current,
+      hours: [{ label: "daily", time: " 10:00 – 15:00 " }],
+      prices: [{ audience: "entry", amount: 0 }, { audience: "adult", residency: { text: "Online tickets" }, amount: 12.5 }],
+      sources: ["https://example.com/visit", " ", "https://example.com/visit"],
+    });
+    expect(validVisitDetails(visitDetails)).toBe(true);
+    expect(visitDetails.sources).toEqual(["https://example.com/visit"]);
+    const html = render({ ...hill, visitDetails }, "ms");
+    expect(html).toContain("10:00 – 15:00");
+    expect(html).toContain(visitorText("ms", "daily"));
+    expect(html).toContain("Online tickets");
+    expect(html).toContain("RM 0.00");
+    expect(html).not.toContain("06:30 - 23:00");
+    expect(render({ ...hill, visitDetails: { sources: [] } })).toContain(visitorText("en", "unknownPrice"));
+  });
+
+  it("rejects incomplete rows and unsafe links while comparing cloud maps by their contents", () => {
+    expect(validVisitDetails({ sources: [], prices: [{ audience: "entry", amount: NaN }] })).toBe(false);
+    expect(validVisitDetails({ sources: [], hours: [{ time: "  " }] })).toBe(false);
+    expect(validVisitDetails({ sources: ["javascript:alert(1)"] })).toBe(false);
+    expect(visitDetailsFingerprint({ sources: [], hours: [{ time: "09:00", label: "daily" }] }))
+      .toBe(visitDetailsFingerprint({ hours: [{ label: "daily", time: "09:00" }], sources: [] }));
   });
 
   it("formats Malaysian weekdays without depending on the device timezone", () => {

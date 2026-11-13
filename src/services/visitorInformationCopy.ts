@@ -67,6 +67,25 @@ const residentPermitLabels: Record<Locale, string> = {
   en: "I-Kad / work permit / dependant pass", ms: "I-Kad / permit kerja / pas tanggungan", zh: "I-Kad／工作准证／家属准证", ja: "I-Kad・就労許可・扶養家族パス", ko: "I-Kad / 취업 허가 / 부양가족 패스", pt: "I-Kad / autorização de trabalho / passe de dependente", ta: "I-Kad / வேலை அனுமதி / சார்ந்திருப்போர் அனுமதி", es: "I-Kad / permiso de trabajo / pase de dependiente", fr: "I-Kad / permis de travail / titre de personne à charge",
 };
 
-export function visitorText(locale: Locale, key: Key) { return key === "residentPermit" ? residentPermitLabels[locale] : copy[locale][key]; }
+const editorKeys = ["visitDetails", "fees", "hours", "rowLabel", "addHour", "removeHour", "addPrice", "removePrice", "notes", "ticketType", "group", "amount", "sourcesAndClosure", "sourceLinks", "closureFrom", "closureThrough", "invalidVisitDetails"] as const;
+type EditorKey = typeof editorKeys[number];
+const editorCopy: Record<Locale, string[]> = {
+  en: ["Visit details", "Fees", "Hours", "Label", "Add hours row", "Remove hours row", "Add fee row", "Remove fee row", "Notes", "Ticket or admission title", "Rate group (optional)", "Price (RM)", "Sources and temporary closure", "HTTPS source links, one per line", "Closed from", "Closed through", "Check the hours, fee amounts, HTTPS links and closure dates."],
+  ms: ["Maklumat lawatan", "Bayaran", "Waktu", "Label", "Tambah baris waktu", "Buang baris waktu", "Tambah baris bayaran", "Buang baris bayaran", "Catatan", "Tajuk tiket atau kemasukan", "Kumpulan kadar (pilihan)", "Harga (RM)", "Sumber dan penutupan sementara", "Pautan sumber HTTPS, satu setiap baris", "Ditutup mulai", "Ditutup hingga", "Semak waktu, jumlah bayaran, pautan HTTPS dan tarikh penutupan."],
+  zh: ["参观信息", "费用", "时间", "标签", "添加时段", "删除时段", "添加费用", "删除费用", "备注", "门票或入场名称", "票价分组（选填）", "价格（RM）", "信息来源与临时关闭", "HTTPS 来源链接，每行一个", "关闭开始日期", "关闭结束日期", "请检查时间、费用金额、HTTPS 链接和关闭日期。"],
+  ja: ["訪問情報", "料金", "時間", "ラベル", "時間の行を追加", "時間の行を削除", "料金の行を追加", "料金の行を削除", "備考", "チケットまたは入場の名称", "料金グループ（任意）", "料金（RM）", "情報源と臨時休業", "HTTPS の情報源リンクを1行に1件", "休業開始日", "休業終了日", "時間、金額、HTTPS リンク、休業日を確認してください。"],
+  ko: ["방문 정보", "요금", "시간", "항목 이름", "시간 행 추가", "시간 행 삭제", "요금 행 추가", "요금 행 삭제", "메모", "티켓 또는 입장권 이름", "요금 그룹 (선택 사항)", "가격 (RM)", "출처 및 임시 휴관", "HTTPS 출처 링크를 한 줄에 하나씩 입력", "휴관 시작일", "휴관 종료일", "시간, 요금, HTTPS 링크 및 휴관 날짜를 확인하세요."],
+  pt: ["Informações da visita", "Preços", "Horário", "Rótulo", "Adicionar linha de horário", "Remover linha de horário", "Adicionar linha de preço", "Remover linha de preço", "Notas", "Nome do bilhete ou da entrada", "Grupo tarifário (opcional)", "Preço (RM)", "Fontes e encerramento temporário", "Ligações HTTPS das fontes, uma por linha", "Encerrado desde", "Encerrado até", "Verifique os horários, valores, ligações HTTPS e datas de encerramento."],
+  ta: ["வருகை விவரங்கள்", "கட்டணங்கள்", "நேரம்", "பெயர்", "நேர வரியைச் சேர்", "நேர வரியை நீக்கு", "கட்டண வரியைச் சேர்", "கட்டண வரியை நீக்கு", "குறிப்புகள்", "டிக்கெட் அல்லது நுழைவின் பெயர்", "கட்டணக் குழு (விருப்பம்)", "விலை (RM)", "ஆதாரங்களும் தற்காலிக மூடலும்", "HTTPS ஆதார இணைப்புகள், வரிக்கு ஒன்று", "மூடும் தொடக்க நாள்", "மூடும் இறுதி நாள்", "நேரம், கட்டணம், HTTPS இணைப்புகள், மூடும் தேதிகளைச் சரிபார்க்கவும்."],
+  es: ["Detalles de la visita", "Precios", "Horario", "Etiqueta", "Añadir fila de horario", "Quitar fila de horario", "Añadir fila de precio", "Quitar fila de precio", "Notas", "Nombre de la entrada o del billete", "Grupo de tarifas (opcional)", "Precio (RM)", "Fuentes y cierre temporal", "Enlaces HTTPS de las fuentes, uno por línea", "Cerrado desde", "Cerrado hasta", "Revisa los horarios, los importes, los enlaces HTTPS y las fechas de cierre."],
+  fr: ["Infos de visite", "Tarifs", "Horaires", "Libellé", "Ajouter une ligne d’horaires", "Supprimer la ligne d’horaires", "Ajouter une ligne de tarif", "Supprimer la ligne de tarif", "Notes", "Intitulé du billet ou de l’entrée", "Groupe tarifaire (facultatif)", "Prix (RM)", "Sources et fermeture temporaire", "Liens HTTPS des sources, un par ligne", "Fermé à partir du", "Fermé jusqu’au", "Vérifiez les horaires, les montants, les liens HTTPS et les dates de fermeture."],
+};
+const editorIndex = new Map<string, number>(editorKeys.map((key, index) => [key, index]));
 
-registerFeatureCopy([...Object.keys(en), "residentPermit"] as Key[], visitorText);
+export function visitorText(locale: Locale, key: Key | EditorKey) {
+  const index = editorIndex.get(key);
+  if (index !== undefined) return editorCopy[locale][index];
+  return key === "residentPermit" ? residentPermitLabels[locale] : copy[locale][key as Exclude<Key, "residentPermit">];
+}
+
+registerFeatureCopy([...Object.keys(en) as Key[], "residentPermit", ...editorKeys], visitorText);

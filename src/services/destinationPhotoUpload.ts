@@ -3,6 +3,8 @@ import type { Destination, User } from "../types";
 import { getFirebaseServices } from "./firebaseClient";
 import { destinationPhotoReference, storedDestinationPhoto } from "./destinationPhoto";
 
+import { visitDetailsFingerprint } from "./visitDetails";
+
 export type DestinationPhotoUpload = { version: string; dataUrl: string; width: number; height: number };
 const maxPhotoCharacters = 180000;
 export const maxDestinationPhotoFileBytes = 8 * 1024 * 1024;
@@ -114,8 +116,14 @@ export async function saveDestinationEdit(destination: Destination, original: De
     const snapshot = await transaction.get(reference);
     if (snapshot.exists() !== Boolean(original)) throw new Error("Destination changed; refresh the catalogue");
     if (original) {
+      const previousDetails = visitDetailsFingerprint(original.visitDetails);
+      const changedDetails = destination.visitDetails !== original.visitDetails
+        && visitDetailsFingerprint(destination.visitDetails) !== previousDetails;
+      if (changedDetails && visitDetailsFingerprint(snapshot.get("visitDetails")) !== previousDetails) {
+        throw new Error("Visit details changed; refresh the catalogue");
+      }
       const fields = new Set([...Object.keys(original), ...Object.keys(destination)]);
-      const changes = Object.fromEntries([...fields].filter((key) => key !== "id" && JSON.stringify(original[key as keyof Destination]) !== JSON.stringify(destination[key as keyof Destination])).map((key) => [key, destination[key as keyof Destination] ?? deleteField()]));
+      const changes = Object.fromEntries([...fields].filter((key) => key !== "id" && (key === "visitDetails" ? changedDetails : JSON.stringify(original[key as keyof Destination]) !== JSON.stringify(destination[key as keyof Destination]))).map((key) => [key, destination[key as keyof Destination] ?? deleteField()]));
       if (Object.keys(changes).length) transaction.update(reference, changes);
     } else transaction.set(reference, JSON.parse(JSON.stringify(destination)));
     if (photo) transaction.set(doc(services.db, "destinations", destination.id, "photos", "current"), photo);

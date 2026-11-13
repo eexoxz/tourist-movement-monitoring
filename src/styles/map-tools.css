@@ -858,6 +858,23 @@
 
 .destination-filter-count { color: var(--muted); font-size: .875rem; margin: 12px 0; }
 .destination-form-fields { display: grid; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.destination-visit-editor { display: grid; gap: 8px; min-width: 0; }
+.destination-visit-section { border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.destination-visit-section > summary { padding: 12px 14px; cursor: pointer; color: var(--teal-dark); font-weight: 700; }
+.destination-visit-section > summary span { margin-inline-start: 6px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.destination-visit-fields { display: grid; gap: 12px; padding: 0 14px 14px; }
+.destination-visit-fields > button { justify-self: start; }
+.destination-visit-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; }
+.destination-visit-price { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .7fr); gap: 8px; }
+.destination-visit-editor label { min-width: 0; }
+.destination-visit-editor input { min-width: 0; }
+.destination-visit-days { display: flex; flex-wrap: wrap; gap: 8px 14px; border: 0; padding: 0; margin: 0; }
+.destination-visit-days legend { padding: 0 0 6px; }
+.destination-visit-editor .destination-closure-toggle, .destination-visit-days label { display: inline-flex; align-items: center; }
+.destination-visit-editor input[type="checkbox"] { width: auto; accent-color: var(--teal); }
+@media (max-width: 550px) {
+  .destination-visit-price { grid-template-columns: minmax(0, 1fr); }
+}
 .destination-photo-editor { display: grid; gap: 12px; min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #f5faf9; }
 .destination-photo-editor label > span { display: flex; align-items: center; gap: 8px; }
 .destination-photo-editor p { margin: 0; color: var(--muted); font-size: .85rem; line-height: 1.5; }
