@@ -34,7 +34,7 @@ describe("review fixes", () => {
   });
   it("does not label absent activity evidence as low demand or claim an unselected interest", () => {
     const destination = initialData.destinations[0];
-    const props = { destinations: [destination], demand: [], festivals: [], recommendations: [], latestAnalysis: undefined, visitedIds: new Set<string>(), locale: "en" as const, onSelectDestination: noop, onOpenEvents: noop };
+    const props = { destinations: [destination], demand: [], festivals: [], recommendations: [], latestAnalysis: undefined, visitedIds: new Set<string>(), locale: "en" as const, onOpenEvents: noop };
     const selected = renderToStaticMarkup(createElement(PlaceDiscovery, { ...props, user: { ...user, travelPreferences: [destination.category] } }));
     expect(selected).toContain("Matches your interest:");
     expect(selected).toContain(activityText("en", "noEvidence"));

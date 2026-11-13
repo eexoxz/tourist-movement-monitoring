@@ -12,6 +12,8 @@ const place = {
 describe("destination photo attribution", () => {
   it("keeps valid source and license information", () => {
     expect(destinationPhotoCredit(place)).toEqual({ label: "Example Photographer · CC BY-SA 4.0", href: place.imageCredit.sourceUrl });
+    const sourceUrl = "https://www.flickr.com/photos/rab68000/2937654339/";
+    expect(destinationPhotoCredit({ ...place, imageCredit: { ...place.imageCredit, sourceUrl } })?.href).toBe(sourceUrl);
     expect(destinationPhotoCredit(destinations[0])).toBeNull();
   });
 

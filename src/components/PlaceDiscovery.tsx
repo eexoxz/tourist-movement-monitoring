@@ -1,4 +1,4 @@
-import { Building2, CalendarDays, ChevronRight, CircleCheck, Compass, Landmark, MapPin, Maximize2, Navigation, Sparkles, Trees, Users, Utensils, Waves } from "lucide-react";
+import { Building2, CalendarDays, ChevronRight, CircleCheck, Compass, Landmark, MapPin, Navigation, Sparkles, Trees, Users, Utensils, Waves } from "lucide-react";
 import { discoveryText } from "../services/discoveryCopy";
 import { useEffect, useMemo, useState } from "react";
 import { destinationCategories } from "../services/destinationManagement";
@@ -46,16 +46,11 @@ type PlaceDiscoveryProps = {
   latestAnalysis: AnalysisResult | undefined;
   visitedIds: Set<string>;
   referencePoint?: MovementPoint;
-  selectedDestinationId?: string;
   locale?: Locale;
-  onSelectDestination: (id: string) => void;
   onOpenEvents: () => void;
   onHideDestination?: (id: string) => void;
   isBrowsingArea?: boolean;
   onCheckIn?: (id: string) => void;
-  guideRequested?: boolean;
-  onGuideRequestConsumed?: () => void;
-  requestedDestination?: Destination;
 };
 
 function getCategoryLabel(category: DestinationCategory, t: (key: TranslationKey) => string) {
@@ -146,25 +141,19 @@ export function PlaceDiscovery({
   latestAnalysis,
   visitedIds,
   referencePoint,
-  selectedDestinationId,
   locale = "en",
-  onSelectDestination,
   onOpenEvents,
   onHideDestination,
   isBrowsingArea = false,
   onCheckIn,
-  guideRequested = false,
-  onGuideRequestConsumed,
-  requestedDestination,
 }: PlaceDiscoveryProps) {
   const t = (key: TranslationKey) => translate(locale, key);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
   const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
-  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideId, setGuideId] = useState<string | null>(null);
   const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
-  const localizedRequest = useMemo(() => requestedDestination ? localizeDestinations([requestedDestination], locale)[0] : undefined, [requestedDestination, locale]);
   const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
   const recommendationByDestinationId = useMemo(() => new Map(recommendations.map((recommendation) => [recommendation.destinationId, recommendation])), [recommendations]);
   const demandByDestinationId = useMemo(() => new Map(demand.map((row) => [row.destinationId, row])), [demand]);
@@ -254,20 +243,15 @@ export function PlaceDiscovery({
     scoredRows,
   ]);
 
-  const selectedRow = rows.find((row) => row.destination.id === selectedDestinationId) ?? rows[0];
-  useEffect(() => {
-    if (!guideRequested || (!localizedRequest && !selectedRow)) return;
-    setGuideOpen(true);
-    onGuideRequestConsumed?.();
-  }, [guideRequested, localizedRequest?.id, selectedRow?.destination.id, onGuideRequestConsumed]);
+  const guideDestination = guideId ? localizedDestinations.find((destination) => destination.id === guideId) : undefined;
+  const closeGuide = () => setGuideId(null);
   const renderGuide = (destination: Destination) => <PlaceGuide destination={destination} locale={locale}
     distance={formatDistanceLabel(referencePoint ? distanceKm(referencePoint, destination) : undefined, t)} distanceLabel={isBrowsingArea ? discoveryText(locale, "fromArea") : t("common.distance")}
     demand={formatDemandLabel(demandByDestinationId.get(destination.id), locale, t)} preference={user.travelPreferences?.includes(destination.category) || categoryFitsProfile(destination.category, latestAnalysis?.profile ?? user.expectedProfile) ? t("tourist.places.matchesProfile") : t("tourist.places.differentStyle")}
     eventRelevance={festivalDestinationIds.has(destination.id) ? t("tourist.places.linkedUpcoming") : t("tourist.places.noCurrentEvent")}
-    onCheckIn={onCheckIn ? () => { setGuideOpen(false); onCheckIn(destination.id); } : undefined}
-    onOpenEvents={() => { setGuideOpen(false); onOpenEvents(); }}
-    onHide={onHideDestination ? () => { setGuideOpen(false); onHideDestination(destination.id); } : undefined} />;
-  const guideDestination = localizedRequest ?? selectedRow?.destination;
+    onCheckIn={onCheckIn ? () => { closeGuide(); onCheckIn(destination.id); } : undefined}
+    onOpenEvents={() => { closeGuide(); onOpenEvents(); }}
+    onHide={onHideDestination ? () => { closeGuide(); onHideDestination(destination.id); } : undefined} />;
   const visibleRows = showAllPlaces ? rows : rows.slice(0, placePreviewLimit);
   const hiddenPlaceCount = rows.length - visibleRows.length;
   const personalized = Boolean(latestAnalysis);
@@ -331,17 +315,16 @@ export function PlaceDiscovery({
         ))}
       </div>
 
-      <section className="places-discovery-layout">
-        <div className="places-results">
+      <section className="places-results">
           {visibleRows.map((row) => {
             const CategoryIcon = categoryIcons[row.destination.category];
             return (
             <button
-              className={selectedRow?.destination.id === row.destination.id ? "place-discovery-card active" : "place-discovery-card"}
+              className="place-discovery-card"
               type="button"
               key={row.destination.id}
-              aria-pressed={selectedRow?.destination.id === row.destination.id}
-              onClick={() => { onSelectDestination(row.destination.id); if (window.matchMedia("(max-width: 900px)").matches) setGuideOpen(true); }}
+              aria-haspopup="dialog"
+              onClick={() => setGuideId(row.destination.id)}
             >
               <DestinationVisual destination={row.destination} compact locale={locale} />
               <div className="place-card-content">
@@ -383,11 +366,8 @@ export function PlaceDiscovery({
             </div>
           )}
           {rows.length === 0 && <EmptyState text={destinations.length === 0 ? discoveryText(locale, referencePoint ? "noLocal" : "locationNeeded") : t("tourist.places.noMatches")} />}
-        </div>
-
-        {selectedRow && <aside key={selectedRow.destination.id} className="place-guide-sidebar" aria-label={selectedRow.destination.name}><button type="button" className="place-guide-expand" onClick={() => { onSelectDestination(selectedRow.destination.id); setGuideOpen(true); }}><Maximize2 size={17} />{t("tourist.recommendations.viewDestination")}</button>{renderGuide(selectedRow.destination)}</aside>}
       </section>
-      {guideOpen && guideDestination && <PlaceGuideDialog title={guideDestination.name} locale={locale} onClose={() => setGuideOpen(false)}>{renderGuide(guideDestination)}</PlaceGuideDialog>}
+      {guideDestination && <PlaceGuideDialog title={guideDestination.name} locale={locale} onClose={closeGuide}>{renderGuide(guideDestination)}</PlaceGuideDialog>}
     </section>
   );
 }

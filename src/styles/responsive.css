@@ -243,8 +243,7 @@
   .trip-preview-stats,
   .recommendation-profile-card,
   .places-hero,
-  .places-controls,
-  .places-discovery-layout {
+  .places-controls {
     grid-template-columns: 1fr;
   }
 

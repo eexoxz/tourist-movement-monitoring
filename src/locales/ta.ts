@@ -687,7 +687,6 @@ const catalog: LocaleCatalog = {
     "Application notifications": "செயலி அறிவிப்புகள்",
     "Dismiss notification": "அறிவிப்பை மூடு",
     "Photo not added": "புகைப்படம் சேர்க்கப்படவில்லை",
-    "Nearby area photo": "அருகிலுள்ள பகுதியின் படம்",
     "Location photo": "இடத்தின் புகைப்படம்",
     "Destinations": "பயண இடங்கள்",
     "{count} Malaysian tourist destination records available for recommendation and movement analysis.": "பரிந்துரைகள் மற்றும் நகர்வுப் பகுப்பாய்விற்கு {count} மலேசிய சுற்றுலா இடங்கள் உள்ளன.",

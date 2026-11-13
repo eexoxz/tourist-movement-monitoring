@@ -12,7 +12,7 @@ describe("supervisor-reviewed tourist interface", () => {
   it("does not add district filters or claim a state reference is the user's location", () => {
     const html = renderToStaticMarkup(createElement(PlaceDiscovery, {
       destinations: initialData.destinations, demand: [], recommendations: [], festivals: [], user: initialData.users[0], latestAnalysis: undefined,
-      visitedIds: new Set<string>(), referencePoint: initialData.points[0], locale: "en", onSelectDestination: noop, onOpenEvents: noop, isBrowsingArea: true,
+      visitedIds: new Set<string>(), referencePoint: initialData.points[0], locale: "en", onOpenEvents: noop, isBrowsingArea: true,
     }));
     expect(html).not.toContain("All Malaysia");
     expect(html).not.toContain(">Near me<");

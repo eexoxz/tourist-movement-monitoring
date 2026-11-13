@@ -15,7 +15,9 @@ export function destinationPhotoCredit(destination: Destination) {
   if (!credit?.author.trim() || !credit.license.trim()) return null;
   try {
     const source = new URL(credit.sourceUrl);
-    if (source.protocol !== "https:" || source.hostname !== "commons.wikimedia.org" || !source.pathname.startsWith("/wiki/File:")) return null;
+    const commonsFile = source.hostname === "commons.wikimedia.org" && source.pathname.startsWith("/wiki/File:");
+    const flickrPhoto = source.hostname === "www.flickr.com" && /^\/photos\/[\w@%-]+\/\d+\/?$/.test(source.pathname);
+    if (source.protocol !== "https:" || (!commonsFile && !flickrPhoto)) return null;
     return { label: `${credit.author} · ${credit.license}`, href: source.href };
   } catch {
     return null;

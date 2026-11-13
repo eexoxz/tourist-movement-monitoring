@@ -49,7 +49,7 @@ describe("state-first discovery picker", () => {
     const html = renderToStaticMarkup(createElement(PlaceDiscovery, {
       destinations: getDiscoveryDestinations(initialData.destinations, user), demand: [], recommendations: [], festivals: [], user,
       latestAnalysis: undefined, visitedIds: new Set<string>(), locale: "en", isBrowsingArea: true,
-      onSelectDestination: () => {}, onOpenEvents: () => {},
+      onOpenEvents: () => {},
     }));
     expect(html.match(/class="place-discovery-card/g)).toHaveLength(4);
     expect(html).toContain(translate("en", "tourist.places.showMore"));

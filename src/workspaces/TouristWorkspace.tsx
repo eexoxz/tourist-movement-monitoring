@@ -100,7 +100,6 @@ export function TouristWorkspace({
   const [locationRetryAvailable, setLocationRetryAvailable] = useState(false);
   const [refreshingActivities, setRefreshingActivities] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string>("");
-  const [selectedDestinationId, setSelectedDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
   const [placeGuideId, setPlaceGuideId] = useState<string | null>(null);
   const [guideFromGps, setGuideFromGps] = useState(false);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
@@ -991,9 +990,7 @@ export function TouristWorkspace({
           latestAnalysis={latestAnalysis}
           visitedIds={visitedDestinationIds}
           referencePoint={discoveryReference}
-          selectedDestinationId={selectedDestinationId}
           locale={locale}
-          onSelectDestination={setSelectedDestinationId}
           onCheckIn={(id) => { setCheckInDestinationId(id); setShowCheckInPanel(true); onViewChange("overview"); }}
           onOpenEvents={() => onViewChange("events")}
           onHideDestination={hideDestination}

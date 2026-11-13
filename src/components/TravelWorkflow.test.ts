@@ -89,7 +89,7 @@ describe("tourist travel workflow boundaries", () => {
       destinations: [destination], demand: calculateDestinationDemand(initialData), recommendations: initialData.recommendations,
       user: initialData.users.find((user) => user.id === "tourist-demo")!, latestAnalysis: initialData.analyses[0],
       festivals: [{ id: "card-event", name: "Card event", date: "2026-10-20", scope: "national", states: [], category: "cultural", description: "", destinationIds: [destination.id] }],
-      visitedIds: new Set<string>(), referencePoint: initialData.points[0], locale, onSelectDestination: noop, onOpenEvents: noop,
+      visitedIds: new Set<string>(), referencePoint: initialData.points[0], locale, onOpenEvents: noop,
     }));
     expect(html).toContain(localizeDestinations([destination], locale)[0].name);
     expect(html).toContain('class="place-card-address"');
@@ -97,7 +97,8 @@ describe("tourist travel workflow boundaries", () => {
     expect(html).toContain('class="place-card-signals"');
     expect(html).toContain(translate(locale, "tourist.places.eventLinked"));
     expect(html).toContain(translate(locale, "tourist.places.newToYou"));
-    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(html).not.toContain('class="place-guide-sidebar"');
     const dialog = renderToStaticMarkup(createElement(TripActionDialog, { kind: "stop", label: "", locale, onLabelChange: noop, onConfirm: noop, onCancel: noop }));
     expect(dialog).toContain('aria-describedby="trip-dialog-description"');
     expect(dialog).toContain('class="trip-dialog-actions"');

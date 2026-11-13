@@ -609,13 +609,6 @@
   background: #ccfbf1;
 }
 
-.places-discovery-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.38fr);
-  gap: 16px;
-  align-items: start;
-}
-
 .places-results {
   display: grid;
   gap: 10px;

@@ -750,7 +750,6 @@ const catalog: LocaleCatalog = {
     "Application notifications": "Pemberitahuan aplikasi",
     "Dismiss notification": "Tutup pemberitahuan",
     "Photo not added": "Foto belum ditambah",
-    "Nearby area photo": "Foto kawasan sekitar",
     "Location photo": "Foto lokasi",
     "Destinations": "Destinasi",
     "{count} Malaysian tourist destination records available for recommendation and movement analysis.": "{count} rekod destinasi Malaysia tersedia untuk cadangan dan analisis pergerakan.",
