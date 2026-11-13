@@ -12,13 +12,17 @@ export function destinationPhotoReference(destinationId: string, version: string
 
 export function destinationPhotoCredit(destination: Destination) {
   const credit = destination.imageCredit;
-  if (!credit?.author.trim() || !credit.license.trim()) return null;
+  const author = credit?.author.trim();
+  if (!credit || !author) return null;
+  const license = credit.license?.trim();
   try {
     const source = new URL(credit.sourceUrl);
     const commonsFile = source.hostname === "commons.wikimedia.org" && source.pathname.startsWith("/wiki/File:");
     const flickrPhoto = source.hostname === "www.flickr.com" && /^\/photos\/[\w@%-]+\/\d+\/?$/.test(source.pathname);
-    if (source.protocol !== "https:" || (!commonsFile && !flickrPhoto)) return null;
-    return { label: `${credit.author} · ${credit.license}`, href: source.href };
+    const catalogueSource = !license && destination.imageUrl?.startsWith("/images/catalogue/");
+    if (source.protocol !== "https:" || source.username || source.password) return null;
+    if (!catalogueSource && !(license && (commonsFile || flickrPhoto))) return null;
+    return { label: license ? `${author} · ${license}` : author, href: source.href };
   } catch {
     return null;
   }

@@ -117,7 +117,7 @@ export type Destination = {
   imageAlt?: string;
   imageCredit?: {
     author: string;
-    license: string;
+    license?: string;
     sourceUrl: string;
     areaCaption?: string;
   };

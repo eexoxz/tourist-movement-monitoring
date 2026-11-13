@@ -17,6 +17,21 @@ describe("destination photo attribution", () => {
     expect(destinationPhotoCredit(destinations[0])).toBeNull();
   });
 
+  it("shows the publisher for a catalogue photo without a stated license", () => {
+    const sourceUrl = "https://example.com/venue";
+    const destination = {
+      ...place,
+      imageUrl: "/images/catalogue/venue.jpg",
+      imageCredit: { author: "Example Publisher", sourceUrl },
+    };
+    expect(destinationPhotoCredit(destination)).toEqual({ label: "Example Publisher", href: sourceUrl });
+    expect(destinationPhotoCredit({ ...destination, imageUrl: "https://example.com/venue.jpg" })).toBeNull();
+    expect(destinationPhotoCredit({
+      ...destination,
+      imageCredit: { ...destination.imageCredit, sourceUrl: "http://example.com/venue" },
+    })).toBeNull();
+  });
+
   it.each(["javascript:alert(1)", "https://commons.wikimedia.org.evil.example/wiki/File:Example.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Example.jpg", "not a url"])("rejects an invalid attribution destination: %s", (sourceUrl) => {
     expect(destinationPhotoCredit({ ...place, imageCredit: { ...place.imageCredit, sourceUrl } })).toBeNull();
   });
