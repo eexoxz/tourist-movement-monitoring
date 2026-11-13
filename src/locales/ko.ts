@@ -389,7 +389,6 @@ const catalog: LocaleCatalog = {
     "tourist.places.visited": "방문함",
     "tourist.places.newToYou": "새로운 장소",
     "tourist.places.noMatches": "이 필터와 맞는 장소가 없습니다. 다른 카테고리, 지역 또는 탐색 모드를 시도하세요.",
-    "tourist.places.moreAvailable": "이 필터와 맞는 장소가 더 있습니다.",
     "tourist.places.showMore": "장소 더 보기",
     "tourist.places.showFewer": "장소 적게 보기",
     "tourist.places.tripFit": "여행 적합도",

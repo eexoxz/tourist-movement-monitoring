@@ -325,10 +325,6 @@
     flex: 0 0 auto;
   }
 
-  .places-results-footer {
-    align-items: stretch;
-  }
-
   .admin-overview-map .map-view {
     min-height: 380px;
   }

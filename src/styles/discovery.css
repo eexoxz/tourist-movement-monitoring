@@ -609,33 +609,18 @@
   background: #ccfbf1;
 }
 
-.places-results {
+.places-results:not([hidden]) {
   display: grid;
   gap: 10px;
 }
 
 .places-results-footer {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border: 1px dashed #b7efe6;
-  border-radius: 8px;
-  background: #effdf9;
-}
-
-.places-results-footer.subtle {
   justify-content: center;
-  border-style: solid;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.places-results-footer p {
-  margin: 0;
-  color: #4b5563;
-  font-weight: 800;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
 }
 
 .place-discovery-card {

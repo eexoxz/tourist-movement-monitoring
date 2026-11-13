@@ -389,7 +389,6 @@ const catalog: LocaleCatalog = {
     "tourist.places.visited": "已到访",
     "tourist.places.newToYou": "对你来说是新地点",
     "tourist.places.noMatches": "没有地点符合这些筛选。请尝试其他类别、区域或探索模式。",
-    "tourist.places.moreAvailable": "还有更多地点符合这些筛选。",
     "tourist.places.showMore": "显示更多地点",
     "tourist.places.showFewer": "显示较少地点",
     "tourist.places.tripFit": "行程匹配",

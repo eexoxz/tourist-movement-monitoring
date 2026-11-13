@@ -425,7 +425,6 @@ const catalog: LocaleCatalog = {
     "tourist.places.visited": "visited",
     "tourist.places.newToYou": "new to you",
     "tourist.places.noMatches": "No places match these filters yet. Try another category, area or discovery mode.",
-    "tourist.places.moreAvailable": "More places match these filters.",
     "tourist.places.showMore": "Show more places",
     "tourist.places.showFewer": "Show fewer places",
     "tourist.places.tripFit": "Trip fit",

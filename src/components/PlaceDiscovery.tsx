@@ -1,6 +1,6 @@
 import { Building2, CalendarDays, ChevronRight, CircleCheck, Compass, Landmark, MapPin, Navigation, Sparkles, Trees, Users, Utensils, Waves } from "lucide-react";
 import { discoveryText } from "../services/discoveryCopy";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { destinationCategories } from "../services/destinationManagement";
 import { distanceKm } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -152,6 +152,7 @@ export function PlaceDiscovery({
   const [categoryFilter, setCategoryFilter] = useState<DestinationCategory | "all">("all");
   const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
+  const additionalPlacesId = useId();
   const [guideId, setGuideId] = useState<string | null>(null);
   const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
   const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
@@ -252,13 +253,48 @@ export function PlaceDiscovery({
     onCheckIn={onCheckIn ? () => { closeGuide(); onCheckIn(destination.id); } : undefined}
     onOpenEvents={() => { closeGuide(); onOpenEvents(); }}
     onHide={onHideDestination ? () => { closeGuide(); onHideDestination(destination.id); } : undefined} />;
-  const visibleRows = showAllPlaces ? rows : rows.slice(0, placePreviewLimit);
-  const hiddenPlaceCount = rows.length - visibleRows.length;
+  const hiddenPlaceCount = Math.max(0, rows.length - placePreviewLimit);
   const personalized = Boolean(latestAnalysis);
   const demandSignalCount = useMemo(() => {
     const localIds = new Set(destinations.map((destination) => destination.id));
     return demand.filter((row) => row.popularityScore > 0 && localIds.has(row.destinationId)).length;
   }, [demand, destinations]);
+
+  function renderPlaceCard(row: (typeof rows)[number]) {
+    const CategoryIcon = categoryIcons[row.destination.category];
+    return (
+      <button
+        className="place-discovery-card"
+        type="button"
+        key={row.destination.id}
+        aria-haspopup="dialog"
+        onClick={() => setGuideId(row.destination.id)}
+      >
+        <DestinationVisual destination={row.destination} compact locale={locale} />
+        <div className="place-card-content">
+          <div className="place-card-heading">
+            <div>
+              <span className="place-card-category"><CategoryIcon size={16} aria-hidden="true" />{getCategoryLabel(row.destination.category, t)}</span>
+              <strong>{row.destination.name}</strong>
+              <span className="place-card-city">{row.destination.city}</span>
+            </div>
+            <ChevronRight size={20} className="place-card-open" aria-hidden="true" />
+          </div>
+          <p>{row.insight}</p>
+          <div className="place-card-address"><MapPin size={16} aria-hidden="true" /><span>{row.destination.address ?? `${row.destination.city}, Malaysia`}</span></div>
+          <div className="place-card-meta">
+            {!isBrowsingArea && <span><Navigation size={16} aria-hidden="true" />{formatDistanceLabel(row.distance, t)}</span>}
+            <span><Users size={16} aria-hidden="true" />{formatDemandLabel(row.demandRow, locale, t)}</span>
+          </div>
+          <div className="place-card-signals">
+            <small className="place-card-fit"><Sparkles size={15} aria-hidden="true" />{formatPlaceFitLabel(row.score, t)}</small>
+            {row.festivalBoosted && <span className="place-card-event"><CalendarDays size={15} aria-hidden="true" />{t("tourist.places.eventLinked")}</span>}
+            <span className="place-card-history">{row.visited ? <CircleCheck size={15} aria-hidden="true" /> : <Compass size={15} aria-hidden="true" />}{t(row.visited ? "tourist.places.visited" : "tourist.places.newToYou")}</span>
+          </div>
+        </div>
+      </button>
+    );
+  }
 
   return (
     <section className="places-page">
@@ -316,55 +352,25 @@ export function PlaceDiscovery({
       </div>
 
       <section className="places-results">
-          {visibleRows.map((row) => {
-            const CategoryIcon = categoryIcons[row.destination.category];
-            return (
-            <button
-              className="place-discovery-card"
-              type="button"
-              key={row.destination.id}
-              aria-haspopup="dialog"
-              onClick={() => setGuideId(row.destination.id)}
-            >
-              <DestinationVisual destination={row.destination} compact locale={locale} />
-              <div className="place-card-content">
-              <div className="place-card-heading">
-                <div>
-                  <span className="place-card-category"><CategoryIcon size={16} aria-hidden="true" />{getCategoryLabel(row.destination.category, t)}</span>
-                  <strong>{row.destination.name}</strong>
-                  <span className="place-card-city">{row.destination.city}</span>
-                </div>
-                <ChevronRight size={20} className="place-card-open" aria-hidden="true" />
-              </div>
-              <p>{row.insight}</p>
-              <div className="place-card-address"><MapPin size={16} aria-hidden="true" /><span>{row.destination.address ?? `${row.destination.city}, Malaysia`}</span></div>
-              <div className="place-card-meta">
-                {!isBrowsingArea && <span><Navigation size={16} aria-hidden="true" />{formatDistanceLabel(row.distance, t)}</span>}
-                <span><Users size={16} aria-hidden="true" />{formatDemandLabel(row.demandRow, locale, t)}</span>
-              </div>
-              <div className="place-card-signals">
-                <small className="place-card-fit"><Sparkles size={15} aria-hidden="true" />{formatPlaceFitLabel(row.score, t)}</small>
-                {row.festivalBoosted && <span className="place-card-event"><CalendarDays size={15} aria-hidden="true" />{t("tourist.places.eventLinked")}</span>}
-                <span className="place-card-history">{row.visited ? <CircleCheck size={15} aria-hidden="true" /> : <Compass size={15} aria-hidden="true" />}{t(row.visited ? "tourist.places.visited" : "tourist.places.newToYou")}</span>
-              </div>
-              </div>
-            </button>
-          ); })}
-          {hiddenPlaceCount > 0 && (
+        {rows.slice(0, placePreviewLimit).map(renderPlaceCard)}
+        {hiddenPlaceCount > 0 && (
+          <>
             <div className="places-results-footer">
-              <p>{t("tourist.places.moreAvailable")}</p>
-              <button className="secondary-action compact-action" type="button" onClick={() => setShowAllPlaces(true)}>
-                {t("tourist.places.showMore")} ({hiddenPlaceCount})
+              <button
+                className="secondary-action compact-action"
+                type="button"
+                aria-controls={additionalPlacesId}
+                aria-expanded={showAllPlaces}
+                onClick={() => setShowAllPlaces((expanded) => !expanded)}
+              >
+                {showAllPlaces ? t("tourist.places.showFewer") : `${t("tourist.places.showMore")} (${hiddenPlaceCount})`}
               </button>
             </div>
-          )}
-          {showAllPlaces && rows.length > placePreviewLimit && (
-            <div className="places-results-footer subtle">
-              <button className="secondary-action compact-action" type="button" onClick={() => setShowAllPlaces(false)}>
-                {t("tourist.places.showFewer")}
-              </button>
+            <div id={additionalPlacesId} className="places-results" hidden={!showAllPlaces}>
+              {showAllPlaces && rows.slice(placePreviewLimit).map(renderPlaceCard)}
             </div>
-          )}
+          </>
+        )}
           {rows.length === 0 && <EmptyState text={destinations.length === 0 ? discoveryText(locale, referencePoint ? "noLocal" : "locationNeeded") : t("tourist.places.noMatches")} />}
       </section>
       {guideDestination && <PlaceGuideDialog title={guideDestination.name} locale={locale} onClose={closeGuide}>{renderGuide(guideDestination)}</PlaceGuideDialog>}

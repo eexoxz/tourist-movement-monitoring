@@ -389,7 +389,6 @@ const catalog: LocaleCatalog = {
     "tourist.places.visited": "பார்வையிட்டது",
     "tourist.places.newToYou": "உங்களுக்கு புதியது",
     "tourist.places.noMatches": "இந்த வடிகட்டிகளுக்கு பொருந்தும் இடங்கள் இல்லை. வேறு வகை, பகுதி அல்லது முறையை முயற்சிக்கவும்.",
-    "tourist.places.moreAvailable": "இந்த வடிகட்டிகளுக்கு மேலும் இடங்கள் பொருந்துகின்றன.",
     "tourist.places.showMore": "மேலும் இடங்களை காட்டு",
     "tourist.places.showFewer": "குறைவான இடங்களை காட்டு",
     "tourist.places.tripFit": "பயண பொருத்தம்",

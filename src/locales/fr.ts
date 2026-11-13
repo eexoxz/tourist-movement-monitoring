@@ -389,7 +389,6 @@ const catalog: LocaleCatalog = {
     "tourist.places.visited": "visité",
     "tourist.places.newToYou": "nouveau pour vous",
     "tourist.places.noMatches": "Aucun lieu ne correspond à ces filtres. Essayez une autre catégorie, zone ou mode.",
-    "tourist.places.moreAvailable": "D'autres lieux correspondent à ces filtres.",
     "tourist.places.showMore": "Afficher plus de lieux",
     "tourist.places.showFewer": "Afficher moins de lieux",
     "tourist.places.tripFit": "Adaptation au voyage",

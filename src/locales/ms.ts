@@ -389,7 +389,6 @@ const catalog: LocaleCatalog = {
     "tourist.places.visited": "telah dilawati",
     "tourist.places.newToYou": "baharu untuk anda",
     "tourist.places.noMatches": "Tiada tempat sepadan dengan penapis ini. Cuba kategori, kawasan atau mod lain.",
-    "tourist.places.moreAvailable": "Ada lagi tempat yang sepadan dengan penapis ini.",
     "tourist.places.showMore": "Tunjuk lebih banyak tempat",
     "tourist.places.showFewer": "Tunjuk lebih sedikit tempat",
     "tourist.places.tripFit": "Padanan perjalanan",

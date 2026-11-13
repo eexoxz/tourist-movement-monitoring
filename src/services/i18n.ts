@@ -473,7 +473,6 @@ export type TranslationKey =
   | "tourist.places.visited"
   | "tourist.places.newToYou"
   | "tourist.places.noMatches"
-  | "tourist.places.moreAvailable"
   | "tourist.places.showMore"
   | "tourist.places.showFewer"
   | "tourist.places.tripFit"

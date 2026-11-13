@@ -389,7 +389,6 @@ const catalog: LocaleCatalog = {
     "tourist.places.visited": "訪問済み",
     "tourist.places.newToYou": "初めての場所",
     "tourist.places.noMatches": "この条件に合う場所はありません。カテゴリ、エリア、発見モードを変えてください。",
-    "tourist.places.moreAvailable": "この条件に合う場所がまだあります。",
     "tourist.places.showMore": "もっと場所を表示",
     "tourist.places.showFewer": "表示を減らす",
     "tourist.places.tripFit": "旅行との相性",
