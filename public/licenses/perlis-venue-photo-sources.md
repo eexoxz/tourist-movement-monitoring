@@ -1,0 +1,42 @@
+# Perlis venue photo sources
+
+- Anjung Keli Restaurant. [Tourism Malaysia](https://www.malaysia.travel/explore/top-eateries-in-perlis-for-foodies-at-heart).
+- Gereja Katolik Our Lady of Fatima. [Roman Catholic Diocese of Penang](https://pgdiocese.org/parish/church-of-our-lady-of-fatima-kangar/).
+- Gurdwara Kangar. [Discover Sikhism](https://discoversikhism.com/sikh_gurdwaras/gurdwara_sri_guru_hargobind_sahib_kangar.html).
+- Kak Su Laksa. [Qilla](https://qilla.blogspot.com/2019/02/kedai-laksa-kak-su-kuala-perlis.html).
+- Kangar Jaya Mall. [Ujie Othman](https://ujieothman.blogspot.com/2026/06/pertama-kali-ke-pusat-beli-belah.html).
+- Kangar Street Art. [MyPOV](https://mypov.com.my/zohldunmps/kangarstreetArt).
+- Kayangan Square. [PropertyGuru](https://www.propertyguru.com.my/condo/kayangan-square-12759).
+- Komalaut Seafood Complex. [Wheree contributor](https://lizamat-ikan-bakar-kola.wheree.com/).
+- Kompleks Arau. [CHJ Property](https://chjproperty.com/shoppingmall.php).
+- KOPITOK. [Restaurant Guru contributor](https://restaurantguru.com/KOPITOK-Kangar).
+- Kota Kayang Museum. [Mohamad Hasan Suratman](https://mohamadhasansuratman.blogspot.com/2012/07/muzium-kota-kayang-perlis.html).
+- Ladang Nipah Kipli. [Tourism Malaysia](https://www.malaysia.travel/explore/top-eateries-in-perlis-for-foodies-at-heart).
+- Masjid Solahuddin Al-Ayyubi. [Masjid Solahuddin Al-Ayyubi fundraising page](https://isadaqah.my/campaign/sumbangan-menaik-taraf-masjid-salahuddin-al-ayubbi).
+- Masjid Tuanku Syed Putra Jamalullail. [Perlis Islamic Affairs Department](https://jaips.perlis.gov.my/galeri-jheaips/senarai-masjid-negeri-perlis/112-masjid/464-masjid-tuanku-syed-putra-jamalullail).
+- Medan Selera Sena. [My Weekend Plan](https://myweekendplan.asia/top-best-food-courts-in-perlis/).
+- Ngopi. [Azaleania](https://azaleania.blogspot.com/2018/02/jom-ngopikangar.html).
+- Arked Niaga Padang Besar. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:Arked_Niaga_Padang_Besar,_Padang_Besar_20231224_111439.jpg) · [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) · resized and re-encoded.
+- Perlis Craft Complex. [Haniem Liznim](https://hanimliznim.blogspot.com/2013/10/liznim-kraf-galeri-kraftangan-perlis.html).
+- Perlis State Park. [Perlis Forestry Department](https://forestry.perlis.gov.my/eko-pelancongan/taman-negeri-perlis).
+- Restoran Sungai Bakong 2. [kakgtukangjahit](https://www.lemon8-app.com/%40kakgtukangjahit/7586557704668185106?region=my).
+- Taman Bukit Lagi. [Wikiloc trail contributor](https://www.wikiloc.com/hiking-trails/bukit-lagi-136820829).
+- Taman Merdeka. [Chongkian](https://commons.wikimedia.org/wiki/File:Merdeka_Park_(Perlis).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Taman Rekreasi Sungai Arau. [Timothy Tye](https://www.penang-traveltips.com/malaysia/perlis/arau/dataran-sungai-arau.htm).
+- Tasik Melati. [Tepak](https://tepak.my/listing/taman-rekreasi-sungai-arau-perlis).
+- Trek Kurong Tengar. [Khalifah Media Networks](https://khalifahmedianetworks.com/13-pulau-pantai-menarik-yang-boleh-dilawati-di-perlis/).
+- Wat Siam Kubang Tiga. [Perlis Lands and Mines Office](https://ptg.ptgps.gov.my/aktivitii/program-kaunter-van-bergerak-pptgps-di-wat-siam-kubang-tiga).
+- Galeri Diraja Arau. [Libur](https://www.libur.com.my/tempat-dan-aktiviti-best-di-perlis-barulah-berbaloi-datang-bercuti/).
+- Istana Arau (palace gate). [Malaysia Tribune](https://malaysiatribune.news/politik/mb-perlis-baharu-angkat-sumpah-hari-ini/).
+- Rumah Penghulu Dato Haji Wan Ahmad. [Perlis Geopark](https://geopark.perlis.gov.my/tour-item/rumah-penghulu-dato-haji-wan-ahmad/).
+- Masjid Lama Arau. [Seni Lama Melayu](https://artmelayu.blogspot.com/2017/02/masjid-lama-old-mosque-of-arau.html).
+- Kampung Warisan Seberang Ramai. [Dewan Budaya](https://dewanbudaya.jendeladbp.my/2021/11/23/685/).
+- Kuala Perlis Ferry Terminal. [Ferry Lipe](https://ferrylipe.com/low-season-guide.html).
+- Arau Railway Station. [Khairil Yusof](https://commons.wikimedia.org/wiki/File:Arau_Train_Station_Perlis.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) · resized and re-encoded.
+- Nat Pokok Getah Market. [Rizwan Sabri / PerlisAktif](https://perlisaktif.wordpress.com/2019/01/28/apa-yang-menarik-di-nat-pokok-getah-pauh/).
+- Pasar Besar Sena. [Mizal’s Channel](https://hayyanarzapparel.wordpress.com/2011/01/08/pasar-besar-kangar-baru/).
+- Padang Waremart. [MaKaN JiKa SeDaP](https://www.sedapnya-makan.com/2021/01/jalan-jalan-padang-waremart-padang-besar.html).
+- Laman Brasmana. [Timothy Tye](https://www.penang-traveltips.com/malaysia/perlis/kuala-perlis/laman-brasmana.htm).
+- Old Perlis State Secretariat. [Chongkian](https://commons.wikimedia.org/wiki/File:Merdeka_Park_(Perlis).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Makam Diraja Arau. [Chongkian](https://commons.wikimedia.org/wiki/File:Royal_Mausoleum_%28Perlis%29.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Pekan Lama Arau. [Small Towns Malaysia](https://smalltowns.my/perlis/arau/do/arau-old-street/).
