@@ -1,6 +1,6 @@
 import { Building2, CalendarDays, ChevronRight, CircleCheck, Compass, Landmark, MapPin, Navigation, Sparkles, Trees, Users, Utensils, Waves } from "lucide-react";
 import { discoveryText } from "../services/discoveryCopy";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { destinationCategories } from "../services/destinationManagement";
 import { distanceKm } from "../services/geo";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -153,6 +153,7 @@ export function PlaceDiscovery({
   const [mode, setMode] = useState<PlaceDiscoveryMode>("recommended");
   const [showAllPlaces, setShowAllPlaces] = useState(false);
   const additionalPlacesId = useId();
+  const lastPreviewCard = useRef<HTMLButtonElement>(null);
   const [guideId, setGuideId] = useState<string | null>(null);
   const localizedDestinations = useMemo(() => localizeDestinations(destinations, locale), [destinations, locale]);
   const festivalDestinationIds = useMemo(() => new Set(festivals.flatMap((festival) => festival.destinationIds)), [festivals]);
@@ -267,6 +268,7 @@ export function PlaceDiscovery({
         className="place-discovery-card"
         type="button"
         key={row.destination.id}
+        ref={row === rows[placePreviewLimit - 1] ? lastPreviewCard : undefined}
         aria-haspopup="dialog"
         onClick={() => setGuideId(row.destination.id)}
       >
@@ -355,19 +357,22 @@ export function PlaceDiscovery({
         {rows.slice(0, placePreviewLimit).map(renderPlaceCard)}
         {hiddenPlaceCount > 0 && (
           <>
+            <div id={additionalPlacesId} className="places-results" hidden={!showAllPlaces}>
+              {showAllPlaces && rows.slice(placePreviewLimit).map(renderPlaceCard)}
+            </div>
             <div className="places-results-footer">
               <button
                 className="secondary-action compact-action"
                 type="button"
                 aria-controls={additionalPlacesId}
                 aria-expanded={showAllPlaces}
-                onClick={() => setShowAllPlaces((expanded) => !expanded)}
+                onClick={() => {
+                  if (!showAllPlaces) lastPreviewCard.current?.focus({ preventScroll: true });
+                  setShowAllPlaces(!showAllPlaces);
+                }}
               >
                 {showAllPlaces ? t("tourist.places.showFewer") : `${t("tourist.places.showMore")} (${hiddenPlaceCount})`}
               </button>
-            </div>
-            <div id={additionalPlacesId} className="places-results" hidden={!showAllPlaces}>
-              {showAllPlaces && rows.slice(placePreviewLimit).map(renderPlaceCard)}
             </div>
           </>
         )}
