@@ -41,3 +41,5 @@
 - Zoo Taiping. [Orang Perak](https://www.orangperak.com/zoo-taiping-beri-diskaun-hebat-kepada-semua-warga-perak-2017.html).
 - Matang Museum (Kota Ngah Ibrahim). [EcoDoor](https://ecodoor.my/products/muzium-sejarah-matang-historical-museum-kota-ngah-ibrahim).
 - Lenggong Valley Archaeological Gallery. [Discover Malaysia UNESCO](https://discovermalaysia-unesco.com/archaeological-heritage-of-the-lenggong-valley-perak-man/).
+- YI ZHAN KOPITIAM 驿站美食中心. [Yi Zhan Kopitiam](https://www.google.com/maps/place/Yi+Zhan+Kopitiam/@4.5474494,101.0711956,3a,75y,90t/data=!3m5!1e2!3m3!1sCIABIhAwJRvv3724h8a1ecXgEnru!2e10!3e12).
+- Kafe Musika. [Koo Chun Hin](https://www.google.com/maps/place/Cafe+Music+Ipoh/@4.596781,101.08479,3a,75y,90t/data=!3m5!1e2!3m3!1sCIHM0ogKEICAgIDEh9SdmQE!2e10!3e12). Archive photo · September 2017.

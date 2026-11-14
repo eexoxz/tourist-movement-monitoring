@@ -40,3 +40,6 @@
 - Old Perlis State Secretariat. [Chongkian](https://commons.wikimedia.org/wiki/File:Merdeka_Park_(Perlis).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
 - Makam Diraja Arau. [Chongkian](https://commons.wikimedia.org/wiki/File:Royal_Mausoleum_%28Perlis%29.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
 - Pekan Lama Arau. [Small Towns Malaysia](https://smalltowns.my/perlis/arau/do/arau-old-street/).
+- Kuan Yin Temple. [Dylan Sim](https://www.google.com/maps/place/Kuan+Yin+Temple/@6.6595344,100.3215627,3a,75y,90t/data=!3m5!1e2!3m3!1sCIHM0ogKEICAgMCIp5_2cQ!2e10!3e12).
+- Restoran Haji Sharin Low. [mohd hafiz](https://www.google.com/maps/place/Restoran+Hj+Sharin+Low+Kangar/@6.4360799,100.1890554,3a,75y,90t/data=!3m5!1e2!3m3!1sCIHM0ogKEICAgIDEuYfE0QE!2e10!3e12). Archive photo · January 2016.
+- Wat Suwankhiri. [Trip.com contributor](https://www.trip.com/travel-guide/attraction/chuping/wat-suwankhiri-143840784/).
