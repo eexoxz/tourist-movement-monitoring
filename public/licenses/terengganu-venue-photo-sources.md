@@ -1,0 +1,62 @@
+# Terengganu venue photos
+
+- Batu Buruk Beach. [Airil anuar](https://commons.wikimedia.org/wiki/File:Pantai_batu_buruk.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Pantai Pandak. [Beautiful Terengganu](https://www.beautifulterengganu.com/pantai-pandak-cendering/).
+- Kemasik Beach. [Napiez](https://commons.wikimedia.org/wiki/File:KemasikBeach.PNG) · [Public domain](https://creativecommons.org/publicdomain/mark/1.0/) · resized and re-encoded.
+- Pantai Tok Jembal. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/pantai-tok-jembal/).
+- Pantai Air Tawar. [Beautiful Terengganu](https://www.beautifulterengganu.com/pantai-air-tawar/).
+- Pantai Bukit Keluang. [Discovery Terengganu](https://www.discoveryterengganu.com/en/tempat/bukit-keluang/).
+- Pantai Penarik. [Petit Go](https://www.petitgo.com/listing_display?listingid=462).
+- Pantai Seberang Takir. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/pantai-seberang-takir/).
+- Rantau Abang. [Awek Retro](https://awekretro.blogspot.com/2013/07/attraction-pantai-rantau-abang.html).
+- Redang Island. [Singaporean](https://commons.wikimedia.org/wiki/File:Pasir_Panjang.JPG) · [Public domain](https://creativecommons.org/publicdomain/mark/1.0/) · resized and re-encoded.
+- Al-Muktafi Billah Shah Mosque. [DK Dayat](https://dkdayat.blogspot.com/2016/09/masjid-al-muktafi-billah-shah-kuala.html).
+- Crystal Mosque. [Ikhwan Salleh](https://commons.wikimedia.org/wiki/File:Masjid_Kristal_(Mei_2011).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Ho Ann Kiong Temple. [Malay Mail](https://www.malaymail.com/news/life/2026/06/19/centuries-old-kampung-cina-evolves-as-residents-age-but-culture-endures/224242).
+- Islamic Civilisation Park. [Airil anuar](https://commons.wikimedia.org/wiki/File:Masjid_Qolsharif.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Masjid Sultan Mahmud. [Majlis Daerah Hulu Terengganu](https://www.mdht.gov.my/ms/pelancongan/masjid-daerah-hulu-terengganu).
+- Masjid Ulul Albab (Masjid Kayu Seberang Jerteh). [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/masjid-ulul-albab/).
+- Muzium Daerah Dungun. [Zatie Wanderer](https://www.discoveryterengganu.com/tempat/muzium-dungun/).
+- Muzium Daerah Kemaman. [Discovery Terengganu](https://www.discoveryterengganu.com/en/tempat/muzium-kemaman/).
+- Tengku Tengah Zaharah Mosque. [bbbsheep from singa-po](https://commons.wikimedia.org/wiki/File:Floating_Mosque.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- Terengganu State Museum Complex. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:Muzium_Negeri_Terengganu,_Kampung_Bukit_Losong_20240227_095051.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+- Abidin Mosque. [rasmuscleve](https://commons.wikimedia.org/wiki/File:Abidin_Mosque,_Kuala_Terengganu.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- Masjid Lama Kampung Tuan. [mStar](https://www.mstar.com.my/lokal/semasa/2017/09/05/masjid-tanpa-paku).
+- Bukit Besi Museum. [KETENGAH](https://tourism.ketengah.gov.my/history-and-heritage/muzium-bukit-besi/show).
+- Bukit Puteri. [Akml5599](https://commons.wikimedia.org/wiki/File:Bukit_Puteri_Fort.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Kampung Cina, Kuala Terengganu. [Rozi Salleh](https://commons.wikimedia.org/wiki/File:Chinatown_Gate,_Kuala_Terengganu.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- Kota Lama Duyong. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/kota-lama-duyong/).
+- Memorial Batu Bersurat. [Terengganu Museum](https://museum.terengganu.gov.my/index.php/muzium/tempat-bersejarah/memorial-batu-bersurat).
+- Rumah Warisan Haji Su. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/rumah-warisan-haji-su/).
+- Makam Sultan Zainal Abidin I, Bukit Keledang. [Terengganu Hebat](https://terengganuhebat.blogspot.com/2010/09/makam-sultan-terengganu-yang-pertama.html).
+- Kampung Budaya Terengganu. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/kampung-budaya-terengganu/).
+- Taman Tasik Tanjung Sura. [MY Dungun](https://mydgn.blogspot.com/2015/11/taman-tasik-tanjung-sura-dungun.html).
+- Kemaman Zoo & Recreation Park. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/taman-rekreasi-zoo-kemaman-trzk/).
+- Taman Rekreasi Keluarga Pulau Kekabu. [Husniey Husain](https://www.husnieyhusain.com/2017/05/taman-rekreasi-pulau-kekabu-marang.html).
+- Taman Awam Lagun Kuala Ibai. [W. Hassan](https://whassan.blogspot.com/2010/07/lets-have-picnics-at-taman-awam-lagun.html).
+- Taman Pesisir Payang. [Siakap Keli](https://siakapkeli.my/articles/taman-rekreasi-pesisir-payang-hampir-siap-berlatar-belakang-draw-bridge-bakal-jadi-port-bergambar).
+- Gawi Point, Tasik Kenyir. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/jeti-pengkalan-gawi/).
+- Setiu Wetlands. [Fikku fiq](https://commons.wikimedia.org/wiki/File:The_boardwalk_of_Setiu_Wetlands_State_Park.jpg) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- Taman Rekreasi Tasik Puteri. [Petit Go](https://petitgo.com/listing_display?listingid=467).
+- Taman Rekreasi Hiliran. [Trip.com contributor](https://www.trip.com/moments/detail/cabang-tiga-1453960-134331276/).
+- Taman Rekreasi Pantai Teluk Ketapang. [Discovery Terengganu](https://www.discoveryterengganu.com/en/tempat/pantai-teluk-ketapang/).
+- Bazaar Warisan. [Fikku fiq](https://commons.wikimedia.org/wiki/File:Bazaar_Warisan.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Marang Waterfront. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:Marang_Waterfront,_Marang_20240227_163818.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/) · resized and re-encoded.
+- MYDIN Mall Gong Badak. [Maream Homestay](https://mareamhomestay.blogspot.com/p/maream-homestay_31.html).
+- Dataran Sungai Jerteh. [Arkitek Zamryz](https://www.archify.com/my/project/jerteh-square).
+- KTCC Mall. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/ktcc-mall/).
+- Kuala Terengganu Drawbridge. [Syakirin Hafizin bin Mohamad](https://www.discoveryterengganu.com/en/tempat/jambatan-angkat-kuala-terengganu-drawbridge/).
+- Mayang Mall. [Pelaburan Hartanah Berhad](https://www.phb.com.my/services/property-investment/retails/mayang-mall).
+- Mesra Mall. [Titian Terengganu](https://titianterengganu.blogspot.com/2010/09/mesra-mall-kertih.html).
+- Paya Bunga Square. [Roggenrola](https://commons.wikimedia.org/wiki/File:Paya_Bunga_Square.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Pusat Sains & Kreativiti Terengganu. [Discovery Terengganu](https://www.discoveryterengganu.com/tempat/pusat-sains-kreativiti-terengganu-pskt/).
+- 88 Lucky Seafood Restaurant. [Tiny Tan](https://tinytanblog.me/2022/10/30/restaurant-seafood-lucky-jalan-jeti-besut/).
+- Dynar Lekor (Buluh Gading). [Dynar Lekor](https://www.dynarlekor.com/).
+- Fauzi Nasi Kerabu (Tok Jembal). [CEO Sekmung](https://ceosekmung.com/makan-tengah-hari-kuala-terengganu/).
+- Kak Pah Nasi Dagang. [Zatie Wanderer](https://www.zatiewanderer.com/carpacker-pantai-timur-warung-nasi-dagang-kak-pah-dan-sekitar-pantai-batu-burok/).
+- Warung Pok Nong. [New Straits Times](https://www.nst.com.my/news/nation/2017/12/316512/kg-kolam-villagers-terengganu-glad-beach-erosion-remedial-work).
+- Mr Celup Tepung Station. [Discovery Terengganu](https://www.discoveryterengganu.com/6-port-ikan-celup-tepung-ict-tepi-pantai-paling-best-di-terengganu/).
+- Pasar Payang. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:Pasar_Besar_Kedai_Payang,_Kuala_Terengganu_20240227_085529.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+- Sukiyang Coffee by Hai Peng. [Travel in Style With Fara](https://travelinstylewithfara.blogspot.com/2014/05/vmy2014-sukiyang-coffee-cafe-aka.html).
+- Nasi Dagang Atas Tol (Kampung Atas Tol). [IKHLAS](https://ikhlas.com/blog/ms/my/halal-food/malaysia/11-tempat-makan-mesti-singgah-kalau-ke-kuala-terengganu/).
+- Keropok Warisan Losong. [Discovery Terengganu](https://www.discoveryterengganu.com/kedai-keropok-lekor-legend-di-terengganu/).
