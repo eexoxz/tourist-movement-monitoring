@@ -43,3 +43,7 @@
 - Kuan Yin Temple. [Dylan Sim](https://www.google.com/maps/place/Kuan+Yin+Temple/@6.6595344,100.3215627,3a,75y,90t/data=!3m5!1e2!3m3!1sCIHM0ogKEICAgMCIp5_2cQ!2e10!3e12).
 - Restoran Haji Sharin Low. [mohd hafiz](https://www.google.com/maps/place/Restoran+Hj+Sharin+Low+Kangar/@6.4360799,100.1890554,3a,75y,90t/data=!3m5!1e2!3m3!1sCIHM0ogKEICAgIDEuYfE0QE!2e10!3e12). Archive photo · January 2016.
 - Wat Suwankhiri. [Trip.com contributor](https://www.trip.com/travel-guide/attraction/chuping/wat-suwankhiri-143840784/).
+- Hai Thien Seafood. [Waze contributor](https://www.waze.com/en-AU/live-map/directions?from=place.w.65601600.656212607.2816802).
+- Gua Kelam 2. [Ujie Othman](https://ujieothman.blogspot.com/2024/09/eksplorasi-gua-kelam-2-perlis.html).
+- Arau Railway Station. [Timothy Tye](https://www.penang-traveltips.com/malaysia/perlis/arau-railway-station.htm).
+- Old Perlis State Secretariat. [Chongkian](https://commons.wikimedia.org/wiki/File:Merdeka_Park_(Perlis).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · cropped and re-encoded.

@@ -49,3 +49,4 @@
 - Underwater World Langkawi. [Trip.com contributor](https://my.trip.com/moments/detail/langkawi-539-14232848?locale=en-MY).
 - Village Mall. [Tripadvisor contributor](https://www.tripadvisor.com/Attraction_Review-g670110-d8337564-Reviews-Village_Mall-Sungai_Petani_Kuala_Muda_District_Kedah.html).
 - Wat Nikrodharam. [Gokayu](https://gokayu.com/malaysia/kedah/alor-setar/attraction/wat-nikrodharam-buddhist-temple).
+- Langkawi Craft Complex. [Kraftangan Malaysia](https://kraftangan.gov.my/en/?id=11).

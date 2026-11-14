@@ -11,3 +11,5 @@
 - Pantai Teluk Aman, Batu Kawan. [Kit Yeng Chan, Penang Insider](https://www.penang-insider.com/batu-kawan-penang/).
 - Pantai Tanjung Tokong shoreline near the Thai Pak Koong Temple. [Jenny Lynn, On Penang](https://onpenang.com/straits-quay-walk/).
 - Two Frenchies Café-Bistro entrance, Lebuh Bishop. [Foodveler](https://foodveler.com/2018/02/two-frenchies.html).
+- George Town Heritage Zone. [philip.mallis](https://commons.wikimedia.org/wiki/File:Heritage_buildings_in_central_George_Town,_Penang.jpg) · [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) · resized and re-encoded.
+- Penang National Park. [Timothy Tye](https://www.penang-traveltips.com/penang-national-park.htm).
