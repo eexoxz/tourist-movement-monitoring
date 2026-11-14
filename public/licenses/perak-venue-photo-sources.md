@@ -1,0 +1,43 @@
+# Perak venue photo sources
+
+- Concubine Lane. [Michael C](https://commons.wikimedia.org/wiki/File:Concubine_Lane.jpg) Â· [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) Â· resized and re-encoded.
+- Kellie's Castle. [Kulshrax](https://commons.wikimedia.org/wiki/File:Kellie%27s_Castle.jpg) Â· [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) Â· resized and re-encoded.
+- 22 Hale Street Gallery. [Options, The Edge](https://www.optionstheedge.com/topic/events/ipoh-special-destination-magazine-launch).
+- AEON Ipoh Falim. [Pemerintah Berani](https://pemerintahberani.blogspot.com/2015/08/list-of-tenants-in-aeon-big-falim-ipoh.html).
+- AEON Mall Kinta City. [DagangNews](https://www.dagangnews.com/article/terkini/keuntungan-hasil-pembesaran-aeon-mall-kinta-city-dengan-kos-rm160-juta-bakal-dinikmati-bermula-fy28-mbsb-research-65151).
+- AEON Mall Seri Manjung. [MD Faiez](https://www.mdfaiez84.com/2019/06/aeon-mall-seri-manjung.html).
+- AEON Mall Taiping. [Sycal Berhad](https://www.sycalberhad.com/pages/pages_id/25127/sycal-project-management/).
+- Citrus Wine & Dine. [Elaine](https://addictivelaine.blogspot.com/2010/09/walks-on-food-2-fine-dining-in-ipoh.html).
+- Coral Beach. [Michael C](https://commons.wikimedia.org/wiki/File:Pangkor_Coral_Beach.jpg) Â· [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) Â· resized and re-encoded.
+- D.R. Seenivasagam Park. [Ipoh City Council](https://www.mbi.gov.my/index.php/rekreasi/taman-d-r-seenivasagam).
+- Doubletap Cafe. [Felicia Grace](https://felicia-grace.blogspot.com/2019/12/DoubleTap.html).
+- Geological Museum Ipoh. [Orang Perak](https://www.orangperak.com/sejarah-dan-kisah-muzium-geologi-di-ipoh-perak.html).
+- Hutan Lipur Kuala Woh. [PetitGo](https://www.petitgo.com/listing_display?listingid=428).
+- JJ Roll Bakery. [My Weekend Plan](https://myweekendplan.asia/ms/bakeri-terbaik-di-ipoh/).
+- Ketapang Bay Beach. [Corals & Oceanic Services](https://coralsandoceanicservices.weebly.com/teluk-ketapang.html).
+- Kledang Saiong Forest Eco Park. [Astro Awani](https://www.astroawani.com/berita-malaysia/penguatkuasaan-permit-masuk-hutan-simpan-kledang-saiong-ditangguh-sementara-364953).
+- Kuala Gula Bird Sanctuary. [Libur](https://www.libur.com.my/5-aktiviti-alam-best-buat-kat-perak-antaranya-explore-gua-berakit-di-sungai-penat-tapi-seronok/).
+- Lata Iskandar. [Thrifty Traveller](https://thriftytraveller.wordpress.com/tag/lata-iskandar/).
+- Lata Kinjang Waterfall. [Malay Mail](https://www.malaymail.com/news/what-you-think/2026/03/20/the-smoke-that-thunders-ng-kwan-hoong/213283).
+- Lim Ko Pi. [Images of Ipoh](https://imagesofipoh.blogspot.com/2011/08/lim-kopi.html).
+- Lumut Waterfront. [EcoDoor](https://ecodoor.my/products/lumut-waterfront-1).
+- Nam Thean Tong Temple. [Maysam Yabandeh](https://pixnio.com/media/malaysia-temple-exterior-taoism-asia).
+- Pantai Ban Pecah. [Astro Awani](https://www.astroawani.com/gaya-hidup/ban-pecah-permata-berharga-utara-perak-keunikan-2dalam1-pukau-pengunjung-433658).
+- Pasir Bogak Beach. [Nomadic Notes](https://www.nomadicnotes.com/pangkor-malaysia/).
+- Perak State Herb Park. [Peraktastic](https://peraktastic.com/p1/index.php/komuniti/1379-rm3-0-juta-biayai-penjenamaan-baharu-taman-herba-gopeng.html).
+- Perak Tong. [PetitGo](https://www.petitgo.com/listing_display?listingid=310).
+- Restoran Iqa Corner Nasi Wanggey Malim Nawar. [Restaurant Guru contributor](https://restaurantguru.com/Restoran-Iqa-Corner-Nasi-Wanggey-Malim-Nawar-Malim-Nawar).
+- Sāsanārakkha Buddhist Sanctuary. [Theravāda Buddhist Council of Malaysia](https://www.tbcm.org.my/blog/venerable-aggacitta-mahathero).
+- Senangin Bay Beach. [TempatCuti](https://tempatcuti.my/teluk-senangin/).
+- Silverlakes Village Outlet. [The Star](https://www.thestar.com.my/lifestyle/living/2023/05/28/malaysia039s-pertubuhan-arkitek-malaysia-pam-awards-2023-winners-announced).
+- Sitiawan Settlement Museum. [Sitiawan Settlement Museum](https://sitiawansettlementmuseum.blogspot.com/2006/07/introduction-in-year-1999the-shepherd.html).
+- Sri Ananda Bahwan. [Reviewbah contributor](https://reviewbah.com/ipoh/restaurant/achis-tea-snack-stall-best-indian-snacks-in-ipoh).
+- Sultan Azlan Shah Gallery. [Tripadvisor contributor](https://www.tripadvisor.com.au/Attraction_Review-g1021525-d2716294-Reviews-Galeri_Sultan_Azlan_Shah-Kuala_Kangsar_Kuala_Kangsar_District_Perak.html).
+- Taiping Mall. [Visit Malaysia](https://visitmalaysia.info/taiping/town.htm).
+- Taiping Sentral Mall. [OpenCity](https://www.opencity.my/location/7/taiping-sentral-mall).
+- Teluk Batik. [Ryan Albey](https://commons.wikimedia.org/wiki/File:Pantai_Teluk_Batik_-_Perak,_Malaysia.jpg) Â· [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) Â· resized and re-encoded.
+- Teluk Segadas Beach. [Menarik Tertarik](https://menariktertarikz.blogspot.com/2012/10/PulauPangkor.html).
+- Tong Sui Kai, Ipoh. [Malay Mail](https://www.malaymail.com/news/malaysia/2024/08/11/ipoh-after-dark-a-haven-for-midnight-marauders/145192).
+- Zoo Taiping. [Orang Perak](https://www.orangperak.com/zoo-taiping-beri-diskaun-hebat-kepada-semua-warga-perak-2017.html).
+- Matang Museum (Kota Ngah Ibrahim). [EcoDoor](https://ecodoor.my/products/muzium-sejarah-matang-historical-museum-kota-ngah-ibrahim).
+- Lenggong Valley Archaeological Gallery. [Discover Malaysia UNESCO](https://discovermalaysia-unesco.com/archaeological-heritage-of-the-lenggong-valley-perak-man/).
