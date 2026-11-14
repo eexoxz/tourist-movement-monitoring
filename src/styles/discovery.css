@@ -505,6 +505,10 @@
   line-height: 1.5;
 }
 
+html:has(.places-page) {
+  overflow-anchor: none;
+}
+
 .places-page {
   display: grid;
   gap: 16px;
@@ -618,7 +622,6 @@
   display: flex;
   justify-content: flex-start;
   padding-block: 4px;
-  overflow-anchor: none;
 }
 
 .place-discovery-card {
