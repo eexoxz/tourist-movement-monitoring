@@ -1,0 +1,62 @@
+# Johor venue photos
+
+- Air Papan Beach. [Zul1603 at Malay Wikipedia](https://commons.wikimedia.org/wiki/File:Air_papan.jpeg) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) · resized and re-encoded.
+- Aur Island. [Singaporean](https://commons.wikimedia.org/wiki/File:Small_Beach_on_Pulau_Aur.JPG) · [Copyrighted free use](https://commons.wikimedia.org/wiki/Template:Copyrighted_free_use) · resized and re-encoded.
+- Besar Island, Johor. [Chongkian](https://commons.wikimedia.org/wiki/File:Besar_Island.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Pantai Pasir Lanun. [Visit Johor 2026](https://visitjohor2026.my/listing/pantai-pasir-lanun/).
+- Desaru Beach. [Chongkian](https://commons.wikimedia.org/wiki/File:Desaru_Beach.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Pantai Teluk Buih. [Downtown JB](https://downtownjb.my/en/attraction/outdoor-recreational-activities/127/pantai-teluk-buih-mersing).
+- Danga Bay. [Tourism Johor](https://tourism.johor.gov.my/danga-bay/).
+- Rawa Island. [Rawa Island Resort](https://rawaislandresort.com/).
+- Sibu Island. [Sea Gypsy Village Resort](https://www.siburesort.com/).
+- Tanjung Balau Beach. [Visit Johor 2026](https://visitjohor2026.my/listing/tanjung-balau-beach/).
+- Arulmigu Rajamariamman Devasthanam Temple. [Chongkian](https://commons.wikimedia.org/wiki/File:Arulmigu_Rajamariamman_Devasthanam_Temple.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Arulmigu Sri Rajakaliamman Glass Temple. [Chainwit.](https://commons.wikimedia.org/wiki/File:Arulmigu_Sri_Rajakaliamman_Glass_Temple,_JB_(2025)_-_img_43.jpg) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- Hakka Heritage Gallery, Bekok. [Trip.com](https://www.trip.com/travel-guide/attraction/segamat/hakka-heritage-gallery-bekok-61891673/).
+- Kite Museum Pasir Gudang. [Visit Johor 2026](https://visitjohor2026.my/listing/muzium-layang-layang/).
+- Pineapple Museum. [Chongkian](https://commons.wikimedia.org/wiki/File:Pineapple_Museum.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Sultan Abu Bakar State Mosque. [Chainwit.](https://commons.wikimedia.org/wiki/File:Masjid_Sultan_Abu_Bakar,_JB_(2025)_-_img_02.jpg) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- Sultan Ibrahim Jamek Mosque. [https://www.flickr.com/photos/xshamx/](https://commons.wikimedia.org/wiki/File:Masjid_Sultan_Ibrahim,_Muar,_Johor.jpg) · [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) · resized and re-encoded.
+- Sultan Iskandar Mosque. [Chongkian](https://commons.wikimedia.org/wiki/File:Sultan_Iskandar_Mosque.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Sultan Ismail Mosque, UTM. [Chongkian](https://commons.wikimedia.org/wiki/File:Sultan_Ismail_Mosque.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Tanjung Balau Fishermen Museum. [Chongkian](https://commons.wikimedia.org/wiki/File:Tanjung_Balau_Fishermen_Museum.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Ah Koong Restaurant. [Restaurant Guru contributors](https://restaurantguru.com/Ah-Koong-Restaurant-Johor-Bahru-2).
+- Grand Seafood Senibong @ Permas Jaya. [DMR Holdings](https://dmrholdings.com/our-business/grand-seafood-senibong/).
+- Hiap Joo Bakery. [Chongkian](https://commons.wikimedia.org/wiki/File:Hiap_Joo_Bakery.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Kluang Rail Coffee, Kluang Station. [Tourism Johor](https://tourism.johor.gov.my/kluang-rail-coffee/).
+- Larkopi, Horizon Hills. [Wanderlog contributor](https://wanderlog.com/place/details/6539984/larkopi).
+- MACO Café, Sutera Mall. [Johor Malls](https://johormalls.com/shop/maco-cafe-sutera-mall).
+- Sai Kee 434 Coffee. [iPackTravel](https://blog.ipacktravel.com/wp/muar-eat-sai-kee-kopi-434-cafe/).
+- IT Roo Cafe. [Restaurant Guru contributor](https://restaurantguru.com/It-Roo-Cafe-Johor-Bahru-2).
+- Oriental Kopi, AEON Tebrau City. [Soh Cheng](https://www.sohcheng.com/2024/06/oriental-kopi/).
+- Salahuddin Bakery, Jalan Jagung. [Wanderlog contributor](https://wanderlog.com/place/details/11935308/salahuddin-bakery).
+- Johor Bahru Chinese Heritage Museum. [Chongkian](https://commons.wikimedia.org/wiki/File:Johor_Bahru_Chinese_Heritage_Museum.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Johor Bahru Old Chinese Temple. [Chainwit.](https://commons.wikimedia.org/wiki/File:Alter_chinesischer_Tempel_-_Old_Chinese_Temple_of_Johor_Bahru_(2025)_-_img_16.jpg) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- Kota Johor Lama Museum. [Chongkian](https://commons.wikimedia.org/wiki/File:Kota_Johor_Lama_Museum.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Kota Tinggi Museum. [Chongkian](https://commons.wikimedia.org/wiki/File:Kota_Tinggi_Museum.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Kwong Siew Heritage Gallery. [Chongkian](https://commons.wikimedia.org/wiki/File:Johor_Bahru_Kwong_Siew_Heritage_Gallery.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Muzium Tokoh Johor. [bainal.ams](https://commons.wikimedia.org/wiki/File:Bangunan_Dato%27_Jaafar.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Parit Sulong Memorial. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:Parit_Sulong_Memorial_Structure,_Parit_Sulong_20230918_074810.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/) · resized and re-encoded.
+- Sultan Ibrahim Building. [Fxchua](https://commons.wikimedia.org/wiki/File:Perspective_View_of_Sultan_Ibrahim_Building.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Tanjung Kupang Memorial Park. [Chongkian](https://commons.wikimedia.org/wiki/File:Tanjung_Kupang_Memorial_Park.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Tan Hiok Nee Heritage Street. [Chongkian](https://commons.wikimedia.org/wiki/File:Tan_Hiok_Nee_Street.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Bukit Indah Recreational Park. [Chongkian](https://commons.wikimedia.org/wiki/File:Bukit_Indah_Recreational_Park.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Desaru Fruit Farm. [Tourism Johor](https://tourism.johor.gov.my/desaru-fruit-farm/).
+- Johor Zoo. [Stress 043](https://commons.wikimedia.org/wiki/File:Zoo_Johor_entrance.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Kluang Lake Park. [Timothy Tye](https://www.penang-traveltips.com/malaysia/johor/kluang/taman-tasik.htm).
+- Laman Rel Mahkota. [Laman Rel Mahkota](https://lamanrelmahkota.com/en/).
+- MBJB City Forest. [Chongkian](https://commons.wikimedia.org/wiki/File:MBJB_City_Forest.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Pulau Kukup National Park. [Toni Wöhrl](https://commons.wikimedia.org/wiki/File:20140705T085601_Lat_1_19_34.61880000_N_Long_103_26_4.89840000_E.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Setia Indah Park. [Chongkian](https://commons.wikimedia.org/wiki/File:Setia_Indah_Park.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Taman Merdeka, Johor Bahru. [Downtown JB](https://downtownjb.my/en/attraction/recreation-park/90/taman-merdeka).
+- Tanjung Piai National Park. [D.W. Fisher-Freberg](https://commons.wikimedia.org/wiki/File:Tanjung_Piai_statue.JPG) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- AEON Mall Bukit Indah. [Sharon Hahn Darlin](https://commons.wikimedia.org/wiki/File:Aeon_Mall,_Bukit_Indah,_Johor_Bahru,_Johor,_Malaysia.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) · resized and re-encoded.
+- Johor Bahru City Square. [Johor Bahru City Square](https://www.citysqjb.com/).
+- Johor Premium Outlets. [Chongkian](https://commons.wikimedia.org/wiki/File:Johor_Premium_Outlets.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Komtar JBCC. [Iwavns](https://commons.wikimedia.org/wiki/File:Komtar_JBCC_Shopping_Mall,_Johor_Bahru,_Johor,_Malaysia.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- KSL City. [Chongkian](https://commons.wikimedia.org/wiki/File:KSL_City.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- LEGOLAND Malaysia. [milst1](https://commons.wikimedia.org/wiki/File:Entrance_Legoland_Malaysia.jpg) · [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/).
+- Mid Valley Southkey. [Chongkian](https://commons.wikimedia.org/wiki/File:Mid_Valley_Southkey.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Paradigm Mall Johor Bahru. [*angys*](https://commons.wikimedia.org/wiki/File:Paradigm_Mall_Johor_Bahru_(220306).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Sunway Kluang Mall. [Sunway REIT](https://www.sunwayreit.com/our-portfolio/sunway-kluang-mall/).
+- Toppen Shopping Centre. [Chongkian](https://commons.wikimedia.org/wiki/File:Toppen_Shopping_Centre.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
