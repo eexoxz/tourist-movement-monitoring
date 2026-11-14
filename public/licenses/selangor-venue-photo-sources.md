@@ -1,0 +1,62 @@
+# Selangor venue photos
+
+- Pantai Acheh. [Waze contributors](https://www.waze.com/ms/live-map/directions/pantai-acheh-pulau-indah?to=place.w.66387997.663814433.4858649).
+- Bagan Lalang Beach. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:Bagan_Lalang_Beach_2.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/) · resized and re-encoded.
+- Batu Laut Beach. [PetitGo](https://petitgo.com/listing_display?listingid=492).
+- Morib Beach. [Ajayrb135](https://commons.wikimedia.org/wiki/File:Morib_Beach.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Pantai Cunang. [Kuala Langat Municipal Council](https://mpkl.gov.my/pelawat/tarikan-pelancong/pantai-cunang).
+- Pantai Kelanang. [Tourism Selangor](https://selangor.travel/listing/kelanang-beach/).
+- Pantai Redang. [Kelvin Chan via Tourism Selangor](https://myjournify.com/discover/articles/r/1667/6-famous-beaches-in-selangor-to-leisure-during-weekend).
+- Pantai Sungai Kajang Baru. [*angys*](https://commons.wikimedia.org/wiki/File:Sungai_Kajang_Baru_Beach_(230316)_08.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Remis Beach. [Tourism Selangor](https://selangor.travel/listing/remis-beach/).
+- Sky Mirror, Kuala Selangor. [Fuzheado ( talk )](https://commons.wikimedia.org/wiki/File:Sandbar_and_tourist_attraction_in_the_Straits_of_Malacca.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Batu Caves. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:Gombak_Selangor_Batu-Caves-01.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) · resized and re-encoded.
+- Fo Guang Shan Dong Zen Temple. [Visit Selangor](https://www.visitselangor.com/fo-guang-shan-dong-zen-temple/).
+- Orang Asli Museum. [Renek78](https://commons.wikimedia.org/wiki/File:Muzium_Orang_Asli,_Gombak,_Malaysia_02.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Petaling Jaya Museum. [Tourism Selangor](https://selangor.travel/listing/petaling-jaya-museum/).
+- Sri Shakti Temple. [Tourism Selangor](https://selangor.travel/listing/sri-shakti-temple/).
+- Sultan Abdul Samad Mosque. [Zahirulnukman](https://commons.wikimedia.org/wiki/File:Masjid_Sultan_Abdul_Samad_KLIA_23_Julai_2023_2.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) · resized and re-encoded.
+- Sultan Alam Shah Museum. [凯乐](https://commons.wikimedia.org/wiki/File:%E8%8B%8F%E4%B8%B9%E8%8E%8E%E9%98%BF%E5%8D%97%E5%8D%9A%E7%89%A9%E9%A6%86.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Sultan Salahuddin Abdul Aziz Shah Mosque. [Ezry Abdul Rahman from Petaling Jaya, Selangor , Malaysia](https://commons.wikimedia.org/wiki/File:Shah_Alam_Blue_mosque_at_night.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- Sultan Sulaiman Mosque. [Harian Metro](https://www.hmetro.com.my/utama/2019/05/460432/87-tahun-arah-sama).
+- Thai Buddhist Chetawan Temple. [Just Norahs](https://justnorahs.blogspot.com/2013/02/wat-chetawan-temple-petaling-jaya.html).
+- Batu Arang Heritage Town. [Musmun](https://musmun.blogspot.com/2021/10/batu-arang-heritage-trail.html).
+- Bukit Melawati. [Leonard Reback](https://commons.wikimedia.org/wiki/File:Bukit_Melawati_cannons.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Kuala Selangor Traditional Games Museum. [PADAT](https://padat.gov.my/v2/index.php/my/muzium-selangor/13-muzium/21-muzium-sejarah-daerah-kuala-selangor).
+- Sultan Alaeddin Royal Mosque. [Visit Selangor](https://www.visitselangor.com/masjid-sultan-alaeddin/).
+- Jugra Lighthouse viewpoint. [Slleong](https://commons.wikimedia.org/wiki/File:Jugra_Hill_3.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+- Kota Raja Mahadi. [SNN95](https://commons.wikimedia.org/wiki/File:Kota_Raja_Mahadi.jpg) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · resized and re-encoded.
+- Morib Landing Memorial. [Kuala Langat Municipal Council](https://tourism.mpkl.gov.my/explore2/8).
+- National Automobile Museum. [Tourism Selangor](https://selangor.travel/listing/national-automobile-museum/).
+- Sultan Abdul Aziz Royal Gallery. [*angys*](https://commons.wikimedia.org/wiki/File:Sultan_Abdul_Aziz_Royal_Gallery_(211027).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Farm in the City. [Farm in the City](https://farminthecity.my/).
+- Forest Research Institute Malaysia, Kepong. [Hannah 50](https://commons.wikimedia.org/wiki/File:Lush_greenery_in_Forest_Research_Institute_of_Malaysia_(FRIM).jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Kelana Jaya Youth Park. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:Taman_Bandaran_Kelana_Jaya,_Kelana_Jaya_20231008_105102.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/) · resized and re-encoded.
+- Kuala Selangor Nature Park. [Visit Selangor](https://www.visitselangor.com/kuala-selangor-nature-park/).
+- National Zoo of Malaysia. [Visit Selangor](https://www.visitselangor.com/zoo-negara/).
+- Sekinchan Paddy Gallery. [Ummi Around Malaysia](https://ummiaroundmalaysia.com/paddy-gallery-sekinchan/).
+- Taman Jaya Park. [Tripadvisor contributor](https://www.tripadvisor.com.my/Attraction_Review-g298313-d14136314-Reviews-Tasik_Taman_Jaya-Petaling_Jaya_Petaling_District_Selangor.html).
+- Elmina Central Park. [Tourism Selangor](https://selangor.travel/listing/elmina-central-park/).
+- Shah Alam Lake Gardens. [Visit Selangor](https://www.visitselangor.com/taman-tasik-shah-alam/).
+- Paya Indah Discovery Wetlands. [Kuala Langat Municipal Council](https://mpkl.gov.my/pelawat/tarikan-pelancong/paya-indah-wetlands-gamuda-cove).
+- Klang Railway Station. [MRT.com.my](https://mrt.com.my/komuter/Klang.htm).
+- 1 Utama. [1UtamaShoppingCentre](https://commons.wikimedia.org/wiki/File:1_Utama_Shopping_Centre.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- 3 Damansara Shopping Mall. [*angys*](https://commons.wikimedia.org/wiki/File:3_Damansara_Shopping_Mall_interior_(221121)_01.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- i-City, Shah Alam. [Stefan Fussan](https://commons.wikimedia.org/wiki/File:Shah_Alam_-_i-City_0005.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- IOI City Mall. [Wee Hong](https://commons.wikimedia.org/wiki/File:IOI_City_Mall.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- IOI Mall Puchong. [Tourism Selangor](https://selangor.travel/listing/ioi-mall-puchong/).
+- Mitsui Outlet Park KLIA Sepang. [Tourism Malaysia](https://www.malaysia.travel/explore/mitsui-outlet-park-klia-sepang).
+- Setia City Mall. [*angys*](https://commons.wikimedia.org/wiki/File:Setia_City_Mall_South_1_Entrance_(230115).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Sunway Lagoon. [Img by Calvin Teo](https://commons.wikimedia.org/wiki/File:Sunway_Lagoon.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Sunway Pyramid. [Sunway Pyramid visitor on Local Guides Connect](https://www.localguidesconnect.com/t/sunway-pyramid-mini-egypt-in-malaysia/278219).
+- The Curve. [Wiki Farazi](https://commons.wikimedia.org/wiki/File:The_Curve,_Mutiara_Damansara_20230409_115743.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/) · resized and re-encoded.
+- Adventurers' Hall. [Adventurers’ Hall](https://adventurershallmy.com/).
+- Capital Nasi Dagang Kelantan. [GoToWhere contributor](https://capital-nasi-dagang-kelantan-damansara-utama.goto-where.com/).
+- Il Mio Cafe. [Lovelemon](https://travelfeed.com/%40lovelemon/il-mio-cafe).
+- Original Penang Kayu Nasi Kandar SS2. [Malaysian Foodie](https://www.malaysianfoodie.com/2010/04/original-kayu-nasi-kandar-ss2.html).
+- Sushi Kitchen, Kota Damansara. [Wanderlog contributors](https://wanderlog.com/place/details/3488143/sushi-kitchen-kota-damansara).
+- Oversea Seafood, 1 Utama. [KLPJ Wedding Fair](https://www.klpj.com.my/restaurants/restaurant-oversea-1-utama).
+- Village Park Restaurant. [KL Foodie](https://klfoodie.com/food-damansara-uptown-petaling-jaya/).
+- Sushi Hiro SS2. [Sushi Hiro](https://sushihiro.my/outlets/ss2/).
+- Kie Kee Chicken Rice and Porridge. [Malaysia Food and Travel](https://malaysiafoodandtravel.com/kie-kee-chicken-rice-porridge-why-popular-pj-since-1963/).
+- Golden Boy Fried Chicken. [Lee Khang Yi, Malay Mail](https://www.malaymail.com/news/eat-drink/2026/09/30/crispy-fried-chicken-wins-at-golden-boy-fried-chicken-in-damansara-kim-especially-in-a-burger-and-ayam-gepuk/237039).
