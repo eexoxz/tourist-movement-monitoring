@@ -1,0 +1,62 @@
+# Kelantan venue photos
+
+- Pantai Bisikan Bayu. [Azmi Foto](https://azmifoto.blogspot.com/2013/01/pantai-bisikan-bayu-pasir-puteh.html).
+- Pantai Cahaya Bulan. [Trackpacking](https://www.trackpacking.com/v/index/4b88e89df964a520001332e3).
+- Pantai Irama. [Azmin/Az08ProGamers](https://commons.wikimedia.org/wiki/File:Pantai_Irama,_Bachok,_Kelantan.jpg) · [Public domain](https://creativecommons.org/publicdomain/mark/1.0/).
+- Pantai Sabak. [Malaysia Track](https://www.malaysiatrack.com/2009/06/kelantan-state.html).
+- Pantai Kundur. [Tripadvisor contributor](https://www.tripadvisor.fr/Attraction_Review-g298285-d18902478-Reviews-Pantai_Kundur-Kota_Bharu_Kelantan.html).
+- Pantai Mek Mas. [Astro Awani](https://www.astroawani.com/berita-malaysia/pantai-mek-mas-diserbu-selepas-tular-fenomena-laut-terbelah-325770).
+- Pantai Senok. [Petit Go](https://www.petitgo.com/listing_display?listingid=483).
+- Pantai Sri Tujuh. [Homestay U1](https://homestayu1.blogspot.com/2013/04/pantai-sri-tujuh.html).
+- Pantai Tok Bali. [Malayan Law](https://commons.wikimedia.org/wiki/File:Pantai_Tok_Bali,_Pasir_Puteh.jpg) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · resized and re-encoded.
+- Pantai Melawi. [Azmi Foto](https://azmifoto.blogspot.com/2013/02/pantai-melawi-bachok.html).
+- Handicraft Village and Craft Museum. [Attractions in Malaysia](https://kelantan.attractionsinmalaysia.com/HandicraftVillageandCraftMuseum.php).
+- Istana Jahar Museum. [Comelote](https://commons.wikimedia.org/wiki/File:Istana_Jahar,_Kota_Bharu.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Kelantan Islamic Museum. [Muzium Galeri](https://muziumgaleri.blogspot.com/2020/10/muzium-islam-negeri-kelantan-seni-bina.html).
+- Kelantan State Museum. [CK Tan](https://commons.wikimedia.org/wiki/File:Museum_Kelantan_-_panoramio.jpg) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- Wat Cheng Buddhavas. [Penang Travel Tips](https://www.penang-traveltips.com/malaysia/kelantan/tumpat/wat-cheng-buddhavas.htm).
+- Wat Machimmaram. [Jetunnel](https://jetunnel.blogspot.com/2016/02/wat-machimmaram-tumpat-kelantan-biggest.html).
+- Wat Mai Suwankhiri. [Photo Dharma from Sadao, Thailand](https://commons.wikimedia.org/wiki/File:001_Dragon_Boat_Temple_(9140504701).jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- Wat Phothivihan. [Photo Dharma from Sadao, Thailand](https://commons.wikimedia.org/wiki/File:001_Gateway_Signboard_(9143224672).jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- Wat Pikulthong. [Nalanda Buddhist Society](https://www.nalanda.org.my/chao-khun-eak-passed-away-today/).
+- Wat Prachumthat Canaram. [Jetunnel](https://jetunnel.blogspot.com/2016/02/wat-prachumthat-canaram-temple-of.html).
+- Bank Kerapu War Museum. [Zamwan](https://commons.wikimedia.org/wiki/File:Bank_Kerapu_Kota_Bharu,_Kelantan.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Bank Pitis. [Depan Kanta](https://depankanta.blogspot.com/2011/07/bank-pitis-kelantan.html).
+- Istana Batu Royal Museum. [Muhamad Fadhli Ahmad](https://commons.wikimedia.org/wiki/File:Muzium_Diraja_Istana_Batu.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Kampung Laut Mosque. [Rileklah](https://rileklah.com/tarikan/masjid-tertua-di-asia-tenggara-mula-dibuka-kepada-orang-ramai-jun-ini).
+- Laman Pendaratan Jepun 1941 Kuala Pak Amat. [CKM Travel](https://ckm-travel.blogspot.com/2019/08/malaysia-kota-bharu-kelantan-d-5-august_4.html).
+- Muhammadi Mosque. [Neponenpasila](https://commons.wikimedia.org/wiki/File:Street_view_of_the_Muhammadi_Mosque.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Tumpat Railway Station. [NSTOS](https://nstos.blogspot.com/2020/04/stesen-ktmb-tumpat-kelantan.html).
+- Menara Jam Tambatan Diraja. [Trixoli](https://www.trixoli.com/ms-my/tarikan/malaysia/kelantan/).
+- Tugu Peringatan Perang Dunia Pertama. [Flickr contributor](https://www.flickr.com/photos/155770146@N06/37671184582/).
+- Muzium Wau Kelantan. [Perbadanan Muzium Negeri Kelantan](https://muzium.kelantan.gov.my/index.php/muzium-wau).
+- Tasik Danau Tok Uban. [Majlis Daerah Pasir Mas](https://mdpmas.kelantan.gov.my/index.php/bantuan/destinasi-menarik/171-tasik-danau-to-uban).
+- Taman Rekreasi Air Panas Tok Bok. [Tourism Kelantan](https://tourism.kelantan.my/index.php/pelancongan/alam-semulajadi/kolam-air-panas/tokbok2).
+- Taman Rekreasi Tengku Anis (Lubok Jong). [Majlis Daerah Pasir Mas](https://mdpmas.kelantan.gov.my/index.php/bantuan/destinasi-menarik/166-taman-rekreasi-tengku-anis).
+- Taman Rekreasi Puteri Saadong. [Majlis Daerah Tumpat](https://mdtumpat.kelantan.gov.my/images/2026/BULETIN/BuletinMDTG2025_compressed.pdf#page=10).
+- Taman Minda Darul Naim. [Trip.com contributor](https://my.trip.com/travel-guide/attraction/kota-bharu/taman-minda-darul-naim-137568362).
+- Taman Orkid Aqua. [Trip.com contributor](https://my.trip.com/travel-guide/attraction/kota-bharu/taman-orkid-aqua-141415996/).
+- Kawasan Rekreasi Taman Wangi. [Majlis Daerah Gua Musang](https://mdgm.kelantan.gov.my/index.php/pelawat/destinasi-menarik/sukan-rekreasi).
+- Taman Tasik Ketitir. [Majlis Daerah Gua Musang](https://mdgm.kelantan.gov.my/index.php/pelawat/destinasi-menarik/tempat-pelancongan/196-taman-tasik-gua-musang-tasik-ketitir).
+- Taman Tasik Kuala Krai. [Majlis Daerah Kuala Krai](https://mdkkrai.kelantan.gov.my/index.php/mdkk/arkib-keratan-akbar/19-april-2027rr).
+- Taman Perbandaran Tengku Anis. [MyEnvironment](https://myenvironment.my/kota-bharu/taman-pembandaran-tengku-anis/).
+- AEON Mall Kota Bharu. [IEC Group](https://iecg.my/places.php).
+- MYDIN Mall Tunjong. [Where2 Lifestyle](https://where2lifestylemagazine.com/2023/05/jom-makan-thai-food-fest-at-mydin-tunjong-kota-bharu/).
+- Bazar Tengku Anis. [4travel contributor](https://4travel.jp/os_shisetsu/10573510).
+- Bazar Tok Guru. [Perbadanan Menteri Besar Kelantan](https://www.pmbk.gov.my/pemasaran/index.php/lines-listing/komersil/bazar-tok-guru-untuk-disewa).
+- Dataran Cheng Ho. [Sinar Harian](https://www.sinarharian.com.my/article/706047/edisi/kelantan/rm14-juta-naik-taraf-jalan-longkang-kampung-baru-cina-di-kelantan).
+- G-Orange Mall Tunjong. [Hag Yuey](https://hagyuey.blogspot.com/2022/04/g-orange-kota-bharu.html).
+- G-Orange Mall Gua Musang. [Majlis Daerah Gua Musang](https://mdgm.kelantan.gov.my/index.php/pelawat/destinasi-menarik/tempat-makan).
+- KB Mall. [KB Mall](https://kbmall.com.my/highlight.html).
+- Kota Sri Mutiara. [Bharu Jadi](https://bharujadi.blogspot.com/2022/01/watson-billion-kota-bharu.html).
+- Lotus’s Kota Bharu. [Lotus’s Malaysia](https://corp.lotuss.com.my/stores/store-locator/lotuss-kota-bahru).
+- Warisan Nasi Kukus (Kebun Sultan). [Tempat Cuti](https://tempatcuti.my/tempat-makan-menarik-di-kota-bharu/).
+- Sun Two Restaurant. [Restaurants Info](https://suntwostrfamilyrestaurant.restaurants-info.com/).
+- Yati Ayam Percik. [Yati Ayam Percik](https://restoran-yati.blogspot.com/p/hubungi-kami.html).
+- Kopitiam Galoq. [Footinder contributor](https://footinder.app/places/65620ed0d16a784df751ebea).
+- Kopitiam Kita. [Food Spy](https://foodspy.meowtainpeople.com/kopitiam-kita/).
+- Sate Razak Wakaf Bharu. [Wheree contributor](https://sate-razak-wakaf-bharu.wheree.com/menu).
+- Nasi Kerabu Tumis Dalam Pagar. [Restaurant Guru contributor](https://restaurantguru.com/Nasi-kerabu-tumis-dalam-pagar-Tumpat).
+- Nasi Ulam Cikgu (Kampung Kraftangan). [Malaysia Asia](https://malaysia-asia.my/2011/06/visiting-kota-bharu-in-kelantan/).
+- Siti Khadijah Market. [CK Tan](https://commons.wikimedia.org/wiki/File:Kota_Bharu_Central_Market_-_panoramio.jpg) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- Wakaf Che Yeh. [Bagasi](https://bagasi.my/shopping-di-kota-bharu/).
