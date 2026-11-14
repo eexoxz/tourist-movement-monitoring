@@ -1,0 +1,51 @@
+# Kedah venue photo sources
+
+- Aman Central. [GreaterKedah](https://greaterkedah.com/).
+- Amanjaya Mall. [Mohd Faiz bin Abdul Manan](https://www.mdfaiez84.com/2019/01/aman-jaya-mall.html).
+- Balai Besar. [Helen Gray](https://helengray.net/travels-in-malaysia/travels-in-malaysia-2020/the-great-malaysian-road/day-9---alor-setar/kedah-royal-museum-and.html).
+- Balai Nobat. [The Island Drum](https://www.theislanddrum.com/things-to-do-in-alor-setar-kedah-malaysia/).
+- Balai Seni Negeri. [Leverage Hotel](https://leveragehotel.com/blogs/leverage-hotel-mergong-kedah/kedah-state-art-gallery).
+- Batu kenangan Terusan Wan Muhammad Saman. [Radzi Sapiee](https://artmelayu.blogspot.com/2019/03/hujung-selatan-southern-end-of-terusan.html).
+- Black Sand Beach. [Libur](https://www.libur.com.my/pantai-pasir-hitam-langkawi-simpan-kisah-peperangan-lagenda-yang-pasti-anda-tak-tahu/).
+- Caffé Diem. [EdgeProp](https://www.edgeprop.my/content/1131931/northern-star).
+- Cenang Mall. [GoTriip](https://www.trexfly.com/places/cenang-mall-langkawi).
+- Chip Lee Dou Mu Gong. [Sin Chew Daily](https://northern.sinchew.com.my/news/20241007/northern/5978238).
+- City Plaza. [The Cube](https://dmagicube.blogspot.com/2019/03/malaysia-alor-setar-in-day.html).
+- Crocodile Adventureland Langkawi. [Banbanjara](https://banbanjara.com/things-to-do-in-malaysia-with-kids).
+- Darulaman Park. [ammar-S4TEAM](https://ammars4team.wordpress.com/tag/tasik-darul-aman/).
+- Datuk Syed Omar Beach. [The Travel in Pink](https://www.thetravelinpink.com/ultimate-langkawi-travel-guide/).
+- Dream Forest Langkawi. [Chapters of Escapism](https://chaptersofescapism.com/dream-forest-langkawi-review/).
+- fatCUPID. [Fleewinter](https://www.fleewinter.com/malaysia/accommodation/La_Pari-Pari).
+- Galeri Tsunami. [Astro Awani](https://international.astroawani.com/malaysia-news/2004-tsunami-forgotten-tragedy-86690).
+- Jalan Teluk Yu Beach. [Tourlane](https://www.tourlane.de/asien/malaysia/sehenswuerdigkeiten-langkawi/).
+- Kedah Royal Museum. [Helen Gray](https://helengray.net/travels-in-malaysia/travels-in-malaysia-2020/the-great-malaysian-road/day-9---alor-setar/kedah-royal-museum-and.html).
+- Kedah State Museum. [Kedah State Museum Board](https://muziumkedah.gov.my/index.php/rangkaian/muzium-negeri).
+- Kin Arai Restaurant. [Restaurant Guru](https://ru.restaurantguru.com/Kin-Arai-Restaurant-Jitra).
+- Kok Beach. [James Clark, Nomadic Notes](https://www.nomadicnotes.com/where-to-stay-in-langkawi/).
+- Kulim Central. [Hektar REIT](https://www.hektarreit.com/about-us/milestones.php).
+- Langkawi Geopark Discovery Centre. [Gokayu](https://gokayu.com/malaysia/kedah/langkawi-island/attraction/langkawi-geopark-discovery-centre).
+- Langkawi Nature Park. [Dixon Thum](https://dixonthum.com/2024/03/12/discovering-the-charms-of-langkawi-nature-park-a-journey-through-mangroves-wildlife-and-seafood-delights/).
+- Langkawi Wildlife Park. [Ticket2u](https://www.ticket2u.com.my/event/25808/langkawi-wildlife-park-admission-ticket-%28%29).
+- Mahathir Mohamad Birthplace Complex. [GreaterKedah](https://greaterkedah.com/rumah-kelahiran-mahathir-mohammad/).
+- Muzium Kota Kuala Kedah. [Tempat Cuti](https://tempatcuti.my/muzium-kota-kuala-kedah/).
+- Nibong Bay Beach. [Andrew J, BeachSearcher](https://beaches-searcher.com/en/beach/458201044/telok-nibong-beach).
+- Paddy Museum. [Leverage Hotel](https://leveragehotel.com/blogs/leverage-lite-hotel-kuala-kedah/kedah-paddy-museum).
+- Pantai Cenang. [Misa88kl](https://misa88kl.exblog.jp/29714032/).
+- Pantai Tengah. [Langkawi Travel](https://langkawi-travel.ru/luchshie-plyazhi-langkavi/).
+- Perdana Gallery. [Loka](https://www.loka.my/attraction/galeria-perdana).
+- Pia's The Padi. [Bidasari](https://www.dinohauz.com/2019/05/pias-padi-langkawi.html).
+- Restoran Sloam Mit Thai. [Here and there, in Kuala Lumpur](https://yoohyein.blogspot.com/2016/10/s-loam-mit-thai-restaurant-bagan-samak.html).
+- Skull Beach. [Perspective of Langkawi](https://travel2langkawi.wordpress.com/2017/02/10/pasir-tengkorak-beach/).
+- Taman Jubli Emas. [Trip.com contributor](https://www.trip.com/moments/detail/alor-setar-14834-128472458/).
+- Taman Rekreasi Jubli Perak. [Wheree](https://taman-jubli-perak-alor-setar.wheree.com/).
+- Tapak Arkeologi Sungai Batu. [Discover Malaysia by Bicycle](https://discovermalaysiabybicycle.com/kedah/merbok-heritage-trail/).
+- Telaga Tujuh Waterfalls. [Holidify](https://www.holidify.com/places/langkawi/telaga-tujuh-waterfalls-sightseeing-1255436.html).
+- Temurun Waterfall. [The Reward Boss](https://therewardboss.com/biking-temurun-waterfalls/).
+- The Beach Grill. [The Ritz-Carlton, Langkawi](https://www.ritzcarlton.com/en/hotels/lgkrz-the-ritz-carlton-langkawi/dining/).
+- The Fat Frog. [Loka](https://www.loka.my/attraction/the-fat-frog).
+- The Gulai House. [The Datai Langkawi](https://www.thedatai.com/dining/the-gulai-house/).
+- The Sultan Abdul Halim Mu'adzam Shah Gallery. [Tripadvisor contributor](https://www.tripadvisor.com.au/Attraction_Review-g298282-d11949778-Reviews-Sultan_Abdul_Halim_Mu_adzam_Shah_Gallery-Alor_Setar_Kota_Setar_District_Kedah.html).
+- The Terrace. [The Danna Langkawi](https://www.thedanna.com/dining/terrace).
+- Underwater World Langkawi. [Trip.com contributor](https://my.trip.com/moments/detail/langkawi-539-14232848?locale=en-MY).
+- Village Mall. [Tripadvisor contributor](https://www.tripadvisor.com/Attraction_Review-g670110-d8337564-Reviews-Village_Mall-Sungai_Petani_Kuala_Muda_District_Kedah.html).
+- Wat Nikrodharam. [Gokayu](https://gokayu.com/malaysia/kedah/alor-setar/attraction/wat-nikrodharam-buddhist-temple).
