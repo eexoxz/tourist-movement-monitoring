@@ -1,0 +1,62 @@
+# Sabah venue photos
+
+- Agnes Keith House. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:Sandakan_Sabah_AgnesKeithHouse-16.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Atkinson Clock Tower. [(WT-shared) Robert Biuk-Aghai](https://commons.wikimedia.org/wiki/File:AtkinsonClockTower-KotaKinabalu.jpg).
+- Double Six Monument. [everythingspossible.wordpress.com](https://everythingspossible.wordpress.com/2009/05/13/monument-double-six-sembulan-kota-kinabalu/).
+- Keningau War Memorial. [tracesofwar.com](https://www.tracesofwar.com/sights/91934/Cho-Huan-Lai-Execution-Memorial.htm).
+- North Borneo War Monument. [sabahtourism.com](https://sabahtourism.com/article/international-day-of-monuments-and-sites/).
+- Petagas War Memorial. [hk.trip.com](https://hk.trip.com/travel-guide/attraction/putatan/petagas-war-memorial-23565134?curr=TWD&locale=en-HK).
+- Kundasang War Memorial. [sabahtourism.com](https://sabahtourism.com/destination/kundasang-war-memorial/).
+- Sandakan Massacre Memorial. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:Sandakan_Sabah_SandakanMassacreMemorial-05.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) · resized and re-encoded.
+- Sandakan Memorial Park. [sabahtravel.com](https://www.sabahtravel.com/tour/sandakan-memorial-park-tour).
+- Tawau Bell Tower. [etawau.com](https://etawau.com/PlacesInterest/BellTower.htm).
+- Kota Kinabalu City Mosque. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:KotaKinabalu_Sabah_CityMosque-08.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Monsopiad Heritage Village. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:KgKuaiKandazon_Sabah_Monsopiad-Cultural-Village-01.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Muzium Tun Sakaran. [muzium-tun-sakaran.wheree.com](https://muzium-tun-sakaran.wheree.com/).
+- Puu Jih Shi Buddhist Temple. [sepilokjungleresort.com](https://www.sepilokjungleresort.com/attractions).
+- Sabah Art Gallery. [mysabah.com](https://www.mysabah.com/wordpress/sabah-art-gallery-balai-seni-lukis-sabah/).
+- Sabah State Mosque. [dawa.center](https://dawa.center/islamic_centre/579).
+- Sabah Museum Heritage Village. [bluekinabalu.com](https://www.bluekinabalu.com/blog//20-fun-activities-to-enjoy-in-kk-5-visit-the-sabah-museum).
+- St. Michael's and All Angels Church, Sandakan. [sg.trip.com](https://sg.trip.com/moments/detail/sandakan-14894-14596478/).
+- Sam Sing Kung Temple. [penang-traveltips.com](https://www.penang-traveltips.com/malaysia/sabah/sandakan/sam-sing-kung-temple.htm).
+- Mari Mari Cultural Village. [klook.com](https://www.klook.com/activity/1764-mari-mari-cultural-village-sabah/).
+- Bavang Jamal Beach. [booking.com](https://www.booking.com/hotel/my/barefoot-luxury-at-the-tip-of-borneo.html).
+- Kelambu Beach. [sabahtourism.com](https://sabahtourism.com/destination/kelambu-beach/).
+- Pantai Bak Bak. [masdeanna.blogspot.com](https://masdeanna.blogspot.com/2012/02/pantai-bak-bak-kudat-sabah.html).
+- Likas Beach. [lite.syok.my](https://lite.syok.my/trending/trending/seven-wonders-malaysia-marriott-bonvoy).
+- Mabul Island. [note-marine.yamaha-motor.co.jp](https://note-marine.yamaha-motor.co.jp/n/nacfc20de4d88).
+- Mamutik Island Beach. [experiences.myrealtrip.com](https://experiences.myrealtrip.com/products/3441557).
+- Manukan Island. [tripadvisor.com](https://www.tripadvisor.com/Attraction_Review-g298307-d1122450-Reviews-Manukan_Island-Kota_Kinabalu_Kota_Kinabalu_District_West_Coast_Division_Sabah.html).
+- Tip of Borneo (Tanjung Simpang Mengayau). [tanjungsimpangmengayau.blogspot.com](https://tanjungsimpangmengayau.blogspot.com/2015/01/tanjung-simpang-mengayau-kudat-sabah.html).
+- Sapi Island. [sabahtravel.com](https://www.sabahtravel.com/tour/twin-islands-hopping).
+- Tanjung Aru Beach. [sabahtravel.com](https://www.sabahtravel.com/tour/2d1n-kundasang-desa-cow-farm-and-tanjung-aru-beach).
+- Bornean Sun Bear Conservation Centre. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:Sepilok_Sabah_Bornean-Sun-Bear-Conservation-Centre-02.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Gomantong Caves. [undiscovered.nl](https://www.undiscovered.nl/borneo/gomantong-caves).
+- Kinabalu Park Headquarters. [sabahtravel.com](https://www.sabahtravel.com/tour/mount-kinabalu-climb-packages-accommodation).
+- Taman Ujana Rimba Tropika. [tripadvisor.jp](https://www.tripadvisor.jp/Attraction_Review-g298307-d33317866-Reviews-Tropical_Rainforest_Ujana_Park-Kota_Kinabalu_Kota_Kinabalu_District_West_Coast_D.html).
+- Lok Kawi Wildlife Park. [kotakinabaluinfo.com](https://kotakinabaluinfo.com/lok-kawi-wildlife-park/).
+- Poring Hot Spring. [sabah.attractionsinmalaysia.com](https://sabah.attractionsinmalaysia.com/Poring-Hot-Spring.php).
+- Rainforest Discovery Centre. [klook.com](https://www.klook.com/sv/activity/46132-4d3n-sepilok-wildlife-tour-kinabatangan-river-cruise-experience/).
+- Sabah Agriculture Park. [iehafarihah.blogspot.com](https://iehafarihah.blogspot.com/2012/05/taman-pertanian-sabah-tenom.html).
+- Sepilok Orangutan Rehabilitation Centre. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:Sandakan_Sabah_Sepilok-Orangutan-Rehabilitation-Centre-01a.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- UMS Aquarium & Marine Museum. [sabahtourism.com](https://sabahtourism.com/destination/aquarium-marine-museum/).
+- 1Borneo. [penang-traveltips.com](https://www.penang-traveltips.com/bm/malaysia/sabah/kota-kinabalu.htm).
+- Centre Point Sabah. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:KotaKinabalu_Sabah_Centre-Point-Mall-02.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) · resized and re-encoded.
+- Gaya Street Sunday Market. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:KotaKinabalu_Sabah_Gaya-Street-Sunday-Market-12.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Petrosains PlaySmart Kota Kinabalu. [nabalunews.com](https://www.nabalunews.com/post/petrosains-playsmart-a-popular-choice-for-families-during-the-school-holidays).
+- Harbour Mall Sandakan. [ricemotions.blogspot.com](https://ricemotions.blogspot.com/2014/11/take-break-sandakan.html).
+- Imago. [sabahtourism.com](https://sabahtourism.com/activity/a-trip-to-imago-where-culture-meets-modernization/?locale=zh_tw).
+- ITCC Shopping Mall. [nidecelevators.com](https://nidecelevators.com/project-details/132).
+- Jesselton Mall. [oceaniahotel.com.my](https://oceaniahotel.com.my/gallery.html).
+- Suria Sabah. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:KotaKinabalu_Sabah_SuriaSabah-03.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) · resized and re-encoded.
+- Sutera Harbour. [tiket.com](https://www.tiket.com/en-my/hotel/malaysia/sutera-harbour-the-pacific-sutera-112001545038136213).
+- San Da Gen Kopitiam. [Reviewbah](https://reviewbah.com/sandakan/restaurant/san-da-gen-kopitiam-%E4%B8%89%E5%A4%A7%E7%BE%B9).
+- Keng Wan Hing. [iPackTravel](https://www.ipacktravel.com/post/sabah-eat-keng-wan-hing-%E7%90%BC%E4%B8%87%E5%B4%B4-pineapple-polo-bun-kota-kinabalu).
+- English Teahouse & Restaurant. [4travel.jp](https://4travel.jp/travelogue/10828014).
+- Floating Seafood Market Restaurant. [klook.com](https://www.klook.com/activity/163915-kampung-nelayan-floating-seafood-market-restaurant-in-kota-kinabalu/).
+- Sim Sim Seafood 88. [tripadvisor.com.my](https://www.tripadvisor.com.my/Restaurant_Review-g303997-d3954067-Reviews-Restoran_Seafood_Sim_Sim_88-Sandakan_Sandakan_Division_Sabah.html).
+- Kedai Kopi Yee Fung. [bluekinabalu.com](https://www.bluekinabalu.com/blog//20-fun-activities-to-enjoy-in-kk-3-sample-local-cuisine).
+- Le Berries Gaya Street. [leberriesbakery.com](https://leberriesbakery.com/pages/about-us).
+- mizumizu coffee. [mizumizu-coffee.menufyy.com](https://mizumizu-coffee.menufyy.com/menu).
+- Fook Yuen Café & Bakery (Gaya Street). [reviewbah.com](https://reviewbah.com/kota-kinabalu/restaurant/fook-yuen-cafe-bakery-gaya-street).
+- Rock, Paper, Scissors Cafe. [yummyadvisor.my](https://www.yummyadvisor.my/sandakan/restaurant-rock-paper-scissors-cafe-sandakan/).
