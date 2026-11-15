@@ -1,0 +1,62 @@
+# Pahang venue photos
+
+- 4D Trick Art Museum. [Ripley’s Adventureland](https://ripleys.com.my/attractions/4d-trick-art-museum/).
+- Kechara Forest Retreat. [tripadvisor.co.uk](https://www.tripadvisor.co.uk/Attraction_Review-g2301861-d12594183-Reviews-Kechara_Forest_Retreat-Bentong_Pahang.html).
+- All Souls Church. [robsrambles.com](https://www.robsrambles.com/asia/malaysia/cameron-highlands/003-trail-3-4-6/).
+- Chin Swee Caves Temple. [Gryffindor](https://commons.wikimedia.org/wiki/File:Chin_Swee_Caves_Temple_KL10.JPG) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Kwong Fook Temple. [sg.trip.com](https://sg.trip.com/moments/detail/bentong-14813-142127386/).
+- Pahang Arts Museum (MOCA). [tripadvisor.ch](https://www.tripadvisor.ch/Attraction_Review-g298296-d7627725-Reviews-Pahang_Art_Museum-Kuantan_Kuantan_District_Pahang.html).
+- Sam Poh Temple. [foodveler.com](https://foodveler.com/2019/08/sam-poh-temple.html).
+- SeniKome Péng Hēng East Coast Arts & Cultural Centre. [rwgenting.com](https://www.rwgenting.com/en/things-to-do/leisure/senikome-peng-heng.html).
+- Sri Marathandavar Temple. [mindtrip.ai](https://mindtrip.ai/attraction/maran-pahang/sri-marathandavar-aalayam-maran/at-NEMONOXa).
+- Sultan Ahmad Shah State Mosque. [Ibnu ariff at English Wikipedia](https://commons.wikimedia.org/wiki/File:Pahang_state_mosque.jpg) · [Public domain](https://creativecommons.org/publicdomain/mark/1.0/).
+- Fraser's Hill Clock Tower. [RoB](https://commons.wikimedia.org/wiki/File:Fraser%27s_Hill_Clock_Tower.JPG) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Kompleks Galeri Mat Kilau. [visitpahang.my](https://www.visitpahang.my/listing/galeri-mat-kilau/).
+- Lipis Heritage Museum. [mdlipis.gov.my](https://mdlipis.gov.my/ms/mdl/pusat-media/berita/muzium-warisan-lipis).
+- Sultan Abdullah Mosque Museum. [thestar.com.my](https://www.thestar.com.my/aseanplus/2025/01/07/reviving-a-cultural-legacy).
+- Sultan Abu Bakar Museum. [visitpahang.my](https://www.visitpahang.my/listing/sultan-abu-bakar-museum-muzium-sultan-abu-bakar/).
+- Sungai Lembing Museum. [WPSamson](https://commons.wikimedia.org/wiki/File:Sungai_Lembing_Museum_October_2011.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+- Bentong Gallery. [bentong-gallery.com](https://www.bentong-gallery.com/).
+- Kuala Lipis Railway Station. [Slleong](https://commons.wikimedia.org/wiki/File:Kuala_Lipis_Railway_Station_1.jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/) · resized and re-encoded.
+- Kuala Lipis Zero Milestone. [libur.com.my](https://www.libur.com.my/akibat-banjir-clifford-school-kuala-lipis-bangunan-bersejarah-berusia-lebih-100-tahun-ditenggelami-air-ds-siti-nurhaliza-mohon-bantuan-ringankan-beban/).
+- Perkampungan Kraf Diraja Tunku Azizah. [mstar.com.my](https://www.mstar.com.my/travel/destinasi/2024/12/31/menelusuri-keindahan-seni-tenun-pahang-warisan-khazanah-berharga-wajib-singgah-perkampungan-kraf-diraja-tunku-azizah).
+- ABC Beach (Air Batang). [kampongtioman.blogspot.com](https://kampongtioman.blogspot.com/2022/03/abc-beach-jetty-tioman.html).
+- Chendor Beach. [visitmalaysia.info](https://visitmalaysia.info/kuantan/chendor.htm).
+- Cherating Beach. [Kondephy](https://commons.wikimedia.org/wiki/File:Cherating,_Pantai_Cherating.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Pantai Gelora. [visitmalaysia.info](https://visitmalaysia.info/kuantan/taman-gelora.htm).
+- Pantai Sepat. [kemdesacempaka.blogspot.com](https://kemdesacempaka.blogspot.com/p/photo-gallery.html).
+- Pantai Balok. [libur.com.my](https://www.libur.com.my/perkongsiaan-percutiaan-keluarga-kecil-di-kuantan-ini-lokasi-bermalam-permata-tersembunyi-dicadangkan/).
+- Pantai Kempadang. [visitpahang.my](https://www.visitpahang.my/listing/recreation-beach-kampung-kempadang/).
+- Pantai Batu Hitam. [petitgo.com](https://petitgo.com/listing_display?listingid=219).
+- Paya Beach. [beaches-searcher.com](https://beaches-searcher.com/en/beach/458201204/paya-beach).
+- Teluk Chempedak. [Dominic Nelson](https://commons.wikimedia.org/wiki/File:Kuantan_-_rocks_on_the_beach_at_Teluk_Cempedak_-_May_2024.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Taman Bandar Kuantan. [mdfaiez84.com](https://www.mdfaiez84.com/2018/06/taman-bandar-kuantan.html).
+- BOH Sungai Palas Tea Centre. [udeyismail](https://commons.wikimedia.org/wiki/File:Cameron_highland.jpg) · [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/).
+- Cameron Highlands Butterfly Farm. [foodveler.com](https://foodveler.com/2019/08/butterfly-farm-2.html).
+- Cameron Lavender Garden. [Pro QueeNia](https://commons.wikimedia.org/wiki/File:Lavenders_field_at_Cameron_Lavender_Garden.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Chamang Waterfall. [pahangtourism.org.my](https://www.pahangtourism.org.my/index.php/destination/must-visit-places-in-pahang/item?files_order=ordering&id=64%3Achamang-waterfall).
+- Allan’s Water. [asiakingtravel.com](https://www.asiakingtravel.com/attraction/frasers-hill).
+- Kuala Gandah Elephant Conservation Centre. [tripadvisor.com](https://www.tripadvisor.com/AttractionProductReview-g298570-d19831076-Elephant_Sanctuary_Kuala_Gandah_Day_Trip-Kuala_Lumpur_Wilayah_Persekutuan.html).
+- Sungai Pandan Waterfall. [Pandanwaterfall](https://commons.wikimedia.org/wiki/File:Sungai_Pandan_Waterfall.png) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Taman Negara (Kuala Tahan). [nstos.blogspot.com](https://nstos.blogspot.com/2020/04/taman-negara-kuala-tahan-jerantut_52.html).
+- The Bentong Farm. [traveloka.com](https://www.traveloka.com/id-id/activities/malaysia/product/the-bentong-farm-ticket-l-pahang-malaysia-5760014407488).
+- Berjaya Megamall. [tripadvisor.in](https://www.tripadvisor.in/Attraction_Review-g298296-d6964188-Reviews-Berjaya_Megamall-Kuantan_Kuantan_District_Pahang.html).
+- Colmar Tropicale. [Peter coxhead](https://commons.wikimedia.org/wiki/File:Colmar_Tropicale_outside.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- East Coast Mall. [capitamallsmalaysia.infinitesparks.com](https://capitamallsmalaysia.infinitesparks.com/portfolio_overview.html).
+- First World Plaza. [trip.com](https://www.trip.com/moments/detail/genting-highlands-561-131634806/).
+- Genting Highlands Premium Outlets. [pamper.my](https://www.pamper.my/news/lifestyle/happenings/festive-savings-fun-await-at-genting-highlands-premium-outlets-and-johor-premium-outlets/).
+- Genting SkyWorlds. [Chongkian](https://commons.wikimedia.org/wiki/File:Genting_SkyWorlds_Theme_Park.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Kuantan City Mall. [xinemas.com](https://xinemas.com/cinema/in-kuantan/gsc-kuantan-city-mall.html).
+- Mentakab Star Mall. [mdfaiez84.com](https://www.mdfaiez84.com/2020/11/mentakab-star-mall.html).
+- SkyAvenue Complex. [timeout.com](https://www.timeout.com/kuala-lumpur/shopping/skyavenue).
+- Kuantan 188. [great-towers.com](https://www.great-towers.com/tower/kuantan-188).
+- A Little Farm on the Hill. [happygokl.com](https://happygokl.com/a-little-farm-on-the-hill/).
+- Bentong Walk. [bagasi.my](https://bagasi.my/tempat-menarik-di-bentong/).
+- Coastal Store. [tripadvisor.com](https://www.tripadvisor.com/Restaurant_Review-g298296-d12712202-Reviews-Coastal_Store-Kuantan_Kuantan_District_Pahang.html).
+- eatCABIN. [visitpahang.my](https://www.visitpahang.my/listing/eatcabin/).
+- Lemon Button Cafe & Dining. [tripadvisor.co.uk](https://www.tripadvisor.co.uk/Restaurant_Review-g1497917-d27982358-Reviews-Lemon_Button_Cafe_Dining-Tanah_Rata_Cameron_Highlands_Pahang.html).
+- Malaysian Food Street. [360tour.asia](https://360tour.asia/malaysian-food-street-at-resorts-world-genting/).
+- Pasar Besar Kuantan food area. [visitpahang.my](https://www.visitpahang.my/listing/pasar-besar-kuantan/).
+- Restoran Hoi Yin. [my.trip.com](https://my.trip.com/restaurant/malaysia/kuala-kuantan/detail/restaurant-hoi-yin-30072403/).
+- KouGen Japanese Restaurant. [my.trip.com](https://my.trip.com/restaurant/malaysia/tanah-rata/detail/kougen-17412824/).
+- Summer Park Restaurant. [escapeanytime.com](https://www.escapeanytime.com/post/summer-park-restaurant-bukit-tinggi-best-food-at-the-start-of-adventure).
