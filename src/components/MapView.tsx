@@ -299,9 +299,10 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !activePoint) return;
-    const marker = L.marker([activePoint.latitude, activePoint.longitude], { icon: routeIcon("current"), title: isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation") })
-      .bindPopup(`<strong>${escapeHtml(isBrowsingArea ? discoveryText(locale, "area") : t("map.currentLocation"))}</strong>${isBrowsingArea ? "" : `<br>${formatDateTime(activePoint.recordedAt, locale)}`}`).addTo(map);
+    if (!map || !activePoint || isBrowsingArea) return;
+    const title = t("map.currentLocation");
+    const marker = L.marker([activePoint.latitude, activePoint.longitude], { icon: routeIcon("current"), title })
+      .bindPopup(`<strong>${escapeHtml(title)}</strong><br>${formatDateTime(activePoint.recordedAt, locale)}`).addTo(map);
     return () => { marker.remove(); };
   }, [activePoint, isBrowsingArea, locale]);
 
