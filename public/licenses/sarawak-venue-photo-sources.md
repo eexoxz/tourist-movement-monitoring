@@ -1,0 +1,62 @@
+# Sarawak venue photos
+
+- Brooke Memorial. [dayakdaily.com](https://dayakdaily.com/charles-brooke-memorial-a-pillar-of-sarawaks-past/).
+- Chinese History Museum. [museum.sarawak.gov.my](https://museum.sarawak.gov.my/web/subpage/webpage_view/102).
+- Fort Margherita. [Graystravels](https://commons.wikimedia.org/wiki/File:Fort_Margherita_-_Kuching.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Fort Sylvia. [sarawaktourism.com](https://www.sarawaktourism.com/web/things-to-do/thing-view/culture).
+- Lau King Howe Hospital Memorial Museum. [lkhhmm.org](https://lkhhmm.org/).
+- Niah National Park. [penn.museum](https://www.penn.museum/sites/expedition/burial-rituals-of-prehistoric-forager-farmers/).
+- Old Kuching Courthouse. [Yeo Jiun Tzen](https://commons.wikimedia.org/wiki/File:Old_Court_House_Complex,_Kuching_03.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Rosli Dhobi Warriors Memorial. [ehornbill.com](https://www.ehornbill.com/v23/index.php/2012-11-06-12-02-23/2012-11-06-12-04-48/12165-2020-06-06-09-59-22).
+- Square Tower. [tripadvisor.com](https://www.tripadvisor.com/Attraction_Review-g298309-d457116-Reviews-Square_Tower-Kuching_Sarawak.html).
+- Tanjung Lobang World War 2 Victims Memorial. [theborneopost.com](https://www.theborneopost.com/2025/02/02/comment-remembering-the-past-building-the-future/).
+- Borneo Cultures Museum. [愛子棋枰](https://commons.wikimedia.org/wiki/File:Front_view_of_Borneo_Cultural_Museum_20220408153640.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Hong San Si Temple. [riversidemajestic.com](https://www.riversidemajestic.com/location).
+- Kuching Cat Museum. [Shoestring at wts.wikivoyage](https://commons.wikimedia.org/wiki/File:Cat_Museum_001,_Kuching,_Malaysia.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Miri Petroleum Museum. [gs.ctrip.com](https://gs.ctrip.com/html5/you/sight/miri14831/3063750.html).
+- Sarawak Islamic Heritage Museum. [sarawaktourism.com](https://www.sarawaktourism.com/web/things-to-do/thing-view/culture/museums/islamic-heritage-museum).
+- Sibu Heritage Centre. [sarawaktourism.com](https://www.sarawaktourism.com/web/things-to-do/thing-view/culture/local-handicrafts-and-heritage-centres/sibu-heritage-centre).
+- St. Joseph's Cathedral, Kuching. [borneoarchitecturejournal.com](https://www.borneoarchitecturejournal.com/chinese/catholic-church-kuching).
+- Miri Handicraft Centre. [trip.com](https://www.trip.com/moments/detail/miri-14831-128225029/).
+- Tua Pek Kong Temple, Miri. [miriresortcity.com](https://www.miriresortcity.com/content/tua-pek-kong-temple).
+- Sarawak Cultural Village. [jnqjourney.com](https://www.jnqjourney.com/spot/sarawak-cultural-village-406).
+- Damai Beach. [cikguzim.blogspot.com](https://cikguzim.blogspot.com/2020/12/damai-beach-resort-santubong-sarawak.html).
+- Marina Beach. [theborneopost.com](https://www.theborneopost.com/2026/07/16/miris-asean-award-inspires-confidence-new-tourism-milestones/).
+- Pantai Bungai. [miricitysharing.com](https://www.miricitysharing.com/bungai-beach-miri-peliau-beach-hidden-tourist-attractions-in-miri/).
+- Pantai Lutong. [mindtrip.ai](https://mindtrip.ai/attraction/miri-sarawak/lutong-beach/at-6MjXLHdS).
+- Pantai Mukah. [sandee.com](https://sandee.com/malaysia/sarawak/mukah/kala-dana-beach).
+- Pantai Pasir Pandak. [borneo2.blogspot.com](https://borneo2.blogspot.com/2011/02/blog-post.html).
+- Pantai Pasir Panjang. [myweekendplan.asia](https://myweekendplan.asia/ms/pantai-terbaik-di-kuching/).
+- Pantai Tanjong Lobang. [trip.com](https://www.trip.com/moments/detail/miri-division-1453461-124239999/).
+- Tanjung Datu National Park. [asiakingtravel.com](https://www.asiakingtravel.com/tour/kuching-tour-3-days-tanjung-datu-national-park).
+- Pantai Temasya Tanjung Batu. [sg.trip.com](https://sg.trip.com/moments/detail/bintulu-1931-15540140/).
+- Bako National Park. [skr.de](https://www.skr.de/malaysia-reisen/sehenswuerdigkeiten/bako-national-park/).
+- Gunung Gading National Park. [Annette Teng](https://commons.wikimedia.org/wiki/File:Waterfall_in_Mt_Gading_NP_-_panoramio.jpg) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- Gunung Mulu National Park. [audleytravel.com](https://www.audleytravel.com/borneo?audkey=borneo+wildlife).
+- Kubah National Park. [KelvinToh](https://commons.wikimedia.org/wiki/File:Kubah_waterafall_at_morning.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Lambir Hills National Park. [malaysiauncovered.com](https://malaysiauncovered.com/lambir-hills-national-park/).
+- Loagan Bunut National Park. [dayakdaily.com](https://dayakdaily.com/dont-wear-red-to-loagan-bunut-national-park/).
+- Miri City Fan Recreational Park. [my.trip.com](https://my.trip.com/travel-guide/attraction/miri/miri-city-fan-recreation-park-56097168).
+- Piasau Nature Reserve. [sarawaktravellers.com](https://www.sarawaktravellers.com/sarawak-cities/miri/destinations/miri-piasau-nature-reserve-discover-hornbill-sanctuary-and-green-oasis).
+- Taman Tumbina. [tripzilla.com](https://www.tripzilla.com/bintulu-malaysia-family-destination/73165).
+- Semenggoh Wildlife Centre. [sarawaktourism.com](https://www.sarawaktourism.com/web/stories/story-view/sarawak-for-family-vacation).
+- AEON Mall Kuching Central. [trexfly.com](https://www.trexfly.com/articles/7-most-popular-shopping-mall-in-kuching-sarawak).
+- Bintang Megamall Shopping Complex. [getoccupi.com](https://getoccupi.com/malls/bintang-megamall).
+- Boulevard Shopping Mall. [shinyang.com.my](https://www.shinyang.com.my/products-services/properties-development.html).
+- Darul Hana Bridge. [sarawaktourism.com](https://www.sarawaktourism.com/web/places-to-visit/town-view/kuching/major-attractions/darul-hana-bridge).
+- Kuching Waterfront. [sekainoasameshi.com](https://www.sekainoasameshi.com/entry/2026/03/15/201851).
+- India Street Pedestrian Mall. [klook.com](https://www.klook.com/en-US/activity/153211-kuching-heritage-city-walking-tour/).
+- The Spring Shopping Mall. [360tour.asia](https://360tour.asia/pokestop-at-the-spring-shopping-mall-kuching/).
+- Times Square Megamall Bintulu. [jaylantarosolomon.blogspot.com](https://jaylantarosolomon.blogspot.com/2022/07/bintulu-shopping-mall.html).
+- Vivacity Megamall. [Cerevisae](https://commons.wikimedia.org/wiki/File:Vivacity_Megamall_at_Jalan_Wan_Alwi,_Kuching.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Wisma Sanyan. [bagasi.my](https://bagasi.my/shopping-di-sibu/).
+- Beach Republic Cafe. [beach-republic.com.my](https://beach-republic.com.my/facilities.php).
+- Chong Choon Cafe. [kokcheehou.blogspot.com](https://kokcheehou.blogspot.com/2020/02/chong-choon-cafe-jalan-chan-chin-ann.html).
+- Choon Hui Café. [thetravelinsider.co](https://thetravelinsider.co/sg/en/travel-inspirations/the-list/top-10-must-see-eat-and-do-in-kuching-sarawak).
+- Common Ground Malaysia. [kalbaronline.com](https://kalbaronline.com/2023/03/26/saradise-kuching-lokasi-perburuan-kuliner-asik-di-sarawak/).
+- Luscious Roasted (Pelita). [miricitysharing.com](https://www.miricitysharing.com/luscious-roasted-%E5%A3%B9%E5%93%81%E7%83%A7%E8%85%8A-pelita-miri/).
+- Madli’s Restaurant. [madligroup.com](https://madligroup.com/outlets/miri-city-centre/).
+- Mira Cake House (Rumah Merah). [thewaterfrontkuching.com](https://thewaterfrontkuching.com/places-of-interest/2019/mira-cake-house/).
+- Sibu Central Market. [Benjy8769](https://commons.wikimedia.org/wiki/File:The_Sibu_Central_Market.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Top Spot Seafood Centre. [hemisphere.my](https://www.hemisphere.my/our-businesses/leisure-attractions/top-spot-seafood-centre).
+- The Maker Cafe. [miricitysharing.com](https://www.miricitysharing.com/the-maker-cafe-is-back-in-miri-city/).
