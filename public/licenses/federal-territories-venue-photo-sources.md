@@ -1,0 +1,69 @@
+# Federal Territories venue photos
+
+- Kuala Lumpur Railway Station. [says.com](https://says.com/my/lifestyle/did-you-know-the-ktm-railway-station-in-kl-was-created-snow-proof-here-s-why).
+- Labuan Chimney Museum. [CEphoto, Uwe Aranas](https://commons.wikimedia.org/wiki/File:Labuan_Malaysia_Chimney-Museum-01.jpg) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Labuan Museum. [orientaldaily.com.my](https://www.orientaldaily.com.my/news/ufood-travels/2025/05/06/728099).
+- Labuan War Cemetery. [tracesofwar.com](https://www.tracesofwar.com/sights/8823/Commonwealth-Memorial-of-the-Missing-Labuan.htm).
+- National Textile Museum. [Marcin Konsek](https://commons.wikimedia.org/wiki/File:2016_Kuala_Lumpur,_Narodowe_Muzeum_W%C5%82%C3%B3kiennictwa.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Royal Malaysian Police Museum. [harmonytarovaldez.blogspot.com](https://harmonytarovaldez.blogspot.com/2022/08/muzium-polis-diraja-malaysia.html).
+- Surrender Point and Peace Park. [tracesofwar.com](https://www.tracesofwar.com/sights/92385/Surrender-Point-Memorial.htm).
+- Sultan Abdul Samad Building. [klook.com](https://www.klook.com/de/destination/p50001978-merdeka-square/).
+- Telekom Museum. [andytrendybiz.blogspot.com](https://andytrendybiz.blogspot.com/2016/12/sejarah-muzium-telekom.html).
+- Tun Abdul Razak Memorial. [arkib.gov.my](https://www.arkib.gov.my/ms/perkhidmatan/arkib-memorial/info-galeri/memorial-tun-abdul-razak).
+- Bank Negara Malaysia Museum and Art Gallery. [petitgo.com](https://www.petitgo.com/listing_display?listingid=73).
+- Jamek Mosque. [qualla.com](https://qualla.com/jamek-mosque/).
+- Labuan Marine Museum. [sabahtravel.com](https://www.sabahtravel.com/tour/labuan-city-tour).
+- National Art Gallery, Malaysia. [newnaratif.com](https://newnaratif.com/the-art-of-censorship-in-malaysia/).
+- National Mosque of Malaysia. [sirbtrips.com](https://sirbtrips.com/%D8%A7%D9%85%D8%A7%D9%83%D9%86/13/%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF-%D8%A7%D9%84%D9%88%D8%B7%D9%86%D9%8A-%D9%81%D9%8A-%D9%83%D9%88%D8%A7%D9%84%D8%A7%D9%84%D9%85%D8%A8%D9%88%D8%B1-%D8%A8%D9%85%D8%A7%D9%84%D9%8A%D8%B2%D9%8A%D8%A7-%D9%85%D8%B3%D8%AC%D8%AF-%D9%86%D8%BA%D8%A7%D8%B1%D8%A7).
+- National Museum / Muzium Negara. [Bahnfrend](https://commons.wikimedia.org/wiki/File:Muzium_Negara,_2023_(01).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Pusat Sains Negara. [timeout.com](https://www.timeout.com/kuala-lumpur/attractions/national-science-centre).
+- Putra Mosque, Putrajaya. [Azuladnan](https://commons.wikimedia.org/wiki/File:Putra_Mosque_being_reflected_in_the_lake_(crop).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Sri Mahamariamman Temple, Kuala Lumpur. [warisankl.my](https://www.warisankl.my/bm/terokai-detik-bermakna/kuil-yang-menyinar-di-hati-kota).
+- Tuanku Mizan Zainal Abidin Mosque. [trends.archiexpo.de](https://trends.archiexpo.de/gkd-gebr-kufferath-ag/project-60640-242732.html).
+- Batu Manikar Beach. [myfaraflk.blogspot.com](https://myfaraflk.blogspot.com/2017/10/pantai-batu-manikarlabuan.html).
+- Layang-Layangan Beach. [sinarharian.com.my](https://www.sinarharian.com.my/article/269711/galeri/program-layangan-sunset-2023).
+- Pancur Hitam Beach. [trip.com](https://www.trip.com/moments/detail/labuan-23100-13728281/).
+- Pohon Batu Beach. [gokayu.com](https://gokayu.com/malaysia/labuan-island/attraction/pohon-batu-beach).
+- Pulau Papan. [tripzilla.com](https://www.tripzilla.com/family-friendly-things-to-do-labuan-island-sabah/80336).
+- Pulau Rusukan Besar. [labuangeopark82.wixsite.com](https://labuangeopark82.wixsite.com/labuangeopark/sesar-p-rusukan-besar).
+- Patau-Patau 2 Water Village. [thestar.com.my](https://www.thestar.com.my/lifestyle/travel/2022/04/19/malaysian-discovers-traditions-and-culture-at-a-floating-village-in-labuan).
+- Tanjung Purun Coastal Park. [tripadvisor.com](https://www.tripadvisor.com/Attraction_Review-g2136172-d19727903-Reviews-Taman_Awam_Pantai_Tanjung_Purun-Labuan_Town_Labuan_Island_Sabah.html).
+- Sungai Pagar Beach. [sinarharian.com.my](https://www.sinarharian.com.my/article/243100/galeri/bermain-papan-luncur-air).
+- Tanjung Kubong Beach. [labuangeopark82.wixsite.com](https://labuangeopark82.wixsite.com/labuangeopark/lanskap-pantai-tjg-kubong).
+- Aquaria KLCC. [Phalinn Ooi from Kuala Lumpur, Malaysia](https://commons.wikimedia.org/wiki/File:Underwater_tunnel_in_Aquaria_KLCC.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) · resized and re-encoded.
+- Labuan Botanical Garden. [tripoto.com](https://www.tripoto.com/sabah/trips/what-to-do-and-see-in-labuan-malaysia-4176).
+- KL Forest Eco Park. [lonelyplanet.com](https://www.lonelyplanet.com/points-of-interest/kl-forest-eco-park/390653).
+- Kuala Lumpur Bird Park. [mykualalumpurpass.com](https://www.mykualalumpurpass.com/kl-bird-park).
+- Kuala Lumpur Butterfly Park. [pelago.com](https://www.pelago.com/en/activity/pbku84wgs-bird-park-butterfly-farm-nature-include-all-entrance-tour-from-kuala-lumpur-kuala-lumpur/).
+- Putrajaya Wetlands Park. [malaysia.travel](https://www.malaysia.travel/explore/15-things-to-see-and-do-in-putrajaya-according-to-locals).
+- Taman Wawasan. [ppj.gov.my](https://www.ppj.gov.my/page/taman-wawasan-1?slug=eko-pelancongan).
+- Titiwangsa Lake Gardens. [*angys*](https://commons.wikimedia.org/wiki/File:Taman_Tasik_Titiwangsa_(220413)_04.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Putrajaya Botanical Garden. [gerbang.ppj.gov.my](https://gerbang.ppj.gov.my/page/taman-botani-putrajaya-1?slug=eko-pelancongan).
+- Perdana Botanical Garden. [thevacationgateway.com](https://www.thevacationgateway.com/perdana-botanical-garden-in-kuala-lumpur.html).
+- Bukit Bintang. [eco-business.com](https://www.eco-business.com/news/how-walkable-is-your-city-tool-aims-to-make-pedestrians-safer-and-happier/).
+- Kuala Lumpur Tower. [DvTor8303](https://commons.wikimedia.org/wiki/File:Kuala_Lumpur_Tower_20250822_(1).jpg) · [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+- Mitsui Shopping Park LaLaport Bukit Bintang City Centre. [malaysia.travel](https://www.malaysia.travel/explore/lalaport-bbcc).
+- Pavilion Kuala Lumpur. [mapple.net](https://www.mapple.net/global/article/36851/).
+- Perdana Putra. [jonyizfahan.blogspot.com](https://jonyizfahan.blogspot.com/2016/02/tempat-tempat-menarik-diputrajaya.html).
+- PETRONAS Twin Towers. [Someformofhuman](https://commons.wikimedia.org/wiki/File:Petronas_Panorama_II.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Petrosains, The Discovery Centre. [skyto.hatenablog.com](https://skyto.hatenablog.com/entry/review-petrosains).
+- Seri Wawasan Bridge. [tripadvisor.com.my](https://www.tripadvisor.com.my/Attraction_Review-g298305-d4287728-Reviews-Seri_Wawasan_Bridge_Putrajaya-Putrajaya_Wilayah_Persekutuan.html).
+- Suria KLCC. [malaysia.travel](https://www.malaysia.travel/explore/petronas-twin-tower).
+- The Exchange TRX. [evcc.my](https://www.evcc.my/post/the-exchange-trx-malaysia-s-largest-leed-gold-certified-mall-and-a-model-for-evcc-pedas-rsa).
+- Feeka Coffee Roasters. [eatdrinkkl.com](https://www.eatdrinkkl.com/posts/snapshot/feeka-coffee-roasters-mesui).
+- ICC Pudu Complex. [tabiikutecho.com](https://tabiikutecho.com/2023-08-19-190000/).
+- Jalan Alor Food Street. [McKay Savage from London, UK](https://commons.wikimedia.org/wiki/File:Busy_food_street_%3D_happy_(5086911721).jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- Lot 10 Hutong. [sg.trip.com](https://sg.trip.com/moments/detail/kuala-lumpur-45-119477032/).
+- Lai Foong Lala Noodles. [guide.michelin.com](https://guide.michelin.com/my/en/kuala-lumpur-region/kuala-lumpur/restaurant/lai-fong-lala-noodles).
+- Petaling Street. [orientaldaily.com.my](https://www.orientaldaily.com.my/news/central/2019/01/01/273669).
+- Tapak Urban Street Dining. [vulcanpost.com](https://vulcanpost.com/842012/tapak-urban-street-dining-food-truck-park-kl-pj-malaysia/).
+- Yut Kee Restaurant. [malaymail.com](https://www.malaymail.com/news/eat/drink/2014/10/16/yut-kee-new-place-but-everything-else-including-prices-is-the-same/764581).
+- Souq Putrajaya. [souqputrajaya.com](https://souqputrajaya.com/).
+- Anjung Ketam. [kay-hussin.blogspot.com](https://kay-hussin.blogspot.com/2018/03/anjung-ketam-tanjung-aru-labuan.html).
+- Central Market. [cathaypacific.com](https://www.cathaypacific.com/cx/en_HK/inspiration/travel/48-hours-kuala-lumpur.html).
+- Islamic Arts Museum Malaysia. [architecture-tour.com](https://architecture-tour.com/world/malaysia/islamic-arts-museum-malaysia/).
+- Kampung Baru. [malaymail.com](https://www.malaymail.com/news/malaysia/2020/02/01/kampung-baru-redevelopment-takes-into-account-interests-of-malays-says-agon/1833547).
+- KLCC Park. [thrillophilia.com](https://www.thrillophilia.com/attractions/klcc-park).
+- Kwai Chai Hong. [theedgemalaysia.com](https://theedgemalaysia.com/node/692397).
+- Merdeka Square. [pelago.com](https://www.pelago.com/en-US/activity/pix0bzx58-shore-excursion-full-day-kuala-lumpur-city-tour-include-all-entrance-petaling-jaya/).
+- Thean Hou Temple. [gs.ctrip.com](https://gs.ctrip.com/html5/you/sight/kualalumpur45/132853.html).
