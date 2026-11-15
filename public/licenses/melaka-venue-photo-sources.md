@@ -1,0 +1,62 @@
+# Melaka venue photos
+
+- A Famosa / Porta de Santiago. [Chongkian](https://commons.wikimedia.org/wiki/File:A_Famosa_Fortress.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Bukit Cina. [malaysia-traveller.com](https://www.malaysia-traveller.com/bukit-cina.html).
+- Hang Li Poh's Well. [Rudolph.A.furtado](https://commons.wikimedia.org/wiki/File:Melaka%27s_famous_hang_Li_Po%27s_Well.JPG) · [Public domain](https://creativecommons.org/publicdomain/mark/1.0/) · resized and re-encoded.
+- Bastion Middleburg. [airial.travel](https://www.airial.travel/attractions/malaysia/melaka/bastion-middleburg-ZTPGVkbv).
+- Malaysia Architecture Museum. [orientaldaily.com.my](https://www.orientaldaily.com.my/news/ufood-travels/2025/05/27/732884).
+- Melaka Sultanate Palace Museum. [Adiput ( talk )](https://commons.wikimedia.org/wiki/File:Malacca_Sultanate_Palace.JPG) · [Public domain](https://creativecommons.org/publicdomain/mark/1.0/).
+- Proclamation of Independence Memorial. [tourismmelakaofficial.blogspot.com](https://tourismmelakaofficial.blogspot.com/2012/12/memorial-pengisytiharan-kemerdekaan.html).
+- St. John's Fort. [interestingplace1.blogspot.com](https://interestingplace1.blogspot.com/2011/07/st-johns-fortinteresting-places-in.html).
+- St Paul's Church ruins. [Bjørn Christian Tørrissen](https://commons.wikimedia.org/wiki/File:St._Paul%27s_Church_Malacca_2012.JPG) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+- Stadthuys. [thrillophilia.com](https://www.thrillophilia.com/attractions/masjid-tanah).
+- Baba & Nyonya Heritage Museum. [Chongkian](https://commons.wikimedia.org/wiki/File:Baba_Nyonya_Heritage_Museum.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Cheng Ho Cultural Museum. [petitgo.com](https://www.petitgo.com/listing_display?listingid=286).
+- Cheng Hoon Teng Temple. [Marcin Konsek](https://commons.wikimedia.org/wiki/File:2016_Malakka,_%C5%9Awi%C4%85tynia_Cheng_Hoon_Teng_(01).jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Christ Church, Malacca. [online-discova.rezdy.com](https://online-discova.rezdy.com/712035/kuala-lumpur-premium-private-malacca-river-cruise-and-historical-tour-with-lunch?source=indestination).
+- Kampung Hulu Mosque. [Chongkian](https://commons.wikimedia.org/wiki/File:Kampung_Hulu_Mosque.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Kampung Kling Mosque. [melaka.96network.com](https://melaka.96network.com/attractions/history-religion/kampung-kling-mosque-malacca/).
+- Melaka Islamic Museum. [petitgo.com](https://petitgo.com/listing_display?listingid=275).
+- Melaka Literature Museum. [Perbadanan Muzium Melaka](https://perzim.gov.my/muzium-galeri/).
+- Malacca Straits Mosque. [islam.in.ua](https://islam.in.ua/ru/kultura/simvol-malakki-plavuchaya-mechet-masdzhid-selat).
+- Maritime Museum. [Chongkian](https://commons.wikimedia.org/wiki/File:Maritime_Museum.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Cape Rachado Lighthouse. [Earth at English Wikipedia](https://commons.wikimedia.org/wiki/File:Cape_Rachado_Lighthouse.jpg) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) · resized and re-encoded.
+- Klebang Beach. [Chongkian](https://commons.wikimedia.org/wiki/File:Klebang_Beach.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Monkey Bay. [trip.com](https://www.trip.com/moments/detail/alor-gajah-128713-140920313/).
+- Pantai Padang Kemunting. [mdfaiez84.com](https://www.mdfaiez84.com/2019/03/pantai-padang-kemunting.html).
+- Pantai Pengkalan Balak. [libur.com.my](https://www.libur.com.my/layan-pantai-di-fuga-village-melaka-private-chalet-untuk-berteduh/).
+- Pantai Puteri (Kundor). [nst.com.my](https://www.nst.com.my/amp/news/nation/2025/03/1188031/coastal-protection-works-underway-pantai-puteri-exco).
+- Submarine Museum. [malaysia.travel](https://www.malaysia.travel/explore/museums-in-melaka).
+- Pantai Tanjung Bidara. [traveloka.com](https://www.traveloka.com/en-sg/explore/tips/8-tranquil-beaches-melaka/48332).
+- Pantai Siring. [petitgo.com](https://www.petitgo.com/listing_display?listingid=300).
+- Pulau Besar. [phoenixtrails.home.blog](https://phoenixtrails.home.blog/2020/03/16/day-trip-to-pulau-besar-melaka/).
+- Bukit Batu Lebah Forest Eco Park. [news.utem.edu.my](https://news.utem.edu.my/index.php/staff-awards/184-press-releases/787-kelab-rakan-kesihatan-utem-redah-belantara-kaji-tumbuhan-untuk-perubatan).
+- Melaka Botanical Garden. [id.trip.com](https://id.trip.com/guide/attraction/destinasi-wisata-keluarga-populer-di-melaka.html).
+- Melaka Butterfly & Reptile Sanctuary. [melakabook.my](https://www.melakabook.my/ms/blogs/tempat-menarik-di-ayer-keroh-melaka).
+- Melaka Crocodile and Recreation Park. [tripadvisor.com.au](https://www.tripadvisor.com.au/AttractionProductReview-g1062560-d13857469-Melaka_Crocodile_Farm_Admission_Tickets-Ayer_Keroh_Central_Melaka_District_Melaka.html).
+- Gadek Hot Springs. [sg.trip.com](https://sg.trip.com/moments/detail/gadek-1453898-139716712/).
+- Taman Seribu Bunga. [visitmelaka.com.my](https://visitmelaka.com.my/index.php/nature-adventure/agro/69-garden-ojthousand-flowers).
+- Taman Rekreasi Datuk Wira Poh Ah Tiam Machap. [orientaldaily.com.my](https://www.orientaldaily.com.my/news/south/2024/10/17/686848).
+- Tasik Ayer Keroh. [Chongkian](https://commons.wikimedia.org/wiki/File:Ayer_Keroh_Lake.JPG) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) · resized and re-encoded.
+- Turtle Conservation and Information Centre. [tripadvisor.com.mx](https://www.tripadvisor.com.mx/Attraction_Review-g303989-d6784520-Reviews-Padang_Kemunting_Turtle_Management_Centre-Masjid_Tanah_Alor_Gajah_District_Melaka.html).
+- Zoo Melaka. [Stress 043](https://commons.wikimedia.org/wiki/File:Malacca_Zoo_and_Bird_Farm.jpg) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- AEON Bandaraya Melaka. [melaka-tourism.com](https://www.melaka-tourism.com/melaka-tourism/melaka-shopping/134-aeon-mall-bandaraya-melaka).
+- AEON Melaka Shopping Centre. [terriploaty.blogspot.com](https://terriploaty.blogspot.com/2022/05/aeon-melaka-alamat-ayer-keroh.html).
+- Dataran Pahlawan Melaka Megamall. [agedashi23cents.blogspot.com](https://agedashi23cents.blogspot.com/2014/04/5-best-eating-experience-at-dataran.html).
+- Freeport A'Famosa Outlet. [malaysia.travel](https://www.malaysia.travel/explore/alor-gajah).
+- Encore Melaka. [archnet.org](https://www.archnet.org/sites/21495).
+- Mahkota Parade. [Sharon Hahn Darlin](https://commons.wikimedia.org/wiki/File:Melaka,_Malaysia_-_Mahkota_Parade_Shopping_Mal.jpg) · [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) · resized and re-encoded.
+- Melaka River Walk. [123reserve.com](https://123reserve.com/malaysia/melaka/attractions/tan-kim-seng-bridge).
+- Menara Taming Sari. [tourismmelakaofficial.blogspot.com](https://tourismmelakaofficial.blogspot.com/2012/12/saksikan-pelbagai-pemandangan-menarik.html).
+- Melaka River Cruise. [melakarivercruise.my](https://melakarivercruise.my/).
+- The Shore Shopping Gallery. [melaka-tourism.com](https://melaka-tourism.com/melaka-tourism/melaka-shopping/137-the-shore-shopping-gallery).
+- Jonker Street. [journals.openedition.org](https://journals.openedition.org/moussons/6671?lang=en).
+- Amigo Steak & Grill. [tripadvisor.com.my](https://www.tripadvisor.com.my/Restaurant_Review-g306997-d7342787-Reviews-Amigo_Restaurant-Melaka_Central_Melaka_District_Melaka_State.html).
+- Atlantic Nyonya (Melaka Raya). [atlantic-nyonya-melaka-raya.menu-world.com](https://atlantic-nyonya-melaka-raya.menu-world.com/).
+- Asam Pedas Claypot Kota Laksamana. [placesandfoods.com](https://www.placesandfoods.com/2023/08/asam-pedas-claypot-restoran-kota-laksamana-melaka.html).
+- Pak Putra Restaurant. [melaka.96network.com](https://melaka.96network.com/restaurants/malay-restaurant/pak-putra-restaurant/).
+- Geographér Café. [melaka.96network.com](https://melaka.96network.com/restaurants/bistro-cafe/geographer-cafe-jonker-walk/).
+- Kedai Kopi Chung Wah. [migrationology.com](https://migrationology.com/chicken-rice-balls-melaka/).
+- Klebang Original Coconut Shake. [klebang-original-coconut-shake.menustic.com](https://klebang-original-coconut-shake.menustic.com/).
+- Kneading Peace Café. [orientaldaily.com.my](https://www.orientaldaily.com.my/news/south/2023/03/02/550257).
+- Portuguese Settlement Seafood Court. [where2go.com.my](https://where2go.com.my/my/melaka/hawker-food/portuguese-settlement/).
