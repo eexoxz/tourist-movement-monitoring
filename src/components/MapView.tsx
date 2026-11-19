@@ -115,7 +115,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
   const [dismissedPreviewId, setDismissedPreviewId] = useState<string | null>(null);
   const [routePopupOpen, setRoutePopupOpen] = useState(false);
   const visibleDestinations = useMemo(() => {
-    if (mode !== "tourist") {
+    if (mode !== "tourist" || isBrowsingArea) {
       return destinations;
     }
 
@@ -128,7 +128,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       : destinations;
 
     return rankedDestinations.slice(0, limit);
-  }, [activePoint, destinations, mode, points.length]);
+  }, [activePoint, destinations, isBrowsingArea, mode, points.length]);
   const calculateSignals = useMemo(() => createDestinationSignalCalculator(), []);
   const destinationSignals = useMemo(() => calculateSignals(visibleDestinations, points, activePoint, activityDemand), [activePoint, points, visibleDestinations, activityDemand]);
   signalsRef.current = destinationSignals;
@@ -174,11 +174,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       mapRef.current.on("popupopen", () => setRoutePopupOpen(true));
       mapRef.current.on("popupclose", () => setRoutePopupOpen(false));
 
-      L.control.zoom({ position: "bottomright" }).addTo(mapRef.current);
-      L.tileLayer(mapTileUrl, mapTileOptions)
-        .on("load", () => setMapStatus("ready"))
-        .on("tileerror", () => setMapStatus("error"))
-        .addTo(mapRef.current);
+      L.control.zoom({ position: "bottomright" }).addTo(map);
     } catch {
       setMapStatus("error");
     }
@@ -207,7 +203,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     mapRef.current?.closePopup();
     setSelectedDestinationId(null); setExpandedDestinationId(null); setPlaceGroup(null);
     focusLayerRef.current?.remove();
-  }, [points[0]?.tripId, isBrowsingArea ? activePoint?.id : undefined]);
+  }, [points[0]?.tripId, isBrowsingArea, isBrowsingArea ? activePoint?.id : undefined]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -259,9 +255,24 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
       }
       for (const [key, value] of markers) if (!wanted.has(key)) { layer.removeLayer(value.marker); markers.delete(key); }
     };
-    renderDestinationsRef.current = render;
-    map.on("moveend zoomend", render); render();
-    return () => { map.off("moveend zoomend", render); layer.remove(); markers.clear(); renderDestinationsRef.current = null; };
+    let frame: number | undefined;
+    const scheduleRender = () => {
+      if (frame !== undefined) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = undefined;
+        render();
+      });
+    };
+    renderDestinationsRef.current = scheduleRender;
+    map.on("moveend", scheduleRender);
+    scheduleRender();
+    return () => {
+      if (frame !== undefined) window.cancelAnimationFrame(frame);
+      map.off("moveend", scheduleRender);
+      layer.remove();
+      markers.clear();
+      renderDestinationsRef.current = null;
+    };
   }, [visibleDestinations, locale, mode, selectedDestinationId]);
 
   useEffect(() => { renderDestinationsRef.current?.(); }, [destinationSignals]);
@@ -367,6 +378,15 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
     }
     return () => { layer.remove(); focusCircleRef.current = null; };
   }, [focusTarget]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    L.tileLayer(mapTileUrl, mapTileOptions)
+      .on("load", () => setMapStatus("ready"))
+      .on("tileerror", () => setMapStatus("error"))
+      .addTo(map);
+  }, []);
 
   useEffect(() => {
     // Reveal only after React has committed the requested selection/footer.
@@ -502,7 +522,7 @@ export function MapView({ points, destinations, activePoint, mode = "admin", dis
         <button type="button" className="map-national-button" onClick={showMalaysia} title={mapDisplayText(locale, "national")} aria-label={mapDisplayText(locale, "national")}><MapPinned size={18} /><span>{mapDisplayText(locale, "national")}</span></button>
       </>}
       {placeGroup && <section className="map-cluster-list" aria-label={mapDisplayText(locale, "group")}><button className="map-detail-close" type="button" aria-label={mapDisplayText(locale, "close")} onClick={() => setPlaceGroup(null)}><X size={16} /></button><strong>{mapDisplayText(locale, "places", { count: placeGroup.length })}</strong>{placeGroup.map((place) => <button key={place.id} className="secondary-action compact-action" type="button" onClick={() => { setSelectedDestinationId(place.id); setExpandedDestinationId(place.id); setDismissedPreviewId(null); setPlaceGroup(null); }}>{place.name}</button>)}</section>}
-      {mode === "tourist" && <div className="map-mode-label">{t("map.touristMap")}</div>}
+      {mode === "tourist" && <div className="map-mode-label">{isBrowsingArea ? mapDisplayText(locale, "places", { count: visibleDestinations.length }) : t("map.touristMap")}</div>}
       {activePoint && (
         <button className="map-current-button" type="button" onClick={centerOnActivePoint} title={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")} aria-label={isBrowsingArea ? discoveryText(locale, "centreArea") : t("map.centerCurrentLocation")}>
           <LocateFixed size={18} aria-hidden="true" />

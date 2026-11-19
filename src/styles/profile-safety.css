@@ -175,9 +175,15 @@ details[open] > summary > .account-control-chevron { transform: rotate(180deg); 
   background: #fffdfa;
 }
 
-.safety-contact-strip div {
+.safety-contact-details {
   display: grid;
   gap: 3px;
+}
+
+.safety-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .safety-contact-strip small,

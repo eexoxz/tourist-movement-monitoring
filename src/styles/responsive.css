@@ -80,7 +80,6 @@
   .two-column,
   .admin-overview-layout,
   .auth-panel,
-  .movement-hero,
   .profile-page-grid,
   .profile-setup-card,
   .destination-admin-grid {
@@ -280,7 +279,7 @@
   .emergency-number-grid,
   .nearby-service-card,
   .check-in-control,
-  .qr-active-check-in-panel .check-in-stack,
+  .qr-active-check-in-panel .check-in-stack:has(> :nth-child(2)),
   .qr-check-in-confirmation,
   .qr-visit-meta,
   .qr-manual-row,
@@ -511,15 +510,6 @@
   }
 
   .auth-copy h1 {
-    font-size: 2rem;
-  }
-
-  .movement-hero {
-    min-height: 0;
-    padding: 18px;
-  }
-
-  .movement-hero-copy h2 {
     font-size: 2rem;
   }
 

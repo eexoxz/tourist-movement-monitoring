@@ -22,7 +22,6 @@ import { silhouetteScores } from "./clusterMetrics";
 import { clusterVectors } from "./kMeans";
 import { getRecommendationEvidence } from "./recommendationEvidence";
 
-const categories: DestinationCategory[] = ["cultural", "nature", "urban", "heritage", "food", "coastal"];
 const kMeansFeatureNames: Array<keyof KMeansFeatureVector> = ["culturalProportion", "natureProportion", "urbanProportion", "uniqueDestinations"];
 export const uniqueDestinationScale = 10;
 type TripFeature = {
@@ -569,47 +568,81 @@ export function getDestinationDemand(data: AppData, destinationId: string, desti
   return destinationDemand.find((row) => row.destinationId === destinationId) ?? null;
 }
 
-function movementAlertSeverity(row: DestinationDemand): MovementAlert["severity"] {
-  if (row.tier === "high" && (row.approachSignalCount > 0 || row.uniqueTouristCount >= 2)) {
-    return "critical";
+const movementAlertDayMs = 24 * 60 * 60 * 1000;
+const movementAlertBaselineDays = 7;
+const reviewMovementAlert = "Review the contributing trips to decide whether the area needs monitoring.";
+
+export function calculateMovementAlerts(data: AppData, now = Date.now()): MovementAlert[] {
+  const oldest = now - (movementAlertBaselineDays + 1) * movementAlertDayMs;
+  const windowPoints = data.points.filter((point) => {
+    const recordedAt = Date.parse(point.recordedAt);
+    return recordedAt > oldest && recordedAt <= now;
+  });
+  if (!windowPoints.length) return [];
+
+  const tripById = new Map(data.trips.map((trip) => [trip.id, trip]));
+  const destinationIndex = createDestinationSpatialIndex(data.destinations);
+  const activity = new Map<string, {
+    destination: Destination;
+    source: MovementPoint["source"];
+    recentTourists: Set<string>;
+    baselineTouristDays: Set<string>;
+    tripIds: Set<string>;
+  }>();
+
+  for (const point of filterQualityMovementPoints(windowPoints, now)) {
+    const trip = tripById.get(point.tripId);
+    if (!trip || (point.userId && point.userId !== trip.userId)) continue;
+    const match = destinationIndex.nearest(point, 1.2);
+    if (!match) continue;
+
+    const { destination } = match;
+    const key = `${point.source}-${destination.id}`;
+    const row = activity.get(key) ?? {
+      destination,
+      source: point.source,
+      recentTourists: new Set<string>(),
+      baselineTouristDays: new Set<string>(),
+      tripIds: new Set<string>(),
+    };
+    activity.set(key, row);
+    const daysAgo = Math.floor((now - Date.parse(point.recordedAt)) / movementAlertDayMs);
+    if (daysAgo === 0) {
+      row.recentTourists.add(trip.userId);
+      row.tripIds.add(trip.id);
+    } else {
+      row.baselineTouristDays.add(`${daysAgo}:${trip.userId}`);
+    }
   }
 
-  if (row.tier === "high" || row.tier === "medium" || row.approachSignalCount > 0) {
-    return "watch";
+  const alerts: MovementAlert[] = [];
+  const generatedAt = new Date(now).toISOString();
+  for (const [key, row] of activity) {
+    const recentTouristCount = row.recentTourists.size;
+    const baselineDailyAverage = row.baselineTouristDays.size / movementAlertBaselineDays;
+    const increase = recentTouristCount - baselineDailyAverage;
+    if (recentTouristCount < 3 || recentTouristCount < baselineDailyAverage * 2 || increase < 2) continue;
+    alerts.push({
+      id: `alert-${key}`,
+      destinationId: row.destination.id,
+      severity: "watch",
+      title: row.destination.name,
+      source: row.source,
+      recentTouristCount,
+      baselineDailyAverage,
+      tripIds: [...row.tripIds],
+      message: `${recentTouristCount} tracked tourists nearby in the last 24 hours. Prior 7-day daily average: ${baselineDailyAverage.toFixed(1)}.`,
+      recommendedAction: reviewMovementAlert,
+      score: increase,
+      generatedAt,
+    });
   }
 
-  return "info";
-}
-
-export function calculateMovementAlerts(data: AppData, destinationDemand = calculateDestinationDemand(data)): MovementAlert[] {
-  const generatedAt = new Date().toISOString();
-  const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
-
-  return destinationDemand
-    .filter((row) => row.popularityScore > 0 && (row.tier !== "low" || row.approachSignalCount > 0))
-    .map((row) => {
-      const destination = destinationById.get(row.destinationId);
-      const severity = movementAlertSeverity(row);
-      const visitorCount = Math.max(row.uniqueTouristCount, row.approachingTouristCount);
-
-      return {
-        id: `alert-${row.destinationId}`,
-        destinationId: row.destinationId,
-        severity,
-        title: `${destination?.name ?? "Destination"} movement ${severity}`,
-        message: `${row.popularityScore}% demand with ${row.movementPointCount} nearby point(s), ${row.recentPointCount} recent point(s), and ${row.approachSignalCount} approach signal(s).`,
-        recommendedAction:
-          severity === "critical"
-            ? "Prioritise crowd monitoring and consider promoting nearby alternative stops."
-            : severity === "watch"
-            ? "Keep this destination visible in travel plans and monitor whether movement continues rising."
-            : "Use as an emerging recommendation candidate when it fits the tourist profile.",
-        score: row.popularityScore + row.approachSignalCount * 8 + visitorCount * 6,
-        generatedAt,
-      };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+  return alerts.sort((a, b) =>
+    Number(a.source === "demo") - Number(b.source === "demo") ||
+    b.score - a.score ||
+    a.destinationId.localeCompare(b.destinationId)
+  ).slice(0, 5);
 }
 
 export function analyzeTrip(trip: TripSession, data: AppData): AnalysisResult | null {
@@ -1007,7 +1040,7 @@ export function buildTravelPlanCsv(plan: TravelPlan, data: AppData) {
 }
 
 export function buildMovementAlertsCsv(alerts: MovementAlert[], data: AppData) {
-  const header = ["destination", "city", "severity", "score", "message", "recommended_action", "generated_at"];
+  const header = ["destination", "city", "severity", "score", "message", "recommended_action", "generated_at", "source", "tourists_last_24_hours", "prior_7_day_daily_average"];
   const destinationById = new Map(data.destinations.map((destination) => [destination.id, destination]));
   const rows = alerts.map((alert) => {
     const destination = destinationById.get(alert.destinationId);
@@ -1020,6 +1053,9 @@ export function buildMovementAlertsCsv(alerts: MovementAlert[], data: AppData) {
       alert.message,
       alert.recommendedAction,
       alert.generatedAt,
+      alert.source === "demo" ? "sample" : "gps",
+      alert.recentTouristCount,
+      alert.baselineDailyAverage.toFixed(2),
     ];
   });
 

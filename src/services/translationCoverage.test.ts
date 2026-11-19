@@ -29,7 +29,7 @@ const featureCopy = [
 const sourceFiles = [path.resolve("src/App.tsx"), ...["src/components", "src/workspaces"].flatMap((directory) => fs.readdirSync(directory).filter((name) => name.endsWith(".tsx")).map((name) => path.resolve(directory, name))), path.resolve("src/services/planningText.ts")];
 const uiSources = new Set<string>();
 const missingLocaleProps: string[] = [];
-const translatedComponents = new Set(["DestinationVisual", "DestinationManager", "ToastViewport", "TourismAdvisoryPanel", "CategoryBars", "ConfusionMatrix", "KMeansFeatureBars", "AiCoverage", "ClusterComposition", "TripClusterComparison", "MovementPulseHero", "MovementAlertList", "MovementDemandList", "TravelPlanPanel", "ListLimitFooter", "FestivalCalendarPanel", "RecommendationList"]);
+const translatedComponents = new Set(["DestinationVisual", "DestinationManager", "ToastViewport", "TourismAdvisoryPanel", "CategoryBars", "ConfusionMatrix", "KMeansFeatureBars", "AiCoverage", "ClusterComposition", "TripClusterComparison", "MovementAlertList", "MovementDemandList", "TravelPlanPanel", "ListLimitFooter", "FestivalCalendarPanel", "RecommendationList"]);
 for (const file of sourceFiles) {
   const source = ts.createSourceFile(file, fs.readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const collect = (node: ts.Node): void => {

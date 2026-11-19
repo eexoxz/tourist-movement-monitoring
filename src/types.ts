@@ -357,8 +357,12 @@ export type DestinationDemand = {
 export type MovementAlert = {
   id: string;
   destinationId: string;
-  severity: "critical" | "watch" | "info";
+  severity: "watch";
   title: string;
+  source: MovementPoint["source"];
+  recentTouristCount: number;
+  baselineDailyAverage: number;
+  tripIds: string[];
   message: string;
   recommendedAction: string;
   score: number;

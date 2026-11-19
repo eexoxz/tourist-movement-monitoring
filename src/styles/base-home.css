@@ -358,14 +358,6 @@ button:disabled {
   min-height: 44px;
 }
 
-.discovery-settings-button {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  flex: 0 0 44px;
-  justify-content: center;
-}
-
 .discovery-location-control p {
   flex-basis: 100%;
   margin: 0;

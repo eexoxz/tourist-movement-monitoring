@@ -27,6 +27,15 @@ describe("neutral passport and ID guidance", () => {
     expect(html).not.toContain("undefined");
   });
 
+  it("shows the selected nationality's guidance with the details still collapsed", () => {
+    const renderField = (nationality: string) => renderToStaticMarkup(createElement(IdentityNumberField, { value: "", onChange: noop, locale: "en", nationality }));
+    const madagascar = renderField("Madagascar");
+    expect(madagascar.split("<details")[0]).toContain("/prado-documents/MDG/all/docs-all.html");
+    expect(madagascar.match(/<select\b/g)).toHaveLength(1);
+    expect(renderField("Malaysia").split("<details")[0]).toContain("<bdi>A12345678</bdi>");
+    expect(renderField("France").split("<details")[0]).toContain("<bdi>12AB34567</bdi>");
+  });
+
   it("associates the input with its label and short hint and preserves existing constraints", () => {
     const html = renderToStaticMarkup(createElement(IdentityNumberField, { value: "TEST12345", onChange: noop, locale: "en", invalid: true }));
     const id = html.match(/<input id="([^"]+)"/)![1];

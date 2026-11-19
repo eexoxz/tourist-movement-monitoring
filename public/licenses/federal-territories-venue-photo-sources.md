@@ -62,7 +62,7 @@
 - Anjung Ketam. [kay-hussin.blogspot.com](https://kay-hussin.blogspot.com/2018/03/anjung-ketam-tanjung-aru-labuan.html).
 - Central Market. [cathaypacific.com](https://www.cathaypacific.com/cx/en_HK/inspiration/travel/48-hours-kuala-lumpur.html).
 - Islamic Arts Museum Malaysia. [architecture-tour.com](https://architecture-tour.com/world/malaysia/islamic-arts-museum-malaysia/).
-- Kampung Baru. [malaymail.com](https://www.malaymail.com/news/malaysia/2020/02/01/kampung-baru-redevelopment-takes-into-account-interests-of-malays-says-agon/1833547).
+- Kampung Baru. Photograph by Shutterstock, published by [Time Out](https://www.timeout.com/kuala-lumpur/things-to-do/best-neighbourhoods-in-kuala-lumpur-to-live-play-and-work).
 - KLCC Park. [thrillophilia.com](https://www.thrillophilia.com/attractions/klcc-park).
 - Kwai Chai Hong. [theedgemalaysia.com](https://theedgemalaysia.com/node/692397).
 - Merdeka Square. [pelago.com](https://www.pelago.com/en-US/activity/pix0bzx58-shore-excursion-full-day-kuala-lumpur-city-tour-include-all-entrance-petaling-jaya/).

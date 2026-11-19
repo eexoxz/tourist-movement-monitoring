@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { initialData } from "../data/demoData";
+import { getNationalityOptions } from "../data/nationalities";
 import { authenticateLocalUser, createTouristAccount, findUserByEmail, isValidEmail, registrationData, validateTouristAccount } from "./accounts";
 
 const validRegistration = {
@@ -62,6 +63,16 @@ describe("accounts service", () => {
     expect(validateTouristAccount(initialData, { ...validRegistration, nationality: "Neverland" }).error).toContain("nationality");
     expect(validateTouristAccount(initialData, { ...validRegistration, passportNumber: "A1" }).error).toContain("passport");
     expect(validateTouristAccount(initialData, { ...validRegistration, termsAccepted: false }).error).toContain("privacy");
+  });
+
+  it("registers countries from the full list and localises their labels without changing stored values", () => {
+    expect(getNationalityOptions("en")).toHaveLength(249);
+    expect(getNationalityOptions("fr")).toContainEqual({ value: "Germany", label: "Allemagne" });
+    for (const nationality of ["France", "Brazil", "Portugal", "Spain", "Malaysia"]) {
+      const result = createTouristAccount(initialData, { ...validRegistration, nationality });
+      expect(result.error).toBeUndefined();
+      expect(result.user?.nationality).toBe(nationality);
+    }
   });
 
   it("creates a tourist account with normalized email", () => {

@@ -14,7 +14,7 @@
   gap: 12px;
 }
 
-.qr-active-check-in-panel .check-in-stack {
+.qr-active-check-in-panel .check-in-stack:has(> :nth-child(2)) {
   grid-template-columns: minmax(260px, 0.8fr) minmax(280px, 1fr);
   align-items: start;
 }
@@ -122,8 +122,17 @@
 
 .qr-station-card strong {
   overflow-wrap: anywhere;
+  user-select: text;
   color: #0f766e;
   font-size: 0.95rem;
+}
+
+.qr-station-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .qr-manual-row,
@@ -148,7 +157,7 @@
   border: 1px solid #ccfbf1;
   border-radius: 8px;
   background: #0f172a;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .qr-camera-preview.active {
@@ -291,76 +300,6 @@
   color: #596575;
   font-weight: 800;
   line-height: 1.35;
-}
-
-.movement-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.52fr);
-  gap: 18px;
-  min-height: 240px;
-  padding: 24px;
-  border-radius: 8px;
-  color: #ffffff;
-  background:
-    linear-gradient(90deg, rgba(10, 40, 34, 0.9), rgba(10, 40, 34, 0.58)),
-    url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80") center/cover;
-  box-shadow: 0 22px 44px rgba(73, 55, 32, 0.14);
-  overflow: hidden;
-}
-
-.movement-hero-copy {
-  display: grid;
-  align-content: end;
-  max-width: 720px;
-}
-
-.movement-hero-copy span {
-  color: #facc15;
-  font-size: 0.8rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.movement-hero-copy h2 {
-  margin: 8px 0 0;
-  font-size: 2.65rem;
-  line-height: 1;
-  letter-spacing: 0;
-}
-
-.movement-hero-copy p {
-  max-width: 620px;
-  margin: 12px 0 0;
-  color: #e8fff7;
-  line-height: 1.55;
-}
-
-.movement-hero-stats {
-  display: grid;
-  gap: 10px;
-  align-content: end;
-}
-
-.movement-hero-stats div {
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(10px);
-}
-
-.movement-hero-stats small {
-  display: block;
-  color: #c8fff0;
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.movement-hero-stats strong {
-  display: block;
-  margin-top: 6px;
-  font-size: 1.5rem;
 }
 
 .metric-card,

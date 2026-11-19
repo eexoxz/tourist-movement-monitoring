@@ -1,12 +1,12 @@
 import { Building2, Castle, HeartHandshake, Landmark, Radar, Save, SlidersHorizontal, TreePine, Utensils, Waves } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { getCategoryLabel, getDisplayName, inferExpectedProfileFromPreferences, profilePreferenceOptions } from "../services/profile";
 import { translate, type Locale, type TranslationKey } from "../services/i18n";
 import { discoveryText } from "../services/discoveryCopy";
 import { activityText } from "../services/activityCopy";
 import { usesSampleActivity } from "../services/activitySummary";
 import type { DestinationCategory, User } from "../types";
-import { nationalityOptions } from "../data/nationalities";
+import { getNationalityOptions, nationalityOptions } from "../data/nationalities";
 import { hasTouristIdentity, normalizeIdentity } from "../services/touristIdentity";
 import { reviewText } from "../services/reviewUpdateCopy";
 import { IdentityNumberField } from "./IdentityNumberField";
@@ -37,6 +37,7 @@ export function TouristProfileForm({
   const t = (key: TranslationKey) => translate(locale, key);
   const [name, setName] = useState(getDisplayName(user));
   const [nationality, setNationality] = useState(user.nationality ?? "");
+  const countries = useMemo(() => getNationalityOptions(locale), [locale]);
   const [passportNumber, setPassportNumber] = useState(user.passportNumber ?? "");
   const [identityError, setIdentityError] = useState(false);
   const [preferences, setPreferences] = useState<DestinationCategory[]>(user.travelPreferences ?? []);
@@ -92,10 +93,10 @@ export function TouristProfileForm({
           <div className="field-pair profile-identity-fields">
             <label>{reviewText(locale, "country")}<select required value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name">
               <option value="">{t("auth.nationality")}</option>
-              {nationality && !(nationalityOptions as readonly string[]).includes(nationality) && <option value={nationality}>{nationality}</option>}
-              {nationalityOptions.map((country) => <option key={country} value={country}>{country}</option>)}
+              {nationality && !nationalityOptions.includes(nationality) && <option value={nationality}>{nationality}</option>}
+              {countries.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
             </select></label>
-            <IdentityNumberField value={passportNumber} onChange={setPassportNumber} locale={locale} invalid={identityError} />
+            <IdentityNumberField value={passportNumber} onChange={setPassportNumber} locale={locale} nationality={nationality} invalid={identityError} />
           </div>
           {identityError && <p role="alert">{reviewText(locale, "identityInvalid")}</p>}
           <label>

@@ -582,6 +582,11 @@ textarea {
 .identity-number-help > div { padding: 10px 12px; border-left: 2px solid var(--line); color: var(--muted); overflow-wrap: anywhere; }
 .identity-number-help ul { display: grid; gap: 8px; margin: 0; padding-left: 18px; }
 .identity-number-help p { margin: 10px 0 0; }
+.identity-document-options { display: grid; gap: 8px; margin-top: 12px; }
+.identity-document-options select { width: 100%; min-width: 0; }
+.identity-document-guidance { display: grid; gap: 3px; color: var(--muted); font-size: 0.8rem; line-height: 1.6; }
+.identity-document-guidance a,
+.identity-document-options a { color: var(--teal); }
 
 .empty-state {
   display: flex;

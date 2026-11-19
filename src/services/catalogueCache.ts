@@ -1,6 +1,6 @@
 import type { Destination } from "../types";
 
-const catalogueCacheVersion = 2;
+const catalogueCacheVersion = 3;
 const prefix = "tourist-movement-monitoring:public-catalogue:";
 export const catalogueCacheLifetimeMs = 10 * 60 * 1000;
 

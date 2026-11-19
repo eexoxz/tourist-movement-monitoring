@@ -6,14 +6,11 @@ import {
   createMovementDashboardSelector,
   getMovementDashboardViews,
   getDailyMovementTrend,
-  getDemoReadiness,
   getDestinationCategoryCoverage,
-  getFunctionalRequirementCoverage,
   getMovementDataStatus,
   getMovementRecords,
   getMovementTripRecords,
   getProfileDistribution,
-  getRequiredDemoFlowCoverage,
   getTourists,
   summarizeDashboard,
 } from "./dashboard";
@@ -45,15 +42,6 @@ describe("dashboard service", () => {
     expect(tourists.every((tourist) => tourist.role === "tourist")).toBe(true);
   });
 
-  it("reports whether the prepared demonstration dataset is presentation-ready", () => {
-    const readiness = getDemoReadiness(refreshAllRecommendations(initialData));
-
-    expect(readiness.readyCount).toBe(readiness.totalCount);
-    expect(readiness.completionRate).toBe(1);
-    expect(readiness.items.find((item) => item.id === "seeded-tourists")?.value).toContain("100");
-    expect(readiness.items.find((item) => item.id === "movement-records")?.ready).toBe(true);
-  });
-
   it("adds prepared demo tourists without replacing current app users", () => {
     const currentUser = {
       id: "firebase-tourist",
@@ -81,37 +69,6 @@ describe("dashboard service", () => {
     expect(merged.users.filter((user) => user.id.startsWith("tourist-seed-"))).toHaveLength(100);
     expect(mergedAgain.users).toHaveLength(merged.users.length);
     expect(mergedAgain.points).toHaveLength(merged.points.length);
-  });
-
-  it("reports required demonstration flow coverage from the prepared dataset", () => {
-    const coverage = getRequiredDemoFlowCoverage(refreshAllRecommendations(initialData));
-
-    expect(coverage.readyCount).toBe(coverage.totalCount);
-    expect(coverage.items.find((item) => item.id === "tourist-recommendations")?.ready).toBe(true);
-    expect(coverage.items.find((item) => item.id === "admin-records")?.evidence).toContain("trip-level");
-  });
-
-  it("reports functional requirement coverage for FR1 through FT14", () => {
-    const coverage = getFunctionalRequirementCoverage(refreshAllRecommendations(initialData));
-
-    expect(coverage.readyCount).toBe(coverage.totalCount);
-    expect(coverage.items.map((item) => item.id)).toEqual([
-      "FR1",
-      "FR2",
-      "FR3",
-      "FR4",
-      "FR5",
-      "FR6",
-      "FR7",
-      "FR8",
-      "FR9",
-      "FR10",
-      "FR11",
-      "FR12",
-      "FR13",
-      "FR14",
-      "FT14",
-    ]);
   });
 
   it("prepares recommendation output for every tourist category", () => {

@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { BarChart3, BellRing, CalendarDays, Compass, Download, LogOut, MapPinned, RotateCcw, Sparkles, UserRound } from "lucide-react";
 import type { AppData, AppView, User } from "./types";
 import { coerceViewForRole, getAuthModeFromPath, getDefaultViewForRole, getPathForAuthMode, getPathForView, getPrimaryViewsForRole, getViewFromPath, type AuthMode } from "./services/access";
-import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveCloudData, saveData, savePlaceReview, saveSession, saveSosAlertChange, subscribeCheckInRecords, subscribeIncidentReports, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
+import { cacheLocalData, clearSession, createId, getStorageMode, loadCloudData, loadData, loadSession, resetData, saveCheckInRecord, saveData, savePlaceReview, saveSession, saveSosAlertChange, subscribeCheckInRecords, subscribeIncidentReports, subscribeSosAlerts, subscribePlaceReviewRecords } from "./services/storage";
 import { confirmCheckInSync, mergeCheckInRecords } from "./services/checkInSync";
 import { hasTouristIdentity } from "./services/touristIdentity";
 import { reviewText } from "./services/reviewUpdateCopy";
@@ -49,10 +49,13 @@ const AdminWorkspace = lazy(() => import("./workspaces/AdminWorkspace").then((mo
 
 function App() {
   useEffect(() => { loadRememberedLogin(); }, []);
-  const [data, setData] = useState<AppData>(() => refreshAllRecommendations(loadData()));
+  const [sessionUserId, setSessionUserId] = useState<string | null>(() => hasConfiguredAuth() ? null : loadSession());
+  const [data, setData] = useState<AppData>(() => {
+    const cached = loadData();
+    return sessionUserId ? refreshAllRecommendations(cached) : cached;
+  });
   const [placeQueueState, setPlaceQueueState] = useState<"loading" | "live" | "offline">();
   const [placeQueueRevision, setPlaceQueueRevision] = useState(0);
-  const [sessionUserId, setSessionUserId] = useState<string | null>(() => hasConfiguredAuth() ? null : loadSession());
   const currentUser = data.users.find((user) => user.id === sessionUserId || user.authUid === sessionUserId) ?? null;
   const [view, setView] = useState<AppView>(() => getViewFromPath(getCurrentPathname()) ?? "overview");
   const [authMode, setAuthMode] = useState<AuthMode>(() => getAuthModeFromPath(getCurrentPathname()) ?? "login");
@@ -204,51 +207,56 @@ function App() {
     const isCurrent = () => isMounted && sessionRevision.current === revision;
 
     const hydrateCloudData = async () => {
+      if (!hasConfiguredAuth()) return;
+      let restoredSession = false;
       try {
-        const firebaseUser = hasConfiguredAuth() ? await getConfiguredAuthState() : null;
+        const firebaseUser = await getConfiguredAuthState();
         if (!isCurrent()) {
           return;
         }
 
-        if (hasConfiguredAuth() && !firebaseUser) {
+        if (!firebaseUser) {
           clearSession();
           setSessionUserId(null);
+          return;
         }
 
-        if (firebaseUser?.uid) {
-          const { hasAccountDeletion } = await import("./services/accountDeletion");
-          if (await hasAccountDeletion(firebaseUser.uid)) {
-            if (isCurrent()) lockForDeletion(firebaseUser.uid, firebaseUser.email);
+        const { hasAccountDeletion } = await import("./services/accountDeletion");
+        if (await hasAccountDeletion(firebaseUser.uid)) {
+          if (isCurrent()) lockForDeletion(firebaseUser.uid, firebaseUser.email);
+          return;
+        }
+        if (!isCurrent()) return;
+        if (!firebaseUser.emailVerified) {
+          const account = await getConfiguredUserRecord(firebaseUser.uid);
+          if (!isCurrent()) return;
+          if (account?.role !== "admin") {
+            await signOutConfiguredProvider();
+            clearSession();
+            setSessionUserId(null);
             return;
           }
-          if (!isCurrent()) return;
-          if (!firebaseUser.emailVerified) {
-            const account = await getConfiguredUserRecord(firebaseUser.uid);
-            if (!isCurrent()) return;
-            if (account?.role !== "admin") {
-              await signOutConfiguredProvider();
-              clearSession();
-              setSessionUserId(null);
-              return;
-            }
-          }
-          saveSession(firebaseUser.uid, false);
-          setSessionUserId(firebaseUser.uid);
         }
+        saveSession(firebaseUser.uid, false);
+        setSessionUserId(firebaseUser.uid);
+        restoredSession = true;
 
         const cloudData = await loadCloudData(undefined, isCurrent);
-        if (!isCurrent() || !cloudData) {
+        if (!isCurrent()) return;
+        if (!cloudData) {
+          setData(refreshAllRecommendations);
           return;
         }
 
         const refreshed = refreshAllRecommendations(cloudData);
         setData(refreshed);
-        if (firebaseUser?.uid && refreshed.users.some((user) => user.id === firebaseUser.uid || user.authUid === firebaseUser.uid)) {
+        if (refreshed.users.some((user) => user.id === firebaseUser.uid || user.authUid === firebaseUser.uid)) {
           setSessionUserId(firebaseUser.uid);
         }
         setSyncStatus("Loaded from Firebase Firestore");
       } catch (error) {
         if (isCurrent()) {
+          if (restoredSession) setData(refreshAllRecommendations);
           if (!isCloudQuotaError(error)) setSyncStatus("Local mode; Firebase sync unavailable");
           reportCloudReadFailure(error);
         }
@@ -678,6 +686,7 @@ function App() {
         .then((cloudData) => {
           if (sessionRevision.current !== revision) return;
           if (!cloudData) {
+            setData(refreshAllRecommendations);
             setSyncStatus("Signed in; local backup ready");
             return;
           }
@@ -688,7 +697,11 @@ function App() {
           setSyncStatus("Loaded from Firebase Firestore");
         })
         .catch((error) => {
-          if (sessionRevision.current === revision) { setSyncStatus("Signed in; cloud refresh needs retry"); reportCloudReadFailure(error); }
+          if (sessionRevision.current === revision) {
+            setData(refreshAllRecommendations);
+            setSyncStatus("Signed in; cloud refresh needs retry");
+            reportCloudReadFailure(error);
+          }
         }).finally(() => { if (sessionRevision.current === revision) setCloudAuthReady(true); });
 
       return {};
@@ -700,6 +713,7 @@ function App() {
         ? { error: "Incorrect password. Try again or reset your password.", field: "password" }
         : { error: "This email address is not registered. Create an account to continue.", field: "email" };
     }
+    setData(refreshAllRecommendations);
     saveSession(localUser.id, rememberSession);
     setSessionUserId(localUser.id);
     setView(getDefaultViewForRole(localUser.role));
@@ -756,7 +770,7 @@ function App() {
       return { message: synced ? message : `${message}\n${workflowText("en", "profilePending")}` };
     }
 
-    commitData(created.data, user);
+    commitData(refreshAllRecommendations(created.data), user);
     saveSession(user.id, false);
     setSessionUserId(user.id);
     setView(getDefaultViewForRole(user.role));

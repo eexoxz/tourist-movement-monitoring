@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Itinerary, User } from "../types";
 import { getConfiguredAuthState } from "./auth";
 import { isFirebaseConfigured } from "./firebaseClient";
-import { createItinerary, reconcileItineraries, sameItineraryContent, type ItineraryEntry } from "./itineraries";
+import { createItinerary, reconcileItineraries, sameItineraryContent } from "./itineraries";
 import { cacheItineraries, deleteItinerary, itineraryDeadline, ItineraryError, loadItineraryCache, registerItineraryDrafts, saveItinerary, subscribeItineraries } from "./itineraryStorage";
 
 export function useItineraries(user: User, enabled = true) {

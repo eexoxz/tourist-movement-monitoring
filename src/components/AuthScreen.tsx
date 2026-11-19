@@ -1,10 +1,10 @@
 import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { CheckCircle2, Circle, Eye, EyeOff, KeyRound, MapPinned, RotateCcw, ShieldCheck } from "lucide-react";
-import { nationalityOptions } from "../data/nationalities";
+import { getNationalityOptions } from "../data/nationalities";
 import { hasTouristIdentity, normalizeIdentity } from "../services/touristIdentity";
 import { reviewText } from "../services/reviewUpdateCopy";
 import { type AuthMode } from "../services/access";
-import { isValidEmail } from "../services/accounts";
+import { isValidEmail, isValidNationality } from "../services/accounts";
 import { getEmailDomainSuggestion } from "../services/emailDomainSuggestion";
 import { hasConfiguredAuth } from "../services/auth";
 import { isLocale, localeOptions, translate, type Locale, type TranslationKey } from "../services/i18n";
@@ -91,6 +91,7 @@ export function AuthScreen({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [nationality, setNationality] = useState("");
+  const countries = useMemo(() => mode === "register" ? getNationalityOptions(locale) : [], [locale, mode]);
   const [passportNumber, setPassportNumber] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -183,7 +184,7 @@ export function AuthScreen({
       return;
     }
 
-    if (mode === "register" && !(nationalityOptions as readonly string[]).includes(nationality.trim())) {
+    if (mode === "register" && !isValidNationality(nationality)) {
       setError("Choose your nationality from the list.");
       setMessage(null);
       notify({ tone: "error", title: "Nationality missing", message: "Choose the nationality shown on your travel document." });
@@ -448,14 +449,10 @@ export function AuthScreen({
                 {t("auth.nationality")}
                 <select value={nationality} onChange={(event) => setNationality(event.target.value)} autoComplete="country-name" required>
                   <option value="">{t("auth.selectNationality")}</option>
-                  {nationalityOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
+                  {countries.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </label>
-              <IdentityNumberField value={passportNumber} onChange={setPassportNumber} locale={locale} />
+              <IdentityNumberField value={passportNumber} onChange={setPassportNumber} locale={locale} nationality={nationality} />
             </div>
           )}
 

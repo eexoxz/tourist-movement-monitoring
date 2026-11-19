@@ -174,7 +174,10 @@ export function TouristHome({
   onSubmitIncidentReport,
 }: TouristHomeProps) {
   const t = (key: TranslationKey) => translate(locale, key);
-  const selectedCheckInDestination = checkInDestinations.find((destination) => destination.id === checkInDestinationId) ?? checkInDestinations[0] ?? null;
+  const contactName = user.emergencyContactName?.trim();
+  const contactPhone = user.emergencyContactPhone?.trim();
+  const dialNumber = contactPhone?.replace(/[\s().-]/g, "") ?? "";
+  const selectedCheckInDestination = checkInDestinations.find((destination) => destination.id === checkInDestinationId) ?? null;
   const checkInPanelRef = useRef<HTMLDetailsElement | null>(null);
   const safetyPanelRef = useRef<HTMLDetailsElement | null>(null);
   const [checkInReady, setCheckInReady] = useState(Boolean(showCheckInPanel || activeCheckIn));
@@ -195,7 +198,7 @@ export function TouristHome({
       {(["known", "unlisted"] as const).map((mode) => <button key={mode} type="button" aria-pressed={checkInMode === mode} onClick={() => setCheckInMode(mode)}>{placeText(locale, mode)}</button>)}
     </div>
     {checkInMode === "unlisted" ? <UnlistedCheckInForm locale={locale} onLocate={onLocateUnlistedPlace} onSubmit={onUnlistedCheckIn} /> : <div className="check-in-stack">
-      <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />
+      {selectedCheckInDestination && <TouristPassCard user={user} destination={selectedCheckInDestination} locale={locale} compact />}
       <QrCheckInPanel cameraEnabled={checkInExpanded} destinations={checkInDestinations} selectedDestination={selectedCheckInDestination} locale={locale} onDestinationChange={onCheckInDestinationChange} onConfirm={onStartAttractionCheckIn} />
     </div>}
   </>;
@@ -225,7 +228,7 @@ export function TouristHome({
       checkInPanelRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
     }, 120);
     return () => window.clearTimeout(timer);
-  }, [showCheckInPanel, checkInDestinationId]);
+  }, [showCheckInPanel]);
 
   useEffect(() => {
     if (!openSafetyPanel || !safetyPanelRef.current) return;
@@ -379,15 +382,24 @@ export function TouristHome({
             </div>
 
             <div className="safety-contact-strip">
-              <div>
+              <div className="safety-contact-details">
                 <small>{t("tourist.safety.emergencyContact")}</small>
-                <strong>{user.emergencyContactName || t("tourist.safety.notAdded")}</strong>
-                <span>{user.emergencyContactPhone || t("tourist.safety.addInProfile")}</span>
+                {contactName && <strong>{contactName}</strong>}
+                {!contactName && !contactPhone && <strong>{t("tourist.safety.notAdded")}</strong>}
+                <span>{contactPhone || t("tourist.safety.addInProfile")}</span>
               </div>
-              <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("profile")}>
-                <UserRound size={16} />
-                {t("tourist.safety.editContact")}
-              </button>
+              <div className="safety-contact-actions">
+                {/^[+]?\d+$/.test(dialNumber) && (
+                  <a className="secondary-action compact-action" href={`tel:${dialNumber}`} aria-label={`${t("tourist.safety.call")} ${contactName || t("tourist.safety.emergencyContact")} ${contactPhone}`}>
+                    <PhoneCall size={16} aria-hidden="true" />
+                    {t("tourist.safety.call")}
+                  </a>
+                )}
+                <button className="secondary-action compact-action" type="button" onClick={() => onViewChange("profile")}>
+                  <UserRound size={16} />
+                  {t("tourist.safety.editContact")}
+                </button>
+              </div>
             </div>
 
             <button className="primary-action danger wide" type="button" onClick={() => setIsConfirmingSos(true)} disabled={isConfirmingSos || userSosAlerts.some((alert) => alert.status !== "resolved")}>

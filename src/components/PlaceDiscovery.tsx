@@ -12,7 +12,6 @@ import { EmptyState } from "./SummaryCards";
 import { PlaceGuide } from "./PlaceGuide";
 import { PlaceGuideDialog } from "./PlaceGuideDialog";
 import { travelerStatusText } from "../services/travelerStatusCopy";
-import { activityText } from "../services/activityCopy";
 import { formatDistanceLabel, formatDemandLabel } from "../services/placeLabels";
 
 type PlaceDiscoveryMode = "recommended" | "trending" | "nearby" | "events" | "hidden";

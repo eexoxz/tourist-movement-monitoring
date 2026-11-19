@@ -104,7 +104,7 @@ export function TouristWorkspace({
   const [guideFromGps, setGuideFromGps] = useState(false);
   const [manualLocation, setManualLocation] = useState({ latitude: "3.1478", longitude: "101.6937", accuracyMeters: "25" });
   const [lastBrowserLocation, setLastBrowserLocation] = useState<MovementPoint | undefined>(() => loadLastBrowserLocation(user.id));
-  const [checkInDestinationId, setCheckInDestinationId] = useState<string>(data.destinations[0]?.id ?? "");
+  const [checkInDestinationId, setCheckInDestinationId] = useState("");
   const [incidentType, setIncidentType] = useState<IncidentType>("lost-item");
   const [incidentDescription, setIncidentDescription] = useState("");
   const [incidentLocationNote, setIncidentLocationNote] = useState("");
@@ -181,8 +181,13 @@ export function TouristWorkspace({
   const suggestedDestinationIds = useMemo(() => recommendations.map((item) => item.destinationId), [recommendations]);
   const activeSamplePoint = activeTrip && activePoints.at(-1)?.source === "demo" ? activePoints.at(-1) : undefined;
   const tripReference = activeSamplePoint ?? discoveryGpsPoint;
-  const tripBrowsingReference = tripReference ?? (!activeTrip ? discoveryReference : undefined);
-  const tripDestinations = useMemo(() => view === "tracking" && tripBrowsingReference ? getDiscoveryDestinations(localizedDestinations, tripReference ? { ...user, discoveryLocationMode: "current" } : user, tripBrowsingReference) : [], [localizedDestinations, tripReference, tripBrowsingReference, user, view]);
+  const isTripAreaBrowsing = !activeTrip && user.discoveryLocationMode === "area";
+  const tripBrowsingReference = isTripAreaBrowsing ? discoveryReference : tripReference;
+  const tripDestinations = useMemo(() => {
+    if (view !== "tracking" || (!isTripAreaBrowsing && !tripBrowsingReference)) return [];
+    const mapUser = isTripAreaBrowsing ? user : { ...user, discoveryLocationMode: "current" as const };
+    return getDiscoveryDestinations(localizedDestinations, mapUser, tripBrowsingReference);
+  }, [isTripAreaBrowsing, localizedDestinations, tripBrowsingReference, user, view]);
   const tripRecommendations = useMemo(() => {
     if (view !== "tracking" || !tripBrowsingReference) return [];
     if (tripBrowsingReference === discoveryReference) return recommendations;
@@ -878,7 +883,7 @@ export function TouristWorkspace({
   }} /> : null;
 
   const guidePlace = placeGuideId ? localizedDestinations.find((place) => place.id === placeGuideId) : undefined;
-  const guideReference = guideFromGps ? discoveryGpsPoint : view === "tracking" ? tripReference ?? discoveryReference : discoveryReference;
+  const guideReference = guideFromGps ? discoveryGpsPoint : view === "tracking" ? tripBrowsingReference : discoveryReference;
   const renderView = () => {
   if (view === "profile") {
     return (
@@ -918,7 +923,8 @@ export function TouristWorkspace({
 
   if (view === "tracking") {
     return <><Page title={travelText(locale, "tripTitle")} eyebrow={t("common.tourist")}>
-      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} gpsFix={activeGpsFix} gpsAttention={Boolean(trackingQualityIssue)} isBrowsingArea={!tripReference && Boolean(discoveryReference)} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus}
+      <TripExperience activeTrip={activeTrip} consent={currentConsent} points={activePoints} reference={tripBrowsingReference} gpsFix={activeGpsFix} gpsAttention={Boolean(trackingQualityIssue)} isBrowsingArea={isTripAreaBrowsing} destinations={tripDestinations} nearbyPlaces={nearbyTripPlaces} demand={destinationDemand} summary={activeTripSummary} trackingMessage={trackingFeedback} isLiveTracking={isLiveTracking} locationRetryAvailable={locationRetryAvailable} geofenceWarnings={geofenceWarnings} locale={locale} syncStatus={syncStatus}
+        discoveryControl={!activeTrip && <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} />}
         tripPlanControl={!activeTrip ? <Suspense fallback={<p role="status">{tripPlanText(locale, "loading")}</p>}><ItineraryTripSetup entries={itineraryStore.entries} selection={tripPlanSelection} connection={itineraryStore.connection} locale={locale} onChange={setTripPlanSelection} /></Suspense> : undefined}
         itineraryContent={activeTrip?.itinerary ? <Suspense fallback={null}><TripItineraryProgress key={activeTrip.id} trip={activeTrip} points={activePoints} checkIns={data.checkIns} destinations={localizedDestinations} locale={locale} onOpenPlace={openPlace} onCheckIn={openTripCheckIn} onRemindersChange={changeTripReminders} /></Suspense> : undefined}
         onAllowLocation={grantConsent} onStart={startTrip} onStartNew={startNewTrip} onStop={() => setTripDialog({ kind: "stop" })} onResume={resumeLiveTracking} onManage={() => onViewChange("history")} onPlan={() => onViewChange("itinerary")} onOpenPlace={openPlace} onSafety={openSafety} />
@@ -979,7 +985,7 @@ export function TouristWorkspace({
           </button>
         }
       >
-        <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
+        <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} />
         <ActivityBasis destinations={discoveryDestinations} user={user} locale={locale} onRefresh={user.authUid ? refreshActivities : undefined} refreshing={refreshingActivities} />
         <PlaceDiscovery
           destinations={canonicalDiscoveryDestinations}
@@ -1004,7 +1010,7 @@ export function TouristWorkspace({
     return (
       <Page title={t("tourist.events.pageTitle")} eyebrow={t("common.tourist")}>
         <section className="event-calendar-page">
-          <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />
+          <DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} />
           <FestivalCalendarPanel events={upcomingFestivals} destinations={data.destinations} locale={locale} initialEventId={spotlightEventId} referencePoint={discoveryReference} referenceState={user.discoveryLocationMode === "area" ? getDiscoveryState(user.discoveryAreaId) : undefined} />
         </section>
       </Page>
@@ -1020,7 +1026,7 @@ export function TouristWorkspace({
       currentConsent={currentConsent}
       destinations={discoveryReference ? discoveryDestinations : localizedDestinations}
       checkInDestinations={localizedDestinations}
-      discoveryControl={<DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} onSettings={() => onViewChange("profile")} />}
+      discoveryControl={<DiscoveryAreaPicker user={user} locale={locale} onChange={changeDiscoveryLocation} />}
       hasLocalReference={Boolean(discoveryReference)}
       geofenceWarnings={geofenceWarnings}
       tourismAdvisories={tourismAdvisories}

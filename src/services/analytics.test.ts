@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { initialData } from "../data/demoData";
+import { getMovementDashboardViews } from "./dashboard";
 import type { AppData, MovementPoint, TripSession } from "../types";
 import {
   analyzeAllTrips,
@@ -205,17 +206,50 @@ describe("analytics service", () => {
     expect(klcc?.approachingTouristCount).toBeGreaterThan(0);
   });
 
-  it("creates movement alerts for administrator monitoring", () => {
-    const alerts = calculateMovementAlerts(initialData);
-    const csv = buildMovementAlertsCsv(alerts, initialData);
+  it("expires old alerts and opens only trips behind the new activity", () => {
+    const now = Date.parse("2026-11-17T12:00:00Z");
+    const at = (hoursAgo: number) => new Date(now - hoursAgo * 3600000).toISOString();
+    const [first, second] = initialData.destinations;
+    const data: AppData = { ...initialData, destinations: [first, second], trips: [], points: [] };
+    const track = (place: typeof first, hoursAgo: number, tourist: string, source: MovementPoint["source"] = "browser") => {
+      const tripId = `trip-${data.trips.length}`;
+      data.trips.push({ id: tripId, userId: tourist, status: "completed", consentId: "consent", startedAt: at(hoursAgo) });
+      data.points.push({ id: tripId, tripId, userId: tourist, latitude: place.latitude, longitude: place.longitude, accuracyMeters: 25, recordedAt: at(hoursAgo), source });
+      return tripId;
+    };
 
-    expect(alerts.length).toBeGreaterThan(0);
-    expect(alerts[0].score).toBeGreaterThan(0);
-    expect(["critical", "watch", "info"]).toContain(alerts[0].severity);
-    expect(alerts[0].recommendedAction.length).toBeGreaterThan(20);
-    expect(csv).toContain('"destination","city","severity"');
-    expect(csv).toContain(alerts[0].severity);
-    expect(calculateMovementAlerts({ ...initialData, points: [] })).toHaveLength(0);
+    for (let day = 0; day < 8; day++) {
+      for (let tourist = 1; tourist <= 3; tourist++) track(first, 2 + day * 24, `regular-${tourist}`);
+    }
+    track(second, 29, "baseline");
+    const evidence = [track(second, 4, "a"), track(second, 3, "b"), track(second, 2, "c"), track(second, 1, "a")];
+    track(second, 1, "sample-a", "demo");
+    track(second, 1, "sample-b", "demo");
+    const alerts = calculateMovementAlerts(data, now);
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]).toMatchObject({ destinationId: second.id, severity: "watch", recentTouristCount: 3, baselineDailyAverage: 1 / 7, source: "browser" });
+    expect(alerts[0].tripIds).toEqual(evidence);
+    expect(buildMovementAlertsCsv(alerts, data)).toContain('"gps","3","0.14"');
+    const history = getMovementDashboardViews(data, { tripIds: new Set(alerts[0].tripIds) });
+    expect(new Set(history.tripRecords.map((record) => record.trip.id))).toEqual(new Set(evidence));
+    expect(new Set(history.records.map((record) => record.point.tripId))).toEqual(new Set(evidence));
+    expect(calculateMovementAlerts(data, now + 86400000)).toEqual([]);
+
+    for (const tourist of ["d", "e", "f", "g", "h", "i", "j"]) track(first, -24, tourist);
+    expect(calculateMovementAlerts(data, now + 25 * 3600000).map((alert) => alert.destinationId)).toEqual([first.id]);
+  });
+
+  it("keeps sample and recorded tourists separate", () => {
+    const now = Date.parse("2026-11-17T12:00:00Z");
+    const recordedAt = new Date(now - 3600000).toISOString();
+    const [place] = initialData.destinations;
+    const trips = Array.from({ length: 4 }, (_, index): TripSession =>
+      ({ id: `trip-${index}`, userId: `tourist-${index}`, status: "completed", consentId: "consent", startedAt: recordedAt }));
+    const points = trips.map((trip, index): MovementPoint =>
+      ({ id: trip.id, tripId: trip.id, latitude: place.latitude, longitude: place.longitude, accuracyMeters: 25, recordedAt, source: index < 3 ? "demo" : "browser" }));
+    expect(calculateMovementAlerts({ ...initialData, trips, points, destinations: [place] }, now)).toEqual([
+      expect.objectContaining({ source: "demo", recentTouristCount: 3, tripIds: trips.slice(0, 3).map((trip) => trip.id) }),
+    ]);
   });
 
   it("creates a travel plan from tourist movement hotspots", () => {

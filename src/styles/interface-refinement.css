@@ -198,11 +198,6 @@ a.secondary-action { text-decoration: none; }
 .admin-tabs button.active { color: var(--teal); border-bottom-color: var(--teal); background: none; }
 .admin-planning-disclosure { border-bottom: 1px solid var(--line); margin-bottom: 14px; }
 .admin-planning-disclosure > summary { display: flex; gap: 8px; align-items: center; min-height: 44px; cursor: pointer; font-size: 0.88rem; color: var(--muted); }
-.admin-shell .movement-hero { padding: 18px 0; border: 0; border-radius: 0; box-shadow: none; background: none; color: var(--ink); }
-.admin-shell .movement-hero h2 { font-size: 1.3rem; }
-.admin-shell .movement-hero p, .admin-shell .movement-hero span { color: var(--muted); }
-.admin-shell .movement-hero-stats > div { background: #fff; color: var(--ink); border: 1px solid var(--line); }
-.admin-shell .movement-hero-stats strong { color: var(--ink); }
 .admin-shell .metric-card { border: 1px solid var(--line); border-radius: 6px; box-shadow: none; background: #fff; }
 .admin-shell .metric-card span { font-weight: 500; font-size: 0.78rem; }
 .admin-shell .metric-card strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }

@@ -25,3 +25,22 @@ export function createQrCameraSession() {
     stop() { revision++; pending = false; release(current); current = null; },
   };
 }
+
+export async function createQrFrameReader() {
+  const { default: decode } = await import("jsqr");
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) throw new Error("Camera frames could not be read.");
+
+  return (video: HTMLVideoElement) => {
+    if (!video.videoWidth || !video.videoHeight) return;
+    const scale = Math.min(1, 720 / Math.max(video.videoWidth, video.videoHeight));
+    const width = Math.max(1, Math.round(video.videoWidth * scale));
+    const height = Math.max(1, Math.round(video.videoHeight * scale));
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
+    context.drawImage(video, 0, 0, width, height);
+    const frame = context.getImageData(0, 0, width, height);
+    return decode(frame.data, width, height, { inversionAttempts: "dontInvert" })?.data;
+  };
+}

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createTouristCheckInUrl, createTouristPassUrl, getShareableAppOrigin, getTouristCheckInRequestFromUrl, isLocalOnlyQrOrigin } from "./checkInDeepLink";
+import { createTouristCheckInUrl, createTouristPassUrl, getShareableAppOrigin, getTouristCheckInRequestFromUrl, getScannedAttractionCheckInPath, isLocalOnlyQrOrigin } from "./checkInDeepLink";
 
 describe("tourist QR deep links", () => {
   afterEach(() => {
@@ -46,6 +46,25 @@ describe("tourist QR deep links", () => {
 
     expect(url.origin).toBe("https://tourism.example.com");
     expect(url.pathname).toBe("/check-in");
+  });
+
+  it("opens scanned attraction QR links in the existing session", () => {
+    const location = new URL("https://tourism.example.com/app/home");
+    vi.stubEnv("VITE_PUBLIC_APP_URL", "https://public.example.com");
+    vi.stubGlobal("window", { location });
+
+    expect(getScannedAttractionCheckInPath(createTouristCheckInUrl("batu-caves", "MYP-ABC123"), location))
+      .toBe("/check-in?checkin=batu-caves&pass=MYP-ABC123");
+    expect(getScannedAttractionCheckInPath("https://tourism.example.com/check-in/?checkin=batu-caves&pass=MYP-ABC123&extra=1", location))
+      .toBe("/check-in?checkin=batu-caves&pass=MYP-ABC123");
+  });
+
+  it("rejects unrelated, external, and incomplete QR links", () => {
+    const location = new URL("https://tourism.example.com/app/home");
+    expect(getScannedAttractionCheckInPath("https://other.example.com/check-in?checkin=batu-caves&pass=MYP-ABC123", location)).toBeNull();
+    expect(getScannedAttractionCheckInPath("https://tourism.example.com/app/profile?pass=MYP-ABC123", location)).toBeNull();
+    expect(getScannedAttractionCheckInPath("https://tourism.example.com/check-in?checkin=batu-caves", location)).toBeNull();
+    expect(getScannedAttractionCheckInPath("TMM-CHECKIN-batu-caves-12345", location)).toBeNull();
   });
 
   it("creates a profile URL for profile-only tourist passes", () => {

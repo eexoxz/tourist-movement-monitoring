@@ -1,7 +1,7 @@
 import type { Destination } from "../types";
 import { baseDestinationStories } from "./destinationStories";
 
-type PracticalDestinationInfo = Partial<Pick<Destination, "openingHours" | "feeNote" | "visitTips" | "imageUrl" | "imageAlt">>;
+type PracticalDestinationInfo = Partial<Pick<Destination, "openingHours" | "feeNote" | "visitTips" | "imageUrl" | "imageAlt" | "imageCredit">>;
 
 function commonsImage(fileName: string) {
   return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=760`;
@@ -89,8 +89,12 @@ const practicalDestinationInfo: Record<string, PracticalDestinationInfo> = {
     openingHours: "Food stall and restaurant hours vary by operator.",
     feeNote: "Area access is free; meals depend on vendor pricing.",
     visitTips: ["Evening food movement can be heavy.", "Use public transport or ride-hailing during peak dining hours."],
-    imageUrl: commonsImage("Kampung Baru, Kuala Lumpur 20230828 145020.jpg"),
-    imageAlt: "Kampung Baru in Kuala Lumpur",
+    imageUrl: "/images/catalogue/my-federal-territories-kampung-baru-kl-clear.jpg",
+    imageAlt: "Traditional blue wooden house in Kampung Baru with the Petronas Twin Towers behind it under a clear sky",
+    imageCredit: {
+      author: "Shutterstock via Time Out",
+      sourceUrl: "https://www.timeout.com/kuala-lumpur/things-to-do/best-neighbourhoods-in-kuala-lumpur-to-live-play-and-work",
+    },
   },
   "thean-hou-temple": {
     openingHours: "Temple hours may vary during ceremonies and festive periods.",

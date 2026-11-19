@@ -1,9 +1,10 @@
-import { Download, MapPinned } from "lucide-react";
+import { Download, MapPinned, Route } from "lucide-react";
 import { useMemo } from "react";
 import type { Destination, DestinationDemand, MovementAlert, TravelPlan } from "../types";
 import { EmptyState } from "./SummaryCards";
-import { translate, type Locale } from "../services/i18n";
+import type { Locale } from "../services/i18n";
 import { adminMapText } from "../services/adminNavigationCopy";
+import { movementAlertText } from "../services/movementAlertCopy";
 import { uiText } from "../services/uiText";
 import { demandTierText, planSummary, planningStopReason, profileLabel } from "../services/planningText";
 
@@ -58,8 +59,17 @@ export function MovementDemandList({
   );
 }
 
-export function MovementAlertList({ alerts, destinations, onExport, locale, onLocate, hideHeading = false }: { hideHeading?: boolean; onLocate?: (destination: Destination) => void; alerts: MovementAlert[]; destinations: Destination[]; onExport: () => void; locale: Locale }) {
+export function MovementAlertList({ alerts, destinations, onExport, locale, onLocate, onViewActivity, hideHeading = false }: {
+  hideHeading?: boolean;
+  onLocate?: (destination: Destination) => void;
+  onViewActivity: (alert: MovementAlert) => void;
+  alerts: MovementAlert[];
+  destinations: Destination[];
+  onExport: () => void;
+  locale: Locale;
+}) {
   const destinationById = useMemo(() => new Map(destinations.map((destination) => [destination.id, destination])), [destinations]);
+  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
 
   return (
     <section className="movement-alerts">
@@ -75,19 +85,21 @@ export function MovementAlertList({ alerts, destinations, onExport, locale, onLo
 
         return (
           <article className={`alert-card ${alert.severity}`} key={alert.id}>
-            <span>{uiText(locale, alert.severity)}</span>
+            <span>{alert.source === "demo" ? movementAlertText(locale, "sample") : uiText(locale, alert.severity)}</span>
             <div>
               <div className="planning-place-heading">
                 <strong>{destination?.name ?? alert.title}</strong>
                 {destination && onLocate && <button type="button" className="secondary-action compact-action map-locate-action" onClick={() => onLocate(destination)}><MapPinned size={16} />{adminMapText(locale)}</button>}
               </div>
-              <p>{uiText(locale, alert.message)}</p>
-              <small>{uiText(locale, alert.recommendedAction)}</small>
+              <p>{movementAlertText(locale, "recent", { count: number.format(alert.recentTouristCount), average: number.format(alert.baselineDailyAverage) })}</p>
+              <div className="planning-place-heading">
+                <button type="button" className="secondary-action compact-action" onClick={() => onViewActivity(alert)}><Route size={16} />{movementAlertText(locale, "viewActivity")}</button>
+              </div>
             </div>
           </article>
         );
       })}
-      {alerts.length === 0 && <EmptyState text={uiText(locale, "Movement alerts appear when tourist flow creates a destination signal.")} />}
+      {alerts.length === 0 && <EmptyState text={movementAlertText(locale, "empty")} />}
     </section>
   );
 }

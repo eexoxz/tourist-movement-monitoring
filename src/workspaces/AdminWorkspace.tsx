@@ -3,7 +3,7 @@ import { useCalendarDay } from "../services/useCalendarDay";
 import { ArrowLeft, ArrowRight, ChartNoAxesCombined, ChevronDown, Download, FlaskConical, LayoutDashboard, MapPin, RotateCcw, Route, ShieldCheck, Siren, SlidersHorizontal, Users } from "lucide-react";
 import { tripLayoutText } from "../services/tripLayoutCopy";
 import { interfaceText } from "../services/interfaceCopy";
-import type { AppData, AppView, Destination, MalaysianState, SafetyStatus, SosClosureReason, User } from "../types";
+import type { AppData, AppView, Destination, MalaysianState, MovementAlert, SafetyStatus, SosClosureReason, User } from "../types";
 import { loadData, loadPlaceReviewRecords } from "../services/storage";
 import { formatDateTime } from "../services/geo";
 import { analyzeAllTrips, buildMovementAlertsCsv, buildTravelPlanCsv, calculateDestinationDemand, calculateMovementAlerts, createMovementBasedTravelPlan, evaluateAiOutput, refreshAllRecommendations } from "../services/analytics";
@@ -41,6 +41,7 @@ import { aiText } from "../services/aiInsightsCopy";
 import { EmptyState, MetricGrid } from "../components/SummaryCards";
 import { ListLimitFooter } from "../components/ListLimitFooter";
 import { adminMapText, adminPanelCloseText } from "../services/adminNavigationCopy";
+import { movementAlertText } from "../services/movementAlertCopy";
 import { type NotifyFn } from "../components/ToastViewport";
 import { DestinationManager } from "../components/DestinationManager";
 import { reviewUnlistedCheckIns, mergePlaceReviewRecords, sampleUnlistedCheckIns, groupUnlistedCheckIns } from "../services/unlistedPlaces";
@@ -92,6 +93,7 @@ export function AdminWorkspace({
   const [selectedMovementState, setSelectedMovementState] = useState<MalaysianState | "all" | "unmatched">("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [recordAlert, setRecordAlert] = useState<{ place: string; tripIds: ReadonlySet<string> } | null>(null);
   const [adminTab, setAdminTab] = useState<AdminDashboardTab>("overview");
   const [planAudience, setPlanAudience] = useState<PlanAudience>("movement");
   const [planCity, setPlanCity] = useState("all");
@@ -130,23 +132,36 @@ export function AdminWorkspace({
   const touristsActive = view === "dashboard" && (adminTab === "tourists" || adminTab === "records");
   const overviewActive = view === "dashboard" && adminTab === "overview";
   const demandActive = view === "dashboard" && !touristsActive;
+  const [alertRefresh, setAlertRefresh] = useState(Date.now);
+  useEffect(() => {
+    if (view !== "dashboard") return;
+    const refresh = () => setAlertRefresh(Date.now());
+    refresh();
+    const timer = window.setInterval(refresh, 60000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [view]);
   const movementTrend = useMemo(() => overviewActive ? getDailyMovementTrend(data) : {}, [overviewActive, data.points, calendarDay]);
   const selectMovementViews = useMemo(createMovementDashboardSelector, []);
   const movementViews = useMemo(
     () =>
       recordsActive ? selectMovementViews(data, {
         touristId: selectedTouristId,
+        tripIds: recordAlert?.tripIds,
         state: selectedMovementState,
         fromDate,
         toDate,
       }) : emptyMovementViews,
-    [data.trips, data.points, data.destinations, data.users, data.analyses, selectMovementViews, recordsActive, selectedTouristId, selectedMovementState, fromDate, toDate]
+    [data.trips, data.points, data.destinations, data.users, data.analyses, selectMovementViews, recordsActive, selectedTouristId, selectedMovementState, fromDate, toDate, recordAlert]
   );
   const movementRecords = movementViews.records;
   const movementTripRecords = movementViews.tripRecords;
   const allDashboardPoints = data.points;
   const destinationDemand = useMemo(() => demandActive ? calculateDestinationDemand(data) : [], [demandActive, data.trips, data.points, data.destinations]);
-  const movementAlerts = useMemo(() => demandActive ? calculateMovementAlerts(data, destinationDemand) : [], [demandActive, data.destinations, destinationDemand]);
+  const movementAlerts = useMemo(() => view === "dashboard" ? calculateMovementAlerts(data, Math.max(alertRefresh, Date.now())) : [], [view, data.trips, data.points, data.destinations, alertRefresh]);
   const upcomingFestivals = useMemo(() => getUpcomingFestivals(malaysiaFestivalEvents, new Date(`${calendarDay}T00:00:00`)), [calendarDay]);
   const geofenceActivity = useMemo(() => overviewActive ? calculateGeofenceActivity(data) : [], [overviewActive, data.geofences, data.points]);
   const activeGeofenceCount = geofenceActivity.filter((row) => row.pointCount > 0).length;
@@ -166,7 +181,7 @@ export function AdminWorkspace({
   const cityOptions = useMemo(() => Array.from(new Set(data.destinations.map((destination) => destination.city))).sort(), [data.destinations]);
   const filteredTouristCount = new Set(movementTripRecords.map((record) => record.trip.userId)).size;
   const filteredTripCount = movementTripRecords.length;
-  const hasRecordFilters = selectedTouristId !== "all" || selectedMovementState !== "all" || Boolean(fromDate) || Boolean(toDate);
+  const hasRecordFilters = selectedTouristId !== "all" || selectedMovementState !== "all" || Boolean(fromDate) || Boolean(toDate) || recordAlert !== null;
   const [selectedRecordTripId, setSelectedRecordTripId] = useState<string | null>(null);
   const recordReturn = useRef({ top: 0, tripId: "" });
   const openRecord = (id: string) => { recordReturn.current = { top: window.scrollY, tripId: id }; setSelectedRecordTripId(id); window.scrollTo({ top: 0, behavior: "instant" }); };
@@ -248,7 +263,7 @@ export function AdminWorkspace({
 
   useEffect(() => {
     setMovementPage(1);
-  }, [fromDate, selectedTouristId, selectedMovementState, toDate]);
+  }, [fromDate, selectedTouristId, selectedMovementState, toDate, recordAlert]);
 
 
   useEffect(() => {
@@ -315,6 +330,17 @@ export function AdminWorkspace({
     setSelectedMovementState("all");
     setFromDate("");
     setToDate("");
+    setRecordAlert(null);
+  };
+
+  const viewAlertActivity = (alert: MovementAlert) => {
+    resetRecordFilters();
+    setRecordAlert({ place: alert.title, tripIds: new Set(alert.tripIds) });
+    setInsight(null);
+    setSelectedRecordTripId(null);
+    setAdminTab("records");
+    window.scrollTo({ top: 0, behavior: "instant" });
+    window.requestAnimationFrame(() => document.getElementById("movement-alert-filter")?.focus({ preventScroll: true }));
   };
 
   const exportFilteredRecords = () => {
@@ -362,6 +388,7 @@ export function AdminWorkspace({
   const touristManagementPanel = useMemo(() => <TouristDirectory rows={touristManagementRows} locale={locale} onViewMovement={(userId) => {
     setSelectedTouristId(userId);
     setSelectedMovementState("all");
+    setRecordAlert(null);
     setSelectedRecordTripId(null);
     setAdminTab("records");
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -370,6 +397,7 @@ export function AdminWorkspace({
   const movementRecordsPanel = (
     <div className="admin-tab-panel movement-records-page">
       {!selectedRecord && <>
+      {recordAlert && <p id="movement-alert-filter" tabIndex={-1}>{movementAlertText(locale, "filtered", { place: recordAlert.place })}</p>}
       <div className="filter-toolbar admin-filter-toolbar">
         <label><span>{t("admin.tabs.tourists")}</span>
         <select
@@ -843,7 +871,7 @@ export function AdminWorkspace({
             </aside>
           </section>
           {insight === "alerts" && <PlaceGuideDialog className="admin-insight-dialog" title={adminText("overview.movementAlertsTitle")} locale={locale} closeLabel={adminPanelCloseText(locale)} onClose={() => setInsight(null)}><div className="admin-overview-section-body">
-                  <MovementAlertList hideHeading alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} locale={locale} onLocate={locateDestination} />
+                  <MovementAlertList hideHeading alerts={movementAlerts} destinations={data.destinations} onExport={exportMovementAlerts} locale={locale} onLocate={locateDestination} onViewActivity={viewAlertActivity} />
                 </div></PlaceGuideDialog>}
           {insight === "geofences" && <PlaceGuideDialog className="admin-insight-dialog" title={adminText("overview.geofenceActivity")} locale={locale} closeLabel={adminPanelCloseText(locale)} onClose={() => setInsight(null)}><div className="admin-overview-section-body">
                   <div className="geofence-admin-list">

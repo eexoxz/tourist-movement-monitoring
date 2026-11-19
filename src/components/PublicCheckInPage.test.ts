@@ -9,7 +9,7 @@ import { QrCheckInPanel } from "./QrCheckInPanel";
 import { PublicCheckInPage } from "./PublicCheckInPage";
 
 describe("standalone check-in navigation", () => {
-  it("uses state labels for both city-based and state-based records", () => {
+  it("groups both city-based and state-based records under a state heading", () => {
     const sample = initialData.destinations[0];
     const cityPlace = { ...sample, id: "city-place", name: "City Place", city: "George Town", state: undefined };
     const statePlace = { ...sample, id: "state-place", name: "State Place", city: "Penang", state: undefined };
@@ -17,8 +17,7 @@ describe("standalone check-in navigation", () => {
       destinations: [cityPlace, statePlace], selectedDestination: cityPlace,
       onConfirm: () => {}, onDestinationChange: () => {},
     }));
-    expect(options).toContain("City Place · Penang");
-    expect(options).toContain("State Place · Penang");
+    expect(options).toMatch(/<optgroup label="Penang"><option value="city-place"[^>]*>City Place<\/option><option value="state-place"[^>]*>State Place<\/option><\/optgroup>/);
     const localized = localizeDestination(cityPlace, "zh");
     expect(localized.state).toBe("Penang");
     const confirmation = renderToStaticMarkup(createElement(PublicCheckInPage, {

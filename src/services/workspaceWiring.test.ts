@@ -109,7 +109,9 @@ describe("workspace integration guardrails", () => {
 
   it("connects QR camera scanning and the manual code fallback to check-in", () => {
     const scanner = readSource("src/components/QrCheckInPanel.tsx");
-    expect(scanner).toContain("BarcodeDetector");
+    expect(scanner).toContain("createQrFrameReader");
+    expect(scanner).toContain("getScannedAttractionCheckInPath");
+    expect(scanner).toContain("window.location.assign(path)");
     expect(scanner).toContain("getUserMedia");
     expect(scanner).toContain('t("tourist.checkin.useCode")');
     expect(home).toContain("QrCheckInPanel");
@@ -117,7 +119,7 @@ describe("workspace integration guardrails", () => {
     expect(home).toContain("cameraEnabled={checkInExpanded}");
     expect(scanner).toContain("if (!cameraEnabled) stopCamera()");
     expect(scanner).toContain('document.addEventListener("visibilitychange", pause)');
-    expect(scanner).toContain("cancelled || !cameraEnabled || !video.srcObject");
+    expect(scanner).toContain("!cancelled && cameraEnabled && video?.srcObject");
     expect(scanner).toContain("window.clearTimeout(scanTimer)");
     expect(home).toContain("(safetyReady || openSafetyCount > 0)");
     expect(tourist).toContain("destinationIdOverride");

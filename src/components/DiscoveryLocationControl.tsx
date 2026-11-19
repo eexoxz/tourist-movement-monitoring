@@ -2,13 +2,11 @@ import { discoveryStates, getDiscoveryState } from "../data/discoveryAreas";
 import { discoveryText } from "../services/discoveryCopy";
 import { translate, type Locale } from "../services/i18n";
 import type { User } from "../types";
-import { Settings } from "lucide-react";
 
-export function DiscoveryLocationControl({ user, locale, onChange, onSettings }: {
+export function DiscoveryLocationControl({ user, locale, onChange }: {
   user: User;
   locale: Locale;
   onChange: (mode: "current" | "area", areaId?: string) => void;
-  onSettings?: () => void;
 }) {
   const mode = user.discoveryLocationMode ?? "current";
   const state = getDiscoveryState(user.discoveryAreaId) ?? "";
@@ -28,7 +26,6 @@ export function DiscoveryLocationControl({ user, locale, onChange, onSettings }:
           {discoveryStates.map((candidate) => <option key={candidate} value={candidate}>{candidate}</option>)}
         </select>
       </label>}
-      {onSettings && <button className="secondary-action discovery-settings-button" type="button" onClick={onSettings} title={discoveryText(locale, "settings")} aria-label={discoveryText(locale, "settings")}><Settings size={18} /></button>}
       {mode === "area" && <p>{discoveryText(locale, "privacy")}</p>}
     </section>
   );

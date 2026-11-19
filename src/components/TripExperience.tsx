@@ -11,7 +11,7 @@ import { MovementMap } from "./MovementMap";
 import { TrackingStatus } from "./TrackingStatus";
 import type { ReactNode } from "react";
 
-export function TripExperience({ activeTrip, consent, points, reference, gpsFix, gpsAttention, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, tripPlanControl, itineraryContent, onAllowLocation, onStart, onStartNew, onStop, onResume, onManage, onPlan, onOpenPlace, onSafety }: {
+export function TripExperience({ activeTrip, consent, points, reference, gpsFix, gpsAttention, isBrowsingArea = false, destinations, nearbyPlaces, demand, summary, trackingMessage, isLiveTracking, locationRetryAvailable, geofenceWarnings, locale, syncStatus, discoveryControl, tripPlanControl, itineraryContent, onAllowLocation, onStart, onStartNew, onStop, onResume, onManage, onPlan, onOpenPlace, onSafety }: {
   activeTrip?: TripSession | null;
   consent?: LocationConsent | null;
   points: MovementPoint[];
@@ -29,6 +29,7 @@ export function TripExperience({ activeTrip, consent, points, reference, gpsFix,
   geofenceWarnings: GeoFenceWarning[];
   locale: Locale;
   syncStatus?: string;
+  discoveryControl?: ReactNode;
   tripPlanControl?: ReactNode;
   itineraryContent?: ReactNode;
   onAllowLocation: () => void;
@@ -64,6 +65,7 @@ export function TripExperience({ activeTrip, consent, points, reference, gpsFix,
     </section>
 
     {itineraryContent}
+    {discoveryControl}
 
     <div className="trip-live-map"><MovementMap points={activeTrip ? points : []} destinations={destinations} activePoint={reference} isBrowsingArea={isBrowsingArea} mode="tourist" displayMode={activeTrip ? "route" : "signals"} locale={locale} activityDemand={demand} /></div>
 

@@ -70,6 +70,22 @@ export function createTouristCheckInUrl(destinationId: string, passId?: string) 
   return url.toString();
 }
 
+export function getScannedAttractionCheckInPath(rawCode: string, location: LocationLike = window.location) {
+  try {
+    const url = new URL(rawCode);
+    if (!isTouristCheckInRoute(url.pathname) ||
+      (url.origin !== location.origin && url.origin !== getShareableAppOrigin(location))) return null;
+
+    const destinationId = url.searchParams.get(CHECK_IN_PARAM);
+    const passId = url.searchParams.get(PASS_PARAM);
+    if (!destinationId?.trim() || !passId?.trim()) return null;
+    const params = new URLSearchParams({ [CHECK_IN_PARAM]: destinationId, [PASS_PARAM]: passId });
+    return `${CHECK_IN_PATH}?${params}`;
+  } catch {
+    return null;
+  }
+}
+
 export function createTouristPassUrl(passId: string) {
   const url = new URL(getPathForView("tourist", "profile"), getShareableAppOrigin());
   url.searchParams.set(PASS_PARAM, passId);

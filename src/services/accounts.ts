@@ -46,7 +46,7 @@ export function isValidPassportNumber(passportNumber: string) {
 }
 
 export function isValidNationality(nationality: string) {
-  return (nationalityOptions as readonly string[]).includes(nationality.trim());
+  return nationalityOptions.includes(nationality.trim());
 }
 
 export function authenticateLocalUser(data: AppData, email: string, password: string) {
